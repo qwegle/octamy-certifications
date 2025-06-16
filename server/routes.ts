@@ -801,6 +801,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const txnid = payuMoneyService.generateTransactionId();
       const amount = payuMoneyService.formatAmount(course.price);
 
+      console.log('Payment data being created:', {
+        userId: req.user?.userId || null,
+        courseId: parseInt(courseId),
+        amount: amount,
+        status: "pending",
+        paymentMethod: "payumoney",
+        transactionId: txnid
+      });
+
       // Create payment record
       const payment = await storage.createPayment({
         userId: req.user?.userId || null,
