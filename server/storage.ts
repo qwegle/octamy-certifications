@@ -36,6 +36,9 @@ import {
   notifications,
   courseRecommendations,
   userActivity,
+  userCourseProgress,
+  achievements,
+  userAchievements,
   type UserPreferences,
   type InsertUserPreferences,
   type Notification,
@@ -43,7 +46,13 @@ import {
   type CourseRecommendation,
   type InsertCourseRecommendation,
   type UserActivity,
-  type InsertUserActivity
+  type InsertUserActivity,
+  type UserCourseProgress,
+  type InsertUserCourseProgress,
+  type Achievement,
+  type InsertAchievement,
+  type UserAchievement,
+  type InsertUserAchievement
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc } from "drizzle-orm";
@@ -599,6 +608,193 @@ export class DatabaseStorage implements IStorage {
     }
 
     return await query;
+  }
+
+  // Course progress operations
+  async getUserCourseProgress(userId: number, courseId?: number): Promise<UserCourseProgress[]> {
+    let query = db.select().from(userCourseProgress).where(eq(userCourseProgress.userId, userId));
+    
+    if (courseId) {
+      query = query.where(and(
+        eq(userCourseProgress.userId, userId),
+        eq(userCourseProgress.courseId, courseId)
+      ));
+    }
+    
+    return await query.orderBy(desc(userCourseProgress.lastAccessedAt));
+  }
+
+  async upsertUserCourseProgress(progress: InsertUserCourseProgress): Promise<UserCourseProgress> {
+    const [result] = await db
+      .insert(userCourseProgress)
+      .values({
+        ...progress,
+        updatedAt: new Date()
+      })
+      .onConflictDoUpdate({
+        target: [userCourseProgress.userId, userCourseProgress.courseId],
+        set: {
+          ...progress,
+          updatedAt: new Date()
+        }
+      })
+      .returning();
+    return result;
+  }
+
+  async updateCourseProgress(userId: number, courseId: number, updates: Partial<InsertUserCourseProgress>): Promise<UserCourseProgress> {
+    const [result] = await db
+      .update(userCourseProgress)
+      .set({
+        ...updates,
+        updatedAt: new Date()
+      })
+      .where(and(
+        eq(userCourseProgress.userId, userId),
+        eq(userCourseProgress.courseId, courseId)
+      ))
+      .returning();
+    return result;
+  }
+
+  // Achievement operations
+  async getAchievements(category?: string): Promise<Achievement[]> {
+    let query = db.select().from(achievements).where(eq(achievements.isActive, true));
+    
+    if (category) {
+      query = query.where(and(
+        eq(achievements.isActive, true),
+        eq(achievements.category, category)
+      ));
+    }
+    
+    return await query.orderBy(achievements.tier, achievements.points);
+  }
+
+  async createAchievement(achievement: InsertAchievement): Promise<Achievement> {
+    const [result] = await db
+      .insert(achievements)
+      .values(achievement)
+      .returning();
+    return result;
+  }
+
+  async getUserAchievements(userId: number, includeDetails = false): Promise<(UserAchievement & { achievement?: Achievement })[]> {
+    if (includeDetails) {
+      return await db
+        .select({
+          id: userAchievements.id,
+          userId: userAchievements.userId,
+          achievementId: userAchievements.achievementId,
+          unlockedAt: userAchievements.unlockedAt,
+          progress: userAchievements.progress,
+          metadata: userAchievements.metadata,
+          isViewed: userAchievements.isViewed,
+          isNotified: userAchievements.isNotified,
+          achievement: achievements
+        })
+        .from(userAchievements)
+        .leftJoin(achievements, eq(userAchievements.achievementId, achievements.id))
+        .where(eq(userAchievements.userId, userId))
+        .orderBy(desc(userAchievements.unlockedAt));
+    }
+    
+    return await db
+      .select()
+      .from(userAchievements)
+      .where(eq(userAchievements.userId, userId))
+      .orderBy(desc(userAchievements.unlockedAt));
+  }
+
+  async unlockAchievement(userId: number, achievementId: number, metadata?: any): Promise<UserAchievement> {
+    const [result] = await db
+      .insert(userAchievements)
+      .values({
+        userId,
+        achievementId,
+        metadata,
+        progress: 100
+      })
+      .onConflictDoNothing()
+      .returning();
+    return result;
+  }
+
+  async checkAndUnlockAchievements(userId: number, courseId?: number): Promise<UserAchievement[]> {
+    // Get user's current achievements
+    const existingAchievements = await this.getUserAchievements(userId);
+    const existingAchievementIds = existingAchievements.map(ua => ua.achievementId);
+    
+    // Get all available achievements
+    const allAchievements = await this.getAchievements();
+    const newAchievements: UserAchievement[] = [];
+    
+    for (const achievement of allAchievements) {
+      if (existingAchievementIds.includes(achievement.id)) continue;
+      
+      const criteria = achievement.criteria as any;
+      let shouldUnlock = false;
+      
+      switch (criteria.type) {
+        case 'score':
+          if (courseId) {
+            const attempts = await db
+              .select()
+              .from(examAttempts)
+              .where(and(
+                eq(examAttempts.userId, userId),
+                eq(examAttempts.courseId, courseId)
+              ))
+              .orderBy(desc(examAttempts.score))
+              .limit(1);
+            
+            if (attempts.length > 0 && attempts[0].score >= criteria.threshold) {
+              shouldUnlock = true;
+            }
+          }
+          break;
+          
+        case 'completion_count':
+          const completedCourses = await db
+            .select()
+            .from(certificates)
+            .where(eq(certificates.userId, userId));
+            
+          if (completedCourses.length >= criteria.threshold) {
+            shouldUnlock = true;
+          }
+          break;
+          
+        case 'perfect_score':
+          if (courseId) {
+            const perfectAttempts = await db
+              .select()
+              .from(examAttempts)
+              .where(and(
+                eq(examAttempts.userId, userId),
+                eq(examAttempts.courseId, courseId),
+                eq(examAttempts.score, 100)
+              ));
+            
+            if (perfectAttempts.length >= criteria.threshold) {
+              shouldUnlock = true;
+            }
+          }
+          break;
+      }
+      
+      if (shouldUnlock) {
+        const newAchievement = await this.unlockAchievement(userId, achievement.id, {
+          courseId,
+          unlockedAt: new Date()
+        });
+        if (newAchievement) {
+          newAchievements.push(newAchievement);
+        }
+      }
+    }
+    
+    return newAchievements;
   }
 }
 
