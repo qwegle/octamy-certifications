@@ -69,6 +69,7 @@ export const certificates = pgTable("certificates", {
   id: serial("id").primaryKey(),
   certificateId: text("certificate_id").notNull().unique(),
   examAttemptId: integer("exam_attempt_id").references(() => examAttempts.id).notNull(),
+  courseId: integer("course_id").references(() => courses.id).notNull(),
   userId: integer("user_id").references(() => users.id),
   userEmail: text("user_email").notNull(),
   userName: text("user_name").notNull(),

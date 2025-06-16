@@ -343,6 +343,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const certificate = await storage.createCertificate({
         certificateId,
         examAttemptId,
+        courseId: examAttempt.courseId,
         userId: req.user?.userId || null,
         userEmail: examAttempt.userEmail,
         userName: examAttempt.userName,

@@ -7,6 +7,7 @@ import { Loader2, CreditCard, Shield } from 'lucide-react';
 
 interface PayUMoneyFormProps {
   certificateId: string;
+  courseId: number;
   amount: string;
   userEmail: string;
   userName: string;
@@ -16,6 +17,7 @@ interface PayUMoneyFormProps {
 
 export default function PayUMoneyForm({
   certificateId,
+  courseId,
   amount,
   userEmail,
   userName,
@@ -31,8 +33,7 @@ export default function PayUMoneyForm({
 
       // Initiate payment with PayUMoney
       const response = await apiRequest('POST', '/api/payment/initiate', {
-        certificateId,
-        amount,
+        courseId,
         userEmail,
         userName,
         productInfo: `Certificate for ${courseTitle}`,
