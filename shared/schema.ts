@@ -92,9 +92,13 @@ export const certificates = pgTable("certificates", {
 
 export const payments = pgTable("payments", {
   id: serial("id").primaryKey(),
-  certificateId: integer("certificate_id").references(() => certificates.id).notNull(),
-  razorpayPaymentId: text("razorpay_payment_id").notNull(),
-  razorpayOrderId: text("razorpay_order_id").notNull(),
+  certificateId: integer("certificate_id").references(() => certificates.id),
+  userId: integer("user_id").references(() => users.id),
+  courseId: integer("course_id").references(() => courses.id),
+  transactionId: text("transaction_id").notNull().unique(),
+  paymentMethod: text("payment_method").default("payumoney").notNull(),
+  razorpayPaymentId: text("razorpay_payment_id"),
+  razorpayOrderId: text("razorpay_order_id"),
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
   currency: text("currency").default("INR").notNull(),
   status: text("status").notNull(),

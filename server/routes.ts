@@ -803,7 +803,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Create payment record
       const payment = await storage.createPayment({
-        userId: req.user?.userId || 0,
+        userId: req.user?.userId || null,
         courseId: parseInt(courseId),
         amount: amount,
         status: "pending",
