@@ -5,11 +5,18 @@ import { seedDatabase } from "./seed";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { z } from "zod";
-import { insertUserSchema, insertExamAttemptSchema, insertCertificateSchema } from "@shared/schema";
+import { insertUserSchema, insertExamAttemptSchema, insertCertificateSchema, insertSellerSchema, insertSaleSchema, insertWithdrawalRequestSchema } from "@shared/schema";
 
 interface AuthenticatedRequest extends Request {
   user?: {
     userId: number;
+    email: string;
+  };
+}
+
+interface SellerAuthenticatedRequest extends Request {
+  seller?: {
+    sellerId: number;
     email: string;
   };
 }
@@ -45,6 +52,22 @@ const optionalAuth = (req: AuthenticatedRequest, res: Response, next: NextFuncti
     });
   }
   next();
+};
+
+// Seller authentication middleware
+const authenticateSellerToken = (req: SellerAuthenticatedRequest, res: Response, next: NextFunction) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) {
+    return res.sendStatus(401);
+  }
+
+  jwt.verify(token, JWT_SECRET, (err: any, seller: any) => {
+    if (err) return res.sendStatus(403);
+    req.seller = seller;
+    next();
+  });
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -483,6 +506,265 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching internship application:", error);
       res.status(500).json({ message: "Failed to fetch internship application" });
+    }
+  });
+
+  // Seller Authentication Routes
+  app.post("/api/sellers/register", async (req: Request, res: Response) => {
+    try {
+      const sellerData = insertSellerSchema.parse(req.body);
+      
+      // Check if seller already exists
+      const existingSeller = await storage.getSellerByEmail(sellerData.email);
+      if (existingSeller) {
+        return res.status(400).json({ message: "Seller already exists" });
+      }
+
+      // Hash password
+      const hashedPassword = await bcrypt.hash(sellerData.password, 10);
+      
+      const seller = await storage.createSeller({
+        ...sellerData,
+        password: hashedPassword,
+      });
+
+      // Generate JWT token
+      const token = jwt.sign({ sellerId: seller.id, email: seller.email }, JWT_SECRET);
+      
+      res.json({ 
+        token, 
+        seller: { 
+          id: seller.id, 
+          email: seller.email, 
+          name: seller.name,
+          isApproved: seller.isApproved,
+          totalEarnings: seller.totalEarnings,
+          pendingEarnings: seller.pendingEarnings
+        } 
+      });
+    } catch (error) {
+      console.error("Error registering seller:", error);
+      res.status(500).json({ message: "Failed to register seller" });
+    }
+  });
+
+  app.post("/api/sellers/login", async (req: Request, res: Response) => {
+    try {
+      const { email, password } = req.body;
+
+      const seller = await storage.getSellerByEmail(email);
+      if (!seller) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+
+      const isPasswordValid = await bcrypt.compare(password, seller.password);
+      if (!isPasswordValid) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+
+      const token = jwt.sign({ sellerId: seller.id, email: seller.email }, JWT_SECRET);
+      
+      res.json({ 
+        token, 
+        seller: { 
+          id: seller.id, 
+          email: seller.email, 
+          name: seller.name,
+          isApproved: seller.isApproved,
+          totalEarnings: seller.totalEarnings,
+          pendingEarnings: seller.pendingEarnings
+        } 
+      });
+    } catch (error) {
+      console.error("Error logging in seller:", error);
+      res.status(500).json({ message: "Failed to login" });
+    }
+  });
+
+  // Seller Dashboard Routes
+  app.get("/api/sellers/dashboard", authenticateSellerToken, async (req: SellerAuthenticatedRequest, res: Response) => {
+    try {
+      const seller = await storage.getSeller(req.seller!.sellerId);
+      if (!seller) {
+        return res.status(404).json({ message: "Seller not found" });
+      }
+
+      const sales = await storage.getSellerSales(req.seller!.sellerId);
+      const withdrawals = await storage.getSellerWithdrawals(req.seller!.sellerId);
+      
+      res.json({
+        seller: {
+          id: seller.id,
+          name: seller.name,
+          email: seller.email,
+          isApproved: seller.isApproved,
+          totalEarnings: seller.totalEarnings,
+          pendingEarnings: seller.pendingEarnings,
+          commissionRate: seller.commissionRate
+        },
+        sales,
+        withdrawals,
+        analytics: {
+          totalSales: sales.length,
+          totalCommission: sales.reduce((sum, sale) => sum + parseFloat(sale.commission), 0),
+          pendingWithdrawals: withdrawals.filter(w => w.status === 'pending').length
+        }
+      });
+    } catch (error) {
+      console.error("Error fetching seller dashboard:", error);
+      res.status(500).json({ message: "Failed to fetch dashboard" });
+    }
+  });
+
+  // Course purchase with referral tracking
+  app.post("/api/courses/:courseId/purchase", async (req: Request, res: Response) => {
+    try {
+      const { courseId } = req.params;
+      const { referralCode, userEmail, userName } = req.body;
+      
+      const course = await storage.getCourse(parseInt(courseId));
+      if (!course) {
+        return res.status(404).json({ message: "Course not found" });
+      }
+
+      // Create certificate first
+      const certificate = await storage.createCertificate({
+        certificateId: `CERT-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        examAttemptId: 0, // Will be updated when exam is taken
+        userEmail,
+        userName,
+        courseTitle: course.title,
+        score: 0,
+        expiresAt: new Date(Date.now() + 2 * 365 * 24 * 60 * 60 * 1000), // 2 years
+        isPaid: true,
+        paymentId: `PAY-${Date.now()}`
+      });
+
+      // If referral code provided, create sale record
+      if (referralCode) {
+        // Find seller by referral code (assuming referral code is seller email for now)
+        const seller = await storage.getSellerByEmail(referralCode);
+        if (seller && seller.isApproved) {
+          const commission = parseFloat(course.price) * (parseFloat(seller.commissionRate) / 100);
+          
+          await storage.createSale({
+            sellerId: seller.id,
+            certificateId: certificate.id,
+            courseId: parseInt(courseId),
+            amount: course.price,
+            commission: commission.toString(),
+            referralCode,
+            status: 'pending'
+          });
+
+          // Update seller pending earnings
+          await storage.updateSeller(seller.id, {
+            pendingEarnings: (parseFloat(seller.pendingEarnings) + commission).toString()
+          });
+        }
+      }
+
+      res.json({ certificate });
+    } catch (error) {
+      console.error("Error processing course purchase:", error);
+      res.status(500).json({ message: "Failed to process purchase" });
+    }
+  });
+
+  // Withdrawal Request Routes
+  app.post("/api/sellers/withdrawals", authenticateSellerToken, async (req: SellerAuthenticatedRequest, res: Response) => {
+    try {
+      const withdrawalData = insertWithdrawalRequestSchema.parse({
+        ...req.body,
+        sellerId: req.seller!.sellerId
+      });
+
+      const seller = await storage.getSeller(req.seller!.sellerId);
+      if (!seller) {
+        return res.status(404).json({ message: "Seller not found" });
+      }
+
+      if (!seller.isApproved) {
+        return res.status(403).json({ message: "Seller not approved" });
+      }
+
+      if (parseFloat(seller.pendingEarnings) < parseFloat(withdrawalData.amount)) {
+        return res.status(400).json({ message: "Insufficient balance" });
+      }
+
+      const withdrawal = await storage.createWithdrawalRequest(withdrawalData);
+      res.json(withdrawal);
+    } catch (error) {
+      console.error("Error creating withdrawal request:", error);
+      res.status(500).json({ message: "Failed to create withdrawal request" });
+    }
+  });
+
+  // Admin Routes for Seller Management
+  app.get("/api/admin/sellers", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const user = await storage.getUser(req.user!.userId);
+      if (!user?.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      // Get all sellers with their stats
+      const sellers = await storage.getSeller(0); // This would need to be updated to get all sellers
+      res.json(sellers);
+    } catch (error) {
+      console.error("Error fetching sellers:", error);
+      res.status(500).json({ message: "Failed to fetch sellers" });
+    }
+  });
+
+  app.post("/api/admin/sellers/:sellerId/approve", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const user = await storage.getUser(req.user!.userId);
+      if (!user?.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { sellerId } = req.params;
+      const { isApproved } = req.body;
+
+      await storage.updateSeller(parseInt(sellerId), { isApproved });
+      res.json({ message: "Seller approval status updated" });
+    } catch (error) {
+      console.error("Error updating seller approval:", error);
+      res.status(500).json({ message: "Failed to update seller approval" });
+    }
+  });
+
+  app.get("/api/admin/withdrawals", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const user = await storage.getUser(req.user!.userId);
+      if (!user?.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const withdrawals = await storage.getAllWithdrawals();
+      res.json(withdrawals);
+    } catch (error) {
+      console.error("Error fetching withdrawals:", error);
+      res.status(500).json({ message: "Failed to fetch withdrawals" });
+    }
+  });
+
+  app.post("/api/admin/withdrawals/:withdrawalId/process", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const user = await storage.getUser(req.user!.userId);
+      if (!user?.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { withdrawalId } = req.params;
+      const { status, adminNotes } = req.body;
+
+      await storage.updateWithdrawalStatus(parseInt(withdrawalId), status, adminNotes);
+      res.json({ message: "Withdrawal status updated" });
+    } catch (error) {
+      console.error("Error processing withdrawal:", error);
+      res.status(500).json({ message: "Failed to process withdrawal" });
     }
   });
 
