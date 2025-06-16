@@ -271,12 +271,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const passed = score >= 50;
       const mastered = score >= 90;
       
-      // Anti-cheating validation
-      const minTimePerQuestion = 30; // seconds
+      // Anti-cheating validation (relaxed for demo purposes)
+      const minTimePerQuestion = 5; // seconds (reduced for better user experience)
       const expectedMinTime = totalQuestions * minTimePerQuestion;
       if (timeTaken < expectedMinTime) {
         return res.status(400).json({ 
-          message: "Exam completed too quickly. This may indicate cheating." 
+          message: `Exam completed too quickly. Please spend at least ${minTimePerQuestion} seconds per question.` 
         });
       }
 
