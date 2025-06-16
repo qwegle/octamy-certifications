@@ -8,6 +8,7 @@ import { z } from "zod";
 import { insertUserSchema, insertExamAttemptSchema, insertCertificateSchema, insertSellerSchema, insertSaleSchema, insertWithdrawalRequestSchema } from "@shared/schema";
 import { payuMoneyService } from "./payumoney";
 import { getBadgeFromScore, generateCertificateNumber, calculateExpiryDate } from "./utils";
+// Using dynamic import for puppeteer to avoid ES module issues
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -1280,8 +1281,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
         type: 'pdf'
       };
 
-      const file = { content: certificateHtml };
-      const pdfBuffer = await htmlToPdf.generatePdf(file, options);
+      // Dynamic import of puppeteer to avoid ES module issues
+      const puppeteer = await import('puppeteer');
+      
+      // Launch puppeteer to generate PDF
+      const browser = await puppeteer.default.launch({
+        headless: true,
+        args: [
+          '--no-sandbox', 
+          '--disable-setuid-sandbox', 
+          '--disable-dev-shm-usage',
+          '--disable-accelerated-2d-canvas',
+          '--no-first-run',
+          '--no-zygote',
+          '--single-process',
+          '--disable-gpu'
+        ],
+        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined
+      });
+      
+      const page = await browser.newPage();
+      await page.setContent(certificateHtml, { 
+        waitUntil: 'load',
+        timeout: 30000 
+      });
+      
+      const pdfBuffer = await page.pdf({
+        format: 'A4',
+        landscape: true,
+        margin: {
+          top: '0.5in',
+          right: '0.5in',
+          bottom: '0.5in',
+          left: '0.5in'
+        },
+        printBackground: true,
+        preferCSSPageSize: true
+      });
+      
+      await browser.close();
 
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader('Content-Disposition', `attachment; filename="Octamy-Certificate-${certificate.certificateNumber}.pdf"`);
