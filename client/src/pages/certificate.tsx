@@ -108,10 +108,10 @@ export default function CertificateView() {
           </p>
         </div>
 
-        {/* Premium Certificate Display */}
+        {/* Ultra-Premium Certificate Display */}
         <div className="relative mb-8">
           {!isActive && (
-            <div className="absolute inset-0 flex items-center justify-center opacity-20 pointer-events-none z-10">
+            <div className="absolute inset-0 flex items-center justify-center opacity-20 pointer-events-none z-20">
               <div className="text-6xl font-bold text-red-400 transform rotate-45">
                 {!certificate.isPaid ? 'UNPAID' : isExpired ? 'EXPIRED' : 'INVALID'}
               </div>
@@ -120,153 +120,263 @@ export default function CertificateView() {
           
           <div className="relative overflow-hidden">
             <style jsx>{`
-              @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@300;400;500;600;700;800&display=swap');
+              @import url('https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700;800&display=swap');
             `}</style>
             
-            <div className="w-full h-auto bg-white border-8 border-black relative" style={{ aspectRatio: '1200/850' }}>
-              {/* Ornate corners */}
-              <div className="absolute top-6 left-6 w-16 h-16 border-2 border-black" style={{ borderRight: 'none', borderBottom: 'none' }}></div>
-              <div className="absolute top-6 right-6 w-16 h-16 border-2 border-black" style={{ borderLeft: 'none', borderBottom: 'none' }}></div>
-              <div className="absolute bottom-6 left-6 w-16 h-16 border-2 border-black" style={{ borderRight: 'none', borderTop: 'none' }}></div>
-              <div className="absolute bottom-6 right-6 w-16 h-16 border-2 border-black" style={{ borderLeft: 'none', borderTop: 'none' }}></div>
+            <div 
+              className="w-full h-auto relative bg-gradient-to-br from-gray-50 via-white to-gray-50"
+              style={{ 
+                aspectRatio: '1400/990',
+                border: '2px solid #d4af37',
+                boxShadow: `
+                  0 0 0 8px #ffffff,
+                  0 0 0 10px #d4af37,
+                  0 0 0 16px #ffffff,
+                  0 0 0 18px #c9a635,
+                  0 40px 80px rgba(0,0,0,0.4),
+                  inset 0 2px 4px rgba(212,175,55,0.1)
+                `
+              }}
+            >
+              {/* Ornate border */}
+              <div 
+                className="absolute inset-5"
+                style={{
+                  border: '1px solid #d4af37',
+                  background: `
+                    radial-gradient(circle at 0 0, #d4af37 2px, transparent 2px),
+                    radial-gradient(circle at 100% 0, #d4af37 2px, transparent 2px),
+                    radial-gradient(circle at 0 100%, #d4af37 2px, transparent 2px),
+                    radial-gradient(circle at 100% 100%, #d4af37 2px, transparent 2px)
+                  `,
+                  backgroundSize: '40px 40px',
+                  backgroundPosition: 'top left, top right, bottom left, bottom right',
+                  backgroundRepeat: 'no-repeat'
+                }}
+              ></div>
               
-              <div className="relative z-10 p-12 text-center h-full flex flex-col justify-center">
-                <div className="mb-8">
-                  <div className="flex items-center justify-center mb-6">
+              {/* Decorative corners */}
+              <div className="absolute top-8 left-8 w-28 h-28" style={{ 
+                background: `
+                  linear-gradient(45deg, #d4af37 1px, transparent 1px 20px, transparent),
+                  linear-gradient(-45deg, #d4af37 1px, transparent 1px 20px, transparent)
+                `,
+                clipPath: 'polygon(0 0, 100% 0, 0 100%)'
+              }}></div>
+              <div className="absolute top-8 right-8 w-28 h-28" style={{ 
+                background: `
+                  linear-gradient(135deg, #d4af37 1px, transparent 1px 20px, transparent),
+                  linear-gradient(45deg, #d4af37 1px, transparent 1px 20px, transparent)
+                `,
+                clipPath: 'polygon(100% 0, 100% 100%, 0 0)'
+              }}></div>
+              <div className="absolute bottom-8 left-8 w-28 h-28" style={{ 
+                background: `
+                  linear-gradient(-45deg, #d4af37 1px, transparent 1px 20px, transparent),
+                  linear-gradient(-135deg, #d4af37 1px, transparent 1px 20px, transparent)
+                `,
+                clipPath: 'polygon(0 0, 100% 100%, 0 100%)'
+              }}></div>
+              <div className="absolute bottom-8 right-8 w-28 h-28" style={{ 
+                background: `
+                  linear-gradient(45deg, #d4af37 1px, transparent 1px 20px, transparent),
+                  linear-gradient(135deg, #d4af37 1px, transparent 1px 20px, transparent)
+                `,
+                clipPath: 'polygon(100% 0, 100% 100%, 0 100%)'
+              }}></div>
+              
+              <div className="relative z-10 p-20 text-center h-full flex flex-col justify-center">
+                {/* Header */}
+                <div className="mb-16 relative">
+                  <div 
+                    className="absolute top-0 left-1/2 transform -translate-x-1/2 w-72 h-px"
+                    style={{ background: 'linear-gradient(90deg, transparent, #d4af37, transparent)' }}
+                  ></div>
+                  <div 
+                    className="absolute -bottom-5 left-1/2 transform -translate-x-1/2 w-48 h-px"
+                    style={{ background: 'linear-gradient(90deg, transparent, #d4af37, transparent)' }}
+                  ></div>
+                  
+                  <div className="inline-block bg-gradient-to-r from-yellow-500 via-yellow-400 to-yellow-500 text-gray-900 px-11 py-6 mb-6 relative"
+                       style={{ clipPath: 'polygon(10% 0%, 90% 0%, 100% 25%, 100% 75%, 90% 100%, 10% 100%, 0% 75%, 0% 25%)' }}>
                     <div 
-                      className="font-black text-black uppercase border-2 border-black px-6 py-3 bg-white shadow-md text-3xl"
-                      style={{ fontFamily: "'Playfair Display', serif", letterSpacing: '4px', boxShadow: '4px 4px 0 black' }}
+                      className="text-5xl font-bold uppercase tracking-widest"
+                      style={{ 
+                        fontFamily: "'Cormorant Garamond', serif",
+                        letterSpacing: '8px',
+                        textShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                      }}
                     >
                       OCTAMY
                     </div>
                   </div>
+                  
                   <div 
-                    className="font-bold text-black uppercase text-sm border-t-2 border-black pt-2"
-                    style={{ fontFamily: "'Inter', sans-serif", letterSpacing: '2px' }}
+                    className="text-sm font-medium text-gray-600 uppercase tracking-widest mb-4"
+                    style={{ fontFamily: "'Inter', sans-serif", letterSpacing: '4px' }}
                   >
-                    SOLUTIONS PRIVATE LIMITED
+                    Solutions Private Limited
                   </div>
                   
+                  <div 
+                    className="text-xs text-gray-500 italic tracking-wide"
+                    style={{ fontFamily: "'Crimson Text', serif", letterSpacing: '1px' }}
+                  >
+                    Authorized Certification Body
+                  </div>
+                </div>
+                
+                {/* Title */}
+                <div className="mb-16 relative">
                   <h1 
-                    className="font-black text-black mb-3 uppercase text-5xl"
+                    className="text-8xl font-semibold text-gray-900 uppercase mb-5 relative"
                     style={{ 
-                      fontFamily: "'Playfair Display', serif", 
-                      letterSpacing: '8px',
-                      textShadow: '2px 2px 0 white, 4px 4px 0 rgba(0,0,0,0.1)'
+                      fontFamily: "'Cormorant Garamond', serif",
+                      letterSpacing: '16px',
+                      textShadow: '0 4px 8px rgba(0,0,0,0.1)'
                     }}
                   >
-                    CERTIFICATE
+                    <div 
+                      className="absolute -top-4 left-1/2 transform -translate-x-1/2 w-20 h-1"
+                      style={{ background: 'linear-gradient(90deg, #d4af37, #f4e09d, #d4af37)' }}
+                    ></div>
+                    Certificate
+                    <div 
+                      className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 w-28 h-0.5"
+                      style={{ background: 'linear-gradient(90deg, transparent, #d4af37, transparent)' }}
+                    ></div>
                   </h1>
+                  
                   <p 
-                    className="text-gray-700 mb-10 text-xl italic"
-                    style={{ fontFamily: "'Playfair Display', serif" }}
+                    className="text-3xl text-gray-600 italic tracking-wide"
+                    style={{ fontFamily: "'Crimson Text', serif", letterSpacing: '2px' }}
                   >
-                    of Professional Achievement
+                    of Professional Excellence
                   </p>
                 </div>
                 
-                <div 
-                  className="font-medium text-black mb-6 uppercase text-sm"
-                  style={{ fontFamily: "'Inter', sans-serif", letterSpacing: '1.5px' }}
-                >
-                  This is to certify that
-                </div>
-                
-                <div 
-                  className="font-bold text-black my-8 py-4 border-t-4 border-b-4 border-black uppercase text-4xl"
-                  style={{ 
-                    fontFamily: "'Playfair Display', serif", 
-                    letterSpacing: '3px',
-                    background: 'linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.02) 50%, transparent 100%)'
-                  }}
-                >
-                  {certificate.userName}
-                </div>
-                
-                <div 
-                  className="text-gray-700 my-6 text-base"
-                  style={{ fontFamily: "'Inter', sans-serif" }}
-                >
-                  has successfully completed the professional certification course
-                </div>
-                
-                <div 
-                  className="font-bold text-black my-6 uppercase text-2xl p-4 border-2 border-black bg-white"
-                  style={{ 
-                    fontFamily: "'Playfair Display', serif", 
-                    letterSpacing: '2px',
-                    boxShadow: '0 3px 0 black'
-                  }}
-                >
-                  {certificate.courseTitle}
-                </div>
-                
-                <div className="flex justify-center items-center my-8 gap-6">
-                  <div 
-                    className="bg-white text-black border-2 border-black px-4 py-3 font-bold uppercase text-sm"
-                    style={{ fontFamily: "'Inter', sans-serif", letterSpacing: '1px' }}
+                {/* Content */}
+                <div className="mb-12">
+                  <p 
+                    className="text-2xl text-gray-700 mb-10 italic tracking-wide"
+                    style={{ fontFamily: "'Crimson Text', serif", letterSpacing: '1px' }}
                   >
-                    {certificate.badge.toUpperCase()} LEVEL
-                  </div>
+                    This is to certify that
+                  </p>
+                  
                   <div 
-                    className="bg-black text-white px-6 py-4 font-extrabold uppercase text-sm border-4 border-black"
+                    className="text-6xl font-semibold text-gray-900 my-12 py-8 relative tracking-wider"
                     style={{ 
-                      fontFamily: "'Inter', sans-serif", 
-                      letterSpacing: '1.5px',
-                      boxShadow: '0 3px 0 #333'
+                      fontFamily: "'Cormorant Garamond', serif",
+                      letterSpacing: '6px'
                     }}
                   >
-                    SCORE: {certificate.score}%
+                    <div 
+                      className="absolute top-0 left-1/2 transform -translate-x-1/2 w-96 h-px"
+                      style={{ background: 'linear-gradient(90deg, transparent, #d4af37, transparent)' }}
+                    ></div>
+                    {certificate.userName}
+                    <div 
+                      className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-96 h-px"
+                      style={{ background: 'linear-gradient(90deg, transparent, #d4af37, transparent)' }}
+                    ></div>
+                  </div>
+                  
+                  <p 
+                    className="text-xl text-gray-600 my-10 leading-relaxed tracking-wide"
+                    style={{ fontFamily: "'Crimson Text', serif", letterSpacing: '0.5px' }}
+                  >
+                    has successfully demonstrated mastery and completed the comprehensive<br />
+                    professional certification program
+                  </p>
+                  
+                  <div 
+                    className="text-4xl font-semibold text-gray-900 my-10 uppercase tracking-widest inline-block px-12 py-6 border border-yellow-500 rounded bg-gradient-to-br from-yellow-50 via-yellow-25 to-yellow-50"
+                    style={{ 
+                      fontFamily: "'Cormorant Garamond', serif",
+                      letterSpacing: '4px',
+                      background: 'linear-gradient(145deg, rgba(212,175,55,0.1) 0%, rgba(244,224,157,0.15) 50%, rgba(212,175,55,0.1) 100%)',
+                      borderColor: '#d4af37'
+                    }}
+                  >
+                    {certificate.courseTitle}
+                  </div>
+                  
+                  <div className="flex justify-center items-center gap-10 my-12">
+                    <div 
+                      className="bg-gradient-to-br from-gray-900 to-gray-700 text-yellow-500 px-8 py-5 text-base font-bold uppercase tracking-widest border-2 border-yellow-500 rounded shadow-lg"
+                      style={{ 
+                        fontFamily: "'Inter', sans-serif",
+                        letterSpacing: '2px',
+                        boxShadow: '0 4px 8px rgba(0,0,0,0.2)'
+                      }}
+                    >
+                      {certificate.badge.toUpperCase()} GRADE
+                    </div>
+                    <div 
+                      className="bg-gradient-to-br from-yellow-500 via-yellow-400 to-yellow-500 text-gray-900 px-11 py-6 text-2xl font-bold tracking-widest rounded shadow-lg"
+                      style={{ 
+                        fontFamily: "'Cormorant Garamond', serif",
+                        letterSpacing: '3px',
+                        boxShadow: '0 6px 12px rgba(212,175,55,0.3)'
+                      }}
+                    >
+                      ACHIEVEMENT SCORE: {certificate.score}%
+                    </div>
                   </div>
                 </div>
                 
-                <div className="flex justify-between mt-10 pt-6 border-t-2 border-b-2 border-black">
+                {/* Details */}
+                <div 
+                  className="flex justify-between mt-16 pt-10 border-t border-b border-yellow-500 bg-gradient-to-r from-transparent via-yellow-50 to-transparent"
+                  style={{ borderColor: '#d4af37' }}
+                >
                   <div className="text-center flex-1">
                     <div 
-                      className="text-gray-600 mb-2 text-xs uppercase font-semibold"
-                      style={{ fontFamily: "'Inter', sans-serif", letterSpacing: '1.5px' }}
+                      className="text-xs text-gray-500 mb-2 uppercase tracking-widest font-semibold"
+                      style={{ fontFamily: "'Inter', sans-serif", letterSpacing: '2px' }}
                     >
-                      Certificate No.
+                      Certificate Number
                     </div>
                     <div 
-                      className="font-bold text-black text-sm uppercase"
-                      style={{ fontFamily: "'Inter', sans-serif" }}
+                      className="text-lg font-semibold text-gray-700 tracking-wide"
+                      style={{ fontFamily: "'Crimson Text', serif", letterSpacing: '1px' }}
                     >
                       {certificate.certificateNumber}
                     </div>
                   </div>
                   <div className="text-center flex-1">
                     <div 
-                      className="text-gray-600 mb-2 text-xs uppercase font-semibold"
-                      style={{ fontFamily: "'Inter', sans-serif", letterSpacing: '1.5px' }}
+                      className="text-xs text-gray-500 mb-2 uppercase tracking-widest font-semibold"
+                      style={{ fontFamily: "'Inter', sans-serif", letterSpacing: '2px' }}
                     >
-                      Issue Date
+                      Date of Issue
                     </div>
                     <div 
-                      className="font-bold text-black text-sm uppercase"
-                      style={{ fontFamily: "'Inter', sans-serif" }}
+                      className="text-lg font-semibold text-gray-700 tracking-wide"
+                      style={{ fontFamily: "'Crimson Text', serif", letterSpacing: '1px' }}
                     >
                       {new Date(certificate.issuedAt).toLocaleDateString('en-US', { 
                         year: 'numeric', 
-                        month: 'short', 
+                        month: 'long', 
                         day: 'numeric' 
                       })}
                     </div>
                   </div>
                   <div className="text-center flex-1">
                     <div 
-                      className="text-gray-600 mb-2 text-xs uppercase font-semibold"
-                      style={{ fontFamily: "'Inter', sans-serif", letterSpacing: '1.5px' }}
+                      className="text-xs text-gray-500 mb-2 uppercase tracking-widest font-semibold"
+                      style={{ fontFamily: "'Inter', sans-serif", letterSpacing: '2px' }}
                     >
                       Valid Until
                     </div>
                     <div 
-                      className="font-bold text-black text-sm uppercase"
-                      style={{ fontFamily: "'Inter', sans-serif" }}
+                      className="text-lg font-semibold text-gray-700 tracking-wide"
+                      style={{ fontFamily: "'Crimson Text', serif", letterSpacing: '1px' }}
                     >
                       {new Date(certificate.expiresAt).toLocaleDateString('en-US', { 
                         year: 'numeric', 
-                        month: 'short', 
+                        month: 'long', 
                         day: 'numeric' 
                       })}
                     </div>
@@ -274,40 +384,61 @@ export default function CertificateView() {
                 </div>
               </div>
               
-              <div className="absolute bottom-8 flex justify-between w-full px-12">
+              {/* Footer */}
+              <div className="absolute bottom-12 flex justify-between w-full px-20">
                 <div className="text-left">
-                  <div className="w-32 h-1 bg-black mb-2"></div>
                   <div 
-                    className="text-gray-700 text-xs uppercase font-semibold"
-                    style={{ fontFamily: "'Inter', sans-serif", letterSpacing: '1px' }}
+                    className="w-60 h-px mb-3 relative"
+                    style={{ background: 'linear-gradient(90deg, #d4af37, transparent)' }}
+                  >
+                    <div 
+                      className="absolute left-0 -top-0.5 w-14 h-1"
+                      style={{ background: '#d4af37' }}
+                    ></div>
+                  </div>
+                  <div 
+                    className="text-xs text-gray-600 uppercase tracking-widest font-semibold mb-1"
+                    style={{ fontFamily: "'Inter', sans-serif", letterSpacing: '1.5px' }}
                   >
                     Authorized Signature
                   </div>
                   <div 
-                    className="text-black text-sm font-semibold mt-1"
-                    style={{ fontFamily: "'Playfair Display', serif" }}
+                    className="text-base text-gray-700 font-semibold tracking-wide"
+                    style={{ fontFamily: "'Crimson Text', serif", letterSpacing: '0.5px' }}
                   >
-                    Director, Octamy Solutions
+                    Dr. Rajesh Kumar
+                  </div>
+                  <div 
+                    className="text-xs text-gray-500 uppercase tracking-wide mt-1"
+                    style={{ fontFamily: "'Inter', sans-serif", letterSpacing: '1px' }}
+                  >
+                    Director of Certification
                   </div>
                 </div>
                 
                 <div className="text-right">
-                  <div className="w-16 h-16 bg-black border-2 border-gray-800 mb-2 relative">
-                    <div className="absolute inset-0 flex items-center justify-center text-white text-xs font-bold">
-                      QR
+                  <div 
+                    className="w-20 h-20 bg-gradient-to-br from-yellow-500 via-yellow-400 to-yellow-500 border-2 border-gray-900 rounded-full mb-4 flex items-center justify-center relative shadow-lg mx-auto"
+                    style={{ boxShadow: '0 4px 8px rgba(212,175,55,0.3)' }}
+                  >
+                    <div 
+                      className="text-xs font-extrabold text-gray-900 text-center leading-tight tracking-wide"
+                      style={{ fontFamily: "'Inter', sans-serif", letterSpacing: '0.5px' }}
+                    >
+                      VERIFIED
                     </div>
                   </div>
                   <div 
-                    className="text-gray-600 text-xs uppercase font-semibold"
+                    className="text-xs text-gray-600 uppercase tracking-wide font-semibold mb-1"
                     style={{ fontFamily: "'Inter', sans-serif", letterSpacing: '1px' }}
                   >
-                    Verify Authenticity
+                    Digital Verification
                   </div>
                   <div 
-                    className="text-black text-xs font-semibold mt-1"
-                    style={{ fontFamily: "'Inter', sans-serif" }}
+                    className="text-xs text-gray-700 font-semibold tracking-wide"
+                    style={{ fontFamily: "'Crimson Text', serif", letterSpacing: '0.5px' }}
                   >
-                    octamy.com/verify
+                    verify.octamy.com
                   </div>
                 </div>
               </div>
