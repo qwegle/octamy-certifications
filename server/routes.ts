@@ -1069,7 +1069,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Certificate payment required" });
       }
 
-      const htmlToPdf = require('html-pdf-node');
+      // HTML-based certificate download - users can print to PDF
       
       // Generate certificate HTML with exact frontend styling
       const certificateHtml = `
@@ -1281,51 +1281,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
         type: 'pdf'
       };
 
-      // Dynamic import of puppeteer to avoid ES module issues
-      const puppeteer = await import('puppeteer');
-      
-      // Launch puppeteer to generate PDF
-      const browser = await puppeteer.default.launch({
-        headless: true,
-        args: [
-          '--no-sandbox', 
-          '--disable-setuid-sandbox', 
-          '--disable-dev-shm-usage',
-          '--disable-accelerated-2d-canvas',
-          '--no-first-run',
-          '--no-zygote',
-          '--single-process',
-          '--disable-gpu'
-        ],
-        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined
-      });
-      
-      const page = await browser.newPage();
-      await page.setContent(certificateHtml, { 
-        waitUntil: 'load',
-        timeout: 30000 
-      });
-      
-      const pdfBuffer = await page.pdf({
-        format: 'A4',
-        landscape: true,
-        margin: {
-          top: '0.5in',
-          right: '0.5in',
-          bottom: '0.5in',
-          left: '0.5in'
-        },
-        printBackground: true,
-        preferCSSPageSize: true
-      });
-      
-      await browser.close();
+      // For now, return the HTML content as a simplified certificate
+      // Users can use browser's print-to-PDF functionality
+      res.setHeader('Content-Type', 'text/html');
+      res.setHeader('Content-Disposition', `inline; filename="Octamy-Certificate-${certificate.certificateNumber}.html"`);
+      res.send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Certificate - ${certificate.userName}</title>
+          <style>
+            @media print {
+              body { margin: 0; }
+              .no-print { display: none; }
+              .certificate-container { 
+                width: 100vw; 
+                height: 100vh; 
+                page-break-inside: avoid;
+              }
+            }
+            ${certificateHtml.match(/<style>(.*?)<\/style>/s)?.[1] || ''}
+          </style>
+        </head>
+        <body>
+          <div class="no-print" style="position: fixed; top: 10px; right: 10px; background: #000; color: #fff; padding: 10px; border-radius: 5px; z-index: 1000;">
+            <button onclick="window.print()" style="background: #fff; color: #000; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;">
+              Print to PDF
+            </button>
+          </div>
+          ${certificateHtml.match(/<body>(.*?)<\/body>/s)?.[1] || certificateHtml}
+        </body>
+        </html>
+      `);
 
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `attachment; filename="Octamy-Certificate-${certificate.certificateNumber}.pdf"`);
-      res.setHeader('Content-Length', pdfBuffer.length);
-      
-      res.send(pdfBuffer);
     } catch (error) {
       console.error("Certificate download error:", error);
       res.status(500).json({ message: "Failed to download certificate" });
