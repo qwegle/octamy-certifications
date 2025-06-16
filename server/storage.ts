@@ -6,6 +6,7 @@ import {
   examAttempts, 
   certificates, 
   payments,
+  internshipApplications,
   type User, 
   type InsertUser,
   type Category,
@@ -19,7 +20,9 @@ import {
   type Certificate,
   type InsertCertificate,
   type Payment,
-  type InsertPayment
+  type InsertPayment,
+  type InternshipApplication,
+  type InsertInternshipApplication
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc } from "drizzle-orm";
@@ -37,6 +40,7 @@ export interface IStorage {
   // Course operations
   getCourses(categoryId?: number): Promise<(Course & { category: Category })[]>;
   getCourse(id: number): Promise<Course | undefined>;
+  getCourseBySlug(slug: string): Promise<(Course & { category: Category }) | undefined>;
   createCourse(course: InsertCourse): Promise<Course>;
   updateCourse(id: number, course: Partial<InsertCourse>): Promise<Course>;
   deleteCourse(id: number): Promise<void>;
