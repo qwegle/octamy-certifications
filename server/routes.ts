@@ -246,7 +246,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const passed = score >= 50;
       const mastered = score >= 90;
       
-      // Create exam attempt
+      // Anti-cheating validation
+      const minTimePerQuestion = 30; // seconds
+      const expectedMinTime = totalQuestions * minTimePerQuestion;
+      if (timeTaken < expectedMinTime) {
+        return res.status(400).json({ 
+          message: "Exam completed too quickly. This may indicate cheating." 
+        });
+      }
+
+      // Create exam attempt with anti-cheating data
       const examAttempt = await storage.createExamAttempt({
         userId: req.user?.userId || null,
         courseId,
@@ -257,6 +266,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         answers: answers as Record<string, number>,
         timeTaken,
         passed,
+        mastered,
+        sessionId,
+        ipAddress: req.ip || req.connection?.remoteAddress,
+        userAgent: req.get('User-Agent'),
+        tabSwitches: req.body.tabSwitches || 0,
       });
       
       res.json({

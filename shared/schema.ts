@@ -56,6 +56,11 @@ export const examAttempts = pgTable("exam_attempts", {
   answers: json("answers").$type<Record<string, number>>().notNull(),
   timeTaken: integer("time_taken").notNull(), // in seconds
   passed: boolean("passed").notNull(),
+  mastered: boolean("mastered").default(false).notNull(),
+  sessionId: text("session_id"),
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  tabSwitches: integer("tab_switches").default(0).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

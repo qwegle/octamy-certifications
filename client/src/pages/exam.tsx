@@ -31,6 +31,8 @@ export default function Exam() {
   const [examStarted, setExamStarted] = useState(false);
   const [examStartTime, setExamStartTime] = useState<number>(0);
   const [sessionId, setSessionId] = useState<string>('');
+  const [tabSwitches, setTabSwitches] = useState(0);
+  const [isWindowFocused, setIsWindowFocused] = useState(true);
   const [userInfo, setUserInfo] = useState({
     name: user?.name || '',
     email: user?.email || ''
@@ -44,12 +46,82 @@ export default function Exam() {
   const { data: questionsData } = useQuery<{questions: ExamQuestion[], sessionId: string}>({
     queryKey: [`/api/courses/${courseId}/questions`],
     enabled: !!courseId && examStarted,
-    onSuccess: (data) => {
-      setSessionId(data.sessionId);
-    }
   });
 
   const questions = questionsData?.questions || [];
+
+  // Set session ID when questions data is available
+  useEffect(() => {
+    if (questionsData?.sessionId && !sessionId) {
+      setSessionId(questionsData.sessionId);
+    }
+  }, [questionsData, sessionId]);
+
+  // Anti-cheating: Monitor tab/window focus
+  useEffect(() => {
+    if (!examStarted) return;
+
+    const handleVisibilityChange = () => {
+      if (document.hidden && isWindowFocused) {
+        setTabSwitches(prev => prev + 1);
+        setIsWindowFocused(false);
+        toast({
+          title: "Warning",
+          description: "Tab switching detected. Excessive tab switching may result in exam termination.",
+          variant: "destructive",
+        });
+      } else if (!document.hidden && !isWindowFocused) {
+        setIsWindowFocused(true);
+      }
+    };
+
+    const handleBlur = () => {
+      if (isWindowFocused) {
+        setTabSwitches(prev => prev + 1);
+        setIsWindowFocused(false);
+      }
+    };
+
+    const handleFocus = () => {
+      setIsWindowFocused(true);
+    };
+
+    // Prevent right-click context menu
+    const handleContextMenu = (e: MouseEvent) => {
+      e.preventDefault();
+    };
+
+    // Prevent common keyboard shortcuts for cheating
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Prevent F12, Ctrl+Shift+I, Ctrl+U, Ctrl+Shift+J
+      if (
+        e.key === 'F12' ||
+        (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) ||
+        (e.ctrlKey && e.key === 'u')
+      ) {
+        e.preventDefault();
+        toast({
+          title: "Action Blocked",
+          description: "Developer tools and view source are disabled during the exam.",
+          variant: "destructive",
+        });
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('blur', handleBlur);
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('contextmenu', handleContextMenu);
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('blur', handleBlur);
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('contextmenu', handleContextMenu);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [examStarted, isWindowFocused, toast]);
 
   const submitExamMutation = useMutation({
     mutationFn: async (examData: any) => {
