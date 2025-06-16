@@ -571,12 +571,16 @@ export type WithdrawalRequest = typeof withdrawalRequests.$inferSelect;
 export type InsertWithdrawalRequest = z.infer<typeof insertWithdrawalRequestSchema>;
 export type Leaderboard = typeof leaderboard.$inferSelect;
 export type InsertLeaderboard = z.infer<typeof insertLeaderboardSchema>;
+
+// Progress and Achievement types
 export type UserCourseProgress = typeof userCourseProgress.$inferSelect;
-export type InsertUserCourseProgress = z.infer<typeof insertUserCourseProgressSchema>;
+export type InsertUserCourseProgress = typeof userCourseProgress.$inferInsert;
+
 export type Achievement = typeof achievements.$inferSelect;
-export type InsertAchievement = z.infer<typeof insertAchievementSchema>;
+export type InsertAchievement = typeof achievements.$inferInsert;
+
 export type UserAchievement = typeof userAchievements.$inferSelect;
-export type InsertUserAchievement = z.infer<typeof insertUserAchievementSchema>;
+export type InsertUserAchievement = typeof userAchievements.$inferInsert;
 
 // Smart Notifications Insert Schemas
 export const insertUserPreferencesSchema = createInsertSchema(userPreferences).omit({
