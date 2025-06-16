@@ -954,11 +954,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
 
           console.log(`Payment successful for certificate ${certificate.certificateId}, user can now download`);
+          res.redirect(`${req.protocol}://${req.get('host')}/payment-success?txnid=${responseData.txnid}&certificateId=${certificate.certificateId}`);
         } else {
           console.error("Certificate not found for payment ID:", paymentId);
+          res.redirect(`${req.protocol}://${req.get('host')}/payment-success?txnid=${responseData.txnid}`);
         }
-
-        res.redirect(`${req.protocol}://${req.get('host')}/payment-success?txnid=${responseData.txnid}`);
       } else {
         res.redirect(`${req.protocol}://${req.get('host')}/payment-failed?txnid=${responseData.txnid}&error=${responseData.error_Message || 'payment_failed'}`);
       }

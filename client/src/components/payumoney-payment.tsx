@@ -45,8 +45,11 @@ export default function PayUMoneyPayment({ course, sellerCode, onSuccess }: PayU
     setIsLoading(true);
 
     try {
-      const response = await apiRequest(`/api/payment/initiate`, {
+      const response = await fetch(`/api/payment/initiate`, {
         method: "POST",
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
           courseId: course.id,
           userEmail: formData.email,
@@ -56,13 +59,23 @@ export default function PayUMoneyPayment({ course, sellerCode, onSuccess }: PayU
         }),
       });
 
-      if (response.success) {
-        // Create and submit PayUMoney form
-        const form = document.createElement('form');
-        form.method = response.paymentForm.method;
-        form.action = response.paymentForm.action;
+      const data = await response.json();
 
-        Object.entries(response.paymentForm.fields).forEach(([key, value]) => {
+      if (data.success) {
+        // Create and submit secure PayUMoney form
+        const form = document.createElement('form');
+        form.method = data.paymentForm.method;
+        form.action = data.paymentForm.action;
+        form.style.display = 'none';
+
+        // Add security headers if provided
+        if (data.paymentForm.securityHeaders) {
+          Object.entries(data.paymentForm.securityHeaders).forEach(([key, value]) => {
+            form.setAttribute(`data-${key.toLowerCase()}`, value as string);
+          });
+        }
+
+        Object.entries(data.paymentForm.fields).forEach(([key, value]) => {
           const input = document.createElement('input');
           input.type = 'hidden';
           input.name = key;
@@ -71,6 +84,13 @@ export default function PayUMoneyPayment({ course, sellerCode, onSuccess }: PayU
         });
 
         document.body.appendChild(form);
+        
+        // Show loading state before redirect
+        toast({
+          title: "Redirecting to Payment Gateway",
+          description: "Please wait while we redirect you to the secure payment page...",
+        });
+
         form.submit();
         document.body.removeChild(form);
 
