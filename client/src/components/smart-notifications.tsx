@@ -58,9 +58,7 @@ export function SmartNotifications() {
 
   // Generate recommendations mutation
   const generateRecommendations = useMutation({
-    mutationFn: () => apiRequest("/api/recommendations/generate", {
-      method: "POST",
-    }),
+    mutationFn: () => apiRequest("POST", "/api/recommendations/generate"),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/recommendations"] });
       toast({
@@ -79,9 +77,7 @@ export function SmartNotifications() {
 
   // Mark notification as read
   const markAsRead = useMutation({
-    mutationFn: (notificationId: number) => apiRequest(`/api/notifications/${notificationId}/read`, {
-      method: "PUT",
-    }),
+    mutationFn: (notificationId: number) => apiRequest("PUT", `/api/notifications/${notificationId}/read`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
     },
@@ -89,9 +85,7 @@ export function SmartNotifications() {
 
   // Mark all as read
   const markAllAsRead = useMutation({
-    mutationFn: () => apiRequest("/api/notifications/read-all", {
-      method: "PUT",
-    }),
+    mutationFn: () => apiRequest("PUT", "/api/notifications/read-all"),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
       toast({
