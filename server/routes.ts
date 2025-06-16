@@ -258,7 +258,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userName: examAttempt.userName,
         courseTitle: course.title,
         score: examAttempt.score,
-        expiresAt: new Date(Date.now() + 2 * 365 * 24 * 60 * 60 * 1000), // 2 years
+        expiresAt: new Date(Date.now() + 50 * 365 * 24 * 60 * 60 * 1000), // Lifetime validity (50 years)
         isPaid: false,
         isActive: true,
       });
