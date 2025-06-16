@@ -7,6 +7,7 @@ import bcrypt from "bcrypt";
 import { z } from "zod";
 import { insertUserSchema, insertExamAttemptSchema, insertCertificateSchema, insertSellerSchema, insertSaleSchema, insertWithdrawalRequestSchema } from "@shared/schema";
 import { payuMoneyService } from "./payumoney";
+import { getBadgeFromScore, generateCertificateNumber, calculateExpiryDate } from "./utils";
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -332,7 +333,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Generate certificate ID
       const certificateId = `OCT-${new Date().getFullYear()}-${course.title.replace(/\s+/g, '').toUpperCase().slice(0, 3)}-${Date.now()}`;
       
-      // Create certificate with mastery recognition
+      // Calculate badge based on score
+      const badge = getBadgeFromScore(examAttempt.score);
+      
+      // Generate unique certificate number
+      const certificateNumber = generateCertificateNumber();
+      
+      // Create certificate with badge system and enhanced features
       const certificate = await storage.createCertificate({
         certificateId,
         examAttemptId,
@@ -341,10 +348,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userName: examAttempt.userName,
         courseTitle: course.title,
         score: examAttempt.score,
-        mastered: examAttempt.mastered || false,
-        expiresAt: new Date(Date.now() + 2 * 365 * 24 * 60 * 60 * 1000), // 2 years validity
-        isPaid: false,
-        isActive: true,
+        badge,
+        certificateNumber,
+        expiresAt: calculateExpiryDate(),
+        businessName: req.body.businessName || null, // For business certificates
+        retakeCount: 0,
       });
       
       res.json(certificate);

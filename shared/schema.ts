@@ -351,3 +351,5 @@ export type Sale = typeof sales.$inferSelect;
 export type InsertSale = z.infer<typeof insertSaleSchema>;
 export type WithdrawalRequest = typeof withdrawalRequests.$inferSelect;
 export type InsertWithdrawalRequest = z.infer<typeof insertWithdrawalRequestSchema>;
+export type Leaderboard = typeof leaderboard.$inferSelect;
+export type InsertLeaderboard = z.infer<typeof insertLeaderboardSchema>;
