@@ -145,6 +145,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/courses/slug/:slug", async (req, res) => {
+    try {
+      const course = await storage.getCourseBySlug(req.params.slug);
+      if (!course) {
+        return res.status(404).json({ message: "Course not found" });
+      }
+      res.json(course);
+    } catch (error) {
+      console.error("Error fetching course by slug:", error);
+      res.status(500).json({ message: "Failed to fetch course" });
+    }
+  });
+
   // Exam routes
   app.get("/api/courses/:id/questions", async (req, res) => {
     try {
@@ -372,6 +385,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error creating question:", error);
       res.status(500).json({ message: "Failed to create question" });
+    }
+  });
+
+  // Internship application routes
+  app.post("/api/internship-applications", optionalAuth, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { certificateId, applicantName, dateOfBirth, startDate, endDate, durationMonths } = req.body;
+      
+      // Verify certificate exists and belongs to user if authenticated
+      const certificate = await storage.getCertificate(certificateId);
+      if (!certificate) {
+        return res.status(404).json({ message: "Certificate not found" });
+      }
+
+      // Create internship application
+      const application = await storage.createInternshipApplication({
+        certificateId,
+        applicantName,
+        dateOfBirth,
+        startDate,
+        endDate,
+        durationMonths,
+      });
+
+      res.json(application);
+    } catch (error) {
+      console.error("Error creating internship application:", error);
+      res.status(500).json({ message: "Failed to create internship application" });
+    }
+  });
+
+  app.get("/api/internship-applications/:certificateId", optionalAuth, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const application = await storage.getInternshipApplication(parseInt(req.params.certificateId));
+      res.json(application);
+    } catch (error) {
+      console.error("Error fetching internship application:", error);
+      res.status(500).json({ message: "Failed to fetch internship application" });
     }
   });
 
