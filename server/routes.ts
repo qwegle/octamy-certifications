@@ -167,7 +167,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/exam/submit", optionalAuth, async (req, res) => {
+  app.post("/api/exam/submit", optionalAuth, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { courseId, answers, timeTaken, userEmail, userName } = req.body;
       
@@ -215,7 +215,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Certificate routes
-  app.post("/api/certificates/create", optionalAuth, async (req, res) => {
+  app.post("/api/certificates/create", optionalAuth, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { examAttemptId } = req.body;
       
@@ -303,7 +303,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // User dashboard
-  app.get("/api/user/certificates", authenticateToken, async (req, res) => {
+  app.get("/api/user/certificates", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const certificates = await storage.getUserCertificates(req.user.userId);
       res.json(certificates);
