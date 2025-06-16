@@ -256,10 +256,64 @@ export const userActivity = pgTable("user_activity", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+export const userCourseProgress = pgTable("user_course_progress", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  courseId: integer("course_id").references(() => courses.id).notNull(),
+  status: text("status").notNull().default("not_started"), // not_started, in_progress, completed, mastered
+  progressPercentage: integer("progress_percentage").default(0).notNull(),
+  timeSpent: integer("time_spent").default(0).notNull(), // in minutes
+  lastAccessedAt: timestamp("last_accessed_at").defaultNow().notNull(),
+  completedAt: timestamp("completed_at"),
+  bestScore: integer("best_score").default(0).notNull(),
+  attemptCount: integer("attempt_count").default(0).notNull(),
+  streakDays: integer("streak_days").default(0).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const achievements = pgTable("achievements", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull().unique(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  icon: text("icon").notNull(),
+  category: text("category").notNull(), // score, streak, completion, mastery, speed
+  tier: text("tier").notNull(), // bronze, silver, gold, platinum, diamond
+  criteria: json("criteria").$type<{
+    type: 'score' | 'streak' | 'completion_count' | 'time_spent' | 'perfect_score' | 'speed';
+    threshold: number;
+    courseId?: number;
+    categoryId?: number;
+  }>().notNull(),
+  points: integer("points").default(0).notNull(),
+  rarity: text("rarity").notNull().default("common"), // common, rare, epic, legendary
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const userAchievements = pgTable("user_achievements", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  achievementId: integer("achievement_id").references(() => achievements.id).notNull(),
+  unlockedAt: timestamp("unlocked_at").defaultNow().notNull(),
+  progress: integer("progress").default(100).notNull(), // percentage toward achievement
+  metadata: json("metadata").$type<{
+    scoreAchieved?: number;
+    courseId?: number;
+    examAttemptId?: number;
+    streakDays?: number;
+  }>(),
+  isViewed: boolean("is_viewed").default(false).notNull(),
+  isNotified: boolean("is_notified").default(false).notNull(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   examAttempts: many(examAttempts),
   certificates: many(certificates),
+  courseProgress: many(userCourseProgress),
+  achievements: many(userAchievements),
 }));
 
 export const categoriesRelations = relations(categories, ({ many }) => ({
@@ -273,6 +327,33 @@ export const coursesRelations = relations(courses, ({ one, many }) => ({
   }),
   questions: many(questions),
   examAttempts: many(examAttempts),
+  userProgress: many(userCourseProgress),
+}));
+
+export const userCourseProgressRelations = relations(userCourseProgress, ({ one }) => ({
+  user: one(users, {
+    fields: [userCourseProgress.userId],
+    references: [users.id],
+  }),
+  course: one(courses, {
+    fields: [userCourseProgress.courseId],
+    references: [courses.id],
+  }),
+}));
+
+export const achievementsRelations = relations(achievements, ({ many }) => ({
+  userAchievements: many(userAchievements),
+}));
+
+export const userAchievementsRelations = relations(userAchievements, ({ one }) => ({
+  user: one(users, {
+    fields: [userAchievements.userId],
+    references: [users.id],
+  }),
+  achievement: one(achievements, {
+    fields: [userAchievements.achievementId],
+    references: [achievements.id],
+  }),
 }));
 
 export const questionsRelations = relations(questions, ({ one }) => ({
