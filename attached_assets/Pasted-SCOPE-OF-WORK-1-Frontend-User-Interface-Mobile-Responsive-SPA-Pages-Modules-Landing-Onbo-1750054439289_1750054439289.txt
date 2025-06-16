@@ -1,0 +1,169 @@
+SCOPE OF WORK
+🖥️ 1. Frontend – User Interface (Mobile Responsive SPA)
+Pages/Modules:
+Landing / Onboarding Page
+
+Beautiful, modern layout with categories (AI, Dev, Business, Internships)
+
+Interactive course tiles with icons, descriptions, and action buttons
+
+Optional search/filter to find certifications
+
+Call-to-action: "Attempt Now"
+
+Course Exam Page
+
+Start Exam → Timer, multiple-choice questions (easy to medium)
+
+Show score instantly after submission
+
+If score ≥ 50% → show a paywall with ₹199 prompt
+
+Option to proceed as:
+
+Guest
+
+Sign Up/Login
+
+Certificate Preview & Payment Page
+
+Certificate preview with watermark
+
+Razorpay (or other) payment gateway integration
+
+After payment: remove watermark, show downloadable link
+
+Share buttons: LinkedIn, Twitter, WhatsApp
+
+Public certificate URL: /certificates/:certificateId
+
+User Dashboard (If logged in)
+
+View all attempted certifications
+
+Download/view active certificates
+
+Renew expired ones by paying ₹199 again
+
+Show expiry date countdown
+
+Certificate Verification Page
+
+Form: Enter certificate ID
+
+On submit: Show certificate details (name, course, validity, status)
+
+🔐 2. Authentication
+JWT-based auth (email/password)
+
+OAuth optional for faster onboarding
+
+Guest flow: minimal data (name, email) + payment
+
+Email verification (optional)
+
+🧪 3. Exam Engine
+MCQ format only (10–15 questions per course)
+
+Randomize questions per user
+
+Question bank per course, managed via Admin Panel
+
+Results:
+
+Pass = 50%+
+
+Certificate ID generated using UUID or structured format
+
+Save exam attempt, marks, time taken, result status
+
+🧾 4. Certificate System
+Certificate includes:
+
+Name, Course Name, Score, Date, Validity (2 years), Unique ID
+
+QR code linking to public verification page
+
+Storage: PDF format (optional image fallback for preview)
+
+Expiry: Track via timestamp, allow renewals
+
+Each certificate should have:
+
+Download URL
+
+Public view URL
+
+Status (Valid / Expired)
+
+🛠️ 5. Admin Panel
+Features:
+Admin Auth (basic login panel)
+
+Manage:
+
+🔹 Courses (title, description, icon, category)
+
+🔹 Questions (add/edit/delete per course)
+
+🔹 Certificates (view, revoke, renew manually)
+
+🔹 Payments (basic list and search)
+
+🔹 Users (email, certificate stats)
+
+Set:
+
+Certificate expiry duration (default: 2 years)
+
+Price (₹199)
+
+💳 6. Payment System
+Integration with Razorpay or Stripe
+
+Payment intent triggered after exam passed
+
+Save payment record with transaction ID, user/certificate reference
+
+Auto-issue certificate after success
+
+📤 7. Public Sharing & SEO
+Certificate page: public URL with OpenGraph image (preview of certificate)
+
+LinkedIn, WhatsApp, Twitter share buttons
+
+OG tags for preview when shared
+
+Option to copy shareable link
+
+📑 8. Technology Stack Suggestions
+Layer	Suggested Technology
+Frontend (Web)	React.js + Tailwind CSS (or Next.js for SSR)
+Backend	Node.js + Express or NestJS
+Database	PostgreSQL / MongoDB
+Auth	JWT, OAuth via Google (optional)
+Payment Gateway	Razorpay (India-focused)
+Certificate Gen.	PDFKit or Puppeteer (HTML to PDF)
+Storage	AWS S3 or Cloudinary (for cert storage)
+Hosting	Vercel (Frontend), Render / Railway / AWS (Backend)
+Admin Panel	React Admin or Custom UI
+QR Code	qrcode npm package
+
+📊 Optional Enhancements
+Email certificate to user after payment
+
+Allow users to "Save progress" in exam
+
+Leaderboard of top scorers (gamification)
+
+Webhooks for Razorpay to confirm payment server-side
+
+✅ Summary
+You are building a self-serve certification platform where users:
+
+Choose a course
+
+Take a short test
+
+Pay ₹199 to access/download/share their certificate
+Admin controls everything via dashboard and the system handles expiry and renewal logic automatically.
