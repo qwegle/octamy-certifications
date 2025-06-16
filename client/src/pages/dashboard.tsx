@@ -273,7 +273,7 @@ export default function Dashboard() {
                           size="sm"
                           className="w-full bg-octamy-black text-white hover:bg-octamy-gray-800"
                         >
-                          Pay ₹199 & Download
+                          Pay ₹99 & Download
                         </Button>
                       </Link>
                     </div>

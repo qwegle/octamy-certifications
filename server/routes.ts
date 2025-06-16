@@ -892,7 +892,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         if (certificate) {
           // Update certificate payment status
-          await storage.updateCertificatePayment(paymentId, {
+          await storage.updateCertificatePayment(certificate.id, {
             isPaid: true,
             paymentId: responseData.mihpayid
           });
