@@ -139,6 +139,10 @@ Octamy is a comprehensive professional certification platform built as a full-st
 
 ```
 Changelog:
+- June 16, 2025: Fixed critical exam submission and certificate creation bugs
+- June 16, 2025: Resolved pricing discrepancy from ₹199 to ₹99 in payment flow
+- June 16, 2025: Added courseId field to certificate schema and updated database
+- June 16, 2025: Fixed answers array format handling in exam submission API
 - June 16, 2025: Implemented smart notifications system with personalized course recommendations
 - June 16, 2025: Added user preferences management for learning goals and notification settings
 - June 16, 2025: Created intelligent recommendation engine based on user activity and interests

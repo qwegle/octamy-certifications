@@ -302,7 +302,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userName,
         score,
         totalQuestions,
-        answers: answers as Record<string, number>,
+        answers: answersRecord,
         timeTaken: finalTimeTaken,
         passed,
         mastered,
