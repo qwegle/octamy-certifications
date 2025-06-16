@@ -1,53 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Trophy, Star, Target, Zap, Book, Award } from 'lucide-react';
-import { apiRequest } from '@/lib/queryClient';
-
-interface Achievement {
-  id: number;
-  name: string;
-  title: string;
-  description: string;
-  icon: string;
-  category: string;
-  tier: string;
-  points: number;
-  rarity: string;
-}
-
-interface UserAchievement {
-  id: number;
-  achievementId: number;
-  unlockedAt: string;
-  progress: number;
-  isViewed: boolean;
-  achievement?: Achievement;
-}
-
-interface CourseProgress {
-  id: number;
-  courseId: number;
-  status: string;
-  progressPercentage: number;
-  timeSpent: number;
-  bestScore: number;
-  attemptCount: number;
-  streakDays: number;
-}
-
-interface Course {
-  id: number;
-  title: string;
-  description: string;
-  level: string;
-  duration: number;
-  categoryId: number;
-  category: {
-    name: string;
-    icon: string;
-  };
-}
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { apiRequest, queryClient } from '@/lib/queryClient';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Trophy, Star, Clock, Target, Zap, Award, BookOpen, TrendingUp } from 'lucide-react';
+import { 
+  UserCourseProgress, 
+  UserAchievement, 
+  Achievement, 
+  Course 
+} from '@shared/schema';
 
 interface Props {
   courseId?: number;
@@ -57,334 +23,327 @@ interface Props {
 export function CourseProgressVisualization({ courseId, userId }: Props) {
   const [newAchievements, setNewAchievements] = useState<UserAchievement[]>([]);
   const [showAchievementModal, setShowAchievementModal] = useState(false);
-  const queryClient = useQueryClient();
+  const [selectedCourse, setSelectedCourse] = useState<number | null>(courseId || null);
 
-  const { data: progress = [] } = useQuery<CourseProgress[]>({
-    queryKey: ['progress', courseId],
-    queryFn: () => apiRequest(`/api/progress${courseId ? `?courseId=${courseId}` : ''}`),
-    enabled: !!userId
+  // Fetch course progress data
+  const { data: progressData = [], isLoading: progressLoading } = useQuery({
+    queryKey: ['/api/progress'],
   });
 
-  const { data: achievements = [] } = useQuery<UserAchievement[]>({
-    queryKey: ['user-achievements'],
-    queryFn: () => apiRequest('/api/user/achievements?details=true'),
-    enabled: !!userId
+  // Fetch user achievements
+  const { data: achievementsData = [], isLoading: achievementsLoading } = useQuery({
+    queryKey: ['/api/user/achievements'],
   });
 
-  const { data: courses = [] } = useQuery<Course[]>({
-    queryKey: ['courses'],
-    queryFn: () => apiRequest('/api/courses')
+  // Fetch courses data
+  const { data: coursesData = [], isLoading: coursesLoading } = useQuery({
+    queryKey: ['/api/courses'],
   });
 
-  const checkAchievementsMutation = useMutation({
+  // Check for new achievements mutation
+  const checkAchievements = useMutation({
     mutationFn: (data: { courseId?: number }) => 
-      apiRequest('/api/achievements/check', { method: 'POST', body: data }),
-    onSuccess: (newUnlocks: UserAchievement[]) => {
-      if (newUnlocks.length > 0) {
-        setNewAchievements(newUnlocks);
+      apiRequest('/api/achievements/check', {
+        method: 'POST',
+        body: data,
+      }),
+    onSuccess: (newAchievements: UserAchievement[]) => {
+      if (newAchievements && newAchievements.length > 0) {
+        setNewAchievements(newAchievements);
         setShowAchievementModal(true);
-        queryClient.invalidateQueries({ queryKey: ['user-achievements'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/user/achievements'] });
       }
-    }
+    },
   });
 
-  const updateProgressMutation = useMutation({
-    mutationFn: (data: Partial<CourseProgress>) => 
-      apiRequest('/api/progress', { method: 'POST', body: data }),
+  // Update progress mutation
+  const updateProgress = useMutation({
+    mutationFn: (progressData: Partial<UserCourseProgress>) =>
+      apiRequest('/api/progress', {
+        method: 'POST',
+        body: progressData,
+      }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['progress'] });
-      if (courseId) {
-        checkAchievementsMutation.mutate({ courseId });
-      }
-    }
+      queryClient.invalidateQueries({ queryKey: ['/api/progress'] });
+    },
   });
 
-  const getTierColor = (tier: string) => {
-    switch (tier) {
-      case 'bronze': return 'from-amber-600 to-amber-800';
-      case 'silver': return 'from-gray-400 to-gray-600';
-      case 'gold': return 'from-yellow-400 to-yellow-600';
-      case 'platinum': return 'from-gray-300 to-gray-500';
-      case 'diamond': return 'from-blue-400 to-blue-600';
-      default: return 'from-gray-400 to-gray-600';
+  // Check for achievements when progress updates
+  useEffect(() => {
+    if (selectedCourse) {
+      checkAchievements.mutate({ courseId: selectedCourse });
     }
-  };
+  }, [selectedCourse]);
 
-  const getRarityGlow = (rarity: string) => {
-    switch (rarity) {
-      case 'common': return 'shadow-md';
-      case 'rare': return 'shadow-lg shadow-blue-500/25';
-      case 'epic': return 'shadow-xl shadow-purple-500/30';
-      case 'legendary': return 'shadow-2xl shadow-yellow-500/40';
-      default: return 'shadow-md';
-    }
-  };
+  const isLoading = progressLoading || achievementsLoading || coursesLoading;
 
-  const getIconComponent = (iconName: string) => {
-    const iconMap: { [key: string]: React.ReactNode } = {
-      '🎯': <Target className="w-8 h-8" />,
-      '💯': <Star className="w-8 h-8" />,
-      '⭐': <Star className="w-8 h-8" />,
-      '🏆': <Trophy className="w-8 h-8" />,
-      '⚡': <Zap className="w-8 h-8" />,
-      '📚': <Book className="w-8 h-8" />
-    };
-    return iconMap[iconName] || <Award className="w-8 h-8" />;
-  };
-
-  const CircularProgress = ({ 
-    percentage, 
-    size = 120, 
-    strokeWidth = 8,
-    className = ''
-  }: { 
-    percentage: number; 
-    size?: number; 
-    strokeWidth?: number;
-    className?: string;
-  }) => {
-    const radius = (size - strokeWidth) / 2;
-    const circumference = radius * 2 * Math.PI;
-    const offset = circumference - (percentage / 100) * circumference;
-
+  if (isLoading) {
     return (
-      <div className={`relative ${className}`}>
-        <svg
-          width={size}
-          height={size}
-          className="transform -rotate-90"
-        >
-          <circle
-            cx={size / 2}
-            cy={size / 2}
-            r={radius}
-            stroke="currentColor"
-            strokeWidth={strokeWidth}
-            fill="none"
-            className="text-white/10"
-          />
-          <motion.circle
-            cx={size / 2}
-            cy={size / 2}
-            r={radius}
-            stroke="url(#gradient)"
-            strokeWidth={strokeWidth}
-            fill="none"
-            strokeLinecap="round"
-            strokeDasharray={circumference}
-            initial={{ strokeDashoffset: circumference }}
-            animate={{ strokeDashoffset: offset }}
-            transition={{ duration: 1.5, ease: "easeInOut" }}
-          />
-          <defs>
-            <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#d4af37" />
-              <stop offset="100%" stopColor="#f4e09d" />
-            </linearGradient>
-          </defs>
-        </svg>
-        <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-2xl font-bold text-white">
-            {percentage}%
-          </span>
+      <div className="space-y-6">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded mb-4"></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-48 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+            ))}
+          </div>
         </div>
       </div>
     );
-  };
+  }
+
+  // Filter progress data by course if specified
+  const filteredProgress = courseId 
+    ? (progressData as UserCourseProgress[]).filter(p => p.courseId === courseId)
+    : progressData as UserCourseProgress[];
+
+  // Find course data for each progress entry
+  const progressWithCourses = filteredProgress.map(courseProgress => {
+    const course = (coursesData as Course[]).find(c => c.id === courseProgress.courseId);
+    return { ...courseProgress, course };
+  });
+
+  // Get recent achievements (last 5)
+  const recentAchievements = (achievementsData as UserAchievement[]).map(achievement => {
+    const achievementDetails = achievement.achievement;
+    return { ...achievement, achievement: achievementDetails };
+  }).slice(0, 5);
 
   const AchievementCard = ({ achievement }: { achievement: UserAchievement }) => (
     <motion.div
-      initial={{ scale: 0, rotate: -180 }}
-      animate={{ scale: 1, rotate: 0 }}
-      exit={{ scale: 0, rotate: 180 }}
-      transition={{ type: "spring", stiffness: 260, damping: 20 }}
-      className={`relative bg-gradient-to-br ${getTierColor(achievement.achievement?.tier || 'bronze')} 
-        p-6 rounded-xl text-white ${getRarityGlow(achievement.achievement?.rarity || 'common')}`}
+      initial={{ opacity: 0, scale: 0.8 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.5 }}
+      className="relative"
     >
-      <div className="absolute inset-0 bg-black/20 rounded-xl" />
-      <div className="relative z-10">
-        <div className="flex items-center justify-between mb-4">
-          <div className="p-3 bg-white/20 rounded-full">
-            {getIconComponent(achievement.achievement?.icon || '🏆')}
+      <Card className="border-2 border-yellow-400 bg-gradient-to-br from-yellow-50 to-amber-100 dark:from-yellow-900/20 dark:to-amber-900/20">
+        <CardContent className="p-4 text-center">
+          <div className="text-4xl mb-2">{achievement.achievement?.icon || '🏆'}</div>
+          <h3 className="font-bold text-lg mb-1">{achievement.achievement?.title}</h3>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+            {achievement.achievement?.description}
+          </p>
+          <Badge 
+            variant="secondary" 
+            className={`${
+              achievement.achievement?.rarity === 'legendary' ? 'bg-purple-500 text-white' :
+              achievement.achievement?.rarity === 'epic' ? 'bg-orange-500 text-white' :
+              achievement.achievement?.rarity === 'rare' ? 'bg-blue-500 text-white' :
+              'bg-gray-500 text-white'
+            }`}
+          >
+            {achievement.achievement?.rarity || 'common'}
+          </Badge>
+          <div className="mt-2 text-sm font-medium">
+            +{achievement.achievement?.points || 10} points
           </div>
-          <div className="text-xs bg-white/20 px-2 py-1 rounded-full">
-            {achievement.achievement?.tier?.toUpperCase()}
-          </div>
-        </div>
-        <h3 className="font-bold text-lg mb-2">{achievement.achievement?.title}</h3>
-        <p className="text-sm opacity-90 mb-3">{achievement.achievement?.description}</p>
-        <div className="flex items-center justify-between">
-          <span className="text-xs">+{achievement.achievement?.points} XP</span>
-          <span className="text-xs capitalize">{achievement.achievement?.rarity}</span>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </motion.div>
   );
 
-  const CourseProgressCard = ({ courseProgress, course }: { 
-    courseProgress: CourseProgress; 
-    course: Course;
-  }) => (
+  const ProgressCard = ({ courseProgress, course }: { courseProgress: UserCourseProgress; course?: Course }) => (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-black border border-white/10 rounded-xl p-6 text-white"
+      transition={{ duration: 0.5 }}
     >
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h3 className="font-bold text-lg">{course.title}</h3>
-          <p className="text-sm text-gray-400 capitalize">{courseProgress.status.replace('_', ' ')}</p>
-        </div>
-        <div className="text-2xl">{course.category.icon}</div>
-      </div>
+      <Card className="h-full">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <BookOpen className="h-5 w-5" />
+            {course?.title || 'Course'}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <div className="flex justify-between text-sm mb-2">
+              <span>Progress</span>
+              <span className="font-medium">{courseProgress.progressPercentage}%</span>
+            </div>
+            <Progress value={courseProgress.progressPercentage} className="h-2" />
+          </div>
 
-      <div className="flex items-center justify-center mb-6">
-        <CircularProgress percentage={courseProgress.progressPercentage} />
-      </div>
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div className="flex items-center gap-2">
+              <Clock className="h-4 w-4 text-blue-500" />
+              <div>
+                <div className="font-medium">{Math.floor(courseProgress.timeSpent / 60)}h {courseProgress.timeSpent % 60}m</div>
+                <div className="text-gray-500">Time Spent</div>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <Target className="h-4 w-4 text-green-500" />
+              <div>
+                <div className="font-medium">{courseProgress.bestScore || 0}%</div>
+                <div className="text-gray-500">Best Score</div>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <Zap className="h-4 w-4 text-orange-500" />
+              <div>
+                <div className="font-medium">{courseProgress.streakDays || 0} days</div>
+                <div className="text-gray-500">Streak</div>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-purple-500" />
+              <div>
+                <div className="font-medium">{courseProgress.attemptCount || 0}</div>
+                <div className="text-gray-500">Attempts</div>
+              </div>
+            </div>
+          </div>
 
-      <div className="grid grid-cols-2 gap-4 text-sm">
-        <div className="bg-white/5 rounded-lg p-3">
-          <div className="text-gray-400">Best Score</div>
-          <div className="font-bold text-xl">{courseProgress.bestScore}%</div>
-        </div>
-        <div className="bg-white/5 rounded-lg p-3">
-          <div className="text-gray-400">Attempts</div>
-          <div className="font-bold text-xl">{courseProgress.attemptCount}</div>
-        </div>
-        <div className="bg-white/5 rounded-lg p-3">
-          <div className="text-gray-400">Time Spent</div>
-          <div className="font-bold text-xl">{Math.floor(courseProgress.timeSpent / 60)}h</div>
-        </div>
-        <div className="bg-white/5 rounded-lg p-3">
-          <div className="text-gray-400">Streak</div>
-          <div className="font-bold text-xl">{courseProgress.streakDays}d</div>
-        </div>
-      </div>
-
-      {courseProgress.status === 'completed' && (
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          className="mt-4 bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-2 rounded-lg text-center font-semibold"
-        >
-          ✓ Completed
-        </motion.div>
-      )}
+          <div className="pt-2">
+            <Badge 
+              variant={courseProgress.status === 'completed' ? 'default' : 'secondary'}
+              className="capitalize"
+            >
+              {courseProgress.status}
+            </Badge>
+          </div>
+        </CardContent>
+      </Card>
     </motion.div>
   );
 
   return (
     <div className="space-y-8">
-      {/* Achievement Modal */}
-      <AnimatePresence>
-        {showAchievementModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
-            onClick={() => setShowAchievementModal(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.5, y: 50 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.5, y: 50 }}
-              className="bg-black border border-white/20 rounded-2xl p-8 max-w-2xl w-full"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="text-center mb-8">
-                <motion.div
-                  animate={{ 
-                    scale: [1, 1.2, 1],
-                    rotate: [0, 10, -10, 0]
-                  }}
-                  transition={{ 
-                    duration: 0.6,
-                    repeat: Infinity,
-                    repeatDelay: 2
-                  }}
-                  className="text-6xl mb-4"
-                >
-                  🎉
-                </motion.div>
-                <h2 className="text-3xl font-bold text-white mb-2">Achievement Unlocked!</h2>
-                <p className="text-gray-400">You've earned new achievements</p>
-              </div>
-
-              <div className="grid gap-4 mb-8">
-                {newAchievements.map((achievement, index) => (
+      {/* Recent Achievements Section */}
+      {recentAchievements.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <Card className="bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/10 dark:to-amber-900/10 border-yellow-200 dark:border-yellow-800">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Trophy className="h-6 w-6 text-yellow-600" />
+                Recent Achievements
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+                {recentAchievements.map((achievement) => (
                   <motion.div
                     key={achievement.id}
-                    initial={{ opacity: 0, x: -50 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.2 }}
+                    whileHover={{ scale: 1.05 }}
+                    className="text-center p-3 rounded-lg bg-white dark:bg-gray-800 shadow-sm"
                   >
-                    <AchievementCard achievement={achievement} />
+                    <div className="text-2xl mb-1">{achievement.achievement?.icon || '🏆'}</div>
+                    <div className="text-xs font-medium truncate">{achievement.achievement?.title}</div>
+                    <div className="text-xs text-gray-500">+{achievement.achievement?.points || 10} pts</div>
                   </motion.div>
                 ))}
               </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
 
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setShowAchievementModal(false)}
-                className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 text-black font-bold py-3 rounded-lg"
-              >
-                Continue Learning
-              </motion.button>
-            </motion.div>
-          </motion.div>
+      {/* Course Progress Grid */}
+      <div>
+        <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+          <BookOpen className="h-6 w-6" />
+          Course Progress
+        </h2>
+        
+        {progressWithCourses.length === 0 ? (
+          <Card className="p-8 text-center">
+            <BookOpen className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+            <h3 className="text-lg font-medium text-gray-600 dark:text-gray-400 mb-2">
+              No Progress Yet
+            </h3>
+            <p className="text-gray-500">
+              Start taking courses to see your progress here!
+            </p>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {progressWithCourses.map((item) => (
+              <ProgressCard 
+                key={item.id} 
+                courseProgress={item} 
+                course={item.course} 
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Achievement Unlock Modal */}
+      <AnimatePresence>
+        {showAchievementModal && (
+          <Dialog open={showAchievementModal} onOpenChange={setShowAchievementModal}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle className="text-center text-2xl font-bold text-yellow-600">
+                  🎉 Achievement Unlocked!
+                </DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                {newAchievements.map((achievement, index) => (
+                  <motion.div
+                    key={achievement.id}
+                    initial={{ opacity: 0, scale: 0.5, rotate: -10 }}
+                    animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                    transition={{ 
+                      duration: 0.8,
+                      delay: index * 0.2,
+                      type: "spring",
+                      stiffness: 200 
+                    }}
+                    className="text-center p-6 bg-gradient-to-br from-yellow-100 to-amber-100 dark:from-yellow-900/30 dark:to-amber-900/30 rounded-lg border-2 border-yellow-400"
+                  >
+                    <motion.div
+                      animate={{ 
+                        scale: [1, 1.2, 1],
+                        rotate: [0, 5, -5, 0] 
+                      }}
+                      transition={{ 
+                        duration: 2,
+                        repeat: Infinity,
+                        repeatType: "reverse" 
+                      }}
+                      className="text-6xl mb-4"
+                    >
+                      {achievement.achievement?.icon || '🏆'}
+                    </motion.div>
+                    <h3 className="text-xl font-bold mb-2">{achievement.achievement?.title}</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                      {achievement.achievement?.description}
+                    </p>
+                    <Badge 
+                      className={`${
+                        achievement.achievement?.rarity === 'legendary' ? 'bg-purple-500' :
+                        achievement.achievement?.rarity === 'epic' ? 'bg-orange-500' :
+                        achievement.achievement?.rarity === 'rare' ? 'bg-blue-500' :
+                        'bg-gray-500'
+                      } text-white px-3 py-1`}
+                    >
+                      {achievement.achievement?.rarity || 'common'}
+                    </Badge>
+                    <div className="mt-3 text-lg font-bold text-yellow-600">
+                      +{achievement.achievement?.points || 10} Points!
+                    </div>
+                  </motion.div>
+                ))}
+                <Button 
+                  onClick={() => setShowAchievementModal(false)}
+                  className="w-full mt-6 bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600"
+                >
+                  Awesome! 🎉
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
         )}
       </AnimatePresence>
-
-      {/* Progress Overview */}
-      <div className="grid gap-6">
-        {courseId ? (
-          // Single course view
-          progress
-            .filter(p => p.courseId === courseId)
-            .map(courseProgress => {
-              const course = courses.find(c => c.id === courseProgress.courseId);
-              return course ? (
-                <CourseProgressCard 
-                  key={courseProgress.id} 
-                  courseProgress={courseProgress} 
-                  course={course} 
-                />
-              ) : null;
-            })
-        ) : (
-          // All courses view
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {progress.map(courseProgress => {
-              const course = courses.find(c => c.id === courseProgress.courseId);
-              return course ? (
-                <CourseProgressCard 
-                  key={courseProgress.id} 
-                  courseProgress={courseProgress} 
-                  course={course} 
-                />
-              ) : null;
-            })}
-          </div>
-        )}
-      </div>
-
-      {/* Achievements Gallery */}
-      <div className="bg-black border border-white/10 rounded-xl p-6">
-        <h2 className="text-2xl font-bold text-white mb-6">Your Achievements</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {achievements.map(achievement => (
-            <AchievementCard key={achievement.id} achievement={achievement} />
-          ))}
-        </div>
-        {achievements.length === 0 && (
-          <div className="text-center py-12 text-gray-400">
-            <Trophy className="w-16 h-16 mx-auto mb-4 opacity-50" />
-            <p>No achievements yet. Complete courses to unlock your first achievement!</p>
-          </div>
-        )}
-      </div>
     </div>
   );
 }
