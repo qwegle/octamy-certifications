@@ -219,58 +219,59 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-octamy-black mb-4">Popular Certifications</h2>
-            <p className="text-xl text-octamy-gray-600">Most in-demand certifications this month</p>
+            <p className="text-xl text-octamy-gray-600 max-w-2xl mx-auto">
+              Start with our most popular certifications across different skill levels and advance your career today.
+            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {popularCourses.map((course, index) => (
-              <CourseCard
-                key={course.id}
-                course={course}
-                certifiedCount={Math.floor(Math.random() * 3000) + 1000}
-                rating={4.7 + Math.random() * 0.3}
-              />
+            {popularCourses.map((course) => (
+              <CourseCard key={course.id} course={course} />
             ))}
           </div>
+
+          {filteredCourses.length > 6 && (
+            <div className="text-center mt-12">
+              <Button variant="outline" className="border-octamy-black text-octamy-black px-8 py-3 text-lg font-semibold hover:bg-octamy-black hover:text-white">
+                View All {filteredCourses.length} Certifications
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Button>
+            </div>
+          )}
         </div>
       </section>
 
-      {/* How It Works */}
+      {/* Features Section */}
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-octamy-black mb-4">How It Works</h2>
-            <p className="text-xl text-octamy-gray-600">Get certified in just 3 simple steps</p>
-          </div>
-
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
             <div className="text-center">
-              <div className="w-20 h-20 bg-octamy-black text-white rounded-full flex items-center justify-center mx-auto mb-6 text-2xl font-bold">
-                1
+              <div className="w-16 h-16 bg-octamy-black rounded-full flex items-center justify-center mx-auto mb-6">
+                <CheckCircle className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-2xl font-bold text-octamy-black mb-4">Choose & Take Exam</h3>
+              <h3 className="text-2xl font-bold text-octamy-black mb-4">Industry Recognized</h3>
               <p className="text-octamy-gray-600">
-                Select your certification and take a quick 10-15 question assessment. Timer-based MCQ format ensures fair evaluation.
+                Our certificates are recognized by leading companies and help advance your career.
               </p>
             </div>
-
+            
             <div className="text-center">
-              <div className="w-20 h-20 bg-octamy-black text-white rounded-full flex items-center justify-center mx-auto mb-6 text-2xl font-bold">
-                2
+              <div className="w-16 h-16 bg-octamy-black rounded-full flex items-center justify-center mx-auto mb-6">
+                <Clock className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-2xl font-bold text-octamy-black mb-4">Pass & Pay</h3>
+              <h3 className="text-2xl font-bold text-octamy-black mb-4">Quick Assessment</h3>
               <p className="text-octamy-gray-600">
-                Score 50% or higher to pass. Pay ₹199 to unlock your certificate with secure Razorpay payment gateway.
+                Complete your certification in 15-45 minutes with our efficient assessment system.
               </p>
             </div>
-
+            
             <div className="text-center">
-              <div className="w-20 h-20 bg-octamy-black text-white rounded-full flex items-center justify-center mx-auto mb-6 text-2xl font-bold">
-                3
+              <div className="w-16 h-16 bg-octamy-black rounded-full flex items-center justify-center mx-auto mb-6">
+                <Users className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-2xl font-bold text-octamy-black mb-4">Download & Share</h3>
+              <h3 className="text-2xl font-bold text-octamy-black mb-4">Trusted by 10k+</h3>
               <p className="text-octamy-gray-600">
-                Get your verified certificate with unique ID and QR code. Share on LinkedIn, Twitter, or download PDF instantly.
+                Join thousands of professionals who have advanced their careers with Octamy.
               </p>
             </div>
           </div>
