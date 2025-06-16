@@ -46,9 +46,11 @@ export default function DemoCertificate() {
             <Card className="bg-white shadow-xl border-2 border-gray-200 overflow-hidden">
               <div className="bg-gradient-to-r from-black to-gray-800 p-6 text-white">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center space-x-2">
-                    <Shield className="w-6 h-6" />
-                    <span className="font-semibold">ISO CERTIFIED</span>
+                  <div className="flex items-center space-x-4">
+                    <div className="bg-white text-black px-3 py-1 rounded font-bold text-sm">
+                      ISO 9001:2015
+                    </div>
+                    <span className="font-semibold">CERTIFIED ORGANIZATION</span>
                   </div>
                   <div className="text-right">
                     <p className="text-sm opacity-90">Certificate No.</p>
@@ -56,7 +58,7 @@ export default function DemoCertificate() {
                   </div>
                 </div>
                 <h2 className="text-2xl font-bold">OCTAMY SOLUTIONS PRIVATE LIMITED</h2>
-                <p className="text-sm opacity-90">ISO 9001:2015 Certified Organization</p>
+                <p className="text-sm opacity-90">Professional Certification Authority</p>
               </div>
 
               <CardContent className="p-12">
@@ -73,27 +75,40 @@ export default function DemoCertificate() {
                   <h2 className="text-2xl font-bold text-black mb-6">ARTIFICIAL INTELLIGENCE FUNDAMENTALS</h2>
                   
                   <div className="flex justify-center mb-6">
-                    <Badge className="bg-yellow-500 text-black text-lg px-6 py-2 font-bold">
-                      🥇 GOLD BADGE
-                    </Badge>
+                    <div className="relative">
+                      <div className="w-20 h-20 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center border-4 border-white shadow-lg">
+                        <Award className="w-10 h-10 text-white" />
+                      </div>
+                      <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-yellow-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+                        GOLD
+                      </div>
+                    </div>
                   </div>
                   
-                  <p className="text-gray-600 mb-2">with a score of <span className="font-bold text-black">85%</span></p>
                   <p className="text-gray-600 mb-8">demonstrating excellence in artificial intelligence concepts</p>
                 </div>
 
                 <div className="flex justify-between items-end">
                   <div className="text-left">
-                    <div className="w-32 h-0.5 bg-black mb-2"></div>
-                    <p className="text-sm font-semibold">AUTHORIZED SIGNATURE</p>
-                    <p className="text-xs text-gray-600">Chief Academic Officer</p>
+                    <div className="mb-4">
+                      <div className="text-2xl font-cursive text-black mb-2" style={{fontFamily: 'cursive'}}>
+                        Nitikesh Pattanayak
+                      </div>
+                      <div className="w-32 h-0.5 bg-black mb-2"></div>
+                      <p className="text-sm font-semibold">NITIKESH PATTANAYAK</p>
+                      <p className="text-xs text-gray-600">Authorized Signatory</p>
+                    </div>
                   </div>
                   
                   <div className="text-center">
-                    <div className="w-20 h-20 bg-black rounded-full flex items-center justify-center mb-2 mx-auto">
-                      <Award className="w-12 h-12 text-white" />
+                    <div className="w-24 h-24 bg-black rounded-full flex items-center justify-center mb-2 mx-auto border-4 border-gray-300">
+                      <div className="text-white text-center">
+                        <div className="text-xs font-bold">OCTAMY</div>
+                        <div className="text-xs">SOLUTIONS</div>
+                        <div className="text-xs">PVT LTD</div>
+                      </div>
                     </div>
-                    <p className="text-xs text-gray-600">OFFICIAL SEAL</p>
+                    <p className="text-xs text-gray-600 font-semibold">OFFICIAL STAMP</p>
                   </div>
                   
                   <div className="text-right">

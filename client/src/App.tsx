@@ -28,6 +28,7 @@ import DemoBusinessCertificate from "@/pages/demo-business-certificate";
 import DemoInternshipCertificate from "@/pages/demo-internship-certificate";
 import BusinessCertificates from "@/pages/business-certificates";
 import InternshipForm from "@/pages/internship-form";
+import Verify from "@/pages/verify";
 
 function Router() {
   return (
@@ -40,7 +41,8 @@ function Router() {
       <Route path="/certificate/:certificateId" component={Certificate} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/admin" component={Admin} />
-      <Route path="/verify" component={Verification} />
+      <Route path="/verify" component={Verify} />
+      <Route path="/verify/:certificateId" component={Verify} />
       <Route path="/certificates/:certificateId" component={Certificate} />
       <Route path="/course/:slug" component={CourseDetail} />
       <Route path="/help-center" component={HelpCenter} />

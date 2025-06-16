@@ -789,6 +789,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { courseId, userEmail, userName, userPhone, sellerCode } = req.body;
 
+      if (!courseId || isNaN(parseInt(courseId))) {
+        return res.status(400).json({ message: "Invalid course ID" });
+      }
+
       const course = await storage.getCourse(parseInt(courseId));
       if (!course) {
         return res.status(404).json({ message: "Course not found" });
