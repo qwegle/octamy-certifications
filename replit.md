@@ -135,10 +135,30 @@ Octamy is a comprehensive professional certification platform built as a full-st
 - **Smart notifications tables** for user preferences, notifications, course recommendations, and activity tracking
 - **Complete relations** between users, sellers, sales, withdrawals, payments, and smart notification system
 
+## Local Development Support
+
+### README Documentation
+- **Comprehensive setup guide** for Windows and Mac development environments
+- **Environment configuration** with detailed .env file examples
+- **Common issues solutions** including dotenv and import.meta.url fixes
+- **Database setup instructions** with PostgreSQL configuration
+- **API documentation** with all endpoint specifications
+- **Deployment guidelines** for production environments
+
+### Development Configuration Fixes
+- **Local vite.config.ts** compatibility for import.meta.url issues
+- **Environment variable loading** with proper dotenv configuration
+- **Database connection** setup for local PostgreSQL instances
+- **Port management** solutions for development conflicts
+
 ## Changelog
 
 ```
 Changelog:
+- June 16, 2025: Added comprehensive README with Windows/Mac setup instructions and local development fixes
+- June 16, 2025: Documented solutions for common development issues including dotenv and import.meta.url problems
+- June 16, 2025: Interactive course progress visualization with animated achievement unlocks fully implemented
+- June 16, 2025: Authentication integration with proper error handling and progress page routing completed
 - June 16, 2025: Redesigned certificates with premium professional styling featuring Playfair Display and Inter fonts
 - June 16, 2025: Added ornate corners, sophisticated black borders, and luxury typography to certificates
 - June 16, 2025: Enhanced certificate branding with proper Octamy Solutions company information
