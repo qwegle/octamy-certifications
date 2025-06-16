@@ -110,7 +110,16 @@ export default function Landing() {
                     <div className="text-sm text-octamy-gray-500 mb-6">
                       {categoryCoursesCount} Certifications Available
                     </div>
-                    <Button className="w-full bg-octamy-black text-white hover:bg-octamy-gray-800">
+                    <Button 
+                      className="w-full bg-octamy-black text-white hover:bg-octamy-gray-800"
+                      onClick={() => {
+                        const categoryElement = document.getElementById('popular-certifications');
+                        if (categoryElement) {
+                          categoryElement.scrollIntoView({ behavior: 'smooth' });
+                        }
+                        setSearchQuery(category.name);
+                      }}
+                    >
                       Explore {category.name} Certs
                     </Button>
                   </CardContent>
@@ -122,7 +131,7 @@ export default function Landing() {
       </section>
 
       {/* Popular Certifications */}
-      <section className="bg-octamy-gray-50 py-20">
+      <section id="popular-certifications" className="bg-octamy-gray-50 py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-octamy-black mb-4">Popular Certifications</h2>

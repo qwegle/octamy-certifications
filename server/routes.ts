@@ -1,4 +1,4 @@
-import type { Express } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { seedDatabase } from "./seed";
@@ -7,10 +7,17 @@ import bcrypt from "bcrypt";
 import { z } from "zod";
 import { insertUserSchema, insertExamAttemptSchema, insertCertificateSchema } from "@shared/schema";
 
+interface AuthenticatedRequest extends Request {
+  user?: {
+    userId: number;
+    email: string;
+  };
+}
+
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 
 // Middleware to verify JWT token
-const authenticateToken = (req: any, res: any, next: any) => {
+const authenticateToken = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
 
@@ -26,7 +33,7 @@ const authenticateToken = (req: any, res: any, next: any) => {
 };
 
 // Optional auth middleware
-const optionalAuth = (req: any, res: any, next: any) => {
+const optionalAuth = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
 
@@ -60,7 +67,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Hash password
-      const hashedPassword = await bcrypt.hash(password, 10);
+      const hashedPassword = await bcrypt.hash(password as string, 10);
       
       // Create user
       const user = await storage.createUser({
