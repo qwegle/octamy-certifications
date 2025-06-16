@@ -172,6 +172,85 @@ export const leaderboard = pgTable("leaderboard", {
   businessName: text("business_name"), // for business certificates
 });
 
+// Smart Notifications for Course Recommendations
+export const userPreferences = pgTable("user_preferences", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  preferredCategories: json("preferred_categories").$type<string[]>().default([]),
+  skillLevel: text("skill_level").default("novice").notNull(), // novice, intermediate, advanced, expert
+  learningGoals: json("learning_goals").$type<string[]>().default([]),
+  notificationSettings: json("notification_settings").$type<{
+    email: boolean;
+    push: boolean;
+    frequency: 'daily' | 'weekly' | 'monthly';
+    courseRecommendations: boolean;
+    newCourses: boolean;
+    achievements: boolean;
+  }>().default({
+    email: true,
+    push: true,
+    frequency: 'weekly',
+    courseRecommendations: true,
+    newCourses: true,
+    achievements: true
+  }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const notifications = pgTable("notifications", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  type: text("type").notNull(), // course_recommendation, new_course, achievement, reminder
+  title: text("title").notNull(),
+  message: text("message").notNull(),
+  data: json("data").$type<{
+    courseId?: number;
+    certificateId?: string;
+    actionUrl?: string;
+    priority?: 'low' | 'medium' | 'high';
+  }>(),
+  isRead: boolean("is_read").default(false).notNull(),
+  isDelivered: boolean("is_delivered").default(false).notNull(),
+  deliveryMethod: text("delivery_method"), // email, push, in_app
+  scheduledFor: timestamp("scheduled_for"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const courseRecommendations = pgTable("course_recommendations", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  courseId: integer("course_id").references(() => courses.id).notNull(),
+  reason: text("reason").notNull(), // based_on_category, skill_progression, popular, trending
+  score: decimal("score", { precision: 3, scale: 2 }).notNull(), // 0.00 to 1.00
+  metadata: json("metadata").$type<{
+    completedCourseIds?: number[];
+    categoryMatch?: boolean;
+    skillLevelMatch?: boolean;
+    popularityScore?: number;
+    trendingScore?: number;
+  }>(),
+  isShown: boolean("is_shown").default(false).notNull(),
+  isClicked: boolean("is_clicked").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const userActivity = pgTable("user_activity", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  activityType: text("activity_type").notNull(), // course_view, exam_start, exam_complete, certificate_download
+  entityId: integer("entity_id"), // courseId, examAttemptId, certificateId
+  entityType: text("entity_type"), // course, exam, certificate
+  metadata: json("metadata").$type<{
+    timeSpent?: number;
+    score?: number;
+    completed?: boolean;
+    deviceType?: string;
+    source?: string;
+  }>(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   examAttempts: many(examAttempts),
@@ -260,6 +339,39 @@ export const withdrawalRequestsRelations = relations(withdrawalRequests, ({ one 
   seller: one(sellers, {
     fields: [withdrawalRequests.sellerId],
     references: [sellers.id],
+  }),
+}));
+
+// Smart Notifications Relations
+export const userPreferencesRelations = relations(userPreferences, ({ one }) => ({
+  user: one(users, {
+    fields: [userPreferences.userId],
+    references: [users.id],
+  }),
+}));
+
+export const notificationsRelations = relations(notifications, ({ one }) => ({
+  user: one(users, {
+    fields: [notifications.userId],
+    references: [users.id],
+  }),
+}));
+
+export const courseRecommendationsRelations = relations(courseRecommendations, ({ one }) => ({
+  user: one(users, {
+    fields: [courseRecommendations.userId],
+    references: [users.id],
+  }),
+  course: one(courses, {
+    fields: [courseRecommendations.courseId],
+    references: [courses.id],
+  }),
+}));
+
+export const userActivityRelations = relations(userActivity, ({ one }) => ({
+  user: one(users, {
+    fields: [userActivity.userId],
+    references: [users.id],
   }),
 }));
 
@@ -353,3 +465,35 @@ export type WithdrawalRequest = typeof withdrawalRequests.$inferSelect;
 export type InsertWithdrawalRequest = z.infer<typeof insertWithdrawalRequestSchema>;
 export type Leaderboard = typeof leaderboard.$inferSelect;
 export type InsertLeaderboard = z.infer<typeof insertLeaderboardSchema>;
+
+// Smart Notifications Insert Schemas
+export const insertUserPreferencesSchema = createInsertSchema(userPreferences).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertNotificationSchema = createInsertSchema(notifications).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertCourseRecommendationSchema = createInsertSchema(courseRecommendations).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertUserActivitySchema = createInsertSchema(userActivity).omit({
+  id: true,
+  createdAt: true,
+});
+
+// Smart Notifications Types
+export type UserPreferences = typeof userPreferences.$inferSelect;
+export type InsertUserPreferences = z.infer<typeof insertUserPreferencesSchema>;
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+export type CourseRecommendation = typeof courseRecommendations.$inferSelect;
+export type InsertCourseRecommendation = z.infer<typeof insertCourseRecommendationSchema>;
+export type UserActivity = typeof userActivity.$inferSelect;
+export type InsertUserActivity = z.infer<typeof insertUserActivitySchema>;
