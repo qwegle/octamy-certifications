@@ -30,6 +30,7 @@ import BusinessCertificates from "@/pages/business-certificates";
 import InternshipForm from "@/pages/internship-form";
 import Verify from "@/pages/verify";
 import Preferences from "@/pages/preferences";
+import Progress from "@/pages/progress";
 
 function Router() {
   return (
@@ -41,6 +42,7 @@ function Router() {
       <Route path="/internship-payment/:certificateId" component={InternshipPayment} />
       <Route path="/certificate/:certificateId" component={Certificate} />
       <Route path="/dashboard" component={Dashboard} />
+      <Route path="/progress" component={Progress} />
       <Route path="/preferences" component={Preferences} />
       <Route path="/admin" component={Admin} />
       <Route path="/verify" component={Verify} />

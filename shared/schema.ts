@@ -256,56 +256,60 @@ export const userActivity = pgTable("user_activity", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Course progress tracking
 export const userCourseProgress = pgTable("user_course_progress", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").references(() => users.id).notNull(),
   courseId: integer("course_id").references(() => courses.id).notNull(),
-  status: text("status").notNull().default("not_started"), // not_started, in_progress, completed, mastered
-  progressPercentage: integer("progress_percentage").default(0).notNull(),
-  timeSpent: integer("time_spent").default(0).notNull(), // in minutes
-  lastAccessedAt: timestamp("last_accessed_at").defaultNow().notNull(),
+  status: text("status").notNull().default("not_started"), // not_started, in_progress, completed, failed
+  progressPercentage: integer("progress_percentage").notNull().default(0),
+  timeSpent: integer("time_spent").notNull().default(0), // in minutes
+  bestScore: integer("best_score").notNull().default(0),
+  attemptCount: integer("attempt_count").notNull().default(0),
+  streakDays: integer("streak_days").notNull().default(0),
+  lastActivity: timestamp("last_activity").defaultNow().notNull(),
   completedAt: timestamp("completed_at"),
-  bestScore: integer("best_score").default(0).notNull(),
-  attemptCount: integer("attempt_count").default(0).notNull(),
-  streakDays: integer("streak_days").default(0).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// Achievement system
 export const achievements = pgTable("achievements", {
   id: serial("id").primaryKey(),
-  name: text("name").notNull().unique(),
+  name: text("name").notNull(),
   title: text("title").notNull(),
   description: text("description").notNull(),
   icon: text("icon").notNull(),
-  category: text("category").notNull(), // score, streak, completion, mastery, speed
+  category: text("category").notNull(), // completion, performance, engagement, special
   tier: text("tier").notNull(), // bronze, silver, gold, platinum, diamond
   criteria: json("criteria").$type<{
-    type: 'score' | 'streak' | 'completion_count' | 'time_spent' | 'perfect_score' | 'speed';
+    type: 'completion_count' | 'score' | 'time_spent' | 'streak' | 'perfect_score' | 'speed';
     threshold: number;
     courseId?: number;
     categoryId?: number;
   }>().notNull(),
-  points: integer("points").default(0).notNull(),
+  points: integer("points").notNull().default(10),
   rarity: text("rarity").notNull().default("common"), // common, rare, epic, legendary
-  isActive: boolean("is_active").default(true).notNull(),
+  isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// User achievements tracking
 export const userAchievements = pgTable("user_achievements", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").references(() => users.id).notNull(),
   achievementId: integer("achievement_id").references(() => achievements.id).notNull(),
   unlockedAt: timestamp("unlocked_at").defaultNow().notNull(),
-  progress: integer("progress").default(100).notNull(), // percentage toward achievement
+  progress: integer("progress").notNull().default(100), // 0-100 for partial achievements
   metadata: json("metadata").$type<{
     scoreAchieved?: number;
     courseId?: number;
     examAttemptId?: number;
-    streakDays?: number;
+    timeSpent?: number;
+    streak?: number;
+    categoryId?: number;
   }>(),
-  isViewed: boolean("is_viewed").default(false).notNull(),
-  isNotified: boolean("is_notified").default(false).notNull(),
+  isViewed: boolean("is_viewed").notNull().default(false),
 });
 
 // Relations

@@ -1885,6 +1885,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Course progress routes
+  app.get("/api/progress", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user!.userId;
+      const courseId = req.query.courseId ? parseInt(req.query.courseId as string) : undefined;
+      
+      const progress = await storage.getUserCourseProgress(userId, courseId);
+      res.json(progress);
+    } catch (error) {
+      console.error("Error fetching progress:", error);
+      res.status(500).json({ message: "Failed to fetch progress" });
+    }
+  });
+
+  app.post("/api/progress", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user!.userId;
+      const progressData = { ...req.body, userId };
+      
+      const progress = await storage.upsertUserCourseProgress(progressData);
+      res.json(progress);
+    } catch (error) {
+      console.error("Error updating progress:", error);
+      res.status(500).json({ message: "Failed to update progress" });
+    }
+  });
+
+  // Achievement routes
+  app.get("/api/achievements", async (req: Request, res: Response) => {
+    try {
+      const category = req.query.category as string;
+      const achievements = await storage.getAchievements(category);
+      res.json(achievements);
+    } catch (error) {
+      console.error("Error fetching achievements:", error);
+      res.status(500).json({ message: "Failed to fetch achievements" });
+    }
+  });
+
+  app.get("/api/user/achievements", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user!.userId;
+      const includeDetails = req.query.details === 'true';
+      
+      const achievements = await storage.getUserAchievements(userId, includeDetails);
+      res.json(achievements);
+    } catch (error) {
+      console.error("Error fetching user achievements:", error);
+      res.status(500).json({ message: "Failed to fetch user achievements" });
+    }
+  });
+
+  app.post("/api/achievements/check", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user!.userId;
+      const { courseId } = req.body;
+      
+      const newAchievements = await storage.checkAndUnlockAchievements(userId, courseId);
+      res.json(newAchievements);
+    } catch (error) {
+      console.error("Error checking achievements:", error);
+      res.status(500).json({ message: "Failed to check achievements" });
+    }
+  });
+
   // Get/Update user preferences
   app.get("/api/preferences", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
     try {
