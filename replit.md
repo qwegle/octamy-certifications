@@ -1,0 +1,116 @@
+# Octamy Professional Certification Platform
+
+## Overview
+
+Octamy is a comprehensive professional certification platform built as a full-stack web application. It enables users to take online assessments across various domains (AI, Development, Business, Internships) and obtain verified certificates upon successful completion. The platform features a modern React frontend with a Node.js/Express backend, using PostgreSQL for data persistence and Drizzle ORM for database operations.
+
+## System Architecture
+
+### Frontend Architecture
+- **Framework**: React 18 with TypeScript
+- **Routing**: Wouter for client-side routing
+- **State Management**: TanStack Query (React Query) for server state management
+- **UI Framework**: Tailwind CSS with shadcn/ui component library
+- **Build Tool**: Vite for development and production builds
+- **Authentication**: JWT-based authentication with context provider pattern
+
+### Backend Architecture
+- **Runtime**: Node.js with Express.js framework
+- **Language**: TypeScript with ES modules
+- **Database**: PostgreSQL with Drizzle ORM
+- **Authentication**: JWT tokens with bcrypt for password hashing
+- **API Design**: RESTful API endpoints
+- **Session Management**: JWT-based stateless authentication
+
+### Data Storage Solutions
+- **Primary Database**: PostgreSQL hosted on Neon serverless platform
+- **ORM**: Drizzle ORM with connection pooling
+- **Database Schema**: Comprehensive schema with users, categories, courses, questions, exam attempts, certificates, and payments
+- **Migrations**: Drizzle Kit for database migrations and schema management
+
+## Key Components
+
+### Database Schema
+- **Users**: User authentication and profile management with admin roles
+- **Categories**: Course categorization (AI, Development, Business, Internships)
+- **Courses**: Course metadata including duration, pricing, and passing scores
+- **Questions**: Multiple-choice questions with correct answer tracking
+- **Exam Attempts**: User exam submissions with scoring
+- **Certificates**: Generated certificates with verification capabilities
+- **Payments**: Payment processing integration with Razorpay
+
+### Authentication and Authorization
+- JWT-based authentication with secure token storage
+- Role-based access control (admin vs regular users)
+- Protected routes and API endpoints
+- Optional authentication middleware for public routes
+
+### UI Components
+- Comprehensive shadcn/ui component library integration
+- Responsive design with mobile-first approach
+- Dark mode support through CSS custom properties
+- Accessible components following ARIA guidelines
+
+### Exam System
+- Timed examinations with countdown timers
+- Real-time progress tracking
+- Automatic submission on timeout
+- Score calculation and pass/fail determination
+
+## Data Flow
+
+1. **User Registration/Login**: Users authenticate through JWT tokens stored in localStorage
+2. **Course Selection**: Users browse categorized courses and select assessments
+3. **Exam Taking**: Timed multiple-choice exams with progress tracking
+4. **Result Processing**: Automatic scoring and certificate generation
+5. **Payment Processing**: Razorpay integration for certificate purchases
+6. **Certificate Generation**: PDF certificates with verification codes
+7. **Certificate Verification**: Public verification system for certificate authenticity
+
+## External Dependencies
+
+### Core Dependencies
+- **Database**: Neon PostgreSQL serverless database
+- **Payment Processing**: Razorpay payment gateway
+- **UI Components**: Radix UI primitives with shadcn/ui styling
+- **Form Handling**: React Hook Form with Zod validation
+- **HTTP Client**: Native fetch API with TanStack Query
+
+### Development Tools
+- **TypeScript**: Type safety across frontend and backend
+- **ESBuild**: Fast backend compilation for production
+- **PostCSS**: CSS processing with Tailwind CSS
+- **Drizzle Kit**: Database migration and introspection tools
+
+## Deployment Strategy
+
+### Development Environment
+- **Runtime**: Node.js 20 with Replit integration
+- **Database**: PostgreSQL 16 module in Replit
+- **Hot Reload**: Vite HMR for frontend, tsx for backend development
+- **Port**: Application runs on port 5000
+
+### Production Build
+- **Frontend**: Vite production build with static asset optimization
+- **Backend**: ESBuild compilation to single bundle
+- **Deployment**: Replit Autoscale deployment target
+- **Environment**: Production environment variable configuration
+
+### Build Process
+1. Frontend assets compiled to `dist/public`
+2. Backend compiled to `dist/index.js`
+3. Static file serving in production mode
+4. Database migrations applied via Drizzle Kit
+
+## Changelog
+
+```
+Changelog:
+- June 16, 2025. Initial setup
+```
+
+## User Preferences
+
+```
+Preferred communication style: Simple, everyday language.
+```
