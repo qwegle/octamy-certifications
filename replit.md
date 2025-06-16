@@ -139,6 +139,11 @@ Octamy is a comprehensive professional certification platform built as a full-st
 
 ```
 Changelog:
+- June 16, 2025: Redesigned certificates with premium professional styling featuring Playfair Display and Inter fonts
+- June 16, 2025: Added ornate corners, sophisticated black borders, and luxury typography to certificates
+- June 16, 2025: Enhanced certificate branding with proper Octamy Solutions company information
+- June 16, 2025: Synchronized certificate preview and download versions with identical premium styling
+- June 16, 2025: Implemented professional certificate layout matching high-end certification standards
 - June 16, 2025: Fixed certificate download functionality with HTML-based solution and print-to-PDF capability
 - June 16, 2025: Resolved ES module compatibility issues in PDF generation endpoint
 - June 16, 2025: Updated both certificate page and dashboard download handlers to work with new HTML format
