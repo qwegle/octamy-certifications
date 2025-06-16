@@ -7,6 +7,9 @@ import {
   certificates, 
   payments,
   internshipApplications,
+  sellers,
+  sales,
+  withdrawalRequests,
   type User, 
   type InsertUser,
   type Category,
@@ -22,7 +25,13 @@ import {
   type Payment,
   type InsertPayment,
   type InternshipApplication,
-  type InsertInternshipApplication
+  type InsertInternshipApplication,
+  type Seller,
+  type InsertSeller,
+  type Sale,
+  type InsertSale,
+  type WithdrawalRequest,
+  type InsertWithdrawalRequest
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc } from "drizzle-orm";
@@ -68,6 +77,23 @@ export interface IStorage {
   // Internship application operations
   createInternshipApplication(application: InsertInternshipApplication): Promise<InternshipApplication>;
   getInternshipApplication(certificateId: number): Promise<InternshipApplication | undefined>;
+
+  // Seller operations
+  getSeller(id: number): Promise<Seller | undefined>;
+  getSellerByEmail(email: string): Promise<Seller | undefined>;
+  createSeller(seller: InsertSeller): Promise<Seller>;
+  updateSeller(id: number, updates: Partial<InsertSeller>): Promise<Seller>;
+  
+  // Sales operations
+  createSale(sale: InsertSale): Promise<Sale>;
+  getSellerSales(sellerId: number): Promise<Sale[]>;
+  updateSaleCommission(id: number, status: string): Promise<void>;
+  
+  // Withdrawal operations
+  createWithdrawalRequest(request: InsertWithdrawalRequest): Promise<WithdrawalRequest>;
+  getSellerWithdrawals(sellerId: number): Promise<WithdrawalRequest[]>;
+  getAllWithdrawals(): Promise<WithdrawalRequest[]>;
+  updateWithdrawalStatus(id: number, status: string, adminNotes?: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -297,6 +323,93 @@ export class DatabaseStorage implements IStorage {
       .from(internshipApplications)
       .where(eq(internshipApplications.certificateId, certificateId));
     return application || undefined;
+  }
+
+  // Seller operations
+  async getSeller(id: number): Promise<Seller | undefined> {
+    const [seller] = await db.select().from(sellers).where(eq(sellers.id, id));
+    return seller || undefined;
+  }
+
+  async getSellerByEmail(email: string): Promise<Seller | undefined> {
+    const [seller] = await db.select().from(sellers).where(eq(sellers.email, email));
+    return seller || undefined;
+  }
+
+  async createSeller(insertSeller: InsertSeller): Promise<Seller> {
+    const [seller] = await db
+      .insert(sellers)
+      .values(insertSeller)
+      .returning();
+    return seller;
+  }
+
+  async updateSeller(id: number, updates: Partial<InsertSeller>): Promise<Seller> {
+    const [seller] = await db
+      .update(sellers)
+      .set(updates)
+      .where(eq(sellers.id, id))
+      .returning();
+    return seller;
+  }
+
+  // Sales operations
+  async createSale(insertSale: InsertSale): Promise<Sale> {
+    const [sale] = await db
+      .insert(sales)
+      .values(insertSale)
+      .returning();
+    return sale;
+  }
+
+  async getSellerSales(sellerId: number): Promise<Sale[]> {
+    return await db
+      .select()
+      .from(sales)
+      .where(eq(sales.sellerId, sellerId))
+      .orderBy(desc(sales.createdAt));
+  }
+
+  async updateSaleCommission(id: number, status: string): Promise<void> {
+    await db
+      .update(sales)
+      .set({ status })
+      .where(eq(sales.id, id));
+  }
+
+  // Withdrawal operations
+  async createWithdrawalRequest(insertRequest: InsertWithdrawalRequest): Promise<WithdrawalRequest> {
+    const [request] = await db
+      .insert(withdrawalRequests)
+      .values(insertRequest)
+      .returning();
+    return request;
+  }
+
+  async getSellerWithdrawals(sellerId: number): Promise<WithdrawalRequest[]> {
+    return await db
+      .select()
+      .from(withdrawalRequests)
+      .where(eq(withdrawalRequests.sellerId, sellerId))
+      .orderBy(desc(withdrawalRequests.createdAt));
+  }
+
+  async getAllWithdrawals(): Promise<WithdrawalRequest[]> {
+    return await db
+      .select()
+      .from(withdrawalRequests)
+      .orderBy(desc(withdrawalRequests.createdAt));
+  }
+
+  async updateWithdrawalStatus(id: number, status: string, adminNotes?: string): Promise<void> {
+    const updates: any = { status };
+    if (adminNotes) updates.adminNotes = adminNotes;
+    if (status === 'processed') updates.processedAt = new Date();
+    
+    await db
+      .update(withdrawalRequests)
+      .set(updates)
+      .where(eq(withdrawalRequests.id, id));
   }
 }
 

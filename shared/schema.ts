@@ -106,6 +106,52 @@ export const internshipApplications = pgTable("internship_applications", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+export const sellers = pgTable("sellers", {
+  id: serial("id").primaryKey(),
+  email: text("email").notNull().unique(),
+  password: text("password").notNull(),
+  name: text("name").notNull(),
+  phone: text("phone"),
+  isApproved: boolean("is_approved").default(false).notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  commissionRate: decimal("commission_rate", { precision: 5, scale: 2 }).default("10.00").notNull(),
+  totalEarnings: decimal("total_earnings", { precision: 10, scale: 2 }).default("0.00").notNull(),
+  pendingEarnings: decimal("pending_earnings", { precision: 10, scale: 2 }).default("0.00").notNull(),
+  upiId: text("upi_id"),
+  bankAccountNumber: text("bank_account_number"),
+  bankIFSC: text("bank_ifsc"),
+  bankName: text("bank_name"),
+  accountHolderName: text("account_holder_name"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const sales = pgTable("sales", {
+  id: serial("id").primaryKey(),
+  sellerId: integer("seller_id").references(() => sellers.id).notNull(),
+  certificateId: integer("certificate_id").references(() => certificates.id).notNull(),
+  courseId: integer("course_id").references(() => courses.id).notNull(),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  commission: decimal("commission", { precision: 10, scale: 2 }).notNull(),
+  status: text("status").default("pending").notNull(), // pending, paid
+  referralCode: text("referral_code").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const withdrawalRequests = pgTable("withdrawal_requests", {
+  id: serial("id").primaryKey(),
+  sellerId: integer("seller_id").references(() => sellers.id).notNull(),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  status: text("status").default("pending").notNull(), // pending, approved, rejected, processed
+  upiId: text("upi_id"),
+  bankAccountNumber: text("bank_account_number"),
+  bankIFSC: text("bank_ifsc"),
+  bankName: text("bank_name"),
+  accountHolderName: text("account_holder_name"),
+  adminNotes: text("admin_notes"),
+  processedAt: timestamp("processed_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   examAttempts: many(examAttempts),
@@ -170,6 +216,33 @@ export const internshipApplicationsRelations = relations(internshipApplications,
   }),
 }));
 
+export const sellersRelations = relations(sellers, ({ many }) => ({
+  sales: many(sales),
+  withdrawalRequests: many(withdrawalRequests),
+}));
+
+export const salesRelations = relations(sales, ({ one }) => ({
+  seller: one(sellers, {
+    fields: [sales.sellerId],
+    references: [sellers.id],
+  }),
+  certificate: one(certificates, {
+    fields: [sales.certificateId],
+    references: [certificates.id],
+  }),
+  course: one(courses, {
+    fields: [sales.courseId],
+    references: [courses.id],
+  }),
+}));
+
+export const withdrawalRequestsRelations = relations(withdrawalRequests, ({ one }) => ({
+  seller: one(sellers, {
+    fields: [withdrawalRequests.sellerId],
+    references: [sellers.id],
+  }),
+}));
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -227,5 +300,29 @@ export const insertInternshipApplicationSchema = createInsertSchema(internshipAp
   createdAt: true,
 });
 
+export const insertSellerSchema = createInsertSchema(sellers).omit({
+  id: true,
+  createdAt: true,
+  totalEarnings: true,
+  pendingEarnings: true,
+});
+
+export const insertSaleSchema = createInsertSchema(sales).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertWithdrawalRequestSchema = createInsertSchema(withdrawalRequests).omit({
+  id: true,
+  createdAt: true,
+  processedAt: true,
+});
+
 export type InternshipApplication = typeof internshipApplications.$inferSelect;
 export type InsertInternshipApplication = z.infer<typeof insertInternshipApplicationSchema>;
+export type Seller = typeof sellers.$inferSelect;
+export type InsertSeller = z.infer<typeof insertSellerSchema>;
+export type Sale = typeof sales.$inferSelect;
+export type InsertSale = z.infer<typeof insertSaleSchema>;
+export type WithdrawalRequest = typeof withdrawalRequests.$inferSelect;
+export type InsertWithdrawalRequest = z.infer<typeof insertWithdrawalRequestSchema>;
