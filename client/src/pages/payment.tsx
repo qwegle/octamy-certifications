@@ -118,11 +118,18 @@ export default function Payment() {
                 
                 <Button 
                   variant="outline"
-                  onClick={() => navigator.share?.({
-                    title: 'My Certificate',
-                    text: `I've earned a certificate in ${certificate.courseTitle}!`,
-                    url: `${window.location.origin}/verify/${certificate.certificateId}`
-                  })}
+                  onClick={() => {
+                    if (navigator.share) {
+                      navigator.share({
+                        title: 'My Certificate',
+                        text: `I've earned a certificate in ${certificate.courseTitle}!`,
+                        url: `${window.location.origin}/verify/${certificate.certificateId}`
+                      });
+                    } else {
+                      navigator.clipboard.writeText(`${window.location.origin}/verify/${certificate.certificateId}`);
+                      // Add toast notification for copy
+                    }
+                  }}
                   className="border-octamy-gray-300 text-octamy-black hover:bg-octamy-gray-50"
                 >
                   <Share2 className="mr-2 h-4 w-4" />

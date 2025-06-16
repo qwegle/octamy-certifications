@@ -340,7 +340,7 @@ export default function BusinessCertificates() {
                               <div className="flex-1">
                                 <span className="font-medium">{course.title}</span>
                                 <Badge variant="outline" className="ml-2">{course.category.name}</Badge>
-                                <span className="block text-sm text-gray-600">${course.price}</span>
+                                <span className="block text-sm text-gray-600">₹{course.price}</span>
                               </div>
                             </label>
                           ))}
@@ -378,7 +378,7 @@ export default function BusinessCertificates() {
                       {selectedCourses.map((course) => (
                         <div key={course.id} className="flex justify-between mt-1">
                           <span className="text-gray-600">{course.title}</span>
-                          <span>${course.price}</span>
+                          <span>₹{course.price}</span>
                         </div>
                       ))}
                     </div>
@@ -388,15 +388,15 @@ export default function BusinessCertificates() {
                         <div className="border-t pt-3">
                           <div className="flex justify-between">
                             <span>Subtotal:</span>
-                            <span>${totalPrice.toFixed(2)}</span>
+                            <span>₹{totalPrice.toFixed(2)}</span>
                           </div>
                           <div className="flex justify-between text-green-600">
                             <span>Bulk Discount (30%):</span>
-                            <span>-${(totalPrice - discountedPrice).toFixed(2)}</span>
+                            <span>-₹{(totalPrice - discountedPrice).toFixed(2)}</span>
                           </div>
                           <div className="flex justify-between font-bold text-lg border-t pt-2">
                             <span>Total:</span>
-                            <span>${discountedPrice.toFixed(2)}</span>
+                            <span>₹{discountedPrice.toFixed(2)}</span>
                           </div>
                         </div>
                         
