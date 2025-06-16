@@ -66,12 +66,19 @@ export default function Dashboard() {
       <Header />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-octamy-black mb-2">
-            Welcome back, {user.name}!
-          </h1>
-          <p className="text-xl text-octamy-gray-600">
-            Manage your certificates and track your progress
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-4xl font-bold text-octamy-black mb-2">
+                Welcome back, {user.name}!
+              </h1>
+              <p className="text-xl text-octamy-gray-600">
+                Manage your certificates and track your progress
+              </p>
+            </div>
+            <div className="flex items-center gap-4">
+              <SmartNotifications />
+            </div>
+          </div>
         </div>
 
         {/* Stats Overview */}

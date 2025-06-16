@@ -132,12 +132,17 @@ Octamy is a comprehensive professional certification platform built as a full-st
 - **Sales table** for commission tracking with referral codes
 - **Withdrawal requests table** with UPI/bank account support and admin processing
 - **Payment tracking** with PayUMoney transaction IDs and gateway responses
-- **Complete relations** between users, sellers, sales, withdrawals, and payments
+- **Smart notifications tables** for user preferences, notifications, course recommendations, and activity tracking
+- **Complete relations** between users, sellers, sales, withdrawals, payments, and smart notification system
 
 ## Changelog
 
 ```
 Changelog:
+- June 16, 2025: Implemented smart notifications system with personalized course recommendations
+- June 16, 2025: Added user preferences management for learning goals and notification settings
+- June 16, 2025: Created intelligent recommendation engine based on user activity and interests
+- June 16, 2025: Integrated real-time notifications with activity tracking
 - June 16, 2025: Integrated PayUMoney payment gateway with secure hash verification and commission tracking
 - June 16, 2025: Implemented comprehensive seller/partner system with 10% commission tracking
 - June 16, 2025: Applied black and white Cred-style branding across entire platform
