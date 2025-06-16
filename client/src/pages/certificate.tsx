@@ -108,8 +108,8 @@ export default function CertificateView() {
           </p>
         </div>
 
-        {/* Certificate Display */}
-        <Card className="mb-8 relative overflow-hidden">
+        {/* Premium Certificate Display */}
+        <div className="relative mb-8">
           {!isActive && (
             <div className="absolute inset-0 flex items-center justify-center opacity-20 pointer-events-none z-10">
               <div className="text-6xl font-bold text-red-400 transform rotate-45">
@@ -118,61 +118,202 @@ export default function CertificateView() {
             </div>
           )}
           
-          <CardContent className="p-8 relative z-20">
-            {/* Certificate Header */}
-            <div className="text-center mb-8">
-              <span className="text-2xl font-bold text-octamy-black mb-4 block">octamy</span>
-              <h3 className="text-3xl font-bold text-octamy-black">Certificate of Completion</h3>
-            </div>
-
-            {/* Certificate Body */}
-            <div className="text-center mb-8">
-              <p className="text-lg text-octamy-gray-600 mb-4">This certifies that</p>
-              <h4 className="text-4xl font-bold text-octamy-black mb-4">{certificate.userName}</h4>
-              <p className="text-lg text-octamy-gray-600 mb-2">has successfully completed</p>
-              <h5 className="text-2xl font-semibold text-octamy-black mb-6">{certificate.courseTitle}</h5>
+          <div className="relative overflow-hidden">
+            <style jsx>{`
+              @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@300;400;500;600;700;800&display=swap');
+            `}</style>
+            
+            <div className="w-full h-auto bg-white border-8 border-black relative" style={{ aspectRatio: '1200/850' }}>
+              {/* Ornate corners */}
+              <div className="absolute top-6 left-6 w-16 h-16 border-2 border-black" style={{ borderRight: 'none', borderBottom: 'none' }}></div>
+              <div className="absolute top-6 right-6 w-16 h-16 border-2 border-black" style={{ borderLeft: 'none', borderBottom: 'none' }}></div>
+              <div className="absolute bottom-6 left-6 w-16 h-16 border-2 border-black" style={{ borderRight: 'none', borderTop: 'none' }}></div>
+              <div className="absolute bottom-6 right-6 w-16 h-16 border-2 border-black" style={{ borderLeft: 'none', borderTop: 'none' }}></div>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center mb-8">
-                <div className="flex flex-col items-center">
-                  <Trophy className="w-8 h-8 text-octamy-black mb-2" />
-                  <p className="text-sm text-octamy-gray-500">Score</p>
-                  <p className="text-xl font-bold text-octamy-black">{certificate.score}%</p>
-                  {certificate.mastered && (
-                    <Badge className="mt-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white">
-                      <Award className="w-3 h-3 mr-1" />
-                      Mastery Achieved
-                    </Badge>
-                  )}
-                </div>
-                <div className="flex flex-col items-center">
-                  <Calendar className="w-8 h-8 text-octamy-black mb-2" />
-                  <p className="text-sm text-octamy-gray-500">Date Issued</p>
-                  <p className="text-xl font-bold text-octamy-black">
-                    {new Date(certificate.issuedAt).toLocaleDateString()}
+              <div className="relative z-10 p-12 text-center h-full flex flex-col justify-center">
+                <div className="mb-8">
+                  <div className="flex items-center justify-center mb-6">
+                    <div 
+                      className="font-black text-black uppercase border-2 border-black px-6 py-3 bg-white shadow-md text-3xl"
+                      style={{ fontFamily: "'Playfair Display', serif", letterSpacing: '4px', boxShadow: '4px 4px 0 black' }}
+                    >
+                      OCTAMY
+                    </div>
+                  </div>
+                  <div 
+                    className="font-bold text-black uppercase text-sm border-t-2 border-black pt-2"
+                    style={{ fontFamily: "'Inter', sans-serif", letterSpacing: '2px' }}
+                  >
+                    SOLUTIONS PRIVATE LIMITED
+                  </div>
+                  
+                  <h1 
+                    className="font-black text-black mb-3 uppercase text-5xl"
+                    style={{ 
+                      fontFamily: "'Playfair Display', serif", 
+                      letterSpacing: '8px',
+                      textShadow: '2px 2px 0 white, 4px 4px 0 rgba(0,0,0,0.1)'
+                    }}
+                  >
+                    CERTIFICATE
+                  </h1>
+                  <p 
+                    className="text-gray-700 mb-10 text-xl italic"
+                    style={{ fontFamily: "'Playfair Display', serif" }}
+                  >
+                    of Professional Achievement
                   </p>
                 </div>
-                <div className="flex flex-col items-center">
-                  <Award className="w-8 h-8 text-octamy-black mb-2" />
-                  <p className="text-sm text-octamy-gray-500">Valid Until</p>
-                  <p className="text-xl font-bold text-octamy-black">
-                    {new Date(certificate.expiresAt).toLocaleDateString()}
-                  </p>
+                
+                <div 
+                  className="font-medium text-black mb-6 uppercase text-sm"
+                  style={{ fontFamily: "'Inter', sans-serif", letterSpacing: '1.5px' }}
+                >
+                  This is to certify that
+                </div>
+                
+                <div 
+                  className="font-bold text-black my-8 py-4 border-t-4 border-b-4 border-black uppercase text-4xl"
+                  style={{ 
+                    fontFamily: "'Playfair Display', serif", 
+                    letterSpacing: '3px',
+                    background: 'linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.02) 50%, transparent 100%)'
+                  }}
+                >
+                  {certificate.userName}
+                </div>
+                
+                <div 
+                  className="text-gray-700 my-6 text-base"
+                  style={{ fontFamily: "'Inter', sans-serif" }}
+                >
+                  has successfully completed the professional certification course
+                </div>
+                
+                <div 
+                  className="font-bold text-black my-6 uppercase text-2xl p-4 border-2 border-black bg-white"
+                  style={{ 
+                    fontFamily: "'Playfair Display', serif", 
+                    letterSpacing: '2px',
+                    boxShadow: '0 3px 0 black'
+                  }}
+                >
+                  {certificate.courseTitle}
+                </div>
+                
+                <div className="flex justify-center items-center my-8 gap-6">
+                  <div 
+                    className="bg-white text-black border-2 border-black px-4 py-3 font-bold uppercase text-sm"
+                    style={{ fontFamily: "'Inter', sans-serif", letterSpacing: '1px' }}
+                  >
+                    {certificate.badge.toUpperCase()} LEVEL
+                  </div>
+                  <div 
+                    className="bg-black text-white px-6 py-4 font-extrabold uppercase text-sm border-4 border-black"
+                    style={{ 
+                      fontFamily: "'Inter', sans-serif", 
+                      letterSpacing: '1.5px',
+                      boxShadow: '0 3px 0 #333'
+                    }}
+                  >
+                    SCORE: {certificate.score}%
+                  </div>
+                </div>
+                
+                <div className="flex justify-between mt-10 pt-6 border-t-2 border-b-2 border-black">
+                  <div className="text-center flex-1">
+                    <div 
+                      className="text-gray-600 mb-2 text-xs uppercase font-semibold"
+                      style={{ fontFamily: "'Inter', sans-serif", letterSpacing: '1.5px' }}
+                    >
+                      Certificate No.
+                    </div>
+                    <div 
+                      className="font-bold text-black text-sm uppercase"
+                      style={{ fontFamily: "'Inter', sans-serif" }}
+                    >
+                      {certificate.certificateNumber}
+                    </div>
+                  </div>
+                  <div className="text-center flex-1">
+                    <div 
+                      className="text-gray-600 mb-2 text-xs uppercase font-semibold"
+                      style={{ fontFamily: "'Inter', sans-serif", letterSpacing: '1.5px' }}
+                    >
+                      Issue Date
+                    </div>
+                    <div 
+                      className="font-bold text-black text-sm uppercase"
+                      style={{ fontFamily: "'Inter', sans-serif" }}
+                    >
+                      {new Date(certificate.issuedAt).toLocaleDateString('en-US', { 
+                        year: 'numeric', 
+                        month: 'short', 
+                        day: 'numeric' 
+                      })}
+                    </div>
+                  </div>
+                  <div className="text-center flex-1">
+                    <div 
+                      className="text-gray-600 mb-2 text-xs uppercase font-semibold"
+                      style={{ fontFamily: "'Inter', sans-serif", letterSpacing: '1.5px' }}
+                    >
+                      Valid Until
+                    </div>
+                    <div 
+                      className="font-bold text-black text-sm uppercase"
+                      style={{ fontFamily: "'Inter', sans-serif" }}
+                    >
+                      {new Date(certificate.expiresAt).toLocaleDateString('en-US', { 
+                        year: 'numeric', 
+                        month: 'short', 
+                        day: 'numeric' 
+                      })}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="absolute bottom-8 flex justify-between w-full px-12">
+                <div className="text-left">
+                  <div className="w-32 h-1 bg-black mb-2"></div>
+                  <div 
+                    className="text-gray-700 text-xs uppercase font-semibold"
+                    style={{ fontFamily: "'Inter', sans-serif", letterSpacing: '1px' }}
+                  >
+                    Authorized Signature
+                  </div>
+                  <div 
+                    className="text-black text-sm font-semibold mt-1"
+                    style={{ fontFamily: "'Playfair Display', serif" }}
+                  >
+                    Director, Octamy Solutions
+                  </div>
+                </div>
+                
+                <div className="text-right">
+                  <div className="w-16 h-16 bg-black border-2 border-gray-800 mb-2 relative">
+                    <div className="absolute inset-0 flex items-center justify-center text-white text-xs font-bold">
+                      QR
+                    </div>
+                  </div>
+                  <div 
+                    className="text-gray-600 text-xs uppercase font-semibold"
+                    style={{ fontFamily: "'Inter', sans-serif", letterSpacing: '1px' }}
+                  >
+                    Verify Authenticity
+                  </div>
+                  <div 
+                    className="text-black text-xs font-semibold mt-1"
+                    style={{ fontFamily: "'Inter', sans-serif" }}
+                  >
+                    octamy.com/verify
+                  </div>
                 </div>
               </div>
             </div>
-
-            {/* Certificate Footer */}
-            <div className="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-octamy-gray-200">
-              <div className="text-center mb-4 md:mb-0">
-                <p className="text-sm text-octamy-gray-500">Certificate ID</p>
-                <p className="font-mono text-octamy-black">{certificate.certificateId}</p>
-              </div>
-              <div className="w-16 h-16 bg-octamy-gray-200 rounded flex items-center justify-center">
-                <QrCode className="w-8 h-8 text-octamy-gray-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Certificate Details */}
         <Card className="mb-8">
