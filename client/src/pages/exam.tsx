@@ -30,6 +30,7 @@ export default function Exam() {
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [examStarted, setExamStarted] = useState(false);
   const [examStartTime, setExamStartTime] = useState<number>(0);
+  const [sessionId, setSessionId] = useState<string>('');
   const [userInfo, setUserInfo] = useState({
     name: user?.name || '',
     email: user?.email || ''
@@ -40,10 +41,15 @@ export default function Exam() {
     enabled: !!courseId,
   });
 
-  const { data: questions = [] } = useQuery<ExamQuestion[]>({
+  const { data: questionsData } = useQuery<{questions: ExamQuestion[], sessionId: string}>({
     queryKey: [`/api/courses/${courseId}/questions`],
     enabled: !!courseId && examStarted,
+    onSuccess: (data) => {
+      setSessionId(data.sessionId);
+    }
   });
+
+  const questions = questionsData?.questions || [];
 
   const submitExamMutation = useMutation({
     mutationFn: async (examData: any) => {

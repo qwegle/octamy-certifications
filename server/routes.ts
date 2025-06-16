@@ -162,18 +162,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/courses/:id/questions", async (req, res) => {
     try {
       const questions = await storage.getQuestionsByCourse(parseInt(req.params.id));
-      // Randomize and limit questions (10-15 questions)
-      const shuffled = questions.sort(() => 0.5 - Math.random());
-      const limitedQuestions = shuffled.slice(0, Math.min(15, questions.length));
+      
+      // Use Fisher-Yates shuffle for proper randomization
+      const shuffled = [...questions];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      
+      // Select random number of questions (10-15) for variety
+      const questionCount = Math.floor(Math.random() * 6) + 10; // 10 to 15 questions
+      const limitedQuestions = shuffled.slice(0, Math.min(questionCount, questions.length));
+      
+      // Shuffle options within each question and track correct answer
+      const questionsWithShuffledOptions = limitedQuestions.map(q => {
+        const originalOptions = [...q.options];
+        const correctAnswerText = originalOptions[q.correctAnswer];
+        
+        // Shuffle options
+        const shuffledOptions = [...q.options];
+        for (let i = shuffledOptions.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [shuffledOptions[i], shuffledOptions[j]] = [shuffledOptions[j], shuffledOptions[i]];
+        }
+        
+        // Find new position of correct answer
+        const newCorrectAnswer = shuffledOptions.findIndex(option => option === correctAnswerText);
+        
+        return {
+          id: q.id,
+          question: q.question,
+          options: shuffledOptions,
+          correctAnswer: newCorrectAnswer
+        };
+      });
+      
+      // Store the question mapping in a temporary store (in production, use Redis or similar)
+      const sessionId = `session_${Date.now()}_${Math.random()}`;
+      (global as any).questionMappings = (global as any).questionMappings || {};
+      (global as any).questionMappings[sessionId] = questionsWithShuffledOptions.reduce((acc: any, q) => {
+        acc[q.id] = q.correctAnswer;
+        return acc;
+      }, {});
       
       // Remove correct answers from response
-      const questionsWithoutAnswers = limitedQuestions.map(q => ({
+      const questionsWithoutAnswers = questionsWithShuffledOptions.map(q => ({
         id: q.id,
         question: q.question,
         options: q.options
       }));
       
-      res.json(questionsWithoutAnswers);
+      res.json({ questions: questionsWithoutAnswers, sessionId });
     } catch (error) {
       console.error("Error fetching questions:", error);
       res.status(500).json({ message: "Failed to fetch questions" });
@@ -182,24 +221,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/exam/submit", optionalAuth, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const { courseId, answers, timeTaken, userEmail, userName } = req.body;
+      const { courseId, answers, timeTaken, userEmail, userName, sessionId } = req.body;
       
-      // Get all questions for the course
-      const questions = await storage.getQuestionsByCourse(courseId);
+      // Get correct answers from session mapping
+      const correctAnswersMapping = (global as any).questionMappings?.[sessionId] || {};
       
-      // Calculate score
+      // Calculate score using session-specific correct answers
       let correctAnswers = 0;
       const totalQuestions = Object.keys(answers).length;
       
       for (const [questionId, userAnswer] of Object.entries(answers)) {
-        const question = questions.find(q => q.id === parseInt(questionId));
-        if (question && question.correctAnswer === userAnswer) {
+        const correctAnswer = correctAnswersMapping[parseInt(questionId)];
+        if (correctAnswer !== undefined && correctAnswer === userAnswer) {
           correctAnswers++;
         }
       }
       
+      // Clean up session data
+      if ((global as any).questionMappings?.[sessionId]) {
+        delete (global as any).questionMappings[sessionId];
+      }
+      
       const score = Math.round((correctAnswers / totalQuestions) * 100);
       const passed = score >= 50;
+      const mastered = score >= 90;
       
       // Create exam attempt
       const examAttempt = await storage.createExamAttempt({
