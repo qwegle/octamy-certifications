@@ -414,6 +414,10 @@ export class DatabaseStorage implements IStorage {
       .set(updates)
       .where(eq(withdrawalRequests.id, id));
   }
+
+  async getAllPayments(): Promise<Payment[]> {
+    return await db.select().from(payments);
+  }
 }
 
 export const storage = new DatabaseStorage();

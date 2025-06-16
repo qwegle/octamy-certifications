@@ -21,6 +21,8 @@ import TermsOfService from "@/pages/terms-of-service";
 import InternshipPayment from "@/pages/internship-payment";
 import SellerAuth from "@/pages/seller-auth";
 import SellerDashboard from "@/pages/seller-dashboard";
+import PaymentSuccess from "@/pages/payment-success";
+import PaymentFailed from "@/pages/payment-failed";
 
 function Router() {
   return (
@@ -41,6 +43,8 @@ function Router() {
       <Route path="/terms-of-service" component={TermsOfService} />
       <Route path="/partners" component={SellerAuth} />
       <Route path="/partner-dashboard" component={SellerDashboard} />
+      <Route path="/payment-success" component={PaymentSuccess} />
+      <Route path="/payment-failed" component={PaymentFailed} />
       <Route component={NotFound} />
     </Switch>
   );
