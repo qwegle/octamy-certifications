@@ -954,6 +954,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Business certificates endpoint
+  app.post("/api/business-certificates", async (req: Request, res: Response) => {
+    try {
+      const {
+        companyName,
+        contactPerson,
+        email,
+        phone,
+        selectedCourses,
+        teamSize,
+        requirements
+      } = req.body;
+
+      console.log("Business certificate request received:", {
+        companyName,
+        contactPerson,
+        email,
+        teamSize: selectedCourses?.length
+      });
+
+      // In a real implementation, you would save this to a business_inquiries table
+      res.json({
+        success: true,
+        message: "Business certificate inquiry submitted successfully",
+        inquiryId: `BIZ-${Date.now()}`,
+        estimatedResponse: "24 hours"
+      });
+    } catch (error) {
+      console.error("Error submitting business certificate request:", error);
+      res.status(500).json({ message: "Failed to submit business certificate request" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

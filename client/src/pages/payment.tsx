@@ -1,12 +1,10 @@
 import { useParams, useLocation } from 'wouter';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/hooks/use-toast';
-import { initializeRazorpay, createRazorpayPayment } from '@/lib/razorpay';
-import { apiRequest } from '@/lib/queryClient';
 import Header from '@/components/header';
+import PayUMoneyForm from '@/components/payumoney-form';
 import { QrCode, Download, Share2, Trophy, Calendar, Award } from 'lucide-react';
 import type { Certificate } from '@shared/schema';
 

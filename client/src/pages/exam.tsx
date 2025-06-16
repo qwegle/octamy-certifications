@@ -137,7 +137,7 @@ export default function Exam() {
       });
       const certificate = await certResponse.json();
       
-      setLocation(`/payment/${certificate.id}`);
+      setLocation(`/payment/${certificate.certificateId}`);
     },
     onError: () => {
       toast({
