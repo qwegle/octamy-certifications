@@ -917,16 +917,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
 
           // Update payment record
-          const payments = await storage.getAllPayments();
-          const payment = payments.find(p => p.transactionId === responseData.txnid);
-          if (payment) {
-            await storage.updatePayment(payment.id, {
-              status: 'completed',
-              paymentMethod: 'payumoney',
-              razorpayPaymentId: responseData.mihpayid,
-              razorpayOrderId: responseData.txnid
-            });
-          }
+          await storage.updatePayment(payment.id, {
+            status: 'completed',
+            paymentMethod: 'payumoney',
+            razorpayPaymentId: responseData.mihpayid,
+            razorpayOrderId: responseData.txnid
+          });
 
           // Handle seller commission if applicable
           if (sellerCode) {
