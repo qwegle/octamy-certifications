@@ -87,9 +87,7 @@ export class PayUMoneyService {
       merchantId: process.env.PAYUMONEY_MERCHANT_ID!,
       merchantKey: process.env.PAYUMONEY_MERCHANT_KEY!,
       salt: process.env.PAYUMONEY_SALT!,
-      baseUrl: process.env.NODE_ENV === 'production' 
-        ? 'https://secure.payu.in/_payment' 
-        : 'https://test.payu.in/_payment'
+      baseUrl: 'https://secure.payu.in/_payment'
     };
 
     if (!this.config.merchantId || !this.config.merchantKey || !this.config.salt) {
