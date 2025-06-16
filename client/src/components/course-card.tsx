@@ -39,11 +39,18 @@ export default function CourseCard({ course, certifiedCount = 0, rating = 4.8 }:
           </div>
         </div>
         
-        <Link href={`/exam/${course.id}`}>
-          <Button className="w-full bg-octamy-black text-white hover:bg-octamy-gray-800">
-            Attempt Now - ₹{course.price}
-          </Button>
-        </Link>
+        <div className="space-y-2">
+          {course.isInternship && (
+            <Badge variant="outline" className="bg-green-50 text-green-700 dark:bg-green-900 dark:text-green-300">
+              Virtual Internship
+            </Badge>
+          )}
+          <Link href={`/course/${course.slug}`}>
+            <Button className="w-full bg-octamy-black text-white hover:bg-octamy-gray-800">
+              Learn More - ₹{course.price}
+            </Button>
+          </Link>
+        </div>
       </CardContent>
     </Card>
   );

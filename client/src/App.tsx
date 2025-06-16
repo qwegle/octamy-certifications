@@ -17,6 +17,7 @@ import CourseDetail from "@/pages/course-detail";
 import HelpCenter from "@/pages/help-center";
 import PrivacyPolicy from "@/pages/privacy-policy";
 import TermsOfService from "@/pages/terms-of-service";
+import InternshipPayment from "@/pages/internship-payment";
 
 function Router() {
   return (
@@ -25,6 +26,7 @@ function Router() {
       <Route path="/auth" component={Auth} />
       <Route path="/exam/:courseId" component={Exam} />
       <Route path="/payment/:certificateId" component={Payment} />
+      <Route path="/internship-payment/:certificateId" component={InternshipPayment} />
       <Route path="/certificate/:certificateId" component={Certificate} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/admin" component={Admin} />
