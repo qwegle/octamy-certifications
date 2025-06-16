@@ -332,7 +332,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/admin/courses", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const user = await storage.getUser(req.user.userId);
+      const user = await storage.getUser(req.user!.userId);
       if (!user?.isAdmin) {
         return res.status(403).json({ message: "Admin access required" });
       }
@@ -345,9 +345,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/admin/questions/:courseId", authenticateToken, async (req, res) => {
+  app.get("/api/admin/questions/:courseId", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const user = await storage.getUser(req.user.userId);
+      const user = await storage.getUser(req.user!.userId);
       if (!user?.isAdmin) {
         return res.status(403).json({ message: "Admin access required" });
       }
@@ -360,9 +360,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/admin/questions", authenticateToken, async (req, res) => {
+  app.post("/api/admin/questions", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const user = await storage.getUser(req.user.userId);
+      const user = await storage.getUser(req.user!.userId);
       if (!user?.isAdmin) {
         return res.status(403).json({ message: "Admin access required" });
       }
