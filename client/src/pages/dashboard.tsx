@@ -196,6 +196,7 @@ export default function Dashboard() {
                       </Button>
                       <Button
                         size="sm"
+                        onClick={() => handleDownload(certificate.certificateId)}
                         className="flex-1 bg-octamy-black text-white hover:bg-octamy-gray-800"
                       >
                         <Download className="w-4 h-4 mr-1" />
