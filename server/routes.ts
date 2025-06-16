@@ -1063,18 +1063,231 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!certificate) {
         return res.status(404).json({ message: "Certificate not found" });
       }
+
+      if (!certificate.isPaid) {
+        return res.status(403).json({ message: "Certificate payment required" });
+      }
+
+      const htmlToPdf = require('html-pdf-node');
       
-      // Generate PDF certificate download
+      // Generate certificate HTML with exact frontend styling
+      const certificateHtml = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { 
+              font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+              min-height: 100vh;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              padding: 40px 20px;
+            }
+            .certificate-container {
+              background: white;
+              border-radius: 20px;
+              padding: 60px;
+              max-width: 800px;
+              width: 100%;
+              box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+              position: relative;
+              overflow: hidden;
+            }
+            .certificate-bg {
+              position: absolute;
+              top: 0;
+              left: 0;
+              right: 0;
+              bottom: 0;
+              background: linear-gradient(45deg, #f8fafc 0%, #e2e8f0 100%);
+              opacity: 0.3;
+            }
+            .certificate-content {
+              position: relative;
+              z-index: 2;
+              text-align: center;
+            }
+            .logo {
+              font-size: 32px;
+              font-weight: 900;
+              color: #000;
+              margin-bottom: 40px;
+              letter-spacing: -1px;
+            }
+            .certificate-title {
+              font-size: 48px;
+              font-weight: 800;
+              color: #1a202c;
+              margin-bottom: 20px;
+              line-height: 1.2;
+            }
+            .certificate-subtitle {
+              font-size: 20px;
+              color: #4a5568;
+              margin-bottom: 40px;
+            }
+            .recipient-name {
+              font-size: 36px;
+              font-weight: 700;
+              color: #2d3748;
+              margin-bottom: 20px;
+              border-bottom: 3px solid #000;
+              display: inline-block;
+              padding-bottom: 10px;
+            }
+            .course-title {
+              font-size: 28px;
+              font-weight: 600;
+              color: #1a202c;
+              margin: 30px 0;
+            }
+            .score-badge {
+              display: inline-block;
+              background: ${certificate.badge === 'Excellent' ? '#10b981' : certificate.badge === 'Good' ? '#f59e0b' : '#ef4444'};
+              color: white;
+              padding: 12px 24px;
+              border-radius: 25px;
+              font-weight: 700;
+              font-size: 18px;
+              margin: 20px 0;
+            }
+            .certificate-details {
+              display: flex;
+              justify-content: space-between;
+              margin-top: 50px;
+              padding-top: 30px;
+              border-top: 2px solid #e2e8f0;
+            }
+            .detail-item {
+              text-align: center;
+            }
+            .detail-label {
+              font-size: 14px;
+              color: #718096;
+              text-transform: uppercase;
+              letter-spacing: 1px;
+              margin-bottom: 5px;
+            }
+            .detail-value {
+              font-size: 16px;
+              font-weight: 600;
+              color: #2d3748;
+            }
+            .qr-section {
+              position: absolute;
+              bottom: 40px;
+              right: 40px;
+              text-align: center;
+            }
+            .qr-text {
+              font-size: 12px;
+              color: #718096;
+              margin-top: 10px;
+            }
+            .signature-section {
+              position: absolute;
+              bottom: 40px;
+              left: 40px;
+            }
+            .signature-line {
+              width: 200px;
+              height: 2px;
+              background: #000;
+              margin-bottom: 5px;
+            }
+            .signature-text {
+              font-size: 14px;
+              color: #4a5568;
+            }
+            .watermark {
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%) rotate(-45deg);
+              font-size: 120px;
+              font-weight: 900;
+              color: rgba(0,0,0,0.03);
+              z-index: 1;
+              pointer-events: none;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="certificate-container">
+            <div class="certificate-bg"></div>
+            <div class="watermark">OCTAMY</div>
+            <div class="certificate-content">
+              <div class="logo">OCTAMY</div>
+              <h1 class="certificate-title">CERTIFICATE</h1>
+              <p class="certificate-subtitle">of Achievement</p>
+              
+              <div class="recipient-name">${certificate.userName}</div>
+              
+              <p style="font-size: 18px; color: #4a5568; margin: 20px 0;">
+                has successfully completed the course
+              </p>
+              
+              <div class="course-title">${certificate.courseTitle}</div>
+              
+              <div class="score-badge">
+                ${certificate.badge} - ${certificate.score}%
+              </div>
+              
+              <div class="certificate-details">
+                <div class="detail-item">
+                  <div class="detail-label">Certificate ID</div>
+                  <div class="detail-value">${certificate.certificateNumber}</div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label">Issue Date</div>
+                  <div class="detail-value">${new Date(certificate.issuedAt).toLocaleDateString()}</div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label">Valid Until</div>
+                  <div class="detail-value">${new Date(certificate.expiresAt).toLocaleDateString()}</div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="signature-section">
+              <div class="signature-line"></div>
+              <div class="signature-text">Authorized Signature</div>
+            </div>
+            
+            <div class="qr-section">
+              <div style="width: 80px; height: 80px; background: #000; margin: 0 auto;"></div>
+              <div class="qr-text">Verify Online</div>
+            </div>
+          </div>
+        </body>
+        </html>
+      `;
+
+      const options = {
+        format: 'A4',
+        orientation: 'landscape',
+        border: {
+          top: '0.5in',
+          right: '0.5in',
+          bottom: '0.5in',
+          left: '0.5in'
+        },
+        quality: '100',
+        type: 'pdf'
+      };
+
+      const file = { content: certificateHtml };
+      const pdfBuffer = await htmlToPdf.generatePdf(file, options);
+
       res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `attachment; filename="certificate-${certificateId}.pdf"`);
+      res.setHeader('Content-Disposition', `attachment; filename="Octamy-Certificate-${certificate.certificateNumber}.pdf"`);
+      res.setHeader('Content-Length', pdfBuffer.length);
       
-      // For now, return certificate data - in production, generate actual PDF
-      res.json({
-        success: true,
-        message: "Certificate download ready",
-        certificate: certificate,
-        downloadUrl: `/api/certificates/${certificateId}/pdf`
-      });
+      res.send(pdfBuffer);
     } catch (error) {
       console.error("Certificate download error:", error);
       res.status(500).json({ message: "Failed to download certificate" });

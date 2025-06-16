@@ -28,6 +28,34 @@ export default function Dashboard() {
     },
   });
 
+  const handleDownload = async (certificateId: string) => {
+    try {
+      const response = await fetch(`/api/certificates/${certificateId}/download`);
+      
+      if (!response.ok) {
+        if (response.status === 403) {
+          alert('Certificate payment is required before download');
+          return;
+        }
+        throw new Error('Failed to download certificate');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = `Octamy-Certificate-${certificateId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Download error:', error);
+      alert('Failed to download certificate. Please try again.');
+    }
+  };
+
   if (!user) {
     return (
       <div className="min-h-screen bg-white">

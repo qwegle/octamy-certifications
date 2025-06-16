@@ -16,6 +16,35 @@ export default function CertificateView() {
     enabled: !!certificateId,
   });
 
+  const handleDownload = async () => {
+    if (!certificate?.isPaid) {
+      alert('Certificate payment is required before download');
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/certificates/${certificateId}/download`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to download certificate');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = `Octamy-Certificate-${certificate.certificateNumber}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Download error:', error);
+      alert('Failed to download certificate. Please try again.');
+    }
+  };
+
   const handleShare = (platform: string) => {
     const url = window.location.href;
     const text = `Check out my ${certificate?.courseTitle} certification from Octamy!`;
@@ -31,6 +60,11 @@ export default function CertificateView() {
       case 'whatsapp':
         shareUrl = `https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`;
         break;
+      case 'copy':
+        navigator.clipboard.writeText(url).then(() => {
+          alert('Certificate link copied to clipboard!');
+        });
+        return;
     }
     
     if (shareUrl) {
@@ -192,15 +226,33 @@ export default function CertificateView() {
           </CardContent>
         </Card>
 
-        {/* Share Section */}
+        {/* Download & Share Section */}
         {isActive && (
           <Card>
             <CardContent className="p-6 text-center">
-              <h3 className="text-xl font-bold text-octamy-black mb-4">Share This Certificate</h3>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <h3 className="text-xl font-bold text-octamy-black mb-4">Download & Share</h3>
+              
+              {/* Download Button */}
+              <div className="mb-6">
+                <Button
+                  onClick={handleDownload}
+                  className="bg-octamy-black text-white hover:bg-octamy-gray-800 px-8 py-3 text-lg"
+                >
+                  <Download className="w-5 h-5 mr-2" />
+                  Download PDF Certificate
+                </Button>
+                <p className="text-sm text-octamy-gray-600 mt-2">
+                  Get your professional certificate as a high-quality PDF
+                </p>
+              </div>
+
+              {/* Share Options */}
+              <h4 className="text-lg font-semibold text-octamy-black mb-3">Share This Certificate</h4>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <Button
                   variant="outline"
-                  onClick={() => navigator.clipboard.writeText(window.location.href)}
+                  onClick={() => handleShare('copy')}
+                  className="border-octamy-gray-300 text-octamy-black hover:bg-octamy-gray-50"
                 >
                   <Share2 className="w-4 h-4 mr-2" />
                   Copy Link
@@ -227,6 +279,24 @@ export default function CertificateView() {
                   Share on WhatsApp
                 </Button>
               </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Payment Required Section */}
+        {!certificate.isPaid && (
+          <Card className="border-orange-200 bg-orange-50">
+            <CardContent className="p-6 text-center">
+              <h3 className="text-xl font-bold text-orange-800 mb-2">Payment Required</h3>
+              <p className="text-orange-700 mb-4">
+                Complete your payment to download and share your certificate
+              </p>
+              <Button 
+                onClick={() => window.location.href = `/payment/${certificate.id}`}
+                className="bg-orange-600 text-white hover:bg-orange-700"
+              >
+                Pay ₹99 & Download Certificate
+              </Button>
             </CardContent>
           </Card>
         )}
