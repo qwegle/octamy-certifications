@@ -12,7 +12,7 @@ export default function Verify() {
   const [searchAttempted, setSearchAttempted] = useState(false);
 
   const { data: certificate, isLoading, error } = useQuery({
-    queryKey: ["/api/certificates/verify", certificateId],
+    queryKey: [`/api/certificates/verify/${certificateId}`],
     enabled: searchAttempted && certificateId.length > 0,
     retry: false,
   });
@@ -112,7 +112,7 @@ export default function Verify() {
                         <User className="w-5 h-5 text-gray-500" />
                         <div>
                           <p className="text-sm text-gray-500">Recipient</p>
-                          <p className="font-semibold">{certificate.userName}</p>
+                          <p className="font-semibold">{certificate?.userName || 'N/A'}</p>
                         </div>
                       </div>
                       
@@ -120,7 +120,7 @@ export default function Verify() {
                         <BookOpen className="w-5 h-5 text-gray-500" />
                         <div>
                           <p className="text-sm text-gray-500">Course</p>
-                          <p className="font-semibold">{certificate.courseTitle}</p>
+                          <p className="font-semibold">{certificate?.courseTitle || 'N/A'}</p>
                         </div>
                       </div>
                       
@@ -129,7 +129,7 @@ export default function Verify() {
                         <div>
                           <p className="text-sm text-gray-500">Achievement</p>
                           <Badge className="bg-yellow-500 text-black font-bold">
-                            {certificate.badge.toUpperCase()}
+                            {certificate?.badge?.toUpperCase() || 'N/A'}
                           </Badge>
                         </div>
                       </div>
@@ -141,7 +141,7 @@ export default function Verify() {
                         <div>
                           <p className="text-sm text-gray-500">Issue Date</p>
                           <p className="font-semibold">
-                            {new Date(certificate.createdAt).toLocaleDateString()}
+                            {certificate?.createdAt ? new Date(certificate.createdAt).toLocaleDateString() : 'N/A'}
                           </p>
                         </div>
                       </div>
@@ -151,7 +151,7 @@ export default function Verify() {
                         <div>
                           <p className="text-sm text-gray-500">Valid Until</p>
                           <p className="font-semibold">
-                            {new Date(certificate.expiresAt).toLocaleDateString()}
+                            {certificate?.expiresAt ? new Date(certificate.expiresAt).toLocaleDateString() : 'N/A'}
                           </p>
                         </div>
                       </div>
@@ -160,7 +160,7 @@ export default function Verify() {
                         <CheckCircle className="w-5 h-5 text-gray-500" />
                         <div>
                           <p className="text-sm text-gray-500">Certificate Number</p>
-                          <p className="font-mono text-sm">{certificate.certificateNumber}</p>
+                          <p className="font-mono text-sm">{certificate?.certificateNumber || 'N/A'}</p>
                         </div>
                       </div>
                     </div>

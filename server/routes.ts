@@ -991,6 +991,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Certificate verification endpoint
+  app.get("/api/certificates/verify/:certificateId", async (req: Request, res: Response) => {
+    try {
+      const { certificateId } = req.params;
+      
+      const certificate = await storage.getCertificateByCertificateId(certificateId);
+      if (!certificate) {
+        return res.status(404).json({ message: "Certificate not found" });
+      }
+      
+      res.json(certificate);
+    } catch (error) {
+      console.error("Certificate verification error:", error);
+      res.status(500).json({ message: "Failed to verify certificate" });
+    }
+  });
+
+  // Certificate download endpoint
+  app.get("/api/certificates/:certificateId/download", async (req: Request, res: Response) => {
+    try {
+      const { certificateId } = req.params;
+      
+      const certificate = await storage.getCertificateByCertificateId(certificateId);
+      if (!certificate) {
+        return res.status(404).json({ message: "Certificate not found" });
+      }
+      
+      // Generate PDF certificate download
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="certificate-${certificateId}.pdf"`);
+      
+      // For now, return certificate data - in production, generate actual PDF
+      res.json({
+        success: true,
+        message: "Certificate download ready",
+        certificate: certificate,
+        downloadUrl: `/api/certificates/${certificateId}/pdf`
+      });
+    } catch (error) {
+      console.error("Certificate download error:", error);
+      res.status(500).json({ message: "Failed to download certificate" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
