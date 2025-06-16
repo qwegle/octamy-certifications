@@ -100,20 +100,24 @@ export default function Landing() {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
-              <Button 
-                size="lg" 
-                className="bg-white text-black hover:bg-gray-100 px-8 py-4 text-lg font-bold border-2 border-white"
-              >
-                START LEARNING
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-              <Button 
-                variant="outline" 
-                size="lg"
-                className="text-white border-white hover:bg-white hover:text-black px-8 py-4 text-lg font-bold"
-              >
-                VIEW CERTIFICATES
-              </Button>
+              <a href="#courses">
+                <Button 
+                  size="lg" 
+                  className="bg-white text-black hover:bg-gray-100 px-8 py-4 text-lg font-bold border-2 border-white"
+                >
+                  START LEARNING
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </a>
+              <Link href="/demo-certificate">
+                <Button 
+                  variant="outline" 
+                  size="lg"
+                  className="text-white border-white hover:bg-white hover:text-black px-8 py-4 text-lg font-bold"
+                >
+                  VIEW CERTIFICATES
+                </Button>
+              </Link>
             </div>
 
             {/* Stats Section */}
