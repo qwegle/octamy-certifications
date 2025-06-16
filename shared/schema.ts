@@ -82,6 +82,12 @@ export const certificates = pgTable("certificates", {
   qrCode: text("qr_code"),
   pdfUrl: text("pdf_url"),
   isActive: boolean("is_active").default(true).notNull(),
+  // New fields for enhanced certificate system
+  businessName: text("business_name"),
+  badge: text("badge").notNull(), // bronze, silver, gold, platinum
+  certificateNumber: text("certificate_number").notNull().unique(),
+  issuedBy: text("issued_by").default("Octamy Solutions Private Limited").notNull(),
+  retakeCount: integer("retake_count").default(0).notNull(),
 });
 
 export const payments = pgTable("payments", {
@@ -150,6 +156,20 @@ export const withdrawalRequests = pgTable("withdrawal_requests", {
   adminNotes: text("admin_notes"),
   processedAt: timestamp("processed_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Leaderboard table for gamification
+export const leaderboard = pgTable("leaderboard", {
+  id: serial("id").primaryKey(),
+  courseId: integer("course_id").references(() => courses.id).notNull(),
+  userId: integer("user_id").references(() => users.id),
+  userName: text("user_name").notNull(),
+  userEmail: text("user_email").notNull(),
+  score: integer("score").notNull(),
+  badge: text("badge").notNull(),
+  certificateId: text("certificate_id").notNull(),
+  achievedAt: timestamp("achieved_at").defaultNow().notNull(),
+  businessName: text("business_name"), // for business certificates
 });
 
 // Relations
@@ -316,6 +336,11 @@ export const insertWithdrawalRequestSchema = createInsertSchema(withdrawalReques
   id: true,
   createdAt: true,
   processedAt: true,
+});
+
+export const insertLeaderboardSchema = createInsertSchema(leaderboard).omit({
+  id: true,
+  achievedAt: true,
 });
 
 export type InternshipApplication = typeof internshipApplications.$inferSelect;
