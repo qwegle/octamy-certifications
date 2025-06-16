@@ -23,25 +23,12 @@ export default function CertificateView() {
     }
 
     try {
-      const response = await fetch(`/api/certificates/${certificateId}/download`);
-      
-      if (!response.ok) {
-        throw new Error('Failed to download certificate');
-      }
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.style.display = 'none';
-      a.href = url;
-      a.download = `Octamy-Certificate-${certificate.certificateNumber}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
+      // Open certificate in new tab for printing/saving as PDF
+      const downloadUrl = `/api/certificates/${certificateId}/download`;
+      window.open(downloadUrl, '_blank');
     } catch (error) {
       console.error('Download error:', error);
-      alert('Failed to download certificate. Please try again.');
+      alert('Failed to open certificate. Please try again.');
     }
   };
 

@@ -139,6 +139,9 @@ Octamy is a comprehensive professional certification platform built as a full-st
 
 ```
 Changelog:
+- June 16, 2025: Fixed certificate download functionality with HTML-based solution and print-to-PDF capability
+- June 16, 2025: Resolved ES module compatibility issues in PDF generation endpoint
+- June 16, 2025: Updated both certificate page and dashboard download handlers to work with new HTML format
 - June 16, 2025: Enhanced payment security with SSL enforcement and comprehensive security headers
 - June 16, 2025: Fixed certificate delivery after successful payment with proper success callback
 - June 16, 2025: Added payment success/failure pages with proper certificate access
