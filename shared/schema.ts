@@ -24,11 +24,15 @@ export const courses = pgTable("courses", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
   description: text("description").notNull(),
+  slug: text("slug").notNull().unique(),
   categoryId: integer("category_id").references(() => categories.id).notNull(),
   duration: integer("duration").notNull(), // in minutes
   passingScore: integer("passing_score").default(50).notNull(),
   price: decimal("price", { precision: 10, scale: 2 }).default("199.00").notNull(),
   isActive: boolean("is_active").default(true).notNull(),
+  isInternship: boolean("is_internship").default(false).notNull(),
+  metaTitle: text("meta_title"),
+  metaDescription: text("meta_description"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -81,6 +85,17 @@ export const payments = pgTable("payments", {
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
   currency: text("currency").default("INR").notNull(),
   status: text("status").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const internshipApplications = pgTable("internship_applications", {
+  id: serial("id").primaryKey(),
+  certificateId: integer("certificate_id").references(() => certificates.id).notNull(),
+  applicantName: text("applicant_name").notNull(),
+  dateOfBirth: text("date_of_birth").notNull(),
+  startDate: text("start_date").notNull(),
+  endDate: text("end_date").notNull(),
+  durationMonths: integer("duration_months").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -141,6 +156,13 @@ export const paymentsRelations = relations(payments, ({ one }) => ({
   }),
 }));
 
+export const internshipApplicationsRelations = relations(internshipApplications, ({ one }) => ({
+  certificate: one(certificates, {
+    fields: [internshipApplications.certificateId],
+    references: [certificates.id],
+  }),
+}));
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -192,3 +214,11 @@ export type Certificate = typeof certificates.$inferSelect;
 export type InsertCertificate = z.infer<typeof insertCertificateSchema>;
 export type Payment = typeof payments.$inferSelect;
 export type InsertPayment = z.infer<typeof insertPaymentSchema>;
+
+export const insertInternshipApplicationSchema = createInsertSchema(internshipApplications).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InternshipApplication = typeof internshipApplications.$inferSelect;
+export type InsertInternshipApplication = z.infer<typeof insertInternshipApplicationSchema>;
