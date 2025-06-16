@@ -5,7 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "./lib/auth";
 import { SellerAuthProvider } from "./lib/sellerAuth";
-import Landing from "@/pages/landing";
+import Landing from "@/pages/landing-new";
 import Exam from "@/pages/exam";
 import Payment from "@/pages/payment";
 import Certificate from "@/pages/certificate";
