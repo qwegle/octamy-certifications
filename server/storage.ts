@@ -132,6 +132,18 @@ export interface IStorage {
   // User activity tracking operations
   recordUserActivity(activity: InsertUserActivity): Promise<UserActivity>;
   getUserActivity(userId: number, activityType?: string): Promise<UserActivity[]>;
+  
+  // Course progress operations
+  getUserCourseProgress(userId: number, courseId?: number): Promise<UserCourseProgress[]>;
+  upsertUserCourseProgress(progress: InsertUserCourseProgress): Promise<UserCourseProgress>;
+  updateCourseProgress(userId: number, courseId: number, updates: Partial<InsertUserCourseProgress>): Promise<UserCourseProgress>;
+  
+  // Achievement operations
+  getAchievements(category?: string): Promise<Achievement[]>;
+  createAchievement(achievement: InsertAchievement): Promise<Achievement>;
+  getUserAchievements(userId: number, includeDetails?: boolean): Promise<(UserAchievement & { achievement?: Achievement })[]>;
+  unlockAchievement(userId: number, achievementId: number, metadata?: any): Promise<UserAchievement>;
+  checkAndUnlockAchievements(userId: number, courseId?: number): Promise<UserAchievement[]>;
 }
 
 export class DatabaseStorage implements IStorage {

@@ -497,6 +497,22 @@ export const insertPaymentSchema = createInsertSchema(payments).omit({
   createdAt: true,
 });
 
+export const insertUserCourseProgressSchema = createInsertSchema(userCourseProgress).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAchievementSchema = createInsertSchema(achievements).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertUserAchievementSchema = createInsertSchema(userAchievements).omit({
+  id: true,
+  unlockedAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -551,6 +567,12 @@ export type WithdrawalRequest = typeof withdrawalRequests.$inferSelect;
 export type InsertWithdrawalRequest = z.infer<typeof insertWithdrawalRequestSchema>;
 export type Leaderboard = typeof leaderboard.$inferSelect;
 export type InsertLeaderboard = z.infer<typeof insertLeaderboardSchema>;
+export type UserCourseProgress = typeof userCourseProgress.$inferSelect;
+export type InsertUserCourseProgress = z.infer<typeof insertUserCourseProgressSchema>;
+export type Achievement = typeof achievements.$inferSelect;
+export type InsertAchievement = z.infer<typeof insertAchievementSchema>;
+export type UserAchievement = typeof userAchievements.$inferSelect;
+export type InsertUserAchievement = z.infer<typeof insertUserAchievementSchema>;
 
 // Smart Notifications Insert Schemas
 export const insertUserPreferencesSchema = createInsertSchema(userPreferences).omit({
