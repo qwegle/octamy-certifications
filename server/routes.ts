@@ -308,7 +308,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Generate certificate ID
       const certificateId = `OCT-${new Date().getFullYear()}-${course.title.replace(/\s+/g, '').toUpperCase().slice(0, 3)}-${Date.now()}`;
       
-      // Create certificate
+      // Create certificate with mastery recognition
       const certificate = await storage.createCertificate({
         certificateId,
         examAttemptId,
@@ -317,6 +317,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userName: examAttempt.userName,
         courseTitle: course.title,
         score: examAttempt.score,
+        mastered: examAttempt.mastered || false,
         expiresAt: new Date(Date.now() + 2 * 365 * 24 * 60 * 60 * 1000), // 2 years validity
         isPaid: false,
         isActive: true,

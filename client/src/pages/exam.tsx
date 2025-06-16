@@ -12,6 +12,7 @@ import { useAuth } from '@/lib/auth';
 import Header from '@/components/header';
 import ExamTimer from '@/components/exam-timer';
 import type { Course, Question } from '@shared/schema';
+import { AlertTriangle } from 'lucide-react';
 
 interface ExamQuestion {
   id: number;
@@ -171,12 +172,23 @@ export default function Exam() {
   const handleSubmit = () => {
     const timeTaken = Math.floor((Date.now() - examStartTime) / 1000);
     
+    // Anti-cheating: Check for excessive tab switching
+    if (tabSwitches > 5) {
+      toast({
+        title: "Exam Terminated",
+        description: "Excessive tab switching detected. Your exam has been flagged for review.",
+        variant: "destructive",
+      });
+    }
+    
     submitExamMutation.mutate({
       courseId: parseInt(courseId!),
       answers,
       timeTaken,
       userName: userInfo.name,
       userEmail: userInfo.email,
+      sessionId,
+      tabSwitches,
     });
   };
 
@@ -304,6 +316,19 @@ export default function Exam() {
           </CardHeader>
           
           <CardContent className="space-y-6">
+            {/* Anti-cheating warning */}
+            {tabSwitches > 0 && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <div className="flex items-center">
+                  <AlertTriangle className="h-5 w-5 text-red-500 mr-2" />
+                  <p className="text-sm text-red-700">
+                    Tab switching detected ({tabSwitches} times). 
+                    {tabSwitches > 3 && <span className="font-semibold"> Warning: Excessive switching may result in exam termination.</span>}
+                  </p>
+                </div>
+              </div>
+            )}
+            
             <div>
               <h3 className="text-xl font-semibold mb-6">{currentQ.question}</h3>
               
@@ -311,7 +336,7 @@ export default function Exam() {
                 value={answers[currentQ.id.toString()]?.toString() || ''}
                 onValueChange={(value) => handleAnswerChange(currentQ.id.toString(), value)}
               >
-                {currentQ.options.map((option, index) => (
+                {currentQ.options.map((option: string, index: number) => (
                   <div key={index} className="flex items-center space-x-2 p-4 border border-octamy-gray-300 rounded-lg hover:bg-octamy-gray-50 transition-colors">
                     <RadioGroupItem value={index.toString()} id={`option-${index}`} />
                     <Label htmlFor={`option-${index}`} className="flex-1 cursor-pointer">
