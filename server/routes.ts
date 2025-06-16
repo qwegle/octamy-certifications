@@ -886,54 +886,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const sellerCode = responseData.udf3;
         const userId = responseData.udf4 ? parseInt(responseData.udf4) : null;
 
-        // Update payment status
-        await storage.updateCertificatePayment(paymentId, {
-          isPaid: true,
-          paymentId: responseData.mihpayid
-        });
+        // Get the certificate from the paymentId stored in udf2
+        const certificate = await storage.getCertificate(paymentId);
+        
+        if (certificate) {
+          // Update certificate payment status
+          await storage.updateCertificatePayment(paymentId, {
+            isPaid: true,
+            paymentId: responseData.mihpayid
+          });
 
-        // Handle seller commission if applicable
-        if (sellerCode) {
-          const seller = await storage.getSellerByEmail(sellerCode);
-          if (seller && seller.isApproved) {
-            const course = await storage.getCourse(courseId);
-            if (course) {
-              const commissionAmount = (parseFloat(course.price) * parseFloat(seller.commissionRate)) / 100;
-              
-              await storage.createSale({
-                sellerId: seller.id,
-                courseId: courseId,
-                amount: course.price,
-                commission: commissionAmount.toString(),
-                buyerEmail: responseData.email,
-                status: "completed"
-              });
+          // Update payment record
+          const payments = await storage.getAllPayments();
+          const payment = payments.find(p => p.transactionId === responseData.txnid);
+          if (payment) {
+            await storage.updatePayment(payment.id, {
+              status: 'completed',
+              paymentMethod: 'payumoney',
+              razorpayPaymentId: responseData.mihpayid,
+              razorpayOrderId: responseData.txnid
+            });
+          }
 
-              // Update seller earnings
-              const currentEarnings = parseFloat(seller.totalEarnings || "0");
-              await storage.updateSeller(seller.id, {
-                totalEarnings: (currentEarnings + commissionAmount).toString()
+          // Handle seller commission if applicable
+          if (sellerCode) {
+            const seller = await storage.getSellerByEmail(sellerCode);
+            if (seller && seller.isApproved) {
+              const course = await storage.getCourse(courseId);
+              if (course) {
+                const commissionAmount = (parseFloat(course.price) * parseFloat(seller.commissionRate)) / 100;
+                
+                await storage.createSale({
+                  sellerId: seller.id,
+                  courseId: courseId,
+                  certificateId: certificate.id,
+                  amount: course.price,
+                  commission: commissionAmount.toString(),
+                  referralCode: sellerCode,
+                  status: "completed"
+                });
+
+                // Update seller earnings
+                const currentEarnings = parseFloat(seller.totalEarnings || "0");
+                await storage.updateSeller(seller.id, {
+                  totalEarnings: (currentEarnings + commissionAmount).toString()
+                });
+              }
+            }
+          }
+
+          // Send success notification to user if registered
+          if (userId) {
+            const user = await storage.getUser(userId);
+            if (user) {
+              await storage.createNotification({
+                userId: userId,
+                title: "Certificate Payment Successful",
+                type: "payment_success",
+                message: `Your payment for certificate ${certificate.certificateId} has been processed successfully. You can now download your certificate.`,
+                data: {
+                  certificateId: certificate.certificateId,
+                  actionUrl: `/certificates/${certificate.certificateId}`,
+                  priority: "high"
+                }
               });
             }
           }
-        }
 
-        // Create certificate if user is authenticated
-        if (userId) {
-          const course = await storage.getCourse(courseId);
-          if (course) {
-            const certificateId = `CERT${Date.now()}${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
-            
-            await storage.createCertificate({
-              userId: userId,
-              courseId: courseId,
-              certificateId: certificateId,
-              score: 0, // Will be updated after exam
-              isPaid: true,
-              paymentId: responseData.mihpayid,
-              issuedAt: new Date()
-            });
-          }
+          console.log(`Payment successful for certificate ${certificate.certificateId}, user can now download`);
+        } else {
+          console.error("Certificate not found for payment ID:", paymentId);
         }
 
         res.redirect(`${req.protocol}://${req.get('host')}/payment-success?txnid=${responseData.txnid}`);

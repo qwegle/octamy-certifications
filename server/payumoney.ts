@@ -144,14 +144,19 @@ export class PayUMoneyService {
   }
 
   /**
-   * Generate payment form data
+   * Generate secure payment form data with SSL enforcement
    */
   generatePaymentForm(paymentData: PaymentRequest): {
     action: string;
     method: string;
     fields: Record<string, string>;
+    securityHeaders: Record<string, string>;
   } {
     const hash = this.generateHash(paymentData);
+
+    // Ensure HTTPS URLs for production security
+    const secureSuccessUrl = paymentData.surl.replace('http://', 'https://');
+    const secureFailureUrl = paymentData.furl.replace('http://', 'https://');
 
     return {
       action: this.config.baseUrl,
@@ -164,15 +169,29 @@ export class PayUMoneyService {
         firstname: paymentData.firstname,
         email: paymentData.email,
         phone: paymentData.phone || '',
-        surl: paymentData.surl,
-        furl: paymentData.furl,
+        surl: secureSuccessUrl,
+        furl: secureFailureUrl,
         hash: hash,
         udf1: paymentData.udf1 || '',
         udf2: paymentData.udf2 || '',
         udf3: paymentData.udf3 || '',
         udf4: paymentData.udf4 || '',
         udf5: paymentData.udf5 || '',
-        service_provider: 'payu_paisa'
+        // Enhanced security fields
+        service_provider: 'payu_paisa',
+        enforce_paymethod: 'creditcard,debitcard,netbanking,upi',
+        pg: 'CC,DC,NB,UPI', // Payment gateway options
+        bankcode: 'CC', // Default to credit card for security
+        drop_category: '0',
+        offer_key: '',
+        show_payment_mode: '1'
+      },
+      securityHeaders: {
+        'Content-Security-Policy': "default-src 'self' https://secure.payu.in https://test.payu.in; script-src 'self' 'unsafe-inline' https://secure.payu.in; style-src 'self' 'unsafe-inline'",
+        'X-Frame-Options': 'SAMEORIGIN',
+        'X-Content-Type-Options': 'nosniff',
+        'Referrer-Policy': 'strict-origin-when-cross-origin',
+        'Strict-Transport-Security': 'max-age=31536000; includeSubDomains'
       }
     };
   }
