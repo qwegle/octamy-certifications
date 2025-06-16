@@ -51,11 +51,17 @@ export default function BusinessCertificates() {
 
   const businessCertificateMutation = useMutation({
     mutationFn: async (data: BusinessCertificateForm) => {
-      return apiRequest("/api/business-certificates", {
+      const response = await fetch("/api/business-certificates", {
         method: "POST",
         body: JSON.stringify(data),
         headers: { "Content-Type": "application/json" },
       });
+      
+      if (!response.ok) {
+        throw new Error("Failed to submit business certificate request");
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       toast({

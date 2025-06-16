@@ -24,6 +24,7 @@ import SellerDashboard from "@/pages/seller-dashboard";
 import PaymentSuccess from "@/pages/payment-success";
 import PaymentFailed from "@/pages/payment-failed";
 import DemoCertificate from "@/pages/demo-certificate";
+import BusinessCertificates from "@/pages/business-certificates";
 
 function Router() {
   return (
@@ -47,6 +48,7 @@ function Router() {
       <Route path="/payment-success" component={PaymentSuccess} />
       <Route path="/payment-failed" component={PaymentFailed} />
       <Route path="/demo-certificate" component={DemoCertificate} />
+      <Route path="/business-certificates" component={BusinessCertificates} />
       <Route component={NotFound} />
     </Switch>
   );
