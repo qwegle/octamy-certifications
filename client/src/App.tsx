@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "./lib/auth";
+import { SellerAuthProvider } from "./lib/sellerAuth";
 import Landing from "@/pages/landing";
 import Exam from "@/pages/exam";
 import Payment from "@/pages/payment";
@@ -18,6 +19,8 @@ import HelpCenter from "@/pages/help-center";
 import PrivacyPolicy from "@/pages/privacy-policy";
 import TermsOfService from "@/pages/terms-of-service";
 import InternshipPayment from "@/pages/internship-payment";
+import SellerAuth from "@/pages/seller-auth";
+import SellerDashboard from "@/pages/seller-dashboard";
 
 function Router() {
   return (
@@ -36,6 +39,8 @@ function Router() {
       <Route path="/help-center" component={HelpCenter} />
       <Route path="/privacy-policy" component={PrivacyPolicy} />
       <Route path="/terms-of-service" component={TermsOfService} />
+      <Route path="/partners" component={SellerAuth} />
+      <Route path="/partner-dashboard" component={SellerDashboard} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -45,10 +50,12 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-        </TooltipProvider>
+        <SellerAuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Router />
+          </TooltipProvider>
+        </SellerAuthProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

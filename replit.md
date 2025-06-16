@@ -102,15 +102,43 @@ Octamy is a comprehensive professional certification platform built as a full-st
 3. Static file serving in production mode
 4. Database migrations applied via Drizzle Kit
 
+## Recent Updates
+
+### Seller/Partner System Implementation (June 16, 2025)
+- **Complete seller authentication system** with separate registration/login
+- **10% commission tracking** on all course sales with referral code system
+- **Real-time analytics dashboard** showing earnings, sales, and withdrawal history
+- **UPI and bank account withdrawal** system with admin approval workflow
+- **Admin seller management** for approval/rejection of partner accounts
+- **Commission calculation and tracking** with pending/paid status management
+
+### Black and White Cred-Style Branding (June 16, 2025)
+- **Complete UI redesign** with black and white Cred-inspired aesthetic
+- **Bold typography** with high contrast design elements
+- **Minimalist interface** focusing on functionality and professionalism
+- **Updated landing page** with partner program integration
+- **Consistent branding** across all pages and components
+
+### Database Schema Extensions
+- **Sellers table** with approval status, earnings tracking, and payment details
+- **Sales table** for commission tracking with referral codes
+- **Withdrawal requests table** with UPI/bank account support and admin processing
+- **Complete relations** between users, sellers, sales, and withdrawals
+
 ## Changelog
 
 ```
 Changelog:
-- June 16, 2025. Initial setup
+- June 16, 2025: Implemented comprehensive seller/partner system with 10% commission tracking
+- June 16, 2025: Applied black and white Cred-style branding across entire platform
+- June 16, 2025: Added real-time analytics dashboard for partners
+- June 16, 2025: Integrated UPI and bank withdrawal system with admin approval
+- June 16, 2025: Initial setup and comprehensive course catalog implementation
 ```
 
 ## User Preferences
 
 ```
 Preferred communication style: Simple, everyday language.
+Branding preference: Black and white Cred-style design with minimalist aesthetic.
 ```

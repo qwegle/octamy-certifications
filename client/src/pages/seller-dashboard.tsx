@@ -1,0 +1,497 @@
+import { useState, useEffect } from "react";
+import { useSellerAuth } from "@/lib/sellerAuth";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
+import { 
+  DollarSign, 
+  TrendingUp, 
+  Users, 
+  CreditCard, 
+  Eye,
+  Copy,
+  Download,
+  LogOut
+} from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+
+interface DashboardData {
+  seller: {
+    id: number;
+    name: string;
+    email: string;
+    isApproved: boolean;
+    totalEarnings: string;
+    pendingEarnings: string;
+    commissionRate: string;
+  };
+  sales: Array<{
+    id: number;
+    amount: string;
+    commission: string;
+    status: string;
+    referralCode: string;
+    createdAt: string;
+  }>;
+  withdrawals: Array<{
+    id: number;
+    amount: string;
+    status: string;
+    createdAt: string;
+  }>;
+  analytics: {
+    totalSales: number;
+    totalCommission: number;
+    pendingWithdrawals: number;
+  };
+}
+
+export default function SellerDashboard() {
+  const { seller, logout, token } = useSellerAuth();
+  const { toast } = useToast();
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [showWithdrawalForm, setShowWithdrawalForm] = useState(false);
+  const [withdrawalData, setWithdrawalData] = useState({
+    amount: "",
+    upiId: "",
+    bankAccountNumber: "",
+    bankIFSC: "",
+    bankName: "",
+    accountHolderName: ""
+  });
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      const response = await fetch("/api/sellers/dashboard", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setDashboardData(data);
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to fetch dashboard data",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching dashboard:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load dashboard",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const copyReferralLink = (courseId: number) => {
+    const referralLink = `${window.location.origin}/course/${courseId}?ref=${seller?.email}`;
+    navigator.clipboard.writeText(referralLink);
+    toast({
+      title: "Copied!",
+      description: "Referral link copied to clipboard",
+    });
+  };
+
+  const handleWithdrawalSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      const response = await fetch("/api/sellers/withdrawals", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(withdrawalData),
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Success",
+          description: "Withdrawal request submitted successfully",
+        });
+        setShowWithdrawalForm(false);
+        setWithdrawalData({
+          amount: "",
+          upiId: "",
+          bankAccountNumber: "",
+          bankIFSC: "",
+          bankName: "",
+          accountHolderName: ""
+        });
+        fetchDashboardData();
+      } else {
+        const error = await response.json();
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to submit withdrawal request",
+        variant: "destructive",
+      });
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-black border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!dashboardData) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600">Failed to load dashboard data</p>
+          <Button onClick={fetchDashboardData} className="mt-4">
+            Retry
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-white">
+      {/* Header */}
+      <header className="bg-black text-white p-6">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold">OCTAMY</h1>
+            <p className="text-gray-300">Partner Dashboard</p>
+          </div>
+          <div className="flex items-center space-x-4">
+            <div className="text-right">
+              <p className="font-medium">{dashboardData.seller.name}</p>
+              <Badge 
+                variant={dashboardData.seller.isApproved ? "default" : "destructive"}
+                className={dashboardData.seller.isApproved ? "bg-green-600" : "bg-red-600"}
+              >
+                {dashboardData.seller.isApproved ? "Approved" : "Pending Approval"}
+              </Badge>
+            </div>
+            <Button 
+              onClick={logout}
+              variant="outline"
+              className="text-white border-white hover:bg-white hover:text-black"
+            >
+              <LogOut size={16} className="mr-2" />
+              Logout
+            </Button>
+          </div>
+        </div>
+      </header>
+
+      <div className="max-w-7xl mx-auto p-6">
+        {/* Approval Status Alert */}
+        {!dashboardData.seller.isApproved && (
+          <div className="mb-6 p-4 bg-yellow-50 border-l-4 border-yellow-400">
+            <div className="flex">
+              <div className="ml-3">
+                <p className="text-sm text-yellow-700">
+                  <strong>Account Pending Approval:</strong> Your partner account is under review. You'll be able to start earning commissions once approved by our team.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <Card className="border-2 border-gray-200">
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <DollarSign className="h-8 w-8 text-black" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Total Earnings</p>
+                  <p className="text-2xl font-bold text-black">₹{dashboardData.seller.totalEarnings}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-2 border-gray-200">
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <TrendingUp className="h-8 w-8 text-black" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Pending Earnings</p>
+                  <p className="text-2xl font-bold text-black">₹{dashboardData.seller.pendingEarnings}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-2 border-gray-200">
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <Users className="h-8 w-8 text-black" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Total Sales</p>
+                  <p className="text-2xl font-bold text-black">{dashboardData.analytics.totalSales}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-2 border-gray-200">
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <CreditCard className="h-8 w-8 text-black" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Commission Rate</p>
+                  <p className="text-2xl font-bold text-black">{dashboardData.seller.commissionRate}%</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Actions */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <Card className="border-2 border-black">
+            <CardHeader className="bg-black text-white">
+              <CardTitle>Quick Actions</CardTitle>
+            </CardHeader>
+            <CardContent className="p-6 space-y-4">
+              <Button 
+                onClick={() => copyReferralLink(1)}
+                className="w-full bg-black text-white hover:bg-gray-800"
+              >
+                <Copy size={16} className="mr-2" />
+                Copy Referral Link
+              </Button>
+              
+              <Button 
+                onClick={() => setShowWithdrawalForm(true)}
+                variant="outline"
+                className="w-full border-2 border-black text-black hover:bg-black hover:text-white"
+                disabled={!dashboardData.seller.isApproved || parseFloat(dashboardData.seller.pendingEarnings) === 0}
+              >
+                <Download size={16} className="mr-2" />
+                Request Withdrawal
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="border-2 border-gray-200">
+            <CardHeader>
+              <CardTitle>Partner Guidelines</CardTitle>
+            </CardHeader>
+            <CardContent className="p-6">
+              <ul className="space-y-2 text-sm text-gray-700">
+                <li>• Share your referral link to earn 10% commission</li>
+                <li>• Commissions are credited after successful course completion</li>
+                <li>• Minimum withdrawal amount: ₹500</li>
+                <li>• Withdrawals processed within 5-7 business days</li>
+              </ul>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Recent Sales */}
+        <Card className="border-2 border-gray-200 mb-8">
+          <CardHeader>
+            <CardTitle>Recent Sales</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {dashboardData.sales.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-gray-200">
+                      <th className="text-left p-3">Date</th>
+                      <th className="text-left p-3">Amount</th>
+                      <th className="text-left p-3">Commission</th>
+                      <th className="text-left p-3">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {dashboardData.sales.map((sale) => (
+                      <tr key={sale.id} className="border-b border-gray-100">
+                        <td className="p-3">{new Date(sale.createdAt).toLocaleDateString()}</td>
+                        <td className="p-3">₹{sale.amount}</td>
+                        <td className="p-3">₹{sale.commission}</td>
+                        <td className="p-3">
+                          <Badge variant={sale.status === 'paid' ? 'default' : 'secondary'}>
+                            {sale.status}
+                          </Badge>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <Users size={48} className="mx-auto mb-4 opacity-50" />
+                <p>No sales yet. Start sharing your referral link!</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Withdrawal History */}
+        <Card className="border-2 border-gray-200">
+          <CardHeader>
+            <CardTitle>Withdrawal History</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {dashboardData.withdrawals.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-gray-200">
+                      <th className="text-left p-3">Date</th>
+                      <th className="text-left p-3">Amount</th>
+                      <th className="text-left p-3">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {dashboardData.withdrawals.map((withdrawal) => (
+                      <tr key={withdrawal.id} className="border-b border-gray-100">
+                        <td className="p-3">{new Date(withdrawal.createdAt).toLocaleDateString()}</td>
+                        <td className="p-3">₹{withdrawal.amount}</td>
+                        <td className="p-3">
+                          <Badge 
+                            variant={
+                              withdrawal.status === 'processed' ? 'default' :
+                              withdrawal.status === 'approved' ? 'secondary' :
+                              withdrawal.status === 'rejected' ? 'destructive' : 'outline'
+                            }
+                          >
+                            {withdrawal.status}
+                          </Badge>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <CreditCard size={48} className="mx-auto mb-4 opacity-50" />
+                <p>No withdrawal requests yet</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Withdrawal Form Modal */}
+      {showWithdrawalForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <Card className="w-full max-w-md border-2 border-black">
+            <CardHeader className="bg-black text-white">
+              <CardTitle>Withdrawal Request</CardTitle>
+            </CardHeader>
+            <CardContent className="p-6">
+              <form onSubmit={handleWithdrawalSubmit} className="space-y-4">
+                <div>
+                  <Label htmlFor="amount">Amount (₹)</Label>
+                  <Input
+                    id="amount"
+                    type="number"
+                    min="500"
+                    max={dashboardData.seller.pendingEarnings}
+                    value={withdrawalData.amount}
+                    onChange={(e) => setWithdrawalData({...withdrawalData, amount: e.target.value})}
+                    className="border-2 border-gray-300 focus:border-black"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="upiId">UPI ID (Optional)</Label>
+                  <Input
+                    id="upiId"
+                    type="text"
+                    value={withdrawalData.upiId}
+                    onChange={(e) => setWithdrawalData({...withdrawalData, upiId: e.target.value})}
+                    className="border-2 border-gray-300 focus:border-black"
+                    placeholder="example@upi"
+                  />
+                </div>
+
+                <div className="border-t pt-4">
+                  <Label className="text-sm font-medium">Bank Details (Alternative to UPI)</Label>
+                  
+                  <div className="mt-2 space-y-3">
+                    <Input
+                      placeholder="Account Holder Name"
+                      value={withdrawalData.accountHolderName}
+                      onChange={(e) => setWithdrawalData({...withdrawalData, accountHolderName: e.target.value})}
+                      className="border-2 border-gray-300 focus:border-black"
+                    />
+                    
+                    <Input
+                      placeholder="Account Number"
+                      value={withdrawalData.bankAccountNumber}
+                      onChange={(e) => setWithdrawalData({...withdrawalData, bankAccountNumber: e.target.value})}
+                      className="border-2 border-gray-300 focus:border-black"
+                    />
+                    
+                    <Input
+                      placeholder="IFSC Code"
+                      value={withdrawalData.bankIFSC}
+                      onChange={(e) => setWithdrawalData({...withdrawalData, bankIFSC: e.target.value})}
+                      className="border-2 border-gray-300 focus:border-black"
+                    />
+                    
+                    <Input
+                      placeholder="Bank Name"
+                      value={withdrawalData.bankName}
+                      onChange={(e) => setWithdrawalData({...withdrawalData, bankName: e.target.value})}
+                      className="border-2 border-gray-300 focus:border-black"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex space-x-3 pt-4">
+                  <Button 
+                    type="button"
+                    onClick={() => setShowWithdrawalForm(false)}
+                    variant="outline"
+                    className="flex-1 border-2 border-gray-300"
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    type="submit"
+                    className="flex-1 bg-black text-white hover:bg-gray-800"
+                  >
+                    Submit Request
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+    </div>
+  );
+}
