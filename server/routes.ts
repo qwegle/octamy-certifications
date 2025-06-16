@@ -803,15 +803,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize PayUMoney payment
   app.post("/api/payment/initiate", optionalAuth, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const { courseId, userEmail, userName, userPhone, sellerCode } = req.body;
+      const { certificateId, courseId, userEmail, userName, userPhone, sellerCode } = req.body;
 
       if (!courseId || isNaN(parseInt(courseId))) {
         return res.status(400).json({ message: "Invalid course ID" });
       }
 
+      if (!certificateId || isNaN(parseInt(certificateId))) {
+        return res.status(400).json({ message: "Invalid certificate ID" });
+      }
+
       const course = await storage.getCourse(parseInt(courseId));
       if (!course) {
         return res.status(404).json({ message: "Course not found" });
+      }
+
+      // Verify certificate exists
+      const certificate = await storage.getCertificate(parseInt(certificateId));
+      if (!certificate) {
+        return res.status(404).json({ message: "Certificate not found" });
       }
 
       const txnid = payuMoneyService.generateTransactionId();
@@ -820,16 +830,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('Payment data being created:', {
         userId: req.user?.userId || null,
         courseId: parseInt(courseId),
+        certificateId: parseInt(certificateId),
         amount: amount,
         status: "pending",
         paymentMethod: "payumoney",
         transactionId: txnid
       });
 
-      // Create payment record
+      // Create payment record with certificate link
       const payment = await storage.createPayment({
         userId: req.user?.userId || null,
         courseId: parseInt(courseId),
+        certificateId: parseInt(certificateId),
         amount: amount,
         status: "pending",
         paymentMethod: "payumoney",
@@ -882,13 +894,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const status = payuMoneyService.getPaymentStatus(responseData);
       
       if (status === 'success') {
-        const paymentId = parseInt(responseData.udf2);
+        const paymentDbId = parseInt(responseData.udf2);
         const courseId = parseInt(responseData.udf1);
         const sellerCode = responseData.udf3;
         const userId = responseData.udf4 ? parseInt(responseData.udf4) : null;
 
-        // Get the certificate from the paymentId stored in udf2
-        const certificate = await storage.getCertificate(paymentId);
+        // Get the payment record first
+        const payment = await storage.getPayment(paymentDbId);
+        if (!payment) {
+          console.error("Payment not found for ID:", paymentDbId);
+          return res.redirect(`${req.protocol}://${req.get('host')}/payment-failed?error=payment_not_found`);
+        }
+
+        // Get the certificate from the payment's certificate ID
+        const certificate = payment.certificateId ? await storage.getCertificate(payment.certificateId) : null;
         
         if (certificate) {
           // Update certificate payment status
@@ -957,7 +976,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log(`Payment successful for certificate ${certificate.certificateId}, user can now download`);
           res.redirect(`${req.protocol}://${req.get('host')}/payment-success?txnid=${responseData.txnid}&certificateId=${certificate.certificateId}`);
         } else {
-          console.error("Certificate not found for payment ID:", paymentId);
+          console.error("Certificate not found for payment ID:", paymentDbId);
           res.redirect(`${req.protocol}://${req.get('host')}/payment-success?txnid=${responseData.txnid}`);
         }
       } else {

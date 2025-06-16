@@ -85,6 +85,7 @@ export interface IStorage {
 
   // Payment operations
   createPayment(payment: InsertPayment): Promise<Payment>;
+  getPayment(id: number): Promise<Payment | undefined>;
   updatePayment(id: number, updates: Partial<InsertPayment>): Promise<Payment>;
 
   // Internship application operations
@@ -342,6 +343,14 @@ export class DatabaseStorage implements IStorage {
       .insert(payments)
       .values(insertPayment)
       .returning();
+    return payment;
+  }
+
+  async getPayment(id: number): Promise<Payment | undefined> {
+    const [payment] = await db
+      .select()
+      .from(payments)
+      .where(eq(payments.id, id));
     return payment;
   }
 

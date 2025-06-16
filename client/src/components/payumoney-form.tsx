@@ -33,6 +33,7 @@ export default function PayUMoneyForm({
 
       // Initiate payment with PayUMoney
       const response = await apiRequest('POST', '/api/payment/initiate', {
+        certificateId,
         courseId,
         userEmail,
         userName,
