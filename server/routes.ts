@@ -1035,6 +1035,228 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Smart Notifications API endpoints
+  
+  // Get user notifications
+  app.get("/api/notifications", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const notifications = await storage.getUserNotifications(userId);
+      res.json(notifications);
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+      res.status(500).json({ message: "Failed to fetch notifications" });
+    }
+  });
+
+  // Mark notification as read
+  app.put("/api/notifications/:id/read", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const notificationId = parseInt(req.params.id);
+      await storage.markNotificationAsRead(notificationId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+      res.status(500).json({ message: "Failed to mark notification as read" });
+    }
+  });
+
+  // Mark all notifications as read
+  app.put("/api/notifications/read-all", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      await storage.markAllNotificationsAsRead(userId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error marking all notifications as read:", error);
+      res.status(500).json({ message: "Failed to mark all notifications as read" });
+    }
+  });
+
+  // Get course recommendations
+  app.get("/api/recommendations", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const recommendations = await storage.getUserRecommendations(userId);
+      
+      // Mark recommendations as shown
+      for (const rec of recommendations) {
+        await storage.markRecommendationAsShown(rec.id);
+      }
+
+      res.json(recommendations);
+    } catch (error) {
+      console.error("Error fetching recommendations:", error);
+      res.status(500).json({ message: "Failed to fetch recommendations" });
+    }
+  });
+
+  // Generate course recommendations based on user activity
+  app.post("/api/recommendations/generate", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      // Get user's completed courses and preferences
+      const userCertificates = await storage.getUserCertificates(userId);
+      const userPrefs = await storage.getUserPreferences(userId);
+      const allCourses = await storage.getCourses();
+
+      // Get completed course IDs
+      const completedCourseIds = userCertificates.map(cert => 
+        parseInt(cert.certificateId.split('-')[2]) || 0
+      ).filter(id => id > 0);
+
+      // Simple recommendation algorithm
+      const recommendations = [];
+      
+      for (const course of allCourses) {
+        // Skip if user already completed this course
+        if (completedCourseIds.includes(course.id)) continue;
+
+        let score = 0.5; // Base score
+        let reason = 'popular';
+        const metadata: any = {
+          completedCourseIds,
+          categoryMatch: false,
+          skillLevelMatch: false
+        };
+
+        // Category-based recommendations
+        if (userPrefs?.preferredCategories?.includes(course.category.name)) {
+          score += 0.3;
+          reason = 'based_on_category';
+          metadata.categoryMatch = true;
+        }
+
+        // Skill level matching
+        if (userPrefs?.skillLevel === course.level) {
+          score += 0.2;
+          metadata.skillLevelMatch = true;
+        }
+
+        // Popular courses get higher score
+        if (course.isActive) {
+          score += 0.1;
+        }
+
+        // Create recommendation if score is above threshold
+        if (score >= 0.6) {
+          await storage.createCourseRecommendation({
+            userId,
+            courseId: course.id,
+            reason,
+            score: score.toString(),
+            metadata
+          });
+          recommendations.push({
+            courseId: course.id,
+            score,
+            reason,
+            course
+          });
+        }
+      }
+
+      res.json({
+        success: true,
+        recommendationsGenerated: recommendations.length,
+        recommendations: recommendations.slice(0, 5) // Return top 5
+      });
+    } catch (error) {
+      console.error("Error generating recommendations:", error);
+      res.status(500).json({ message: "Failed to generate recommendations" });
+    }
+  });
+
+  // Track user activity
+  app.post("/api/activity", optionalAuth, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.userId;
+      const { activityType, entityId, entityType, metadata } = req.body;
+
+      if (userId) {
+        await storage.recordUserActivity({
+          userId,
+          activityType,
+          entityId: entityId ? parseInt(entityId) : undefined,
+          entityType,
+          metadata
+        });
+      }
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error recording activity:", error);
+      res.status(500).json({ message: "Failed to record activity" });
+    }
+  });
+
+  // Get/Update user preferences
+  app.get("/api/preferences", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      let preferences = await storage.getUserPreferences(userId);
+      
+      // Create default preferences if none exist
+      if (!preferences) {
+        preferences = await storage.createUserPreferences({
+          userId,
+          preferredCategories: [],
+          skillLevel: 'novice',
+          learningGoals: [],
+          notificationSettings: {
+            email: true,
+            push: true,
+            frequency: 'weekly',
+            courseRecommendations: true,
+            newCourses: true,
+            achievements: true
+          }
+        });
+      }
+
+      res.json(preferences);
+    } catch (error) {
+      console.error("Error fetching preferences:", error);
+      res.status(500).json({ message: "Failed to fetch preferences" });
+    }
+  });
+
+  app.put("/api/preferences", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const updates = req.body;
+      const preferences = await storage.updateUserPreferences(userId, updates);
+      res.json(preferences);
+    } catch (error) {
+      console.error("Error updating preferences:", error);
+      res.status(500).json({ message: "Failed to update preferences" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

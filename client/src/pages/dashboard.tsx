@@ -8,6 +8,7 @@ import Header from '@/components/header';
 import Footer from '@/components/footer';
 import { Download, Eye, Calendar, Trophy, Award, AlertCircle } from 'lucide-react';
 import type { Certificate } from '@shared/schema';
+import { SmartNotifications } from '@/components/smart-notifications';
 
 export default function Dashboard() {
   const { user, token } = useAuth();

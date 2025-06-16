@@ -31,7 +31,19 @@ import {
   type Sale,
   type InsertSale,
   type WithdrawalRequest,
-  type InsertWithdrawalRequest
+  type InsertWithdrawalRequest,
+  userPreferences,
+  notifications,
+  courseRecommendations,
+  userActivity,
+  type UserPreferences,
+  type InsertUserPreferences,
+  type Notification,
+  type InsertNotification,
+  type CourseRecommendation,
+  type InsertCourseRecommendation,
+  type UserActivity,
+  type InsertUserActivity
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc } from "drizzle-orm";
@@ -97,6 +109,27 @@ export interface IStorage {
   
   // Additional payment operations for PayUMoney
   getAllPayments(): Promise<Payment[]>;
+  
+  // Smart Notifications operations
+  getUserPreferences(userId: number): Promise<UserPreferences | undefined>;
+  createUserPreferences(preferences: InsertUserPreferences): Promise<UserPreferences>;
+  updateUserPreferences(userId: number, preferences: Partial<InsertUserPreferences>): Promise<UserPreferences>;
+  
+  // Notifications operations
+  getUserNotifications(userId: number, limit?: number): Promise<Notification[]>;
+  createNotification(notification: InsertNotification): Promise<Notification>;
+  markNotificationAsRead(notificationId: number): Promise<void>;
+  markAllNotificationsAsRead(userId: number): Promise<void>;
+  
+  // Course recommendations operations
+  getUserRecommendations(userId: number, limit?: number): Promise<(CourseRecommendation & { course: Course & { category: Category } })[]>;
+  createCourseRecommendation(recommendation: InsertCourseRecommendation): Promise<CourseRecommendation>;
+  markRecommendationAsShown(recommendationId: number): Promise<void>;
+  markRecommendationAsClicked(recommendationId: number): Promise<void>;
+  
+  // User activity tracking operations
+  recordUserActivity(activity: InsertUserActivity): Promise<UserActivity>;
+  getUserActivity(userId: number, activityType?: string): Promise<UserActivity[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -417,6 +450,124 @@ export class DatabaseStorage implements IStorage {
 
   async getAllPayments(): Promise<Payment[]> {
     return await db.select().from(payments);
+  }
+
+  // Smart Notifications implementation
+  async getUserPreferences(userId: number): Promise<UserPreferences | undefined> {
+    const [prefs] = await db.select().from(userPreferences).where(eq(userPreferences.userId, userId));
+    return prefs || undefined;
+  }
+
+  async createUserPreferences(preferences: InsertUserPreferences): Promise<UserPreferences> {
+    const [prefs] = await db
+      .insert(userPreferences)
+      .values(preferences)
+      .returning();
+    return prefs;
+  }
+
+  async updateUserPreferences(userId: number, preferences: Partial<InsertUserPreferences>): Promise<UserPreferences> {
+    const [prefs] = await db
+      .update(userPreferences)
+      .set({ ...preferences, updatedAt: new Date() })
+      .where(eq(userPreferences.userId, userId))
+      .returning();
+    return prefs;
+  }
+
+  // Notifications operations
+  async getUserNotifications(userId: number, limit = 20): Promise<Notification[]> {
+    return await db
+      .select()
+      .from(notifications)
+      .where(eq(notifications.userId, userId))
+      .orderBy(desc(notifications.createdAt))
+      .limit(limit);
+  }
+
+  async createNotification(notification: InsertNotification): Promise<Notification> {
+    const [notif] = await db
+      .insert(notifications)
+      .values(notification)
+      .returning();
+    return notif;
+  }
+
+  async markNotificationAsRead(notificationId: number): Promise<void> {
+    await db
+      .update(notifications)
+      .set({ isRead: true })
+      .where(eq(notifications.id, notificationId));
+  }
+
+  async markAllNotificationsAsRead(userId: number): Promise<void> {
+    await db
+      .update(notifications)
+      .set({ isRead: true })
+      .where(eq(notifications.userId, userId));
+  }
+
+  // Course recommendations operations
+  async getUserRecommendations(userId: number, limit = 10): Promise<(CourseRecommendation & { course: Course & { category: Category } })[]> {
+    return await db
+      .select()
+      .from(courseRecommendations)
+      .leftJoin(courses, eq(courseRecommendations.courseId, courses.id))
+      .leftJoin(categories, eq(courses.categoryId, categories.id))
+      .where(and(
+        eq(courseRecommendations.userId, userId),
+        eq(courseRecommendations.isShown, false)
+      ))
+      .orderBy(desc(courseRecommendations.score))
+      .limit(limit) as any;
+  }
+
+  async createCourseRecommendation(recommendation: InsertCourseRecommendation): Promise<CourseRecommendation> {
+    const [rec] = await db
+      .insert(courseRecommendations)
+      .values(recommendation)
+      .returning();
+    return rec;
+  }
+
+  async markRecommendationAsShown(recommendationId: number): Promise<void> {
+    await db
+      .update(courseRecommendations)
+      .set({ isShown: true })
+      .where(eq(courseRecommendations.id, recommendationId));
+  }
+
+  async markRecommendationAsClicked(recommendationId: number): Promise<void> {
+    await db
+      .update(courseRecommendations)
+      .set({ isClicked: true })
+      .where(eq(courseRecommendations.id, recommendationId));
+  }
+
+  // User activity tracking operations
+  async recordUserActivity(activity: InsertUserActivity): Promise<UserActivity> {
+    const [act] = await db
+      .insert(userActivity)
+      .values(activity)
+      .returning();
+    return act;
+  }
+
+  async getUserActivity(userId: number, activityType?: string): Promise<UserActivity[]> {
+    const query = db
+      .select()
+      .from(userActivity)
+      .where(eq(userActivity.userId, userId))
+      .orderBy(desc(userActivity.createdAt));
+
+    if (activityType) {
+      return await query.where(and(
+        eq(userActivity.userId, userId),
+        eq(userActivity.activityType, activityType)
+      ));
+    }
+
+    return await query;
   }
 }
 
