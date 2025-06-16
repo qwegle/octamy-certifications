@@ -251,44 +251,54 @@ export function SmartNotifications() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {recommendations.map((rec: CourseRecommendation) => (
-                  <Card key={rec.id} className="border-2 hover:border-blue-500 transition-colors">
-                    <CardContent className="p-4">
-                      <div className="flex items-start justify-between mb-2">
-                        <Badge variant="secondary" className="flex items-center gap-1">
-                          {getReasonIcon(rec.reason)}
-                          {getReasonText(rec.reason)}
-                        </Badge>
-                        <div className="flex items-center gap-1">
-                          <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                          <span className="text-xs font-medium">
-                            {(parseFloat(rec.score) * 100).toFixed(0)}%
-                          </span>
-                        </div>
-                      </div>
-                      <h4 className="font-semibold text-sm mb-1">{rec.course.title}</h4>
-                      <p className="text-xs text-gray-600 dark:text-gray-300 mb-2 line-clamp-2">
-                        {rec.course.description}
-                      </p>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Badge variant="outline" className="text-xs">
-                            {rec.course.category.name}
+                {recommendations.map((rec: any) => {
+                  // Handle different API response structures
+                  const course = rec.course || rec.course_recommendations?.course || rec;
+                  const recommendation = rec.course_recommendations || rec;
+                  
+                  if (!course || !course.title) {
+                    return null; // Skip invalid entries
+                  }
+                  
+                  return (
+                    <Card key={rec.id || recommendation.id} className="border-2 hover:border-blue-500 transition-colors">
+                      <CardContent className="p-4">
+                        <div className="flex items-start justify-between mb-2">
+                          <Badge variant="secondary" className="flex items-center gap-1">
+                            {getReasonIcon(recommendation.reason || rec.reason)}
+                            {getReasonText(recommendation.reason || rec.reason)}
                           </Badge>
-                          <Badge variant="outline" className="text-xs">
-                            {rec.course.level}
-                          </Badge>
+                          <div className="flex items-center gap-1">
+                            <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                            <span className="text-xs font-medium">
+                              {(parseFloat(recommendation.score || rec.score || '0.5') * 100).toFixed(0)}%
+                            </span>
+                          </div>
                         </div>
-                        <span className="text-sm font-semibold">₹{rec.course.price}</span>
-                      </div>
-                      <Button className="w-full mt-3" size="sm" asChild>
-                        <a href={`/courses/${rec.course.id}`}>
-                          Explore Course
-                        </a>
-                      </Button>
-                    </CardContent>
-                  </Card>
-                ))}
+                        <h4 className="font-semibold text-sm mb-1">{course.title}</h4>
+                        <p className="text-xs text-gray-600 dark:text-gray-300 mb-2 line-clamp-2">
+                          {course.description}
+                        </p>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="text-xs">
+                              {course.category?.name || 'General'}
+                            </Badge>
+                            <Badge variant="outline" className="text-xs">
+                              {course.level || 'Beginner'}
+                            </Badge>
+                          </div>
+                          <span className="text-sm font-semibold">₹{course.price || '99.00'}</span>
+                        </div>
+                        <Button className="w-full mt-3" size="sm" asChild>
+                          <a href={`/courses/${course.id}`}>
+                            Explore Course
+                          </a>
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </div>
             )}
           </CardContent>
