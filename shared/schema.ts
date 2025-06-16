@@ -29,6 +29,7 @@ export const courses = pgTable("courses", {
   duration: integer("duration").notNull(), // in minutes
   passingScore: integer("passing_score").default(50).notNull(),
   price: decimal("price", { precision: 10, scale: 2 }).default("199.00").notNull(),
+  level: text("level").notNull().default("novice"), // novice, intermediate, advanced, expert
   isActive: boolean("is_active").default(true).notNull(),
   isInternship: boolean("is_internship").default(false).notNull(),
   metaTitle: text("meta_title"),

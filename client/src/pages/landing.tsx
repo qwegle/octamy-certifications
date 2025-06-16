@@ -4,18 +4,25 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
-import { useState } from "react";
-import { Brain, Code, TrendingUp, GraduationCap, Search, Clock, Users, Star } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Brain, Code, TrendingUp, GraduationCap, Search, Clock, Users, Star, Shield, Zap, Target, Award, CheckCircle, ArrowRight, Briefcase, Database, Palette, LineChart } from "lucide-react";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import CourseCard from "@/components/course-card";
 import type { Course, Category } from "@shared/schema";
+import { motion } from "framer-motion";
 
 const categoryIcons = {
   'AI': Brain,
   'Development': Code,
   'Business': TrendingUp,
   'Internships': GraduationCap,
+  'Data Science': Database,
+  'Design': Palette,
+  'Marketing': Target,
+  'Cybersecurity': Shield,
+  'Finance': LineChart,
+  'Project Management': Briefcase,
 };
 
 export default function Landing() {
@@ -42,30 +49,88 @@ export default function Landing() {
       <Header />
       
       {/* Hero Section */}
-      <section className="bg-octamy-gray-50 py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h1 className="text-5xl md:text-6xl font-bold text-octamy-black mb-6">
-              Earn Professional
-              <span className="text-octamy-gray-600"> Certifications</span>
-            </h1>
-            <p className="text-xl text-octamy-gray-600 mb-8 max-w-2xl mx-auto">
-              Take quick assessments and get verified certificates in AI, Development, Business, and Internships. 
-              Boost your career with industry-recognized credentials.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+      <section className="relative bg-gradient-to-br from-slate-900 via-purple-900 to-slate-800 py-20 overflow-hidden">
+        {/* Animated Background */}
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,rgba(120,119,198,0.3),transparent_50%)] animate-pulse"></div>
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(255,255,255,0.1),transparent_50%)] animate-pulse delay-1000"></div>
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_40%_40%,rgba(120,119,198,0.2),transparent_50%)] animate-pulse delay-500"></div>
+        </div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <motion.div 
+            className="text-center"
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+            <motion.h1 
+              className="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 1, delay: 0.2 }}
+            >
+              Master Your
+              <span className="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent block">
+                Professional Skills
+              </span>
+            </motion.h1>
+            
+            <motion.p 
+              className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto leading-relaxed"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+            >
+              Earn industry-recognized certifications in AI, Development, Data Science, Cybersecurity, and more. 
+              Join thousands of professionals advancing their careers with our comprehensive assessment platform.
+            </motion.p>
+            
+            <motion.div 
+              className="flex flex-col sm:flex-row gap-4 justify-center mb-12"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.6 }}
+            >
               <a href="#courses">
-                <Button className="bg-octamy-black text-white px-8 py-4 text-lg font-semibold hover:bg-octamy-gray-800">
+                <Button className="bg-gradient-to-r from-yellow-400 to-orange-500 text-black px-8 py-4 text-lg font-semibold hover:from-yellow-500 hover:to-orange-600 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                  <Zap className="w-5 h-5 mr-2" />
                   Start Learning
                 </Button>
               </a>
               <Link href="/verify">
-                <Button variant="outline" className="border-octamy-gray-300 text-octamy-black px-8 py-4 text-lg font-semibold hover:bg-octamy-gray-50">
-                  View Certificates
+                <Button variant="outline" className="border-white text-white px-8 py-4 text-lg font-semibold hover:bg-white hover:text-black transition-all duration-300 transform hover:scale-105">
+                  <Shield className="w-5 h-5 mr-2" />
+                  Verify Certificates
                 </Button>
               </Link>
-            </div>
-          </div>
+            </motion.div>
+            
+            {/* Stats Section */}
+            <motion.div 
+              className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.8 }}
+            >
+              <div className="text-center">
+                <div className="text-3xl font-bold text-yellow-400 mb-2">50+</div>
+                <div className="text-gray-300 text-sm">Certifications</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-yellow-400 mb-2">10k+</div>
+                <div className="text-gray-300 text-sm">Professionals</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-yellow-400 mb-2">500+</div>
+                <div className="text-gray-300 text-sm">Companies</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-yellow-400 mb-2">98%</div>
+                <div className="text-gray-300 text-sm">Success Rate</div>
+              </div>
+            </motion.div>
+          </motion.div>
         </div>
       </section>
 
