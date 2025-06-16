@@ -23,6 +23,7 @@ import SellerAuth from "@/pages/seller-auth";
 import SellerDashboard from "@/pages/seller-dashboard";
 import PaymentSuccess from "@/pages/payment-success";
 import PaymentFailed from "@/pages/payment-failed";
+import DemoCertificate from "@/pages/demo-certificate";
 
 function Router() {
   return (
@@ -45,6 +46,7 @@ function Router() {
       <Route path="/partner-dashboard" component={SellerDashboard} />
       <Route path="/payment-success" component={PaymentSuccess} />
       <Route path="/payment-failed" component={PaymentFailed} />
+      <Route path="/demo-certificate" component={DemoCertificate} />
       <Route component={NotFound} />
     </Switch>
   );

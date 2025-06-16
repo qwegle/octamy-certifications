@@ -636,17 +636,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Course not found" });
       }
 
-      // Create certificate first
+      // Create certificate first with proper badge system
+      const certificateId = `OCT-${new Date().getFullYear()}-${course.title.replace(/\s+/g, '').toUpperCase().slice(0, 3)}-${Date.now()}`;
+      const badge = "Bronze"; // Default badge, will be updated after exam
+      const certificateNumber = generateCertificateNumber();
+      
       const certificate = await storage.createCertificate({
-        certificateId: `CERT-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        certificateId,
         examAttemptId: 0, // Will be updated when exam is taken
         userEmail,
         userName,
         courseTitle: course.title,
         score: 0,
-        expiresAt: new Date(Date.now() + 2 * 365 * 24 * 60 * 60 * 1000), // 2 years
-        isPaid: true,
-        paymentId: `PAY-${Date.now()}`
+        badge,
+        certificateNumber,
+        expiresAt: calculateExpiryDate(),
+        retakeCount: 0,
       });
 
       // If referral code provided, create sale record
