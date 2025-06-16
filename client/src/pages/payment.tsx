@@ -11,102 +11,22 @@ import type { Certificate } from '@shared/schema';
 export default function Payment() {
   const { certificateId } = useParams();
   const [, setLocation] = useLocation();
-  const { toast } = useToast();
 
   const { data: certificate, refetch } = useQuery<Certificate>({
     queryKey: [`/api/certificates/${certificateId}`],
     enabled: !!certificateId,
   });
 
-  const paymentMutation = useMutation({
-    mutationFn: async (paymentData: any) => {
-      return apiRequest('POST', `/api/certificates/${certificateId}/payment`, paymentData);
-    },
-    onSuccess: async () => {
-      await refetch();
-      toast({
-        title: "Payment Successful!",
-        description: "Your certificate is now available for download.",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Payment Failed",
-        description: "Please try again or contact support.",
-        variant: "destructive",
-      });
-    },
-  });
-
-  const handlePayment = async () => {
-    const razorpayLoaded = await initializeRazorpay();
-    
-    if (!razorpayLoaded) {
-      toast({
-        title: "Payment Error",
-        description: "Payment gateway failed to load. Please try again.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const options = {
-      key: process.env.RAZORPAY_KEY_ID || 'rzp_test_key',
-      amount: 19900, // ₹199 in paise
-      currency: 'INR',
-      name: 'Octamy',
-      description: `Certificate for ${certificate?.courseTitle}`,
-      order_id: `order_${Date.now()}`,
-      handler: (response: any) => {
-        paymentMutation.mutate({
-          razorpayPaymentId: response.razorpay_payment_id,
-          razorpayOrderId: response.razorpay_order_id,
-        });
-      },
-      prefill: {
-        name: certificate?.userName || '',
-        email: certificate?.userEmail || '',
-      },
-      theme: {
-        color: '#000000',
-      },
-    };
-
-    createRazorpayPayment(options);
-  };
-
-  const handleShare = (platform: string) => {
-    const url = `${window.location.origin}/certificates/${certificate?.certificateId}`;
-    const text = `I just earned my ${certificate?.courseTitle} certification from Octamy! Check it out:`;
-    
-    let shareUrl = '';
-    switch (platform) {
-      case 'linkedin':
-        shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
-        break;
-      case 'twitter':
-        shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
-        break;
-      case 'whatsapp':
-        shareUrl = `https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`;
-        break;
-    }
-    
-    if (shareUrl) {
-      window.open(shareUrl, '_blank');
-    }
+  const handlePaymentSuccess = async () => {
+    await refetch();
+    setLocation('/dashboard');
   };
 
   if (!certificate) {
     return (
-      <div className="min-h-screen bg-white">
-        <Header />
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <Card>
-            <CardContent className="text-center py-12">
-              <p>Loading certificate...</p>
-            </CardContent>
-          </Card>
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-4">Loading certificate...</h2>
         </div>
       </div>
     );
@@ -116,160 +36,111 @@ export default function Payment() {
     <div className="min-h-screen bg-white">
       <Header />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-octamy-black mb-4">
-            {certificate.isPaid ? 'Your Certificate' : 'Certificate Preview'}
-          </h1>
-          <p className="text-xl text-octamy-gray-600">
-            {certificate.isPaid 
-              ? 'Download and share your verified certificate'
-              : 'Remove watermark and unlock download access'
-            }
-          </p>
-        </div>
-
-        {/* Certificate Preview */}
-        <Card className="mb-8 relative overflow-hidden">
-          {!certificate.isPaid && (
-            <div className="absolute inset-0 flex items-center justify-center opacity-10 pointer-events-none z-10">
-              <div className="text-6xl font-bold text-octamy-gray-400 transform rotate-45">
-                PREVIEW
-              </div>
-            </div>
-          )}
-          
-          <CardContent className="p-8 relative z-20">
-            {/* Certificate Header */}
-            <div className="text-center mb-8">
-              <span className="text-2xl font-bold text-octamy-black mb-4 block">octamy</span>
-              <h3 className="text-3xl font-bold text-octamy-black">Certificate of Completion</h3>
-            </div>
-
-            {/* Certificate Body */}
-            <div className="text-center mb-8">
-              <p className="text-lg text-octamy-gray-600 mb-4">This certifies that</p>
-              <h4 className="text-4xl font-bold text-octamy-black mb-4">{certificate.userName}</h4>
-              <p className="text-lg text-octamy-gray-600 mb-2">has successfully completed</p>
-              <h5 className="text-2xl font-semibold text-octamy-black mb-6">{certificate.courseTitle}</h5>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center mb-8">
-                <div className="flex flex-col items-center">
-                  <Trophy className="w-8 h-8 text-octamy-black mb-2" />
-                  <p className="text-sm text-octamy-gray-500">Score</p>
-                  <p className="text-xl font-bold text-octamy-black">{certificate.score}%</p>
-                </div>
-                <div className="flex flex-col items-center">
-                  <Calendar className="w-8 h-8 text-octamy-black mb-2" />
-                  <p className="text-sm text-octamy-gray-500">Date Issued</p>
-                  <p className="text-xl font-bold text-octamy-black">
-                    {new Date(certificate.issuedAt).toLocaleDateString()}
-                  </p>
-                </div>
-                <div className="flex flex-col items-center">
-                  <Award className="w-8 h-8 text-octamy-black mb-2" />
-                  <p className="text-sm text-octamy-gray-500">Valid Until</p>
-                  <p className="text-xl font-bold text-octamy-black">
-                    {new Date(certificate.expiresAt).toLocaleDateString()}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Certificate Footer */}
-            <div className="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-octamy-gray-200">
-              <div className="text-center mb-4 md:mb-0">
-                <p className="text-sm text-octamy-gray-500">Certificate ID</p>
-                <p className="font-mono text-octamy-black">{certificate.certificateId}</p>
-              </div>
-              <div className="w-16 h-16 bg-octamy-gray-200 rounded flex items-center justify-center">
-                <QrCode className="w-8 h-8 text-octamy-gray-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Action Section */}
-        {certificate.isPaid ? (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-center text-octamy-black">
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  <Badge variant="secondary" className="bg-green-100 text-green-800">
-                    Verified Certificate
+        {!certificate.isPaid ? (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Certificate Preview */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Award className="h-5 w-5" />
+                  Certificate Preview
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-6 rounded-lg text-center">
+                  <div className="text-2xl font-bold mb-2">{certificate.courseTitle}</div>
+                  <div className="text-lg mb-4">Certificate of Achievement</div>
+                  <div className="text-sm text-gray-600 mb-4">
+                    This is to certify that
+                  </div>
+                  <div className="text-xl font-semibold mb-4">{certificate.userName}</div>
+                  <div className="text-sm text-gray-600 mb-4">
+                    has successfully completed the course with a score of
+                  </div>
+                  <Badge variant="secondary" className="text-lg px-4 py-1">
+                    {certificate.score}% - {certificate.badge}
                   </Badge>
+                  <div className="text-xs text-gray-500 mt-4">
+                    Certificate ID: {certificate.certificateId}
+                  </div>
                 </div>
-                Your certificate is ready!
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button className="bg-octamy-black text-white hover:bg-octamy-gray-800">
-                  <Download className="w-4 h-4 mr-2" />
-                  Download PDF
-                </Button>
-                <Button variant="outline" onClick={() => navigator.clipboard.writeText(`${window.location.origin}/certificates/${certificate.certificateId}`)}>
-                  <Share2 className="w-4 h-4 mr-2" />
-                  Copy Link
-                </Button>
-              </div>
-              
-              <div className="text-center">
-                <p className="text-sm text-octamy-gray-600 mb-4">Share on social media:</p>
-                <div className="flex justify-center gap-4">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleShare('linkedin')}
-                    className="text-blue-600 border-blue-600 hover:bg-blue-50"
-                  >
-                    LinkedIn
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleShare('twitter')}
-                    className="text-blue-400 border-blue-400 hover:bg-blue-50"
-                  >
-                    Twitter
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleShare('whatsapp')}
-                    className="text-green-600 border-green-600 hover:bg-green-50"
-                  >
-                    WhatsApp
-                  </Button>
+                
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span>Score:</span>
+                    <span className="font-medium">{certificate.score}%</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Badge:</span>
+                    <Badge variant="outline">{certificate.badge}</Badge>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Valid Until:</span>
+                    <span className="font-medium">
+                      {new Date(certificate.expiresAt).toLocaleDateString()}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+
+            {/* Payment Form */}
+            <PayUMoneyForm
+              certificateId={certificateId!}
+              amount="199"
+              userEmail={certificate.userEmail}
+              userName={certificate.userName}
+              courseTitle={certificate.courseTitle}
+              onSuccess={handlePaymentSuccess}
+            />
+          </div>
         ) : (
           <Card>
             <CardHeader>
-              <CardTitle className="text-center text-octamy-black">
-                Unlock Your Certificate
+              <CardTitle className="text-center text-green-600">
+                <Award className="h-8 w-8 mx-auto mb-2" />
+                Payment Successful!
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <p className="text-center text-octamy-gray-600">
-                Remove watermark and get download access for ₹199
+            <CardContent className="text-center space-y-6">
+              <p className="text-lg">
+                Your certificate is now ready for download.
               </p>
+              
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button
-                  onClick={handlePayment}
-                  disabled={paymentMutation.isPending}
+                <Button 
                   className="bg-octamy-black text-white hover:bg-octamy-gray-800"
+                  onClick={() => window.open(`/api/certificates/${certificate.certificateId}/download`, '_blank')}
                 >
-                  {paymentMutation.isPending ? 'Processing...' : 'Pay ₹199 & Download'}
+                  <Download className="mr-2 h-4 w-4" />
+                  Download Certificate
                 </Button>
-                <Button
+                
+                <Button 
                   variant="outline"
-                  onClick={() => setLocation('/dashboard')}
+                  onClick={() => navigator.share?.({
+                    title: 'My Certificate',
+                    text: `I've earned a certificate in ${certificate.courseTitle}!`,
+                    url: `${window.location.origin}/verify/${certificate.certificateId}`
+                  })}
                   className="border-octamy-gray-300 text-octamy-black hover:bg-octamy-gray-50"
                 >
-                  Continue as Guest
+                  <Share2 className="mr-2 h-4 w-4" />
+                  Share Certificate
                 </Button>
+              </div>
+
+              <div className="bg-octamy-gray-50 p-4 rounded-lg">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <QrCode className="h-4 w-4" />
+                  <span className="text-sm font-medium">Verification</span>
+                </div>
+                <p className="text-xs text-octamy-gray-600">
+                  Certificate ID: {certificate.certificateId}
+                </p>
+                <p className="text-xs text-octamy-gray-600">
+                  Verify at: octamy.com/verify
+                </p>
               </div>
             </CardContent>
           </Card>
