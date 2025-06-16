@@ -138,6 +138,7 @@ Octamy is a comprehensive professional certification platform built as a full-st
 
 ```
 Changelog:
+- June 16, 2025: Integrated PayUMoney payment gateway with secure hash verification and commission tracking
 - June 16, 2025: Implemented comprehensive seller/partner system with 10% commission tracking
 - June 16, 2025: Applied black and white Cred-style branding across entire platform
 - June 16, 2025: Added real-time analytics dashboard for partners
