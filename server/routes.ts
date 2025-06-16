@@ -809,8 +809,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid course ID" });
       }
 
-      if (!certificateId || isNaN(parseInt(certificateId))) {
-        return res.status(400).json({ message: "Invalid certificate ID" });
+      if (!certificateId) {
+        return res.status(400).json({ message: "Certificate ID is required" });
       }
 
       const course = await storage.getCourse(parseInt(courseId));
@@ -818,8 +818,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Course not found" });
       }
 
-      // Verify certificate exists
-      const certificate = await storage.getCertificate(parseInt(certificateId));
+      // Verify certificate exists - handle both numeric and string certificate IDs
+      let certificate;
+      if (typeof certificateId === 'string' && certificateId.startsWith('OCT-')) {
+        // Handle string certificate ID (like "OCT-2025-DEM-1750088793632")
+        certificate = await storage.getCertificateByCertificateId(certificateId);
+      } else if (!isNaN(parseInt(certificateId))) {
+        // Handle numeric certificate ID
+        certificate = await storage.getCertificate(parseInt(certificateId));
+      } else {
+        return res.status(400).json({ message: "Invalid certificate ID format" });
+      }
+
       if (!certificate) {
         return res.status(404).json({ message: "Certificate not found" });
       }
@@ -830,7 +840,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('Payment data being created:', {
         userId: req.user?.userId || null,
         courseId: parseInt(courseId),
-        certificateId: parseInt(certificateId),
+        certificateId: certificate.id,
         amount: amount,
         status: "pending",
         paymentMethod: "payumoney",
@@ -841,7 +851,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const payment = await storage.createPayment({
         userId: req.user?.userId || null,
         courseId: parseInt(courseId),
-        certificateId: parseInt(certificateId),
+        certificateId: certificate.id,
         amount: amount,
         status: "pending",
         paymentMethod: "payumoney",
