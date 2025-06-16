@@ -64,6 +64,10 @@ export interface IStorage {
 
   // Payment operations
   createPayment(payment: InsertPayment): Promise<Payment>;
+
+  // Internship application operations
+  createInternshipApplication(application: InsertInternshipApplication): Promise<InternshipApplication>;
+  getInternshipApplication(certificateId: number): Promise<InternshipApplication | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -106,11 +110,15 @@ export class DatabaseStorage implements IStorage {
         id: courses.id,
         title: courses.title,
         description: courses.description,
+        slug: courses.slug,
         categoryId: courses.categoryId,
         duration: courses.duration,
         passingScore: courses.passingScore,
         price: courses.price,
         isActive: courses.isActive,
+        isInternship: courses.isInternship,
+        metaTitle: courses.metaTitle,
+        metaDescription: courses.metaDescription,
         createdAt: courses.createdAt,
         category: {
           id: categories.id,
@@ -130,6 +138,38 @@ export class DatabaseStorage implements IStorage {
   async getCourse(id: number): Promise<Course | undefined> {
     const [course] = await db.select().from(courses).where(eq(courses.id, id));
     return course || undefined;
+  }
+
+  async getCourseBySlug(slug: string): Promise<(Course & { category: Category }) | undefined> {
+    const query = db
+      .select({
+        id: courses.id,
+        title: courses.title,
+        description: courses.description,
+        slug: courses.slug,
+        categoryId: courses.categoryId,
+        duration: courses.duration,
+        passingScore: courses.passingScore,
+        price: courses.price,
+        isActive: courses.isActive,
+        isInternship: courses.isInternship,
+        metaTitle: courses.metaTitle,
+        metaDescription: courses.metaDescription,
+        createdAt: courses.createdAt,
+        category: {
+          id: categories.id,
+          name: categories.name,
+          description: categories.description,
+          icon: categories.icon,
+          slug: categories.slug,
+        }
+      })
+      .from(courses)
+      .innerJoin(categories, eq(courses.categoryId, categories.id))
+      .where(eq(courses.slug, slug));
+
+    const [result] = await query;
+    return result || undefined;
   }
 
   async createCourse(insertCourse: InsertCourse): Promise<Course> {
@@ -240,6 +280,23 @@ export class DatabaseStorage implements IStorage {
       .values(insertPayment)
       .returning();
     return payment;
+  }
+
+  // Internship application operations
+  async createInternshipApplication(insertApplication: InsertInternshipApplication): Promise<InternshipApplication> {
+    const [application] = await db
+      .insert(internshipApplications)
+      .values(insertApplication)
+      .returning();
+    return application;
+  }
+
+  async getInternshipApplication(certificateId: number): Promise<InternshipApplication | undefined> {
+    const [application] = await db
+      .select()
+      .from(internshipApplications)
+      .where(eq(internshipApplications.certificateId, certificateId));
+    return application || undefined;
   }
 }
 
