@@ -160,7 +160,7 @@ export class DatabaseStorage implements IStorage {
   async createQuestion(insertQuestion: InsertQuestion): Promise<Question> {
     const [question] = await db
       .insert(questions)
-      .values(insertQuestion)
+      .values(insertQuestion as any)
       .returning();
     return question;
   }

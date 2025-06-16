@@ -158,6 +158,8 @@ export const insertCourseSchema = createInsertSchema(courses).omit({
 
 export const insertQuestionSchema = createInsertSchema(questions).omit({
   id: true,
+}).extend({
+  options: z.array(z.string()),
 });
 
 export const insertExamAttemptSchema = createInsertSchema(examAttempts).omit({
