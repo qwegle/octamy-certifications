@@ -94,6 +94,9 @@ export interface IStorage {
   getSellerWithdrawals(sellerId: number): Promise<WithdrawalRequest[]>;
   getAllWithdrawals(): Promise<WithdrawalRequest[]>;
   updateWithdrawalStatus(id: number, status: string, adminNotes?: string): Promise<void>;
+  
+  // Additional payment operations for PayUMoney
+  getAllPayments(): Promise<Payment[]>;
 }
 
 export class DatabaseStorage implements IStorage {

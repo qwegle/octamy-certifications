@@ -6,6 +6,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { z } from "zod";
 import { insertUserSchema, insertExamAttemptSchema, insertCertificateSchema, insertSellerSchema, insertSaleSchema, insertWithdrawalRequestSchema } from "@shared/schema";
+import { payuMoneyService } from "./payumoney";
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -765,6 +766,178 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error processing withdrawal:", error);
       res.status(500).json({ message: "Failed to process withdrawal" });
+    }
+  });
+
+  // PayUMoney Payment Routes
+  
+  // Initialize PayUMoney payment
+  app.post("/api/payment/initiate", optionalAuth, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { courseId, userEmail, userName, userPhone, sellerCode } = req.body;
+
+      const course = await storage.getCourse(parseInt(courseId));
+      if (!course) {
+        return res.status(404).json({ message: "Course not found" });
+      }
+
+      const txnid = payuMoneyService.generateTransactionId();
+      const amount = payuMoneyService.formatAmount(course.price);
+
+      // Create payment record
+      const payment = await storage.createPayment({
+        userId: req.user?.userId || 0,
+        courseId: parseInt(courseId),
+        amount: amount,
+        status: "pending",
+        paymentMethod: "payumoney",
+        transactionId: txnid
+      });
+
+      const baseUrl = `${req.protocol}://${req.get('host')}`;
+      
+      const paymentData = {
+        txnid,
+        amount,
+        productinfo: `${course.title} - Professional Certification`,
+        firstname: userName,
+        email: userEmail,
+        phone: userPhone,
+        surl: `${baseUrl}/api/payment/success`,
+        furl: `${baseUrl}/api/payment/failure`,
+        udf1: courseId,
+        udf2: payment.id.toString(),
+        udf3: sellerCode || '',
+        udf4: req.user?.userId?.toString() || '',
+        udf5: ''
+      };
+
+      const paymentForm = payuMoneyService.generatePaymentForm(paymentData);
+
+      res.json({
+        success: true,
+        paymentForm,
+        transactionId: txnid,
+        amount: amount
+      });
+    } catch (error) {
+      console.error("Error initiating payment:", error);
+      res.status(500).json({ message: "Failed to initiate payment" });
+    }
+  });
+
+  // PayUMoney success callback
+  app.post("/api/payment/success", async (req: Request, res: Response) => {
+    try {
+      const responseData = req.body;
+
+      // Verify hash
+      if (!payuMoneyService.verifyHash(responseData)) {
+        console.error("Hash verification failed for transaction:", responseData.txnid);
+        return res.redirect(`${req.protocol}://${req.get('host')}/payment-failed?error=hash_verification_failed`);
+      }
+
+      const status = payuMoneyService.getPaymentStatus(responseData);
+      
+      if (status === 'success') {
+        const paymentId = parseInt(responseData.udf2);
+        const courseId = parseInt(responseData.udf1);
+        const sellerCode = responseData.udf3;
+        const userId = responseData.udf4 ? parseInt(responseData.udf4) : null;
+
+        // Update payment status
+        await storage.updateCertificatePayment(paymentId, {
+          isPaid: true,
+          paymentId: responseData.mihpayid
+        });
+
+        // Handle seller commission if applicable
+        if (sellerCode) {
+          const seller = await storage.getSellerByEmail(sellerCode);
+          if (seller && seller.isApproved) {
+            const course = await storage.getCourse(courseId);
+            if (course) {
+              const commissionAmount = (parseFloat(course.price) * parseFloat(seller.commissionRate)) / 100;
+              
+              await storage.createSale({
+                sellerId: seller.id,
+                courseId: courseId,
+                amount: course.price,
+                commission: commissionAmount.toString(),
+                buyerEmail: responseData.email,
+                status: "completed"
+              });
+
+              // Update seller earnings
+              const currentEarnings = parseFloat(seller.totalEarnings || "0");
+              await storage.updateSeller(seller.id, {
+                totalEarnings: (currentEarnings + commissionAmount).toString()
+              });
+            }
+          }
+        }
+
+        // Create certificate if user is authenticated
+        if (userId) {
+          const course = await storage.getCourse(courseId);
+          if (course) {
+            const certificateId = `CERT${Date.now()}${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
+            
+            await storage.createCertificate({
+              userId: userId,
+              courseId: courseId,
+              certificateId: certificateId,
+              score: 0, // Will be updated after exam
+              isPaid: true,
+              paymentId: responseData.mihpayid,
+              issuedAt: new Date()
+            });
+          }
+        }
+
+        res.redirect(`${req.protocol}://${req.get('host')}/payment-success?txnid=${responseData.txnid}`);
+      } else {
+        res.redirect(`${req.protocol}://${req.get('host')}/payment-failed?txnid=${responseData.txnid}&error=${responseData.error_Message || 'payment_failed'}`);
+      }
+    } catch (error) {
+      console.error("Error processing payment success:", error);
+      res.redirect(`${req.protocol}://${req.get('host')}/payment-failed?error=processing_error`);
+    }
+  });
+
+  // PayUMoney failure callback
+  app.post("/api/payment/failure", async (req: Request, res: Response) => {
+    try {
+      const responseData = req.body;
+      
+      res.redirect(`${req.protocol}://${req.get('host')}/payment-failed?txnid=${responseData.txnid}&error=${responseData.error_Message || 'payment_failed'}`);
+    } catch (error) {
+      console.error("Error processing payment failure:", error);
+      res.redirect(`${req.protocol}://${req.get('host')}/payment-failed?error=processing_error`);
+    }
+  });
+
+  // Verify payment status
+  app.get("/api/payment/status/:transactionId", async (req: Request, res: Response) => {
+    try {
+      const { transactionId } = req.params;
+      
+      const payments = await storage.getAllPayments();
+      const payment = payments.find(p => p.transactionId === transactionId);
+      
+      if (!payment) {
+        return res.status(404).json({ message: "Payment not found" });
+      }
+
+      res.json({
+        status: payment.status,
+        amount: payment.amount,
+        transactionId: payment.transactionId,
+        createdAt: payment.createdAt
+      });
+    } catch (error) {
+      console.error("Error checking payment status:", error);
+      res.status(500).json({ message: "Failed to check payment status" });
     }
   });
 
