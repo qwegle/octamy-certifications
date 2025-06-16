@@ -272,7 +272,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const mastered = score >= 90;
       
       // Anti-cheating validation (relaxed for demo purposes)
-      const minTimePerQuestion = 5; // seconds (reduced for better user experience)
+      const minTimePerQuestion = 2; // seconds (reduced for better user experience)
       const expectedMinTime = totalQuestions * minTimePerQuestion;
       if (timeTaken < expectedMinTime) {
         return res.status(400).json({ 

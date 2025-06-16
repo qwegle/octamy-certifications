@@ -45,6 +45,7 @@ function Router() {
       <Route path="/verify/:certificateId" component={Verify} />
       <Route path="/certificates/:certificateId" component={Certificate} />
       <Route path="/course/:slug" component={CourseDetail} />
+      <Route path="/courses/:slug" component={CourseDetail} />
       <Route path="/help-center" component={HelpCenter} />
       <Route path="/privacy-policy" component={PrivacyPolicy} />
       <Route path="/terms-of-service" component={TermsOfService} />
