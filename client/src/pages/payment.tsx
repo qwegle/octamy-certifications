@@ -87,6 +87,7 @@ export default function Payment() {
             {/* Payment Form */}
             <PayUMoneyForm
               certificateId={certificateId!}
+              courseId={certificate.courseId || 67}
               amount="99"
               userEmail={certificate.userEmail}
               userName={certificate.userName}
