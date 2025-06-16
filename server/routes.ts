@@ -246,16 +246,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/exam/submit", optionalAuth, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const { courseId, answers, timeTaken, userEmail, userName, sessionId } = req.body;
+      const { courseId, answers, timeSpent, timeTaken, userEmail, userName, sessionId, tabSwitches } = req.body;
+      const finalTimeTaken = timeTaken || timeSpent || 60; // Use timeTaken or timeSpent as fallback
       
       // Get correct answers from session mapping
       const correctAnswersMapping = (global as any).questionMappings?.[sessionId] || {};
       
+      // Transform answers array to Record<string, number> format
+      const answersRecord: Record<string, number> = {};
+      if (Array.isArray(answers)) {
+        answers.forEach((answer: any) => {
+          if (answer.questionId && answer.selectedOption !== undefined) {
+            answersRecord[answer.questionId.toString()] = answer.selectedOption;
+          }
+        });
+      } else {
+        // If answers is already in the correct format
+        Object.assign(answersRecord, answers);
+      }
+
       // Calculate score using session-specific correct answers
       let correctAnswers = 0;
-      const totalQuestions = Object.keys(answers).length;
+      const totalQuestions = Object.keys(answersRecord).length;
       
-      for (const [questionId, userAnswer] of Object.entries(answers)) {
+      for (const [questionId, userAnswer] of Object.entries(answersRecord)) {
         const correctAnswer = correctAnswersMapping[parseInt(questionId)];
         if (correctAnswer !== undefined && correctAnswer === userAnswer) {
           correctAnswers++;
@@ -274,7 +288,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Anti-cheating validation (relaxed for demo purposes)
       const minTimePerQuestion = 2; // seconds (reduced for better user experience)
       const expectedMinTime = totalQuestions * minTimePerQuestion;
-      if (timeTaken < expectedMinTime) {
+      if (finalTimeTaken < expectedMinTime) {
         return res.status(400).json({ 
           message: `Exam completed too quickly. Please spend at least ${minTimePerQuestion} seconds per question.` 
         });
@@ -289,7 +303,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         score,
         totalQuestions,
         answers: answers as Record<string, number>,
-        timeTaken,
+        timeTaken: finalTimeTaken,
         passed,
         mastered,
         sessionId,
