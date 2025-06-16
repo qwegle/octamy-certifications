@@ -116,6 +116,12 @@ export default function CertificateView() {
                   <Trophy className="w-8 h-8 text-octamy-black mb-2" />
                   <p className="text-sm text-octamy-gray-500">Score</p>
                   <p className="text-xl font-bold text-octamy-black">{certificate.score}%</p>
+                  {certificate.mastered && (
+                    <Badge className="mt-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white">
+                      <Award className="w-3 h-3 mr-1" />
+                      Mastery Achieved
+                    </Badge>
+                  )}
                 </div>
                 <div className="flex flex-col items-center">
                   <Calendar className="w-8 h-8 text-octamy-black mb-2" />

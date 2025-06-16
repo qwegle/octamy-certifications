@@ -106,6 +106,14 @@ export default function Dashboard() {
               <div className="text-sm text-octamy-gray-600">Total Attempts</div>
             </CardContent>
           </Card>
+          
+          <Card>
+            <CardContent className="p-6 text-center">
+              <Award className="w-8 h-8 text-yellow-600 mx-auto mb-2" />
+              <div className="text-2xl font-bold text-octamy-black">{certificates.filter(c => c.mastered).length}</div>
+              <div className="text-sm text-octamy-gray-600">Mastery Achieved</div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Active Certificates */}
@@ -125,7 +133,14 @@ export default function Dashboard() {
                   <CardContent className="space-y-3">
                     <div className="flex justify-between text-sm">
                       <span className="text-octamy-gray-600">Score:</span>
-                      <span className="font-semibold">{certificate.score}%</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold">{certificate.score}%</span>
+                        {certificate.mastered && (
+                          <Badge className="text-xs bg-gradient-to-r from-yellow-400 to-orange-500 text-white">
+                            Master
+                          </Badge>
+                        )}
+                      </div>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-octamy-gray-600">Expires:</span>

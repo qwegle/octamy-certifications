@@ -73,6 +73,7 @@ export const certificates = pgTable("certificates", {
   userName: text("user_name").notNull(),
   courseTitle: text("course_title").notNull(),
   score: integer("score").notNull(),
+  mastered: boolean("mastered").default(false).notNull(),
   issuedAt: timestamp("issued_at").defaultNow().notNull(),
   expiresAt: timestamp("expires_at").notNull(),
   isPaid: boolean("is_paid").default(false).notNull(),
