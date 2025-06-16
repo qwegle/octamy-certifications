@@ -24,7 +24,10 @@ import SellerDashboard from "@/pages/seller-dashboard";
 import PaymentSuccess from "@/pages/payment-success";
 import PaymentFailed from "@/pages/payment-failed";
 import DemoCertificate from "@/pages/demo-certificate";
+import DemoBusinessCertificate from "@/pages/demo-business-certificate";
+import DemoInternshipCertificate from "@/pages/demo-internship-certificate";
 import BusinessCertificates from "@/pages/business-certificates";
+import InternshipForm from "@/pages/internship-form";
 
 function Router() {
   return (
@@ -48,7 +51,10 @@ function Router() {
       <Route path="/payment-success" component={PaymentSuccess} />
       <Route path="/payment-failed" component={PaymentFailed} />
       <Route path="/demo-certificate" component={DemoCertificate} />
+      <Route path="/demo-business-certificate" component={DemoBusinessCertificate} />
+      <Route path="/demo-internship-certificate" component={DemoInternshipCertificate} />
       <Route path="/business-certificates" component={BusinessCertificates} />
+      <Route path="/internship/:slug" component={InternshipForm} />
       <Route component={NotFound} />
     </Switch>
   );
