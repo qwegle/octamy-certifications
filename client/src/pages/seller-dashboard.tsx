@@ -458,6 +458,50 @@ export default function SellerDashboard() {
           </Card>
         </div>
 
+        {/* Click Analytics */}
+        {dashboardData.clickAnalytics && (
+          <Card className="border-2 border-gray-200 mb-8">
+            <CardHeader>
+              <CardTitle className="text-xl font-bold text-black">Click Analytics</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-3 gap-4 mb-6">
+                <div className="text-center p-4 bg-gray-50 rounded-lg">
+                  <p className="text-3xl font-bold text-black">{dashboardData.clickAnalytics.totalClicks}</p>
+                  <p className="text-sm text-gray-600">Total Clicks</p>
+                </div>
+                <div className="text-center p-4 bg-gray-50 rounded-lg">
+                  <p className="text-3xl font-bold text-black">{dashboardData.clickAnalytics.totalConversions}</p>
+                  <p className="text-sm text-gray-600">Conversions</p>
+                </div>
+                <div className="text-center p-4 bg-gray-50 rounded-lg">
+                  <p className="text-3xl font-bold text-black">{dashboardData.clickAnalytics.conversionRate.toFixed(1)}%</p>
+                  <p className="text-sm text-gray-600">Conversion Rate</p>
+                </div>
+              </div>
+              
+              {dashboardData.clickAnalytics.courseWiseAnalytics.length > 0 && (
+                <div className="space-y-3">
+                  <h4 className="font-semibold text-black">Course Performance</h4>
+                  {dashboardData.clickAnalytics.courseWiseAnalytics.map((course) => (
+                    <div key={course.courseId} className="p-4 bg-white border rounded-lg">
+                      <div className="flex justify-between items-start mb-2">
+                        <h5 className="font-medium text-black">{course.courseTitle}</h5>
+                        <span className="text-lg font-bold text-black">{course.conversionRate.toFixed(1)}%</span>
+                      </div>
+                      <div className="grid grid-cols-3 gap-2 text-sm text-gray-600">
+                        <span><strong>{course.clicks}</strong> clicks</span>
+                        <span><strong>{course.conversions}</strong> conversions</span>
+                        <span>Latest: {course.latestClick ? new Date(course.latestClick).toLocaleDateString() : 'No clicks yet'}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
         {/* Recent Sales */}
         <Card className="border-2 border-gray-200 mb-8">
           <CardHeader>

@@ -740,6 +740,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const sales = await storage.getSellerSales(req.seller!.sellerId);
       const withdrawals = await storage.getSellerWithdrawals(req.seller!.sellerId);
+      const clickAnalytics = await storage.getSellerClickAnalytics(req.seller!.sellerId);
       
       res.json({
         seller: {
@@ -757,7 +758,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           totalSales: sales.length,
           totalCommission: sales.reduce((sum, sale) => sum + parseFloat(sale.commission), 0),
           pendingWithdrawals: withdrawals.filter(w => w.status === 'pending').length
-        }
+        },
+        clickAnalytics
       });
     } catch (error) {
       console.error("Error fetching seller dashboard:", error);

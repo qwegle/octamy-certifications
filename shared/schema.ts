@@ -733,6 +733,15 @@ export type Sale = typeof sales.$inferSelect;
 export type InsertSale = z.infer<typeof insertSaleSchema>;
 export type WithdrawalRequest = typeof withdrawalRequests.$inferSelect;
 export type InsertWithdrawalRequest = z.infer<typeof insertWithdrawalRequestSchema>;
+
+export const insertReferralClickSchema = createInsertSchema(referralClicks).omit({
+  id: true,
+  clickedAt: true,
+});
+
+export type ReferralClick = typeof referralClicks.$inferSelect;
+export type InsertReferralClick = z.infer<typeof insertReferralClickSchema>;
+
 export type Leaderboard = typeof leaderboard.$inferSelect;
 export type InsertLeaderboard = z.infer<typeof insertLeaderboardSchema>;
 
