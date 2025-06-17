@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Search, Award, Users, TrendingUp, ChevronRight, Star, CheckCircle, ArrowRight } from "lucide-react";
 import CourseCard from "@/components/course-card";
+import { useAuth } from "@/hooks/useAuth";
 import type { Category, Course } from "@shared/schema";
 
 // Certificate Slider Component
@@ -66,6 +67,7 @@ function CertificateSlider() {
 export default function Landing() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+  const { user, isAuthenticated, isLoading } = useAuth();
 
   const { data: categories = [] } = useQuery<Category[]>({
     queryKey: ["/api/categories"],
@@ -99,16 +101,33 @@ export default function Landing() {
             </div>
           </div>
           <div className="flex items-center space-x-4">
-            <Link href="/auth">
-              <Button variant="outline" className="border-white text-white hover:bg-white hover:text-black">
-                Login
-              </Button>
-            </Link>
-            <Link href="/demo-certificate">
-              <Button className="bg-white text-black hover:bg-gray-200">
-                View Demo Certificate
-              </Button>
-            </Link>
+            {!isLoading && !isAuthenticated ? (
+              <>
+                <Link href="/auth">
+                  <Button variant="outline" className="border-white text-white hover:bg-white hover:text-black">
+                    Login
+                  </Button>
+                </Link>
+                <Link href="/demo-certificate">
+                  <Button className="bg-white text-black hover:bg-gray-200">
+                    View Demo Certificate
+                  </Button>
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link href="/dashboard">
+                  <Button variant="outline" className="border-white text-white hover:bg-white hover:text-black">
+                    Dashboard
+                  </Button>
+                </Link>
+                <Link href="/logout">
+                  <Button className="bg-white text-black hover:bg-gray-200">
+                    Logout
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </nav>
