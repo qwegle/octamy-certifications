@@ -381,6 +381,15 @@ export default function Exam() {
           </CardContent>
         </Card>
       </div>
+      
+      {/* Mascot for exam encouragement */}
+      <OctamyMascot 
+        currentPage="exam"
+        onAction={(action) => {
+          // Mascot actions during exam are limited to avoid distraction
+          console.log('Exam mascot action:', action);
+        }}
+      />
     </div>
   );
 }
