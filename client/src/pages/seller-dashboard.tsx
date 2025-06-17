@@ -117,9 +117,27 @@ export default function SellerDashboard() {
       if (response.ok) {
         const data = await response.json();
         setShareableItems(data);
+      } else if (response.status === 401 || response.status === 403) {
+        toast({
+          title: "Authentication Error",
+          description: "Please log in again to continue",
+          variant: "destructive",
+        });
+        logout();
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to fetch shareable items",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error("Error fetching shareable items:", error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch shareable items",
+        variant: "destructive",
+      });
     }
   };
 
@@ -141,10 +159,18 @@ export default function SellerDashboard() {
           title: "Success",
           description: "Referral URL generated successfully",
         });
+      } else if (response.status === 401 || response.status === 403) {
+        toast({
+          title: "Authentication Error",
+          description: "Please log in again to continue",
+          variant: "destructive",
+        });
+        logout();
       } else {
+        const errorData = await response.json().catch(() => ({ message: "Unknown error" }));
         toast({
           title: "Error",
-          description: "Failed to generate referral URL",
+          description: errorData.message || "Failed to generate referral URL",
           variant: "destructive",
         });
       }
