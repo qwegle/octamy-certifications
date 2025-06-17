@@ -207,6 +207,10 @@ Octamy is a comprehensive professional certification platform built as a full-st
 
 ```
 Changelog:
+- June 17, 2025: Fixed critical seller authentication infinite redirect loop between /seller-auth and /partner-dashboard
+- June 17, 2025: Fixed payment loading issue - certificates now created automatically after passing exams
+- June 17, 2025: Added seller-auth route (/seller-auth) for proper partner authentication access
+- June 17, 2025: Created learning_paths and user_learning_paths database tables for learning path functionality
 - June 17, 2025: Removed playful mascot character system as requested - not well defined
 - June 17, 2025: Fixed critical dashboard validCertificates error by using correct variable name
 - June 17, 2025: Simplified exam success flow to prevent premature certificate creation

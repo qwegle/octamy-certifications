@@ -53,7 +53,7 @@ interface DashboardData {
 }
 
 export default function SellerDashboard() {
-  const { seller, logout, token } = useSellerAuth();
+  const { seller, logout, token, isLoading: authLoading } = useSellerAuth();
   const { toast } = useToast();
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -72,18 +72,21 @@ export default function SellerDashboard() {
   });
 
   useEffect(() => {
-    if (!seller || !token) {
-      // Redirect to login if not authenticated
+    // Only redirect if we're not loading and there's no token
+    if (!authLoading && !token) {
       window.location.href = '/seller-auth';
       return;
     }
-    fetchDashboardData();
-    fetchShareableItems();
-  }, [seller, token]);
+    
+    // Only fetch data if we have a token
+    if (token) {
+      fetchDashboardData();
+      fetchShareableItems();
+    }
+  }, [token, authLoading]);
 
   const fetchDashboardData = async () => {
     if (!token) {
-      window.location.href = '/seller-auth';
       return;
     }
 
