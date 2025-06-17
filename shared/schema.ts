@@ -195,6 +195,20 @@ export const withdrawalRequests = pgTable("withdrawal_requests", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Click tracking for partner referral links
+export const referralClicks = pgTable("referral_clicks", {
+  id: serial("id").primaryKey(),
+  sellerId: integer("seller_id").references(() => sellers.id).notNull(),
+  courseId: integer("course_id").references(() => courses.id).notNull(),
+  referralCode: text("referral_code").notNull(),
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  clickedAt: timestamp("clicked_at").defaultNow().notNull(),
+  converted: boolean("converted").default(false).notNull(),
+  conversionDate: timestamp("conversion_date"),
+  userId: integer("user_id").references(() => users.id), // set when user actually purchases
+});
+
 // Leaderboard table for gamification
 export const leaderboard = pgTable("leaderboard", {
   id: serial("id").primaryKey(),

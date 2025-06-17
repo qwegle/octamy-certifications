@@ -1628,7 +1628,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.send(pdfBuffer);
       } else {
         // Return HTML version for viewing using the new professional design
-        const { generateCertificateHTML } = await import('./utils/certificateGenerator');
+        const { generateCertificateHTML } = await import('./utils/newCertificateGenerator');
         const certificateHtml = generateCertificateHTML(certificateData);
         
         res.setHeader('Content-Type', 'text/html');

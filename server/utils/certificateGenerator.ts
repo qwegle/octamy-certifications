@@ -465,7 +465,7 @@ function generateCertificateHTML(data: CertificateData): string {
                   <path d="M20 70 L15 85 L25 80 Z" fill="url(#ribbonGradient)" opacity="0.9"/>
                   <path d="M100 70 L105 85 L95 80 Z" fill="url(#ribbonGradient)" opacity="0.9"/>
                 </svg>
-                <div class="badge-text">${data.courseLevel.toUpperCase()}</div>
+                <div class="badge-text">${(data.courseLevel || 'CERTIFIED').toUpperCase()}</div>
               </div>
               
               <div class="achievement-details">
