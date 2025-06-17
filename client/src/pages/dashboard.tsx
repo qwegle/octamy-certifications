@@ -269,7 +269,7 @@ export default function Dashboard() {
                       </span>
                     </div>
                     <div className="pt-2">
-                      <Link href={`/payment/${certificate.id}`}>
+                      <Link href={`/checkout?certificateId=${certificate.certificateId}&courseId=${certificate.courseId}`}>
                         <Button
                           size="sm"
                           className="w-full bg-octamy-black text-white hover:bg-octamy-gray-800"
