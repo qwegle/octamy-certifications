@@ -50,6 +50,24 @@ function generateCertificateHTML(data: CertificateData): string {
           position: relative;
           overflow: hidden;
           box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+          page-break-inside: avoid;
+        }
+        
+        @media print {
+          body {
+            margin: 0;
+            padding: 0;
+            background: white;
+          }
+          
+          .certificate-container {
+            width: 297mm;
+            height: 210mm;
+            margin: 0;
+            box-shadow: none;
+            page-break-inside: avoid;
+            page-break-after: always;
+          }
         }
         
         .certificate-border {
@@ -100,7 +118,7 @@ function generateCertificateHTML(data: CertificateData): string {
         .certificate-content {
           position: relative;
           z-index: 10;
-          padding: 60px;
+          padding: 40px;
           height: 100%;
           display: flex;
           flex-direction: column;
@@ -109,22 +127,22 @@ function generateCertificateHTML(data: CertificateData): string {
         }
         
         .company-header {
-          margin-bottom: 40px;
+          margin-bottom: 20px;
         }
         
         .company-logo {
           display: inline-block;
           background: linear-gradient(145deg, #000000, #333333);
           color: white;
-          padding: 20px 40px;
-          margin-bottom: 20px;
+          padding: 15px 30px;
+          margin-bottom: 15px;
           clip-path: polygon(10% 0%, 90% 0%, 100% 25%, 100% 75%, 90% 100%, 10% 100%, 0% 75%, 0% 25%);
         }
         
         .company-name {
-          font-size: 48px;
+          font-size: 32px;
           font-weight: 700;
-          letter-spacing: 8px;
+          letter-spacing: 6px;
           font-family: 'Playfair Display', serif;
         }
         
@@ -138,11 +156,11 @@ function generateCertificateHTML(data: CertificateData): string {
         }
         
         .certificate-title {
-          font-size: 72px;
+          font-size: 48px;
           font-weight: 600;
           color: #000;
-          margin: 30px 0;
-          letter-spacing: 12px;
+          margin: 20px 0;
+          letter-spacing: 8px;
           text-transform: uppercase;
           font-family: 'Playfair Display', serif;
           position: relative;
@@ -187,13 +205,13 @@ function generateCertificateHTML(data: CertificateData): string {
         }
         
         .recipient-name {
-          font-size: 56px;
+          font-size: 32px;
           font-weight: 600;
           color: #000;
-          margin: 30px 0;
+          margin: 20px 0;
           font-family: 'Playfair Display', serif;
           position: relative;
-          padding: 20px 0;
+          padding: 15px 0;
         }
         
         .recipient-name::before,
@@ -224,11 +242,11 @@ function generateCertificateHTML(data: CertificateData): string {
         }
         
         .course-name {
-          font-size: 36px;
+          font-size: 24px;
           font-weight: 600;
           color: #000;
-          margin: 30px 0;
-          padding: 20px 40px;
+          margin: 20px 0;
+          padding: 15px 30px;
           border: 2px solid #c0c0c0;
           border-radius: 8px;
           background: linear-gradient(145deg, rgba(192,192,192,0.1) 0%, rgba(192,192,192,0.05) 100%);
