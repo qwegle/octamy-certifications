@@ -123,6 +123,10 @@ export interface IStorage {
   
   // Additional payment operations for PayUMoney
   getAllPayments(): Promise<Payment[]>;
+  updatePaymentStatus(transactionId: string, status: string, paymentResponse: any): Promise<void>;
+  getPaymentByTransactionId(transactionId: string): Promise<Payment | undefined>;
+  processSale(saleData: any): Promise<void>;
+  deliverCertificate(certificateId: string, deliveryData: any): Promise<void>;
   
   // Smart Notifications operations
   getUserPreferences(userId: number): Promise<UserPreferences | undefined>;
@@ -332,6 +336,20 @@ export class DatabaseStorage implements IStorage {
   async getExamAttempt(id: number): Promise<ExamAttempt | undefined> {
     const [attempt] = await db.select().from(examAttempts).where(eq(examAttempts.id, id));
     return attempt || undefined;
+  }
+
+  async getUserExamAttempts(userId: number, courseId?: number): Promise<ExamAttempt[]> {
+    const query = db
+      .select()
+      .from(examAttempts)
+      .where(
+        courseId 
+          ? and(eq(examAttempts.userId, userId), eq(examAttempts.courseId, courseId))
+          : eq(examAttempts.userId, userId)
+      )
+      .orderBy(desc(examAttempts.createdAt));
+    
+    return await query;
   }
 
   // Certificate operations

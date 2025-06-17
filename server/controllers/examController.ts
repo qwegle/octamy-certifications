@@ -46,13 +46,17 @@ export class ExamController {
       const examAttempt = await storage.createExamAttempt({
         userId,
         courseId,
-        answers: JSON.stringify(answers),
+        answers,
         score,
-        timeSpent: timeSpent || 0
+        timeTaken: timeSpent || 0,
+        userEmail: '',
+        userName: '',
+        totalQuestions,
+        passed: score >= course.passingScore
       });
 
       // Update user progress
-      await storage.updateUserProgress(userId, courseId, {
+      await storage.updateCourseProgress(userId, courseId, {
         progressPercentage: 100,
         bestScore: score,
         timeSpent: timeSpent || 0,

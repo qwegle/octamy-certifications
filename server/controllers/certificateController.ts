@@ -69,7 +69,7 @@ export class CertificateController {
   static async getCertificate(req: Request, res: Response) {
     try {
       const certificateId = req.params.id;
-      const certificate = await storage.getCertificate(certificateId);
+      const certificate = await storage.getCertificateByCertificateId(certificateId);
       
       if (!certificate) {
         return res.status(404).json({ message: "Certificate not found" });
@@ -85,7 +85,7 @@ export class CertificateController {
   static async downloadCertificate(req: Request, res: Response) {
     try {
       const certificateId = req.params.id;
-      const certificate = await storage.getCertificate(certificateId);
+      const certificate = await storage.getCertificateByCertificateId(certificateId);
       
       if (!certificate) {
         return res.status(404).json({ message: "Certificate not found" });
@@ -105,7 +105,7 @@ export class CertificateController {
   static async verifyCertificate(req: Request, res: Response) {
     try {
       const certificateId = req.params.id;
-      const certificate = await storage.getCertificate(certificateId);
+      const certificate = await storage.getCertificateByCertificateId(certificateId);
       
       if (!certificate) {
         return res.status(404).json({ message: "Certificate not found" });
