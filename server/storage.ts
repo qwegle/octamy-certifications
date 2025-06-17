@@ -1,5 +1,6 @@
 import { 
   users, 
+  userAddresses,
   categories, 
   courses, 
   questions, 
@@ -12,6 +13,8 @@ import {
   withdrawalRequests,
   type User, 
   type InsertUser,
+  type UserAddress,
+  type InsertUserAddress,
   type Category,
   type InsertCategory,
   type Course,
@@ -62,6 +65,13 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+
+  // User address operations
+  getUserAddresses(userId: number): Promise<UserAddress[]>;
+  createUserAddress(address: InsertUserAddress): Promise<UserAddress>;
+  updateUserAddress(id: number, updates: Partial<InsertUserAddress>): Promise<UserAddress>;
+  deleteUserAddress(id: number): Promise<void>;
+  setDefaultAddress(userId: number, addressId: number): Promise<void>;
 
   // Category operations
   getCategories(): Promise<Category[]>;
@@ -180,6 +190,61 @@ export class DatabaseStorage implements IStorage {
       .values(insertUser)
       .returning();
     return user;
+  }
+
+  // User address operations
+  async getUserAddresses(userId: number): Promise<UserAddress[]> {
+    return await db.select().from(userAddresses).where(eq(userAddresses.userId, userId));
+  }
+
+  async createUserAddress(insertAddress: InsertUserAddress): Promise<UserAddress> {
+    // If this is set as default, unset other defaults for this user
+    if (insertAddress.isDefault) {
+      await db.update(userAddresses)
+        .set({ isDefault: false })
+        .where(eq(userAddresses.userId, insertAddress.userId));
+    }
+
+    const [address] = await db
+      .insert(userAddresses)
+      .values(insertAddress)
+      .returning();
+    return address;
+  }
+
+  async updateUserAddress(id: number, updates: Partial<InsertUserAddress>): Promise<UserAddress> {
+    // If setting as default, unset other defaults for this user
+    if (updates.isDefault) {
+      const [currentAddress] = await db.select().from(userAddresses).where(eq(userAddresses.id, id));
+      if (currentAddress) {
+        await db.update(userAddresses)
+          .set({ isDefault: false })
+          .where(eq(userAddresses.userId, currentAddress.userId));
+      }
+    }
+
+    const [address] = await db
+      .update(userAddresses)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(userAddresses.id, id))
+      .returning();
+    return address;
+  }
+
+  async deleteUserAddress(id: number): Promise<void> {
+    await db.delete(userAddresses).where(eq(userAddresses.id, id));
+  }
+
+  async setDefaultAddress(userId: number, addressId: number): Promise<void> {
+    // Unset all defaults for this user
+    await db.update(userAddresses)
+      .set({ isDefault: false })
+      .where(eq(userAddresses.userId, userId));
+    
+    // Set the new default
+    await db.update(userAddresses)
+      .set({ isDefault: true, updatedAt: new Date() })
+      .where(and(eq(userAddresses.id, addressId), eq(userAddresses.userId, userId)));
   }
 
   // Category operations

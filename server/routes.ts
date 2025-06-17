@@ -1034,6 +1034,95 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User address management endpoints
+  app.get("/api/user/addresses", optionalAuth, async (req: Request, res: Response) => {
+    try {
+      const userId = req.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const addresses = await storage.getUserAddresses(userId);
+      res.json(addresses);
+    } catch (error) {
+      console.error("Error fetching user addresses:", error);
+      res.status(500).json({ message: "Failed to fetch addresses" });
+    }
+  });
+
+  app.post("/api/user/addresses", optionalAuth, async (req: Request, res: Response) => {
+    try {
+      const userId = req.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const addressData = {
+        ...req.body,
+        userId
+      };
+
+      const address = await storage.createUserAddress(addressData);
+      res.json(address);
+    } catch (error) {
+      console.error("Error creating user address:", error);
+      res.status(500).json({ message: "Failed to create address" });
+    }
+  });
+
+  app.put("/api/user/addresses/:id", optionalAuth, async (req: Request, res: Response) => {
+    try {
+      const userId = req.userId;
+      const addressId = parseInt(req.params.id);
+      
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const address = await storage.updateUserAddress(addressId, req.body);
+      res.json(address);
+    } catch (error) {
+      console.error("Error updating user address:", error);
+      res.status(500).json({ message: "Failed to update address" });
+    }
+  });
+
+  app.delete("/api/user/addresses/:id", optionalAuth, async (req: Request, res: Response) => {
+    try {
+      const userId = req.userId;
+      const addressId = parseInt(req.params.id);
+      
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      await storage.deleteUserAddress(addressId);
+      res.json({ message: "Address deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting user address:", error);
+      res.status(500).json({ message: "Failed to delete address" });
+    }
+  });
+
+  app.put("/api/user/addresses/:id/default", optionalAuth, async (req: Request, res: Response) => {
+    try {
+      const userId = req.userId;
+      const addressId = parseInt(req.params.id);
+      
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      await storage.setDefaultAddress(userId, addressId);
+      res.json({ message: "Default address updated successfully" });
+    } catch (error) {
+      console.error("Error updating default address:", error);
+      res.status(500).json({ message: "Failed to update default address" });
+    }
+  });
+
   // Business certificates endpoint
   app.post("/api/business-certificates", async (req: Request, res: Response) => {
     try {
