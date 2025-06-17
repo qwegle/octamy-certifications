@@ -105,12 +105,14 @@ Octamy is a comprehensive professional certification platform built as a full-st
 ## Recent Updates
 
 ### PayUMoney Payment System Fix (June 17, 2025)
-- **Fixed payment flow issue** where certificates were created as already paid (isPaid: true)
-- **Corrected certificate creation** to create unpaid certificates requiring PayUMoney payment activation
+- **Fixed critical payment flow issue** where certificates were created as already paid (isPaid: true)
+- **Corrected certificate creation logic** in both routes.ts and certificateController.ts to always create unpaid certificates
+- **Removed certificate reuse logic** that was finding existing paid certificates instead of creating new unpaid ones
 - **Payment page now displays properly** showing PayUMoney payment form instead of success message
 - **PayUMoney integration fully functional** with payment initiation, form generation, and success callbacks
 - **Revenue protection restored** - users must complete PayUMoney payment to access certificates
 - **Complete payment flow working** from exam success through PayUMoney payment to certificate activation
+- **Database integrity maintained** - all new exam attempts create fresh unpaid certificates requiring payment
 
 ### Simplified Exam Scoring Logic (June 17, 2025)
 - **Fixed critical exam bug** where 100% scores were failing due to complex retake system

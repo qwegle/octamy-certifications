@@ -412,16 +412,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Course not found" });
       }
 
-      // Check if user already has a certificate for this course
-      const existingCertificate = await storage.getUserCertificateForCourse(
-        req.user?.userId || null,
-        examAttempt.courseId,
-        examAttempt.userEmail
-      );
-
-      if (existingCertificate) {
-        return res.json(existingCertificate);
-      }
+      // Always create a new certificate for each exam attempt - no reusing existing certificates
       
       // Generate certificate ID
       const certificateId = `OCT-${new Date().getFullYear()}-${course.title.replace(/\s+/g, '').toUpperCase().slice(0, 3)}-${Date.now()}`;
@@ -1026,6 +1017,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const certificateNumber = generateCertificateNumber();
       
       const certificate = await storage.createCertificate({
+        courseId: parseInt(courseId),
         certificateId,
         examAttemptId: 0, // Will be updated when exam is taken
         userEmail,
@@ -1036,6 +1028,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         certificateNumber,
         expiresAt: calculateExpiryDate(),
         retakeCount: 0,
+        isPaid: false, // Always create as unpaid
+        paymentId: null, // No payment initially
+        isActive: true
       });
 
       // If referral code provided, create sale record

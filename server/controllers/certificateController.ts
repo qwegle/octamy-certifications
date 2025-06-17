@@ -56,7 +56,10 @@ export class CertificateController {
         expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year
         badge: examAttempt.score >= 90 ? 'Gold' : examAttempt.score >= 80 ? 'Silver' : 'Bronze',
         certificateNumber: certificateId,
-        retakeCount: 0
+        retakeCount: 0,
+        isPaid: false, // Always create as unpaid
+        paymentId: null, // No payment initially
+        isActive: true
       });
 
       res.status(201).json(certificate);
