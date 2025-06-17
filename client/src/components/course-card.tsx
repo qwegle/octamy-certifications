@@ -17,15 +17,6 @@ export default function CourseCard({ course, certifiedCount = 0, rating = 4.8, v
     <Card className={`group hover:shadow-lg transition-all duration-300 border-2 hover:border-black relative ${
       viewMode === "list" ? "flex flex-row" : ""
     }`}>
-      {/* Sale Badge */}
-      {course.isOnSale && (
-        <div className="absolute top-2 right-2 z-20">
-          <div className="bg-red-600 text-white px-3 py-1 rounded-lg text-sm font-bold shadow-lg">
-            SALE
-          </div>
-        </div>
-      )}
-      
       <div className={`${viewMode === "list" ? "w-64 flex-shrink-0" : ""}`}>
         <div className="aspect-video bg-gradient-to-br from-gray-900 to-black rounded-t-lg relative overflow-hidden">
           <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center">
@@ -36,10 +27,15 @@ export default function CourseCard({ course, certifiedCount = 0, rating = 4.8, v
               {course.category.name}
             </Badge>
           </div>
-          <div className="absolute top-4 right-4">
+          <div className="absolute top-4 right-4 flex gap-2">
             <Badge variant="outline" className="bg-black text-white border-white">
               {course.duration} mins
             </Badge>
+            {course.isOnSale && (
+              <Badge className="bg-red-600 text-white font-bold shadow-lg">
+                SALE
+              </Badge>
+            )}
           </div>
         </div>
       </div>
