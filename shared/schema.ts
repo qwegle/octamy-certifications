@@ -154,6 +154,7 @@ export const sellers = pgTable("sellers", {
   password: text("password").notNull(),
   name: text("name").notNull(),
   phone: text("phone"),
+  referralCode: text("referral_code").unique(),
   isApproved: boolean("is_approved").default(false).notNull(),
   isActive: boolean("is_active").default(true).notNull(),
   commissionRate: decimal("commission_rate", { precision: 5, scale: 2 }).default("10.00").notNull(),

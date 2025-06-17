@@ -1300,74 +1300,90 @@ export async function registerRoutes(app: Express): Promise<Server> {
             console.log('No seller code provided in payment');
           }
 
-          // Send success notification and email to user if registered
-          if (userId) {
-            const user = await storage.getUser(userId);
-            if (user) {
-              await storage.createNotification({
-                userId: userId,
-                title: "Certificate Payment Successful",
-                type: "payment_success",
-                message: `Your payment for certificate ${certificate.certificateId} has been processed successfully. You can now download your certificate.`,
-                data: {
-                  certificateId: certificate.certificateId,
-                  actionUrl: `/certificates/${certificate.certificateId}`,
-                  priority: "high"
+          // Handle email delivery for both registered and guest users
+          try {
+            const course = await storage.getCourse(courseId);
+            const examAttempt = await storage.getExamAttemptByCertificateId(certificate.id);
+            
+            if (course && examAttempt) {
+              // Import certificate generator functions
+              const { generateCertificatePDF, generateInvoicePDF } = await import('../utils/certificateGenerator');
+              
+              // Determine user info - either from registered user or certificate data
+              let userName = certificate.userName;
+              let userEmail = certificate.userEmail;
+              
+              if (userId) {
+                const user = await storage.getUser(userId);
+                if (user) {
+                  userName = user.name || user.email;
+                  userEmail = user.email;
+                  
+                  // Send notification for registered users
+                  await storage.createNotification({
+                    userId: userId,
+                    title: "Certificate Payment Successful",
+                    type: "payment_success",
+                    message: `Your payment for certificate ${certificate.certificateId} has been processed successfully. You can now download your certificate.`,
+                    data: {
+                      certificateId: certificate.certificateId,
+                      actionUrl: `/certificates/${certificate.certificateId}`,
+                      priority: "high"
+                    }
+                  });
                 }
+              }
+
+              // Generate certificate PDF
+              const certificatePdf = await generateCertificatePDF({
+                certificateId: certificate.certificateId,
+                userName: userName,
+                courseTitle: course.title,
+                issueDate: new Date(),
+                completionDate: examAttempt.submittedAt || new Date(),
+                passingScore: course.passingScore,
+                userScore: examAttempt.score
               });
 
-              // Send email with certificate and invoice
-              try {
-                const course = await storage.getCourse(courseId);
-                const examAttempt = await storage.getExamAttemptByCertificateId(certificate.id);
+              // Generate invoice PDF
+              const invoicePdf = await generateInvoicePDF({
+                transactionId: responseData.txnid,
+                customerName: userName,
+                customerEmail: userEmail,
+                courseTitle: course.title,
+                amount: payment.amount,
+                certificateAmount: payment.certificateAmount || payment.amount,
+                shippingAmount: payment.shippingAmount || "0.00",
+                includesPhysicalCopy: payment.includesPhysicalCopy || false,
+                date: new Date(),
+                paymentMethod: "PayUMoney"
+              });
+
+              // Send email with certificate and invoice (works for both registered and guest users)
+              const emailSent = await emailService.sendCertificateEmail(
+                userEmail,
+                userName,
+                course.title,
+                certificate.certificateId,
+                certificatePdf,
+                invoicePdf,
+                payment.includesPhysicalCopy || false
+              );
+
+              if (emailSent) {
+                console.log(`Certificate and invoice emailed successfully to ${userEmail} (${userId ? 'registered' : 'guest'} user)`);
                 
-                if (course && examAttempt) {
-                  // Generate certificate PDF
-                  const certificatePdf = await generateCertificatePDF({
-                    certificateId: certificate.certificateId,
-                    userName: user.name || user.email,
-                    courseTitle: course.title,
-                    issueDate: new Date(),
-                    completionDate: examAttempt.submittedAt || new Date(),
-                    passingScore: course.passingScore,
-                    userScore: examAttempt.score
-                  });
-
-                  // Generate invoice PDF
-                  const invoicePdf = await generateInvoicePDF({
-                    transactionId: responseData.txnid,
-                    customerName: user.name || user.email,
-                    customerEmail: user.email,
-                    courseTitle: course.title,
-                    amount: payment.amount,
-                    certificateAmount: payment.certificateAmount || payment.amount,
-                    shippingAmount: payment.shippingAmount || "0.00",
-                    includesPhysicalCopy: payment.includesPhysicalCopy || false,
-                    date: new Date(),
-                    paymentMethod: "PayUMoney"
-                  });
-
-                  // Send email with attachments
-                  const emailSent = await emailService.sendCertificateEmail(
-                    user.email,
-                    user.name || user.email,
-                    course.title,
-                    certificate.certificateId,
-                    certificatePdf,
-                    invoicePdf,
-                    payment.includesPhysicalCopy || false
-                  );
-
-                  if (emailSent) {
-                    console.log(`Certificate and invoice emailed successfully to ${user.email}`);
-                  } else {
-                    console.error(`Failed to send email to ${user.email}`);
-                  }
-                }
-              } catch (emailError) {
-                console.error("Error sending certificate email:", emailError);
+                // Update certificate delivery status
+                await storage.updateCertificate(certificate.id, {
+                  isDelivered: true,
+                  deliveredAt: new Date()
+                });
+              } else {
+                console.error(`Failed to send email to ${userEmail}`);
               }
             }
+          } catch (emailError) {
+            console.error("Error sending certificate email:", emailError);
           }
 
           console.log(`Payment successful for certificate ${certificate.certificateId}, user can now download`);

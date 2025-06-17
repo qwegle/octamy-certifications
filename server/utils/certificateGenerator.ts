@@ -2,430 +2,695 @@ import puppeteer from 'puppeteer';
 
 interface CertificateData {
   certificateId: string;
-  studentName: string;
-  courseName: string;
-  completionDate: string;
-  score: number;
-  instructorName?: string;
-  courseDuration?: string;
-  issueDate: string;
+  userName: string;
+  courseTitle: string;
+  issueDate: Date;
+  completionDate: Date;
+  passingScore: number;
+  userScore: number;
 }
 
 export async function generateCertificatePDF(data: CertificateData): Promise<Buffer> {
+  const html = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Professional Certificate</title>
+      <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+      <style>
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+        
+        @page {
+          size: A4 landscape;
+          margin: 0;
+        }
+        
+        body {
+          font-family: 'Inter', sans-serif;
+          background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          min-height: 100vh;
+          padding: 20px;
+        }
+        
+        .certificate-container {
+          width: 1100px;
+          height: 750px;
+          background: white;
+          position: relative;
+          border: 8px solid #000;
+          box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+          overflow: hidden;
+        }
+        
+        .certificate-border {
+          position: absolute;
+          top: 20px;
+          left: 20px;
+          right: 20px;
+          bottom: 20px;
+          border: 3px solid #d4af37;
+          background: linear-gradient(135deg, #fafafa 0%, #ffffff 100%);
+        }
+        
+        .decorative-corners {
+          position: absolute;
+          width: 60px;
+          height: 60px;
+          background: linear-gradient(45deg, #d4af37, #f4d03f);
+          clip-path: polygon(0 0, 100% 0, 0 100%);
+        }
+        
+        .decorative-corners.top-left {
+          top: 30px;
+          left: 30px;
+        }
+        
+        .decorative-corners.top-right {
+          top: 30px;
+          right: 30px;
+          transform: rotate(90deg);
+        }
+        
+        .decorative-corners.bottom-left {
+          bottom: 30px;
+          left: 30px;
+          transform: rotate(-90deg);
+        }
+        
+        .decorative-corners.bottom-right {
+          bottom: 30px;
+          right: 30px;
+          transform: rotate(180deg);
+        }
+        
+        .certificate-content {
+          position: absolute;
+          top: 50px;
+          left: 50px;
+          right: 50px;
+          bottom: 50px;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          text-align: center;
+          z-index: 2;
+        }
+        
+        .certificate-header {
+          margin-bottom: 20px;
+        }
+        
+        .certificate-title {
+          font-family: 'Playfair Display', serif;
+          font-size: 48px;
+          font-weight: 700;
+          color: #000;
+          margin-bottom: 10px;
+          letter-spacing: 2px;
+        }
+        
+        .certificate-subtitle {
+          font-size: 18px;
+          color: #666;
+          font-weight: 300;
+          letter-spacing: 1px;
+        }
+        
+        .certificate-body {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          padding: 40px 0;
+        }
+        
+        .recipient-text {
+          font-size: 20px;
+          color: #333;
+          margin-bottom: 20px;
+          font-weight: 300;
+        }
+        
+        .recipient-name {
+          font-family: 'Playfair Display', serif;
+          font-size: 42px;
+          font-weight: 700;
+          color: #000;
+          margin: 20px 0;
+          padding: 0 20px;
+          border-bottom: 3px solid #d4af37;
+          display: inline-block;
+          letter-spacing: 1px;
+        }
+        
+        .course-text {
+          font-size: 18px;
+          color: #333;
+          margin: 30px 0;
+          line-height: 1.6;
+          font-weight: 400;
+        }
+        
+        .course-title {
+          font-family: 'Playfair Display', serif;
+          font-size: 28px;
+          font-weight: 600;
+          color: #000;
+          margin: 10px 0;
+          letter-spacing: 0.5px;
+        }
+        
+        .performance-section {
+          margin: 25px 0;
+          padding: 20px;
+          background: rgba(212, 175, 55, 0.1);
+          border-radius: 10px;
+          border: 1px solid #d4af37;
+        }
+        
+        .score-text {
+          font-size: 16px;
+          color: #333;
+          font-weight: 500;
+        }
+        
+        .certificate-footer {
+          display: flex;
+          justify-content: space-between;
+          align-items: end;
+          margin-top: 40px;
+        }
+        
+        .signature-section {
+          text-align: center;
+          flex: 1;
+        }
+        
+        .signature-line {
+          width: 200px;
+          height: 1px;
+          background: #000;
+          margin: 40px auto 10px;
+        }
+        
+        .signature-title {
+          font-size: 14px;
+          color: #666;
+          font-weight: 500;
+        }
+        
+        .signature-name {
+          font-size: 16px;
+          color: #000;
+          font-weight: 600;
+          margin-top: 5px;
+        }
+        
+        .certificate-details {
+          text-align: right;
+          font-size: 12px;
+          color: #666;
+          line-height: 1.5;
+        }
+        
+        .watermark {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%) rotate(-45deg);
+          font-size: 120px;
+          color: rgba(212, 175, 55, 0.05);
+          font-weight: 700;
+          z-index: 1;
+          pointer-events: none;
+        }
+        
+        .logo-section {
+          position: absolute;
+          top: 80px;
+          left: 80px;
+          display: flex;
+          align-items: center;
+          gap: 15px;
+        }
+        
+        .company-logo {
+          width: 60px;
+          height: 60px;
+          background: #000;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          font-weight: 700;
+          font-size: 24px;
+        }
+        
+        .company-info {
+          text-align: left;
+        }
+        
+        .company-name {
+          font-size: 18px;
+          font-weight: 700;
+          color: #000;
+          margin-bottom: 2px;
+        }
+        
+        .company-tagline {
+          font-size: 12px;
+          color: #666;
+          font-weight: 400;
+        }
+        
+        .verification-qr {
+          position: absolute;
+          top: 80px;
+          right: 80px;
+          text-align: center;
+        }
+        
+        .qr-code {
+          width: 80px;
+          height: 80px;
+          background: #f0f0f0;
+          border: 2px solid #d4af37;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin: 0 auto 8px;
+          font-size: 10px;
+          color: #666;
+        }
+        
+        .qr-text {
+          font-size: 10px;
+          color: #666;
+          font-weight: 500;
+        }
+        
+        .iso-badges {
+          position: absolute;
+          bottom: 80px;
+          left: 80px;
+          display: flex;
+          gap: 10px;
+        }
+        
+        .iso-badge {
+          width: 50px;
+          height: 50px;
+          background: #000;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          font-size: 8px;
+          font-weight: 600;
+          text-align: center;
+          line-height: 1.1;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="certificate-container">
+        <div class="certificate-border">
+          <div class="decorative-corners top-left"></div>
+          <div class="decorative-corners top-right"></div>
+          <div class="decorative-corners bottom-left"></div>
+          <div class="decorative-corners bottom-right"></div>
+          
+          <div class="watermark">OCTAMY</div>
+          
+          <div class="logo-section">
+            <div class="company-logo">O</div>
+            <div class="company-info">
+              <div class="company-name">Octamy Solutions</div>
+              <div class="company-tagline">Professional Excellence</div>
+            </div>
+          </div>
+          
+          <div class="verification-qr">
+            <div class="qr-code">QR CODE</div>
+            <div class="qr-text">Verify Online</div>
+          </div>
+          
+          <div class="certificate-content">
+            <div class="certificate-header">
+              <div class="certificate-title">CERTIFICATE</div>
+              <div class="certificate-subtitle">OF PROFESSIONAL ACHIEVEMENT</div>
+            </div>
+            
+            <div class="certificate-body">
+              <div class="recipient-text">This is to certify that</div>
+              <div class="recipient-name">${data.userName}</div>
+              
+              <div class="course-text">
+                has successfully completed the professional certification program
+              </div>
+              <div class="course-title">${data.courseTitle}</div>
+              
+              <div class="performance-section">
+                <div class="score-text">
+                  Score Achieved: ${data.userScore}% | Passing Score: ${data.passingScore}%
+                </div>
+              </div>
+            </div>
+            
+            <div class="certificate-footer">
+              <div class="signature-section">
+                <div class="signature-line"></div>
+                <div class="signature-title">Director</div>
+                <div class="signature-name">Octamy Solutions</div>
+              </div>
+              
+              <div class="certificate-details">
+                <div>Certificate ID: ${data.certificateId}</div>
+                <div>Issue Date: ${data.issueDate.toLocaleDateString()}</div>
+                <div>Completion Date: ${data.completionDate.toLocaleDateString()}</div>
+                <div>Valid Internationally</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="iso-badges">
+            <div class="iso-badge">ISO<br>9001</div>
+            <div class="iso-badge">ISO<br>27001</div>
+          </div>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
   const browser = await puppeteer.launch({
     headless: true,
     args: ['--no-sandbox', '--disable-setuid-sandbox']
   });
-  
-  const page = await browser.newPage();
-  
-  const html = generateCertificateHTML(data);
-  
-  await page.setContent(html, { waitUntil: 'networkidle0' });
-  await page.setViewport({ width: 1200, height: 850 });
-  
-  const pdf = await page.pdf({
-    format: 'A4',
-    landscape: true,
-    printBackground: true,
-    margin: {
-      top: '10mm',
-      bottom: '10mm',
-      left: '10mm',
-      right: '10mm'
-    }
-  });
-  
-  await browser.close();
-  return Buffer.from(pdf);
+
+  try {
+    const page = await browser.newPage();
+    await page.setContent(html, { waitUntil: 'networkidle0' });
+    
+    const pdf = await page.pdf({
+      format: 'A4',
+      landscape: true,
+      printBackground: true,
+      margin: { top: 0, right: 0, bottom: 0, left: 0 }
+    });
+
+    return Buffer.from(pdf);
+  } finally {
+    await browser.close();
+  }
 }
 
-export function generateCertificateHTML(data: CertificateData): string {
-  return `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Professional Certificate</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+export async function generateInvoicePDF(data: {
+  transactionId: string;
+  customerName: string;
+  customerEmail: string;
+  courseTitle: string;
+  amount: string;
+  certificateAmount: string;
+  shippingAmount: string;
+  includesPhysicalCopy: boolean;
+  date: Date;
+  paymentMethod: string;
+}): Promise<Buffer> {
+  const html = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Invoice - Octamy Solutions</title>
+      <style>
         body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
+          font-family: Arial, sans-serif;
+          margin: 0;
+          padding: 20px;
+          background: #f8f9fa;
         }
-
-        .certificate-container {
-            width: 1050px;
-            height: 750px;
-            background: white;
-            position: relative;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
-            border-radius: 15px;
-            overflow: hidden;
-        }
-
-        .certificate-border {
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            right: 15px;
-            bottom: 15px;
-            border: 4px solid #1a202c;
-            border-radius: 10px;
-        }
-
-        .decorative-border {
-            position: absolute;
-            top: 25px;
-            left: 25px;
-            right: 25px;
-            bottom: 25px;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-        }
-
-        .corner-ornament {
-            position: absolute;
-            width: 80px;
-            height: 80px;
-            border: 3px solid #1a202c;
-        }
-
-        .corner-ornament.top-left {
-            top: 40px;
-            left: 40px;
-            border-right: none;
-            border-bottom: none;
-        }
-
-        .corner-ornament.top-right {
-            top: 40px;
-            right: 40px;
-            border-left: none;
-            border-bottom: none;
-        }
-
-        .corner-ornament.bottom-left {
-            bottom: 40px;
-            left: 40px;
-            border-right: none;
-            border-top: none;
-        }
-
-        .corner-ornament.bottom-right {
-            bottom: 40px;
-            right: 40px;
-            border-left: none;
-            border-top: none;
-        }
-
-        .header {
-            text-align: center;
-            padding: 60px 60px 40px;
-            position: relative;
-        }
-
-        .logo-section {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            padding: 0 20px;
-        }
-
-        .logo-group {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .logo {
-            height: 50px;
-            width: auto;
-        }
-
-        .octamy-logo {
-            height: 60px;
-            font-weight: 700;
-            font-size: 32px;
-            color: #1a202c;
-            letter-spacing: -1px;
-        }
-
-        .cert-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 48px;
-            font-weight: 700;
-            color: #1a202c;
-            margin-bottom: 15px;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-        }
-
-        .cert-subtitle {
-            font-size: 18px;
-            color: #4a5568;
-            font-weight: 300;
-            margin-bottom: 40px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
-        .content {
-            text-align: center;
-            padding: 0 80px 40px;
-        }
-
-        .awarded-text {
-            font-size: 22px;
-            color: #2d3748;
-            margin-bottom: 20px;
-            font-style: italic;
-        }
-
-        .student-name {
-            font-family: 'Playfair Display', serif;
-            font-size: 42px;
-            font-weight: 600;
-            color: #1a202c;
-            margin: 20px 0 30px;
-            border-bottom: 3px solid #1a202c;
-            padding-bottom: 10px;
-            display: inline-block;
-        }
-
-        .completion-text {
-            font-size: 20px;
-            color: #2d3748;
-            margin-bottom: 15px;
-            line-height: 1.6;
-        }
-
-        .course-name {
-            font-family: 'Playfair Display', serif;
-            font-size: 32px;
-            font-weight: 600;
-            color: #1a202c;
-            margin: 25px 0;
-        }
-
-        .achievement-details {
-            display: flex;
-            justify-content: space-around;
-            margin: 40px 0;
-            padding: 20px 0;
-            border-top: 2px solid #e2e8f0;
-            border-bottom: 2px solid #e2e8f0;
-        }
-
-        .detail-item {
-            text-align: center;
-        }
-
-        .detail-label {
-            font-size: 14px;
-            color: #718096;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 5px;
-        }
-
-        .detail-value {
-            font-size: 18px;
-            font-weight: 600;
-            color: #1a202c;
-        }
-
-        .footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            padding: 0 80px 60px;
-            margin-top: 40px;
-        }
-
-        .signature-section {
-            text-align: center;
-            flex: 1;
-        }
-
-        .signature-line {
-            width: 200px;
-            height: 2px;
-            background: #1a202c;
-            margin: 40px auto 10px;
-        }
-
-        .signature-text {
-            font-size: 14px;
-            color: #718096;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .certification-info {
-            text-align: right;
-            flex: 1;
-        }
-
-        .cert-id {
-            font-size: 14px;
-            color: #718096;
-            margin-bottom: 5px;
-        }
-
-        .issue-date {
-            font-size: 14px;
-            color: #718096;
-        }
-
-        .verify-qr {
-            text-align: center;
-            flex: 1;
-        }
-
-        .qr-placeholder {
-            width: 80px;
-            height: 80px;
-            background: #f7fafc;
-            border: 2px solid #e2e8f0;
-            margin: 0 auto 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            color: #718096;
-        }
-
-        .verify-text {
-            font-size: 12px;
-            color: #718096;
-        }
-
-        .watermark {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) rotate(-45deg);
-            font-size: 120px;
-            color: rgba(26, 32, 44, 0.03);
-            font-weight: 700;
-            z-index: 1;
-            pointer-events: none;
-        }
-
-        .gold-accent {
-            background: linear-gradient(45deg, #d4af37, #ffd700);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        @media print {
-            body {
-                background: white;
-                padding: 0;
-            }
-            
-            .certificate-container {
-                box-shadow: none;
-                width: 100%;
-                height: 100%;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="certificate-container">
-        <div class="watermark">OCTAMY</div>
-        <div class="certificate-border"></div>
-        <div class="decorative-border"></div>
         
-        <div class="corner-ornament top-left"></div>
-        <div class="corner-ornament top-right"></div>
-        <div class="corner-ornament bottom-left"></div>
-        <div class="corner-ornament bottom-right"></div>
-
-        <div class="header">
-            <div class="logo-section">
-                <div class="logo-group">
-                    <div class="logo" style="background: #f0f0f0; padding: 10px; border-radius: 8px; font-size: 12px; color: #666;">ISO CERT</div>
-                    <div class="logo" style="background: #ff6b35; color: white; padding: 10px; border-radius: 8px; font-size: 12px; font-weight: bold;">STARTUP INDIA</div>
-                </div>
-                
-                <div class="octamy-logo gold-accent">OCTAMY</div>
-                
-                <div class="logo-group">
-                    <div class="logo" style="background: #4a90e2; color: white; padding: 10px; border-radius: 8px; font-size: 12px; font-weight: bold;">STARTUP ODISHA</div>
-                    <div class="logo" style="background: #f0f0f0; padding: 10px; border-radius: 8px; font-size: 12px; color: #666;">VERIFIED</div>
-                </div>
-            </div>
-
-            <h1 class="cert-title">Certificate</h1>
-            <p class="cert-subtitle">of Achievement</p>
+        .invoice-container {
+          max-width: 800px;
+          margin: 0 auto;
+          background: white;
+          padding: 40px;
+          box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .invoice-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: start;
+          margin-bottom: 40px;
+          border-bottom: 2px solid #000;
+          padding-bottom: 20px;
+        }
+        
+        .company-info h1 {
+          font-size: 28px;
+          font-weight: bold;
+          margin: 0 0 5px 0;
+          color: #000;
+        }
+        
+        .company-info p {
+          margin: 2px 0;
+          color: #666;
+          font-size: 14px;
+        }
+        
+        .invoice-details {
+          text-align: right;
+        }
+        
+        .invoice-number {
+          font-size: 24px;
+          font-weight: bold;
+          color: #000;
+          margin-bottom: 10px;
+        }
+        
+        .invoice-date {
+          color: #666;
+          font-size: 14px;
+        }
+        
+        .billing-section {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 40px;
+        }
+        
+        .billing-info h3 {
+          font-size: 16px;
+          font-weight: bold;
+          margin-bottom: 10px;
+          color: #000;
+        }
+        
+        .billing-info p {
+          margin: 5px 0;
+          color: #333;
+          font-size: 14px;
+        }
+        
+        .items-table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-bottom: 30px;
+        }
+        
+        .items-table th {
+          background: #000;
+          color: white;
+          padding: 15px;
+          text-align: left;
+          font-weight: bold;
+        }
+        
+        .items-table td {
+          padding: 15px;
+          border-bottom: 1px solid #eee;
+        }
+        
+        .items-table .amount {
+          text-align: right;
+          font-weight: bold;
+        }
+        
+        .total-section {
+          display: flex;
+          justify-content: flex-end;
+          margin-bottom: 40px;
+        }
+        
+        .total-table {
+          min-width: 300px;
+        }
+        
+        .total-table tr td {
+          padding: 8px 15px;
+          text-align: right;
+        }
+        
+        .total-table .total-label {
+          font-weight: bold;
+          text-align: left;
+        }
+        
+        .total-table .grand-total {
+          background: #000;
+          color: white;
+          font-weight: bold;
+          font-size: 18px;
+        }
+        
+        .payment-info {
+          background: #f8f9fa;
+          padding: 20px;
+          border-left: 4px solid #000;
+          margin-bottom: 30px;
+        }
+        
+        .payment-info h3 {
+          margin-top: 0;
+          color: #000;
+        }
+        
+        .footer {
+          text-align: center;
+          color: #666;
+          font-size: 12px;
+          border-top: 1px solid #eee;
+          padding-top: 20px;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="invoice-container">
+        <div class="invoice-header">
+          <div class="company-info">
+            <h1>Octamy Solutions</h1>
+            <p>Professional Excellence in Certification</p>
+            <p>support@octamy.com</p>
+            <p>www.octamy.com</p>
+          </div>
+          <div class="invoice-details">
+            <div class="invoice-number">INVOICE</div>
+            <div class="invoice-date">${data.date.toLocaleDateString()}</div>
+          </div>
         </div>
-
-        <div class="content">
-            <p class="awarded-text">This is to certify that</p>
-            
-            <h2 class="student-name">${data.studentName}</h2>
-            
-            <p class="completion-text">
-                has successfully completed the comprehensive course
-            </p>
-            
-            <h3 class="course-name">${data.courseName}</h3>
-            
-            <div class="achievement-details">
-                <div class="detail-item">
-                    <div class="detail-label">Score Achieved</div>
-                    <div class="detail-value">${data.score}%</div>
-                </div>
-                <div class="detail-item">
-                    <div class="detail-label">Completion Date</div>
-                    <div class="detail-value">${data.completionDate}</div>
-                </div>
-                <div class="detail-item">
-                    <div class="detail-label">Duration</div>
-                    <div class="detail-value">${data.courseDuration || '2 Hours'}</div>
-                </div>
-                <div class="detail-item">
-                    <div class="detail-label">Grade</div>
-                    <div class="detail-value">${data.score >= 90 ? 'Excellent' : data.score >= 80 ? 'Very Good' : data.score >= 70 ? 'Good' : 'Pass'}</div>
-                </div>
-            </div>
+        
+        <div class="billing-section">
+          <div class="billing-info">
+            <h3>Bill To:</h3>
+            <p><strong>${data.customerName}</strong></p>
+            <p>${data.customerEmail}</p>
+          </div>
+          <div class="billing-info">
+            <h3>Payment Details:</h3>
+            <p>Transaction ID: ${data.transactionId}</p>
+            <p>Payment Method: ${data.paymentMethod}</p>
+            <p>Status: Completed</p>
+          </div>
         </div>
-
+        
+        <table class="items-table">
+          <thead>
+            <tr>
+              <th>Description</th>
+              <th>Course</th>
+              <th class="amount">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Digital Certificate</td>
+              <td>${data.courseTitle}</td>
+              <td class="amount">₹${data.certificateAmount}</td>
+            </tr>
+            ${data.includesPhysicalCopy ? `
+            <tr>
+              <td>Physical Certificate Shipping</td>
+              <td>Premium Paper & Delivery</td>
+              <td class="amount">₹${data.shippingAmount}</td>
+            </tr>
+            ` : ''}
+          </tbody>
+        </table>
+        
+        <div class="total-section">
+          <table class="total-table">
+            <tr>
+              <td class="total-label">Subtotal:</td>
+              <td>₹${data.certificateAmount}</td>
+            </tr>
+            ${data.includesPhysicalCopy ? `
+            <tr>
+              <td class="total-label">Shipping:</td>
+              <td>₹${data.shippingAmount}</td>
+            </tr>
+            ` : ''}
+            <tr>
+              <td class="total-label">Tax:</td>
+              <td>₹0.00</td>
+            </tr>
+            <tr class="grand-total">
+              <td class="total-label">Total:</td>
+              <td>₹${data.amount}</td>
+            </tr>
+          </table>
+        </div>
+        
+        <div class="payment-info">
+          <h3>Payment Information</h3>
+          <p><strong>Status:</strong> Payment Completed Successfully</p>
+          <p><strong>Certificate:</strong> Available for immediate download</p>
+          ${data.includesPhysicalCopy ? '<p><strong>Physical Copy:</strong> Will be shipped within 7-10 business days</p>' : ''}
+          <p><strong>Verification:</strong> Certificate can be verified online using the certificate ID</p>
+        </div>
+        
         <div class="footer">
-            <div class="signature-section">
-                <div class="signature-line"></div>
-                <p class="signature-text">Director, Octamy Solutions</p>
-            </div>
-            
-            <div class="verify-qr">
-                <div class="qr-placeholder">QR CODE</div>
-                <p class="verify-text">Scan to Verify</p>
-            </div>
-            
-            <div class="certification-info">
-                <p class="cert-id">Certificate ID: ${data.certificateId}</p>
-                <p class="issue-date">Issued: ${data.issueDate}</p>
-            </div>
+          <p>© 2025 Octamy Solutions. All rights reserved.</p>
+          <p>This is a computer-generated invoice. No signature required.</p>
+          <p>For queries, contact support@octamy.com</p>
         </div>
-    </div>
-</body>
-</html>
+      </div>
+    </body>
+    </html>
   `;
+
+  const browser = await puppeteer.launch({
+    headless: true,
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
+  });
+
+  try {
+    const page = await browser.newPage();
+    await page.setContent(html, { waitUntil: 'networkidle0' });
+    
+    const pdf = await page.pdf({
+      format: 'A4',
+      printBackground: true,
+      margin: { top: '20px', right: '20px', bottom: '20px', left: '20px' }
+    });
+
+    return Buffer.from(pdf);
+  } finally {
+    await browser.close();
+  }
 }

@@ -98,12 +98,14 @@ class EmailService {
               <p><strong>Issue Date:</strong> ${new Date().toLocaleDateString()}</p>
             </div>
             
-            <p>Your certificate is attached to this email as a PDF file. You can also:</p>
+            <p>Your certificate and invoice are attached to this email as PDF files. You can also:</p>
             <ul>
-              <li>Download it anytime from your dashboard</li>
-              <li>Verify its authenticity using the certificate ID</li>
-              <li>Share it on professional networks</li>
+              <li>Download them anytime from your dashboard</li>
+              <li>Verify certificate authenticity using the certificate ID</li>
+              <li>Share your certificate on professional networks</li>
             </ul>
+            
+            ${includesPhysical ? '<p><strong>Physical Certificate:</strong> Your certificate will be printed on premium paper and shipped to your registered address within 7-10 business days.</p>' : ''}
             
             <p>Thank you for choosing Octamy Solutions for your professional development!</p>
           </div>
@@ -125,6 +127,11 @@ class EmailService {
         {
           filename: `${certificateId}-certificate.pdf`,
           content: certificateBuffer,
+          contentType: 'application/pdf',
+        },
+        {
+          filename: `${certificateId}-invoice.pdf`,
+          content: invoiceBuffer,
           contentType: 'application/pdf',
         },
       ],
