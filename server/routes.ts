@@ -281,9 +281,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Get correct answers from session mapping
       const correctAnswersMapping = (global as any).questionMappings?.[sessionId] || {};
-      console.log('Session ID:', sessionId);
-      console.log('Available sessions:', Object.keys((global as any).questionMappings || {}));
-      console.log('Correct answers mapping:', correctAnswersMapping);
       
       // Transform answers array to Record<string, number> format
       const answersRecord: Record<string, number> = {};
@@ -297,8 +294,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // If answers is already in the correct format
         Object.assign(answersRecord, answers);
       }
-      
-      console.log('User answers:', answersRecord);
 
       // Calculate score using session-specific correct answers
       let correctAnswers = 0;
@@ -306,7 +301,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       for (const [questionId, userAnswer] of Object.entries(answersRecord)) {
         const correctAnswer = correctAnswersMapping[parseInt(questionId)];
-        console.log(`Question ${questionId}: user=${userAnswer}, correct=${correctAnswer}`);
         if (correctAnswer !== undefined && correctAnswer === userAnswer) {
           correctAnswers++;
         }
