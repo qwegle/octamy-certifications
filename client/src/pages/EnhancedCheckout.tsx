@@ -264,12 +264,12 @@ export default function EnhancedCheckout() {
     }
   };
 
-  if (courseLoading) {
+  if (courseLoading || certificateLoading) {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin w-8 h-8 border-2 border-white border-t-transparent rounded-full mx-auto mb-4"></div>
-          <p>Loading course details...</p>
+          <p>Loading checkout details...</p>
         </div>
       </div>
     );

@@ -26,7 +26,16 @@ export default function Payment() {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">Loading certificate...</h2>
+          <h2 className="text-2xl font-bold mb-4">Certificate Not Found</h2>
+          <p className="text-gray-600 mb-4">
+            The certificate you're looking for doesn't exist. You may need to take and pass the exam first.
+          </p>
+          <Button onClick={() => setLocation('/courses')} className="mr-2">
+            Browse Courses
+          </Button>
+          <Button onClick={() => setLocation('/dashboard')} variant="outline">
+            Go to Dashboard
+          </Button>
         </div>
       </div>
     );
@@ -87,7 +96,7 @@ export default function Payment() {
             {/* Payment Form */}
             <PayUMoneyForm
               certificateId={certificateId!}
-              courseId={certificate.courseId || 67}
+              courseId={certificate.courseId}
               amount="99"
               userEmail={certificate.userEmail}
               userName={certificate.userName}
