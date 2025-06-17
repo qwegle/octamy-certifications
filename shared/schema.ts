@@ -287,6 +287,65 @@ export const userActivity = pgTable("user_activity", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Learning Paths for Personalized Course Sequences
+export const learningPaths = pgTable("learning_paths", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  categoryId: integer("category_id").references(() => categories.id).notNull(),
+  difficulty: text("difficulty").notNull(), // beginner, intermediate, advanced
+  estimatedDuration: integer("estimated_duration").notNull(), // in hours
+  courseSequence: json("course_sequence").$type<number[]>().notNull(), // ordered course IDs
+  prerequisites: json("prerequisites").$type<{
+    minScore?: number;
+    requiredCourses?: number[];
+    skillLevel?: string;
+  }>().default({}),
+  tags: json("tags").$type<string[]>().default([]),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdBy: integer("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const userLearningPaths = pgTable("user_learning_paths", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  learningPathId: integer("learning_path_id").references(() => learningPaths.id).notNull(),
+  status: text("status").notNull().default("not_started"), // not_started, in_progress, completed, paused
+  currentCourseIndex: integer("current_course_index").notNull().default(0),
+  progressPercentage: integer("progress_percentage").notNull().default(0),
+  startedAt: timestamp("started_at"),
+  completedAt: timestamp("completed_at"),
+  estimatedCompletionDate: timestamp("estimated_completion_date"),
+  personalizedAdjustments: json("personalized_adjustments").$type<{
+    recommendedPace?: 'slow' | 'normal' | 'fast';
+    skipRecommendations?: number[];
+    additionalCourses?: number[];
+    difficultyAdjustment?: 'easier' | 'standard' | 'harder';
+  }>().default({}),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const skillAssessments = pgTable("skill_assessments", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  categoryId: integer("category_id").references(() => categories.id).notNull(),
+  skillLevel: text("skill_level").notNull(), // novice, intermediate, advanced, expert
+  strengths: json("strengths").$type<string[]>().default([]),
+  weaknesses: json("weaknesses").$type<string[]>().default([]),
+  recommendedCourses: json("recommended_courses").$type<number[]>().default([]),
+  assessmentData: json("assessment_data").$type<{
+    questions?: number;
+    correctAnswers?: number;
+    timeSpent?: number;
+    confidenceScore?: number;
+  }>(),
+  validUntil: timestamp("valid_until"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // Course progress tracking
 export const userCourseProgress = pgTable("user_course_progress", {
   id: serial("id").primaryKey(),
@@ -350,6 +409,11 @@ export const usersRelations = relations(users, ({ many }) => ({
   courseProgress: many(userCourseProgress),
   achievements: many(userAchievements),
   addresses: many(userAddresses),
+  preferences: many(userPreferences),
+  learningPaths: many(userLearningPaths),
+  skillAssessments: many(skillAssessments),
+  recommendations: many(courseRecommendations),
+  activity: many(userActivity),
 }));
 
 export const userAddressesRelations = relations(userAddresses, ({ one }) => ({
@@ -361,6 +425,8 @@ export const userAddressesRelations = relations(userAddresses, ({ one }) => ({
 
 export const categoriesRelations = relations(categories, ({ many }) => ({
   courses: many(courses),
+  learningPaths: many(learningPaths),
+  skillAssessments: many(skillAssessments),
 }));
 
 export const coursesRelations = relations(courses, ({ one, many }) => ({
@@ -501,6 +567,41 @@ export const userActivityRelations = relations(userActivity, ({ one }) => ({
   user: one(users, {
     fields: [userActivity.userId],
     references: [users.id],
+  }),
+}));
+
+// Learning Path Relations
+export const learningPathsRelations = relations(learningPaths, ({ one, many }) => ({
+  category: one(categories, {
+    fields: [learningPaths.categoryId],
+    references: [categories.id],
+  }),
+  creator: one(users, {
+    fields: [learningPaths.createdBy],
+    references: [users.id],
+  }),
+  userPaths: many(userLearningPaths),
+}));
+
+export const userLearningPathsRelations = relations(userLearningPaths, ({ one }) => ({
+  user: one(users, {
+    fields: [userLearningPaths.userId],
+    references: [users.id],
+  }),
+  learningPath: one(learningPaths, {
+    fields: [userLearningPaths.learningPathId],
+    references: [learningPaths.id],
+  }),
+}));
+
+export const skillAssessmentsRelations = relations(skillAssessments, ({ one }) => ({
+  user: one(users, {
+    fields: [skillAssessments.userId],
+    references: [users.id],
+  }),
+  category: one(categories, {
+    fields: [skillAssessments.categoryId],
+    references: [categories.id],
   }),
 }));
 
@@ -661,3 +762,29 @@ export type CourseRecommendation = typeof courseRecommendations.$inferSelect;
 export type InsertCourseRecommendation = z.infer<typeof insertCourseRecommendationSchema>;
 export type UserActivity = typeof userActivity.$inferSelect;
 export type InsertUserActivity = z.infer<typeof insertUserActivitySchema>;
+
+// Learning Path Insert Schemas
+export const insertLearningPathSchema = createInsertSchema(learningPaths).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertUserLearningPathSchema = createInsertSchema(userLearningPaths).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertSkillAssessmentSchema = createInsertSchema(skillAssessments).omit({
+  id: true,
+  createdAt: true,
+});
+
+// Learning Path Types
+export type LearningPath = typeof learningPaths.$inferSelect;
+export type InsertLearningPath = z.infer<typeof insertLearningPathSchema>;
+export type UserLearningPath = typeof userLearningPaths.$inferSelect;
+export type InsertUserLearningPath = z.infer<typeof insertUserLearningPathSchema>;
+export type SkillAssessment = typeof skillAssessments.$inferSelect;
+export type InsertSkillAssessment = z.infer<typeof insertSkillAssessmentSchema>;
