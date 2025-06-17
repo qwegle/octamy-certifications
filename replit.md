@@ -104,6 +104,16 @@ Octamy is a comprehensive professional certification platform built as a full-st
 
 ## Recent Updates
 
+### Certificate Design Enhancement with Signature Integration (June 17, 2025)
+- **Enhanced certificate styling** with professional Poppins font family and refined typography
+- **Integrated authentic signature** of Nitikesh Pattanayak (Director of Certification) into certificate design
+- **Updated certificate elements** including recipient name, course name, completion text, and footer sections
+- **Professional color scheme** using #1f2138 for primary text and improved visual hierarchy
+- **Signature positioning** above signature line with proper sizing and placement
+- **Certification logos** sized to 55px height for optimal presentation and authenticity
+- **Badge styling** with precise positioning and professional verification elements
+- **Footer section** enhanced with 70px margin and proper certificate details formatting
+
 ### PayUMoney Payment System Fix (June 17, 2025)
 - **Fixed critical payment flow issue** where certificates were created as already paid (isPaid: true)
 - **Corrected certificate creation logic** in both routes.ts and certificateController.ts to always create unpaid certificates

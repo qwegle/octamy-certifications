@@ -259,10 +259,14 @@ export default function CertificateView() {
                   </p>
                   
                   <div 
-                    className="text-6xl font-semibold text-gray-900 my-12 py-8 relative tracking-wider"
+                    className="recipient-name my-12 py-8 relative"
                     style={{ 
-                      fontFamily: "'Cormorant Garamond', serif",
-                      letterSpacing: '6px'
+                      fontSize: '28px',
+                      fontWeight: '600',
+                      color: '#1f2138',
+                      fontFamily: "'Poppins', serif",
+                      position: 'relative',
+                      padding: '10px 0'
                     }}
                   >
                     <div 
@@ -277,20 +281,33 @@ export default function CertificateView() {
                   </div>
                   
                   <p 
-                    className="text-xl text-gray-600 my-10 leading-relaxed tracking-wide"
-                    style={{ fontFamily: "'Crimson Text', serif", letterSpacing: '0.5px' }}
+                    className="completion-text my-10"
+                    style={{ 
+                      fontSize: '14px',
+                      color: '#666',
+                      margin: '15px 0',
+                      lineHeight: '1.6',
+                      fontFamily: "'Poppins', serif"
+                    }}
                   >
                     has successfully demonstrated mastery and completed the comprehensive<br />
                     professional certification program
                   </p>
                   
                   <div 
-                    className="text-4xl font-semibold text-gray-900 my-10 uppercase tracking-widest inline-block px-12 py-6 border border-yellow-500 rounded bg-gradient-to-br from-yellow-50 via-yellow-25 to-yellow-50"
+                    className="course-name my-10"
                     style={{ 
-                      fontFamily: "'Cormorant Garamond', serif",
-                      letterSpacing: '4px',
-                      background: 'linear-gradient(145deg, rgba(212,175,55,0.1) 0%, rgba(244,224,157,0.15) 50%, rgba(212,175,55,0.1) 100%)',
-                      borderColor: '#d4af37'
+                      fontSize: '20px',
+                      fontWeight: '600',
+                      color: '#1f2138',
+                      margin: '15px 0',
+                      padding: '12px 25px',
+                      border: '2px solid #000000',
+                      borderRadius: '6px',
+                      background: 'linear-gradient(141deg, rgba(192, 192, 192, 0.1) 0%, rgba(192, 192, 192, 0.05) 100%)',
+                      fontFamily: "'Poppins', serif",
+                      textTransform: 'uppercase',
+                      letterSpacing: '2px'
                     }}
                   >
                     {certificate.courseTitle}
@@ -368,10 +385,17 @@ export default function CertificateView() {
               </div>
               
               {/* Footer */}
-              <div className="absolute bottom-12 flex justify-between w-full px-20">
+              <div className="footer-section absolute bottom-12 flex justify-between w-full px-20" style={{ marginBottom: '70px' }}>
                 <div className="text-left">
+                  {/* Signature Image */}
+                  <img 
+                    src="/attached_assets/Nitikesh_signature_1750177747117.png" 
+                    alt="Nitikesh Pattanayak Signature" 
+                    className="mb-2 h-12 w-auto"
+                    style={{ height: '48px', width: 'auto', marginBottom: '8px' }}
+                  />
                   <div 
-                    className="w-60 h-px mb-3 relative"
+                    className="w-60 h-px mb-3 relative signature-line"
                     style={{ background: 'linear-gradient(90deg, #d4af37, transparent)' }}
                   >
                     <div 
@@ -380,55 +404,87 @@ export default function CertificateView() {
                     ></div>
                   </div>
                   <div 
-                    className="text-xs text-gray-600 uppercase tracking-widest font-semibold mb-1"
-                    style={{ fontFamily: "'Inter', sans-serif", letterSpacing: '1.5px' }}
+                    className="signature-name"
+                    style={{ 
+                      fontSize: '14px',
+                      color: '#000',
+                      fontWeight: '600',
+                      marginTop: '3px',
+                      fontFamily: "'Poppins', serif"
+                    }}
                   >
-                    Authorized Signature
+                    Nitikesh Pattanayak
                   </div>
                   <div 
-                    className="text-base text-gray-700 font-semibold tracking-wide"
-                    style={{ fontFamily: "'Crimson Text', serif", letterSpacing: '0.5px' }}
-                  >
-                    Dr. Rajesh Kumar
-                  </div>
-                  <div 
-                    className="text-xs text-gray-500 uppercase tracking-wide mt-1"
-                    style={{ fontFamily: "'Inter', sans-serif", letterSpacing: '1px' }}
+                    className="company-tagline"
+                    style={{ 
+                      fontSize: '12px',
+                      color: '#1f2138',
+                      marginBottom: '5px',
+                      fontFamily: "'Poppins', sans-serif"
+                    }}
                   >
                     Director of Certification
                   </div>
                 </div>
                 
-                <div className="text-right">
+                <div className="text-right certificate-details">
                   <div 
                     className="w-20 h-20 bg-gradient-to-br from-yellow-500 via-yellow-400 to-yellow-500 border-2 border-gray-900 rounded-full mb-4 flex items-center justify-center relative shadow-lg mx-auto"
                     style={{ boxShadow: '0 4px 8px rgba(212,175,55,0.3)' }}
                   >
                     <div 
-                      className="text-xs font-extrabold text-gray-900 text-center leading-tight tracking-wide"
-                      style={{ fontFamily: "'Inter', sans-serif", letterSpacing: '0.5px' }}
+                      className="badge-text"
+                      style={{
+                        position: 'absolute',
+                        top: '68%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        fontSize: '12px',
+                        fontWeight: '700',
+                        color: '#fff',
+                        textAlign: 'center',
+                        zIndex: '10',
+                        fontFamily: "'Inter', sans-serif"
+                      }}
                     >
                       VERIFIED
                     </div>
                   </div>
                   <div 
-                    className="text-xs text-gray-600 uppercase tracking-wide font-semibold mb-1"
-                    style={{ fontFamily: "'Inter', sans-serif", letterSpacing: '1px' }}
+                    className="expiry-info"
+                    style={{ 
+                      fontSize: '11px',
+                      color: '#666',
+                      fontFamily: "'Poppins', sans-serif",
+                      textAlign: 'left'
+                    }}
                   >
-                    Digital Verification
-                  </div>
-                  <div 
-                    className="text-xs text-gray-700 font-semibold tracking-wide"
-                    style={{ fontFamily: "'Crimson Text', serif", letterSpacing: '0.5px' }}
-                  >
+                    Digital Verification<br />
                     verify.octamy.com
                   </div>
                 </div>
                 
                 {/* Certification Logos */}
-                <div className="flex justify-center items-center gap-8 mt-10 pt-6 border-t-2 border-yellow-500">
-                  <img src="https://images.seeklogo.com/logo-png/55/2/iso-certified-company-stamp-logo-png_seeklogo-556487.png" alt="ISO Certified" className="h-12 w-auto object-contain" />
-                  <img src="https://static.vecteezy.com/system/resources/previews/019/909/405/non_2x/make-in-india-transparent-make-in-india-free-free-png.png" alt="Make in India" className="h-12 w-auto object-contain" />
+                <div className="certification-logos flex justify-center items-center gap-8 mt-10 pt-6 border-t-2 border-yellow-500">
+                  <img 
+                    src="https://images.seeklogo.com/logo-png/55/2/iso-certified-company-stamp-logo-png_seeklogo-556487.png" 
+                    alt="ISO Certified" 
+                    style={{ 
+                      height: '55px',
+                      width: 'auto',
+                      objectFit: 'contain'
+                    }} 
+                  />
+                  <img 
+                    src="https://static.vecteezy.com/system/resources/previews/019/909/405/non_2x/make-in-india-transparent-make-in-india-free-free-png.png" 
+                    alt="Make in India" 
+                    style={{ 
+                      height: '55px',
+                      width: 'auto',
+                      objectFit: 'contain'
+                    }} 
+                  />
                 </div>
               </div>
             </div>
