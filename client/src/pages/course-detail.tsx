@@ -15,7 +15,7 @@ export default function CourseDetail() {
   const { user } = useAuth();
   const [referralCode, setReferralCode] = useState<string | null>(null);
 
-  // Extract referral code from URL parameters
+  // Extract referral code from URL parameters and track click
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const ref = urlParams.get('ref');
@@ -23,6 +23,22 @@ export default function CourseDetail() {
       setReferralCode(ref);
       // Store in localStorage for persistence across navigation
       localStorage.setItem('referralCode', ref);
+      
+      // Track the referral click immediately when course page is visited
+      if (course?.id) {
+        fetch('/api/referral/track-click', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            referralCode: ref,
+            courseId: course.id,
+          }),
+        }).catch(error => {
+          console.error('Failed to track referral click:', error);
+        });
+      }
     } else {
       // Check if we have a stored referral code
       const storedRef = localStorage.getItem('referralCode');
@@ -30,7 +46,7 @@ export default function CourseDetail() {
         setReferralCode(storedRef);
       }
     }
-  }, []);
+  }, [course?.id]);
 
   const { data: course, isLoading } = useQuery<Course & { category: Category }>({
     queryKey: ['/api/courses/slug', slug],
