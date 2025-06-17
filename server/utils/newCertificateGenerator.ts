@@ -187,7 +187,7 @@ function generateCertificateHTML(data: CertificateData): string {
           color: #666;
           margin-bottom: 15px;
           font-style: italic;
-          font-family: 'Playfair Display', serif;
+          font-family: 'Poppins', sans-serif;
         }
         
         .recipient-name {
@@ -261,7 +261,7 @@ function generateCertificateHTML(data: CertificateData): string {
           color: #fff;
           text-align: center;
           z-index: 10;
-          font-family: 'Inter', sans-serif;
+          font-family: 'Poppins', sans-serif;
         }
         
         .footer-section {
@@ -277,7 +277,7 @@ function generateCertificateHTML(data: CertificateData): string {
           font-size: 10px;
           color: #666;
           line-height: 1.6;
-          font-family: 'Inter', sans-serif;
+          font-family: 'Poppins', sans-serif;
         }
         
         .signature-section {
@@ -427,8 +427,7 @@ function generateCertificateHTML(data: CertificateData): string {
             </div>
 
             <div class="main-content">
-              <div class="certificate-title">Certificate</div>
-              <div class="certificate-subtitle">of Professional Excellence</div>
+              <div class="certificate-title">Certificate of Completion</div>
               
               <div class="awarded-text">This is to certify that</div>
               
