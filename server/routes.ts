@@ -107,8 +107,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isAdmin: false,
       });
 
-      // Generate JWT token
-      const token = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET);
+      // Generate JWT token with 24 hour expiration
+      const token = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, { expiresIn: '24h' });
       
       res.json({ token, user: { id: user.id, email: user.email, name: user.name, isAdmin: user.isAdmin } });
     } catch (error) {
@@ -131,7 +131,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
-      const token = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET);
+      const token = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, { expiresIn: '24h' });
       
       res.json({ token, user: { id: user.id, email: user.email, name: user.name, isAdmin: user.isAdmin } });
     } catch (error) {
@@ -600,8 +600,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         password: hashedPassword,
       });
 
-      // Generate JWT token
-      const token = jwt.sign({ sellerId: seller.id, email: seller.email }, JWT_SECRET);
+      // Generate JWT token with 24 hour expiration
+      const token = jwt.sign({ sellerId: seller.id, email: seller.email }, JWT_SECRET, { expiresIn: '24h' });
       
       res.json({ 
         token, 
