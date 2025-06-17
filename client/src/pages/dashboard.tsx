@@ -65,12 +65,23 @@ export default function Dashboard() {
     );
   }
 
+  // CERTIFICATE DISPLAY LOGIC FOR DEVELOPERS:
+  // Dashboard shows certificates in three categories based on status and payment
+  
+  // 1. Active Certificates: Paid certificates that haven't expired yet
+  // These are the user's valid, downloadable certificates
   const activeCertificates = certificates.filter(cert => 
     cert.isActive && cert.isPaid && new Date(cert.expiresAt) > new Date()
   );
+  
+  // 2. Expired Certificates: Paid certificates that have passed their expiry date
+  // These were valid certificates but are no longer current
   const expiredCertificates = certificates.filter(cert => 
     cert.isActive && cert.isPaid && new Date(cert.expiresAt) <= new Date()
   );
+  
+  // 3. Unpaid Certificates: Certificates created after passing exams but not yet purchased
+  // Users need to complete payment to activate these certificates
   const unpaidCertificates = certificates.filter(cert => !cert.isPaid);
 
   return (

@@ -268,6 +268,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // EXAM SUBMISSION ENDPOINT WITH IMPROVED SCORING LOGIC
+  // This endpoint handles exam submissions and determines pass/fail based on these rules:
+  // 1. First-time exam takers: Must score >= 50% to pass
+  // 2. Retakers: Must score higher than their previous best attempt to pass
+  // The response includes detailed information about retake status and scoring thresholds
   app.post("/api/exam/submit", optionalAuth, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { courseId, answers, timeSpent, timeTaken, userEmail, userName, sessionId, tabSwitches } = req.body;
@@ -305,8 +310,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
         delete (global as any).questionMappings[sessionId];
       }
       
+      // Calculate the final score percentage
       const score = Math.round((correctAnswers / totalQuestions) * 100);
-      const passed = score >= 50;
+      
+      // EXAM PASSING LOGIC:
+      // 1. First time exam takers: Need >= 50% to pass
+      // 2. Retakers: Need to score higher than their previous best score
+      let passed = false;
+      let isRetake = false;
+      let previousBestScore = 0;
+      
+      // Check if user has taken this exam before
+      if (req.user?.userId) {
+        const previousAttempts = await storage.getExamAttemptsByUserAndCourse(req.user.userId, courseId);
+        
+        if (previousAttempts.length > 0) {
+          isRetake = true;
+          // Find the highest score from previous attempts
+          previousBestScore = Math.max(...previousAttempts.map(attempt => attempt.score));
+          
+          // For retakers: Must score higher than previous best
+          passed = score > previousBestScore;
+        } else {
+          // First time: Must score >= 50%
+          passed = score >= 50;
+        }
+      } else {
+        // Anonymous users (first time only): Must score >= 50%
+        passed = score >= 50;
+      }
+      
+      // Mastery is achieved at 90% regardless of attempt number
       const mastered = score >= 90;
       
       // Anti-cheating validation (relaxed for demo purposes)
@@ -336,12 +370,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         tabSwitches: req.body.tabSwitches || 0,
       });
       
+      // Return comprehensive exam result with retake information for frontend
       res.json({
         examAttemptId: examAttempt.id,
         score,
         passed,
         correctAnswers,
         totalQuestions,
+        // Additional information for developers and frontend logic
+        isRetake,
+        previousBestScore,
+        passingThreshold: isRetake ? previousBestScore + 1 : 50, // What score was needed to pass
+        message: passed 
+          ? (isRetake 
+            ? `Congratulations! You improved from ${previousBestScore}% to ${score}%`
+            : `Congratulations! You passed with ${score}%`)
+          : (isRetake 
+            ? `You scored ${score}%. You need to score higher than your previous best of ${previousBestScore}% to pass.`
+            : `You scored ${score}%. You need at least 50% to pass.`)
       });
     } catch (error) {
       console.error("Error submitting exam:", error);
@@ -404,12 +450,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Generate unique certificate number
       const certificateNumber = generateCertificateNumber();
       
-      // Only create certificate if score is passing (≥50%)
-      if (examAttempt.score < 50) {
+      // CERTIFICATE CREATION LOGIC:
+      // Only create certificates for exam attempts that actually passed
+      // This uses the same logic as exam submission:
+      // - First time: Must have scored ≥50%
+      // - Retakes: Must have scored higher than previous best
+      
+      if (!examAttempt.passed) {
+        // Get user's exam history to provide helpful error message
+        let errorMessage = `Certificate can only be created for passing exam attempts. Current score: ${examAttempt.score}%`;
+        
+        if (req.user?.userId) {
+          const userAttempts = await storage.getExamAttemptsByUserAndCourse(req.user.userId, examAttempt.courseId);
+          const otherAttempts = userAttempts.filter(attempt => attempt.id !== examAttempt.id);
+          
+          if (otherAttempts.length > 0) {
+            const previousBest = Math.max(...otherAttempts.map(attempt => attempt.score));
+            errorMessage = `This is a retake attempt. You scored ${examAttempt.score}% but need to score higher than your previous best of ${previousBest}% to get a certificate.`;
+          } else {
+            errorMessage = `This is your first attempt. You scored ${examAttempt.score}% but need at least 50% to get a certificate.`;
+          }
+        }
+        
         return res.status(400).json({ 
-          message: "Certificate can only be created for passing scores (50% or higher)",
+          message: errorMessage,
           score: examAttempt.score,
-          required: 50
+          passed: false
         });
       }
 
