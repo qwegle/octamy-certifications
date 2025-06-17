@@ -348,6 +348,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!course) {
         return res.status(404).json({ message: "Course not found" });
       }
+
+      // Check if user already has a certificate for this course
+      const existingCertificate = await storage.getUserCertificateForCourse(
+        examAttempt.userId || null, 
+        examAttempt.courseId,
+        examAttempt.userEmail
+      );
+
+      if (existingCertificate) {
+        // If new score is lower or equal, don't allow payment
+        if (examAttempt.score <= existingCertificate.score) {
+          return res.status(400).json({ 
+            message: `You already have a certificate with a higher score (${existingCertificate.score}%). You cannot purchase a certificate with a lower score.`,
+            existingScore: existingCertificate.score,
+            newScore: examAttempt.score
+          });
+        }
+        
+        // If new score is higher, update existing certificate
+        const badge = getBadgeFromScore(examAttempt.score);
+        
+        const updatedCertificate = await storage.updateCertificate(existingCertificate.id, {
+          examAttemptId,
+          score: examAttempt.score,
+          badge,
+          isPaid: false, // Reset payment status for new score
+          retakeCount: existingCertificate.retakeCount + 1
+        });
+        
+        return res.json(updatedCertificate);
+      }
       
       // Generate certificate ID
       const certificateId = `OCT-${new Date().getFullYear()}-${course.title.replace(/\s+/g, '').toUpperCase().slice(0, 3)}-${Date.now()}`;
@@ -358,7 +389,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Generate unique certificate number
       const certificateNumber = generateCertificateNumber();
       
-      // Create certificate with badge system and enhanced features
+      // Create new certificate
       const certificate = await storage.createCertificate({
         certificateId,
         examAttemptId,

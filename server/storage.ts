@@ -454,6 +454,41 @@ export class DatabaseStorage implements IStorage {
       .where(eq(certificates.id, id));
   }
 
+  async getUserCertificateForCourse(userId: number | null, courseId: number, userEmail: string): Promise<Certificate | undefined> {
+    const [certificate] = await db
+      .select()
+      .from(certificates)
+      .where(
+        and(
+          eq(certificates.courseId, courseId),
+          userId ? eq(certificates.userId, userId) : eq(certificates.userEmail, userEmail)
+        )
+      );
+    return certificate || undefined;
+  }
+
+  async updateCertificate(id: number, updates: Partial<InsertCertificate>): Promise<Certificate> {
+    const [certificate] = await db
+      .update(certificates)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(certificates.id, id))
+      .returning();
+    return certificate;
+  }
+
+  async getUserCertificatesCount(userId: number | null, userEmail?: string): Promise<number> {
+    const whereCondition = userId 
+      ? eq(certificates.userId, userId)
+      : eq(certificates.userEmail, userEmail || '');
+    
+    const result = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(certificates)
+      .where(whereCondition);
+    
+    return result[0]?.count || 0;
+  }
+
   // Payment operations
   async createPayment(insertPayment: InsertPayment): Promise<Payment> {
     const [payment] = await db
