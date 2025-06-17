@@ -12,11 +12,12 @@ import { motion, AnimatePresence } from "framer-motion";
 
 interface LearningPath {
   id: number;
-  name: string;
+  title: string;
   description: string;
   difficulty: string;
   estimatedDuration: number;
-  courseSequence: number[];
+  courseIds: number[];
+  prerequisites: number[];
   categoryId: number;
   isActive: boolean;
   category: {
@@ -285,7 +286,7 @@ export default function LearningPaths() {
                     'Data Science & Analytics': TrendingUp,
                     'Cybersecurity Specialist': Shield,
                   };
-                  const IconComponent = pathIcons[path.name] || BookOpen;
+                  const IconComponent = pathIcons[path.title] || BookOpen;
                   
                   return (
                     <motion.div
@@ -303,7 +304,7 @@ export default function LearningPaths() {
                               </div>
                               <div>
                                 <CardTitle className="text-lg text-black dark:text-white">
-                                  {path.name}
+                                  {path.title}
                                 </CardTitle>
                                 <CardDescription className="text-gray-600 dark:text-gray-400 mt-1">
                                   {path.category?.name || 'Professional'}
@@ -327,7 +328,7 @@ export default function LearningPaths() {
                             </div>
                             <div className="flex items-center gap-1">
                               <BookOpen className="w-4 h-4" />
-                              {path.courseSequence?.length || 0} courses
+                              {path.courseIds?.length || 0} courses
                             </div>
                           </div>
 
@@ -408,7 +409,7 @@ export default function LearningPaths() {
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <CardTitle className="text-lg text-black dark:text-white">
-                            {userPath.learningPath.name}
+                            {userPath.learningPath.title}
                           </CardTitle>
                           <CardDescription className="text-gray-600 dark:text-gray-400 mt-1">
                             {userPath.learningPath.category?.name || 'Professional'}
@@ -436,7 +437,7 @@ export default function LearningPaths() {
                       <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
                         <div className="flex items-center gap-1">
                           <Trophy className="w-4 h-4" />
-                          {userPath.completedCourses?.length || 0}/{userPath.learningPath.courseSequence?.length || 0} completed
+                          {userPath.completedCourses?.length || 0}/{userPath.learningPath.courseIds?.length || 0} completed
                         </div>
                         <div className="flex items-center gap-1">
                           <Clock className="w-4 h-4" />
