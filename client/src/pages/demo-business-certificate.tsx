@@ -246,14 +246,14 @@ export default function DemoBusinessCertificate() {
 
             <Card>
               <CardContent className="p-6">
-                <h3 className="font-bold text-lg mb-4">Get Business Certificates</h3>
+                <h3 className="font-bold text-lg mb-4">Support Our Project</h3>
                 <p className="text-sm text-gray-600 mb-4">
-                  Ready to get your team certified with company-branded certificates? Contact us for custom business pricing.
+                  Help us continue developing innovative certification solutions. Your support enables us to build better features and reach more learners.
                 </p>
                 <div className="space-y-2">
-                  <Link href="/business-certificates">
+                  <Link href="/sponsors">
                     <Button className="w-full bg-black text-white hover:bg-gray-800">
-                      Get Business Pricing
+                      Become a Sponsor
                     </Button>
                   </Link>
                   <Link href="/">

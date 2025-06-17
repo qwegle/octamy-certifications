@@ -282,9 +282,11 @@ export default function Landing() {
               </CardContent>
             </Card>
           </div>
-          <Button size="lg" className="bg-white text-black hover:bg-gray-200">
-            Get Business Pricing
-          </Button>
+          <Link href="/sponsors">
+            <Button size="lg" className="bg-white text-black hover:bg-gray-200">
+              Support Our Project
+            </Button>
+          </Link>
         </div>
       </section>
 
