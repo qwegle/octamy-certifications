@@ -92,7 +92,10 @@ export default function SellerDashboard() {
     
     // If no token after loading is complete, redirect to login
     if (!token) {
-      window.location.href = '/seller-auth';
+      // Use setTimeout to prevent immediate redirect loops
+      setTimeout(() => {
+        window.location.href = '/seller-auth';
+      }, 100);
       return;
     }
     
