@@ -11,7 +11,7 @@ import { apiRequest } from '@/lib/queryClient';
 import { useAuth } from '@/lib/auth';
 import Header from '@/components/header';
 import ExamTimer from '@/components/exam-timer';
-import OctamyMascot from '@/components/OctamyMascot';
+
 import type { Course, Question } from '@shared/schema';
 import { AlertTriangle } from 'lucide-react';
 
@@ -427,14 +427,7 @@ export default function Exam() {
         </Card>
       </div>
       
-      {/* Mascot for exam encouragement */}
-      <OctamyMascot 
-        currentPage="exam"
-        onAction={(action) => {
-          // Mascot actions during exam are limited to avoid distraction
-          console.log('Exam mascot action:', action);
-        }}
-      />
+
     </div>
   );
 }

@@ -5,24 +5,25 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BookOpen, Clock, Trophy, Target, Star, Users, TrendingUp, CheckCircle } from "lucide-react";
+import { BookOpen, Clock, Trophy, Target, Star, Users, TrendingUp, CheckCircle, Lock, Play, Zap, Brain, Code, Shield } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface LearningPath {
   id: number;
-  title: string;
+  name: string;
   description: string;
   difficulty: string;
   estimatedDuration: number;
-  courseIds: number[];
-  prerequisites: number[];
+  courseSequence: number[];
   categoryId: number;
   isActive: boolean;
   category: {
     id: number;
     name: string;
   };
+  tags?: string[];
 }
 
 interface UserLearningPath {
@@ -147,6 +148,118 @@ export default function LearningPaths() {
           </TabsList>
 
           <TabsContent value="discover" className="mt-6">
+            {/* Skill Tree Visualization */}
+            <div className="mb-8 p-6 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950 dark:to-purple-950 rounded-lg border">
+              <h2 className="text-2xl font-bold text-center mb-6 text-black dark:text-white">
+                Interactive Skill Tree
+              </h2>
+              <div className="relative overflow-x-auto">
+                <svg width="800" height="400" className="mx-auto">
+                  {/* Connection lines */}
+                  <defs>
+                    <linearGradient id="pathGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stopColor="#3B82F6" />
+                      <stop offset="100%" stopColor="#8B5CF6" />
+                    </linearGradient>
+                  </defs>
+                  
+                  {/* Skill tree paths */}
+                  <motion.path
+                    d="M150 200 L250 200 L350 150 L450 100"
+                    stroke="url(#pathGradient)"
+                    strokeWidth="3"
+                    fill="none"
+                    strokeDasharray="10,5"
+                    initial={{ pathLength: 0 }}
+                    animate={{ pathLength: 1 }}
+                    transition={{ duration: 2, delay: 0.5 }}
+                  />
+                  <motion.path
+                    d="M150 200 L250 200 L350 250 L450 300"
+                    stroke="url(#pathGradient)"
+                    strokeWidth="3"
+                    fill="none"
+                    strokeDasharray="10,5"
+                    initial={{ pathLength: 0 }}
+                    animate={{ pathLength: 1 }}
+                    transition={{ duration: 2, delay: 1 }}
+                  />
+                  <motion.path
+                    d="M450 100 L550 150 L650 200"
+                    stroke="url(#pathGradient)"
+                    strokeWidth="3"
+                    fill="none"
+                    strokeDasharray="10,5"
+                    initial={{ pathLength: 0 }}
+                    animate={{ pathLength: 1 }}
+                    transition={{ duration: 2, delay: 1.5 }}
+                  />
+                  
+                  {/* Skill nodes */}
+                  {[
+                    { x: 150, y: 200, icon: "🎯", label: "Fundamentals", unlocked: true, level: 1 },
+                    { x: 350, y: 150, icon: "🧠", label: "AI/ML", unlocked: true, level: 2 },
+                    { x: 350, y: 250, icon: "💼", label: "Business", unlocked: true, level: 2 },
+                    { x: 450, y: 100, icon: "🤖", label: "Advanced AI", unlocked: false, level: 3 },
+                    { x: 450, y: 300, icon: "📊", label: "Analytics", unlocked: false, level: 3 },
+                    { x: 650, y: 200, icon: "🏆", label: "Mastery", unlocked: false, level: 4 },
+                  ].map((node, index) => (
+                    <g key={index}>
+                      <motion.circle
+                        cx={node.x}
+                        cy={node.y}
+                        r="30"
+                        fill={node.unlocked ? "#10B981" : "#6B7280"}
+                        stroke={node.unlocked ? "#059669" : "#4B5563"}
+                        strokeWidth="3"
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ delay: index * 0.3, type: "spring", stiffness: 260, damping: 20 }}
+                        className="cursor-pointer"
+                      />
+                      <motion.text
+                        x={node.x}
+                        y={node.y + 5}
+                        textAnchor="middle"
+                        fontSize="20"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: index * 0.3 + 0.5 }}
+                      >
+                        {node.icon}
+                      </motion.text>
+                      <motion.text
+                        x={node.x}
+                        y={node.y + 50}
+                        textAnchor="middle"
+                        fontSize="12"
+                        fill="currentColor"
+                        className="font-medium"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: index * 0.3 + 0.7 }}
+                      >
+                        {node.label}
+                      </motion.text>
+                      {!node.unlocked && (
+                        <motion.g
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ delay: index * 0.3 + 1 }}
+                        >
+                          <circle cx={node.x + 20} cy={node.y - 20} r="8" fill="#EF4444" />
+                          <text x={node.x + 20} y={node.y - 15} textAnchor="middle" fontSize="10" fill="white">🔒</text>
+                        </motion.g>
+                      )}
+                    </g>
+                  ))}
+                </svg>
+              </div>
+              <div className="text-center mt-4 text-sm text-gray-600 dark:text-gray-400">
+                Complete learning paths to unlock advanced skills and specializations
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {pathsLoading ? (
                 Array.from({ length: 6 }).map((_, i) => (
@@ -163,50 +276,94 @@ export default function LearningPaths() {
                     </CardContent>
                   </Card>
                 ))
-              ) : (
-                learningPaths.map((path: LearningPath) => (
-                  <Card key={path.id} className="border-gray-200 dark:border-gray-800 hover:shadow-lg transition-shadow">
-                    <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <CardTitle className="text-lg text-black dark:text-white">
-                            {path.title}
-                          </CardTitle>
-                          <CardDescription className="text-gray-600 dark:text-gray-400 mt-1">
-                            {path.category.name}
-                          </CardDescription>
-                        </div>
-                        <Badge className={getDifficultyColor(path.difficulty)}>
-                          {path.difficulty}
-                        </Badge>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-3">
-                        {path.description}
-                      </p>
-                      
-                      <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
-                        <div className="flex items-center gap-1">
-                          <Clock className="w-4 h-4" />
-                          {formatDuration(path.estimatedDuration)}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <BookOpen className="w-4 h-4" />
-                          {path.courseIds.length} courses
-                        </div>
-                      </div>
+              ) : learningPaths.length > 0 ? (
+                learningPaths.map((path: LearningPath, index: number) => {
+                  const pathIcons: Record<string, any> = {
+                    'AI & Machine Learning Mastery': Brain,
+                    'Full-Stack Development Pro': Code,
+                    'Business Leadership Excellence': Target,
+                    'Data Science & Analytics': TrendingUp,
+                    'Cybersecurity Specialist': Shield,
+                  };
+                  const IconComponent = pathIcons[path.name] || BookOpen;
+                  
+                  return (
+                    <motion.div
+                      key={path.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                    >
+                      <Card className="border-gray-200 dark:border-gray-800 hover:shadow-lg transition-all duration-300 hover:scale-105">
+                        <CardHeader>
+                          <div className="flex items-start justify-between">
+                            <div className="flex items-center gap-3 flex-1">
+                              <div className="p-2 rounded-full bg-blue-100 dark:bg-blue-900">
+                                <IconComponent className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                              </div>
+                              <div>
+                                <CardTitle className="text-lg text-black dark:text-white">
+                                  {path.name}
+                                </CardTitle>
+                                <CardDescription className="text-gray-600 dark:text-gray-400 mt-1">
+                                  {path.category?.name || 'Professional'}
+                                </CardDescription>
+                              </div>
+                            </div>
+                            <Badge className={getDifficultyColor(path.difficulty)}>
+                              {path.difficulty}
+                            </Badge>
+                          </div>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-3">
+                            {path.description}
+                          </p>
+                          
+                          <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
+                            <div className="flex items-center gap-1">
+                              <Clock className="w-4 h-4" />
+                              {formatDuration(path.estimatedDuration)}
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <BookOpen className="w-4 h-4" />
+                              {path.courseSequence?.length || 0} courses
+                            </div>
+                          </div>
 
-                      <Button
-                        onClick={() => enrollMutation.mutate(path.id)}
-                        disabled={enrollMutation.isPending}
-                        className="w-full bg-black text-white hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200"
-                      >
-                        {enrollMutation.isPending ? "Enrolling..." : "Enroll Now"}
-                      </Button>
-                    </CardContent>
-                  </Card>
-                ))
+                          {path.tags && path.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-1">
+                              {path.tags.slice(0, 3).map((tag, i) => (
+                                <Badge key={i} variant="outline" className="text-xs">
+                                  {tag}
+                                </Badge>
+                              ))}
+                            </div>
+                          )}
+
+                          <Button
+                            onClick={() => enrollMutation.mutate(path.id)}
+                            disabled={enrollMutation.isPending}
+                            className="w-full bg-black text-white hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200 flex items-center gap-2"
+                          >
+                            <Play className="w-4 h-4" />
+                            {enrollMutation.isPending ? "Enrolling..." : "Start Learning Path"}
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  );
+                })
+              ) : (
+                <div className="col-span-full text-center py-12">
+                  <Target className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    No Learning Paths Available
+                  </h3>
+                  <p className="text-gray-500 dark:text-gray-400">
+                    Check back soon for new learning paths
+                  </p>
+                </div>
               )}
             </div>
           </TabsContent>
@@ -251,10 +408,10 @@ export default function LearningPaths() {
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <CardTitle className="text-lg text-black dark:text-white">
-                            {userPath.learningPath.title}
+                            {userPath.learningPath.name}
                           </CardTitle>
                           <CardDescription className="text-gray-600 dark:text-gray-400 mt-1">
-                            {userPath.learningPath.category.name}
+                            {userPath.learningPath.category?.name || 'Professional'}
                           </CardDescription>
                         </div>
                         {userPath.completedAt && (
@@ -279,7 +436,7 @@ export default function LearningPaths() {
                       <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
                         <div className="flex items-center gap-1">
                           <Trophy className="w-4 h-4" />
-                          {userPath.completedCourses.length}/{userPath.learningPath.courseIds.length} completed
+                          {userPath.completedCourses?.length || 0}/{userPath.learningPath.courseSequence?.length || 0} completed
                         </div>
                         <div className="flex items-center gap-1">
                           <Clock className="w-4 h-4" />
