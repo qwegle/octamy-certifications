@@ -428,15 +428,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get certificate by ID (database ID, not certificate ID)
+  // Get certificate by ID (certificate ID string, not database ID)
   app.get("/api/certificates/:id", async (req, res) => {
     try {
-      const certificateId = parseInt(req.params.id);
-      const certificate = await storage.getCertificate(certificateId);
-      if (!certificate) {
-        return res.status(404).json({ message: "Certificate not found" });
+      const certificateId = req.params.id;
+      
+      // If it looks like a certificate ID (OCT-YYYY-XXX-TIMESTAMP), use getCertificateByCertificateId
+      if (certificateId.startsWith('OCT-')) {
+        const certificate = await storage.getCertificateByCertificateId(certificateId);
+        if (!certificate) {
+          return res.status(404).json({ message: "Certificate not found" });
+        }
+        res.json(certificate);
+      } else {
+        // Otherwise try to parse as database ID
+        const dbId = parseInt(certificateId);
+        if (isNaN(dbId)) {
+          return res.status(400).json({ message: "Invalid certificate ID" });
+        }
+        const certificate = await storage.getCertificate(dbId);
+        if (!certificate) {
+          return res.status(404).json({ message: "Certificate not found" });
+        }
+        res.json(certificate);
       }
-      res.json(certificate);
     } catch (error) {
       console.error("Error fetching certificate:", error);
       res.status(500).json({ message: "Failed to fetch certificate" });

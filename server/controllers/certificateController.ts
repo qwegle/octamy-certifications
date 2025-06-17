@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { storage } from '../storage';
-import { generateCertificateHTML } from '../utils/certificateGenerator';
+import { generateCertificatePDF } from '../utils/certificateGenerator';
 
 interface AuthenticatedRequest extends Request {
   user?: {
