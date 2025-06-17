@@ -1265,7 +1265,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Handle seller commission if applicable
           if (sellerCode) {
             console.log(`Processing commission for seller code: ${sellerCode}`);
-            const seller = await storage.getSellerByEmail(sellerCode);
+            const seller = await storage.getSellerByReferralCode(sellerCode);
             console.log(`Seller found:`, seller ? `ID: ${seller.id}, Approved: ${seller.isApproved}` : 'Not found');
             
             if (seller && seller.isApproved) {

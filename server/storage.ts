@@ -618,6 +618,11 @@ export class DatabaseStorage implements IStorage {
     return seller || undefined;
   }
 
+  async getSellerByReferralCode(referralCode: string): Promise<Seller | undefined> {
+    const [seller] = await db.select().from(sellers).where(eq(sellers.referralCode, referralCode));
+    return seller || undefined;
+  }
+
   async createSeller(insertSeller: InsertSeller): Promise<Seller> {
     const [seller] = await db
       .insert(sellers)
