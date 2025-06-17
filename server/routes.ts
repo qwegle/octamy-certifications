@@ -10,6 +10,9 @@ import { LearningPathController } from './controllers/learningPathController';
 import { payuMoneyService } from "./payumoney";
 import { getBadgeFromScore, generateCertificateNumber, calculateExpiryDate } from "./utils";
 import apiRoutes from "./routes/index";
+import { emailService } from "./utils/emailService";
+import { generateCertificatePDF } from "./utils/certificateGenerator";
+import { generateInvoicePDF } from "./utils/invoiceGenerator";
 // Using dynamic import for puppeteer to avoid ES module issues
 
 interface AuthenticatedRequest extends Request {
@@ -1271,7 +1274,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
           }
 
-          // Send success notification to user if registered
+          // Send success notification and email to user if registered
           if (userId) {
             const user = await storage.getUser(userId);
             if (user) {
@@ -1286,6 +1289,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   priority: "high"
                 }
               });
+
+              // Send email with certificate and invoice
+              try {
+                const course = await storage.getCourse(courseId);
+                const examAttempt = await storage.getExamAttemptByCertificateId(certificate.id);
+                
+                if (course && examAttempt) {
+                  // Generate certificate PDF
+                  const certificatePdf = await generateCertificatePDF({
+                    certificateId: certificate.certificateId,
+                    userName: user.name || user.email,
+                    courseTitle: course.title,
+                    issueDate: new Date(),
+                    completionDate: examAttempt.submittedAt || new Date(),
+                    passingScore: course.passingScore,
+                    userScore: examAttempt.score
+                  });
+
+                  // Generate invoice PDF
+                  const invoicePdf = await generateInvoicePDF({
+                    transactionId: responseData.txnid,
+                    customerName: user.name || user.email,
+                    customerEmail: user.email,
+                    courseTitle: course.title,
+                    amount: payment.amount,
+                    certificateAmount: payment.certificateAmount || payment.amount,
+                    shippingAmount: payment.shippingAmount || "0.00",
+                    includesPhysicalCopy: payment.includesPhysicalCopy || false,
+                    date: new Date(),
+                    paymentMethod: "PayUMoney"
+                  });
+
+                  // Send email with attachments
+                  const emailSent = await emailService.sendCertificateEmail(
+                    user.email,
+                    user.name || user.email,
+                    course.title,
+                    certificate.certificateId,
+                    certificatePdf,
+                    invoicePdf,
+                    payment.includesPhysicalCopy || false
+                  );
+
+                  if (emailSent) {
+                    console.log(`Certificate and invoice emailed successfully to ${user.email}`);
+                  } else {
+                    console.error(`Failed to send email to ${user.email}`);
+                  }
+                }
+              } catch (emailError) {
+                console.error("Error sending certificate email:", emailError);
+              }
             }
           }
 

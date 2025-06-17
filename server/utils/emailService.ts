@@ -23,7 +23,7 @@ class EmailService {
       throw new Error('Gmail credentials not provided. Please set GMAIL_EMAIL and GMAIL_APP_PASSWORD environment variables.');
     }
 
-    this.transporter = nodemailer.createTransporter({
+    this.transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
         user: process.env.GMAIL_EMAIL,

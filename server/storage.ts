@@ -106,6 +106,7 @@ export interface IStorage {
   createExamAttempt(attempt: InsertExamAttempt): Promise<ExamAttempt>;
   getExamAttempt(id: number): Promise<ExamAttempt | undefined>;
   getUserExamAttempts(userId: number, courseId?: number): Promise<ExamAttempt[]>;
+  getExamAttemptByCertificateId(certificateId: number): Promise<ExamAttempt | undefined>;
 
   // Certificate operations
   createCertificate(certificate: InsertCertificate): Promise<Certificate>;
@@ -436,6 +437,28 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(examAttempts.createdAt));
     
     return await query;
+  }
+
+  async getExamAttemptByCertificateId(certificateId: number): Promise<ExamAttempt | undefined> {
+    // Get the certificate first to find the associated exam attempt
+    const certificate = await this.getCertificate(certificateId);
+    if (!certificate) return undefined;
+
+    // Find the exam attempt for this user and course
+    const [attempt] = await db
+      .select()
+      .from(examAttempts)
+      .where(
+        and(
+          eq(examAttempts.userId, certificate.userId || 0),
+          eq(examAttempts.courseId, certificate.courseId),
+          eq(examAttempts.passed, true)
+        )
+      )
+      .orderBy(desc(examAttempts.createdAt))
+      .limit(1);
+    
+    return attempt || undefined;
   }
 
   // Certificate operations
