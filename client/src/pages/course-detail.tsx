@@ -7,12 +7,30 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Clock, Users, Award, Star, ChevronRight } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useLocation } from "wouter";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function CourseDetail() {
   const { slug } = useParams();
   const [, setLocation] = useLocation();
   const { user } = useAuth();
+  const [referralCode, setReferralCode] = useState<string | null>(null);
+
+  // Extract referral code from URL parameters
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const ref = urlParams.get('ref');
+    if (ref) {
+      setReferralCode(ref);
+      // Store in localStorage for persistence across navigation
+      localStorage.setItem('referralCode', ref);
+    } else {
+      // Check if we have a stored referral code
+      const storedRef = localStorage.getItem('referralCode');
+      if (storedRef) {
+        setReferralCode(storedRef);
+      }
+    }
+  }, []);
 
   const { data: course, isLoading } = useQuery<Course & { category: Category }>({
     queryKey: ['/api/courses/slug', slug],

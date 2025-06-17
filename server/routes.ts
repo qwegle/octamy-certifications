@@ -1249,11 +1249,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
           // Handle seller commission if applicable
           if (sellerCode) {
+            console.log(`Processing commission for seller code: ${sellerCode}`);
             const seller = await storage.getSellerByEmail(sellerCode);
+            console.log(`Seller found:`, seller ? `ID: ${seller.id}, Approved: ${seller.isApproved}` : 'Not found');
+            
             if (seller && seller.isApproved) {
               const course = await storage.getCourse(courseId);
               if (course) {
                 const commissionAmount = (parseFloat(course.price) * parseFloat(seller.commissionRate)) / 100;
+                console.log(`Creating sale record: Commission ${commissionAmount} for course ${course.title} (${course.price})`);
                 
                 await storage.createSale({
                   sellerId: seller.id,
@@ -1267,11 +1271,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
                 // Update seller earnings
                 const currentEarnings = parseFloat(seller.totalEarnings || "0");
+                const newEarnings = currentEarnings + commissionAmount;
+                console.log(`Updating seller earnings from ${currentEarnings} to ${newEarnings}`);
+                
                 await storage.updateSeller(seller.id, {
-                  totalEarnings: (currentEarnings + commissionAmount).toString()
+                  totalEarnings: newEarnings.toString()
                 });
               }
+            } else {
+              console.log(`Seller not found or not approved for code: ${sellerCode}`);
             }
+          } else {
+            console.log('No seller code provided in payment');
           }
 
           // Send success notification and email to user if registered
