@@ -38,14 +38,37 @@ interface Partner {
 }
 
 interface Analytics {
+  totalUsers: number;
+  totalCourses: number;
+  totalCertificates: number;
+  totalSellers: number;
+  approvedSellers: number;
+  pendingSellers: number;
+  totalRevenue: number;
   totalClicks: number;
   totalConversions: number;
-  totalRevenue: number;
-  totalPartners: number;
-  approvedPartners: number;
-  pendingPartners: number;
-  topPerformingPartners: Partner[];
-  recentActivity: any[];
+}
+
+interface Withdrawal {
+  id: number;
+  sellerId: number;
+  amount: string;
+  status: string;
+  requestedAt: string;
+  processedAt: string;
+  sellerName: string;
+  sellerEmail: string;
+  upiId: string;
+}
+
+interface Transaction {
+  id: number;
+  transactionId: string;
+  amount: string;
+  status: string;
+  createdAt: string;
+  referralCode: string;
+  certificateId: number;
 }
 
 export default function AdminDashboard() {

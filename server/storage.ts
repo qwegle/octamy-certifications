@@ -1423,24 +1423,108 @@ export class DatabaseStorage implements IStorage {
     return result;
   }
 
-  // Admin analytics
+  // Admin analytics with comprehensive data
   async getAdminAnalytics() {
     const totalUsers = await db.select({ count: sql`count(*)::int` }).from(users);
     const totalCourses = await db.select({ count: sql`count(*)::int` }).from(courses);
     const totalCertificates = await db.select({ count: sql`count(*)::int` }).from(certificates);
     const totalSellers = await db.select({ count: sql`count(*)::int` }).from(sellers);
+    const approvedSellers = await db.select({ count: sql`count(*)::int` }).from(sellers).where(eq(sellers.isApproved, true));
+    const pendingSellers = await db.select({ count: sql`count(*)::int` }).from(sellers).where(eq(sellers.isApproved, false));
+    
+    // Calculate total revenue from payments
+    const totalRevenue = await db.select({ 
+      total: sql`COALESCE(SUM(CAST(amount AS DECIMAL)), 0)::int` 
+    }).from(payments).where(eq(payments.status, 'success'));
+    
+    // Get total clicks and conversions
+    const totalClicks = await db.select({ count: sql`count(*)::int` }).from(referralClicks);
+    const totalConversions = await db.select({ count: sql`count(*)::int` }).from(payments);
     
     return {
       totalUsers: Number(totalUsers[0]?.count) || 0,
       totalCourses: Number(totalCourses[0]?.count) || 0,
       totalCertificates: Number(totalCertificates[0]?.count) || 0,
-      totalSellers: Number(totalSellers[0]?.count) || 0
+      totalSellers: Number(totalSellers[0]?.count) || 0,
+      approvedSellers: Number(approvedSellers[0]?.count) || 0,
+      pendingSellers: Number(pendingSellers[0]?.count) || 0,
+      totalRevenue: Number(totalRevenue[0]?.total) || 0,
+      totalClicks: Number(totalClicks[0]?.count) || 0,
+      totalConversions: Number(totalConversions[0]?.count) || 0
     };
   }
 
-  // Get all sellers for admin
+  // Get all sellers with detailed analytics
   async getAllSellers() {
-    return await db.select().from(sellers).orderBy(desc(sellers.createdAt));
+    const sellersWithStats = await db.select({
+      id: sellers.id,
+      name: sellers.name,
+      email: sellers.email,
+      phone: sellers.phone,
+      isApproved: sellers.isApproved,
+      isActive: sellers.isActive,
+      referralCode: sellers.referralCode,
+      commissionRate: sellers.commissionRate,
+      upiId: sellers.upiId,
+      accountHolderName: sellers.accountHolderName,
+      createdAt: sellers.createdAt,
+      clickCount: sql`(
+        SELECT COUNT(*) FROM referral_clicks 
+        WHERE referral_code = ${sellers.referralCode}
+      )`.as('clickCount'),
+      conversionCount: sql`(
+        SELECT COUNT(*) FROM payments 
+        WHERE referral_code = ${sellers.referralCode} 
+        AND status = 'success'
+      )`.as('conversionCount'),
+      totalEarnings: sql`(
+        SELECT COALESCE(SUM(CAST(amount AS DECIMAL) * CAST(${sellers.commissionRate} AS DECIMAL) / 100), 0)
+        FROM payments 
+        WHERE referral_code = ${sellers.referralCode} 
+        AND status = 'success'
+      )`.as('totalEarnings')
+    }).from(sellers).orderBy(desc(sellers.createdAt));
+
+    return sellersWithStats.map(seller => ({
+      ...seller,
+      clickCount: Number(seller.clickCount) || 0,
+      conversionCount: Number(seller.conversionCount) || 0,
+      totalEarnings: Number(seller.totalEarnings) || 0,
+      conversionRate: seller.clickCount > 0 ? ((Number(seller.conversionCount) / Number(seller.clickCount)) * 100).toFixed(2) : '0.00'
+    }));
+  }
+
+  // Get withdrawal requests for admin
+  async getWithdrawalRequests() {
+    return await db.select({
+      id: withdrawalRequests.id,
+      sellerId: withdrawalRequests.sellerId,
+      amount: withdrawalRequests.amount,
+      status: withdrawalRequests.status,
+      requestedAt: withdrawalRequests.requestedAt,
+      processedAt: withdrawalRequests.processedAt,
+      sellerName: sellers.name,
+      sellerEmail: sellers.email,
+      upiId: sellers.upiId
+    })
+    .from(withdrawalRequests)
+    .leftJoin(sellers, eq(withdrawalRequests.sellerId, sellers.id))
+    .orderBy(desc(withdrawalRequests.requestedAt));
+  }
+
+  // Get recent transactions
+  async getRecentTransactions() {
+    return await db.select({
+      id: payments.id,
+      transactionId: payments.transactionId,
+      amount: payments.amount,
+      status: payments.status,
+      createdAt: payments.createdAt,
+      certificateId: payments.certificateId
+    })
+    .from(payments)
+    .orderBy(desc(payments.createdAt))
+    .limit(20);
   }
 }
 
