@@ -100,13 +100,13 @@ export class CertificateController {
       // Prepare certificate data for the new professional design
       const certificateData = {
         certificateId: certificate.certificateId,
-        userName: certificate.userName || 'Student Name',
+        userName: certificate.userName,
         courseTitle: course.title,
-        issueDate: certificate.issuedAt || new Date(),
-        completionDate: certificate.issuedAt || new Date(),
+        issueDate: certificate.issuedAt,
+        completionDate: certificate.issuedAt,
         passingScore: course.passingScore,
         userScore: certificate.score,
-        courseLevel: course.level || 'Beginner'
+        courseLevel: course.level
       };
 
       // Check if PDF download is requested

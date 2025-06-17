@@ -413,14 +413,14 @@ function generateCertificateHTML(data: CertificateData): string {
             
             <div class="awarded-text">This is to certify that</div>
             
-            <div class="recipient-name">${data.userName || 'Student Name'}</div>
+            <div class="recipient-name">${data.userName}</div>
             
             <div class="completion-text">
               has successfully demonstrated mastery and completed the comprehensive<br />
               professional certification program
             </div>
             
-            <div class="course-name">${data.courseTitle || 'Course Title'}</div>
+            <div class="course-name">${data.courseTitle}</div>
             
             <div class="achievement-section">
               <div class="badge-container">
@@ -465,12 +465,12 @@ function generateCertificateHTML(data: CertificateData): string {
                   <path d="M20 70 L15 85 L25 80 Z" fill="url(#ribbonGradient)" opacity="0.9"/>
                   <path d="M100 70 L105 85 L95 80 Z" fill="url(#ribbonGradient)" opacity="0.9"/>
                 </svg>
-                <div class="badge-text">${courseLevel.toUpperCase()}</div>
+                <div class="badge-text">${data.courseLevel.toUpperCase()}</div>
               </div>
               
               <div class="achievement-details">
-                <div class="achievement-score">Score Achieved: ${data.userScore || 0}%</div>
-                <div class="achievement-label">Passing Score: ${data.passingScore || 70}%</div>
+                <div class="achievement-score">Score Achieved: ${data.userScore}%</div>
+                <div class="achievement-label">Passing Score: ${data.passingScore}%</div>
               </div>
             </div>
             
