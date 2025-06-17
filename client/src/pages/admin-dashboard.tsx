@@ -509,6 +509,14 @@ export default function AdminDashboard() {
   const [showCourseForm, setShowCourseForm] = useState(false);
   const [editingCourse, setEditingCourse] = useState<AdminCourse | null>(null);
   const [isEditingCourse, setIsEditingCourse] = useState(false);
+  
+  // Pagination states
+  const [customersPage, setCustomersPage] = useState(1);
+  const [coursesPage, setCoursesPage] = useState(1);
+  const [examsPage, setExamsPage] = useState(1);
+  const [transactionsPage, setTransactionsPage] = useState(1);
+  const [partnersPage, setPartnersPage] = useState(1);
+  const itemsPerPage = 10;
 
   // Check admin authentication
   useEffect(() => {
@@ -798,7 +806,9 @@ export default function AdminDashboard() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {customers.map((customer: Customer) => (
+                        {customers
+                          .slice((customersPage - 1) * itemsPerPage, customersPage * itemsPerPage)
+                          .map((customer: Customer) => (
                           <TableRow key={customer.id}>
                             <TableCell className="font-medium">{customer.name}</TableCell>
                             <TableCell>{customer.email}</TableCell>
@@ -868,7 +878,9 @@ export default function AdminDashboard() {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {adminCourses.map((course: AdminCourse) => (
+                          {adminCourses
+                            .slice((coursesPage - 1) * itemsPerPage, coursesPage * itemsPerPage)
+                            .map((course: AdminCourse) => (
                             <TableRow key={course.id}>
                               <TableCell>
                                 <div>
@@ -970,6 +982,29 @@ export default function AdminDashboard() {
                           ))}
                         </TableBody>
                       </Table>
+                      {adminCourses.length > itemsPerPage && (
+                        <div className="flex justify-center gap-2 mt-4">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCoursesPage(Math.max(1, coursesPage - 1))}
+                            disabled={coursesPage === 1}
+                          >
+                            Previous
+                          </Button>
+                          <span className="flex items-center px-3 text-sm">
+                            Page {coursesPage} of {Math.ceil(adminCourses.length / itemsPerPage)}
+                          </span>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCoursesPage(Math.min(Math.ceil(adminCourses.length / itemsPerPage), coursesPage + 1))}
+                            disabled={coursesPage >= Math.ceil(adminCourses.length / itemsPerPage)}
+                          >
+                            Next
+                          </Button>
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 </>
@@ -999,7 +1034,9 @@ export default function AdminDashboard() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {examAttempts.map((attempt: ExamAttempt) => (
+                        {examAttempts
+                          .slice((examsPage - 1) * itemsPerPage, examsPage * itemsPerPage)
+                          .map((attempt: ExamAttempt) => (
                           <TableRow key={attempt.id}>
                             <TableCell>
                               <div>
@@ -1121,12 +1158,21 @@ export default function AdminDashboard() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {transactions.map((transaction: Transaction) => (
+                        {transactions
+                          .slice((transactionsPage - 1) * itemsPerPage, transactionsPage * itemsPerPage)
+                          .map((transaction: Transaction) => (
                           <TableRow key={transaction.id}>
                             <TableCell className="font-medium">{transaction.transactionId}</TableCell>
                             <TableCell>₹{transaction.amount}</TableCell>
                             <TableCell>
-                              <Badge variant={transaction.status === "success" ? "default" : "destructive"}>
+                              <Badge variant={
+                                transaction.status === "completed" ? "default" : 
+                                transaction.status === "success" ? "default" : 
+                                transaction.status === "pending" ? "secondary" : "destructive"
+                              } className={
+                                transaction.status === "completed" ? "bg-green-100 text-green-800 hover:bg-green-200" :
+                                transaction.status === "success" ? "bg-green-100 text-green-800 hover:bg-green-200" : ""
+                              }>
                                 {transaction.status}
                               </Badge>
                             </TableCell>

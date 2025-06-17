@@ -1407,10 +1407,10 @@ export class DatabaseStorage implements IStorage {
     const approvedSellers = await db.select({ count: sql`count(*)::int` }).from(sellers).where(eq(sellers.isApproved, true));
     const pendingSellers = await db.select({ count: sql`count(*)::int` }).from(sellers).where(eq(sellers.isApproved, false));
     
-    // Calculate total revenue from payments
+    // Calculate total revenue from completed certificates (actual revenue)
     const totalRevenue = await db.select({ 
-      total: sql`COALESCE(SUM(CAST(amount AS DECIMAL)), 0)::int` 
-    }).from(payments).where(eq(payments.status, 'success'));
+      total: sql`COALESCE(SUM(CAST(certificate_amount AS DECIMAL)), 0)::int` 
+    }).from(payments).where(eq(payments.status, 'completed'));
     
     // Get total clicks and conversions
     const totalClicks = await db.select({ count: sql`count(*)::int` }).from(referralClicks);
@@ -1517,7 +1517,7 @@ export class DatabaseStorage implements IStorage {
       totalSpent: sql`(
         SELECT COALESCE(SUM(CAST(certificate_amount AS DECIMAL)), 0)
         FROM payments 
-        WHERE user_id = ${users.id} AND status = 'success'
+        WHERE user_id = ${users.id} AND status = 'completed'
       )`.as('totalSpent')
     })
     .from(users)
@@ -1554,7 +1554,7 @@ export class DatabaseStorage implements IStorage {
       revenue: sql`(
         SELECT COALESCE(SUM(CAST(certificate_amount AS DECIMAL)), 0)
         FROM payments 
-        WHERE course_id = ${courses.id} AND status = 'success'
+        WHERE course_id = ${courses.id} AND status = 'completed'
       )`.as('revenue')
     })
     .from(courses)
