@@ -1,75 +1,33 @@
-import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { Link, useLocation } from "wouter";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { queryClient, apiRequest } from "@/lib/queryClient";
+import { useLocation } from "wouter";
 import { 
+  Shield, 
   Users, 
-  TrendingUp, 
   DollarSign, 
-  MousePointer, 
-  Award,
-  CheckCircle,
-  XCircle,
-  Eye,
-  Download,
-  BarChart3,
-  Shield,
-  LogOut
+  TrendingUp, 
+  Eye, 
+  Check, 
+  X, 
+  BookOpen, 
+  GraduationCap, 
+  BarChart3, 
+  UserCheck, 
+  Download, 
+  Plus, 
+  Edit, 
+  Trash2,
+  LogOut,
+  MousePointer,
+  Award
 } from "lucide-react";
-
-interface Partner {
-  id: number;
-  name: string;
-  email: string;
-  isApproved: boolean;
-  totalEarnings: number;
-  pendingEarnings: number;
-  referralCode: string;
-  clickCount: number;
-  conversionCount: number;
-  conversionRate: number;
-  createdAt: string;
-}
-
-interface Analytics {
-  totalUsers: number;
-  totalCourses: number;
-  totalCertificates: number;
-  totalSellers: number;
-  approvedSellers: number;
-  pendingSellers: number;
-  totalRevenue: number;
-  totalClicks: number;
-  totalConversions: number;
-}
-
-interface Withdrawal {
-  id: number;
-  sellerId: number;
-  amount: string;
-  status: string;
-  requestedAt: string;
-  processedAt: string;
-  sellerName: string;
-  sellerEmail: string;
-  upiId: string;
-}
-
-interface Transaction {
-  id: number;
-  transactionId: string;
-  amount: string;
-  status: string;
-  createdAt: string;
-  referralCode: string;
-  certificateId: number;
-}
 
 interface Customer {
   id: number;
@@ -102,15 +60,6 @@ interface AdminCourse {
   revenue: number;
 }
 
-interface Question {
-  id: number;
-  courseId: number;
-  questionText: string;
-  options: string[];
-  correctAnswer: number;
-  explanation: string;
-}
-
 interface ExamAttempt {
   id: number;
   userId: number;
@@ -125,46 +74,55 @@ interface ExamAttempt {
   passed: boolean;
 }
 
+interface Transaction {
+  id: number;
+  transactionId: string;
+  amount: string;
+  status: string;
+  createdAt: string;
+  certificateId: number;
+}
+
+interface Partner {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+  referralCode: string;
+  isApproved: boolean;
+  totalEarnings: number;
+  createdAt: string;
+}
+
+interface WithdrawalRequest {
+  id: number;
+  sellerId: number;
+  amount: string;
+  status: string;
+  createdAt: string;
+  sellerName: string;
+  sellerEmail: string;
+  upiId: string;
+  accountHolderName: string;
+}
+
 export default function AdminDashboard() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("overview");
 
   // Check admin authentication
-  const adminToken = localStorage.getItem("adminToken");
-  if (!adminToken) {
-    setLocation("/admin-login");
-    return null;
-  }
-
-  // Logout function
-  const logout = () => {
-    localStorage.removeItem("adminToken");
-    setLocation("/admin-login");
-    toast({
-      title: "Logged out",
-      description: "You have been successfully logged out.",
-    });
-  };
+  useEffect(() => {
+    const adminToken = localStorage.getItem("adminToken");
+    if (!adminToken) {
+      setLocation("/admin/login");
+      return;
+    }
+  }, [setLocation]);
 
   // Fetch analytics data
-  const { data: analytics, isLoading: analyticsLoading } = useQuery({
+  const { data: analytics = {}, isLoading: analyticsLoading } = useQuery({
     queryKey: ["/api/admin/analytics"],
-  });
-
-  // Fetch partners data
-  const { data: partners = [], isLoading: partnersLoading } = useQuery({
-    queryKey: ["/api/admin/partners"],
-  });
-
-  // Fetch withdrawals data
-  const { data: withdrawals = [], isLoading: withdrawalsLoading } = useQuery({
-    queryKey: ["/api/admin/withdrawals"],
-  });
-
-  // Fetch transactions data
-  const { data: transactions = [], isLoading: transactionsLoading } = useQuery({
-    queryKey: ["/api/admin/transactions"],
   });
 
   // Fetch customers data
@@ -182,6 +140,21 @@ export default function AdminDashboard() {
     queryKey: ["/api/admin/exam-attempts"],
   });
 
+  // Fetch transactions data
+  const { data: transactions = [], isLoading: transactionsLoading } = useQuery({
+    queryKey: ["/api/admin/transactions"],
+  });
+
+  // Fetch partners data
+  const { data: partners = [], isLoading: partnersLoading } = useQuery({
+    queryKey: ["/api/admin/partners"],
+  });
+
+  // Fetch withdrawals data
+  const { data: withdrawals = [], isLoading: withdrawalsLoading } = useQuery({
+    queryKey: ["/api/admin/withdrawals"],
+  });
+
   // Partner approval mutation
   const approvePartnerMutation = useMutation({
     mutationFn: async ({ partnerId, approved }: { partnerId: number; approved: boolean }) => {
@@ -192,8 +165,8 @@ export default function AdminDashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/partners"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/analytics"] });
       toast({
-        title: "Partner Status Updated",
-        description: "Partner approval status has been updated successfully.",
+        title: "Partner Updated",
+        description: "Partner status has been updated successfully.",
       });
     },
     onError: (error: any) => {
@@ -233,7 +206,7 @@ export default function AdminDashboard() {
     setLocation("/admin/login");
   };
 
-  if (analyticsLoading || partnersLoading || withdrawalsLoading) {
+  if (analyticsLoading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full" />
@@ -250,17 +223,15 @@ export default function AdminDashboard() {
             <div className="flex items-center space-x-3">
               <Shield className="w-8 h-8 text-blue-600" />
               <div>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Admin Dashboard</h1>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Octamy Platform Management</p>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Admin Dashboard</h1>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Octamy Platform Administration</p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <Link href="/">
-                <Button variant="ghost" size="sm">
-                  <Eye className="w-4 h-4 mr-2" />
-                  View Site
-                </Button>
-              </Link>
+              <Button variant="outline" size="sm" onClick={() => setLocation("/")}>
+                <Eye className="w-4 h-4 mr-2" />
+                View Site
+              </Button>
               <Button variant="outline" size="sm" onClick={handleLogout}>
                 <LogOut className="w-4 h-4 mr-2" />
                 Logout
@@ -272,340 +243,413 @@ export default function AdminDashboard() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="partners">Partners</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            <TabsTrigger value="withdrawals">Withdrawals</TabsTrigger>
-          </TabsList>
+        <div className="space-y-6">
+          <Tabs defaultValue="overview" className="space-y-4">
+            <TabsList className="grid w-full grid-cols-6">
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="customers">Customers</TabsTrigger>
+              <TabsTrigger value="courses">Courses</TabsTrigger>
+              <TabsTrigger value="exams">Exams</TabsTrigger>
+              <TabsTrigger value="partners">Partners</TabsTrigger>
+              <TabsTrigger value="transactions">Transactions</TabsTrigger>
+            </TabsList>
 
-          {/* Overview Tab */}
-          <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Partners</CardTitle>
-                  <Users className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{analytics?.totalPartners || 0}</div>
-                  <p className="text-xs text-muted-foreground">
-                    {analytics?.approvedPartners || 0} approved, {analytics?.pendingPartners || 0} pending
-                  </p>
-                </CardContent>
-              </Card>
+            <TabsContent value="overview" className="space-y-4">
+              {/* Quick Stats */}
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+                    <Users className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{analytics?.totalUsers || 0}</div>
+                    <p className="text-xs text-muted-foreground">
+                      Registered customers
+                    </p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Total Courses</CardTitle>
+                    <BookOpen className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{analytics?.totalCourses || 0}</div>
+                    <p className="text-xs text-muted-foreground">
+                      Available courses
+                    </p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Certificates Issued</CardTitle>
+                    <GraduationCap className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{analytics?.totalCertificates || 0}</div>
+                    <p className="text-xs text-muted-foreground">
+                      Paid certificates
+                    </p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+                    <DollarSign className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">₹{analytics?.totalRevenue || 0}</div>
+                    <p className="text-xs text-muted-foreground">
+                      Platform earnings
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
 
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Clicks</CardTitle>
-                  <MousePointer className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{analytics?.totalClicks || 0}</div>
-                  <p className="text-xs text-muted-foreground">
-                    {analytics?.totalConversions || 0} conversions
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-                  <DollarSign className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">₹{analytics?.totalRevenue || 0}</div>
-                  <p className="text-xs text-muted-foreground">
-                    From partner referrals
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Conversion Rate</CardTitle>
-                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    {analytics?.totalClicks ? ((analytics.totalConversions / analytics.totalClicks) * 100).toFixed(1) : 0}%
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Overall platform rate
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Top Performing Partners */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Top Performing Partners</CardTitle>
-                <CardDescription>Partners with highest earnings and conversion rates</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Partner</TableHead>
-                      <TableHead>Clicks</TableHead>
-                      <TableHead>Conversions</TableHead>
-                      <TableHead>Rate</TableHead>
-                      <TableHead>Earnings</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {analytics?.topPerformingPartners?.map((partner) => (
-                      <TableRow key={partner.id}>
-                        <TableCell>
-                          <div>
-                            <div className="font-medium">{partner.name}</div>
-                            <div className="text-sm text-gray-500">{partner.email}</div>
+              {/* Recent Activity */}
+              <div className="grid gap-4 md:grid-cols-2">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Recent Customers</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {customers?.slice(0, 5).map((customer: Customer) => (
+                        <div key={customer.id} className="flex items-center">
+                          <UserCheck className="h-4 w-4 text-muted-foreground" />
+                          <div className="ml-4 space-y-1">
+                            <p className="text-sm font-medium leading-none">{customer.name}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {customer.email} • {customer.certificateCount} certificates
+                            </p>
                           </div>
-                        </TableCell>
-                        <TableCell>{partner.clickCount}</TableCell>
-                        <TableCell>{partner.conversionCount}</TableCell>
-                        <TableCell>{partner.conversionRate.toFixed(1)}%</TableCell>
-                        <TableCell>₹{partner.totalEarnings}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </TabsContent>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
 
-          {/* Partners Tab */}
-          <TabsContent value="partners" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Partner Management</CardTitle>
-                <CardDescription>Manage partner approvals and view performance</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Partner</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Referral Code</TableHead>
-                      <TableHead>Clicks</TableHead>
-                      <TableHead>Conversions</TableHead>
-                      <TableHead>Earnings</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {partners?.map((partner) => (
-                      <TableRow key={partner.id}>
-                        <TableCell>
-                          <div>
-                            <div className="font-medium">{partner.name}</div>
-                            <div className="text-sm text-gray-500">{partner.email}</div>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Top Courses</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {adminCourses?.slice(0, 5).map((course: AdminCourse) => (
+                        <div key={course.id} className="flex items-center">
+                          <BookOpen className="h-4 w-4 text-muted-foreground" />
+                          <div className="ml-4 space-y-1">
+                            <p className="text-sm font-medium leading-none">{course.title}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {course.enrollmentCount} enrollments • ₹{course.revenue} revenue
+                            </p>
                           </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={partner.isApproved ? "default" : "secondary"}>
-                            {partner.isApproved ? "Approved" : "Pending"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <code className="text-sm bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
-                            {partner.referralCode}
-                          </code>
-                        </TableCell>
-                        <TableCell>{partner.clickCount}</TableCell>
-                        <TableCell>{partner.conversionCount}</TableCell>
-                        <TableCell>₹{partner.totalEarnings}</TableCell>
-                        <TableCell>
-                          <div className="flex space-x-2">
-                            {!partner.isApproved && (
-                              <Button
-                                size="sm"
-                                onClick={() => approvePartnerMutation.mutate({ partnerId: partner.id, approved: true })}
-                                disabled={approvePartnerMutation.isPending}
-                              >
-                                <CheckCircle className="w-4 h-4 mr-1" />
-                                Approve
-                              </Button>
-                            )}
-                            {partner.isApproved && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => approvePartnerMutation.mutate({ partnerId: partner.id, approved: false })}
-                                disabled={approvePartnerMutation.isPending}
-                              >
-                                <XCircle className="w-4 h-4 mr-1" />
-                                Suspend
-                              </Button>
-                            )}
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </TabsContent>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
 
-          {/* Analytics Tab */}
-          <TabsContent value="analytics" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <BarChart3 className="w-5 h-5 mr-2" />
-                    Click Analytics
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex justify-between">
-                      <span>Total Clicks</span>
-                      <span className="font-semibold">{analytics?.totalClicks || 0}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Total Conversions</span>
-                      <span className="font-semibold">{analytics?.totalConversions || 0}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Conversion Rate</span>
-                      <span className="font-semibold">
-                        {analytics?.totalClicks ? ((analytics.totalConversions / analytics.totalClicks) * 100).toFixed(1) : 0}%
-                      </span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <DollarSign className="w-5 h-5 mr-2" />
-                    Revenue Analytics
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex justify-between">
-                      <span>Total Revenue</span>
-                      <span className="font-semibold">₹{analytics?.totalRevenue || 0}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Partner Commission (10%)</span>
-                      <span className="font-semibold">₹{((analytics?.totalRevenue || 0) * 0.1).toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Platform Revenue (90%)</span>
-                      <span className="font-semibold">₹{((analytics?.totalRevenue || 0) * 0.9).toFixed(2)}</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Export Controls */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Export Reports</CardTitle>
-                <CardDescription>Download analytics reports for external analysis</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex space-x-4">
-                  <Button variant="outline">
-                    <Download className="w-4 h-4 mr-2" />
-                    Export Partners CSV
-                  </Button>
-                  <Button variant="outline">
-                    <Download className="w-4 h-4 mr-2" />
-                    Export Analytics CSV
-                  </Button>
-                  <Button variant="outline">
-                    <Download className="w-4 h-4 mr-2" />
-                    Export Revenue Report
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Withdrawals Tab */}
-          <TabsContent value="withdrawals" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Withdrawal Requests</CardTitle>
-                <CardDescription>Manage partner withdrawal requests and payments</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Partner</TableHead>
-                      <TableHead>Amount</TableHead>
-                      <TableHead>Method</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Requested</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {withdrawals?.map((withdrawal: any) => (
-                      <TableRow key={withdrawal.id}>
-                        <TableCell>
-                          <div>
-                            <div className="font-medium">{withdrawal.seller?.name}</div>
-                            <div className="text-sm text-gray-500">{withdrawal.seller?.email}</div>
-                          </div>
-                        </TableCell>
-                        <TableCell>₹{withdrawal.amount}</TableCell>
-                        <TableCell>
-                          <Badge variant="outline">
-                            {withdrawal.method === 'upi' ? 'UPI' : 'Bank Transfer'}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={
-                            withdrawal.status === 'approved' ? 'default' : 
-                            withdrawal.status === 'rejected' ? 'destructive' : 'secondary'
-                          }>
-                            {withdrawal.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          {new Date(withdrawal.createdAt).toLocaleDateString()}
-                        </TableCell>
-                        <TableCell>
-                          {withdrawal.status === 'pending' && (
-                            <div className="flex space-x-2">
-                              <Button
-                                size="sm"
-                                onClick={() => processWithdrawalMutation.mutate({ withdrawalId: withdrawal.id, status: 'approved' })}
-                                disabled={processWithdrawalMutation.isPending}
-                              >
-                                Approve
+            <TabsContent value="customers" className="space-y-4">
+              {customersLoading ? (
+                <div className="text-center py-8">Loading customers...</div>
+              ) : (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Customer Management</CardTitle>
+                    <CardDescription>Manage registered users and their activity</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Name</TableHead>
+                          <TableHead>Email</TableHead>
+                          <TableHead>Certificates</TableHead>
+                          <TableHead>Total Spent</TableHead>
+                          <TableHead>Joined</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {customers.map((customer: Customer) => (
+                          <TableRow key={customer.id}>
+                            <TableCell className="font-medium">{customer.name}</TableCell>
+                            <TableCell>{customer.email}</TableCell>
+                            <TableCell>{customer.certificateCount}</TableCell>
+                            <TableCell>₹{customer.totalSpent}</TableCell>
+                            <TableCell>{new Date(customer.createdAt).toLocaleDateString()}</TableCell>
+                            <TableCell>
+                              <Badge variant={customer.isAdmin ? "destructive" : "default"}>
+                                {customer.isAdmin ? "Admin" : "Customer"}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <Button size="sm" variant="outline">
+                                <Eye className="h-4 w-4" />
                               </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => processWithdrawalMutation.mutate({ withdrawalId: withdrawal.id, status: 'rejected' })}
-                                disabled={processWithdrawalMutation.isPending}
-                              >
-                                Reject
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                </Card>
+              )}
+            </TabsContent>
+
+            <TabsContent value="courses" className="space-y-4">
+              {adminCoursesLoading ? (
+                <div className="text-center py-8">Loading courses...</div>
+              ) : (
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between">
+                    <div>
+                      <CardTitle>Course Management</CardTitle>
+                      <CardDescription>Manage courses, pricing, and content</CardDescription>
+                    </div>
+                    <Button>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add New Course
+                    </Button>
+                  </CardHeader>
+                  <CardContent>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Course</TableHead>
+                          <TableHead>Category</TableHead>
+                          <TableHead>Price</TableHead>
+                          <TableHead>Enrollments</TableHead>
+                          <TableHead>Certificates</TableHead>
+                          <TableHead>Revenue</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {adminCourses.map((course: AdminCourse) => (
+                          <TableRow key={course.id}>
+                            <TableCell>
+                              <div>
+                                <div className="font-medium">{course.title}</div>
+                                <div className="text-sm text-muted-foreground">{course.duration} min • {course.passingScore}% pass</div>
+                              </div>
+                            </TableCell>
+                            <TableCell>{course.categoryName}</TableCell>
+                            <TableCell>
+                              <div>
+                                <span className="font-medium">₹{course.price}</span>
+                                {course.isOnSale && course.originalPrice && (
+                                  <span className="text-sm text-muted-foreground line-through ml-2">₹{course.originalPrice}</span>
+                                )}
+                              </div>
+                            </TableCell>
+                            <TableCell>{course.enrollmentCount}</TableCell>
+                            <TableCell>{course.certificateCount}</TableCell>
+                            <TableCell>₹{course.revenue}</TableCell>
+                            <TableCell>
+                              <Badge variant={course.isActive ? "default" : "secondary"}>
+                                {course.isActive ? "Active" : "Inactive"}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex gap-2">
+                                <Button size="sm" variant="outline">
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                                <Button size="sm" variant="outline">
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                                <Button size="sm" variant="outline">
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                </Card>
+              )}
+            </TabsContent>
+
+            <TabsContent value="exams" className="space-y-4">
+              {examAttemptsLoading ? (
+                <div className="text-center py-8">Loading exam attempts...</div>
+              ) : (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Exam Management</CardTitle>
+                    <CardDescription>Monitor exam attempts and results</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Student</TableHead>
+                          <TableHead>Course</TableHead>
+                          <TableHead>Score</TableHead>
+                          <TableHead>Result</TableHead>
+                          <TableHead>Time Taken</TableHead>
+                          <TableHead>Date</TableHead>
+                          <TableHead>Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {examAttempts.map((attempt: ExamAttempt) => (
+                          <TableRow key={attempt.id}>
+                            <TableCell>
+                              <div>
+                                <div className="font-medium">{attempt.userName}</div>
+                                <div className="text-sm text-muted-foreground">{attempt.userEmail}</div>
+                              </div>
+                            </TableCell>
+                            <TableCell>{attempt.courseTitle}</TableCell>
+                            <TableCell>
+                              <span className="font-medium">
+                                {attempt.score}/{attempt.totalQuestions}
+                              </span>
+                              <span className="text-sm text-muted-foreground ml-2">
+                                ({Math.round((attempt.score / attempt.totalQuestions) * 100)}%)
+                              </span>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={attempt.passed ? "default" : "destructive"}>
+                                {attempt.passed ? "Passed" : "Failed"}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>{Math.round(attempt.timeTaken / 60)} min</TableCell>
+                            <TableCell>{new Date(attempt.createdAt).toLocaleDateString()}</TableCell>
+                            <TableCell>
+                              <Button size="sm" variant="outline">
+                                <Eye className="h-4 w-4" />
                               </Button>
-                            </div>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                </Card>
+              )}
+            </TabsContent>
+
+            <TabsContent value="partners" className="space-y-4">
+              {partnersLoading ? (
+                <div className="text-center py-8">Loading partners...</div>
+              ) : (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Partner Management</CardTitle>
+                    <CardDescription>Approve and manage affiliate partners</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Name</TableHead>
+                          <TableHead>Email</TableHead>
+                          <TableHead>Phone</TableHead>
+                          <TableHead>Referral Code</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Earnings</TableHead>
+                          <TableHead>Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {partners.map((partner: Partner) => (
+                          <TableRow key={partner.id}>
+                            <TableCell className="font-medium">{partner.name}</TableCell>
+                            <TableCell>{partner.email}</TableCell>
+                            <TableCell>{partner.phone || "N/A"}</TableCell>
+                            <TableCell>
+                              <Badge variant="outline">{partner.referralCode}</Badge>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={partner.isApproved ? "default" : "secondary"}>
+                                {partner.isApproved ? "Approved" : "Pending"}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>₹{partner.totalEarnings || 0}</TableCell>
+                            <TableCell>
+                              <div className="flex gap-2">
+                                {!partner.isApproved && (
+                                  <Button
+                                    size="sm"
+                                    onClick={() => approvePartnerMutation.mutate({ partnerId: partner.id, approved: true })}
+                                    disabled={approvePartnerMutation.isPending}
+                                  >
+                                    <Check className="h-4 w-4" />
+                                  </Button>
+                                )}
+                                <Button size="sm" variant="outline">
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                </Card>
+              )}
+            </TabsContent>
+
+            <TabsContent value="transactions" className="space-y-4">
+              {transactionsLoading ? (
+                <div className="text-center py-8">Loading transactions...</div>
+              ) : (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Recent Transactions</CardTitle>
+                    <CardDescription>Monitor payment transactions</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Transaction ID</TableHead>
+                          <TableHead>Amount</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Certificate ID</TableHead>
+                          <TableHead>Date</TableHead>
+                          <TableHead>Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {transactions.map((transaction: Transaction) => (
+                          <TableRow key={transaction.id}>
+                            <TableCell className="font-medium">{transaction.transactionId}</TableCell>
+                            <TableCell>₹{transaction.amount}</TableCell>
+                            <TableCell>
+                              <Badge variant={transaction.status === "success" ? "default" : "destructive"}>
+                                {transaction.status}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>{transaction.certificateId}</TableCell>
+                            <TableCell>{new Date(transaction.createdAt).toLocaleDateString()}</TableCell>
+                            <TableCell>
+                              <Button size="sm" variant="outline">
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                </Card>
+              )}
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
     </div>
   );
