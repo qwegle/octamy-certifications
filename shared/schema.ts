@@ -12,6 +12,23 @@ export const users = pgTable("users", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+export const userAddresses = pgTable("user_addresses", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  type: text("type").notNull().default("shipping"), // shipping, billing
+  fullName: text("full_name").notNull(),
+  addressLine1: text("address_line1").notNull(),
+  addressLine2: text("address_line2"),
+  city: text("city").notNull(),
+  state: text("state").notNull(),
+  postalCode: text("postal_code").notNull(),
+  country: text("country").notNull().default("India"),
+  phoneNumber: text("phone_number").notNull(),
+  isDefault: boolean("is_default").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 export const categories = pgTable("categories", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
@@ -89,6 +106,13 @@ export const certificates = pgTable("certificates", {
   certificateNumber: text("certificate_number").notNull().unique(),
   issuedBy: text("issued_by").default("Octamy Solutions Private Limited").notNull(),
   retakeCount: integer("retake_count").default(0).notNull(),
+  // Physical certificate shipping
+  needsPhysicalCopy: boolean("needs_physical_copy").default(false).notNull(),
+  shippingAddressId: integer("shipping_address_id").references(() => userAddresses.id),
+  shippingStatus: text("shipping_status").default("not_required"), // not_required, pending, processing, shipped, delivered
+  trackingNumber: text("tracking_number"),
+  shippedAt: timestamp("shipped_at"),
+  deliveredAt: timestamp("delivered_at"),
 });
 
 export const payments = pgTable("payments", {
@@ -103,6 +127,10 @@ export const payments = pgTable("payments", {
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
   currency: text("currency").default("INR").notNull(),
   status: text("status").notNull(),
+  // Physical certificate shipping
+  certificateAmount: decimal("certificate_amount", { precision: 10, scale: 2 }).notNull(),
+  shippingAmount: decimal("shipping_amount", { precision: 10, scale: 2 }).default("0.00").notNull(),
+  includesPhysicalCopy: boolean("includes_physical_copy").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -318,6 +346,14 @@ export const usersRelations = relations(users, ({ many }) => ({
   certificates: many(certificates),
   courseProgress: many(userCourseProgress),
   achievements: many(userAchievements),
+  addresses: many(userAddresses),
+}));
+
+export const userAddressesRelations = relations(userAddresses, ({ one }) => ({
+  user: one(users, {
+    fields: [userAddresses.userId],
+    references: [users.id],
+  }),
 }));
 
 export const categoriesRelations = relations(categories, ({ many }) => ({
@@ -520,6 +556,15 @@ export const insertUserAchievementSchema = createInsertSchema(userAchievements).
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
+
+export const insertUserAddressSchema = createInsertSchema(userAddresses).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type UserAddress = typeof userAddresses.$inferSelect;
+export type InsertUserAddress = z.infer<typeof insertUserAddressSchema>;
+
 export type Category = typeof categories.$inferSelect;
 export type InsertCategory = z.infer<typeof insertCategorySchema>;
 export type Course = typeof courses.$inferSelect;
