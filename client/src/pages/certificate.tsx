@@ -355,17 +355,13 @@ export default function CertificateView() {
                       className="text-xs text-gray-500 mb-2 uppercase tracking-widest font-semibold"
                       style={{ fontFamily: "'Inter', sans-serif", letterSpacing: '2px' }}
                     >
-                      Valid Until
+                      Validity
                     </div>
                     <div 
                       className="text-lg font-semibold text-gray-700 tracking-wide"
                       style={{ fontFamily: "'Crimson Text', serif", letterSpacing: '1px' }}
                     >
-                      {new Date(certificate.expiresAt).toLocaleDateString('en-US', { 
-                        year: 'numeric', 
-                        month: 'long', 
-                        day: 'numeric' 
-                      })}
+                      Lifetime
                     </div>
                   </div>
                 </div>
@@ -427,6 +423,12 @@ export default function CertificateView() {
                   >
                     verify.octamy.com
                   </div>
+                </div>
+                
+                {/* Certification Logos */}
+                <div className="flex justify-center items-center gap-8 mt-10 pt-6 border-t-2 border-yellow-500">
+                  <img src="https://images.seeklogo.com/logo-png/55/2/iso-certified-company-stamp-logo-png_seeklogo-556487.png" alt="ISO Certified" className="h-12 w-auto object-contain" />
+                  <img src="https://static.vecteezy.com/system/resources/previews/019/909/405/non_2x/make-in-india-transparent-make-in-india-free-free-png.png" alt="Make in India" className="h-12 w-auto object-contain" />
                 </div>
               </div>
             </div>
