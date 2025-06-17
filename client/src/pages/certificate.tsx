@@ -60,6 +60,94 @@ export default function CertificateView() {
     }
   };
 
+  const handlePrint = () => {
+    // Create a new window for printing
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      return;
+    }
+
+    // Get the certificate content
+    const certificateElement = document.querySelector('.certificate-preview');
+    if (!certificateElement) {
+      return;
+    }
+
+    // Write HTML to the print window with landscape orientation
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Certificate - ${certificate?.courseTitle || 'Certificate'}</title>
+        <style>
+          @page {
+            size: A4 landscape;
+            margin: 0;
+          }
+          
+          @media print {
+            * {
+              -webkit-print-color-adjust: exact !important;
+              color-adjust: exact !important;
+              print-color-adjust: exact !important;
+            }
+            
+            body {
+              margin: 0;
+              padding: 0;
+              background: white;
+              font-family: 'Poppins', Arial, sans-serif;
+            }
+            
+            .print-certificate {
+              width: 297mm;
+              height: 210mm;
+              margin: 0;
+              padding: 0;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              background: white;
+            }
+          }
+          
+          body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Poppins', Arial, sans-serif;
+            background: #f5f5f5;
+          }
+          
+          .print-certificate {
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            max-width: 100%;
+            margin: 0 auto;
+          }
+        </style>
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+      </head>
+      <body>
+        <div class="print-certificate">
+          ${certificateElement.innerHTML}
+        </div>
+        <script>
+          window.onload = function() {
+            setTimeout(function() {
+              window.print();
+              window.close();
+            }, 500);
+          };
+        </script>
+      </body>
+      </html>
+    `);
+    
+    printWindow.document.close();
+  };
+
   if (!certificate) {
     return (
       <div className="min-h-screen bg-white">
@@ -621,8 +709,8 @@ export default function CertificateView() {
             <CardContent className="p-6 text-center">
               <h3 className="text-xl font-bold text-octamy-black mb-4">Download & Share</h3>
               
-              {/* Download Button */}
-              <div className="mb-6">
+              {/* Download & Print Buttons */}
+              <div className="mb-6 flex flex-col sm:flex-row gap-4 justify-center">
                 <Button
                   onClick={handleDownload}
                   className="bg-octamy-black text-white hover:bg-octamy-gray-800 px-8 py-3 text-lg"
@@ -630,10 +718,18 @@ export default function CertificateView() {
                   <Download className="w-5 h-5 mr-2" />
                   Download PDF Certificate
                 </Button>
-                <p className="text-sm text-octamy-gray-600 mt-2">
-                  Get your professional certificate as a high-quality PDF
-                </p>
+                <Button
+                  onClick={() => handlePrint()}
+                  variant="outline"
+                  className="border-octamy-black text-octamy-black hover:bg-octamy-gray-50 px-8 py-3 text-lg"
+                >
+                  <Printer className="w-5 h-5 mr-2" />
+                  Print Certificate
+                </Button>
               </div>
+              <p className="text-sm text-octamy-gray-600 mb-4">
+                Get your professional certificate as a high-quality PDF or print with landscape orientation
+              </p>
 
               {/* Share Options */}
               <h4 className="text-lg font-semibold text-octamy-black mb-3">Share This Certificate</h4>

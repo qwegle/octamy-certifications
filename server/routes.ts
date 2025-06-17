@@ -2092,6 +2092,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin login route
+  app.post("/api/admin/login", async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      
+      const user = await storage.getUserByEmail(email);
+      if (!user || !user.isAdmin) {
+        return res.status(401).json({ message: "Invalid admin credentials" });
+      }
+
+      const validPassword = await bcrypt.compare(password, user.password);
+      if (!validPassword) {
+        return res.status(401).json({ message: "Invalid admin credentials" });
+      }
+
+      const token = jwt.sign(
+        { userId: user.id, email: user.email, isAdmin: true },
+        JWT_SECRET,
+        { expiresIn: "7d" }
+      );
+
+      return res.json({ 
+        success: true,
+        token, 
+        user: { 
+          id: user.id, 
+          email: user.email, 
+          name: user.name, 
+          isAdmin: true 
+        } 
+      });
+    } catch (error) {
+      console.error("Admin login error:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Admin analytics route
+  app.get("/api/admin/analytics", authenticateAdminToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const analytics = await storage.getAdminAnalytics();
+      res.json(analytics);
+    } catch (error) {
+      console.error("Error fetching admin analytics:", error);
+      res.status(500).json({ message: "Failed to fetch analytics" });
+    }
+  });
+
+  // Admin partners route
+  app.get("/api/admin/partners", authenticateAdminToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const partners = await storage.getAllSellers();
+      res.json(partners);
+    } catch (error) {
+      console.error("Error fetching partners:", error);
+      res.status(500).json({ message: "Failed to fetch partners" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
