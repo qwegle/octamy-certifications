@@ -471,6 +471,145 @@ export default function SellerDashboard() {
         </Card>
       </div>
 
+      {/* Partner Sharing Modal */}
+      {showShareModal && shareableItems && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-2xl font-bold text-black">Generate Partner Sharing URLs</h3>
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setShowShareModal(false);
+                  setGeneratedUrl("");
+                  setSelectedItem(null);
+                }}
+                className="text-gray-500 hover:text-black"
+              >
+                <X size={20} />
+              </Button>
+            </div>
+
+            <div className="space-y-6">
+              {/* Courses */}
+              <div>
+                <h4 className="text-lg font-semibold text-black mb-4 flex items-center">
+                  <ExternalLink size={20} className="mr-2" />
+                  Professional Courses ({shareableItems.courses?.length || 0})
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {shareableItems.courses?.map((course: any) => (
+                    <Card key={course.id} className="border border-gray-200 hover:border-black transition-colors">
+                      <CardContent className="p-4">
+                        <h5 className="font-medium text-black mb-2">{course.title}</h5>
+                        <p className="text-sm text-gray-600 mb-3 line-clamp-2">{course.description}</p>
+                        <div className="flex items-center justify-between">
+                          <span className="text-lg font-bold text-black">₹{course.price}</span>
+                          <Button 
+                            onClick={() => generateReferralUrl('course', course.id)}
+                            size="sm"
+                            className="bg-black text-white hover:bg-gray-800"
+                          >
+                            <Share2 size={14} className="mr-1" />
+                            Generate URL
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+
+              {/* Virtual Internships */}
+              <div>
+                <h4 className="text-lg font-semibold text-black mb-4 flex items-center">
+                  <ExternalLink size={20} className="mr-2" />
+                  Virtual Internships ({shareableItems.internships?.length || 0})
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {shareableItems.internships?.map((internship: any) => (
+                    <Card key={internship.id} className="border border-gray-200 hover:border-black transition-colors">
+                      <CardContent className="p-4">
+                        <h5 className="font-medium text-black mb-2">{internship.title}</h5>
+                        <p className="text-sm text-gray-600 mb-3 line-clamp-2">{internship.description}</p>
+                        <div className="flex items-center justify-between">
+                          <span className="text-lg font-bold text-black">₹{internship.price}</span>
+                          <Button 
+                            onClick={() => generateReferralUrl('internship', internship.id)}
+                            size="sm"
+                            className="bg-black text-white hover:bg-gray-800"
+                          >
+                            <Share2 size={14} className="mr-1" />
+                            Generate URL
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+
+              {/* Business Certifications */}
+              <div>
+                <h4 className="text-lg font-semibold text-black mb-4 flex items-center">
+                  <ExternalLink size={20} className="mr-2" />
+                  Business Certifications ({shareableItems.businessCertifications?.length || 0})
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {shareableItems.businessCertifications?.map((cert: any) => (
+                    <Card key={cert.id} className="border border-gray-200 hover:border-black transition-colors">
+                      <CardContent className="p-4">
+                        <h5 className="font-medium text-black mb-2">{cert.title}</h5>
+                        <p className="text-sm text-gray-600 mb-3 line-clamp-2">{cert.description}</p>
+                        <div className="flex items-center justify-between">
+                          <span className="text-lg font-bold text-black">₹{cert.price}</span>
+                          <Button 
+                            onClick={() => generateReferralUrl('business', cert.id)}
+                            size="sm"
+                            className="bg-black text-white hover:bg-gray-800"
+                          >
+                            <Share2 size={14} className="mr-1" />
+                            Generate URL
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+
+              {/* Generated URL Display */}
+              {generatedUrl && (
+                <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <h5 className="font-semibold text-green-800 mb-2 flex items-center">
+                    <CheckCircle size={16} className="mr-2" />
+                    Referral URL Generated Successfully
+                  </h5>
+                  <div className="flex items-center space-x-2">
+                    <Input 
+                      value={generatedUrl}
+                      readOnly
+                      className="flex-1 bg-white border-green-300"
+                    />
+                    <Button 
+                      onClick={() => copyToClipboard(generatedUrl)}
+                      size="sm"
+                      className="bg-green-600 text-white hover:bg-green-700"
+                    >
+                      <Copy size={14} className="mr-1" />
+                      Copy
+                    </Button>
+                  </div>
+                  <p className="text-sm text-green-700 mt-2">
+                    Share this URL to earn {dashboardData?.seller.commissionRate}% commission on every sale!
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Withdrawal Form Modal */}
       {showWithdrawalForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
