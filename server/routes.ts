@@ -389,13 +389,92 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Certificate routes - This endpoint should NOT create certificates automatically
-  // Certificates should only be created after successful PayUMoney payment
+  // Certificate routes - Create unpaid certificate for payment flow
   app.post("/api/certificates/create", optionalAuth, async (req: AuthenticatedRequest, res: Response) => {
-    return res.status(400).json({ 
-      message: "Certificates can only be created through payment. Please complete your purchase through PayUMoney.",
-      requiresPayment: true
-    });
+    try {
+      const { courseId, examAttemptId } = req.body;
+      
+      if (!courseId) {
+        return res.status(400).json({ message: "Course ID is required" });
+      }
+      
+      const course = await storage.getCourse(courseId);
+      if (!course) {
+        return res.status(404).json({ message: "Course not found" });
+      }
+
+      // Find the user's passing exam attempt for this course
+      let examAttempt;
+      if (examAttemptId) {
+        examAttempt = await storage.getExamAttempt(examAttemptId);
+      } else {
+        // Find the latest passing exam attempt for this course
+        const userEmail = req.body.userEmail || req.user?.email;
+        if (!userEmail) {
+          return res.status(400).json({ message: "User email is required" });
+        }
+        
+        const attempts = await storage.getExamAttemptsByEmail(userEmail, courseId);
+        examAttempt = attempts.find(attempt => attempt.passed);
+      }
+      
+      if (!examAttempt) {
+        return res.status(400).json({ 
+          message: "No passing exam attempt found. Please complete the exam first.",
+          requiresExam: true
+        });
+      }
+      
+      if (!examAttempt.passed) {
+        return res.status(400).json({ 
+          message: "Exam not passed. Please retake the exam.",
+          requiresExam: true
+        });
+      }
+
+      // Check if user already has a certificate for this course
+      const existingCertificate = await storage.getUserCertificateForCourse(
+        req.user?.userId || null,
+        courseId,
+        examAttempt.userEmail
+      );
+
+      if (existingCertificate) {
+        return res.json(existingCertificate);
+      }
+      
+      // Generate certificate ID
+      const certificateId = `OCT-${new Date().getFullYear()}-${course.title.replace(/\s+/g, '').toUpperCase().slice(0, 3)}-${Date.now()}`;
+      
+      // Calculate badge based on score
+      const badge = getBadgeFromScore(examAttempt.score);
+      
+      // Generate unique certificate number
+      const certificateNumber = generateCertificateNumber();
+      
+      // Create new UNPAID certificate (will be activated after PayUMoney payment)
+      const certificate = await storage.createCertificate({
+        certificateId,
+        examAttemptId: examAttempt.id,
+        courseId: courseId,
+        userId: req.user?.userId || null,
+        userEmail: examAttempt.userEmail,
+        userName: examAttempt.userName,
+        courseTitle: course.title,
+        score: examAttempt.score,
+        badge,
+        certificateNumber,
+        expiresAt: calculateExpiryDate(),
+        businessName: req.body.businessName || null,
+        retakeCount: 0,
+        isPaid: false, // Certificate is created but requires payment to activate
+      });
+      
+      res.json(certificate);
+    } catch (error) {
+      console.error("Error creating certificate:", error);
+      res.status(500).json({ message: "Failed to create certificate" });
+    }
   });
 
   // Get certificate by ID (certificate ID string, not database ID)

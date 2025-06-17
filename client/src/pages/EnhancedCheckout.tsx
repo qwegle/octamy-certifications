@@ -247,37 +247,63 @@ export default function EnhancedCheckout() {
     }
   };
 
-  const handleProceedToPayment = () => {
+  const handleProceedToPayment = async () => {
     if (!course) return;
 
     const basePrice = 99; // Base certificate price
     const shippingCost = includesPhysicalCopy ? 50 : 0;
     const totalAmount = basePrice + shippingCost;
 
-    // Check if user has an existing certificate
-    if (existingCertificate) {
-      // Prepare payment data
-      const paymentData = {
-        courseId: course.id,
-        amount: totalAmount,
-        includesPhysicalCopy,
-        shippingAddressId: includesPhysicalCopy ? selectedAddressId : null,
-        sellerCode: referralCode, // Include referral code for partner commissions
-      };
+    try {
+      // First create a certificate for this course after exam pass
+      // This creates an unpaid certificate that will be activated after PayUMoney payment
+      const certificateResponse = await apiRequest('POST', '/api/certificates/create', {
+        courseId: course.id
+      });
 
-      // Store payment data in sessionStorage for the payment page
-      sessionStorage.setItem('paymentData', JSON.stringify(paymentData));
-      
-      // Navigate to payment page with certificate ID
-      navigate(`/payment/${existingCertificate.id}?amount=${totalAmount}&physical=${includesPhysicalCopy}&address=${selectedAddressId || ''}&ref=${referralCode || ''}`);
-    } else {
-      // Redirect to exam if no certificate exists
+      if (certificateResponse.ok) {
+        const certificate = await certificateResponse.json();
+        
+        // Prepare payment data
+        const paymentData = {
+          courseId: course.id,
+          certificateId: certificate.id,
+          amount: totalAmount,
+          includesPhysicalCopy,
+          shippingAddressId: includesPhysicalCopy ? selectedAddressId : null,
+          sellerCode: referralCode,
+        };
+
+        // Store payment data in sessionStorage
+        sessionStorage.setItem('paymentData', JSON.stringify(paymentData));
+        
+        // Navigate to payment page
+        navigate(`/payment/${certificate.id}?amount=${totalAmount}&physical=${includesPhysicalCopy}&address=${selectedAddressId || ''}&ref=${referralCode || ''}`);
+      } else {
+        const error = await certificateResponse.json();
+        if (error.requiresPayment) {
+          // Certificate creation blocked - user needs to complete payment first
+          toast({
+            title: "Payment Required",
+            description: "Complete your payment through PayUMoney to get your certificate.",
+            variant: "destructive",
+          });
+        } else {
+          // User needs to take exam first
+          toast({
+            title: "Complete Exam First", 
+            description: "You need to take and pass the exam before purchasing a certificate.",
+            variant: "destructive",
+          });
+          navigate(`/exam/${course.id}`);
+        }
+      }
+    } catch (error) {
       toast({
-        title: "Complete Exam First",
-        description: "You need to take and pass the exam before purchasing a certificate.",
+        title: "Error",
+        description: "Failed to process checkout. Please try again.",
         variant: "destructive",
       });
-      navigate(`/exam/${course.id}`);
     }
   };
 
