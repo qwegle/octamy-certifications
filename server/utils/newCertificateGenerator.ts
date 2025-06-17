@@ -239,19 +239,14 @@ function generateCertificateHTML(data: CertificateData): string {
           letter-spacing: 2px;
         }
         
-        .achievement-section {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          gap: 30px;
-          margin: 20px 0;
-        }
-        
         .badge-container {
-          position: relative;
+          position: absolute;
+          top: 30px;
+          right: 50px;
           display: flex;
           flex-direction: column;
           align-items: center;
+          z-index: 15;
         }
         
         .badge-text {
@@ -259,25 +254,12 @@ function generateCertificateHTML(data: CertificateData): string {
           top: 50%;
           left: 50%;
           transform: translate(-50%, -50%);
-          font-size: 12px;
+          font-size: 10px;
           font-weight: 700;
           color: #fff;
           text-align: center;
           z-index: 10;
           font-family: 'Inter', sans-serif;
-        }
-        
-        .achievement-details {
-          text-align: left;
-        }
-        
-        .achievement-score,
-        .achievement-label {
-          font-size: 14px;
-          color: #333;
-          margin: 5px 0;
-          font-family: 'Inter', sans-serif;
-          font-weight: 500;
         }
         
         .footer-section {
@@ -291,7 +273,7 @@ function generateCertificateHTML(data: CertificateData): string {
           text-align: left;
           font-size: 10px;
           color: #666;
-          line-height: 1.4;
+          line-height: 1.6;
           font-family: 'Inter', sans-serif;
         }
         
@@ -321,6 +303,29 @@ function generateCertificateHTML(data: CertificateData): string {
           font-family: 'Playfair Display', serif;
         }
         
+        .bottom-section {
+          position: absolute;
+          bottom: 20px;
+          left: 0;
+          right: 0;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 0 40px;
+          z-index: 10;
+        }
+        
+        .expiry-info {
+          font-size: 11px;
+          color: #666;
+          font-family: 'Inter', sans-serif;
+          text-align: left;
+        }
+        
+        .expiry-info strong {
+          color: #333;
+        }
+        
         .watermark {
           position: absolute;
           top: 50%;
@@ -335,18 +340,13 @@ function generateCertificateHTML(data: CertificateData): string {
         }
         
         .certification-logos {
-          position: absolute;
-          bottom: 15px;
-          left: 50%;
-          transform: translateX(-50%);
           display: flex;
           gap: 15px;
           align-items: center;
-          z-index: 10;
         }
         
         .certification-logos img {
-          height: 30px;
+          height: 25px;
           width: auto;
           object-fit: contain;
           opacity: 0.7;
@@ -372,6 +372,52 @@ function generateCertificateHTML(data: CertificateData): string {
               <div style="font-size: 10px; color: #999; font-style: italic;">Authorized Certification Body</div>
             </div>
             
+            <!-- Badge positioned in top right -->
+            <div class="badge-container">
+              <svg width="80" height="80" viewBox="0 0 120 120" class="badge-image">
+                <defs>
+                  <linearGradient id="shieldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#4a4a4a;stop-opacity:1" />
+                    <stop offset="50%" style="stop-color:#2a2a2a;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#1a1a1a;stop-opacity:1" />
+                  </linearGradient>
+                  <linearGradient id="ribbonGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#888;stop-opacity:1" />
+                    <stop offset="50%" style="stop-color:#666;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#555;stop-opacity:1" />
+                  </linearGradient>
+                </defs>
+                
+                <!-- Shield Shape -->
+                <path d="M60 10 L100 30 L100 60 Q100 80 85 95 Q70 105 60 110 Q50 105 35 95 Q20 80 20 60 L20 30 Z" 
+                      fill="url(#shieldGradient)" stroke="#fff" stroke-width="2"/>
+                
+                <!-- Inner Circle -->
+                <circle cx="60" cy="45" r="15" fill="#fff" stroke="#333" stroke-width="1"/>
+                
+                <!-- Sunburst pattern around circle -->
+                <g transform="translate(60,45)">
+                  <g stroke="#fff" stroke-width="1" fill="none">
+                    <circle r="20" opacity="0.3"/>
+                    <path d="M0,-25 L0,-20 M0,20 L0,25 M25,0 L20,0 M-20,0 L-25,0" stroke-width="2"/>
+                    <path d="M17.6,-17.6 L14.1,-14.1 M-14.1,14.1 L-17.6,17.6 M17.6,17.6 L14.1,14.1 M-14.1,-14.1 L-17.6,-17.6" stroke-width="1.5"/>
+                  </g>
+                </g>
+                
+                <!-- Ribbon banners -->
+                <path d="M20 70 Q35 65 50 70 Q60 72 70 70 Q85 65 100 70 L95 85 Q80 80 65 85 Q60 87 55 85 Q40 80 25 85 Z" 
+                      fill="url(#ribbonGradient)" stroke="#333" stroke-width="1" opacity="0.8"/>
+                
+                <path d="M25 85 Q40 80 55 85 Q60 87 65 85 Q80 80 95 85 L90 95 Q75 90 60 95 Q45 90 30 95 Z" 
+                      fill="url(#ribbonGradient)" stroke="#333" stroke-width="1" opacity="0.6"/>
+                
+                <!-- Ribbon ends -->
+                <path d="M20 70 L15 85 L25 80 Z" fill="url(#ribbonGradient)" opacity="0.9"/>
+                <path d="M100 70 L105 85 L95 80 Z" fill="url(#ribbonGradient)" opacity="0.9"/>
+              </svg>
+              <div class="badge-text">${(data.courseLevel || 'CERTIFIED').toUpperCase()}</div>
+            </div>
+
             <div class="main-content">
               <div class="certificate-title">Certificate</div>
               <div class="certificate-subtitle">of Professional Excellence</div>
@@ -386,58 +432,6 @@ function generateCertificateHTML(data: CertificateData): string {
               </div>
               
               <div class="course-name">${data.courseTitle}</div>
-              
-              <div class="achievement-section">
-                <div class="badge-container">
-                  <svg width="100" height="100" viewBox="0 0 120 120" class="badge-image">
-                    <defs>
-                      <linearGradient id="shieldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" style="stop-color:#4a4a4a;stop-opacity:1" />
-                        <stop offset="50%" style="stop-color:#2a2a2a;stop-opacity:1" />
-                        <stop offset="100%" style="stop-color:#1a1a1a;stop-opacity:1" />
-                      </linearGradient>
-                      <linearGradient id="ribbonGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" style="stop-color:#888;stop-opacity:1" />
-                        <stop offset="50%" style="stop-color:#666;stop-opacity:1" />
-                        <stop offset="100%" style="stop-color:#555;stop-opacity:1" />
-                      </linearGradient>
-                    </defs>
-                    
-                    <!-- Shield Shape -->
-                    <path d="M60 10 L100 30 L100 60 Q100 80 85 95 Q70 105 60 110 Q50 105 35 95 Q20 80 20 60 L20 30 Z" 
-                          fill="url(#shieldGradient)" stroke="#fff" stroke-width="2"/>
-                    
-                    <!-- Inner Circle -->
-                    <circle cx="60" cy="45" r="15" fill="#fff" stroke="#333" stroke-width="1"/>
-                    
-                    <!-- Sunburst pattern around circle -->
-                    <g transform="translate(60,45)">
-                      <g stroke="#fff" stroke-width="1" fill="none">
-                        <circle r="20" opacity="0.3"/>
-                        <path d="M0,-25 L0,-20 M0,20 L0,25 M25,0 L20,0 M-20,0 L-25,0" stroke-width="2"/>
-                        <path d="M17.6,-17.6 L14.1,-14.1 M-14.1,14.1 L-17.6,17.6 M17.6,17.6 L14.1,14.1 M-14.1,-14.1 L-17.6,-17.6" stroke-width="1.5"/>
-                      </g>
-                    </g>
-                    
-                    <!-- Ribbon banners -->
-                    <path d="M20 70 Q35 65 50 70 Q60 72 70 70 Q85 65 100 70 L95 85 Q80 80 65 85 Q60 87 55 85 Q40 80 25 85 Z" 
-                          fill="url(#ribbonGradient)" stroke="#333" stroke-width="1" opacity="0.8"/>
-                    
-                    <path d="M25 85 Q40 80 55 85 Q60 87 65 85 Q80 80 95 85 L90 95 Q75 90 60 95 Q45 90 30 95 Z" 
-                          fill="url(#ribbonGradient)" stroke="#333" stroke-width="1" opacity="0.6"/>
-                    
-                    <!-- Ribbon ends -->
-                    <path d="M20 70 L15 85 L25 80 Z" fill="url(#ribbonGradient)" opacity="0.9"/>
-                    <path d="M100 70 L105 85 L95 80 Z" fill="url(#ribbonGradient)" opacity="0.9"/>
-                  </svg>
-                  <div class="badge-text">${data.courseLevel.toUpperCase()}</div>
-                </div>
-                
-                <div class="achievement-details">
-                  <div class="achievement-score">Score Achieved: ${data.userScore}%</div>
-                  <div class="achievement-label">Passing Score: ${data.passingScore}%</div>
-                </div>
-              </div>
             </div>
             
             <div class="footer-section">
@@ -445,7 +439,6 @@ function generateCertificateHTML(data: CertificateData): string {
                 <div><strong>Certificate ID:</strong> ${data.certificateId}</div>
                 <div><strong>Issue Date:</strong> ${new Date(data.issueDate).toLocaleDateString()}</div>
                 <div><strong>Completion Date:</strong> ${new Date(data.completionDate).toLocaleDateString()}</div>
-                <div><strong>Valid Until:</strong> ${expiryDate.toLocaleDateString()}</div>
                 <div><strong>Status:</strong> Valid Internationally</div>
               </div>
               
@@ -457,11 +450,19 @@ function generateCertificateHTML(data: CertificateData): string {
             </div>
           </div>
           
-          <div class="certification-logos">
-            <img src="https://images.seeklogo.com/logo-png/55/2/iso-certified-company-stamp-logo-png_seeklogo-556487.png" alt="ISO Certified" />
-            <img src="https://static.vecteezy.com/system/resources/previews/019/909/405/non_2x/make-in-india-transparent-make-in-india-free-free-png.png" alt="Make in India" />
-            <img src="https://sudikshya.com/wp-content/uploads/2024/08/startup-and-odisha-combo.png" alt="Startup Odisha" />
-            <img src="https://octamy.com/storage/optionbuilder/uploads/554402-14-2025_0143pmoctamy_logo_black.png" alt="Octamy Logo" />
+          <!-- Bottom section with logos and expiry -->
+          <div class="bottom-section">
+            <div class="expiry-info">
+              <strong>Valid Until:</strong> ${expiryDate.toLocaleDateString()}<br>
+              <strong>Verification:</strong> octamy.com/verify
+            </div>
+            
+            <div class="certification-logos">
+              <img src="https://images.seeklogo.com/logo-png/55/2/iso-certified-company-stamp-logo-png_seeklogo-556487.png" alt="ISO Certified" />
+              <img src="https://static.vecteezy.com/system/resources/previews/019/909/405/non_2x/make-in-india-transparent-make-in-india-free-free-png.png" alt="Make in India" />
+              <img src="https://sudikshya.com/wp-content/uploads/2024/08/startup-and-odisha-combo.png" alt="Startup Odisha" />
+              <img src="https://octamy.com/storage/optionbuilder/uploads/554402-14-2025_0143pmoctamy_logo_black.png" alt="Octamy Logo" />
+            </div>
           </div>
         </div>
       </div>
