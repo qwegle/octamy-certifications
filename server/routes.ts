@@ -436,8 +436,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           return res.json(updatedCertificate);
         } else {
-          // Return existing certificate if score is same or lower
-          return res.json(existingCertificate);
+          // Prevent certificate purchase if score is same or lower
+          return res.status(400).json({ 
+            message: `You scored ${examAttempt.score}% but need to score higher than your previous best of ${existingCertificate.score}% to purchase a new certificate.`,
+            score: examAttempt.score,
+            previousBest: existingCertificate.score,
+            canPurchase: false
+          });
         }
       }
       

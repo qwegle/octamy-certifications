@@ -204,7 +204,7 @@ export const referralClicks = pgTable("referral_clicks", {
   ipAddress: text("ip_address"),
   userAgent: text("user_agent"),
   clickedAt: timestamp("clicked_at").defaultNow().notNull(),
-  converted: boolean("converted").default(false).notNull(),
+  converted: boolean("is_converted").default(false).notNull(),
   conversionDate: timestamp("conversion_date"),
   userId: integer("user_id").references(() => users.id), // set when user actually purchases
 });

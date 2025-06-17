@@ -149,9 +149,16 @@ export default function Exam() {
             const errorData = await certificateResponse.json();
             console.log('Certificate creation response:', errorData);
             
-            // If certificate already exists, redirect to checkout
+            // Handle different certificate creation errors
             if (errorData.message && errorData.message.includes('already have a certificate')) {
               setLocation(`/checkout/${courseId}`);
+            } else if (errorData.message && errorData.message.includes('need to score higher than your previous best')) {
+              // Show error for same/lower score attempts
+              toast({
+                title: "Score Not Improved",
+                description: errorData.message,
+                variant: "destructive",
+              });
             } else {
               throw new Error(errorData.message || 'Failed to create certificate');
             }
