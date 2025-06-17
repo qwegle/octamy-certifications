@@ -154,7 +154,7 @@ Octamy is a comprehensive professional certification platform built as a full-st
 - **Unique value propositions** section explaining Octamy's competitive advantages
 - **PayUMoney payment integration** for secure sponsor payment processing with transaction tracking
 - **Database schema** with sponsors table for donation tracking and payment status management
-- **Navigation integration** with "Support Us" links in both desktop and mobile headers
+- **Navigation integration** with "Sponsors" links in both desktop and mobile headers (removed Business Pricing)
 - **API endpoints** for sponsor creation, payment processing, and transaction status updates
 
 ### Enhanced Checkout System with Physical Certificate Shipping (June 17, 2025)
