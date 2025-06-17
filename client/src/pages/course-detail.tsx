@@ -15,6 +15,18 @@ export default function CourseDetail() {
   const { user } = useAuth();
   const [referralCode, setReferralCode] = useState<string | null>(null);
 
+  const { data: course, isLoading } = useQuery<Course & { category: Category }>({
+    queryKey: ['/api/courses/slug', slug],
+    queryFn: async () => {
+      const response = await fetch(`/api/courses/slug/${slug}`);
+      if (!response.ok) {
+        throw new Error('Course not found');
+      }
+      return response.json();
+    },
+    enabled: !!slug,
+  });
+
   // Extract referral code from URL parameters and track click
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -24,7 +36,7 @@ export default function CourseDetail() {
       // Store in localStorage for persistence across navigation
       localStorage.setItem('referralCode', ref);
       
-      // Track the referral click immediately when course page is visited
+      // Track the referral click when course data is available
       if (course?.id) {
         fetch('/api/referral/track-click', {
           method: 'POST',
@@ -47,18 +59,6 @@ export default function CourseDetail() {
       }
     }
   }, [course?.id]);
-
-  const { data: course, isLoading } = useQuery<Course & { category: Category }>({
-    queryKey: ['/api/courses/slug', slug],
-    queryFn: async () => {
-      const response = await fetch(`/api/courses/slug/${slug}`);
-      if (!response.ok) {
-        throw new Error('Course not found');
-      }
-      return response.json();
-    },
-    enabled: !!slug,
-  });
 
   // Set page title and meta tags for SEO
   useEffect(() => {
