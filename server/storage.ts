@@ -583,11 +583,6 @@ export class DatabaseStorage implements IStorage {
     
     return result.length;
   }
-    } catch (error) {
-      console.error("Error getting user certificate for course:", error);
-      return null;
-    }
-  }
 
   // Payment operations
   async createPayment(insertPayment: InsertPayment): Promise<Payment> {
