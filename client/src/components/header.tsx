@@ -31,6 +31,7 @@ export default function Header() {
             <Link href="/learning-paths" className="hover:text-gray-300">Learning Paths</Link>
             <Link href="/virtual-internships" className="hover:text-gray-300">Internships</Link>
             <Link href="/business-certifications" className="hover:text-gray-300">Business Pricing</Link>
+            <Link href="/sponsor" className="hover:text-gray-300">Support Us</Link>
             <Link href="/partners" className="hover:text-gray-300">Partners</Link>
             <Link href="/help-center" className="hover:text-gray-300">Help</Link>
           </nav>
@@ -101,6 +102,13 @@ export default function Header() {
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Business Pricing
+              </Link>
+              <Link
+                href="/sponsor"
+                className="block text-white hover:text-gray-300 font-medium py-2"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Support Us
               </Link>
               <Link
                 href="/partners"
