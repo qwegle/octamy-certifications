@@ -70,7 +70,7 @@ interface AdminCourse {
   duration: number;
   passingScore: number;
   price: string;
-  originalPrice?: string;
+  originalPrice?: string | null;
   isOnSale: boolean;
   level: string;
   isActive: boolean;
@@ -78,6 +78,7 @@ interface AdminCourse {
   enrollmentCount: number;
   revenue: number;
   createdAt: string;
+  category?: { id: number; name: string };
 }
 
 interface ExamAttempt {
@@ -451,26 +452,7 @@ function CourseForm({ course, onCancel, onSuccess }: { course?: any; onCancel: (
   );
 }
 
-interface AdminCourse {
-  id: number;
-  title: string;
-  description: string;
-  slug: string;
-  categoryId: number;
-  categoryName: string;
-  duration: number;
-  passingScore: number;
-  price: string;
-  originalPrice: string;
-  isOnSale: boolean;
-  level: string;
-  isActive: boolean;
-  isInternship: boolean;
-  createdAt: string;
-  enrollmentCount: number;
-  certificateCount: number;
-  revenue: number;
-}
+
 
 interface ExamAttempt {
   id: number;
@@ -524,6 +506,8 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
   const [selectedCourse, setSelectedCourse] = useState<AdminCourse | null>(null);
   const [isCreatingCourse, setIsCreatingCourse] = useState(false);
+  const [showCourseForm, setShowCourseForm] = useState(false);
+  const [editingCourse, setEditingCourse] = useState<AdminCourse | null>(null);
   const [isEditingCourse, setIsEditingCourse] = useState(false);
 
   // Check admin authentication
@@ -892,7 +876,7 @@ export default function AdminDashboard() {
                                   <div className="text-sm text-muted-foreground">{course.duration} min • {course.passingScore}% pass</div>
                                 </div>
                               </TableCell>
-                              <TableCell>{course.categoryName}</TableCell>
+                              <TableCell>{course.category?.name || 'Unknown'}</TableCell>
                               <TableCell>
                                 <div>
                                   <span className="font-medium">₹{course.price}</span>
