@@ -73,7 +73,7 @@ export default function CourseDetail() {
       setLocation("/auth");
       return;
     }
-    setLocation(`/exam/${course?.id}`);
+    setLocation(`/checkout/${course?.id}`);
   };
 
   if (isLoading) {

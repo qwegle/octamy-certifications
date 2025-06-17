@@ -31,6 +31,7 @@ import InternshipForm from "@/pages/internship-form";
 import Verify from "@/pages/verify";
 import Preferences from "@/pages/preferences";
 import Progress from "@/pages/progress";
+import EnhancedCheckout from "@/pages/EnhancedCheckout";
 
 function Router() {
   return (
@@ -38,6 +39,7 @@ function Router() {
       <Route path="/" component={Landing} />
       <Route path="/auth" component={Auth} />
       <Route path="/exam/:courseId" component={Exam} />
+      <Route path="/checkout/:courseId" component={EnhancedCheckout} />
       <Route path="/payment/:certificateId" component={Payment} />
       <Route path="/internship-payment/:certificateId" component={InternshipPayment} />
       <Route path="/certificate/:certificateId" component={Certificate} />
