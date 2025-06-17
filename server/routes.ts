@@ -82,8 +82,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     console.error("Failed to seed database:", error);
   }
 
-  // Mount MVC API routes
-  app.use('/api', apiRoutes);
+  // Mount MVC API routes - disabled to avoid conflicts with existing routes
+  // app.use('/api', apiRoutes);
 
   // Auth routes
   app.post("/api/auth/register", async (req, res) => {

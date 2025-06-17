@@ -62,38 +62,39 @@ export class ExamController {
       // Create exam attempt with anti-cheating data
       const examAttempt = await storage.createExamAttempt({
         userId: userId || null,
-        courseId,
-        userEmail,
-        userName,
-        score,
-        totalQuestions,
+        courseId: parseInt(courseId.toString()),
+        userEmail: userEmail || 'anonymous@example.com',
+        userName: userName || 'Anonymous User',
+        score: score,
+        totalQuestions: totalQuestions,
         answers: answersRecord,
         timeTaken: finalTimeTaken,
-        passed,
-        mastered,
-        sessionId,
-        ipAddress: req.ip || req.connection?.remoteAddress || '',
-        userAgent: req.get('User-Agent') || '',
+        passed: passed,
+        mastered: mastered,
+        sessionId: sessionId || null,
+        ipAddress: req.ip || req.connection?.remoteAddress || null,
+        userAgent: req.get('User-Agent') || null,
         tabSwitches: tabSwitches || 0,
-        passed: score >= course.passingScore
       });
 
-      // Update user progress
-      await storage.updateCourseProgress(userId, courseId, {
-        progressPercentage: 100,
-        bestScore: score,
-        timeSpent: timeSpent || 0,
-        status: score >= course.passingScore ? 'completed' : 'failed',
-        attemptCount: 1
-      });
+      // Update user progress (only for authenticated users)
+      if (userId) {
+        await storage.updateCourseProgress(userId, courseId, {
+          progressPercentage: 100,
+          bestScore: score,
+          timeSpent: finalTimeTaken,
+          status: passed ? 'completed' : 'failed',
+          attemptCount: 1
+        });
+      }
 
       res.json({
         examAttemptId: examAttempt.id,
         score,
         totalQuestions,
         correctAnswers,
-        passed: score >= course.passingScore,
-        passingScore: course.passingScore
+        passed,
+        passingScore: 50 // Default passing score
       });
     } catch (error) {
       console.error("Submit exam error:", error);
