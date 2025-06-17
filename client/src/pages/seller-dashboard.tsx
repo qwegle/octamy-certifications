@@ -561,25 +561,63 @@ export default function SellerDashboard() {
                   Professional Courses ({shareableItems.courses?.length || 0})
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {shareableItems.courses?.map((course: any) => (
-                    <Card key={course.id} className="border border-gray-200 hover:border-black transition-colors">
-                      <CardContent className="p-4">
-                        <h5 className="font-medium text-black mb-2">{course.title}</h5>
-                        <p className="text-sm text-gray-600 mb-3 line-clamp-2">{course.description}</p>
-                        <div className="flex items-center justify-between">
-                          <span className="text-lg font-bold text-black">₹{course.price}</span>
-                          <Button 
-                            onClick={() => generateReferralUrl('course', course.id)}
-                            size="sm"
-                            className="bg-black text-white hover:bg-gray-800"
-                          >
-                            <Share2 size={14} className="mr-1" />
-                            Generate URL
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                  {shareableItems.courses?.map((course: any) => {
+                    const urlKey = `course_${course.id}`;
+                    const hasUrl = generatedUrls[urlKey];
+                    
+                    return (
+                      <Card key={course.id} className="border border-gray-200 hover:border-black transition-colors">
+                        <CardContent className="p-4">
+                          <h5 className="font-medium text-black mb-2">{course.title}</h5>
+                          <p className="text-sm text-gray-600 mb-3 line-clamp-2">{course.description}</p>
+                          
+                          <div className="flex items-center justify-between mb-3">
+                            <span className="text-lg font-bold text-black">₹{course.price}</span>
+                            <Badge variant="secondary" className="text-xs">
+                              10% Commission
+                            </Badge>
+                          </div>
+
+                          {hasUrl ? (
+                            <div className="space-y-2">
+                              <div className="flex items-center justify-between bg-green-50 border border-green-200 rounded p-2">
+                                <span className="text-xs text-green-800 font-medium">Referral URL Generated</span>
+                                <CheckCircle size={14} className="text-green-600" />
+                              </div>
+                              <div className="flex gap-2">
+                                <Button 
+                                  onClick={() => copyToClipboard(hasUrl)}
+                                  size="sm"
+                                  variant="outline"
+                                  className="flex-1 border-black text-black hover:bg-black hover:text-white"
+                                >
+                                  <Copy size={14} className="mr-1" />
+                                  Copy URL
+                                </Button>
+                                <Button 
+                                  onClick={() => generateReferralUrl('course', course.id)}
+                                  size="sm"
+                                  variant="ghost"
+                                  className="text-gray-500 hover:text-black"
+                                >
+                                  <Share2 size={14} />
+                                </Button>
+                              </div>
+                            </div>
+                          ) : (
+                            <Button 
+                              onClick={() => generateReferralUrl('course', course.id)}
+                              size="sm"
+                              className="w-full bg-black text-white hover:bg-gray-800"
+                            >
+                              <Share2 size={14} className="mr-1" />
+                              Generate Referral URL
+                            </Button>
+                          )}
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -590,25 +628,63 @@ export default function SellerDashboard() {
                   Virtual Internships ({shareableItems.internships?.length || 0})
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {shareableItems.internships?.map((internship: any) => (
-                    <Card key={internship.id} className="border border-gray-200 hover:border-black transition-colors">
-                      <CardContent className="p-4">
-                        <h5 className="font-medium text-black mb-2">{internship.title}</h5>
-                        <p className="text-sm text-gray-600 mb-3 line-clamp-2">{internship.description}</p>
-                        <div className="flex items-center justify-between">
-                          <span className="text-lg font-bold text-black">₹{internship.price}</span>
-                          <Button 
-                            onClick={() => generateReferralUrl('internship', internship.id)}
-                            size="sm"
-                            className="bg-black text-white hover:bg-gray-800"
-                          >
-                            <Share2 size={14} className="mr-1" />
-                            Generate URL
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                  {shareableItems.internships?.map((internship: any) => {
+                    const urlKey = `internship_${internship.id}`;
+                    const hasUrl = generatedUrls[urlKey];
+                    
+                    return (
+                      <Card key={internship.id} className="border border-gray-200 hover:border-black transition-colors">
+                        <CardContent className="p-4">
+                          <h5 className="font-medium text-black mb-2">{internship.title}</h5>
+                          <p className="text-sm text-gray-600 mb-3 line-clamp-2">{internship.description}</p>
+                          
+                          <div className="flex items-center justify-between mb-3">
+                            <span className="text-lg font-bold text-black">₹{internship.price}</span>
+                            <Badge variant="secondary" className="text-xs">
+                              10% Commission
+                            </Badge>
+                          </div>
+
+                          {hasUrl ? (
+                            <div className="space-y-2">
+                              <div className="flex items-center justify-between bg-green-50 border border-green-200 rounded p-2">
+                                <span className="text-xs text-green-800 font-medium">Referral URL Generated</span>
+                                <CheckCircle size={14} className="text-green-600" />
+                              </div>
+                              <div className="flex gap-2">
+                                <Button 
+                                  onClick={() => copyToClipboard(hasUrl)}
+                                  size="sm"
+                                  variant="outline"
+                                  className="flex-1 border-black text-black hover:bg-black hover:text-white"
+                                >
+                                  <Copy size={14} className="mr-1" />
+                                  Copy URL
+                                </Button>
+                                <Button 
+                                  onClick={() => generateReferralUrl('internship', internship.id)}
+                                  size="sm"
+                                  variant="ghost"
+                                  className="text-gray-500 hover:text-black"
+                                >
+                                  <Share2 size={14} />
+                                </Button>
+                              </div>
+                            </div>
+                          ) : (
+                            <Button 
+                              onClick={() => generateReferralUrl('internship', internship.id)}
+                              size="sm"
+                              className="w-full bg-black text-white hover:bg-gray-800"
+                            >
+                              <Share2 size={14} className="mr-1" />
+                              Generate Referral URL
+                            </Button>
+                          )}
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -619,55 +695,67 @@ export default function SellerDashboard() {
                   Business Certifications ({shareableItems.businessCertifications?.length || 0})
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {shareableItems.businessCertifications?.map((cert: any) => (
-                    <Card key={cert.id} className="border border-gray-200 hover:border-black transition-colors">
-                      <CardContent className="p-4">
-                        <h5 className="font-medium text-black mb-2">{cert.title}</h5>
-                        <p className="text-sm text-gray-600 mb-3 line-clamp-2">{cert.description}</p>
-                        <div className="flex items-center justify-between">
-                          <span className="text-lg font-bold text-black">₹{cert.price}</span>
-                          <Button 
-                            onClick={() => generateReferralUrl('business', cert.id)}
-                            size="sm"
-                            className="bg-black text-white hover:bg-gray-800"
-                          >
-                            <Share2 size={14} className="mr-1" />
-                            Generate URL
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                  {shareableItems.businessCertifications?.map((cert: any) => {
+                    const urlKey = `business_${cert.id}`;
+                    const hasUrl = generatedUrls[urlKey];
+                    
+                    return (
+                      <Card key={cert.id} className="border border-gray-200 hover:border-black transition-colors">
+                        <CardContent className="p-4">
+                          <h5 className="font-medium text-black mb-2">{cert.title}</h5>
+                          <p className="text-sm text-gray-600 mb-3 line-clamp-2">{cert.description}</p>
+                          
+                          <div className="flex items-center justify-between mb-3">
+                            <span className="text-lg font-bold text-black">₹{cert.price}</span>
+                            <Badge variant="secondary" className="text-xs">
+                              10% Commission
+                            </Badge>
+                          </div>
+
+                          {hasUrl ? (
+                            <div className="space-y-2">
+                              <div className="flex items-center justify-between bg-green-50 border border-green-200 rounded p-2">
+                                <span className="text-xs text-green-800 font-medium">Referral URL Generated</span>
+                                <CheckCircle size={14} className="text-green-600" />
+                              </div>
+                              <div className="flex gap-2">
+                                <Button 
+                                  onClick={() => copyToClipboard(hasUrl)}
+                                  size="sm"
+                                  variant="outline"
+                                  className="flex-1 border-black text-black hover:bg-black hover:text-white"
+                                >
+                                  <Copy size={14} className="mr-1" />
+                                  Copy URL
+                                </Button>
+                                <Button 
+                                  onClick={() => generateReferralUrl('business', cert.id)}
+                                  size="sm"
+                                  variant="ghost"
+                                  className="text-gray-500 hover:text-black"
+                                >
+                                  <Share2 size={14} />
+                                </Button>
+                              </div>
+                            </div>
+                          ) : (
+                            <Button 
+                              onClick={() => generateReferralUrl('business', cert.id)}
+                              size="sm"
+                              className="w-full bg-black text-white hover:bg-gray-800"
+                            >
+                              <Share2 size={14} className="mr-1" />
+                              Generate Referral URL
+                            </Button>
+                          )}
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
                 </div>
               </div>
 
-              {/* Generated URL Display */}
-              {generatedUrl && (
-                <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-                  <h5 className="font-semibold text-green-800 mb-2 flex items-center">
-                    <CheckCircle size={16} className="mr-2" />
-                    Referral URL Generated Successfully
-                  </h5>
-                  <div className="flex items-center space-x-2">
-                    <Input 
-                      value={generatedUrl}
-                      readOnly
-                      className="flex-1 bg-white border-green-300"
-                    />
-                    <Button 
-                      onClick={() => copyToClipboard(generatedUrl)}
-                      size="sm"
-                      className="bg-green-600 text-white hover:bg-green-700"
-                    >
-                      <Copy size={14} className="mr-1" />
-                      Copy
-                    </Button>
-                  </div>
-                  <p className="text-sm text-green-700 mt-2">
-                    Share this URL to earn {dashboardData?.seller.commissionRate}% commission on every sale!
-                  </p>
-                </div>
-              )}
+
             </div>
           </div>
         </div>
