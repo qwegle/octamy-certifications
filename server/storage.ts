@@ -686,8 +686,19 @@ export class DatabaseStorage implements IStorage {
     ipAddress?: string;
     userAgent?: string;
   }): Promise<void> {
-    const seller = await this.getSellerByReferralCode(clickData.referralCode);
-    if (!seller) return;
+    // Extract seller ID from referral code (format: sellerId-type-itemId-timestamp)
+    const sellerIdMatch = clickData.referralCode.match(/^(\d+)-/);
+    if (!sellerIdMatch) {
+      console.error('Invalid referral code format:', clickData.referralCode);
+      return;
+    }
+    
+    const sellerId = parseInt(sellerIdMatch[1]);
+    const seller = await this.getSeller(sellerId);
+    if (!seller) {
+      console.error('Seller not found for ID:', sellerId);
+      return;
+    }
 
     await db.insert(referralClicks).values({
       sellerId: seller.id,
