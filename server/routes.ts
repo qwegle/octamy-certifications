@@ -384,7 +384,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             examAttemptId,
             score: examAttempt.score,
             badge,
-            isPaid: true, // Certificate is earned by passing the exam
+            isPaid: false, // User needs to pay for new certificate
             retakeCount: existingCertificate.retakeCount + 1
           });
           
@@ -419,7 +419,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         expiresAt: calculateExpiryDate(),
         businessName: req.body.businessName || null, // For business certificates
         retakeCount: 0,
-        isPaid: true, // Certificate is earned by passing the exam
+        isPaid: false, // User needs to pay for certificate
       });
       
       res.json(certificate);
