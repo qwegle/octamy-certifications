@@ -1,21 +1,55 @@
 import { useParams, useLocation } from 'wouter';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
 import Header from '@/components/header';
 import PayUMoneyForm from '@/components/payumoney-form';
-import { QrCode, Download, Share2, Trophy, Calendar, Award } from 'lucide-react';
+import { QrCode, Download, Share2, Trophy, Calendar, Award, Truck, MapPin } from 'lucide-react';
 import type { Certificate } from '@shared/schema';
+import { useState, useEffect } from 'react';
+import { apiRequest } from '@/lib/queryClient';
+
+interface Address {
+  id: number;
+  fullName: string;
+  addressLine1: string;
+  addressLine2?: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+  phone: string;
+  isDefault: boolean;
+}
 
 export default function Payment() {
   const { certificateId } = useParams();
   const [, setLocation] = useLocation();
+  const [includesPhysicalCopy, setIncludesPhysicalCopy] = useState(false);
+  const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
 
   const { data: certificate, refetch } = useQuery<Certificate>({
     queryKey: [`/api/certificates/${certificateId}`],
     enabled: !!certificateId,
   });
+
+  // Fetch user addresses
+  const { data: addresses = [] } = useQuery<Address[]>({
+    queryKey: ["/api/user/addresses"],
+    retry: false,
+  });
+
+  // Find default address
+  useEffect(() => {
+    const defaultAddress = addresses.find(addr => addr.isDefault);
+    if (defaultAddress && !selectedAddressId) {
+      setSelectedAddressId(defaultAddress.id);
+    }
+  }, [addresses, selectedAddressId]);
 
   const handlePaymentSuccess = async () => {
     await refetch();
@@ -94,15 +128,128 @@ export default function Payment() {
             </Card>
 
             {/* Payment Form */}
-            <PayUMoneyForm
-              certificateId={certificateId!}
-              courseId={certificate.courseId}
-              amount="99"
-              userEmail={certificate.userEmail}
-              userName={certificate.userName}
-              courseTitle={certificate.courseTitle}
-              onSuccess={handlePaymentSuccess}
-            />
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-gray-900">Payment Details</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Certificate Options */}
+                <div className="space-y-4">
+                  <h3 className="font-semibold text-gray-900">Certificate Options</h3>
+                  
+                  <div className="space-y-3">
+                    {/* Digital Only Option */}
+                    <div className="flex items-center space-x-3 p-3 border rounded-lg">
+                      <Checkbox 
+                        id="digital-only"
+                        checked={!includesPhysicalCopy}
+                        onCheckedChange={() => setIncludesPhysicalCopy(false)}
+                      />
+                      <div className="flex-1">
+                        <Label htmlFor="digital-only" className="flex items-center gap-2 cursor-pointer">
+                          <Download className="w-4 h-4" />
+                          Digital Certificate Only
+                        </Label>
+                        <p className="text-sm text-gray-500 mt-1">
+                          Download high-quality PDF certificate
+                        </p>
+                      </div>
+                      <span className="font-semibold">₹99</span>
+                    </div>
+
+                    {/* Physical + Digital Option */}
+                    <div className="flex items-center space-x-3 p-3 border rounded-lg">
+                      <Checkbox 
+                        id="physical-copy"
+                        checked={includesPhysicalCopy}
+                        onCheckedChange={() => setIncludesPhysicalCopy(true)}
+                      />
+                      <div className="flex-1">
+                        <Label htmlFor="physical-copy" className="flex items-center gap-2 cursor-pointer">
+                          <Truck className="w-4 h-4" />
+                          Digital + Physical Certificate
+                        </Label>
+                        <p className="text-sm text-gray-500 mt-1">
+                          Premium paper certificate shipped to your address
+                        </p>
+                      </div>
+                      <span className="font-semibold">₹149</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Shipping Address (only if physical copy is selected) */}
+                {includesPhysicalCopy && (
+                  <div className="space-y-4">
+                    <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+                      <MapPin className="w-4 h-4" />
+                      Shipping Address
+                    </h3>
+                    
+                    {addresses.length > 0 ? (
+                      <Select value={selectedAddressId?.toString()} onValueChange={(value) => setSelectedAddressId(parseInt(value))}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select shipping address" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {addresses.map((address) => (
+                            <SelectItem key={address.id} value={address.id.toString()}>
+                              <div className="text-left">
+                                <div className="font-medium">{address.fullName}</div>
+                                <div className="text-sm text-gray-500">
+                                  {address.addressLine1}, {address.city}, {address.state} {address.postalCode}
+                                </div>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <div className="text-center p-4 border border-dashed rounded-lg">
+                        <MapPin className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                        <p className="text-gray-600 mb-2">No shipping addresses found</p>
+                        <Button variant="outline" onClick={() => setLocation('/profile')}>
+                          Add Shipping Address
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Price Breakdown */}
+                <div className="border-t pt-4">
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span>Digital Certificate</span>
+                      <span>₹99.00</span>
+                    </div>
+                    {includesPhysicalCopy && (
+                      <div className="flex justify-between">
+                        <span>Physical Copy & Shipping</span>
+                        <span>₹50.00</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between font-semibold text-lg pt-2 border-t">
+                      <span>Total</span>
+                      <span>₹{includesPhysicalCopy ? 149 : 99}.00</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Payment Form */}
+                <PayUMoneyForm
+                  certificateId={certificateId!}
+                  courseId={certificate.courseId}
+                  amount={includesPhysicalCopy ? "149" : "99"}
+                  userEmail={certificate.userEmail}
+                  userName={certificate.userName}
+                  courseTitle={certificate.courseTitle}
+                  includesPhysicalCopy={includesPhysicalCopy}
+                  selectedAddressId={selectedAddressId}
+                  onSuccess={handlePaymentSuccess}
+                />
+              </CardContent>
+            </Card>
           </div>
         ) : (
           <Card>

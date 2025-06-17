@@ -12,6 +12,8 @@ interface PayUMoneyFormProps {
   userEmail: string;
   userName: string;
   courseTitle: string;
+  includesPhysicalCopy?: boolean;
+  selectedAddressId?: number | null;
   onSuccess: () => void;
 }
 
@@ -22,6 +24,8 @@ export default function PayUMoneyForm({
   userEmail,
   userName,
   courseTitle,
+  includesPhysicalCopy = false,
+  selectedAddressId = null,
   onSuccess
 }: PayUMoneyFormProps) {
   const [isLoading, setIsLoading] = useState(false);
