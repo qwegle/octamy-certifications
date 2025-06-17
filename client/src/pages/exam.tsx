@@ -46,7 +46,22 @@ export default function Exam() {
   });
 
   const { data: questionsData } = useQuery<{questions: ExamQuestion[], sessionId: string}>({
-    queryKey: [`/api/courses/${courseId}/questions`],
+    queryKey: [`/api/courses/${courseId}/questions`, sessionId],
+    queryFn: async () => {
+      const response = await fetch(`/api/courses/${courseId}/questions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          sessionId: sessionId || `session_${Date.now()}_${Math.random()}`
+        }),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch questions');
+      }
+      return response.json();
+    },
     enabled: !!courseId && examStarted,
   });
 
