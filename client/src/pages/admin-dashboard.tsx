@@ -79,35 +79,38 @@ export default function AdminDashboard() {
   // Check admin authentication
   const adminToken = localStorage.getItem("adminToken");
   if (!adminToken) {
-    setLocation("/admin/login");
+    setLocation("/admin-login");
     return null;
   }
+
+  // Logout function
+  const logout = () => {
+    localStorage.removeItem("adminToken");
+    setLocation("/admin-login");
+    toast({
+      title: "Logged out",
+      description: "You have been successfully logged out.",
+    });
+  };
 
   // Fetch analytics data
   const { data: analytics, isLoading: analyticsLoading } = useQuery({
     queryKey: ["/api/admin/analytics"],
-    queryFn: async () => {
-      const response = await apiRequest("GET", "/api/admin/analytics");
-      return response.json() as Promise<Analytics>;
-    },
   });
 
   // Fetch partners data
-  const { data: partners, isLoading: partnersLoading } = useQuery({
+  const { data: partners = [], isLoading: partnersLoading } = useQuery({
     queryKey: ["/api/admin/partners"],
-    queryFn: async () => {
-      const response = await apiRequest("GET", "/api/admin/partners");
-      return response.json() as Promise<Partner[]>;
-    },
   });
 
   // Fetch withdrawals data
-  const { data: withdrawals, isLoading: withdrawalsLoading } = useQuery({
+  const { data: withdrawals = [], isLoading: withdrawalsLoading } = useQuery({
     queryKey: ["/api/admin/withdrawals"],
-    queryFn: async () => {
-      const response = await apiRequest("GET", "/api/admin/withdrawals");
-      return response.json();
-    },
+  });
+
+  // Fetch transactions data
+  const { data: transactions = [], isLoading: transactionsLoading } = useQuery({
+    queryKey: ["/api/admin/transactions"],
   });
 
   // Partner approval mutation

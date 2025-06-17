@@ -12,7 +12,12 @@ export async function apiRequest(
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
-  const token = localStorage.getItem('authToken');
+  // Use admin token for admin routes, regular token for others
+  const isAdminRoute = url.includes('/admin');
+  const token = isAdminRoute 
+    ? localStorage.getItem('adminToken') 
+    : localStorage.getItem('authToken');
+    
   const headers: Record<string, string> = {};
   
   if (data) {
@@ -40,14 +45,19 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    const token = localStorage.getItem('authToken');
+    const url = queryKey[0] as string;
+    const isAdminRoute = url.includes('/admin');
+    const token = isAdminRoute 
+      ? localStorage.getItem('adminToken') 
+      : localStorage.getItem('authToken');
+      
     const headers: Record<string, string> = {};
     
     if (token) {
       headers["Authorization"] = `Bearer ${token}`;
     }
 
-    const res = await fetch(queryKey[0] as string, {
+    const res = await fetch(url, {
       headers,
       credentials: "include",
     });
