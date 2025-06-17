@@ -688,6 +688,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Generate referral URLs for partners
+  app.post("/api/sellers/generate-referral-url", authenticateSellerToken, async (req: SellerAuthenticatedRequest, res: Response) => {
+    try {
+      const { type, itemId } = req.body; // type: 'course', 'internship', 'business'
+      const sellerId = req.seller!.sellerId;
+      
+      // Generate unique referral code
+      const referralCode = `${sellerId}-${type}-${itemId}-${Date.now()}`;
+      
+      let baseUrl = '';
+      switch (type) {
+        case 'course':
+          const course = await storage.getCourse(itemId);
+          if (!course) {
+            return res.status(404).json({ message: "Course not found" });
+          }
+          baseUrl = `/courses/${course.slug}`;
+          break;
+        case 'internship':
+          const internship = await storage.getCourse(itemId);
+          if (!internship || !internship.isInternship) {
+            return res.status(404).json({ message: "Internship not found" });
+          }
+          baseUrl = `/virtual-internships/${internship.slug}`;
+          break;
+        case 'business':
+          const businessCert = await storage.getCourse(itemId);
+          if (!businessCert || !businessCert.isBusiness) {
+            return res.status(404).json({ message: "Business certification not found" });
+          }
+          baseUrl = `/business-certifications/${businessCert.slug}`;
+          break;
+        default:
+          return res.status(400).json({ message: "Invalid type" });
+      }
+      
+      const referralUrl = `${req.protocol}://${req.get('host')}${baseUrl}?ref=${referralCode}`;
+      
+      res.json({
+        referralUrl,
+        referralCode,
+        type,
+        itemId,
+        sellerId
+      });
+    } catch (error) {
+      console.error("Error generating referral URL:", error);
+      res.status(500).json({ message: "Failed to generate referral URL" });
+    }
+  });
+
+  // Get all courses/internships/business certs for partner sharing
+  app.get("/api/sellers/shareable-items", authenticateSellerToken, async (req: SellerAuthenticatedRequest, res: Response) => {
+    try {
+      const courses = await storage.getCourses();
+      
+      const shareableItems = {
+        courses: courses.filter(c => !c.isInternship && !c.isBusiness),
+        internships: courses.filter(c => c.isInternship),
+        businessCertifications: courses.filter(c => c.isBusiness)
+      };
+      
+      res.json(shareableItems);
+    } catch (error) {
+      console.error("Error fetching shareable items:", error);
+      res.status(500).json({ message: "Failed to fetch shareable items" });
+    }
+  });
+
   // Course purchase with referral tracking
   app.post("/api/courses/:courseId/purchase", async (req: Request, res: Response) => {
     try {

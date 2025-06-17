@@ -32,12 +32,16 @@ export default function SellerAuth() {
           title: "Success",
           description: "Logged in successfully",
         });
+        // Redirect to partner dashboard after successful login
+        window.location.href = '/partner-dashboard';
       } else {
         await register(formData.email, formData.password, formData.name, formData.phone);
         toast({
           title: "Success",
           description: "Account created successfully. Awaiting admin approval.",
         });
+        // Redirect to partner dashboard after registration
+        window.location.href = '/partner-dashboard';
       }
     } catch (error: any) {
       toast({
