@@ -58,7 +58,7 @@ import {
   type InsertUserAchievement
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, count } from "drizzle-orm";
 
 export interface IStorage {
   // User operations
@@ -470,7 +470,7 @@ export class DatabaseStorage implements IStorage {
   async updateCertificate(id: number, updates: Partial<InsertCertificate>): Promise<Certificate> {
     const [certificate] = await db
       .update(certificates)
-      .set({ ...updates, updatedAt: new Date() })
+      .set(updates)
       .where(eq(certificates.id, id))
       .returning();
     return certificate;
@@ -482,11 +482,11 @@ export class DatabaseStorage implements IStorage {
       : eq(certificates.userEmail, userEmail || '');
     
     const result = await db
-      .select({ count: sql<number>`count(*)` })
+      .select()
       .from(certificates)
       .where(whereCondition);
     
-    return result[0]?.count || 0;
+    return result.length;
   }
 
   // Payment operations

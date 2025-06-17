@@ -469,6 +469,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get certificate count for dashboard
+  app.get("/api/user/certificates/count", optionalAuth, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userEmail = req.query.email as string;
+      const count = await storage.getUserCertificatesCount(req.user?.userId || null, userEmail);
+      res.json({ count });
+    } catch (error) {
+      console.error("Error fetching certificate count:", error);
+      res.status(500).json({ message: "Failed to fetch certificate count" });
+    }
+  });
+
   // Admin routes
   app.get("/api/admin/courses", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
     try {
