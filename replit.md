@@ -104,6 +104,25 @@ Octamy is a comprehensive professional certification platform built as a full-st
 
 ## Recent Updates
 
+### Production Deployment Documentation and Build System (June 17, 2025)
+- **Comprehensive deployment guide** with DEPLOYMENT.md covering all deployment scenarios
+- **Automated build script** (build.sh) with complete production preparation workflow
+- **Multiple deployment options** including traditional server, Docker, PM2, and cloud platforms
+- **Security hardening** with SSL configuration, environment management, and monitoring setup
+- **Database migration** and backup strategies for production environments
+- **Performance optimization** guidelines with caching, compression, and load balancing
+- **Docker configuration** with multi-stage builds and health checks
+- **PM2 ecosystem** configuration for process management and clustering
+- **Nginx reverse proxy** setup with SSL termination and static file serving
+
+### Certificate Management System Fixes (June 17, 2025)
+- **Prevented duplicate certificates** - only one certificate per user per course allowed
+- **Best score tracking** - users can only purchase certificates for improved scores
+- **Fixed certificate count display** - home page now shows actual certified users instead of 0
+- **Enhanced certificate creation logic** - updates existing certificates with better performance
+- **Resolved checkout flow issues** - proper certificate retrieval and payment processing
+- **Database integrity** - comprehensive certificate validation and duplicate prevention
+
 ### Enhanced Checkout System with Physical Certificate Shipping (June 17, 2025)
 - **Complete address management system** with CRUD operations for user shipping addresses
 - **Physical certificate shipping option** with ₹50 additional cost for premium paper delivery
