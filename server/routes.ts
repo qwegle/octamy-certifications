@@ -1088,7 +1088,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize PayUMoney payment
   app.post("/api/payment/initiate", optionalAuth, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const { certificateId, courseId, userEmail, userName, userPhone, sellerCode } = req.body;
+      const { 
+        certificateId, 
+        courseId, 
+        userEmail, 
+        userName, 
+        userPhone, 
+        sellerCode,
+        includesPhysicalCopy = false,
+        selectedAddressId = null,
+        amount
+      } = req.body;
 
       if (!courseId || isNaN(parseInt(courseId))) {
         return res.status(400).json({ message: "Invalid course ID" });
@@ -1120,24 +1130,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const txnid = payuMoneyService.generateTransactionId();
-      const amount = payuMoneyService.formatAmount(course.price);
+      
+      // Calculate total amount based on physical copy selection
+      const baseAmount = parseFloat(amount || course.price);
+      const shippingCost = includesPhysicalCopy ? 50 : 0;
+      const totalAmount = baseAmount + shippingCost;
+      const formattedAmount = payuMoneyService.formatAmount(totalAmount.toString());
 
       console.log('Payment data being created:', {
         userId: req.user?.userId || null,
         courseId: parseInt(courseId),
         certificateId: certificate.id,
-        amount: amount,
+        amount: formattedAmount,
+        certificateAmount: baseAmount.toFixed(2),
+        shippingAmount: shippingCost.toFixed(2),
+        includesPhysicalCopy,
+        selectedAddressId,
         status: "pending",
         paymentMethod: "payumoney",
         transactionId: txnid
       });
 
-      // Create payment record with certificate link
+      // Create payment record with certificate link and physical copy details
       const payment = await storage.createPayment({
         userId: req.user?.userId || null,
         courseId: parseInt(courseId),
         certificateId: certificate.id,
-        amount: amount,
+        amount: formattedAmount,
+        certificateAmount: baseAmount.toFixed(2),
+        shippingAmount: shippingCost.toFixed(2),
+        includesPhysicalCopy,
+        selectedAddressId,
         status: "pending",
         paymentMethod: "payumoney",
         transactionId: txnid
@@ -1147,8 +1170,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const paymentData = {
         txnid,
-        amount,
-        productinfo: `${course.title} - Professional Certification`,
+        amount: formattedAmount,
+        productinfo: includesPhysicalCopy 
+          ? `${course.title} - Professional Certification (Digital + Physical)`
+          : `${course.title} - Professional Certification`,
         firstname: userName,
         email: userEmail,
         phone: userPhone,
@@ -1158,7 +1183,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         udf2: payment.id.toString(),
         udf3: sellerCode || '',
         udf4: req.user?.userId?.toString() || '',
-        udf5: ''
+        udf5: selectedAddressId?.toString() || ''
       };
 
       const paymentForm = payuMoneyService.generatePaymentForm(paymentData);
@@ -1167,7 +1192,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         success: true,
         paymentForm,
         transactionId: txnid,
-        amount: amount
+        amount: formattedAmount
       });
     } catch (error) {
       console.error("Error initiating payment:", error);

@@ -43,7 +43,10 @@ export default function PayUMoneyForm({
         userName,
         productInfo: `Certificate for ${courseTitle}`,
         successUrl: `${window.location.origin}/payment/success`,
-        failureUrl: `${window.location.origin}/payment/failure`
+        failureUrl: `${window.location.origin}/payment/failure`,
+        includesPhysicalCopy,
+        selectedAddressId,
+        amount
       });
 
       const data = await response.json();
