@@ -32,12 +32,18 @@ import Verify from "@/pages/verify";
 import Preferences from "@/pages/preferences";
 import Progress from "@/pages/progress";
 import EnhancedCheckout from "@/pages/EnhancedCheckout";
+import Courses from "@/pages/courses";
+import VirtualInternships from "@/pages/virtual-internships";
+import BusinessCertificationsPage from "@/pages/business-certifications";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Landing} />
       <Route path="/auth" component={Auth} />
+      <Route path="/courses" component={Courses} />
+      <Route path="/virtual-internships" component={VirtualInternships} />
+      <Route path="/business-certifications" component={BusinessCertificationsPage} />
       <Route path="/exam/:courseId" component={Exam} />
       <Route path="/checkout/:courseId" component={EnhancedCheckout} />
       <Route path="/payment/:certificateId" component={Payment} />

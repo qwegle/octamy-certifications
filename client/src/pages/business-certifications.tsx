@@ -1,0 +1,510 @@
+import { useState, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Link } from "wouter";
+import { Search, Filter, Clock, Users, Star, TrendingUp, Award, Grid, List, Building, Target, Zap, ShieldCheck, ChevronRight, Calendar } from "lucide-react";
+import Header from "@/components/header";
+import Footer from "@/components/footer";
+import type { Course, Category } from "@shared/schema";
+
+const businessTypes = [
+  "Startup",
+  "Small Business", 
+  "Medium Enterprise",
+  "Large Corporation",
+  "Non-Profit",
+  "Government"
+];
+
+const industryFocus = [
+  "Technology",
+  "Finance",
+  "Healthcare", 
+  "Manufacturing",
+  "Retail",
+  "Education",
+  "Consulting",
+  "Real Estate"
+];
+
+const sortOptions = [
+  { value: "popularity", label: "Most Popular", icon: TrendingUp },
+  { value: "newest", label: "Recently Added", icon: Award },
+  { value: "price-asc", label: "Lowest Price", icon: Target },
+  { value: "price-desc", label: "Highest Price", icon: Target },
+  { value: "duration-asc", label: "Shortest Duration", icon: Clock },
+];
+
+export default function BusinessCertificationsPage() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedBusinessType, setSelectedBusinessType] = useState<string>("all");
+  const [selectedIndustry, setSelectedIndustry] = useState<string>("all");
+  const [selectedPriceRange, setSelectedPriceRange] = useState<string>("all");
+  const [sortBy, setSortBy] = useState("popularity");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [showFilters, setShowFilters] = useState(false);
+
+  const { data: categories = [] } = useQuery<Category[]>({
+    queryKey: ['/api/categories'],
+  });
+
+  const { data: courses = [], isLoading } = useQuery<(Course & { category: Category })[]>({
+    queryKey: ['/api/courses'],
+  });
+
+  // Filter for business courses only
+  const businessCourses = courses.filter(course => 
+    course.category.name === "Business" || 
+    course.title.toLowerCase().includes("business") ||
+    course.description.toLowerCase().includes("business") ||
+    course.title.toLowerCase().includes("management") ||
+    course.title.toLowerCase().includes("leadership")
+  );
+
+  const priceRanges = [
+    { label: "Under ₹500", min: 0, max: 499 },
+    { label: "₹500 - ₹1,500", min: 500, max: 1499 },
+    { label: "₹1,500 - ₹5,000", min: 1500, max: 4999 },
+    { label: "₹5,000 - ₹15,000", min: 5000, max: 14999 },
+    { label: "Above ₹15,000", min: 15000, max: Infinity },
+  ];
+
+  // Filter and sort business certifications
+  const filteredAndSortedCertifications = useMemo(() => {
+    let filtered = businessCourses.filter(course => {
+      // Search filter
+      const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           course.description.toLowerCase().includes(searchQuery.toLowerCase());
+
+      // Business type filter (using difficulty as proxy)
+      const matchesBusinessType = selectedBusinessType === "all" || course.difficulty === selectedBusinessType;
+
+      // Industry filter (using category or description)
+      let matchesIndustry = true;
+      if (selectedIndustry !== "all") {
+        matchesIndustry = course.description.toLowerCase().includes(selectedIndustry.toLowerCase()) ||
+                         course.title.toLowerCase().includes(selectedIndustry.toLowerCase());
+      }
+
+      // Price filter
+      let matchesPrice = true;
+      if (selectedPriceRange !== "all") {
+        const priceRange = priceRanges.find(range => range.label === selectedPriceRange);
+        if (priceRange) {
+          const coursePrice = parseFloat(course.price);
+          matchesPrice = coursePrice >= priceRange.min && coursePrice <= priceRange.max;
+        }
+      }
+
+      return matchesSearch && matchesBusinessType && matchesIndustry && matchesPrice;
+    });
+
+    // Sort certifications
+    filtered.sort((a, b) => {
+      switch (sortBy) {
+        case "popularity":
+          return (b.enrollmentCount || 0) - (a.enrollmentCount || 0);
+        case "newest":
+          return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+        case "price-asc":
+          return parseFloat(a.price) - parseFloat(b.price);
+        case "price-desc":
+          return parseFloat(b.price) - parseFloat(a.price);
+        case "duration-asc":
+          return a.duration - b.duration;
+        default:
+          return 0;
+      }
+    });
+
+    return filtered;
+  }, [businessCourses, searchQuery, selectedBusinessType, selectedIndustry, selectedPriceRange, sortBy]);
+
+  const clearFilters = () => {
+    setSearchQuery("");
+    setSelectedBusinessType("all");
+    setSelectedIndustry("all");
+    setSelectedPriceRange("all");
+    setSortBy("popularity");
+  };
+
+  const hasActiveFilters = searchQuery || selectedBusinessType !== "all" || selectedIndustry !== "all" || selectedPriceRange !== "all";
+
+  const BusinessCertificationCard = ({ certification, viewMode }: { certification: Course & { category: Category }, viewMode: "grid" | "list" }) => (
+    <Card className={`group hover:shadow-lg transition-all duration-300 border-2 hover:border-black ${
+      viewMode === "list" ? "flex flex-row" : ""
+    }`}>
+      <div className={`${viewMode === "list" ? "w-64 flex-shrink-0" : ""}`}>
+        <div className="aspect-video bg-gradient-to-br from-blue-900 to-black rounded-t-lg relative overflow-hidden">
+          <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center">
+            <Building className="h-12 w-12 text-white" />
+          </div>
+          <div className="absolute top-4 left-4">
+            <Badge variant="secondary" className="bg-white text-black font-bold">
+              BUSINESS
+            </Badge>
+          </div>
+          <div className="absolute top-4 right-4">
+            <Badge variant="outline" className="bg-black text-white border-white">
+              Professional
+            </Badge>
+          </div>
+          <div className="absolute bottom-4 left-4">
+            <div className="flex items-center gap-2 text-white text-sm">
+              <ShieldCheck className="h-4 w-4" />
+              Verified Certificate
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div className={`${viewMode === "list" ? "flex-1" : ""}`}>
+        <CardHeader className="pb-3">
+          <div className="flex items-start justify-between gap-2">
+            <CardTitle className="text-lg group-hover:text-blue-600 transition-colors">
+              {certification.title}
+            </CardTitle>
+            <div className="flex items-center gap-1 text-yellow-500">
+              <Star className="h-4 w-4 fill-current" />
+              <span className="text-sm font-medium">{certification.rating || "4.8"}</span>
+            </div>
+          </div>
+          <p className="text-sm text-gray-600 line-clamp-2">
+            {certification.description}
+          </p>
+        </CardHeader>
+        
+        <CardContent className="pt-0">
+          <div className="space-y-4">
+            <div className="flex items-center gap-4 text-sm text-gray-600">
+              <div className="flex items-center gap-1">
+                <Clock className="h-4 w-4" />
+                {certification.duration} days
+              </div>
+              <div className="flex items-center gap-1">
+                <Users className="h-4 w-4" />
+                {certification.enrollmentCount || 0} enrolled
+              </div>
+              <div className="flex items-center gap-1">
+                <Calendar className="h-4 w-4" />
+                Self-paced
+              </div>
+            </div>
+
+            {/* Key Benefits */}
+            <div className="flex flex-wrap gap-2">
+              <Badge variant="outline" className="text-xs">Industry Recognized</Badge>
+              <Badge variant="outline" className="text-xs">Lifetime Access</Badge>
+              <Badge variant="outline" className="text-xs">Expert Support</Badge>
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <div className="text-2xl font-bold text-black">
+                  ₹{certification.price}
+                </div>
+                <div className="text-xs text-gray-500">
+                  One-time payment
+                </div>
+              </div>
+              <Link href={`/course/${certification.id}`}>
+                <Button className="bg-black hover:bg-gray-800 text-white group">
+                  Get Certified
+                  <ChevronRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </CardContent>
+      </div>
+    </Card>
+  );
+
+  return (
+    <div className="min-h-screen bg-white">
+      <Header />
+      
+      {/* Hero Section */}
+      <section className="bg-black text-white py-16">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center">
+            <h1 className="text-5xl md:text-6xl font-bold mb-6">
+              BUSINESS CERTIFICATIONS
+            </h1>
+            <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
+              Elevate your business expertise with industry-recognized certifications. 
+              Master leadership, strategy, and operations to drive organizational success.
+            </p>
+            <div className="flex items-center justify-center gap-4 text-sm text-gray-400">
+              <div className="flex items-center gap-2">
+                <Building className="h-4 w-4" />
+                {businessCourses.length}+ Certifications
+              </div>
+              <div className="flex items-center gap-2">
+                <Target className="h-4 w-4" />
+                All Business Sizes
+              </div>
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="h-4 w-4" />
+                Industry Verified
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Search and Filters */}
+      <section className="py-8 bg-gray-50 border-b">
+        <div className="max-w-7xl mx-auto px-6">
+          {/* Search Bar */}
+          <div className="relative mb-6">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+            <Input
+              placeholder="Search business certifications, skills, or topics..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 h-12 text-lg border-2 focus:border-black"
+            />
+          </div>
+
+          {/* Filter Controls */}
+          <div className="flex flex-wrap items-center gap-4 mb-6">
+            <Button
+              variant={showFilters ? "default" : "outline"}
+              onClick={() => setShowFilters(!showFilters)}
+              className="flex items-center gap-2"
+            >
+              <Filter className="h-4 w-4" />
+              Filters
+              {hasActiveFilters && (
+                <Badge variant="destructive" className="ml-2 h-5 w-5 p-0 text-xs">
+                  !
+                </Badge>
+              )}
+            </Button>
+
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                {sortOptions.map((option) => {
+                  const Icon = option.icon;
+                  return (
+                    <SelectItem key={option.value} value={option.value}>
+                      <div className="flex items-center gap-2">
+                        <Icon className="h-4 w-4" />
+                        {option.label}
+                      </div>
+                    </SelectItem>
+                  );
+                })}
+              </SelectContent>
+            </Select>
+
+            <Link href="/business-pricing">
+              <Button variant="outline" className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100">
+                Get Business Pricing
+              </Button>
+            </Link>
+
+            <div className="flex items-center gap-2 ml-auto">
+              <span className="text-sm text-gray-600">{filteredAndSortedCertifications.length} certifications</span>
+              <Separator orientation="vertical" className="h-6" />
+              <Button
+                variant={viewMode === "grid" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setViewMode("grid")}
+              >
+                <Grid className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={viewMode === "list" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setViewMode("list")}
+              >
+                <List className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Expanded Filters */}
+          {showFilters && (
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  Filter Business Certifications
+                  {hasActiveFilters && (
+                    <Button variant="outline" size="sm" onClick={clearFilters}>
+                      Clear All
+                    </Button>
+                  )}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                  {/* Business Type Filter */}
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">Business Type</label>
+                    <Select value={selectedBusinessType} onValueChange={setSelectedBusinessType}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="All Types" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Types</SelectItem>
+                        {businessTypes.map((type) => (
+                          <SelectItem key={type} value={type}>
+                            {type}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Industry Filter */}
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">Industry Focus</label>
+                    <Select value={selectedIndustry} onValueChange={setSelectedIndustry}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="All Industries" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Industries</SelectItem>
+                        {industryFocus.map((industry) => (
+                          <SelectItem key={industry} value={industry}>
+                            {industry}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Price Range Filter */}
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">Price Range</label>
+                    <Select value={selectedPriceRange} onValueChange={setSelectedPriceRange}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="All Prices" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Prices</SelectItem>
+                        {priceRanges.map((range) => (
+                          <SelectItem key={range.label} value={range.label}>
+                            {range.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Quick Actions */}
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">Quick Actions</label>
+                    <div className="space-y-2">
+                      <Link href="/business-demo">
+                        <Button variant="outline" size="sm" className="w-full">
+                          View Demo Certificate
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </section>
+
+      {/* Business Value Proposition */}
+      <section className="py-12 bg-white">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+            <Card className="text-center border-2 hover:border-black transition-colors">
+              <CardContent className="pt-6">
+                <div className="bg-black rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                  <Target className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="text-xl font-bold mb-2">Strategic Leadership</h3>
+                <p className="text-gray-600 text-sm">Master strategic thinking and decision-making skills.</p>
+              </CardContent>
+            </Card>
+            <Card className="text-center border-2 hover:border-black transition-colors">
+              <CardContent className="pt-6">
+                <div className="bg-black rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                  <Zap className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="text-xl font-bold mb-2">Operational Excellence</h3>
+                <p className="text-gray-600 text-sm">Optimize processes and drive efficiency.</p>
+              </CardContent>
+            </Card>
+            <Card className="text-center border-2 hover:border-black transition-colors">
+              <CardContent className="pt-6">
+                <div className="bg-black rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                  <Building className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="text-xl font-bold mb-2">Team Management</h3>
+                <p className="text-gray-600 text-sm">Build and lead high-performing teams.</p>
+              </CardContent>
+            </Card>
+            <Card className="text-center border-2 hover:border-black transition-colors">
+              <CardContent className="pt-6">
+                <div className="bg-black rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                  <ShieldCheck className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="text-xl font-bold mb-2">Industry Recognition</h3>
+                <p className="text-gray-600 text-sm">Earn credentials that employers value.</p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Business Certifications Grid */}
+      <section className="py-12 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-6">
+          {isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="animate-pulse">
+                  <div className="bg-gray-200 rounded-lg h-80"></div>
+                </div>
+              ))}
+            </div>
+          ) : filteredAndSortedCertifications.length === 0 ? (
+            <div className="text-center py-16">
+              <div className="text-6xl mb-4">🏢</div>
+              <h3 className="text-2xl font-bold mb-2">No business certifications found</h3>
+              <p className="text-gray-600 mb-6">
+                Try adjusting your filters or search terms to find more certifications.
+              </p>
+              <Button onClick={clearFilters} variant="outline">
+                Clear Filters
+              </Button>
+            </div>
+          ) : (
+            <div className={`grid gap-8 ${
+              viewMode === "grid" 
+                ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" 
+                : "grid-cols-1"
+            }`}>
+              {filteredAndSortedCertifications.map((certification) => (
+                <BusinessCertificationCard
+                  key={certification.id}
+                  certification={certification}
+                  viewMode={viewMode}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      <Footer />
+    </div>
+  );
+}
