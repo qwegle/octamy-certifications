@@ -157,6 +157,14 @@ Octamy is a comprehensive professional certification platform built as a full-st
 - **Navigation integration** with "Sponsors" links in both desktop and mobile headers (removed Business Pricing)
 - **API endpoints** for sponsor creation, payment processing, and transaction status updates
 
+### Click Tracking Analytics and Certificate Display Fixes (June 17, 2025)
+- **Fixed click tracking analytics** - referral link clicks now properly recorded in database
+- **Resolved database schema issues** - added missing conversion_date column for proper tracking
+- **Partner dashboard analytics working** - shows real-time click data with course-wise breakdown
+- **Certificate course names displaying correctly** - API and frontend alignment verified
+- **Referral URL generation and tracking** - complete flow from generation to analytics working
+- **Database column mapping fixed** - storage methods now use correct schema field names
+
 ### Enhanced Checkout System with Physical Certificate Shipping (June 17, 2025)
 - **Complete address management system** with CRUD operations for user shipping addresses
 - **Physical certificate shipping option** with ₹50 additional cost for premium paper delivery
