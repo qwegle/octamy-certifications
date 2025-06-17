@@ -127,6 +127,9 @@ interface WithdrawalRequest {
 interface Category {
   id: number;
   name: string;
+  description: string;
+  courseCount?: number;
+  createdAt: string;
 }
 
 const courseSchema = z.object({
@@ -145,6 +148,13 @@ const courseSchema = z.object({
 });
 
 type CourseFormData = z.infer<typeof courseSchema>;
+
+const categorySchema = z.object({
+  name: z.string().min(1, "Category name is required"),
+  description: z.string().min(1, "Description is required")
+});
+
+type CategoryFormData = z.infer<typeof categorySchema>;
 
 // Inline CourseForm component
 function CourseForm({ course, onCancel, onSuccess }: { course?: any; onCancel: () => void; onSuccess: () => void }) {
@@ -527,9 +537,17 @@ export default function AdminDashboard() {
     }
   }, [setLocation]);
 
+  // State for modals and pagination
+  const [isCreatingCategory, setIsCreatingCategory] = useState(false);
+
   // Fetch analytics data
   const { data: analytics = {}, isLoading: analyticsLoading } = useQuery<Analytics>({
     queryKey: ["/api/admin/analytics"],
+  });
+
+  // Fetch categories data
+  const { data: categories = [], isLoading: categoriesLoading } = useQuery<Category[]>({
+    queryKey: ["/api/categories"],
   });
 
   // Fetch customers data
@@ -675,9 +693,10 @@ export default function AdminDashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="space-y-6">
           <Tabs defaultValue="overview" className="space-y-4">
-            <TabsList className="grid w-full grid-cols-6">
+            <TabsList className="grid w-full grid-cols-7">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="customers">Customers</TabsTrigger>
+              <TabsTrigger value="categories">Categories</TabsTrigger>
               <TabsTrigger value="courses">Courses</TabsTrigger>
               <TabsTrigger value="exams">Exams</TabsTrigger>
               <TabsTrigger value="partners">Partners</TabsTrigger>
@@ -832,6 +851,117 @@ export default function AdminDashboard() {
                   </CardContent>
                 </Card>
               )}
+            </TabsContent>
+
+            <TabsContent value="categories" className="space-y-4">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <div>
+                    <CardTitle>Category Management</CardTitle>
+                    <CardDescription>Manage course categories and organization</CardDescription>
+                  </div>
+                  <Dialog open={isCreatingCategory} onOpenChange={setIsCreatingCategory}>
+                    <DialogTrigger asChild>
+                      <Button>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add New Category
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-2xl">
+                      <DialogHeader>
+                        <DialogTitle>Create New Category</DialogTitle>
+                      </DialogHeader>
+                      <CategoryForm
+                        onCancel={() => setIsCreatingCategory(false)}
+                        onSuccess={() => setIsCreatingCategory(false)}
+                      />
+                    </DialogContent>
+                  </Dialog>
+                </CardHeader>
+                <CardContent>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Description</TableHead>
+                        <TableHead>Courses</TableHead>
+                        <TableHead>Created</TableHead>
+                        <TableHead>Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {categories.map((category: any) => (
+                        <TableRow key={category.id}>
+                          <TableCell>
+                            <div className="font-medium">{category.name}</div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="text-sm text-muted-foreground">{category.description}</div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="secondary">{category.courseCount || 0} courses</Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="text-sm text-muted-foreground">
+                              {new Date(category.createdAt).toLocaleDateString()}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center space-x-2">
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <Button variant="outline" size="sm">
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-2xl">
+                                  <DialogHeader>
+                                    <DialogTitle>Edit Category</DialogTitle>
+                                  </DialogHeader>
+                                  <CategoryForm
+                                    category={category}
+                                    onCancel={() => {}}
+                                    onSuccess={() => {}}
+                                  />
+                                </DialogContent>
+                              </Dialog>
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button variant="outline" size="sm">
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Delete Category</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Are you sure you want to delete "{category.name}"? This action cannot be undone.
+                                      {category.courseCount > 0 && (
+                                        <div className="mt-2 text-red-600">
+                                          Warning: This category has {category.courseCount} courses. They will need to be reassigned.
+                                        </div>
+                                      )}
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction
+                                      onClick={() => handleDeleteCategory(category.id)}
+                                      className="bg-red-600 hover:bg-red-700"
+                                    >
+                                      Delete
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
             </TabsContent>
 
             <TabsContent value="courses" className="space-y-4">
