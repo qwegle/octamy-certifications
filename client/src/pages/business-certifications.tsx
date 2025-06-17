@@ -142,7 +142,7 @@ export default function BusinessCertificationsPage() {
       <div className={`${viewMode === "list" ? "w-64 flex-shrink-0" : ""}`}>
         <div className="aspect-video bg-gradient-to-br from-blue-900 to-black rounded-t-lg relative overflow-hidden">
           <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center">
-            <Building className="h-12 w-12 text-white" />
+            <Building className="h-16 w-16 text-white" />
           </div>
           <div className="absolute top-4 left-4">
             <Badge variant="secondary" className="bg-white text-black font-bold">
