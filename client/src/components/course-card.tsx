@@ -29,7 +29,7 @@ export default function CourseCard({ course, certifiedCount = 0, rating = 4.8, v
           </div>
           <div className="absolute top-4 right-4">
             <Badge variant="outline" className="bg-black text-white border-white">
-              {course.duration} days
+              {course.duration} mins
             </Badge>
           </div>
         </div>
@@ -56,7 +56,7 @@ export default function CourseCard({ course, certifiedCount = 0, rating = 4.8, v
             <div className="flex items-center gap-4 text-sm text-gray-600">
               <div className="flex items-center gap-1">
                 <Clock className="h-4 w-4" />
-                {course.duration} days
+                {course.duration} mins
               </div>
               <div className="flex items-center gap-1">
                 <Users className="h-4 w-4" />
@@ -69,8 +69,22 @@ export default function CourseCard({ course, certifiedCount = 0, rating = 4.8, v
             </div>
             
             <div className="flex items-center justify-between">
-              <div className="text-2xl font-bold text-black">
-                ₹{course.price}
+              <div className="space-y-1">
+                {course.isOnSale && course.originalPrice ? (
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl font-bold text-black">₹{course.price}</span>
+                      <span className="text-lg text-gray-500 line-through">₹{course.originalPrice}</span>
+                    </div>
+                    <div className="text-sm text-green-600 font-medium">
+                      Save ₹{(parseFloat(course.originalPrice) - parseFloat(course.price)).toFixed(0)}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-2xl font-bold text-black">
+                    ₹{course.price}
+                  </div>
+                )}
               </div>
               <Link href={`/course/${course.id}`}>
                 <Button className="bg-black hover:bg-gray-800 text-white group">
