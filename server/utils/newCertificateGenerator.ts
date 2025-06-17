@@ -120,12 +120,14 @@ function generateCertificateHTML(data: CertificateData): string {
         }
         
         .company-logo {
-          display: inline-block;
-          background: linear-gradient(145deg, #000000, #333333);
-          color: white;
-          padding: 12px 25px;
+          text-align: center;
           margin-bottom: 10px;
-          clip-path: polygon(10% 0%, 90% 0%, 100% 25%, 100% 75%, 90% 100%, 10% 100%, 0% 75%, 0% 25%);
+        }
+        
+        .company-logo img {
+          height: 50px;
+          width: auto;
+          object-fit: contain;
         }
         
         .company-name {

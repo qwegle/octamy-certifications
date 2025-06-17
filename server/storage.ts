@@ -722,7 +722,7 @@ export class DatabaseStorage implements IStorage {
     const clickStats = await db
       .select({
         totalClicks: count(),
-        totalConversions: sql<number>`COUNT(CASE WHEN is_converted = true THEN 1 END)`,
+        totalConversions: sql<number>`COUNT(CASE WHEN converted = true THEN 1 END)`,
       })
       .from(referralClicks)
       .where(eq(referralClicks.sellerId, sellerId));
@@ -737,7 +737,7 @@ export class DatabaseStorage implements IStorage {
         courseId: referralClicks.courseId,
         courseTitle: courses.title,
         clicks: count(),
-        conversions: sql<number>`COUNT(CASE WHEN is_converted = true THEN 1 END)`,
+        conversions: sql<number>`COUNT(CASE WHEN converted = true THEN 1 END)`,
         latestClick: sql<Date>`MAX(${referralClicks.clickedAt})`,
       })
       .from(referralClicks)
