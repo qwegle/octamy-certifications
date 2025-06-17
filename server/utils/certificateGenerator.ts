@@ -25,8 +25,8 @@ function getBadgeImage(badge: string): string {
   return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iNTAiIGN5PSI1MCIgcj0iNDUiIGZpbGw9IiNEQUFGMzciIHN0cm9rZT0iI0I4OTMzMCIgc3Ryb2tlLXdpZHRoPSIyIi8+PHRleHQgeD0iNTAiIHk9IjQwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSIjMDAwIj5HR09MRDwvdGV4dD48dGV4dCB4PSI1MCIgeT0iNjAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSI4IiBmaWxsPSIjMDAwIj5BV0FSRDI8L3RleHQ+PC9zdmc+';
 }
 
-export async function generateCertificatePDF(data: CertificateData): Promise<Buffer> {
-  const html = `
+function generateCertificateHTML(data: CertificateData): string {
+  return `
     <!DOCTYPE html>
     <html lang="en">
     <head>
@@ -435,15 +435,20 @@ export async function generateCertificatePDF(data: CertificateData): Promise<Buf
             </div>
           </div>
           
-          <div class="iso-badges">
-            <div class="iso-badge">ISO<br>9001</div>
-            <div class="iso-badge">ISO<br>27001</div>
+          <div class="certification-logos">
+            <img src="https://images.seeklogo.com/logo-png/55/2/iso-certified-company-stamp-logo-png_seeklogo-556487.png" alt="ISO Certified" class="cert-logo" />
+            <img src="https://static.vecteezy.com/system/resources/previews/019/909/405/non_2x/make-in-india-transparent-make-in-india-free-free-png.png" alt="Make in India" class="cert-logo" />
+            <img src="https://sudikshya.com/wp-content/uploads/2024/08/startup-and-odisha-combo.png" alt="Startup Odisha" class="cert-logo" />
           </div>
         </div>
       </div>
     </body>
     </html>
   `;
+}
+
+export async function generateCertificatePDF(data: CertificateData): Promise<Buffer> {
+  const html = generateCertificateHTML(data);
 
   const browser = await puppeteer.launch({
     headless: true,
@@ -466,6 +471,8 @@ export async function generateCertificatePDF(data: CertificateData): Promise<Buf
     await browser.close();
   }
 }
+
+export { generateCertificateHTML };
 
 export async function generateInvoicePDF(data: {
   transactionId: string;
