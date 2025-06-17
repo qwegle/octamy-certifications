@@ -72,9 +72,14 @@ export default function SellerDashboard() {
   });
 
   useEffect(() => {
+    if (!seller || !token) {
+      // Redirect to login if not authenticated
+      window.location.href = '/seller-auth';
+      return;
+    }
     fetchDashboardData();
     fetchShareableItems();
-  }, []);
+  }, [seller, token]);
 
   const fetchDashboardData = async () => {
     try {
@@ -87,6 +92,14 @@ export default function SellerDashboard() {
       if (response.ok) {
         const data = await response.json();
         setDashboardData(data);
+      } else if (response.status === 401 || response.status === 403) {
+        toast({
+          title: "Authentication Error", 
+          description: "Please log in again to continue",
+          variant: "destructive",
+        });
+        logout();
+        window.location.href = '/seller-auth';
       } else {
         toast({
           title: "Error",

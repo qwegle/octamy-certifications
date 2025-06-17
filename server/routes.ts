@@ -615,8 +615,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         password: hashedPassword,
       });
 
-      // Generate JWT token with 24 hour expiration
-      const token = jwt.sign({ sellerId: seller.id, email: seller.email }, JWT_SECRET, { expiresIn: '24h' });
+      // Generate JWT token with 7 day expiration
+      const token = jwt.sign({ 
+        sellerId: seller.id, 
+        email: seller.email,
+        iat: Math.floor(Date.now() / 1000)
+      }, JWT_SECRET, { expiresIn: '7d' });
       
       res.json({ 
         token, 
@@ -649,7 +653,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
-      const token = jwt.sign({ sellerId: seller.id, email: seller.email }, JWT_SECRET, { expiresIn: '24h' });
+      const token = jwt.sign({ 
+        sellerId: seller.id, 
+        email: seller.email,
+        iat: Math.floor(Date.now() / 1000)
+      }, JWT_SECRET, { expiresIn: '7d' });
       
       res.json({ 
         token, 
