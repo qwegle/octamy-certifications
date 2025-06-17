@@ -133,13 +133,25 @@ export default function Exam() {
       const result = await response.json();
       
       if (result.passed) {
-        // Redirect to checkout if exam passed
-        setLocation(`/checkout/${courseId}`);
+        // Create certificate after successful exam
+        try {
+          const certificateResponse = await apiRequest('POST', '/api/certificates/create', {
+            examAttemptId: result.examAttemptId
+          });
+          const certificateData = await certificateResponse.json();
+          
+          // Redirect to payment page with certificate ID
+          setLocation(`/payment/${certificateData.id}`);
+        } catch (error) {
+          console.error('Certificate creation error:', error);
+          // Fall back to checkout if certificate creation fails
+          setLocation(`/checkout/${courseId}`);
+        }
       } else {
         // Show failure message if exam failed
         toast({
           title: "Exam Failed",
-          description: `You scored ${result.score}%. You need ${course?.passingScore}% to pass. Please try again.`,
+          description: `You scored ${result.score}%. You need ${course?.passingScore || 50}% to pass. Please try again.`,
           variant: "destructive",
         });
       }

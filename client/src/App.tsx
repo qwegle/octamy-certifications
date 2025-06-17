@@ -63,6 +63,7 @@ function Router() {
       <Route path="/help-center" component={HelpCenter} />
       <Route path="/privacy-policy" component={PrivacyPolicy} />
       <Route path="/terms-of-service" component={TermsOfService} />
+      <Route path="/seller-auth" component={SellerAuth} />
       <Route path="/partners" component={SellerAuth} />
       <Route path="/partner-dashboard" component={SellerDashboard} />
       <Route path="/payment-success" component={PaymentSuccess} />
