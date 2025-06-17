@@ -1537,16 +1537,121 @@ export class DatabaseStorage implements IStorage {
       isAdmin: users.isAdmin,
       certificateCount: sql`(
         SELECT COUNT(*) FROM certificates 
-        WHERE user_id = ${users.id}
+        WHERE user_email = ${users.email} AND is_paid = true
       )`.as('certificateCount'),
       totalSpent: sql`(
-        SELECT COALESCE(SUM(CAST(amount AS DECIMAL)), 0)
+        SELECT COALESCE(SUM(CAST(certificate_amount AS DECIMAL)), 0)
         FROM payments 
         WHERE user_id = ${users.id} AND status = 'success'
       )`.as('totalSpent')
     })
     .from(users)
     .orderBy(desc(users.createdAt));
+  }
+
+  // Admin course management
+  async getAdminCourses() {
+    return await db.select({
+      id: courses.id,
+      title: courses.title,
+      description: courses.description,
+      slug: courses.slug,
+      categoryId: courses.categoryId,
+      categoryName: sql`(SELECT name FROM categories WHERE id = ${courses.categoryId})`.as('categoryName'),
+      duration: courses.duration,
+      passingScore: courses.passingScore,
+      price: courses.price,
+      originalPrice: courses.originalPrice,
+      isOnSale: courses.isOnSale,
+      saleEndDate: courses.saleEndDate,
+      level: courses.level,
+      isActive: courses.isActive,
+      isInternship: courses.isInternship,
+      createdAt: courses.createdAt,
+      enrollmentCount: sql`(
+        SELECT COUNT(*) FROM exam_attempts 
+        WHERE course_id = ${courses.id}
+      )`.as('enrollmentCount'),
+      certificateCount: sql`(
+        SELECT COUNT(*) FROM certificates 
+        WHERE course_id = ${courses.id} AND is_paid = true
+      )`.as('certificateCount'),
+      revenue: sql`(
+        SELECT COALESCE(SUM(CAST(certificate_amount AS DECIMAL)), 0)
+        FROM payments 
+        WHERE course_id = ${courses.id} AND status = 'success'
+      )`.as('revenue')
+    })
+    .from(courses)
+    .orderBy(desc(courses.createdAt));
+  }
+
+  async createCourse(courseData: any) {
+    const [course] = await db.insert(courses).values(courseData).returning();
+    return course;
+  }
+
+  async updateCourse(courseId: number, courseData: any) {
+    const [course] = await db.update(courses)
+      .set(courseData)
+      .where(eq(courses.id, courseId))
+      .returning();
+    return course;
+  }
+
+  async deleteCourse(courseId: number) {
+    // First delete related data
+    await db.delete(questions).where(eq(questions.courseId, courseId));
+    await db.delete(examAttempts).where(eq(examAttempts.courseId, courseId));
+    
+    // Then delete the course
+    const [course] = await db.delete(courses)
+      .where(eq(courses.id, courseId))
+      .returning();
+    return course;
+  }
+
+  async getCourseQuestions(courseId: number) {
+    return await db.select().from(questions).where(eq(questions.courseId, courseId));
+  }
+
+  async createQuestion(questionData: any) {
+    const [question] = await db.insert(questions).values(questionData).returning();
+    return question;
+  }
+
+  async updateQuestion(questionId: number, questionData: any) {
+    const [question] = await db.update(questions)
+      .set(questionData)
+      .where(eq(questions.id, questionId))
+      .returning();
+    return question;
+  }
+
+  async deleteQuestion(questionId: number) {
+    const [question] = await db.delete(questions)
+      .where(eq(questions.id, questionId))
+      .returning();
+    return question;
+  }
+
+  // Get all exam attempts for admin
+  async getAllExamAttempts() {
+    return await db.select({
+      id: examAttempts.id,
+      userId: examAttempts.userId,
+      courseId: examAttempts.courseId,
+      userEmail: examAttempts.userEmail,
+      userName: examAttempts.userName,
+      score: examAttempts.score,
+      totalQuestions: examAttempts.totalQuestions,
+      timeTaken: examAttempts.timeTaken,
+      createdAt: examAttempts.createdAt,
+      courseTitle: sql`(SELECT title FROM courses WHERE id = ${examAttempts.courseId})`.as('courseTitle'),
+      passed: examAttempts.passed
+    })
+    .from(examAttempts)
+    .orderBy(desc(examAttempts.createdAt));
   }
 
   // Admin course management

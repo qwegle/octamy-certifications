@@ -4,10 +4,20 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { 
   Shield, 
   Users, 
@@ -29,6 +39,18 @@ import {
   Award
 } from "lucide-react";
 
+interface Analytics {
+  totalUsers?: number;
+  totalCourses?: number;
+  totalCertificates?: number;
+  totalRevenue?: number;
+  totalPartners?: number;
+  approvedPartners?: number;
+  pendingPartners?: number;
+  totalClicks?: number;
+  totalConversions?: number;
+}
+
 interface Customer {
   id: number;
   name: string;
@@ -37,6 +59,329 @@ interface Customer {
   isAdmin: boolean;
   certificateCount: number;
   totalSpent: number;
+}
+
+const courseSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  description: z.string().min(1, "Description is required"),
+  slug: z.string().min(1, "Slug is required"),
+  categoryId: z.number().min(1, "Category is required"),
+  duration: z.number().min(1, "Duration must be at least 1 minute"),
+  passingScore: z.number().min(1).max(100, "Passing score must be between 1-100"),
+  price: z.string().min(1, "Price is required"),
+  originalPrice: z.string().optional(),
+  isOnSale: z.boolean().default(false),
+  level: z.enum(["Beginner", "Intermediate", "Advanced"]),
+  isActive: z.boolean().default(true),
+  isInternship: z.boolean().default(false)
+});
+
+type CourseFormData = z.infer<typeof courseSchema>;
+
+// Inline CourseForm component
+function CourseForm({ course, onCancel, onSuccess }: { course?: any; onCancel: () => void; onSuccess: () => void }) {
+  const { toast } = useToast();
+  const isEditing = !!course;
+
+  const form = useForm<CourseFormData>({
+    resolver: zodResolver(courseSchema),
+    defaultValues: {
+      title: course?.title || "",
+      description: course?.description || "",
+      slug: course?.slug || "",
+      categoryId: course?.categoryId || 0,
+      duration: course?.duration || 30,
+      passingScore: course?.passingScore || 60,
+      price: course?.price || "99",
+      originalPrice: course?.originalPrice || "",
+      isOnSale: course?.isOnSale || false,
+      level: course?.level || "Beginner",
+      isActive: course?.isActive !== false,
+      isInternship: course?.isInternship || false
+    }
+  });
+
+  // Fetch categories
+  const { data: categories = [] } = useQuery({
+    queryKey: ["/api/categories"]
+  });
+
+  // Create/Update course mutation
+  const courseMutation = useMutation({
+    mutationFn: async (data: CourseFormData) => {
+      const url = isEditing ? `/api/admin/courses/${course.id}` : "/api/admin/courses";
+      const method = isEditing ? "PUT" : "POST";
+      return await apiRequest(method, url, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/courses"] });
+      toast({
+        title: "Success",
+        description: `Course ${isEditing ? 'updated' : 'created'} successfully`
+      });
+      onSuccess();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || `Failed to ${isEditing ? 'update' : 'create'} course`,
+        variant: "destructive"
+      });
+    }
+  });
+
+  const onSubmit = (data: CourseFormData) => {
+    // Generate slug from title if not provided
+    if (!data.slug && data.title) {
+      data.slug = data.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    }
+    courseMutation.mutate(data);
+  };
+
+  const handleTitleChange = (title: string) => {
+    form.setValue("title", title);
+    if (!form.getValues("slug")) {
+      const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      form.setValue("slug", slug);
+    }
+  };
+
+  return (
+    <div className="w-full max-w-4xl mx-auto">
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Course Title</FormLabel>
+                  <FormControl>
+                    <Input 
+                      placeholder="e.g., Advanced AI Development"
+                      {...field}
+                      onChange={(e) => handleTitleChange(e.target.value)}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="slug"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>URL Slug</FormLabel>
+                  <FormControl>
+                    <Input placeholder="advanced-ai-development" {...field} />
+                  </FormControl>
+                  <FormDescription>Used in the course URL</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="categoryId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Category</FormLabel>
+                  <Select onValueChange={(value) => field.onChange(parseInt(value))} value={field.value?.toString()}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a category" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {categories.map((category: any) => (
+                        <SelectItem key={category.id} value={category.id.toString()}>
+                          {category.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="level"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Difficulty Level</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select difficulty" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="Beginner">Beginner</SelectItem>
+                      <SelectItem value="Intermediate">Intermediate</SelectItem>
+                      <SelectItem value="Advanced">Advanced</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="duration"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Duration (minutes)</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number" 
+                      placeholder="30"
+                      {...field}
+                      onChange={(e) => field.onChange(parseInt(e.target.value))}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="passingScore"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Passing Score (%)</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number" 
+                      placeholder="60"
+                      min="1"
+                      max="100"
+                      {...field}
+                      onChange={(e) => field.onChange(parseInt(e.target.value))}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="price"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Price (₹)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="99" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="originalPrice"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Original Price (₹)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="199" {...field} />
+                  </FormControl>
+                  <FormDescription>For sale pricing display</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Description</FormLabel>
+                <FormControl>
+                  <Textarea 
+                    placeholder="Detailed course description..."
+                    className="min-h-[100px]"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <FormField
+              control={form.control}
+              name="isOnSale"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                  <div className="space-y-0.5">
+                    <FormLabel className="text-base">On Sale</FormLabel>
+                    <FormDescription>Mark this course as on sale</FormDescription>
+                  </div>
+                  <FormControl>
+                    <Switch checked={field.value} onCheckedChange={field.onChange} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="isActive"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                  <div className="space-y-0.5">
+                    <FormLabel className="text-base">Active</FormLabel>
+                    <FormDescription>Make course available to users</FormDescription>
+                  </div>
+                  <FormControl>
+                    <Switch checked={field.value} onCheckedChange={field.onChange} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="isInternship"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                  <div className="space-y-0.5">
+                    <FormLabel className="text-base">Internship</FormLabel>
+                    <FormDescription>Mark as internship course</FormDescription>
+                  </div>
+                  <FormControl>
+                    <Switch checked={field.value} onCheckedChange={field.onChange} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className="flex gap-4 pt-4">
+            <Button type="submit" disabled={courseMutation.isPending}>
+              {courseMutation.isPending ? "Saving..." : (isEditing ? "Update Course" : "Create Course")}
+            </Button>
+            <Button type="button" variant="outline" onClick={onCancel}>
+              Cancel
+            </Button>
+          </div>
+        </form>
+      </Form>
+    </div>
+  );
 }
 
 interface AdminCourse {
@@ -110,6 +455,9 @@ export default function AdminDashboard() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("overview");
+  const [selectedCourse, setSelectedCourse] = useState<AdminCourse | null>(null);
+  const [isCreatingCourse, setIsCreatingCourse] = useState(false);
+  const [isEditingCourse, setIsEditingCourse] = useState(false);
 
   // Check admin authentication
   useEffect(() => {
@@ -121,37 +469,37 @@ export default function AdminDashboard() {
   }, [setLocation]);
 
   // Fetch analytics data
-  const { data: analytics = {}, isLoading: analyticsLoading } = useQuery({
+  const { data: analytics = {}, isLoading: analyticsLoading } = useQuery<Analytics>({
     queryKey: ["/api/admin/analytics"],
   });
 
   // Fetch customers data
-  const { data: customers = [], isLoading: customersLoading } = useQuery({
+  const { data: customers = [], isLoading: customersLoading } = useQuery<Customer[]>({
     queryKey: ["/api/admin/customers"],
   });
 
   // Fetch admin courses data
-  const { data: adminCourses = [], isLoading: adminCoursesLoading } = useQuery({
+  const { data: adminCourses = [], isLoading: adminCoursesLoading } = useQuery<AdminCourse[]>({
     queryKey: ["/api/admin/courses"],
   });
 
   // Fetch exam attempts data
-  const { data: examAttempts = [], isLoading: examAttemptsLoading } = useQuery({
+  const { data: examAttempts = [], isLoading: examAttemptsLoading } = useQuery<ExamAttempt[]>({
     queryKey: ["/api/admin/exam-attempts"],
   });
 
   // Fetch transactions data
-  const { data: transactions = [], isLoading: transactionsLoading } = useQuery({
+  const { data: transactions = [], isLoading: transactionsLoading } = useQuery<Transaction[]>({
     queryKey: ["/api/admin/transactions"],
   });
 
   // Fetch partners data
-  const { data: partners = [], isLoading: partnersLoading } = useQuery({
+  const { data: partners = [], isLoading: partnersLoading } = useQuery<Partner[]>({
     queryKey: ["/api/admin/partners"],
   });
 
   // Fetch withdrawals data
-  const { data: withdrawals = [], isLoading: withdrawalsLoading } = useQuery({
+  const { data: withdrawals = [], isLoading: withdrawalsLoading } = useQuery<WithdrawalRequest[]>({
     queryKey: ["/api/admin/withdrawals"],
   });
 
@@ -196,6 +544,29 @@ export default function AdminDashboard() {
       toast({
         title: "Error",
         description: error.message || "Failed to process withdrawal",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Course deletion mutation
+  const deleteCourse = useMutation({
+    mutationFn: async (courseId: number) => {
+      const response = await apiRequest("DELETE", `/api/admin/courses/${courseId}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/courses"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/analytics"] });
+      toast({
+        title: "Course Deleted",
+        description: "Course has been deleted successfully.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete course",
         variant: "destructive",
       });
     },
@@ -315,7 +686,7 @@ export default function AdminDashboard() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {customers?.slice(0, 5).map((customer: Customer) => (
+                      {customers.slice(0, 5).map((customer: Customer) => (
                         <div key={customer.id} className="flex items-center">
                           <UserCheck className="h-4 w-4 text-muted-foreground" />
                           <div className="ml-4 space-y-1">
@@ -336,7 +707,7 @@ export default function AdminDashboard() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {adminCourses?.slice(0, 5).map((course: AdminCourse) => (
+                      {adminCourses.slice(0, 5).map((course: AdminCourse) => (
                         <div key={course.id} className="flex items-center">
                           <BookOpen className="h-4 w-4 text-muted-foreground" />
                           <div className="ml-4 space-y-1">
@@ -406,76 +777,151 @@ export default function AdminDashboard() {
               {adminCoursesLoading ? (
                 <div className="text-center py-8">Loading courses...</div>
               ) : (
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between">
-                    <div>
-                      <CardTitle>Course Management</CardTitle>
-                      <CardDescription>Manage courses, pricing, and content</CardDescription>
-                    </div>
-                    <Button>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add New Course
-                    </Button>
-                  </CardHeader>
-                  <CardContent>
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Course</TableHead>
-                          <TableHead>Category</TableHead>
-                          <TableHead>Price</TableHead>
-                          <TableHead>Enrollments</TableHead>
-                          <TableHead>Certificates</TableHead>
-                          <TableHead>Revenue</TableHead>
-                          <TableHead>Status</TableHead>
-                          <TableHead>Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {adminCourses.map((course: AdminCourse) => (
-                          <TableRow key={course.id}>
-                            <TableCell>
-                              <div>
-                                <div className="font-medium">{course.title}</div>
-                                <div className="text-sm text-muted-foreground">{course.duration} min • {course.passingScore}% pass</div>
-                              </div>
-                            </TableCell>
-                            <TableCell>{course.categoryName}</TableCell>
-                            <TableCell>
-                              <div>
-                                <span className="font-medium">₹{course.price}</span>
-                                {course.isOnSale && course.originalPrice && (
-                                  <span className="text-sm text-muted-foreground line-through ml-2">₹{course.originalPrice}</span>
-                                )}
-                              </div>
-                            </TableCell>
-                            <TableCell>{course.enrollmentCount}</TableCell>
-                            <TableCell>{course.certificateCount}</TableCell>
-                            <TableCell>₹{course.revenue}</TableCell>
-                            <TableCell>
-                              <Badge variant={course.isActive ? "default" : "secondary"}>
-                                {course.isActive ? "Active" : "Inactive"}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex gap-2">
-                                <Button size="sm" variant="outline">
-                                  <Eye className="h-4 w-4" />
-                                </Button>
-                                <Button size="sm" variant="outline">
-                                  <Edit className="h-4 w-4" />
-                                </Button>
-                                <Button size="sm" variant="outline">
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </TableCell>
+                <>
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between">
+                      <div>
+                        <CardTitle>Course Management</CardTitle>
+                        <CardDescription>Manage courses, pricing, and content</CardDescription>
+                      </div>
+                      <Dialog open={isCreatingCourse} onOpenChange={setIsCreatingCourse}>
+                        <DialogTrigger asChild>
+                          <Button>
+                            <Plus className="h-4 w-4 mr-2" />
+                            Add New Course
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                          <DialogHeader>
+                            <DialogTitle>Create New Course</DialogTitle>
+                          </DialogHeader>
+                          <CourseForm
+                            onCancel={() => setIsCreatingCourse(false)}
+                            onSuccess={() => setIsCreatingCourse(false)}
+                          />
+                        </DialogContent>
+                      </Dialog>
+                    </CardHeader>
+                    <CardContent>
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Course</TableHead>
+                            <TableHead>Category</TableHead>
+                            <TableHead>Price</TableHead>
+                            <TableHead>Enrollments</TableHead>
+                            <TableHead>Certificates</TableHead>
+                            <TableHead>Revenue</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead>Actions</TableHead>
                           </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </CardContent>
-                </Card>
+                        </TableHeader>
+                        <TableBody>
+                          {adminCourses.map((course: AdminCourse) => (
+                            <TableRow key={course.id}>
+                              <TableCell>
+                                <div>
+                                  <div className="font-medium">{course.title}</div>
+                                  <div className="text-sm text-muted-foreground">{course.duration} min • {course.passingScore}% pass</div>
+                                </div>
+                              </TableCell>
+                              <TableCell>{course.categoryName}</TableCell>
+                              <TableCell>
+                                <div>
+                                  <span className="font-medium">₹{course.price}</span>
+                                  {course.isOnSale && course.originalPrice && (
+                                    <span className="text-sm text-muted-foreground line-through ml-2">₹{course.originalPrice}</span>
+                                  )}
+                                  {course.isOnSale && (
+                                    <Badge variant="secondary" className="ml-2 text-xs">SALE</Badge>
+                                  )}
+                                </div>
+                              </TableCell>
+                              <TableCell>{course.enrollmentCount}</TableCell>
+                              <TableCell>{course.certificateCount}</TableCell>
+                              <TableCell>₹{course.revenue}</TableCell>
+                              <TableCell>
+                                <div className="flex gap-1">
+                                  <Badge variant={course.isActive ? "default" : "secondary"}>
+                                    {course.isActive ? "Active" : "Inactive"}
+                                  </Badge>
+                                  {course.isInternship && (
+                                    <Badge variant="outline">Internship</Badge>
+                                  )}
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex gap-2">
+                                  <Button 
+                                    size="sm" 
+                                    variant="outline"
+                                    onClick={() => setLocation(`/courses/${course.slug}`)}
+                                  >
+                                    <Eye className="h-4 w-4" />
+                                  </Button>
+                                  <Dialog open={isEditingCourse && selectedCourse?.id === course.id} onOpenChange={(open) => {
+                                    setIsEditingCourse(open);
+                                    if (!open) setSelectedCourse(null);
+                                  }}>
+                                    <DialogTrigger asChild>
+                                      <Button 
+                                        size="sm" 
+                                        variant="outline"
+                                        onClick={() => setSelectedCourse(course)}
+                                      >
+                                        <Edit className="h-4 w-4" />
+                                      </Button>
+                                    </DialogTrigger>
+                                    <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                                      <DialogHeader>
+                                        <DialogTitle>Edit Course</DialogTitle>
+                                      </DialogHeader>
+                                      <CourseForm
+                                        course={selectedCourse}
+                                        onCancel={() => {
+                                          setIsEditingCourse(false);
+                                          setSelectedCourse(null);
+                                        }}
+                                        onSuccess={() => {
+                                          setIsEditingCourse(false);
+                                          setSelectedCourse(null);
+                                        }}
+                                      />
+                                    </DialogContent>
+                                  </Dialog>
+                                  <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                      <Button size="sm" variant="outline">
+                                        <Trash2 className="h-4 w-4" />
+                                      </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                      <AlertDialogHeader>
+                                        <AlertDialogTitle>Delete Course</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                          Are you sure you want to delete "{course.title}"? This action cannot be undone and will remove all associated questions and exam attempts.
+                                        </AlertDialogDescription>
+                                      </AlertDialogHeader>
+                                      <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogAction
+                                          onClick={() => deleteCourse.mutate(course.id)}
+                                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                        >
+                                          Delete Course
+                                        </AlertDialogAction>
+                                      </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                  </AlertDialog>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </CardContent>
+                  </Card>
+                </>
               )}
             </TabsContent>
 
