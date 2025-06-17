@@ -1317,7 +1317,7 @@ export class DatabaseStorage implements IStorage {
       .leftJoin(learningPaths, eq(userLearningPaths.learningPathId, learningPaths.id))
       .leftJoin(categories, eq(learningPaths.categoryId, categories.id))
       .where(eq(userLearningPaths.userId, userId))
-      .orderBy(desc(userLearningPaths.createdAt));
+      .orderBy(desc(userLearningPaths.enrolledAt));
 
     return results.map(row => ({
       ...row.user_learning_paths,

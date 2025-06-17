@@ -304,23 +304,17 @@ export const userActivity = pgTable("user_activity", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-// Learning Paths for Personalized Course Sequences
+// Learning Paths for Personalized Course Sequences (matches actual database schema)
 export const learningPaths = pgTable("learning_paths", {
   id: serial("id").primaryKey(),
-  name: text("name").notNull(),
+  title: text("title").notNull(),
   description: text("description").notNull(),
-  categoryId: integer("category_id").references(() => categories.id).notNull(),
   difficulty: text("difficulty").notNull(), // beginner, intermediate, advanced
   estimatedDuration: integer("estimated_duration").notNull(), // in hours
-  courseSequence: json("course_sequence").$type<number[]>().notNull(), // ordered course IDs
-  prerequisites: json("prerequisites").$type<{
-    minScore?: number;
-    requiredCourses?: number[];
-    skillLevel?: string;
-  }>().default({}),
-  tags: json("tags").$type<string[]>().default([]),
+  courseIds: json("course_ids").$type<number[]>().notNull(), // ordered course IDs
+  prerequisites: json("prerequisites").$type<number[]>().default([]),
+  categoryId: integer("category_id").references(() => categories.id).notNull(),
   isActive: boolean("is_active").default(true).notNull(),
-  createdBy: integer("created_by").references(() => users.id),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -329,20 +323,11 @@ export const userLearningPaths = pgTable("user_learning_paths", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").references(() => users.id).notNull(),
   learningPathId: integer("learning_path_id").references(() => learningPaths.id).notNull(),
-  status: text("status").notNull().default("not_started"), // not_started, in_progress, completed, paused
-  currentCourseIndex: integer("current_course_index").notNull().default(0),
-  progressPercentage: integer("progress_percentage").notNull().default(0),
-  startedAt: timestamp("started_at"),
+  progress: integer("progress").notNull().default(0), // percentage 0-100
+  completedCourses: json("completed_courses").$type<number[]>().default([]),
+  enrolledAt: timestamp("enrolled_at").defaultNow().notNull(),
   completedAt: timestamp("completed_at"),
-  estimatedCompletionDate: timestamp("estimated_completion_date"),
-  personalizedAdjustments: json("personalized_adjustments").$type<{
-    recommendedPace?: 'slow' | 'normal' | 'fast';
-    skipRecommendations?: number[];
-    additionalCourses?: number[];
-    difficultyAdjustment?: 'easier' | 'standard' | 'harder';
-  }>().default({}),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
 });
 
 export const skillAssessments = pgTable("skill_assessments", {
@@ -593,10 +578,7 @@ export const learningPathsRelations = relations(learningPaths, ({ one, many }) =
     fields: [learningPaths.categoryId],
     references: [categories.id],
   }),
-  creator: one(users, {
-    fields: [learningPaths.createdBy],
-    references: [users.id],
-  }),
+
   userPaths: many(userLearningPaths),
 }));
 
@@ -798,8 +780,6 @@ export const insertLearningPathSchema = createInsertSchema(learningPaths).omit({
 
 export const insertUserLearningPathSchema = createInsertSchema(userLearningPaths).omit({
   id: true,
-  createdAt: true,
-  updatedAt: true,
 });
 
 export const insertSkillAssessmentSchema = createInsertSchema(skillAssessments).omit({

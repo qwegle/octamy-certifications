@@ -1939,7 +1939,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Learning paths endpoints
   app.get("/api/learning-paths", async (req: Request, res: Response) => {
     try {
-      const learningPaths = await storage.getAllLearningPaths();
+      const learningPaths = await storage.getLearningPaths();
       res.json(learningPaths);
     } catch (error) {
       console.error("Error fetching learning paths:", error);
@@ -1949,8 +1949,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/learning-paths/featured", async (req: Request, res: Response) => {
     try {
-      const featuredPaths = await storage.getFeaturedLearningPaths();
-      res.json(featuredPaths);
+      const featuredPaths = await storage.getLearningPaths();
+      // Return first 3 as featured for now
+      res.json(featuredPaths.slice(0, 3));
     } catch (error) {
       console.error("Error fetching featured learning paths:", error);
       res.status(500).json({ message: "Failed to fetch featured learning paths" });
