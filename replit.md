@@ -112,6 +112,8 @@ Octamy is a comprehensive professional certification platform built as a full-st
 - **Comprehensive storage interface** with all required methods for database operations
 - **Professional certificate generator** with HTML-based PDF generation and premium styling
 - **Clean separation of concerns** for better maintainability and scalability
+- **Fixed exam submission 401 Unauthorized error** by resolving routing conflicts between MVC and legacy routes
+- **Optional authentication support** for anonymous exam submissions working correctly
 
 ### Seller/Partner System Implementation (June 16, 2025)
 - **Complete seller authentication system** with separate registration/login
