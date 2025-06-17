@@ -132,13 +132,17 @@ export default function Exam() {
     onSuccess: async (response) => {
       const result = await response.json();
       
-      // Create certificate
-      const certResponse = await apiRequest('POST', '/api/certificates/create', {
-        examAttemptId: result.examAttemptId
-      });
-      const certificate = await certResponse.json();
-      
-      setLocation(`/checkout/${courseId}`);
+      if (result.passed) {
+        // Redirect to checkout if exam passed
+        setLocation(`/checkout/${courseId}`);
+      } else {
+        // Show failure message if exam failed
+        toast({
+          title: "Exam Failed",
+          description: `You scored ${result.score}%. You need ${course?.passingScore}% to pass. Please try again.`,
+          variant: "destructive",
+        });
+      }
     },
     onError: () => {
       toast({

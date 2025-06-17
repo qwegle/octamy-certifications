@@ -309,10 +309,10 @@ export default function Dashboard() {
       <OctamyMascot 
         currentPage="dashboard"
         userProgress={{
-          coursesCompleted: validCertificates.length,
+          coursesCompleted: activeCertificates.length,
           totalCourses: certificates.length,
-          streak: validCertificates.length > 0 ? 7 : 0, // Example streak
-          level: validCertificates.length >= 3 ? 'Expert' : validCertificates.length >= 1 ? 'Intermediate' : 'Beginner'
+          streak: activeCertificates.length > 0 ? 7 : 0, // Example streak
+          level: activeCertificates.length >= 3 ? 'Expert' : activeCertificates.length >= 1 ? 'Intermediate' : 'Beginner'
         }}
         onAction={(action) => {
           switch (action) {
