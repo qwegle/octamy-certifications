@@ -21,15 +21,23 @@ export default function AdminLogin() {
   const loginMutation = useMutation({
     mutationFn: async (data: { email: string; password: string }) => {
       const response = await apiRequest("POST", "/api/admin/login", data);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Login failed');
+      }
       return response.json();
     },
     onSuccess: (data) => {
-      localStorage.setItem("adminToken", data.token);
-      toast({
-        title: "Login Successful",
-        description: "Welcome to the admin dashboard!",
-      });
-      setLocation("/admin/dashboard");
+      if (data.token) {
+        localStorage.setItem("adminToken", data.token);
+        toast({
+          title: "Login Successful",
+          description: "Welcome to the admin dashboard!",
+        });
+        setLocation("/admin/dashboard");
+      } else {
+        throw new Error('Invalid response format');
+      }
     },
     onError: (error: any) => {
       toast({
