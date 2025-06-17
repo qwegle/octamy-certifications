@@ -828,12 +828,5 @@ export type InsertUserLearningPath = z.infer<typeof insertUserLearningPathSchema
 export type SkillAssessment = typeof skillAssessments.$inferSelect;
 export type InsertSkillAssessment = z.infer<typeof insertSkillAssessmentSchema>;
 
-// Sponsor types
-export const insertSponsorSchema = createInsertSchema(sponsors).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-export type Sponsor = typeof sponsors.$inferSelect;
-export type InsertSponsor = z.infer<typeof insertSponsorSchema>;
+// Import sponsors from separate schema file
+export { sponsors, insertSponsorSchema, type Sponsor, type InsertSponsor } from "./sponsorSchema";

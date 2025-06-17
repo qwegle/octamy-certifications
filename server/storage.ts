@@ -14,6 +14,7 @@ import {
   learningPaths,
   userLearningPaths,
   skillAssessments,
+  sponsors,
   type User, 
   type InsertUser,
   type UserAddress,
