@@ -1659,20 +1659,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Prepare certificate data for the new professional design
       const certificateData = {
         certificateId: certificate.certificateId,
-        studentName: certificate.studentName,
-        courseName: course.title,
-        completionDate: new Date(certificate.createdAt).toLocaleDateString('en-US', {
+        userName: certificate.userName, // Fixed: use correct field name
+        courseTitle: course.title, // Fixed: use correct field name
+        passingScore: course.passingScore,
+        userScore: certificate.score,
+        completionDate: new Date(certificate.issuedAt).toLocaleDateString('en-US', {
           year: 'numeric',
           month: 'long',
           day: 'numeric'
         }),
         score: certificate.score,
         courseDuration: `${course.duration} Hours`,
-        issueDate: new Date(certificate.createdAt).toLocaleDateString('en-US', {
+        issueDate: new Date(certificate.issuedAt).toLocaleDateString('en-US', {
           year: 'numeric',
           month: 'long',
           day: 'numeric'
-        })
+        }),
+        courseLevel: course.level || 'Professional'
       };
 
       // Check if PDF download is requested

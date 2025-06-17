@@ -108,7 +108,7 @@ export default function CertificateView() {
           </p>
         </div>
 
-        {/* Ultra-Premium Certificate Display */}
+        {/* Premium Certificate Display - Updated Design */}
         <div className="relative mb-8">
           {!isActive && (
             <div className="absolute inset-0 flex items-center justify-center opacity-20 pointer-events-none z-20">
@@ -124,30 +124,24 @@ export default function CertificateView() {
             `}</style>
             
             <div 
-              className="w-full h-auto relative bg-gradient-to-br from-gray-50 via-white to-gray-50"
+              className="w-full h-auto relative bg-gradient-to-br from-white via-gray-50 to-white"
               style={{ 
-                aspectRatio: '1400/990',
-                border: '2px solid #d4af37',
-                boxShadow: `
-                  0 0 0 8px #ffffff,
-                  0 0 0 10px #d4af37,
-                  0 0 0 16px #ffffff,
-                  0 0 0 18px #c9a635,
-                  0 40px 80px rgba(0,0,0,0.4),
-                  inset 0 2px 4px rgba(212,175,55,0.1)
-                `
+                aspectRatio: '1.414/1',
+                background: 'linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%)',
+                border: '8px solid #000',
+                borderRadius: '16px',
+                boxShadow: '0 40px 80px rgba(0,0,0,0.4)'
               }}
             >
-              {/* Ornate border */}
+              {/* Decorative borders */}
               <div 
-                className="absolute inset-5"
+                className="absolute inset-4"
                 style={{
-                  border: '1px solid #d4af37',
                   background: `
-                    radial-gradient(circle at 0 0, #d4af37 2px, transparent 2px),
-                    radial-gradient(circle at 100% 0, #d4af37 2px, transparent 2px),
-                    radial-gradient(circle at 0 100%, #d4af37 2px, transparent 2px),
-                    radial-gradient(circle at 100% 100%, #d4af37 2px, transparent 2px)
+                    radial-gradient(circle at 0% 0%, #c0c0c0 2px, transparent 2px),
+                    radial-gradient(circle at 100% 0%, #c0c0c0 2px, transparent 2px),
+                    radial-gradient(circle at 0% 100%, #c0c0c0 2px, transparent 2px),
+                    radial-gradient(circle at 100% 100%, #c0c0c0 2px, transparent 2px)
                   `,
                   backgroundSize: '40px 40px',
                   backgroundPosition: 'top left, top right, bottom left, bottom right',
@@ -158,29 +152,29 @@ export default function CertificateView() {
               {/* Decorative corners */}
               <div className="absolute top-8 left-8 w-28 h-28" style={{ 
                 background: `
-                  linear-gradient(45deg, #d4af37 1px, transparent 1px 20px, transparent),
-                  linear-gradient(-45deg, #d4af37 1px, transparent 1px 20px, transparent)
+                  linear-gradient(45deg, #c0c0c0 1px, transparent 1px 20px, transparent),
+                  linear-gradient(-45deg, #c0c0c0 1px, transparent 1px 20px, transparent)
                 `,
                 clipPath: 'polygon(0 0, 100% 0, 0 100%)'
               }}></div>
               <div className="absolute top-8 right-8 w-28 h-28" style={{ 
                 background: `
-                  linear-gradient(135deg, #d4af37 1px, transparent 1px 20px, transparent),
-                  linear-gradient(45deg, #d4af37 1px, transparent 1px 20px, transparent)
+                  linear-gradient(135deg, #c0c0c0 1px, transparent 1px 20px, transparent),
+                  linear-gradient(45deg, #c0c0c0 1px, transparent 1px 20px, transparent)
                 `,
                 clipPath: 'polygon(100% 0, 100% 100%, 0 0)'
               }}></div>
               <div className="absolute bottom-8 left-8 w-28 h-28" style={{ 
                 background: `
-                  linear-gradient(-45deg, #d4af37 1px, transparent 1px 20px, transparent),
-                  linear-gradient(-135deg, #d4af37 1px, transparent 1px 20px, transparent)
+                  linear-gradient(-45deg, #c0c0c0 1px, transparent 1px 20px, transparent),
+                  linear-gradient(-135deg, #c0c0c0 1px, transparent 1px 20px, transparent)
                 `,
                 clipPath: 'polygon(0 0, 100% 100%, 0 100%)'
               }}></div>
               <div className="absolute bottom-8 right-8 w-28 h-28" style={{ 
                 background: `
-                  linear-gradient(45deg, #d4af37 1px, transparent 1px 20px, transparent),
-                  linear-gradient(135deg, #d4af37 1px, transparent 1px 20px, transparent)
+                  linear-gradient(45deg, #c0c0c0 1px, transparent 1px 20px, transparent),
+                  linear-gradient(135deg, #c0c0c0 1px, transparent 1px 20px, transparent)
                 `,
                 clipPath: 'polygon(100% 0, 100% 100%, 0 100%)'
               }}></div>
@@ -190,14 +184,14 @@ export default function CertificateView() {
                 <div className="mb-16 relative">
                   <div 
                     className="absolute top-0 left-1/2 transform -translate-x-1/2 w-72 h-px"
-                    style={{ background: 'linear-gradient(90deg, transparent, #d4af37, transparent)' }}
+                    style={{ background: 'linear-gradient(90deg, transparent, #c0c0c0, transparent)' }}
                   ></div>
                   <div 
                     className="absolute -bottom-5 left-1/2 transform -translate-x-1/2 w-48 h-px"
-                    style={{ background: 'linear-gradient(90deg, transparent, #d4af37, transparent)' }}
+                    style={{ background: 'linear-gradient(90deg, transparent, #c0c0c0, transparent)' }}
                   ></div>
                   
-                  <div className="inline-block bg-gradient-to-r from-yellow-500 via-yellow-400 to-yellow-500 text-gray-900 px-11 py-6 mb-6 relative"
+                  <div className="inline-block bg-gradient-to-r from-black via-gray-800 to-black text-white px-11 py-6 mb-6 relative"
                        style={{ clipPath: 'polygon(10% 0%, 90% 0%, 100% 25%, 100% 75%, 90% 100%, 10% 100%, 0% 75%, 0% 25%)' }}>
                     <div 
                       className="text-5xl font-bold uppercase tracking-widest"
@@ -303,15 +297,8 @@ export default function CertificateView() {
                   </div>
                   
                   <div className="flex justify-center items-center gap-10 my-12">
-                    <div 
-                      className="bg-gradient-to-br from-gray-900 to-gray-700 text-yellow-500 px-8 py-5 text-base font-bold uppercase tracking-widest border-2 border-yellow-500 rounded shadow-lg"
-                      style={{ 
-                        fontFamily: "'Inter', sans-serif",
-                        letterSpacing: '2px',
-                        boxShadow: '0 4px 8px rgba(0,0,0,0.2)'
-                      }}
-                    >
-                      {certificate.badge.toUpperCase()} GRADE
+                    <div className="w-20 h-20 bg-gradient-to-br from-yellow-500 via-yellow-400 to-yellow-500 rounded-full flex items-center justify-center shadow-lg">
+                      <Award className="w-10 h-10 text-gray-900" />
                     </div>
                     <div 
                       className="bg-gradient-to-br from-yellow-500 via-yellow-400 to-yellow-500 text-gray-900 px-11 py-6 text-2xl font-bold tracking-widest rounded shadow-lg"
