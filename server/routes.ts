@@ -447,7 +447,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         expiresAt: calculateExpiryDate(),
         businessName: businessName || null,
         retakeCount: 0,
-        isPaid: true, // Restore original behavior - certificates are immediately available
+        isPaid: false, // Certificate requires payment to activate
       });
       
       res.json(certificate);
