@@ -64,14 +64,16 @@ const authenticateSellerToken = (req: SellerAuthenticatedRequest, res: Response,
   const token = authHeader && authHeader.split(' ')[1];
 
   if (!token) {
-    return res.sendStatus(401);
+    return res.status(401).json({ message: "No token provided" });
   }
 
-  jwt.verify(token, JWT_SECRET, (err: any, seller: any) => {
-    if (err) return res.sendStatus(403);
-    req.seller = seller;
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET) as any;
+    req.seller = decoded;
     next();
-  });
+  } catch (err) {
+    return res.status(403).json({ message: "Invalid token" });
+  }
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -177,7 +179,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/courses/slug/:slug", async (req, res) => {
     try {
-      const course = await storage.getCourseBySlug(req.params.slug);
+      const slug = req.params.slug;
+      
+      // Check if slug is actually a numeric ID (common mistake)
+      if (/^\d+$/.test(slug)) {
+        const course = await storage.getCourse(parseInt(slug));
+        if (!course) {
+          return res.status(404).json({ message: "Course not found" });
+        }
+        // Get full course with category for consistency
+        const fullCourse = await storage.getCourseBySlug(course.slug);
+        return res.json(fullCourse || course);
+      }
+      
+      const course = await storage.getCourseBySlug(slug);
       if (!course) {
         return res.status(404).json({ message: "Course not found" });
       }
