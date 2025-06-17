@@ -583,32 +583,6 @@ export class DatabaseStorage implements IStorage {
     
     return result.length;
   }
-
-  async getUserCertificateForCourse(userId: number | null, courseId: number, userEmail?: string | null): Promise<Certificate | null> {
-    try {
-      let whereCondition;
-      
-      if (userId) {
-        whereCondition = and(
-          eq(certificates.userId, userId),
-          eq(certificates.courseId, courseId)
-        );
-      } else if (userEmail) {
-        whereCondition = and(
-          eq(certificates.userEmail, userEmail),
-          eq(certificates.courseId, courseId)
-        );
-      } else {
-        return null;
-      }
-
-      const result = await db
-        .select()
-        .from(certificates)
-        .where(whereCondition)
-        .limit(1);
-
-      return result[0] || null;
     } catch (error) {
       console.error("Error getting user certificate for course:", error);
       return null;
@@ -1103,7 +1077,7 @@ export class DatabaseStorage implements IStorage {
       ));
     }
     
-    return await query.orderBy(desc(userCourseProgress.lastAccessedAt));
+    return await query.orderBy(desc(userCourseProgress.updatedAt));
   }
 
   async upsertUserCourseProgress(progress: InsertUserCourseProgress): Promise<UserCourseProgress> {
@@ -1310,7 +1284,7 @@ export class DatabaseStorage implements IStorage {
     return result;
   }
 
-  async getUserLearningPaths(userId: number): Promise<(UserLearningPath & { learningPath: LearningPath & { category: Category } })[]> {
+  async getUserLearningPaths(userId: number): Promise<any[]> {
     const results = await db
       .select()
       .from(userLearningPaths)
@@ -1325,10 +1299,10 @@ export class DatabaseStorage implements IStorage {
         ...row.learning_paths!,
         category: row.categories!
       }
-    })) as (UserLearningPath & { learningPath: LearningPath & { category: Category } })[];
+    }));
   }
 
-  async enrollInLearningPath(enrollment: InsertUserLearningPath): Promise<UserLearningPath> {
+  async enrollInLearningPath(enrollment: any): Promise<any> {
     // Check if user is already enrolled
     const existing = await db
       .select()
