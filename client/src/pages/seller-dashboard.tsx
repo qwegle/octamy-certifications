@@ -60,7 +60,7 @@ export default function SellerDashboard() {
   const [showWithdrawalForm, setShowWithdrawalForm] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [shareableItems, setShareableItems] = useState<any>(null);
-  const [generatedUrl, setGeneratedUrl] = useState("");
+  const [generatedUrls, setGeneratedUrls] = useState<{[key: string]: string}>({});
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [withdrawalData, setWithdrawalData] = useState({
     amount: "",
@@ -178,7 +178,11 @@ export default function SellerDashboard() {
 
       if (response.ok) {
         const data = await response.json();
-        setGeneratedUrl(data.referralUrl);
+        const urlKey = `${type}_${itemId}`;
+        setGeneratedUrls(prev => ({
+          ...prev,
+          [urlKey]: data.referralUrl
+        }));
         toast({
           title: "Success",
           description: "Referral URL generated successfully",
@@ -208,12 +212,20 @@ export default function SellerDashboard() {
     }
   };
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    toast({
-      title: "Copied",
-      description: "URL copied to clipboard",
-    });
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast({
+        title: "Copied!",
+        description: "Referral URL copied to clipboard",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to copy URL",
+        variant: "destructive",
+      });
+    }
   };
 
   const copyReferralLink = (courseId: number) => {
