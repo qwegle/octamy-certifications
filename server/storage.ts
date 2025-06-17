@@ -649,6 +649,99 @@ export class DatabaseStorage implements IStorage {
     return sale;
   }
 
+  // Referral click tracking
+  async trackReferralClick(clickData: {
+    referralCode: string;
+    courseId: number;
+    ipAddress?: string;
+    userAgent?: string;
+  }): Promise<void> {
+    const seller = await this.getSellerByReferralCode(clickData.referralCode);
+    if (!seller) return;
+
+    await db.insert(referralClicks).values({
+      sellerId: seller.id,
+      courseId: clickData.courseId,
+      referralCode: clickData.referralCode,
+      ipAddress: clickData.ipAddress,
+      userAgent: clickData.userAgent,
+    });
+  }
+
+  async updateReferralConversion(referralCode: string, courseId: number, userId: number): Promise<void> {
+    await db
+      .update(referralClicks)
+      .set({
+        converted: true,
+        conversionDate: new Date(),
+        userId: userId,
+      })
+      .where(
+        and(
+          eq(referralClicks.referralCode, referralCode),
+          eq(referralClicks.courseId, courseId),
+          eq(referralClicks.converted, false)
+        )
+      );
+  }
+
+  async getSellerClickAnalytics(sellerId: number): Promise<{
+    totalClicks: number;
+    totalConversions: number;
+    conversionRate: number;
+    courseWiseAnalytics: Array<{
+      courseId: number;
+      courseTitle: string;
+      clicks: number;
+      conversions: number;
+      conversionRate: number;
+      latestClick: Date | null;
+    }>;
+  }> {
+    // Get total clicks and conversions
+    const clickStats = await db
+      .select({
+        totalClicks: count(),
+        totalConversions: sql<number>`COUNT(CASE WHEN ${referralClicks.converted} = true THEN 1 END)`,
+      })
+      .from(referralClicks)
+      .where(eq(referralClicks.sellerId, sellerId));
+
+    const totalClicks = clickStats[0]?.totalClicks || 0;
+    const totalConversions = clickStats[0]?.totalConversions || 0;
+    const conversionRate = totalClicks > 0 ? (totalConversions / totalClicks) * 100 : 0;
+
+    // Get course-wise analytics
+    const courseAnalytics = await db
+      .select({
+        courseId: referralClicks.courseId,
+        courseTitle: courses.title,
+        clicks: count(),
+        conversions: sql<number>`COUNT(CASE WHEN ${referralClicks.converted} = true THEN 1 END)`,
+        latestClick: sql<Date>`MAX(${referralClicks.clickedAt})`,
+      })
+      .from(referralClicks)
+      .leftJoin(courses, eq(referralClicks.courseId, courses.id))
+      .where(eq(referralClicks.sellerId, sellerId))
+      .groupBy(referralClicks.courseId, courses.title);
+
+    const courseWiseAnalytics = courseAnalytics.map(row => ({
+      courseId: row.courseId,
+      courseTitle: row.courseTitle || 'Unknown Course',
+      clicks: row.clicks,
+      conversions: row.conversions,
+      conversionRate: row.clicks > 0 ? (row.conversions / row.clicks) * 100 : 0,
+      latestClick: row.latestClick,
+    }));
+
+    return {
+      totalClicks,
+      totalConversions,
+      conversionRate,
+      courseWiseAnalytics,
+    };
+  }
+
   async getSellerSales(sellerId: number): Promise<Sale[]> {
     return await db
       .select()

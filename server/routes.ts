@@ -944,6 +944,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Track referral link clicks
+  app.post("/api/referral/track-click", async (req: Request, res: Response) => {
+    try {
+      const { referralCode, courseId } = req.body;
+      const ipAddress = req.ip || req.connection.remoteAddress;
+      const userAgent = req.get('User-Agent');
+
+      if (!referralCode || !courseId) {
+        return res.status(400).json({ message: "Missing referral code or course ID" });
+      }
+
+      await storage.trackReferralClick({
+        referralCode,
+        courseId: parseInt(courseId),
+        ipAddress,
+        userAgent
+      });
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error tracking referral click:", error);
+      res.status(500).json({ message: "Failed to track click" });
+    }
+  });
+
   // Course purchase with referral tracking
   app.post("/api/courses/:courseId/purchase", async (req: Request, res: Response) => {
     try {

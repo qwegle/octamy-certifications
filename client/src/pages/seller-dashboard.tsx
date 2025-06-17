@@ -50,6 +50,19 @@ interface DashboardData {
     totalCommission: number;
     pendingWithdrawals: number;
   };
+  clickAnalytics?: {
+    totalClicks: number;
+    totalConversions: number;
+    conversionRate: number;
+    courseWiseAnalytics: Array<{
+      courseId: number;
+      courseTitle: string;
+      clicks: number;
+      conversions: number;
+      conversionRate: number;
+      latestClick: Date | null;
+    }>;
+  };
 }
 
 export default function SellerDashboard() {
