@@ -373,27 +373,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
 
       if (existingCertificate) {
-        // If new score is lower or equal, don't allow payment
-        if (examAttempt.score <= existingCertificate.score) {
-          return res.status(400).json({ 
-            message: `You already have a certificate with a higher score (${existingCertificate.score}%). You cannot purchase a certificate with a lower score.`,
-            existingScore: existingCertificate.score,
-            newScore: examAttempt.score
-          });
-        }
-        
         // If new score is higher, update existing certificate
-        const badge = getBadgeFromScore(examAttempt.score);
-        
-        const updatedCertificate = await storage.updateCertificate(existingCertificate.id, {
-          examAttemptId,
-          score: examAttempt.score,
-          badge,
-          isPaid: false, // Reset payment status for new score
-          retakeCount: existingCertificate.retakeCount + 1
-        });
-        
-        return res.json(updatedCertificate);
+        if (examAttempt.score > existingCertificate.score) {
+          const badge = getBadgeFromScore(examAttempt.score);
+          
+          const updatedCertificate = await storage.updateCertificate(existingCertificate.id, {
+            examAttemptId,
+            score: examAttempt.score,
+            badge,
+            isPaid: false, // Reset payment status for new score
+            retakeCount: existingCertificate.retakeCount + 1
+          });
+          
+          return res.json(updatedCertificate);
+        } else {
+          // Return existing certificate if score is same or lower
+          return res.json(existingCertificate);
+        }
       }
       
       // Generate certificate ID
@@ -429,7 +425,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/certificates/:certificateId", async (req, res) => {
+  // Get certificate by ID (database ID, not certificate ID)
+  app.get("/api/certificates/:id", async (req, res) => {
+    try {
+      const certificateId = parseInt(req.params.id);
+      const certificate = await storage.getCertificate(certificateId);
+      if (!certificate) {
+        return res.status(404).json({ message: "Certificate not found" });
+      }
+      res.json(certificate);
+    } catch (error) {
+      console.error("Error fetching certificate:", error);
+      res.status(500).json({ message: "Failed to fetch certificate" });
+    }
+  });
+
+  // Get certificate by certificate ID (OCT-YYYY-XXX-timestamp format)
+  app.get("/api/certificates/verify/:certificateId", async (req, res) => {
     try {
       const certificate = await storage.getCertificateByCertificateId(req.params.certificateId);
       if (!certificate) {

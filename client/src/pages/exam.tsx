@@ -138,10 +138,24 @@ export default function Exam() {
           const certificateResponse = await apiRequest('POST', '/api/certificates/create', {
             examAttemptId: result.examAttemptId
           });
-          const certificateData = await certificateResponse.json();
           
-          // Redirect to payment page with certificate ID
-          setLocation(`/payment/${certificateData.id}`);
+          if (certificateResponse.ok) {
+            const certificateData = await certificateResponse.json();
+            console.log('Certificate created successfully:', certificateData);
+            
+            // Redirect to payment page with certificate ID
+            setLocation(`/payment/${certificateData.id}`);
+          } else {
+            const errorData = await certificateResponse.json();
+            console.log('Certificate creation response:', errorData);
+            
+            // If certificate already exists, redirect to checkout
+            if (errorData.message && errorData.message.includes('already have a certificate')) {
+              setLocation(`/checkout/${courseId}`);
+            } else {
+              throw new Error(errorData.message || 'Failed to create certificate');
+            }
+          }
         } catch (error) {
           console.error('Certificate creation error:', error);
           // Fall back to checkout if certificate creation fails
