@@ -208,8 +208,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Exam routes
-  app.get("/api/courses/:id/questions", async (req, res) => {
+  app.post("/api/courses/:id/questions", async (req, res) => {
     try {
+      const { sessionId } = req.body;
       const questions = await storage.getQuestionsByCourse(parseInt(req.params.id));
       
       // Use Fisher-Yates shuffle for proper randomization
@@ -246,10 +247,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         };
       });
       
-      // Store the question mapping in a temporary store (in production, use Redis or similar)
-      const sessionId = `session_${Date.now()}_${Math.random()}`;
+      // Store the question mapping using provided session ID
+      const finalSessionId = sessionId || `session_${Date.now()}_${Math.random()}`;
       (global as any).questionMappings = (global as any).questionMappings || {};
-      (global as any).questionMappings[sessionId] = questionsWithShuffledOptions.reduce((acc: any, q) => {
+      (global as any).questionMappings[finalSessionId] = questionsWithShuffledOptions.reduce((acc: any, q) => {
         acc[q.id] = q.correctAnswer;
         return acc;
       }, {});
@@ -261,7 +262,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         options: q.options
       }));
       
-      res.json({ questions: questionsWithoutAnswers, sessionId });
+      res.json({ questions: questionsWithoutAnswers, sessionId: finalSessionId });
     } catch (error) {
       console.error("Error fetching questions:", error);
       res.status(500).json({ message: "Failed to fetch questions" });
@@ -280,6 +281,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Get correct answers from session mapping
       const correctAnswersMapping = (global as any).questionMappings?.[sessionId] || {};
+      console.log('Session ID:', sessionId);
+      console.log('Available sessions:', Object.keys((global as any).questionMappings || {}));
+      console.log('Correct answers mapping:', correctAnswersMapping);
       
       // Transform answers array to Record<string, number> format
       const answersRecord: Record<string, number> = {};
@@ -293,6 +297,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // If answers is already in the correct format
         Object.assign(answersRecord, answers);
       }
+      
+      console.log('User answers:', answersRecord);
 
       // Calculate score using session-specific correct answers
       let correctAnswers = 0;
@@ -300,6 +306,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       for (const [questionId, userAnswer] of Object.entries(answersRecord)) {
         const correctAnswer = correctAnswersMapping[parseInt(questionId)];
+        console.log(`Question ${questionId}: user=${userAnswer}, correct=${correctAnswer}`);
         if (correctAnswer !== undefined && correctAnswer === userAnswer) {
           correctAnswers++;
         }
