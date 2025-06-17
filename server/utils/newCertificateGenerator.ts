@@ -276,7 +276,7 @@ function generateCertificateHTML(data: CertificateData): string {
           justify-content: space-between;
           align-items: flex-end;
           margin-top: 20px;
-          margin-bottom: 70px;
+          margin-bottom: 70px !important;
         }
         
         .certificate-details {
@@ -394,7 +394,7 @@ function generateCertificateHTML(data: CertificateData): string {
                 <img src="https://octamy.com/storage/optionbuilder/uploads/554402-14-2025_0143pmoctamy_logo_black.png" alt="Octamy Logo" style="height: 50px;">
               </div>
               <div class="company-tagline">Solutions Private Limited</div>
-              <div style="font-size: 10px; color: #999; font-style: italic;">An ISO Certified Company</div>
+              <div style="font-size: 10px; color: #333; font-family: 'Poppins', sans-serif; letter-spacing: 1px;">An ISO Certified Company</div>
             </div>
             
             <!-- Badge positioned in top right -->
@@ -464,7 +464,18 @@ function generateCertificateHTML(data: CertificateData): string {
                 <div><strong>Issue Date:</strong> ${new Date(data.issueDate).toLocaleDateString()}</div>
                 <div><strong>Completion Date:</strong> ${new Date(data.completionDate).toLocaleDateString()}</div>
                 <div><strong>Status:</strong> Valid Internationally</div>
-
+              </div>
+              
+              <div class="signature-section">
+                <img 
+                  src="./attached_assets/Nitikesh_signature_1750177747117.png" 
+                  alt="Nitikesh Pattanayak Signature" 
+                  class="signature-image"
+                />
+                <div class="signature-line"></div>
+                <div class="signature-name" style="font-size: 14px; color: #000; font-weight: 600; margin-top: 3px; font-family: 'Poppins', serif;">Nitikesh Pattanayak</div>
+                <div class="signature-title" style="font-size: 12px; color: #1f2138; margin-bottom: 5px; font-family: 'Poppins', sans-serif;">Director of Certification</div>
+              </div>
             </div>
           </div>
           
@@ -476,9 +487,8 @@ function generateCertificateHTML(data: CertificateData): string {
             </div>
             
             <div class="certification-logos">
-              <img src="https://images.seeklogo.com/logo-png/55/2/iso-certified-company-stamp-logo-png_seeklogo-556487.png" alt="ISO Certified" />
-              <img src="https://static.vecteezy.com/system/resources/previews/019/909/405/non_2x/make-in-india-transparent-make-in-india-free-free-png.png" alt="Make in India" />
-              <img src="https://sudikshya.com/wp-content/uploads/2024/08/startup-and-odisha-combo.png" alt="Startup Odisha" />
+              <img src="./attached_assets/64180 (1)_1750158023564.png" alt="ISO Certified" />
+              <img src="./attached_assets/image_1750156610131.png" alt="Make in India" />
             </div>
           </div>
         </div>
