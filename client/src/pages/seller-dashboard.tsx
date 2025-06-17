@@ -12,7 +12,10 @@ import {
   Eye,
   Copy,
   Download,
-  LogOut
+  LogOut,
+  Share2,
+  ExternalLink,
+  CheckCircle
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -54,6 +57,10 @@ export default function SellerDashboard() {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showWithdrawalForm, setShowWithdrawalForm] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [shareableItems, setShareableItems] = useState<any>(null);
+  const [generatedUrl, setGeneratedUrl] = useState("");
+  const [selectedItem, setSelectedItem] = useState<any>(null);
   const [withdrawalData, setWithdrawalData] = useState({
     amount: "",
     upiId: "",
@@ -65,6 +72,7 @@ export default function SellerDashboard() {
 
   useEffect(() => {
     fetchDashboardData();
+    fetchShareableItems();
   }, []);
 
   const fetchDashboardData = async () => {
@@ -95,6 +103,66 @@ export default function SellerDashboard() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const fetchShareableItems = async () => {
+    try {
+      const response = await fetch("/api/sellers/shareable-items", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setShareableItems(data);
+      }
+    } catch (error) {
+      console.error("Error fetching shareable items:", error);
+    }
+  };
+
+  const generateReferralUrl = async (type: string, itemId: number) => {
+    try {
+      const response = await fetch("/api/sellers/generate-referral-url", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ type, itemId }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setGeneratedUrl(data.referralUrl);
+        toast({
+          title: "Success",
+          description: "Referral URL generated successfully",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to generate referral URL",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error generating referral URL:", error);
+      toast({
+        title: "Error",
+        description: "Failed to generate referral URL",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast({
+      title: "Copied",
+      description: "URL copied to clipboard",
+    });
   };
 
   const copyReferralLink = (courseId: number) => {
@@ -279,11 +347,12 @@ export default function SellerDashboard() {
             </CardHeader>
             <CardContent className="p-6 space-y-4">
               <Button 
-                onClick={() => copyReferralLink(1)}
+                onClick={() => setShowShareModal(true)}
                 className="w-full bg-black text-white hover:bg-gray-800"
+                disabled={!dashboardData.seller.isApproved}
               >
-                <Copy size={16} className="mr-2" />
-                Copy Referral Link
+                <Share2 size={16} className="mr-2" />
+                Generate Sharing URLs
               </Button>
               
               <Button 
