@@ -1678,664 +1678,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Recommendations endpoint
   app.get("/api/recommendations", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
-            
-            * { margin: 0; padding: 0; box-sizing: border-box; }
-            
-            body { 
-              font-family: 'Inter', sans-serif;
-              background: linear-gradient(135deg, #1a1a1a 0%, #000 100%);
-              min-height: 100vh;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              padding: 30px;
-            }
-            
-            .certificate-container {
-              width: 1400px;
-              height: 990px;
-              background: linear-gradient(145deg, #fefefe 0%, #f8f9fa 50%, #ffffff 100%);
-              position: relative;
-              border: 2px solid #d4af37;
-              box-shadow: 
-                0 0 0 8px #ffffff,
-                0 0 0 10px #d4af37,
-                0 0 0 16px #ffffff,
-                0 0 0 18px #c9a635,
-                0 40px 80px rgba(0,0,0,0.4),
-                inset 0 2px 4px rgba(212,175,55,0.1);
-              overflow: hidden;
-            }
-            
-            .ornate-border {
-              position: absolute;
-              inset: 20px;
-              border: 1px solid #d4af37;
-              background: 
-                radial-gradient(circle at 0 0, #d4af37 2px, transparent 2px),
-                radial-gradient(circle at 100% 0, #d4af37 2px, transparent 2px),
-                radial-gradient(circle at 0 100%, #d4af37 2px, transparent 2px),
-                radial-gradient(circle at 100% 100%, #d4af37 2px, transparent 2px);
-              background-size: 40px 40px;
-              background-position: top left, top right, bottom left, bottom right;
-              background-repeat: no-repeat;
-            }
-            
-            .decorative-corners {
-              position: absolute;
-              width: 120px;
-              height: 120px;
-            }
-            
-            .decorative-corners::before {
-              content: '';
-              position: absolute;
-              inset: 0;
-              background: radial-gradient(circle, #d4af37 1px, transparent 1px);
-              background-size: 8px 8px;
-              opacity: 0.3;
-            }
-            
-            .decorative-corners.top-left {
-              top: 30px;
-              left: 30px;
-              background: 
-                linear-gradient(45deg, #d4af37 1px, transparent 1px 20px, transparent),
-                linear-gradient(-45deg, #d4af37 1px, transparent 1px 20px, transparent);
-              clip-path: polygon(0 0, 100% 0, 0 100%);
-            }
-            
-            .decorative-corners.top-right {
-              top: 30px;
-              right: 30px;
-              background: 
-                linear-gradient(135deg, #d4af37 1px, transparent 1px 20px, transparent),
-                linear-gradient(45deg, #d4af37 1px, transparent 1px 20px, transparent);
-              clip-path: polygon(100% 0, 100% 100%, 0 0);
-            }
-            
-            .decorative-corners.bottom-left {
-              bottom: 30px;
-              left: 30px;
-              background: 
-                linear-gradient(-45deg, #d4af37 1px, transparent 1px 20px, transparent),
-                linear-gradient(-135deg, #d4af37 1px, transparent 1px 20px, transparent);
-              clip-path: polygon(0 0, 100% 100%, 0 100%);
-            }
-            
-            .decorative-corners.bottom-right {
-              bottom: 30px;
-              right: 30px;
-              background: 
-                linear-gradient(45deg, #d4af37 1px, transparent 1px 20px, transparent),
-                linear-gradient(135deg, #d4af37 1px, transparent 1px 20px, transparent);
-              clip-path: polygon(100% 0, 100% 100%, 0 100%);
-            }
-            
-            .certificate-content {
-              position: relative;
-              z-index: 10;
-              padding: 100px 80px;
-              text-align: center;
-              height: 100%;
-              display: flex;
-              flex-direction: column;
-              justify-content: center;
-            }
-            
-            .institutional-header {
-              margin-bottom: 60px;
-              position: relative;
-            }
-            
-            .institutional-header::before {
-              content: '';
-              position: absolute;
-              top: -20px;
-              left: 50%;
-              transform: translateX(-50%);
-              width: 300px;
-              height: 1px;
-              background: linear-gradient(90deg, transparent, #d4af37, transparent);
-            }
-            
-            .institutional-header::after {
-              content: '';
-              position: absolute;
-              bottom: -20px;
-              left: 50%;
-              transform: translateX(-50%);
-              width: 200px;
-              height: 1px;
-              background: linear-gradient(90deg, transparent, #d4af37, transparent);
-            }
-            
-            .logo-emblem {
-              display: inline-block;
-              background: linear-gradient(145deg, #d4af37 0%, #f4e09d 50%, #d4af37 100%);
-              color: #1a1a1a;
-              padding: 25px 45px;
-              margin-bottom: 25px;
-              position: relative;
-              clip-path: polygon(10% 0%, 90% 0%, 100% 25%, 100% 75%, 90% 100%, 10% 100%, 0% 75%, 0% 25%);
-            }
-            
-            .logo-text {
-              font-family: 'Cormorant Garamond', serif;
-              font-size: 48px;
-              font-weight: 700;
-              letter-spacing: 8px;
-              text-transform: uppercase;
-              text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            }
-            
-            .institution-name {
-              font-family: 'Inter', sans-serif;
-              font-size: 14px;
-              font-weight: 500;
-              color: #666;
-              text-transform: uppercase;
-              letter-spacing: 4px;
-              margin-bottom: 15px;
-            }
-            
-            .accreditation {
-              font-family: 'Crimson Text', serif;
-              font-size: 12px;
-              color: #888;
-              font-style: italic;
-              letter-spacing: 1px;
-            }
-            
-            .certificate-title-section {
-              margin-bottom: 60px;
-              position: relative;
-            }
-            
-            .certificate-title {
-              font-family: 'Cormorant Garamond', serif;
-              font-size: 84px;
-              font-weight: 600;
-              color: #1a1a1a;
-              text-transform: uppercase;
-              letter-spacing: 16px;
-              margin-bottom: 20px;
-              position: relative;
-              text-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            }
-            
-            .certificate-title::before {
-              content: '';
-              position: absolute;
-              top: -15px;
-              left: 50%;
-              transform: translateX(-50%);
-              width: 80px;
-              height: 3px;
-              background: linear-gradient(90deg, #d4af37, #f4e09d, #d4af37);
-            }
-            
-            .certificate-title::after {
-              content: '';
-              position: absolute;
-              bottom: -15px;
-              left: 50%;
-              transform: translateX(-50%);
-              width: 120px;
-              height: 2px;
-              background: linear-gradient(90deg, transparent, #d4af37, transparent);
-            }
-            
-            .certificate-subtitle {
-              font-family: 'Crimson Text', serif;
-              font-size: 32px;
-              color: #555;
-              font-style: italic;
-              letter-spacing: 2px;
-              font-weight: 400;
-            }
-            
-            .presentation-section {
-              margin-bottom: 50px;
-            }
-            
-            .presentation-text {
-              font-family: 'Crimson Text', serif;
-              font-size: 24px;
-              color: #333;
-              margin-bottom: 40px;
-              font-style: italic;
-              letter-spacing: 1px;
-            }
-            
-            .recipient-name {
-              font-family: 'Cormorant Garamond', serif;
-              font-size: 64px;
-              font-weight: 600;
-              color: #1a1a1a;
-              margin: 50px 0;
-              padding: 30px 0;
-              position: relative;
-              letter-spacing: 6px;
-            }
-            
-            .recipient-name::before {
-              content: '';
-              position: absolute;
-              top: 0;
-              left: 50%;
-              transform: translateX(-50%);
-              width: 400px;
-              height: 1px;
-              background: linear-gradient(90deg, transparent, #d4af37, transparent);
-            }
-            
-            .recipient-name::after {
-              content: '';
-              position: absolute;
-              bottom: 0;
-              left: 50%;
-              transform: translateX(-50%);
-              width: 400px;
-              height: 1px;
-              background: linear-gradient(90deg, transparent, #d4af37, transparent);
-            }
-            
-            .completion-statement {
-              font-family: 'Crimson Text', serif;
-              font-size: 20px;
-              color: #444;
-              margin: 40px 0;
-              line-height: 1.6;
-              letter-spacing: 0.5px;
-            }
-            
-            .course-title {
-              font-family: 'Cormorant Garamond', serif;
-              font-size: 42px;
-              font-weight: 600;
-              color: #1a1a1a;
-              margin: 40px 0;
-              letter-spacing: 4px;
-              text-transform: uppercase;
-              position: relative;
-              display: inline-block;
-              padding: 25px 50px;
-              background: linear-gradient(145deg, rgba(212,175,55,0.1) 0%, rgba(244,224,157,0.15) 50%, rgba(212,175,55,0.1) 100%);
-              border: 1px solid #d4af37;
-              border-radius: 5px;
-            }
-            
-            .achievement-badges {
-              display: flex;
-              justify-content: center;
-              align-items: center;
-              gap: 40px;
-              margin: 50px 0;
-            }
-            
-            .grade-badge {
-              background: linear-gradient(145deg, #1a1a1a 0%, #333 100%);
-              color: #d4af37;
-              padding: 20px 35px;
-              font-family: 'Inter', sans-serif;
-              font-size: 16px;
-              font-weight: 700;
-              text-transform: uppercase;
-              letter-spacing: 2px;
-              border: 2px solid #d4af37;
-              border-radius: 3px;
-              box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            }
-            
-            .score-display {
-              background: linear-gradient(145deg, #d4af37 0%, #f4e09d 50%, #d4af37 100%);
-              color: #1a1a1a;
-              padding: 25px 45px;
-              font-family: 'Cormorant Garamond', serif;
-              font-size: 24px;
-              font-weight: 700;
-              letter-spacing: 3px;
-              border-radius: 3px;
-              box-shadow: 0 6px 12px rgba(212,175,55,0.3);
-              text-transform: uppercase;
-            }
-            
-            .certification-details {
-              display: flex;
-              justify-content: space-between;
-              margin-top: 70px;
-              padding: 40px 0;
-              border-top: 1px solid #d4af37;
-              border-bottom: 1px solid #d4af37;
-              background: linear-gradient(90deg, transparent, rgba(212,175,55,0.03), transparent);
-            }
-            
-            .detail-group {
-              text-align: center;
-              flex: 1;
-            }
-            
-            .detail-label {
-              font-family: 'Inter', sans-serif;
-              font-size: 11px;
-              color: #888;
-              text-transform: uppercase;
-              letter-spacing: 2px;
-              margin-bottom: 8px;
-              font-weight: 600;
-            }
-            
-            .detail-value {
-              font-family: 'Crimson Text', serif;
-              font-size: 18px;
-              font-weight: 600;
-              color: #333;
-              letter-spacing: 1px;
-            }
-            
-            .footer-credentials {
-              position: absolute;
-              bottom: 50px;
-              left: 0;
-              right: 0;
-              display: flex;
-              justify-content: space-between;
-              align-items: end;
-              padding: 0 80px;
-            }
-            
-            .signature-area {
-              text-align: left;
-            }
-            
-            .signature-line {
-              width: 250px;
-              height: 1px;
-              background: linear-gradient(90deg, #d4af37, transparent);
-              margin-bottom: 12px;
-              position: relative;
-            }
-            
-            .signature-line::after {
-              content: '';
-              position: absolute;
-              left: 0;
-              top: -1px;
-              width: 60px;
-              height: 3px;
-              background: #d4af37;
-            }
-            
-            .signature-title {
-              font-family: 'Inter', sans-serif;
-              font-size: 10px;
-              color: #666;
-              text-transform: uppercase;
-              letter-spacing: 1.5px;
-              margin-bottom: 5px;
-              font-weight: 600;
-            }
-            
-            .signature-name {
-              font-family: 'Crimson Text', serif;
-              font-size: 16px;
-              color: #333;
-              font-weight: 600;
-              letter-spacing: 0.5px;
-            }
-            
-            .signature-designation {
-              font-family: 'Inter', sans-serif;
-              font-size: 9px;
-              color: #888;
-              text-transform: uppercase;
-              letter-spacing: 1px;
-              margin-top: 2px;
-            }
-            
-            .verification-area {
-              text-align: right;
-            }
-            
-            .verification-seal {
-              width: 90px;
-              height: 90px;
-              background: linear-gradient(145deg, #d4af37 0%, #f4e09d 50%, #d4af37 100%);
-              border: 3px solid #1a1a1a;
-              border-radius: 50%;
-              margin: 0 auto 15px auto;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              position: relative;
-              box-shadow: 0 4px 8px rgba(212,175,55,0.3);
-            }
-            
-            .verification-seal::before {
-              content: 'VERIFIED';
-              font-family: 'Inter', sans-serif;
-              font-size: 8px;
-              font-weight: 800;
-              color: #1a1a1a;
-              text-transform: uppercase;
-              letter-spacing: 0.5px;
-              text-align: center;
-              line-height: 1.2;
-            }
-            
-            .verification-text {
-              font-family: 'Inter', sans-serif;
-              font-size: 9px;
-              color: #666;
-              text-transform: uppercase;
-              letter-spacing: 1px;
-              font-weight: 600;
-              margin-bottom: 5px;
-            }
-            
-            .verification-url {
-              font-family: 'Crimson Text', serif;
-              font-size: 11px;
-              color: #333;
-              font-weight: 600;
-              letter-spacing: 0.5px;
-            }
-            
-            /* Print styles */
-            @media print {
-              body {
-                background: #fff;
-                padding: 0;
-              }
-              .certificate-container {
-                box-shadow: none;
-                border: 2px solid #d4af37;
-                width: 100vw;
-                height: 100vh;
-              }
-            }
-          </style>
-        </head>
-        <body>
-          <div class="certificate-container">
-            <div class="ornate-border"></div>
-            <div class="decorative-corners top-left"></div>
-            <div class="decorative-corners top-right"></div>
-            <div class="decorative-corners bottom-left"></div>
-            <div class="decorative-corners bottom-right"></div>
-            
-            <div class="certificate-content">
-              <div class="institutional-header">
-                <div class="logo-emblem">
-                  <div class="logo-text">OCTAMY</div>
-                </div>
-                <div class="institution-name">Solutions Private Limited</div>
-                <div class="accreditation">Authorized Certification Body</div>
-              </div>
-              
-              <div class="certificate-title-section">
-                <h1 class="certificate-title">Certificate</h1>
-                <p class="certificate-subtitle">of Professional Excellence</p>
-              </div>
-              
-              <div class="presentation-section">
-                <p class="presentation-text">This is to certify that</p>
-                
-                <div class="recipient-name">${certificate.userName}</div>
-                
-                <p class="completion-statement">
-                  has successfully demonstrated mastery and completed the comprehensive 
-                  professional certification program
-                </p>
-                
-                <div class="course-title">${certificate.courseTitle}</div>
-                
-                <div class="achievement-badges">
-                  <div class="grade-badge">${certificate.badge.toUpperCase()} GRADE</div>
-                  <div class="score-display">Achievement Score: ${certificate.score}%</div>
-                </div>
-              </div>
-              
-              <div class="certification-details">
-                <div class="detail-group">
-                  <div class="detail-label">Certificate Number</div>
-                  <div class="detail-value">${certificate.certificateNumber}</div>
-                </div>
-                <div class="detail-group">
-                  <div class="detail-label">Date of Issue</div>
-                  <div class="detail-value">${new Date(certificate.issuedAt).toLocaleDateString('en-US', { 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric' 
-                  })}</div>
-                </div>
-                <div class="detail-group">
-                  <div class="detail-label">Valid Until</div>
-                  <div class="detail-value">${new Date(certificate.expiresAt).toLocaleDateString('en-US', { 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric' 
-                  })}</div>
-                </div>
-              </div>
-            </div>
-            
-            <div class="footer-credentials">
-              <div class="signature-area">
-                <div class="signature-line"></div>
-                <div class="signature-title">Authorized Signature</div>
-                <div class="signature-name">Dr. Rajesh Kumar</div>
-                <div class="signature-designation">Director of Certification</div>
-              </div>
-              
-              <div class="verification-area">
-                <div class="verification-seal"></div>
-                <div class="verification-text">Digital Verification</div>
-                <div class="verification-url">verify.octamy.com</div>
-              </div>
-            </div>
-          </div>
-        </body>
-        </html>
-      `;
-
-      const options = {
-        format: 'A4',
-        orientation: 'landscape',
-        border: {
-          top: '0.5in',
-          right: '0.5in',
-          bottom: '0.5in',
-          left: '0.5in'
-        },
-        quality: '100',
-        type: 'pdf'
-      };
-
-      // Return the ultra-premium certificate HTML for download
-      res.setHeader('Content-Type', 'text/html');
-      res.setHeader('Content-Disposition', `inline; filename="Octamy-Certificate-${certificate.certificateNumber}.html"`);
-      
-      // Add print button to the certificate HTML and return it directly
-      const certificateWithPrintButton = certificateHtml.replace(
-        '<body>',
-        `<body>
-          <div class="no-print" style="position: fixed; top: 15px; right: 15px; background: linear-gradient(145deg, #d4af37 0%, #f4e09d 50%, #d4af37 100%); color: #1a1a1a; padding: 12px 20px; border-radius: 6px; z-index: 2000; box-shadow: 0 4px 12px rgba(212,175,55,0.3); font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600;">
-            <button onclick="window.print()" style="background: #1a1a1a; color: #d4af37; border: 1px solid #d4af37; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">
-              Print to PDF
-            </button>
-          </div>`
-      ).replace(
-        '</style>',
-        `  @media print {
-            body { margin: 0; padding: 0; }
-            .no-print { display: none; }
-            .certificate-container { 
-              width: 100vw; 
-              height: 100vh; 
-              page-break-inside: avoid;
-            }
-          }
-        </style>`
-      );
-      
-      res.send(certificateWithPrintButton);
-
-    } catch (error) {
-      console.error("Certificate download error:", error);
-      res.status(500).json({ message: "Failed to download certificate" });
-    }
-  });
-
-  // Smart Notifications API endpoints
-  
-  // Get user notifications
-  app.get("/api/notifications", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
-    try {
-      const userId = req.user?.userId;
-      if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
-
-      const notifications = await storage.getUserNotifications(userId);
-      res.json(notifications);
-    } catch (error) {
-      console.error("Error fetching notifications:", error);
-      res.status(500).json({ message: "Failed to fetch notifications" });
-    }
-  });
-
-  // Mark notification as read
-  app.put("/api/notifications/:id/read", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
-    try {
-      const notificationId = parseInt(req.params.id);
-      await storage.markNotificationAsRead(notificationId);
-      res.json({ success: true });
-    } catch (error) {
-      console.error("Error marking notification as read:", error);
-      res.status(500).json({ message: "Failed to mark notification as read" });
-    }
-  });
-
-  // Mark all notifications as read
-  app.put("/api/notifications/read-all", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
-    try {
-      const userId = req.user?.userId;
-      if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
-
-      await storage.markAllNotificationsAsRead(userId);
-      res.json({ success: true });
-    } catch (error) {
-      console.error("Error marking all notifications as read:", error);
-      res.status(500).json({ message: "Failed to mark all notifications as read" });
-    }
-  });
-
-  // Get course recommendations
-  app.get("/api/recommendations", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const userId = req.user?.userId;
       if (!userId) {
@@ -2343,12 +1685,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const recommendations = await storage.getUserRecommendations(userId);
-      
-      // Mark recommendations as shown
-      for (const rec of recommendations) {
-        await storage.markRecommendationAsShown(rec.id);
-      }
-
       res.json(recommendations);
     } catch (error) {
       console.error("Error fetching recommendations:", error);
@@ -2356,7 +1692,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Generate course recommendations based on user activity
+  // Generate new recommendations
   app.post("/api/recommendations/generate", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const userId = req.user?.userId;
@@ -2364,72 +1700,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Unauthorized" });
       }
 
-      // Get user's completed courses and preferences
-      const userCertificates = await storage.getUserCertificates(userId);
-      const userPrefs = await storage.getUserPreferences(userId);
-      const allCourses = await storage.getCourses();
-
-      // Get completed course IDs
-      const completedCourseIds = userCertificates.map(cert => 
-        parseInt(cert.certificateId.split('-')[2]) || 0
-      ).filter(id => id > 0);
-
-      // Simple recommendation algorithm
-      const recommendations = [];
-      
-      for (const course of allCourses) {
-        // Skip if user already completed this course
-        if (completedCourseIds.includes(course.id)) continue;
-
-        let score = 0.5; // Base score
-        let reason = 'popular';
-        const metadata: any = {
-          completedCourseIds,
-          categoryMatch: false,
-          skillLevelMatch: false
-        };
-
-        // Category-based recommendations
-        if (userPrefs?.preferredCategories?.includes(course.category.name)) {
-          score += 0.3;
-          reason = 'based_on_category';
-          metadata.categoryMatch = true;
-        }
-
-        // Skill level matching
-        if (userPrefs?.skillLevel === course.level) {
-          score += 0.2;
-          metadata.skillLevelMatch = true;
-        }
-
-        // Popular courses get higher score
-        if (course.isActive) {
-          score += 0.1;
-        }
-
-        // Create recommendation if score is above threshold
-        if (score >= 0.6) {
-          await storage.createCourseRecommendation({
-            userId,
-            courseId: course.id,
-            reason,
-            score: score.toString(),
-            metadata
-          });
-          recommendations.push({
-            courseId: course.id,
-            score,
-            reason,
-            course
-          });
-        }
-      }
-
-      res.json({
-        success: true,
-        recommendationsGenerated: recommendations.length,
-        recommendations: recommendations.slice(0, 5) // Return top 5
-      });
+      await storage.generateUserRecommendations(userId);
+      const recommendations = await storage.getUserRecommendations(userId);
+      res.json(recommendations);
     } catch (error) {
       console.error("Error generating recommendations:", error);
       res.status(500).json({ message: "Failed to generate recommendations" });
@@ -2439,33 +1712,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Track user activity
   app.post("/api/activity", optionalAuth, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const userId = req.user?.userId;
-      const { activityType, entityId, entityType, metadata } = req.body;
+      const userId = req.userId || null;
+      const { activityType, entityType, entityId, metadata } = req.body;
 
-      if (userId) {
-        await storage.recordUserActivity({
-          userId,
-          activityType,
-          entityId: entityId ? parseInt(entityId) : undefined,
-          entityType,
-          metadata
-        });
-      }
+      await storage.trackUserActivity({
+        userId,
+        activityType,
+        entityType,
+        entityId,
+        metadata
+      });
 
-      res.json({ success: true });
+      res.json({ message: "Activity tracked successfully" });
     } catch (error) {
-      console.error("Error recording activity:", error);
-      res.status(500).json({ message: "Failed to record activity" });
+      console.error("Error tracking activity:", error);
+      res.status(500).json({ message: "Failed to track activity" });
     }
   });
 
-  // Course progress routes
+  // Get user progress
   app.get("/api/progress", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const userId = req.user!.userId;
-      const courseId = req.query.courseId ? parseInt(req.query.courseId as string) : undefined;
-      
-      const progress = await storage.getUserCourseProgress(userId, courseId);
+      const userId = req.user?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const progress = await storage.getUserProgress(userId);
       res.json(progress);
     } catch (error) {
       console.error("Error fetching progress:", error);
@@ -2473,12 +1746,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update user progress
   app.post("/api/progress", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const userId = req.user!.userId;
-      const progressData = { ...req.body, userId };
-      
-      const progress = await storage.upsertUserCourseProgress(progressData);
+      const userId = req.user?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const progress = await storage.updateUserProgress(userId, req.body);
       res.json(progress);
     } catch (error) {
       console.error("Error updating progress:", error);
@@ -2486,11 +1762,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Achievement routes
+  // Get achievements
   app.get("/api/achievements", async (req: Request, res: Response) => {
     try {
-      const category = req.query.category as string;
-      const achievements = await storage.getAchievements(category);
+      const achievements = await storage.getAllAchievements();
       res.json(achievements);
     } catch (error) {
       console.error("Error fetching achievements:", error);
@@ -2498,12 +1773,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get user achievements
   app.get("/api/user/achievements", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const userId = req.user!.userId;
-      const includeDetails = req.query.details === 'true';
-      
-      const achievements = await storage.getUserAchievements(userId, includeDetails);
+      const userId = req.user?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const achievements = await storage.getUserAchievements(userId);
       res.json(achievements);
     } catch (error) {
       console.error("Error fetching user achievements:", error);
@@ -2511,12 +1789,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Check achievements
   app.post("/api/achievements/check", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const userId = req.user!.userId;
-      const { courseId } = req.body;
-      
-      const newAchievements = await storage.checkAndUnlockAchievements(userId, courseId);
+      const userId = req.user?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const newAchievements = await storage.checkAndUnlockAchievements(userId, req.body);
       res.json(newAchievements);
     } catch (error) {
       console.error("Error checking achievements:", error);
@@ -2524,7 +1805,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get/Update user preferences
+  // Get user preferences
   app.get("/api/preferences", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const userId = req.user?.userId;
@@ -2532,26 +1813,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Unauthorized" });
       }
 
-      let preferences = await storage.getUserPreferences(userId);
-      
-      // Create default preferences if none exist
-      if (!preferences) {
-        preferences = await storage.createUserPreferences({
-          userId,
-          preferredCategories: [],
-          skillLevel: 'novice',
-          learningGoals: [],
-          notificationSettings: {
-            email: true,
-            push: true,
-            frequency: 'weekly',
-            courseRecommendations: true,
-            newCourses: true,
-            achievements: true
-          }
-        });
-      }
-
+      const preferences = await storage.getUserPreferences(userId);
       res.json(preferences);
     } catch (error) {
       console.error("Error fetching preferences:", error);
@@ -2559,6 +1821,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update user preferences
   app.put("/api/preferences", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const userId = req.user?.userId;
@@ -2566,8 +1829,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Unauthorized" });
       }
 
-      const updates = req.body;
-      const preferences = await storage.updateUserPreferences(userId, updates);
+      const preferences = await storage.updateUserPreferences(userId, req.body);
       res.json(preferences);
     } catch (error) {
       console.error("Error updating preferences:", error);
@@ -2575,13 +1837,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Learning Path Routes
-  app.get("/api/learning-paths", LearningPathController.getLearningPaths);
-  app.get("/api/user/learning-paths", authenticateToken, LearningPathController.getUserLearningPaths);
-  app.post("/api/learning-paths/enroll", authenticateToken, LearningPathController.enrollInLearningPath);
-  app.get("/api/recommendations/personalized", authenticateToken, LearningPathController.generatePersonalizedRecommendations);
-  app.get("/api/recommendations/learning-paths", authenticateToken, LearningPathController.getLearningPathRecommendations);
-  app.post("/api/skill-assessments", authenticateToken, LearningPathController.createSkillAssessment);
+  // Learning paths endpoints
+  app.get("/api/learning-paths", async (req: Request, res: Response) => {
+    try {
+      const learningPaths = await storage.getAllLearningPaths();
+      res.json(learningPaths);
+    } catch (error) {
+      console.error("Error fetching learning paths:", error);
+      res.status(500).json({ message: "Failed to fetch learning paths" });
+    }
+  });
+
+  app.get("/api/learning-paths/featured", async (req: Request, res: Response) => {
+    try {
+      const featuredPaths = await storage.getFeaturedLearningPaths();
+      res.json(featuredPaths);
+    } catch (error) {
+      console.error("Error fetching featured learning paths:", error);
+      res.status(500).json({ message: "Failed to fetch featured learning paths" });
+    }
+  });
+
+  app.post("/api/learning-paths/:pathId/enroll", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.userId;
+      const pathId = parseInt(req.params.pathId);
+      
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const enrollment = await storage.enrollInLearningPath(userId, pathId);
+      res.json(enrollment);
+    } catch (error) {
+      console.error("Error enrolling in learning path:", error);
+      res.status(500).json({ message: "Failed to enroll in learning path" });
+    }
+  });
+
+  app.get("/api/user/learning-paths", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const userPaths = await storage.getUserLearningPaths(userId);
+      res.json(userPaths);
+    } catch (error) {
+      console.error("Error fetching user learning paths:", error);
+      res.status(500).json({ message: "Failed to fetch user learning paths" });
+    }
+  });
 
   const httpServer = createServer(app);
   return httpServer;
