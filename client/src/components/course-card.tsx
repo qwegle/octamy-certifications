@@ -14,9 +14,18 @@ interface CourseCardProps {
 
 export default function CourseCard({ course, certifiedCount = 0, rating = 4.8, viewMode = "grid" }: CourseCardProps) {
   return (
-    <Card className={`group hover:shadow-lg transition-all duration-300 border-2 hover:border-black ${
+    <Card className={`group hover:shadow-lg transition-all duration-300 border-2 hover:border-black relative ${
       viewMode === "list" ? "flex flex-row" : ""
     }`}>
+      {/* Sale Badge */}
+      {course.isOnSale && (
+        <div className="absolute top-2 right-2 z-20">
+          <div className="bg-red-600 text-white px-3 py-1 rounded-lg text-sm font-bold shadow-lg">
+            SALE
+          </div>
+        </div>
+      )}
+      
       <div className={`${viewMode === "list" ? "w-64 flex-shrink-0" : ""}`}>
         <div className="aspect-video bg-gradient-to-br from-gray-900 to-black rounded-t-lg relative overflow-hidden">
           <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center">
@@ -73,11 +82,16 @@ export default function CourseCard({ course, certifiedCount = 0, rating = 4.8, v
                 {course.isOnSale && course.originalPrice ? (
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-2xl font-bold text-black">₹{course.price}</span>
+                      <span className="text-2xl font-bold text-red-600">₹{course.price}</span>
                       <span className="text-lg text-gray-500 line-through">₹{course.originalPrice}</span>
                     </div>
-                    <div className="text-sm text-green-600 font-medium">
-                      Save ₹{(parseFloat(course.originalPrice) - parseFloat(course.price)).toFixed(0)}
+                    <div className="flex items-center gap-2">
+                      <div className="text-sm text-green-600 font-medium">
+                        Save ₹{(parseFloat(course.originalPrice) - parseFloat(course.price)).toFixed(0)}
+                      </div>
+                      <div className="bg-red-100 text-red-800 px-2 py-0.5 rounded text-xs font-semibold">
+                        {Math.round(((parseFloat(course.originalPrice) - parseFloat(course.price)) / parseFloat(course.originalPrice)) * 100)}% OFF
+                      </div>
                     </div>
                   </div>
                 ) : (
