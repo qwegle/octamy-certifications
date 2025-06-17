@@ -18,6 +18,7 @@ import { useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+
 import { 
   Shield, 
   Users, 
@@ -149,6 +150,7 @@ const courseSchema = z.object({
 
 type CourseFormData = z.infer<typeof courseSchema>;
 
+// Category form schema
 const categorySchema = z.object({
   name: z.string().min(1, "Category name is required"),
   description: z.string().min(1, "Description is required")

@@ -300,6 +300,40 @@ export class DatabaseStorage implements IStorage {
     return category;
   }
 
+  async getAllCategoriesWithCounts(): Promise<(Category & { courseCount: number })[]> {
+    const categoriesWithCounts = await db
+      .select({
+        id: categories.id,
+        name: categories.name,
+        description: categories.description,
+        slug: categories.slug,
+        icon: categories.icon,
+        courseCount: sql<number>`count(${courses.id})::int`
+      })
+      .from(categories)
+      .leftJoin(courses, eq(categories.id, courses.categoryId))
+      .groupBy(categories.id, categories.name, categories.description, categories.slug, categories.icon)
+      .orderBy(categories.name);
+    
+    return categoriesWithCounts;
+  }
+
+  async updateCategory(id: number, updates: Partial<InsertCategory>): Promise<Category | undefined> {
+    const [category] = await db
+      .update(categories)
+      .set(updates)
+      .where(eq(categories.id, id))
+      .returning();
+    return category;
+  }
+
+  async deleteCategory(id: number): Promise<boolean> {
+    const result = await db
+      .delete(categories)
+      .where(eq(categories.id, id));
+    return (result.rowCount || 0) > 0;
+  }
+
   // Course operations
   async getCourses(categoryId?: number): Promise<(Course & { category: Category })[]> {
     const query = db

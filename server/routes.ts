@@ -2634,7 +2634,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Name and description are required" });
       }
 
-      const category = await storage.createCategory({ name, description });
+      // Generate slug from name
+      const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      
+      const category = await storage.createCategory({ 
+        name, 
+        description, 
+        slug,
+        icon: "📚" // Default icon
+      });
       res.status(201).json(category);
     } catch (error) {
       console.error("Error creating category:", error);
