@@ -71,13 +71,20 @@ function generateCertificateHTML(data: CertificateData): string {
           inset: 15px;
           border: 2px solid #c0c0c0;
           border-radius: 8px;
+          background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(248,249,250,0.9) 50%, rgba(255,255,255,0.9) 100%);
+          background-image: 
+            radial-gradient(circle at 25% 25%, rgba(200,200,200,0.1) 2px, transparent 2px),
+            radial-gradient(circle at 75% 25%, rgba(200,200,200,0.1) 2px, transparent 2px),
+            radial-gradient(circle at 25% 75%, rgba(200,200,200,0.1) 2px, transparent 2px),
+            radial-gradient(circle at 75% 75%, rgba(200,200,200,0.1) 2px, transparent 2px);
+          background-size: 50px 50px;
         }
         
         .decorative-corners {
           position: absolute;
           width: 60px;
           height: 60px;
-          background: linear-gradient(45deg, #c0c0c0, #a0a0a0);
+          background: linear-gradient(45deg, #000000, #b6b6b6);
         }
         
         .decorative-corners.top-left {
@@ -282,6 +289,16 @@ function generateCertificateHTML(data: CertificateData): string {
         
         .signature-section {
           text-align: center;
+          position: relative;
+        }
+        
+        .signature-image {
+          width: 100px;
+          height: auto;
+          margin-bottom: 5px;
+          display: block;
+          margin-left: auto;
+          margin-right: auto;
         }
         
         .signature-line {
@@ -447,19 +464,7 @@ function generateCertificateHTML(data: CertificateData): string {
                 <div><strong>Issue Date:</strong> ${new Date(data.issueDate).toLocaleDateString()}</div>
                 <div><strong>Completion Date:</strong> ${new Date(data.completionDate).toLocaleDateString()}</div>
                 <div><strong>Status:</strong> Valid Internationally</div>
-              </div>
-              
-              <div class="signature-section">
-                <!-- Signature Image -->
-                <img 
-                  src="https://repl.it/api/v1/projects/current/files/attached_assets/Nitikesh_signature_1750177747117.png" 
-                  alt="Nitikesh Pattanayak Signature" 
-                  style="height: 48px; width: auto; margin-bottom: 8px;"
-                />
-                <div class="signature-line"></div>
-                <div class="signature-name" style="font-size: 14px; color: #000; font-weight: 600; margin-top: 3px; font-family: 'Poppins', serif;">Nitikesh Pattanayak</div>
-                <div class="signature-title" style="font-size: 12px; color: #1f2138; margin-bottom: 5px; font-family: 'Poppins', sans-serif;">Director of Certification</div>
-              </div>
+
             </div>
           </div>
           
