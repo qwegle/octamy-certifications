@@ -63,10 +63,12 @@ interface Address {
 interface Course {
   id: number;
   title: string;
+  description: string;
   price: string;
-  category: {
-    name: string;
-  };
+  categoryId: number;
+  level: string;
+  isActive: boolean;
+  isInternship: boolean;
 }
 
 export default function EnhancedCheckout() {
@@ -86,6 +88,13 @@ export default function EnhancedCheckout() {
   const { data: course, isLoading: courseLoading } = useQuery<Course>({
     queryKey: ["/api/courses", courseId],
     enabled: !!courseId,
+    queryFn: async () => {
+      const response = await fetch(`/api/courses/${courseId}`);
+      if (!response.ok) {
+        throw new Error('Course not found');
+      }
+      return response.json();
+    },
   });
 
   // Fetch user addresses
@@ -291,7 +300,7 @@ export default function EnhancedCheckout() {
                     <div>
                       <h3 className="font-semibold text-lg text-white">{course.title}</h3>
                       <Badge variant="secondary" className="mt-2">
-                        {course.category.name}
+                        {course.level}
                       </Badge>
                     </div>
                   </div>

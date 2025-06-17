@@ -104,6 +104,16 @@ Octamy is a comprehensive professional certification platform built as a full-st
 
 ## Recent Updates
 
+### Enhanced Checkout System with Physical Certificate Shipping (June 17, 2025)
+- **Complete address management system** with CRUD operations for user shipping addresses
+- **Physical certificate shipping option** with ₹50 additional cost for premium paper delivery
+- **Enhanced checkout page** with dual certificate options (digital-only vs digital + physical)
+- **Default address management** with user-friendly address selection interface
+- **Database schema extensions** for shipping addresses, payment amounts, and physical copy tracking
+- **API endpoints** for comprehensive address management and shipping cost calculation
+- **Updated course detail flow** directing users through enhanced checkout instead of direct exam access
+- **Seamless integration** with existing payment gateway supporting physical certificate orders
+
 ### Complete MVC Architecture Refactoring (June 17, 2025)
 - **Full MVC structure implementation** with separated controllers, middleware, and routes
 - **Modular controller architecture** with AuthController, CourseController, ExamController, CertificateController, and PaymentController
