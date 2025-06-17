@@ -104,6 +104,14 @@ Octamy is a comprehensive professional certification platform built as a full-st
 
 ## Recent Updates
 
+### Critical Payment Bypass Security Fix (June 17, 2025)
+- **Eliminated payment bypass vulnerability** where users could access certificates without PayUMoney payment
+- **Secured certificate access control** with 402 Payment Required responses for unpaid certificates
+- **Updated exam success flow** to redirect to checkout instead of creating certificates immediately
+- **Enhanced checkout security** with unpaid certificate creation that requires payment activation
+- **Strengthened backend validation** ensuring only PayUMoney success callback activates certificates
+- **Protected revenue stream** by enforcing mandatory payment for all certificate access
+
 ### Simplified Exam Scoring Logic (June 17, 2025)
 - **Fixed critical exam bug** where 100% scores were failing due to complex retake system
 - **Simplified passing logic** to use each course's defined passing score (e.g., 60% for Demo Course)
