@@ -104,16 +104,13 @@ Octamy is a comprehensive professional certification platform built as a full-st
 
 ## Recent Updates
 
-### Enhanced Exam Scoring Logic with Developer Documentation (June 17, 2025)
-- **Comprehensive exam scoring system** with clear first-time vs retake logic implementation
-- **First-time scoring rule**: Users must achieve ≥50% to pass on their initial attempt
-- **Retake scoring rule**: Users must score higher than their previous best attempt to pass
-- **Developer-friendly code comments** throughout all exam-related files for easy maintenance
-- **Enhanced storage methods** including getExamAttemptsByUserAndCourse for retake validation
-- **Detailed exam response data** with retake status, previous scores, and helpful user messages
-- **Certificate creation logic** updated to only generate certificates for actual passing attempts
-- **Dashboard filtering logic** clearly documented with three certificate categories explanation
-- **Simple code structure** making exam logic easy to understand and modify for future developers
+### Simplified Exam Scoring Logic (June 17, 2025)
+- **Fixed critical exam bug** where 100% scores were failing due to complex retake system
+- **Simplified passing logic** to use each course's defined passing score (e.g., 60% for Demo Course)
+- **Removed confusing retake requirements** that prevented high scores from passing
+- **Updated response messages** to show correct passing thresholds from course settings
+- **Streamlined exam logic** making it easy to understand: score >= course.passingScore = pass
+- **Developer-friendly code structure** with clear comments explaining the simple passing criteria
 
 ### Interactive Course Recommendation System with Personalized Learning Paths (June 17, 2025)
 - **Complete learning path system** with structured course sequences and progress tracking

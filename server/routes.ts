@@ -314,13 +314,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const score = Math.round((correctAnswers / totalQuestions) * 100);
       
       // EXAM PASSING LOGIC:
-      // 1. First time exam takers: Need >= 50% to pass
-      // 2. Retakers: Need to score higher than their previous best score
-      let passed = false;
+      // Use the course's defined passing score (e.g., 60% for Demo Course)
+      const passingScore = course.passingScore;
+      let passed = score >= passingScore;
       let isRetake = false;
       let previousBestScore = 0;
       
-      // Check if user has taken this exam before
+      // Check if user has taken this exam before (for tracking purposes)
       if (req.user?.userId) {
         const previousAttempts = await storage.getExamAttemptsByUserAndCourse(req.user.userId, courseId);
         
@@ -328,16 +328,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           isRetake = true;
           // Find the highest score from previous attempts
           previousBestScore = Math.max(...previousAttempts.map(attempt => attempt.score));
-          
-          // For retakers: Must score higher than previous best
-          passed = score > previousBestScore;
-        } else {
-          // First time: Must score >= 50%
-          passed = score >= 50;
         }
-      } else {
-        // Anonymous users (first time only): Must score >= 50%
-        passed = score >= 50;
       }
       
       // Mastery is achieved at 90% regardless of attempt number
@@ -380,14 +371,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Additional information for developers and frontend logic
         isRetake,
         previousBestScore,
-        passingThreshold: isRetake ? previousBestScore + 1 : 50, // What score was needed to pass
+        passingThreshold: passingScore, // What score was needed to pass
         message: passed 
-          ? (isRetake 
-            ? `Congratulations! You improved from ${previousBestScore}% to ${score}%`
-            : `Congratulations! You passed with ${score}%`)
-          : (isRetake 
-            ? `You scored ${score}%. You need to score higher than your previous best of ${previousBestScore}% to pass.`
-            : `You scored ${score}%. You need at least 50% to pass.`)
+          ? `Congratulations! You passed with ${score}%`
+          : `You scored ${score}%. You need at least ${passingScore}% to pass.`
       });
     } catch (error) {
       console.error("Error submitting exam:", error);
