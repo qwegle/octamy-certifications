@@ -45,7 +45,7 @@ export default function DemoCertificate() {
           <div className="lg:col-span-2">
             {/* Professional Certificate Design */}
             <div 
-              className="bg-white shadow-2xl relative w-full overflow-hidden"
+              className="bg-white shadow-2xl relative w-full overflow-hidden border-8 border-black rounded-2xl"
               style={{ 
                 aspectRatio: '1.414/1',
                 background: 'linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%)',
@@ -58,10 +58,10 @@ export default function DemoCertificate() {
                 className="absolute inset-4"
                 style={{
                   background: `
-                    radial-gradient(circle at 0% 0%, #d4af37 2px, transparent 2px),
-                    radial-gradient(circle at 100% 0%, #d4af37 2px, transparent 2px),
-                    radial-gradient(circle at 0% 100%, #d4af37 2px, transparent 2px),
-                    radial-gradient(circle at 100% 100%, #d4af37 2px, transparent 2px)
+                    radial-gradient(circle at 0% 0%, #c0c0c0 2px, transparent 2px),
+                    radial-gradient(circle at 100% 0%, #c0c0c0 2px, transparent 2px),
+                    radial-gradient(circle at 0% 100%, #c0c0c0 2px, transparent 2px),
+                    radial-gradient(circle at 100% 100%, #c0c0c0 2px, transparent 2px)
                   `,
                   backgroundSize: '40px 40px',
                   backgroundPosition: 'top left, top right, bottom left, bottom right',
@@ -72,29 +72,29 @@ export default function DemoCertificate() {
               {/* Decorative corners */}
               <div className="absolute top-8 left-8 w-28 h-28" style={{ 
                 background: `
-                  linear-gradient(45deg, #d4af37 1px, transparent 1px 20px, transparent),
-                  linear-gradient(-45deg, #d4af37 1px, transparent 1px 20px, transparent)
+                  linear-gradient(45deg, #c0c0c0 1px, transparent 1px 20px, transparent),
+                  linear-gradient(-45deg, #c0c0c0 1px, transparent 1px 20px, transparent)
                 `,
                 clipPath: 'polygon(0 0, 100% 0, 0 100%)'
               }}></div>
               <div className="absolute top-8 right-8 w-28 h-28" style={{ 
                 background: `
-                  linear-gradient(135deg, #d4af37 1px, transparent 1px 20px, transparent),
-                  linear-gradient(45deg, #d4af37 1px, transparent 1px 20px, transparent)
+                  linear-gradient(135deg, #c0c0c0 1px, transparent 1px 20px, transparent),
+                  linear-gradient(45deg, #c0c0c0 1px, transparent 1px 20px, transparent)
                 `,
                 clipPath: 'polygon(100% 0, 100% 100%, 0 0)'
               }}></div>
               <div className="absolute bottom-8 left-8 w-28 h-28" style={{ 
                 background: `
-                  linear-gradient(-45deg, #d4af37 1px, transparent 1px 20px, transparent),
-                  linear-gradient(-135deg, #d4af37 1px, transparent 1px 20px, transparent)
+                  linear-gradient(-45deg, #c0c0c0 1px, transparent 1px 20px, transparent),
+                  linear-gradient(-135deg, #c0c0c0 1px, transparent 1px 20px, transparent)
                 `,
                 clipPath: 'polygon(0 0, 100% 100%, 0 100%)'
               }}></div>
               <div className="absolute bottom-8 right-8 w-28 h-28" style={{ 
                 background: `
-                  linear-gradient(45deg, #d4af37 1px, transparent 1px 20px, transparent),
-                  linear-gradient(135deg, #d4af37 1px, transparent 1px 20px, transparent)
+                  linear-gradient(45deg, #c0c0c0 1px, transparent 1px 20px, transparent),
+                  linear-gradient(135deg, #c0c0c0 1px, transparent 1px 20px, transparent)
                 `,
                 clipPath: 'polygon(100% 0, 100% 100%, 0 100%)'
               }}></div>
@@ -104,14 +104,14 @@ export default function DemoCertificate() {
                 <div className="mb-16 relative">
                   <div 
                     className="absolute top-0 left-1/2 transform -translate-x-1/2 w-72 h-px"
-                    style={{ background: 'linear-gradient(90deg, transparent, #d4af37, transparent)' }}
+                    style={{ background: 'linear-gradient(90deg, transparent, #c0c0c0, transparent)' }}
                   ></div>
                   <div 
                     className="absolute -bottom-5 left-1/2 transform -translate-x-1/2 w-48 h-px"
-                    style={{ background: 'linear-gradient(90deg, transparent, #d4af37, transparent)' }}
+                    style={{ background: 'linear-gradient(90deg, transparent, #c0c0c0, transparent)' }}
                   ></div>
                   
-                  <div className="inline-block bg-gradient-to-r from-yellow-500 via-yellow-400 to-yellow-500 text-gray-900 px-11 py-6 mb-6 relative"
+                  <div className="inline-block bg-gradient-to-r from-black via-gray-800 to-black text-white px-11 py-6 mb-6 relative"
                        style={{ clipPath: 'polygon(10% 0%, 90% 0%, 100% 25%, 100% 75%, 90% 100%, 10% 100%, 0% 75%, 0% 25%)' }}>
                     <div 
                       className="text-5xl font-bold uppercase tracking-widest"
