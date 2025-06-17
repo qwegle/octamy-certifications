@@ -313,6 +313,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Calculate the final score percentage
       const score = Math.round((correctAnswers / totalQuestions) * 100);
       
+      // Get course data to check passing score
+      const course = await storage.getCourse(courseId);
+      if (!course) {
+        return res.status(404).json({ message: "Course not found" });
+      }
+      
       // EXAM PASSING LOGIC:
       // Use the course's defined passing score (e.g., 60% for Demo Course)
       const passingScore = course.passingScore;
