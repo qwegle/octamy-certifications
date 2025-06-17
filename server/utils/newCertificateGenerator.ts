@@ -305,7 +305,7 @@ function generateCertificateHTML(data: CertificateData): string {
         
         .bottom-section {
           position: absolute;
-          bottom: 20px;
+          bottom: 70px;
           left: 0;
           right: 0;
           display: flex;
@@ -374,7 +374,7 @@ function generateCertificateHTML(data: CertificateData): string {
             
             <!-- Badge positioned in top right -->
             <div class="badge-container">
-              <svg width="80" height="80" viewBox="0 0 120 120" class="badge-image">
+              <svg width="120" height="120" viewBox="0 0 120 120" class="badge-image">
                 <defs>
                   <linearGradient id="shieldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" style="stop-color:#4a4a4a;stop-opacity:1" />

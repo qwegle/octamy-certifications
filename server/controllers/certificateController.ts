@@ -97,16 +97,22 @@ export class CertificateController {
         return res.status(404).json({ message: "Course not found" });
       }
 
+      // Get exam attempt for completion date
+      let examAttempt = null;
+      if (certificate.examAttemptId) {
+        examAttempt = await storage.getExamAttempt(certificate.examAttemptId);
+      }
+
       // Prepare certificate data for the new professional design
       const certificateData = {
-        certificateId: certificate.certificateId,
-        userName: certificate.userName,
-        courseTitle: course.title,
-        issueDate: certificate.issuedAt,
-        completionDate: certificate.issuedAt,
-        passingScore: course.passingScore,
-        userScore: certificate.score,
-        courseLevel: course.level
+        certificateId: certificate.certificateId || 'N/A',
+        userName: certificate.userName || 'Certificate Holder',
+        courseTitle: course.title || 'Professional Course',
+        issueDate: certificate.issuedAt || new Date(),
+        completionDate: examAttempt?.createdAt || certificate.issuedAt || new Date(),
+        passingScore: course.passingScore || 50,
+        userScore: certificate.score || 0,
+        courseLevel: course.level || 'Beginner'
       };
 
       // Check if PDF download is requested
