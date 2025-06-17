@@ -124,6 +124,9 @@ export default function LearningPaths() {
     },
   });
 
+
+
+  // Generate proper duration formatting
   const formatDuration = (minutes: number) => {
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;

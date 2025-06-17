@@ -1967,11 +1967,130 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Unauthorized" });
       }
 
-      const enrollment = await storage.enrollInLearningPath(userId, pathId);
+      const enrollment = await storage.enrollInLearningPath({ userId, learningPathId: pathId });
       res.json(enrollment);
     } catch (error) {
       console.error("Error enrolling in learning path:", error);
       res.status(500).json({ message: "Failed to enroll in learning path" });
+    }
+  });
+
+  app.get("/api/user/learning-paths", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const userPaths = await storage.getUserLearningPaths(userId);
+      res.json(userPaths);
+    } catch (error) {
+      console.error("Error fetching user learning paths:", error);
+      res.status(500).json({ message: "Failed to fetch user learning paths" });
+    }
+  });
+
+  // Get course recommendations for enrolled learning paths
+  app.get("/api/recommendations/enrolled-paths", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: 'User not authenticated' });
+      }
+
+      // Get user's enrolled learning paths
+      const userPaths = await storage.getUserLearningPaths(userId);
+      if (userPaths.length === 0) {
+        return res.json([]);
+      }
+
+      // Get user's completed courses and preferences
+      const userProgress = await storage.getUserCourseProgress(userId);
+      const completedCourseIds = userProgress
+        .filter(p => p.status === 'completed')
+        .map(p => p.courseId);
+
+      // Get all courses for recommendation matching
+      const allCourses = await storage.getCourses({});
+      const recommendations = [];
+
+      for (const userPath of userPaths) {
+        const pathCourses = allCourses.filter(course => 
+          userPath.learningPath.courseIds?.includes(course.id)
+        );
+
+        // Find similar courses within the same learning path
+        for (const course of allCourses) {
+          if (completedCourseIds.includes(course.id)) continue;
+          
+          let score = 0;
+          let reason = '';
+          const metadata: any = {};
+
+          // Category match bonus
+          if (pathCourses.some(pc => pc.categoryId === course.categoryId)) {
+            score += 0.4;
+            metadata.categoryMatch = true;
+            reason = 'Matches your learning path category';
+          }
+
+          // Level progression match
+          const userLevel = userPath.progress > 75 ? 'advanced' : 
+                          userPath.progress > 40 ? 'intermediate' : 'beginner';
+          if (course.level === userLevel || 
+              (userLevel === 'intermediate' && course.level === 'advanced')) {
+            score += 0.3;
+            metadata.skillLevelMatch = true;
+            reason += reason ? ' and matches your skill level' : 'Matches your current skill level';
+          }
+
+          // Similar duration preference
+          const avgPathDuration = userPath.learningPath.estimatedDuration;
+          if (Math.abs(course.duration - avgPathDuration) < 60) {
+            score += 0.2;
+            reason += reason ? ' with similar time commitment' : 'Similar time commitment to your preferences';
+          }
+
+          // Add trending bonus for popular courses
+          if (Math.random() > 0.7) { // Simulate popularity
+            score += 0.1;
+            metadata.popularityScore = Math.random() * 0.3;
+          }
+
+          if (score > 0.4) {
+            recommendations.push({
+              courseId: course.id,
+              course: {
+                id: course.id,
+                title: course.title,
+                description: course.description,
+                level: course.level,
+                duration: course.duration,
+                price: course.price,
+                categoryId: course.categoryId,
+                category: { name: pathCourses[0]?.category?.name || 'Professional' }
+              },
+              score: score.toFixed(2),
+              reason: reason || 'Recommended based on your learning pattern',
+              metadata: {
+                ...metadata,
+                completedCourseIds,
+                learningPathId: userPath.learningPathId
+              }
+            });
+          }
+        }
+      }
+
+      // Sort by score and return top recommendations
+      const sortedRecommendations = recommendations
+        .sort((a, b) => parseFloat(b.score) - parseFloat(a.score))
+        .slice(0, 10);
+
+      res.json(sortedRecommendations);
+    } catch (error) {
+      console.error('Error getting enrolled path recommendations:', error);
+      res.status(500).json({ message: 'Failed to get enrolled path recommendations' });
     }
   });
 
