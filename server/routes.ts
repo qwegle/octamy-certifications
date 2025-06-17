@@ -2015,6 +2015,108 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Sponsor endpoints
+  app.post("/api/sponsors", async (req, res) => {
+    try {
+      const sponsorData = insertSponsorSchema.parse(req.body);
+      
+      // Generate transaction ID
+      const transactionId = payuMoneyService.generateTransactionId();
+      
+      // Create sponsor record
+      const sponsor = await storage.createSponsor({
+        ...sponsorData,
+        transactionId,
+        paymentStatus: "pending"
+      });
+
+      // Generate PayUMoney payment form
+      const paymentRequest = {
+        txnid: transactionId,
+        amount: sponsor.amount.toString(),
+        productinfo: `Octamy Sponsorship - ${sponsor.name}`,
+        firstname: sponsor.name,
+        email: sponsor.email,
+        surl: `${req.protocol}://${req.get('host')}/api/sponsor/payment/success`,
+        furl: `${req.protocol}://${req.get('host')}/api/sponsor/payment/failure`,
+        udf1: sponsor.id.toString(),
+        udf2: "sponsorship"
+      };
+
+      const paymentForm = payuMoneyService.generatePaymentForm(paymentRequest);
+      
+      res.json({
+        success: true,
+        sponsor,
+        payment: paymentForm
+      });
+    } catch (error) {
+      console.error("Error creating sponsor:", error);
+      res.status(400).json({ 
+        success: false, 
+        message: "Failed to create sponsor record" 
+      });
+    }
+  });
+
+  app.get("/api/sponsors", async (req, res) => {
+    try {
+      const sponsors = await storage.getAllSponsors();
+      res.json(sponsors);
+    } catch (error) {
+      console.error("Error fetching sponsors:", error);
+      res.status(500).json({ message: "Failed to fetch sponsors" });
+    }
+  });
+
+  // Sponsor payment success callback
+  app.post("/api/sponsor/payment/success", async (req, res) => {
+    try {
+      const responseData = req.body;
+      
+      // Verify payment hash
+      const isValidHash = payuMoneyService.verifyHash(responseData);
+      
+      if (!isValidHash) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Invalid payment hash" 
+        });
+      }
+
+      // Update sponsor payment status
+      if (responseData.status === 'success') {
+        await storage.updateSponsorPaymentStatus(
+          responseData.txnid, 
+          'success'
+        );
+      }
+
+      res.redirect(`/sponsor-success?txnid=${responseData.txnid}&status=${responseData.status}`);
+    } catch (error) {
+      console.error("Error processing sponsor payment:", error);
+      res.status(500).json({ message: "Payment processing failed" });
+    }
+  });
+
+  // Sponsor payment failure callback
+  app.post("/api/sponsor/payment/failure", async (req, res) => {
+    try {
+      const responseData = req.body;
+      
+      // Update sponsor payment status
+      await storage.updateSponsorPaymentStatus(
+        responseData.txnid, 
+        'failed'
+      );
+
+      res.redirect(`/sponsor-failure?txnid=${responseData.txnid}&status=${responseData.status}`);
+    } catch (error) {
+      console.error("Error processing sponsor payment failure:", error);
+      res.status(500).json({ message: "Payment processing failed" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

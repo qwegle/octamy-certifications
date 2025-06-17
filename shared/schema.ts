@@ -195,6 +195,21 @@ export const withdrawalRequests = pgTable("withdrawal_requests", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Sponsors table for donations/sponsorships
+export const sponsors = pgTable("sponsors", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  email: text("email").notNull(),
+  amount: integer("amount").notNull(), // Amount in INR
+  message: text("message"), // Optional message from sponsor
+  paymentMethod: text("payment_method").default("payumoney").notNull(),
+  transactionId: text("transaction_id"),
+  paymentStatus: text("payment_status").default("pending").notNull(), // pending, success, failed
+  isAnonymous: boolean("is_anonymous").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // Click tracking for partner referral links
 export const referralClicks = pgTable("referral_clicks", {
   id: serial("id").primaryKey(),
@@ -812,3 +827,13 @@ export type UserLearningPath = typeof userLearningPaths.$inferSelect;
 export type InsertUserLearningPath = z.infer<typeof insertUserLearningPathSchema>;
 export type SkillAssessment = typeof skillAssessments.$inferSelect;
 export type InsertSkillAssessment = z.infer<typeof insertSkillAssessmentSchema>;
+
+// Sponsor types
+export const insertSponsorSchema = createInsertSchema(sponsors).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type Sponsor = typeof sponsors.$inferSelect;
+export type InsertSponsor = z.infer<typeof insertSponsorSchema>;

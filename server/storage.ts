@@ -1274,6 +1274,28 @@ export class DatabaseStorage implements IStorage {
     }
     return undefined;
   }
+  // Sponsor operations
+  async createSponsor(sponsorData: InsertSponsor): Promise<Sponsor> {
+    const [sponsor] = await db
+      .insert(sponsors)
+      .values(sponsorData)
+      .returning();
+    return sponsor;
+  }
+
+  async getAllSponsors(): Promise<Sponsor[]> {
+    return await db.select().from(sponsors).orderBy(desc(sponsors.createdAt));
+  }
+
+  async updateSponsorPaymentStatus(transactionId: string, status: string): Promise<void> {
+    await db
+      .update(sponsors)
+      .set({ 
+        paymentStatus: status,
+        updatedAt: new Date()
+      })
+      .where(eq(sponsors.transactionId, transactionId));
+  }
 }
 
 export const storage = new DatabaseStorage();
