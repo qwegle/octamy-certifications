@@ -8,6 +8,7 @@ import { z } from "zod";
 import { insertUserSchema, insertExamAttemptSchema, insertCertificateSchema, insertSellerSchema, insertSaleSchema, insertWithdrawalRequestSchema } from "@shared/schema";
 import { payuMoneyService } from "./payumoney";
 import { getBadgeFromScore, generateCertificateNumber, calculateExpiryDate } from "./utils";
+import apiRoutes from "./routes/index";
 // Using dynamic import for puppeteer to avoid ES module issues
 
 interface AuthenticatedRequest extends Request {
@@ -80,6 +81,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   } catch (error) {
     console.error("Failed to seed database:", error);
   }
+
+  // Mount MVC API routes
+  app.use('/api', apiRoutes);
 
   // Auth routes
   app.post("/api/auth/register", async (req, res) => {

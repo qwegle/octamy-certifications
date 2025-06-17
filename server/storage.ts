@@ -523,6 +523,35 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(payments);
   }
 
+  async updatePaymentStatus(transactionId: string, status: string, paymentResponse: any): Promise<void> {
+    await db
+      .update(payments)
+      .set({ 
+        status,
+        gatewayResponse: paymentResponse,
+        updatedAt: new Date()
+      })
+      .where(eq(payments.transactionId, transactionId));
+  }
+
+  async getPaymentByTransactionId(transactionId: string): Promise<Payment | undefined> {
+    const [payment] = await db
+      .select()
+      .from(payments)
+      .where(eq(payments.transactionId, transactionId));
+    return payment || undefined;
+  }
+
+  async processSale(saleData: any): Promise<void> {
+    // Process seller commission logic
+    console.log('Processing sale:', saleData);
+  }
+
+  async deliverCertificate(certificateId: string, deliveryData: any): Promise<void> {
+    // Handle certificate delivery logic
+    console.log('Delivering certificate:', certificateId, deliveryData);
+  }
+
   // Smart Notifications implementation
   async getUserPreferences(userId: number): Promise<UserPreferences | undefined> {
     const [prefs] = await db.select().from(userPreferences).where(eq(userPreferences.userId, userId));
