@@ -39,6 +39,12 @@ export default function Landing() {
     queryKey: ['/api/courses'],
   });
 
+  // Fetch certificate count for stats
+  const { data: certificateCount = { count: 0 } } = useQuery<{ count: number }>({
+    queryKey: ['/api/user/certificates/count'],
+    retry: false,
+  });
+
   const filteredCourses = courses.filter(course =>
     course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     course.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -126,16 +132,16 @@ export default function Landing() {
             {/* Stats Section */}
             <div className="grid grid-cols-3 gap-8 max-w-2xl mx-auto">
               <div className="text-center">
-                <div className="text-3xl font-bold text-white">50+</div>
+                <div className="text-3xl font-bold text-white">{courses.length}+</div>
                 <div className="text-gray-400 text-sm">COURSES</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-white">10</div>
+                <div className="text-3xl font-bold text-white">{categories.length}</div>
                 <div className="text-gray-400 text-sm">CATEGORIES</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-white">5000+</div>
-                <div className="text-gray-400 text-sm">QUESTIONS</div>
+                <div className="text-3xl font-bold text-white">{certificateCount.count}</div>
+                <div className="text-gray-400 text-sm">CERTIFIED</div>
               </div>
             </div>
           </motion.div>
