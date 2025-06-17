@@ -226,13 +226,12 @@ export default function CertificateView() {
                     className="text-xs tracking-wide"
                     style={{ 
                       fontSize: '10px',
-                      color: '#000',
-                      fontStyle: 'italic',
+                      color: '#333',
                       fontFamily: "'Poppins', sans-serif",
                       letterSpacing: '1px'
                     }}
                   >
-                    Authorized Certification Body
+                    An ISO Certified Company
                   </div>
                 </div>
                 
@@ -268,7 +267,7 @@ export default function CertificateView() {
                   </p>
                   
                   <div 
-                    className="recipient-name my-12 py-8 relative"
+                    className="recipient-name py-8 relative"
                     style={{ 
                       fontSize: '28px',
                       fontWeight: '600',

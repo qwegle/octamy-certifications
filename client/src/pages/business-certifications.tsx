@@ -307,9 +307,9 @@ export default function BusinessCertificationsPage() {
               </SelectContent>
             </Select>
 
-            <Link href="/business-pricing">
+            <Link href="/sponsor">
               <Button variant="outline" className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100">
-                Get Business Pricing
+                Support Us
               </Button>
             </Link>
 
