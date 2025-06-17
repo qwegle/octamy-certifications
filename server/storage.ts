@@ -848,6 +848,93 @@ export class DatabaseStorage implements IStorage {
       .where(eq(withdrawalRequests.id, id));
   }
 
+  // Admin analytics operations
+  async getSellerCount(): Promise<number> {
+    const result = await db.select({ count: count() }).from(sellers);
+    return result[0]?.count || 0;
+  }
+
+  async getApprovedSellerCount(): Promise<number> {
+    const result = await db.select({ count: count() })
+      .from(sellers)
+      .where(eq(sellers.isApproved, true));
+    return result[0]?.count || 0;
+  }
+
+  async getTotalReferralClicks(): Promise<number> {
+    const result = await db.select({ count: count() }).from(referralClicks);
+    return result[0]?.count || 0;
+  }
+
+  async getTotalConversions(): Promise<number> {
+    const result = await db.select({ count: count() }).from(sales);
+    return result[0]?.count || 0;
+  }
+
+  async getTotalRevenue(): Promise<number> {
+    const result = await db
+      .select({ total: sql<number>`sum(${sales.amount})` })
+      .from(sales);
+    return Number(result[0]?.total || 0);
+  }
+
+  async getTopPerformingPartners(limit: number): Promise<any[]> {
+    const partners = await db
+      .select({
+        id: sellers.id,
+        name: sellers.name,
+        email: sellers.email,
+        referralCode: sellers.referralCode,
+        totalEarnings: sql<number>`coalesce(sum(${sales.commission}), 0)`,
+        clickCount: sql<number>`coalesce(count(distinct ${referralClicks.id}), 0)`,
+        conversionCount: sql<number>`coalesce(count(distinct ${sales.id}), 0)`,
+      })
+      .from(sellers)
+      .leftJoin(referralClicks, eq(sellers.referralCode, referralClicks.referralCode))
+      .leftJoin(sales, eq(sellers.id, sales.sellerId))
+      .groupBy(sellers.id, sellers.name, sellers.email, sellers.referralCode)
+      .orderBy(sql`coalesce(sum(${sales.commission}), 0) desc`)
+      .limit(limit);
+
+    return partners.map(partner => ({
+      ...partner,
+      conversionRate: partner.clickCount > 0 ? (partner.conversionCount / partner.clickCount) * 100 : 0
+    }));
+  }
+
+  async getAllSellersWithStats(): Promise<any[]> {
+    const sellersWithStats = await db
+      .select({
+        id: sellers.id,
+        name: sellers.name,
+        email: sellers.email,
+        isApproved: sellers.isApproved,
+        referralCode: sellers.referralCode,
+        createdAt: sellers.createdAt,
+        totalEarnings: sql<number>`coalesce(sum(${sales.commission}), 0)`,
+        pendingEarnings: sql<number>`coalesce(sum(case when ${sales.status} = 'completed' then ${sales.commission} else 0 end), 0)`,
+        clickCount: sql<number>`coalesce(count(distinct ${referralClicks.id}), 0)`,
+        conversionCount: sql<number>`coalesce(count(distinct ${sales.id}), 0)`,
+      })
+      .from(sellers)
+      .leftJoin(referralClicks, eq(sellers.referralCode, referralClicks.referralCode))
+      .leftJoin(sales, eq(sellers.id, sales.sellerId))
+      .groupBy(sellers.id, sellers.name, sellers.email, sellers.isApproved, sellers.referralCode, sellers.createdAt)
+      .orderBy(desc(sellers.createdAt));
+
+    return sellersWithStats.map(seller => ({
+      ...seller,
+      conversionRate: seller.clickCount > 0 ? (seller.conversionCount / seller.clickCount) * 100 : 0
+    }));
+  }
+
+  async updateSellerApproval(sellerId: number, approved: boolean): Promise<void> {
+    await db
+      .update(sellers)
+      .set({ isApproved: approved })
+      .where(eq(sellers.id, sellerId));
+  }
+
   async getAllPayments(): Promise<Payment[]> {
     return await db.select().from(payments);
   }

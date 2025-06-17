@@ -37,6 +37,8 @@ import VirtualInternships from "@/pages/virtual-internships";
 import BusinessCertificationsPage from "@/pages/business-certifications";
 import LearningPaths from "@/pages/learning-paths";
 import SponsorPage from "@/pages/sponsor";
+import AdminLogin from "@/pages/admin-login";
+import AdminDashboard from "@/pages/admin-dashboard";
 
 function Router() {
   return (
@@ -48,6 +50,8 @@ function Router() {
       <Route path="/business-certifications" component={BusinessCertificationsPage} />
       <Route path="/learning-paths" component={LearningPaths} />
       <Route path="/sponsor" component={SponsorPage} />
+      <Route path="/admin/login" component={AdminLogin} />
+      <Route path="/admin/dashboard" component={AdminDashboard} />
       <Route path="/exam/:courseId" component={Exam} />
       <Route path="/checkout/:courseId" component={EnhancedCheckout} />
       <Route path="/payment/:certificateId" component={Payment} />
