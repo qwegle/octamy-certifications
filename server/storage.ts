@@ -45,6 +45,8 @@ import {
   type InsertUserLearningPath,
   type SkillAssessment,
   type InsertSkillAssessment,
+  type Sponsor,
+  type InsertSponsor,
   userPreferences,
   notifications,
   courseRecommendations,
@@ -196,6 +198,13 @@ export interface IStorage {
   
   // Skill Assessment operations
   createSkillAssessment(assessment: InsertSkillAssessment): Promise<SkillAssessment>;
+
+  // Sponsor operations
+  createSponsor(sponsor: InsertSponsor): Promise<Sponsor>;
+  updateSponsorPaymentStatus(id: number, status: string, transactionId?: string): Promise<Sponsor>;
+  getAllSponsors(): Promise<Sponsor[]>;
+  
+  // Skill Assessment operations
   getUserSkillAssessments(userId: number, categoryId?: number): Promise<SkillAssessment[]>;
   getValidSkillAssessment(userId: number, categoryId: number): Promise<SkillAssessment | undefined>;
 }
@@ -1288,14 +1297,17 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(sponsors).orderBy(desc(sponsors.createdAt));
   }
 
-  async updateSponsorPaymentStatus(transactionId: string, status: string): Promise<void> {
-    await db
+  async updateSponsorPaymentStatus(id: number, status: string, transactionId?: string): Promise<Sponsor> {
+    const [result] = await db
       .update(sponsors)
-      .set({ 
+      .set({
         paymentStatus: status,
+        ...(transactionId && { transactionId }),
         updatedAt: new Date()
       })
-      .where(eq(sponsors.transactionId, transactionId));
+      .where(eq(sponsors.id, id))
+      .returning();
+    return result;
   }
 }
 
