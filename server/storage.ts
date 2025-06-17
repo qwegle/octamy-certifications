@@ -1422,6 +1422,26 @@ export class DatabaseStorage implements IStorage {
       .returning();
     return result;
   }
+
+  // Admin analytics
+  async getAdminAnalytics() {
+    const totalUsers = await db.select({ count: sql`count(*)::int` }).from(users);
+    const totalCourses = await db.select({ count: sql`count(*)::int` }).from(courses);
+    const totalCertificates = await db.select({ count: sql`count(*)::int` }).from(certificates);
+    const totalSellers = await db.select({ count: sql`count(*)::int` }).from(sellers);
+    
+    return {
+      totalUsers: Number(totalUsers[0]?.count) || 0,
+      totalCourses: Number(totalCourses[0]?.count) || 0,
+      totalCertificates: Number(totalCertificates[0]?.count) || 0,
+      totalSellers: Number(totalSellers[0]?.count) || 0
+    };
+  }
+
+  // Get all sellers for admin
+  async getAllSellers() {
+    return await db.select().from(sellers).orderBy(desc(sellers.createdAt));
+  }
 }
 
 export const storage = new DatabaseStorage();
