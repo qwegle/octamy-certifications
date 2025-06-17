@@ -428,8 +428,8 @@ function generateCertificateHTML(data: CertificateData): string {
               
               <div class="certificate-details">
                 <div>Certificate ID: ${data.certificateId}</div>
-                <div>Issue Date: ${data.issueDate.toLocaleDateString()}</div>
-                <div>Completion Date: ${data.completionDate.toLocaleDateString()}</div>
+                <div>Issue Date: ${new Date(data.issueDate).toLocaleDateString()}</div>
+                <div>Completion Date: ${new Date(data.completionDate).toLocaleDateString()}</div>
                 <div>Valid Internationally</div>
               </div>
             </div>
