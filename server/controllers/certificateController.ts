@@ -100,20 +100,13 @@ export class CertificateController {
       // Prepare certificate data for the new professional design
       const certificateData = {
         certificateId: certificate.certificateId,
-        studentName: certificate.studentName,
-        courseName: course.title,
-        completionDate: new Date(certificate.createdAt).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric'
-        }),
-        score: certificate.score,
-        courseDuration: `${course.duration} Hours`,
-        issueDate: new Date(certificate.createdAt).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric'
-        })
+        userName: certificate.userName || 'Student Name',
+        courseTitle: course.title,
+        issueDate: certificate.issuedAt || new Date(),
+        completionDate: certificate.issuedAt || new Date(),
+        passingScore: course.passingScore,
+        userScore: certificate.score,
+        badge: certificate.score >= 90 ? 'Gold' : certificate.score >= 80 ? 'Silver' : certificate.score >= 70 ? 'Bronze' : 'Participation'
       };
 
       // Check if PDF download is requested
