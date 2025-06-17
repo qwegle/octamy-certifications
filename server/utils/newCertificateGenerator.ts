@@ -193,9 +193,9 @@ function generateCertificateHTML(data: CertificateData): string {
         .recipient-name {
           font-size: 28px;
           font-weight: 600;
-          color: #000;
+          color: #1f2138;
           margin: 15px 0;
-          font-family: 'Playfair Display', serif;
+          font-family: 'Poppins', serif;
           position: relative;
           padding: 10px 0;
         }
@@ -224,19 +224,19 @@ function generateCertificateHTML(data: CertificateData): string {
           color: #666;
           margin: 15px 0;
           line-height: 1.6;
-          font-family: 'Playfair Display', serif;
+          font-family: 'Poppins', serif;
         }
         
         .course-name {
           font-size: 20px;
           font-weight: 600;
-          color: #000;
+          color: #1f2138;
           margin: 15px 0;
           padding: 12px 25px;
-          border: 2px solid #c0c0c0;
+          border: 2px solid #000000;
           border-radius: 6px;
-          background: linear-gradient(145deg, rgba(192,192,192,0.1) 0%, rgba(192,192,192,0.05) 100%);
-          font-family: 'Playfair Display', serif;
+          background: linear-gradient(141deg, rgba(192, 192, 192, 0.1) 0%, rgba(192, 192, 192, 0.05) 100%);
+          font-family: 'Poppins', serif;
           text-transform: uppercase;
           letter-spacing: 2px;
         }
@@ -269,6 +269,7 @@ function generateCertificateHTML(data: CertificateData): string {
           justify-content: space-between;
           align-items: flex-end;
           margin-top: 20px;
+          margin-bottom: 70px;
         }
         
         .certificate-details {
@@ -353,7 +354,7 @@ function generateCertificateHTML(data: CertificateData): string {
         }
         
         .certification-logos img {
-          height: 25px;
+          height: 55px;
           width: auto;
           object-fit: contain;
           opacity: 0.7;
@@ -422,7 +423,7 @@ function generateCertificateHTML(data: CertificateData): string {
                 <path d="M20 70 L15 85 L25 80 Z" fill="url(#ribbonGradient)" opacity="0.9"/>
                 <path d="M100 70 L105 85 L95 80 Z" fill="url(#ribbonGradient)" opacity="0.9"/>
               </svg>
-              <div class="badge-text">${(data.courseLevel || 'CERTIFIED').toUpperCase()}</div>
+              <div class="badge-text" style="position: absolute; top: 68%; left: 50%; transform: translate(-50%, -50%); font-size: 12px; font-weight: 700; color: #fff; text-align: center; z-index: 10; font-family: 'Inter', sans-serif;">${(data.courseLevel || 'VERIFIED').toUpperCase()}</div>
             </div>
 
             <div class="main-content">
@@ -450,9 +451,15 @@ function generateCertificateHTML(data: CertificateData): string {
               </div>
               
               <div class="signature-section">
+                <!-- Signature Image -->
+                <img 
+                  src="https://repl.it/api/v1/projects/current/files/attached_assets/Nitikesh_signature_1750177747117.png" 
+                  alt="Nitikesh Pattanayak Signature" 
+                  style="height: 48px; width: auto; margin-bottom: 8px;"
+                />
                 <div class="signature-line"></div>
-                <div class="signature-title">Director</div>
-                <div class="signature-name">Octamy Solutions</div>
+                <div class="signature-name" style="font-size: 14px; color: #000; font-weight: 600; margin-top: 3px; font-family: 'Poppins', serif;">Nitikesh Pattanayak</div>
+                <div class="signature-title" style="font-size: 12px; color: #1f2138; margin-bottom: 5px; font-family: 'Poppins', sans-serif;">Director of Certification</div>
               </div>
             </div>
           </div>
