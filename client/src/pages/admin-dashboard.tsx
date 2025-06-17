@@ -61,6 +61,73 @@ interface Customer {
   totalSpent: number;
 }
 
+interface AdminCourse {
+  id: number;
+  title: string;
+  description: string;
+  slug: string;
+  categoryId: number;
+  duration: number;
+  passingScore: number;
+  price: string;
+  originalPrice?: string;
+  isOnSale: boolean;
+  level: string;
+  isActive: boolean;
+  isInternship: boolean;
+  enrollmentCount: number;
+  revenue: number;
+  createdAt: string;
+}
+
+interface ExamAttempt {
+  id: number;
+  userId: number;
+  courseId: number;
+  courseTitle: string;
+  userName: string;
+  userEmail: string;
+  score: number;
+  passed: boolean;
+  timeTaken: number;
+  createdAt: string;
+}
+
+interface Transaction {
+  id: number;
+  certificateId: number;
+  amount: string;
+  status: string;
+  createdAt: string;
+  userName: string;
+  courseTitle: string;
+}
+
+interface Partner {
+  id: number;
+  name: string;
+  email: string;
+  isApproved: boolean;
+  clickCount: number;
+  earnings: number;
+  createdAt: string;
+}
+
+interface WithdrawalRequest {
+  id: number;
+  sellerId: number;
+  amount: string;
+  status: string;
+  createdAt: string;
+  sellerName: string;
+  sellerEmail: string;
+}
+
+interface Category {
+  id: number;
+  name: string;
+}
+
 const courseSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().min(1, "Description is required"),
@@ -102,7 +169,7 @@ function CourseForm({ course, onCancel, onSuccess }: { course?: any; onCancel: (
   });
 
   // Fetch categories
-  const { data: categories = [] } = useQuery({
+  const { data: categories = [] } = useQuery<Category[]>({
     queryKey: ["/api/categories"]
   });
 
@@ -197,7 +264,7 @@ function CourseForm({ course, onCancel, onSuccess }: { course?: any; onCancel: (
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {categories.map((category: any) => (
+                      {categories.map((category: Category) => (
                         <SelectItem key={category.id} value={category.id.toString()}>
                           {category.name}
                         </SelectItem>
@@ -478,7 +545,7 @@ export default function AdminDashboard() {
     queryKey: ["/api/admin/customers"],
   });
 
-  // Fetch admin courses data
+  // Fetch admin courses data  
   const { data: adminCourses = [], isLoading: adminCoursesLoading } = useQuery<AdminCourse[]>({
     queryKey: ["/api/admin/courses"],
   });
