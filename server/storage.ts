@@ -69,8 +69,10 @@ export interface IStorage {
 
   // Course operations
   getCourses(categoryId?: number): Promise<(Course & { category: Category })[]>;
+  getAllCourses(): Promise<(Course & { category: Category })[]>;
   getCourse(id: number): Promise<Course | undefined>;
   getCourseBySlug(slug: string): Promise<(Course & { category: Category }) | undefined>;
+  getCoursesByCategory(categoryId: number): Promise<(Course & { category: Category })[]>;
   createCourse(course: InsertCourse): Promise<Course>;
   updateCourse(id: number, course: Partial<InsertCourse>): Promise<Course>;
   deleteCourse(id: number): Promise<void>;
@@ -84,6 +86,7 @@ export interface IStorage {
   // Exam attempt operations
   createExamAttempt(attempt: InsertExamAttempt): Promise<ExamAttempt>;
   getExamAttempt(id: number): Promise<ExamAttempt | undefined>;
+  getUserExamAttempts(userId: number, courseId?: number): Promise<ExamAttempt[]>;
 
   // Certificate operations
   createCertificate(certificate: InsertCertificate): Promise<Certificate>;
@@ -200,6 +203,7 @@ export class DatabaseStorage implements IStorage {
         duration: courses.duration,
         passingScore: courses.passingScore,
         price: courses.price,
+        level: courses.level,
         isActive: courses.isActive,
         isInternship: courses.isInternship,
         metaTitle: courses.metaTitle,
@@ -220,6 +224,14 @@ export class DatabaseStorage implements IStorage {
     return await query;
   }
 
+  async getAllCourses(): Promise<(Course & { category: Category })[]> {
+    return this.getCourses();
+  }
+
+  async getCoursesByCategory(categoryId: number): Promise<(Course & { category: Category })[]> {
+    return this.getCourses(categoryId);
+  }
+
   async getCourse(id: number): Promise<Course | undefined> {
     const [course] = await db.select().from(courses).where(eq(courses.id, id));
     return course || undefined;
@@ -236,6 +248,7 @@ export class DatabaseStorage implements IStorage {
         duration: courses.duration,
         passingScore: courses.passingScore,
         price: courses.price,
+        level: courses.level,
         isActive: courses.isActive,
         isInternship: courses.isInternship,
         metaTitle: courses.metaTitle,
