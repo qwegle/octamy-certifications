@@ -446,6 +446,18 @@ export class DatabaseStorage implements IStorage {
     return attempt || undefined;
   }
 
+  async getExamAttemptsByUserAndCourse(userEmail: string, courseId: number): Promise<ExamAttempt[]> {
+    const results = await db
+      .select()
+      .from(examAttempts)
+      .where(and(
+        eq(examAttempts.userEmail, userEmail),
+        eq(examAttempts.courseId, courseId)
+      ))
+      .orderBy(desc(examAttempts.createdAt));
+    return results;
+  }
+
   async getUserExamAttempts(userId: number, courseId?: number): Promise<ExamAttempt[]> {
     const query = db
       .select()

@@ -401,7 +401,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         passingThreshold: passingScore, // What score was needed to pass
         message: passed 
           ? `Congratulations! You passed with ${score}%`
-          : `You scored ${score}%. You need at least ${passingScore}% to pass.`
+          : `You scored ${score}%. You need at least ${passingScore}% to pass.`,
+        redirectTo: `/exam-results/${examAttempt.id}`
       });
     } catch (error) {
       console.error("Error submitting exam:", error);
@@ -696,6 +697,109 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching internship application:", error);
       res.status(500).json({ message: "Failed to fetch internship application" });
+    }
+  });
+
+  // Get detailed exam results
+  app.get("/api/exam-results/:examAttemptId", async (req: Request, res: Response) => {
+    try {
+      const examAttemptId = parseInt(req.params.examAttemptId);
+      
+      const examAttempt = await storage.getExamAttempt(examAttemptId);
+      if (!examAttempt) {
+        return res.status(404).json({ message: "Exam attempt not found" });
+      }
+
+      const course = await storage.getCourse(examAttempt.courseId);
+      const questions = await storage.getQuestionsByCourse(examAttempt.courseId);
+      
+      // Calculate detailed analysis
+      const categoryBreakdown: Record<string, { correct: number; total: number }> = {};
+      const difficultyBreakdown = { easy: { correct: 0, total: 0 }, medium: { correct: 0, total: 0 }, hard: { correct: 0, total: 0 } };
+      const weakAreas: string[] = [];
+      
+      questions.forEach((question, index) => {
+        const userAnswer = examAttempt.answers[index.toString()];
+        const isCorrect = userAnswer === question.correctAnswer;
+        
+        // Category analysis
+        const category = question.category || 'General';
+        if (!categoryBreakdown[category]) {
+          categoryBreakdown[category] = { correct: 0, total: 0 };
+        }
+        categoryBreakdown[category].total++;
+        if (isCorrect) categoryBreakdown[category].correct++;
+        
+        // Difficulty analysis  
+        const difficulty = (question as any).difficulty || 'medium';
+        if (difficultyBreakdown[difficulty as keyof typeof difficultyBreakdown]) {
+          difficultyBreakdown[difficulty as keyof typeof difficultyBreakdown].total++;
+          if (isCorrect) difficultyBreakdown[difficulty as keyof typeof difficultyBreakdown].correct++;
+        }
+        
+        // Track weak areas
+        if (!isCorrect && category !== 'General') {
+          weakAreas.push(category);
+        }
+      });
+
+      // Generate recommendations
+      const recommendations: string[] = [];
+      Object.entries(categoryBreakdown).forEach(([category, stats]) => {
+        const percentage = (stats.correct / stats.total) * 100;
+        if (percentage < 60) {
+          recommendations.push(`Focus more on ${category} concepts and practice related questions`);
+        }
+      });
+
+      if (examAttempt.score < (course?.passingScore || 60)) {
+        recommendations.push(`Review the course material for ${course?.title} thoroughly`);
+        recommendations.push(`Take practice quizzes before attempting the exam again`);
+        recommendations.push(`Study for at least ${Math.ceil((course?.duration || 30) * 0.5)} more minutes`);
+      }
+
+      // Get previous attempts count
+      const previousAttempts = await storage.getExamAttemptsByUserAndCourse(
+        examAttempt.userEmail, 
+        examAttempt.courseId
+      );
+
+      const detailedResult = {
+        examAttemptId: examAttempt.id,
+        score: examAttempt.score,
+        passed: examAttempt.passed,
+        courseId: examAttempt.courseId,
+        courseTitle: course?.title || 'Course',
+        passingScore: course?.passingScore || 60,
+        totalQuestions: questions.length,
+        correctAnswers: Object.values(examAttempt.answers).filter((answer, index) => 
+          answer === questions[index]?.correctAnswer
+        ).length,
+        timeTaken: examAttempt.timeTaken,
+        submittedAt: examAttempt.createdAt,
+        retakeCount: previousAttempts.length - 1,
+        questionAnalysis: {
+          categoryBreakdown: Object.entries(categoryBreakdown).map(([category, stats]) => ({
+            category,
+            correct: stats.correct,
+            total: stats.total,
+            percentage: Math.round((stats.correct / stats.total) * 100)
+          })),
+          difficultyBreakdown: Object.entries(difficultyBreakdown).map(([level, stats]) => ({
+            level,
+            correct: stats.correct,
+            total: stats.total,
+            percentage: stats.total > 0 ? Math.round((stats.correct / stats.total) * 100) : 0
+          })).filter(item => item.total > 0),
+          weakAreas: [...new Set(weakAreas)].slice(0, 5),
+          recommendations: recommendations.slice(0, 4)
+        }
+      };
+
+      res.json(detailedResult);
+    } catch (error) {
+      console.error("Error fetching exam results:", error);
+      res.status(500).json({ message: "Failed to fetch exam results" });
     }
   });
 
