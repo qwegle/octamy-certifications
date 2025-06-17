@@ -8,6 +8,21 @@ interface CertificateData {
   completionDate: Date;
   passingScore: number;
   userScore: number;
+  badge?: string;
+}
+
+function getBadgeImage(badge: string): string {
+  const badgeLower = badge.toLowerCase();
+  if (badgeLower.includes('gold')) {
+    return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iNTAiIGN5PSI1MCIgcj0iNDUiIGZpbGw9IiNEQUFGMzciIHN0cm9rZT0iI0I4OTMzMCIgc3Ryb2tlLXdpZHRoPSIyIi8+PHRleHQgeD0iNTAiIHk9IjQwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSIjMDAwIj5HT0xEPC90ZXh0Pjx0ZXh0IHg9IjUwIiB5PSI2MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjgiIGZpbGw9IiMwMDAiPkFXQVJEPC90ZXh0Pjwvdmc+';
+  } else if (badgeLower.includes('silver')) {
+    return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iNTAiIGN5PSI1MCIgcj0iNDUiIGZpbGw9IiNDMEM0Q0EiIHN0cm9rZT0iIzk5QTNBRCIgc3Ryb2tlLXdpZHRoPSIyIi8+PHRleHQgeD0iNTAiIHk9IjQwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTAiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSIjMDAwIj5TSUxWRVI8L3RleHQ+PHRleHQgeD0iNTAiIHk9IjYwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iOCIgZmlsbD0iIzAwMCI+QVdBUkQ8L3RleHQ+PC9zdmc+';
+  } else if (badgeLower.includes('bronze')) {
+    return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iNTAiIGN5PSI1MCIgcj0iNDUiIGZpbGw9IiNDRDdGMzIiIHN0cm9rZT0iI0E2NkQyQiIgc3Ryb2tlLXdpZHRoPSIyIi8+PHRleHQgeD0iNTAiIHk9IjQwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTAiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSIjMDAwIj5CUk9OWkU8L3RleHQ+PHRleHQgeD0iNTAiIHk9IjYwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iOCIgZmlsbD0iIzAwMCI+QVdBUkQ8L3RleHQ+PC9zdmc+';
+  } else if (badgeLower.includes('platinum')) {
+    return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iNTAiIGN5PSI1MCIgcj0iNDUiIGZpbGw9IiNFNUU1RTUiIHN0cm9rZT0iI0JCQkJCQiIgc3Ryb2tlLXdpZHRoPSIyIi8+PHRleHQgeD0iNTAiIHk9IjM1IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iOCIgZm9udC13ZWlnaHQ9ImJvbGQiIGZpbGw9IiMwMDAiPlBMQVRJTlVNPC90ZXh0Pjx0ZXh0IHg9IjUwIiB5PSI2MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjgiIGZpbGw9IiMwMDAiPkFXQVJEPC90ZXh0Pjwvdmc+';
+  }
+  return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iNTAiIGN5PSI1MCIgcj0iNDUiIGZpbGw9IiNEQUFGMzciIHN0cm9rZT0iI0I4OTMzMCIgc3Ryb2tlLXdpZHRoPSIyIi8+PHRleHQgeD0iNTAiIHk9IjQwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSIjMDAwIj5HR09MRDwvdGV4dD48dGV4dCB4PSI1MCIgeT0iNjAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSI4IiBmaWxsPSIjMDAwIj5BV0FSRDI8L3RleHQ+PC9zdmc+';
 }
 
 export async function generateCertificatePDF(data: CertificateData): Promise<Buffer> {
@@ -246,14 +261,45 @@ export async function generateCertificatePDF(data: CertificateData): Promise<Buf
         .company-logo {
           width: 60px;
           height: 60px;
-          background: #000;
-          border-radius: 50%;
+          border-radius: 8px;
           display: flex;
           align-items: center;
           justify-content: center;
-          color: white;
-          font-weight: 700;
-          font-size: 24px;
+          overflow: hidden;
+        }
+        
+        .company-logo img {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+        }
+        
+        .badge-container {
+          display: flex;
+          justify-content: center;
+          margin: 20px 0;
+        }
+        
+        .achievement-badge {
+          width: 80px;
+          height: 80px;
+          object-fit: contain;
+        }
+        
+        .certification-logos {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          gap: 30px;
+          margin-top: 20px;
+          padding: 20px;
+          border-top: 2px solid #d4af37;
+        }
+        
+        .cert-logo {
+          height: 40px;
+          width: auto;
+          object-fit: contain;
         }
         
         .company-info {
@@ -334,7 +380,9 @@ export async function generateCertificatePDF(data: CertificateData): Promise<Buf
           <div class="watermark">OCTAMY</div>
           
           <div class="logo-section">
-            <div class="company-logo">O</div>
+            <div class="company-logo">
+              <img src="https://octamy.com/storage/optionbuilder/uploads/554402-14-2025_0143pmoctamy_logo_black.png" alt="Octamy Logo" />
+            </div>
             <div class="company-info">
               <div class="company-name">Octamy Solutions</div>
               <div class="company-tagline">Professional Excellence</div>
@@ -362,6 +410,9 @@ export async function generateCertificatePDF(data: CertificateData): Promise<Buf
               <div class="course-title">${data.courseTitle}</div>
               
               <div class="performance-section">
+                <div class="badge-container">
+                  <img src="${getBadgeImage(data.badge || 'gold')}" alt="${data.badge || 'Gold'} Badge" class="achievement-badge" />
+                </div>
                 <div class="score-text">
                   Score Achieved: ${data.userScore}% | Passing Score: ${data.passingScore}%
                 </div>
