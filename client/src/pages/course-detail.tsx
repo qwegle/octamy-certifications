@@ -69,11 +69,7 @@ export default function CourseDetail() {
   };
 
   const handleGetCertified = () => {
-    if (!user) {
-      setLocation("/auth");
-      return;
-    }
-    setLocation(`/checkout/${course?.id}`);
+    setLocation(`/exam/${course?.id}`);
   };
 
   if (isLoading) {
