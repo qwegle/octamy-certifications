@@ -509,6 +509,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Check if user has certificate for specific course
+  app.get("/api/user/certificate-for-course/:courseId", optionalAuth, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const courseId = parseInt(req.params.courseId);
+      const userEmail = req.query.email as string;
+      
+      const certificate = await storage.getUserCertificateForCourse(
+        req.user?.userId || null,
+        courseId,
+        userEmail || null
+      );
+      
+      if (certificate) {
+        res.json(certificate);
+      } else {
+        res.status(404).json({ message: "No certificate found for this course" });
+      }
+    } catch (error) {
+      console.error("Error fetching certificate for course:", error);
+      res.status(500).json({ message: "Failed to fetch certificate" });
+    }
+  });
+
   // Admin routes
   app.get("/api/admin/courses", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
     try {

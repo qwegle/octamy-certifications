@@ -103,6 +103,13 @@ export default function EnhancedCheckout() {
     retry: false,
   });
 
+  // Check if user has a certificate for this course
+  const { data: existingCertificate, isLoading: certificateLoading } = useQuery({
+    queryKey: [`/api/user/certificate-for-course/${courseId}`],
+    enabled: !!courseId,
+    retry: false,
+  });
+
   // Find default address
   useEffect(() => {
     const defaultAddress = addresses.find(addr => addr.isDefault);
@@ -231,19 +238,30 @@ export default function EnhancedCheckout() {
     const shippingCost = includesPhysicalCopy ? 50 : 0;
     const totalAmount = basePrice + shippingCost;
 
-    // Prepare payment data
-    const paymentData = {
-      courseId: course.id,
-      amount: totalAmount,
-      includesPhysicalCopy,
-      shippingAddressId: includesPhysicalCopy ? selectedAddressId : null,
-    };
+    // Check if user has an existing certificate
+    if (existingCertificate) {
+      // Prepare payment data
+      const paymentData = {
+        courseId: course.id,
+        amount: totalAmount,
+        includesPhysicalCopy,
+        shippingAddressId: includesPhysicalCopy ? selectedAddressId : null,
+      };
 
-    // Store payment data in sessionStorage for the payment page
-    sessionStorage.setItem('paymentData', JSON.stringify(paymentData));
-    
-    // Navigate to payment page
-    navigate(`/payment/${course.id}?amount=${totalAmount}&physical=${includesPhysicalCopy}&address=${selectedAddressId || ''}`);
+      // Store payment data in sessionStorage for the payment page
+      sessionStorage.setItem('paymentData', JSON.stringify(paymentData));
+      
+      // Navigate to payment page with certificate ID
+      navigate(`/payment/${existingCertificate.id}?amount=${totalAmount}&physical=${includesPhysicalCopy}&address=${selectedAddressId || ''}`);
+    } else {
+      // Redirect to exam if no certificate exists
+      toast({
+        title: "Complete Exam First",
+        description: "You need to take and pass the exam before purchasing a certificate.",
+        variant: "destructive",
+      });
+      navigate(`/exam/${course.id}`);
+    }
   };
 
   if (courseLoading) {
