@@ -389,53 +389,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Certificate routes - Create unpaid certificate for payment flow
+  // Certificate routes
   app.post("/api/certificates/create", optionalAuth, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const { courseId, examAttemptId } = req.body;
+      const { examAttemptId, businessName } = req.body;
       
-      if (!courseId) {
-        return res.status(400).json({ message: "Course ID is required" });
+      if (!examAttemptId) {
+        return res.status(400).json({ message: "Exam attempt ID is required" });
       }
       
-      const course = await storage.getCourse(courseId);
-      if (!course) {
-        return res.status(404).json({ message: "Course not found" });
-      }
-
-      // Find the user's passing exam attempt for this course
-      let examAttempt;
-      if (examAttemptId) {
-        examAttempt = await storage.getExamAttempt(examAttemptId);
-      } else {
-        // Find the latest passing exam attempt for this course
-        const userEmail = req.body.userEmail || req.user?.email;
-        if (!userEmail) {
-          return res.status(400).json({ message: "User email is required" });
-        }
-        
-        const attempts = await storage.getExamAttemptsByEmail(userEmail, courseId);
-        examAttempt = attempts.find(attempt => attempt.passed);
-      }
-      
+      const examAttempt = await storage.getExamAttempt(examAttemptId);
       if (!examAttempt) {
-        return res.status(400).json({ 
-          message: "No passing exam attempt found. Please complete the exam first.",
-          requiresExam: true
-        });
+        return res.status(404).json({ message: "Exam attempt not found" });
       }
       
       if (!examAttempt.passed) {
-        return res.status(400).json({ 
-          message: "Exam not passed. Please retake the exam.",
-          requiresExam: true
-        });
+        return res.status(400).json({ message: "Exam not passed" });
+      }
+      
+      const course = await storage.getCourse(examAttempt.courseId);
+      if (!course) {
+        return res.status(404).json({ message: "Course not found" });
       }
 
       // Check if user already has a certificate for this course
       const existingCertificate = await storage.getUserCertificateForCourse(
         req.user?.userId || null,
-        courseId,
+        examAttempt.courseId,
         examAttempt.userEmail
       );
 
@@ -452,11 +432,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Generate unique certificate number
       const certificateNumber = generateCertificateNumber();
       
-      // Create new UNPAID certificate (will be activated after PayUMoney payment)
+      // Create new certificate
       const certificate = await storage.createCertificate({
         certificateId,
-        examAttemptId: examAttempt.id,
-        courseId: courseId,
+        examAttemptId,
+        courseId: examAttempt.courseId,
         userId: req.user?.userId || null,
         userEmail: examAttempt.userEmail,
         userName: examAttempt.userName,
@@ -465,9 +445,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         badge,
         certificateNumber,
         expiresAt: calculateExpiryDate(),
-        businessName: req.body.businessName || null,
+        businessName: businessName || null,
         retakeCount: 0,
-        isPaid: false, // Certificate is created but requires payment to activate
+        isPaid: true, // Restore original behavior - certificates are immediately available
       });
       
       res.json(certificate);

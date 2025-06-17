@@ -476,6 +476,21 @@ export class DatabaseStorage implements IStorage {
     return attempt || undefined;
   }
 
+  async getExamAttemptsByEmail(userEmail: string, courseId: number): Promise<ExamAttempt[]> {
+    const attempts = await db
+      .select()
+      .from(examAttempts)
+      .where(
+        and(
+          eq(examAttempts.userEmail, userEmail),
+          eq(examAttempts.courseId, courseId)
+        )
+      )
+      .orderBy(desc(examAttempts.createdAt));
+    
+    return attempts;
+  }
+
   // Certificate operations
   async createCertificate(insertCertificate: InsertCertificate): Promise<Certificate> {
     const [certificate] = await db
