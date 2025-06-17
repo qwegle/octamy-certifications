@@ -83,6 +83,11 @@ export function SellerAuthProvider({ children }: { children: ReactNode }) {
     setToken(data.token);
     setSeller(data.seller);
     localStorage.setItem("sellerToken", data.token);
+    
+    // Redirect to partner dashboard after successful login
+    setTimeout(() => {
+      window.location.href = '/partner-dashboard';
+    }, 100);
   };
 
   const register = async (email: string, password: string, name: string, phone?: string) => {

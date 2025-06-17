@@ -404,6 +404,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Generate unique certificate number
       const certificateNumber = generateCertificateNumber();
       
+      // Only create certificate if score is passing (≥50%)
+      if (examAttempt.score < 50) {
+        return res.status(400).json({ 
+          message: "Certificate can only be created for passing scores (50% or higher)",
+          score: examAttempt.score,
+          required: 50
+        });
+      }
+
       // Create new certificate
       const certificate = await storage.createCertificate({
         certificateId,

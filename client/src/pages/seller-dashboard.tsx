@@ -85,17 +85,20 @@ export default function SellerDashboard() {
   });
 
   useEffect(() => {
-    // Only redirect if we're not loading and there's no token
-    if (!authLoading && !token) {
+    // Wait for auth to finish loading before making decisions
+    if (authLoading) {
+      return;
+    }
+    
+    // If no token after loading is complete, redirect to login
+    if (!token) {
       window.location.href = '/seller-auth';
       return;
     }
     
-    // Only fetch data if we have a token
-    if (token) {
-      fetchDashboardData();
-      fetchShareableItems();
-    }
+    // If we have a token, fetch dashboard data
+    fetchDashboardData();
+    fetchShareableItems();
   }, [token, authLoading]);
 
   const fetchDashboardData = async () => {
