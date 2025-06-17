@@ -176,6 +176,10 @@ Octamy is a comprehensive professional certification platform built as a full-st
 
 ```
 Changelog:
+- June 17, 2025: Removed playful mascot character system as requested - not well defined
+- June 17, 2025: Fixed critical dashboard validCertificates error by using correct variable name
+- June 17, 2025: Simplified exam success flow to prevent premature certificate creation
+- June 17, 2025: Proper exam → checkout redirect only when exam is passed
 - June 17, 2025: Complete MVC architecture refactoring with modular controllers, middleware, and database-first approach
 - June 17, 2025: Implemented AuthController, CourseController, ExamController, CertificateController, and PaymentController
 - June 17, 2025: Added comprehensive authentication middleware with JWT token validation

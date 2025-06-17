@@ -9,7 +9,7 @@ import Footer from '@/components/footer';
 import { Download, Eye, Calendar, Trophy, Award, AlertCircle } from 'lucide-react';
 import type { Certificate } from '@shared/schema';
 import { SmartNotifications } from '@/components/smart-notifications';
-import OctamyMascot from '@/components/OctamyMascot';
+
 
 export default function Dashboard() {
   const { user, token } = useAuth();
@@ -304,29 +304,6 @@ export default function Dashboard() {
         )}
       </div>
       <Footer />
-      
-      {/* Mascot for dashboard guidance */}
-      <OctamyMascot 
-        currentPage="dashboard"
-        userProgress={{
-          coursesCompleted: activeCertificates.length,
-          totalCourses: certificates.length,
-          streak: activeCertificates.length > 0 ? 7 : 0, // Example streak
-          level: activeCertificates.length >= 3 ? 'Expert' : activeCertificates.length >= 1 ? 'Intermediate' : 'Beginner'
-        }}
-        onAction={(action) => {
-          switch (action) {
-            case 'browse-courses':
-              setLocation('/');
-              break;
-            case 'view-progress':
-              setLocation('/progress');
-              break;
-            default:
-              break;
-          }
-        }}
-      />
     </div>
   );
 }

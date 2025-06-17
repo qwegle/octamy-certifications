@@ -9,7 +9,7 @@ import { Brain, Code, TrendingUp, GraduationCap, Search, Clock, Users, Star, Shi
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import CourseCard from "@/components/course-card";
-import OctamyMascot from "@/components/OctamyMascot";
+
 import type { Course, Category } from "@shared/schema";
 import { motion } from "framer-motion";
 import { useLocation } from "wouter";
@@ -430,21 +430,6 @@ export default function Landing() {
       </section>
 
       <Footer />
-      
-      {/* Mascot */}
-      <OctamyMascot 
-        currentPage="landing"
-        onAction={(action) => {
-          switch (action) {
-            case 'explore-courses':
-              // Scroll to courses section
-              document.getElementById('courses-section')?.scrollIntoView({ behavior: 'smooth' });
-              break;
-            default:
-              break;
-          }
-        }}
-      />
     </div>
   );
 }
