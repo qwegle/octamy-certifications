@@ -154,32 +154,32 @@ export default function CertificateView() {
               ></div>
               
               {/* Decorative corners */}
-              <div className="absolute top-8 left-8 w-28 h-28" style={{ 
-                background: `
-                  linear-gradient(45deg, #c0c0c0 1px, transparent 1px 20px, transparent),
-                  linear-gradient(-45deg, #c0c0c0 1px, transparent 1px 20px, transparent)
-                `,
+              <div className="decorative-corners absolute top-8 left-8" style={{ 
+                position: 'absolute',
+                width: '60px',
+                height: '60px',
+                background: 'linear-gradient(45deg, #000000, #b6b6b6)',
                 clipPath: 'polygon(0 0, 100% 0, 0 100%)'
               }}></div>
-              <div className="absolute top-8 right-8 w-28 h-28" style={{ 
-                background: `
-                  linear-gradient(135deg, #c0c0c0 1px, transparent 1px 20px, transparent),
-                  linear-gradient(45deg, #c0c0c0 1px, transparent 1px 20px, transparent)
-                `,
+              <div className="decorative-corners absolute top-8 right-8" style={{ 
+                position: 'absolute',
+                width: '60px',
+                height: '60px',
+                background: 'linear-gradient(45deg, #000000, #b6b6b6)',
                 clipPath: 'polygon(100% 0, 100% 100%, 0 0)'
               }}></div>
-              <div className="absolute bottom-8 left-8 w-28 h-28" style={{ 
-                background: `
-                  linear-gradient(-45deg, #c0c0c0 1px, transparent 1px 20px, transparent),
-                  linear-gradient(-135deg, #c0c0c0 1px, transparent 1px 20px, transparent)
-                `,
+              <div className="decorative-corners absolute bottom-8 left-8" style={{ 
+                position: 'absolute',
+                width: '60px',
+                height: '60px',
+                background: 'linear-gradient(45deg, #000000, #b6b6b6)',
                 clipPath: 'polygon(0 0, 100% 100%, 0 100%)'
               }}></div>
-              <div className="absolute bottom-8 right-8 w-28 h-28" style={{ 
-                background: `
-                  linear-gradient(45deg, #c0c0c0 1px, transparent 1px 20px, transparent),
-                  linear-gradient(135deg, #c0c0c0 1px, transparent 1px 20px, transparent)
-                `,
+              <div className="decorative-corners absolute bottom-8 right-8" style={{ 
+                position: 'absolute',
+                width: '60px',
+                height: '60px',
+                background: 'linear-gradient(45deg, #000000, #b6b6b6)',
                 clipPath: 'polygon(100% 0, 100% 100%, 0 100%)'
               }}></div>
               

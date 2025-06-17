@@ -349,7 +349,7 @@ function generateCertificateHTML(data: CertificateData): string {
         
         .certification-logos {
           display: flex;
-          gap: 15px;
+          gap: 20px;
           align-items: center;
         }
         
