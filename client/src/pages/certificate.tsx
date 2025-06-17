@@ -128,15 +128,46 @@ export default function CertificateView() {
               className="w-full h-auto relative bg-gradient-to-br from-white via-gray-50 to-white certificate-content"
               style={{ 
                 aspectRatio: '1.414/1',
-                background: `linear-gradient(145deg, rgba(255,255,255,0.9) 0%, rgba(248,249,250,0.9) 100%), url(${certificateBackground})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                backgroundRepeat: 'no-repeat',
                 border: '8px solid #000',
                 borderRadius: '16px',
                 boxShadow: '0 40px 80px rgba(0,0,0,0.4)'
               }}
             >
+              {/* SVG Certificate Background */}
+              <svg
+                width="100%"
+                height="100%"
+                viewBox="0 0 1122 794"
+                style={{ position: 'absolute', top: 0, left: 0, zIndex: 1 }}
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <defs>
+                  <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#f8f9fa" />
+                    <stop offset="50%" stopColor="#ffffff" />
+                    <stop offset="100%" stopColor="#f1f3f4" />
+                  </linearGradient>
+                  <pattern id="watermark" x="0" y="0" width="200" height="200" patternUnits="userSpaceOnUse" opacity="0.02">
+                    <text x="100" y="100" textAnchor="middle" fill="#1f2138" fontSize="18" fontFamily="serif" transform="rotate(-45 100 100)">OCTAMY</text>
+                  </pattern>
+                </defs>
+                
+                {/* Background */}
+                <rect width="1122" height="794" fill="url(#bgGradient)" />
+                <rect width="1122" height="794" fill="url(#watermark)" />
+                
+                {/* Decorative Border */}
+                <rect x="15" y="15" width="1092" height="764" fill="none" stroke="#d4af37" strokeWidth="2" rx="12" />
+                <rect x="25" y="25" width="1072" height="744" fill="none" stroke="#1f2138" strokeWidth="1" rx="8" />
+                
+                {/* Corner Ornaments */}
+                <g stroke="#d4af37" strokeWidth="2" fill="none">
+                  <path d="M50 50 L70 50 L70 70 M50 50 L50 70" />
+                  <path d="M1052 50 L1072 50 L1072 70 M1072 50 L1052 70" />
+                  <path d="M50 744 L70 744 L70 724 M50 744 L50 724" />
+                  <path d="M1052 744 L1072 744 L1072 724 M1072 744 L1052 724" />
+                </g>
+              </svg>
               {/* Decorative borders */}
               <div 
                 className="absolute inset-4"
@@ -396,12 +427,31 @@ export default function CertificateView() {
               <div className="footer-section absolute bottom-12 flex justify-between w-full px-20" style={{ marginBottom: '70px' }}>
                 <div className="text-left">
                   {/* Signature Image */}
-                  <img 
-                    src="/attached_assets/nitikesh-signature.svg" 
-                    alt="Nitikesh Pattanayak Signature" 
-                    className="mb-2 h-12 w-auto"
+                  <svg 
+                    width="200" 
+                    height="60" 
+                    viewBox="0 0 200 60" 
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="mb-2"
                     style={{ height: '48px', width: 'auto', marginBottom: '8px' }}
-                  />
+                  >
+                    <path d="M20 40 Q30 25, 45 35 Q60 45, 75 30 Q90 20, 105 35 Q120 50, 135 25 Q150 15, 165 40 Q175 50, 185 35" 
+                          fill="none" 
+                          stroke="#1f2138" 
+                          strokeWidth="2" 
+                          strokeLinecap="round"/>
+                    <path d="M25 45 Q40 50, 55 42 Q70 35, 85 48 Q100 55, 115 42 Q130 30, 145 45 Q160 55, 175 42" 
+                          fill="none" 
+                          stroke="#1f2138" 
+                          strokeWidth="1" 
+                          strokeLinecap="round" 
+                          opacity="0.7"/>
+                    <path d="M20 50 Q100 45, 180 50" 
+                          fill="none" 
+                          stroke="#1f2138" 
+                          strokeWidth="1" 
+                          strokeLinecap="round"/>
+                  </svg>
                   <div 
                     className="w-60 h-px mb-3 relative signature-line"
                     style={{ background: 'linear-gradient(90deg, #d4af37, transparent)' }}
@@ -475,24 +525,42 @@ export default function CertificateView() {
                 
                 {/* Certification Logos */}
                 <div className="certification-logos flex justify-center items-center gap-8 mt-10 pt-6 border-t-2 border-yellow-500">
-                  <img 
-                    src="/attached_assets/iso-certified.svg" 
-                    alt="ISO Certified" 
-                    style={{ 
-                      height: '55px',
-                      width: 'auto',
-                      objectFit: 'contain'
-                    }} 
-                  />
-                  <img 
-                    src="/attached_assets/make-in-india.svg" 
-                    alt="Make in India" 
-                    style={{ 
-                      height: '55px',
-                      width: 'auto',
-                      objectFit: 'contain'
-                    }} 
-                  />
+                  {/* ISO Certified Logo */}
+                  <svg 
+                    width="120" 
+                    height="80" 
+                    viewBox="0 0 120 80" 
+                    xmlns="http://www.w3.org/2000/svg"
+                    style={{ height: '55px', width: 'auto' }}
+                  >
+                    <rect width="120" height="80" fill="#003366" rx="5"/>
+                    <circle cx="60" cy="40" r="25" fill="none" stroke="#ffffff" strokeWidth="3"/>
+                    <text x="60" y="30" textAnchor="middle" fill="#ffffff" fontSize="12" fontFamily="Arial, sans-serif" fontWeight="bold">ISO</text>
+                    <text x="60" y="45" textAnchor="middle" fill="#ffffff" fontSize="8" fontFamily="Arial, sans-serif">CERTIFIED</text>
+                    <text x="60" y="55" textAnchor="middle" fill="#ffffff" fontSize="8" fontFamily="Arial, sans-serif">COMPANY</text>
+                  </svg>
+                  
+                  {/* Make in India Logo */}
+                  <svg 
+                    width="120" 
+                    height="80" 
+                    viewBox="0 0 120 80" 
+                    xmlns="http://www.w3.org/2000/svg"
+                    style={{ height: '55px', width: 'auto' }}
+                  >
+                    <rect width="120" height="80" fill="#ff9933" rx="5"/>
+                    <rect y="27" width="120" height="26" fill="#ffffff"/>
+                    <rect y="53" width="120" height="27" fill="#138808" rx="0 0 5 5"/>
+                    <circle cx="60" cy="40" r="12" fill="none" stroke="#000080" strokeWidth="1"/>
+                    <g stroke="#000080" strokeWidth="0.5">
+                      <line x1="60" y1="28" x2="60" y2="52"/>
+                      <line x1="48" y1="40" x2="72" y2="40"/>
+                      <line x1="51.5" y1="31.5" x2="68.5" y2="48.5"/>
+                      <line x1="68.5" y1="31.5" x2="51.5" y2="48.5"/>
+                    </g>
+                    <text x="60" y="15" textAnchor="middle" fill="#000" fontSize="10" fontFamily="Arial, sans-serif" fontWeight="bold">MAKE IN</text>
+                    <text x="60" y="72" textAnchor="middle" fill="#fff" fontSize="10" fontFamily="Arial, sans-serif" fontWeight="bold">INDIA</text>
+                  </svg>
                 </div>
               </div>
             </div>

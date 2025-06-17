@@ -467,11 +467,30 @@ function generateCertificateHTML(data: CertificateData): string {
               </div>
               
               <div class="signature-section">
-                <img 
-                  src="./attached_assets/nitikesh-signature.svg" 
-                  alt="Nitikesh Pattanayak Signature" 
+                <svg 
+                  width="200" 
+                  height="60" 
+                  viewBox="0 0 200 60" 
+                  xmlns="http://www.w3.org/2000/svg"
                   class="signature-image"
-                />
+                >
+                  <path d="M20 40 Q30 25, 45 35 Q60 45, 75 30 Q90 20, 105 35 Q120 50, 135 25 Q150 15, 165 40 Q175 50, 185 35" 
+                        fill="none" 
+                        stroke="#1f2138" 
+                        stroke-width="2" 
+                        stroke-linecap="round"/>
+                  <path d="M25 45 Q40 50, 55 42 Q70 35, 85 48 Q100 55, 115 42 Q130 30, 145 45 Q160 55, 175 42" 
+                        fill="none" 
+                        stroke="#1f2138" 
+                        stroke-width="1" 
+                        stroke-linecap="round" 
+                        opacity="0.7"/>
+                  <path d="M20 50 Q100 45, 180 50" 
+                        fill="none" 
+                        stroke="#1f2138" 
+                        stroke-width="1" 
+                        stroke-linecap="round"/>
+                </svg>
                 <div class="signature-line"></div>
                 <div class="signature-name" style="font-size: 14px; color: #000; font-weight: 600; margin-top: 3px; font-family: 'Poppins', serif;">Nitikesh Pattanayak</div>
                 <div class="signature-title" style="font-size: 12px; color: #1f2138; margin-bottom: 5px; font-family: 'Poppins', sans-serif;">Director of Certification</div>
@@ -487,8 +506,42 @@ function generateCertificateHTML(data: CertificateData): string {
             </div>
             
             <div class="certification-logos">
-              <img src="./attached_assets/iso-certified.svg" alt="ISO Certified" />
-              <img src="./attached_assets/make-in-india.svg" alt="Make in India" />
+              <!-- ISO Certified Logo -->
+              <svg 
+                width="120" 
+                height="80" 
+                viewBox="0 0 120 80" 
+                xmlns="http://www.w3.org/2000/svg"
+                style="height: 55px; width: auto;"
+              >
+                <rect width="120" height="80" fill="#003366" rx="5"/>
+                <circle cx="60" cy="40" r="25" fill="none" stroke="#ffffff" stroke-width="3"/>
+                <text x="60" y="30" text-anchor="middle" fill="#ffffff" font-size="12" font-family="Arial, sans-serif" font-weight="bold">ISO</text>
+                <text x="60" y="45" text-anchor="middle" fill="#ffffff" font-size="8" font-family="Arial, sans-serif">CERTIFIED</text>
+                <text x="60" y="55" text-anchor="middle" fill="#ffffff" font-size="8" font-family="Arial, sans-serif">COMPANY</text>
+              </svg>
+              
+              <!-- Make in India Logo -->
+              <svg 
+                width="120" 
+                height="80" 
+                viewBox="0 0 120 80" 
+                xmlns="http://www.w3.org/2000/svg"
+                style="height: 55px; width: auto;"
+              >
+                <rect width="120" height="80" fill="#ff9933" rx="5"/>
+                <rect y="27" width="120" height="26" fill="#ffffff"/>
+                <rect y="53" width="120" height="27" fill="#138808" rx="0 0 5 5"/>
+                <circle cx="60" cy="40" r="12" fill="none" stroke="#000080" stroke-width="1"/>
+                <g stroke="#000080" stroke-width="0.5">
+                  <line x1="60" y1="28" x2="60" y2="52"/>
+                  <line x1="48" y1="40" x2="72" y2="40"/>
+                  <line x1="51.5" y1="31.5" x2="68.5" y2="48.5"/>
+                  <line x1="68.5" y1="31.5" x2="51.5" y2="48.5"/>
+                </g>
+                <text x="60" y="15" text-anchor="middle" fill="#000" font-size="10" font-family="Arial, sans-serif" font-weight="bold">MAKE IN</text>
+                <text x="60" y="72" text-anchor="middle" fill="#fff" font-size="10" font-family="Arial, sans-serif" font-weight="bold">INDIA</text>
+              </svg>
             </div>
           </div>
         </div>
