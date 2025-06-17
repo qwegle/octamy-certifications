@@ -71,6 +71,60 @@ interface Transaction {
   certificateId: number;
 }
 
+interface Customer {
+  id: number;
+  name: string;
+  email: string;
+  createdAt: string;
+  isAdmin: boolean;
+  certificateCount: number;
+  totalSpent: number;
+}
+
+interface AdminCourse {
+  id: number;
+  title: string;
+  description: string;
+  slug: string;
+  categoryId: number;
+  categoryName: string;
+  duration: number;
+  passingScore: number;
+  price: string;
+  originalPrice: string;
+  isOnSale: boolean;
+  level: string;
+  isActive: boolean;
+  isInternship: boolean;
+  createdAt: string;
+  enrollmentCount: number;
+  certificateCount: number;
+  revenue: number;
+}
+
+interface Question {
+  id: number;
+  courseId: number;
+  questionText: string;
+  options: string[];
+  correctAnswer: number;
+  explanation: string;
+}
+
+interface ExamAttempt {
+  id: number;
+  userId: number;
+  courseId: number;
+  userEmail: string;
+  userName: string;
+  score: number;
+  totalQuestions: number;
+  timeTaken: number;
+  createdAt: string;
+  courseTitle: string;
+  passed: boolean;
+}
+
 export default function AdminDashboard() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -111,6 +165,21 @@ export default function AdminDashboard() {
   // Fetch transactions data
   const { data: transactions = [], isLoading: transactionsLoading } = useQuery({
     queryKey: ["/api/admin/transactions"],
+  });
+
+  // Fetch customers data
+  const { data: customers = [], isLoading: customersLoading } = useQuery({
+    queryKey: ["/api/admin/customers"],
+  });
+
+  // Fetch admin courses data
+  const { data: adminCourses = [], isLoading: adminCoursesLoading } = useQuery({
+    queryKey: ["/api/admin/courses"],
+  });
+
+  // Fetch exam attempts data
+  const { data: examAttempts = [], isLoading: examAttemptsLoading } = useQuery({
+    queryKey: ["/api/admin/exam-attempts"],
   });
 
   // Partner approval mutation

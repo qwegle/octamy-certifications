@@ -1526,6 +1526,175 @@ export class DatabaseStorage implements IStorage {
     .orderBy(desc(payments.createdAt))
     .limit(20);
   }
+
+  // Admin customer management
+  async getAllCustomers() {
+    return await db.select({
+      id: users.id,
+      name: users.name,
+      email: users.email,
+      createdAt: users.createdAt,
+      isAdmin: users.isAdmin,
+      certificateCount: sql`(
+        SELECT COUNT(*) FROM certificates 
+        WHERE user_id = ${users.id}
+      )`.as('certificateCount'),
+      totalSpent: sql`(
+        SELECT COALESCE(SUM(CAST(amount AS DECIMAL)), 0)
+        FROM payments 
+        WHERE user_id = ${users.id} AND status = 'success'
+      )`.as('totalSpent')
+    })
+    .from(users)
+    .orderBy(desc(users.createdAt));
+  }
+
+  // Admin course management
+  async getAllCoursesForAdmin() {
+    return await db.select({
+      id: courses.id,
+      title: courses.title,
+      description: courses.description,
+      slug: courses.slug,
+      categoryId: courses.categoryId,
+      categoryName: categories.name,
+      duration: courses.duration,
+      passingScore: courses.passingScore,
+      price: courses.price,
+      originalPrice: courses.originalPrice,
+      isOnSale: courses.isOnSale,
+      level: courses.level,
+      isActive: courses.isActive,
+      isInternship: courses.isInternship,
+      createdAt: courses.createdAt,
+      enrollmentCount: sql`(
+        SELECT COUNT(*) FROM exam_attempts 
+        WHERE course_id = ${courses.id}
+      )`.as('enrollmentCount'),
+      certificateCount: sql`(
+        SELECT COUNT(*) FROM certificates 
+        WHERE course_id = ${courses.id}
+      )`.as('certificateCount'),
+      revenue: sql`(
+        SELECT COALESCE(SUM(CAST(amount AS DECIMAL)), 0)
+        FROM payments p
+        JOIN certificates c ON p.certificate_id = c.id
+        WHERE c.course_id = ${courses.id} AND p.status = 'success'
+      )`.as('revenue')
+    })
+    .from(courses)
+    .leftJoin(categories, eq(courses.categoryId, categories.id))
+    .orderBy(desc(courses.createdAt));
+  }
+
+  // Get questions for a course (admin)
+  async getQuestionsForAdmin(courseId: number) {
+    return await db.select()
+      .from(questions)
+      .where(eq(questions.courseId, courseId))
+      .orderBy(asc(questions.id));
+  }
+
+  // Create course (admin)
+  async createCourseAdmin(courseData: InsertCourse) {
+    const [course] = await db.insert(courses).values(courseData).returning();
+    return course;
+  }
+
+  // Update course (admin)
+  async updateCourseAdmin(id: number, updates: Partial<InsertCourse>) {
+    const [course] = await db.update(courses)
+      .set({ ...updates, createdAt: new Date() })
+      .where(eq(courses.id, id))
+      .returning();
+    return course;
+  }
+
+  // Delete course (admin)
+  async deleteCourseAdmin(id: number) {
+    // First delete related data
+    await db.delete(questions).where(eq(questions.courseId, id));
+    await db.delete(examAttempts).where(eq(examAttempts.courseId, id));
+    await db.delete(certificates).where(eq(certificates.courseId, id));
+    
+    // Then delete the course
+    await db.delete(courses).where(eq(courses.id, id));
+  }
+
+  // Create question (admin)
+  async createQuestionAdmin(questionData: InsertQuestion) {
+    const [question] = await db.insert(questions).values(questionData).returning();
+    return question;
+  }
+
+  // Update question (admin)
+  async updateQuestionAdmin(id: number, updates: Partial<InsertQuestion>) {
+    const [question] = await db.update(questions)
+      .set(updates)
+      .where(eq(questions.id, id))
+      .returning();
+    return question;
+  }
+
+  // Delete question (admin)
+  async deleteQuestionAdmin(id: number) {
+    await db.delete(questions).where(eq(questions.id, id));
+  }
+
+  // Get exam attempts for admin
+  async getExamAttemptsForAdmin() {
+    return await db.select({
+      id: examAttempts.id,
+      userId: examAttempts.userId,
+      courseId: examAttempts.courseId,
+      userEmail: examAttempts.userEmail,
+      userName: examAttempts.userName,
+      score: examAttempts.score,
+      totalQuestions: examAttempts.totalQuestions,
+      timeTaken: examAttempts.timeTaken,
+      createdAt: examAttempts.createdAt,
+      courseTitle: courses.title,
+      passed: sql`CASE WHEN ${examAttempts.score} >= ${courses.passingScore} THEN true ELSE false END`.as('passed')
+    })
+    .from(examAttempts)
+    .leftJoin(courses, eq(examAttempts.courseId, courses.id))
+    .orderBy(desc(examAttempts.createdAt))
+    .limit(100);
+  }
+
+  // Get detailed analytics for admin
+  async getDetailedAnalytics() {
+    const [todayStats] = await db.select({
+      todayUsers: sql`COUNT(CASE WHEN DATE(created_at) = CURRENT_DATE THEN 1 END)`,
+      todayRevenue: sql`COALESCE(SUM(CASE WHEN DATE(p.created_at) = CURRENT_DATE AND p.status = 'success' THEN CAST(p.amount AS DECIMAL) ELSE 0 END), 0)`,
+      todayExams: sql`COUNT(CASE WHEN DATE(ea.created_at) = CURRENT_DATE THEN 1 END)`
+    })
+    .from(users)
+    .leftJoin(payments, eq(users.id, payments.userId))
+    .leftJoin(examAttempts, eq(users.id, examAttempts.userId));
+
+    const [monthlyStats] = await db.select({
+      monthlyUsers: sql`COUNT(CASE WHEN DATE_TRUNC('month', created_at) = DATE_TRUNC('month', CURRENT_DATE) THEN 1 END)`,
+      monthlyRevenue: sql`COALESCE(SUM(CASE WHEN DATE_TRUNC('month', p.created_at) = DATE_TRUNC('month', CURRENT_DATE) AND p.status = 'success' THEN CAST(p.amount AS DECIMAL) ELSE 0 END), 0)`,
+      monthlyExams: sql`COUNT(CASE WHEN DATE_TRUNC('month', ea.created_at) = DATE_TRUNC('month', CURRENT_DATE) THEN 1 END)`
+    })
+    .from(users)
+    .leftJoin(payments, eq(users.id, payments.userId))
+    .leftJoin(examAttempts, eq(users.id, examAttempts.userId));
+
+    return {
+      today: {
+        users: Number(todayStats.todayUsers) || 0,
+        revenue: Number(todayStats.todayRevenue) || 0,
+        exams: Number(todayStats.todayExams) || 0
+      },
+      monthly: {
+        users: Number(monthlyStats.monthlyUsers) || 0,
+        revenue: Number(monthlyStats.monthlyRevenue) || 0,
+        exams: Number(monthlyStats.monthlyExams) || 0
+      }
+    };
+  }
 }
 
 export const storage = new DatabaseStorage();

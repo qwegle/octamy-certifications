@@ -2173,6 +2173,132 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin customers route
+  app.get("/api/admin/customers", authenticateAdminToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const customers = await storage.getAllCustomers();
+      res.json(customers);
+    } catch (error) {
+      console.error("Error fetching customers:", error);
+      res.status(500).json({ message: "Failed to fetch customers" });
+    }
+  });
+
+  // Admin courses management
+  app.get("/api/admin/courses", authenticateAdminToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const courses = await storage.getAllCoursesForAdmin();
+      res.json(courses);
+    } catch (error) {
+      console.error("Error fetching courses:", error);
+      res.status(500).json({ message: "Failed to fetch courses" });
+    }
+  });
+
+  // Create course
+  app.post("/api/admin/courses", authenticateAdminToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const course = await storage.createCourseAdmin(req.body);
+      res.json(course);
+    } catch (error) {
+      console.error("Error creating course:", error);
+      res.status(500).json({ message: "Failed to create course" });
+    }
+  });
+
+  // Update course
+  app.put("/api/admin/courses/:id", authenticateAdminToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const courseId = parseInt(req.params.id);
+      const course = await storage.updateCourseAdmin(courseId, req.body);
+      res.json(course);
+    } catch (error) {
+      console.error("Error updating course:", error);
+      res.status(500).json({ message: "Failed to update course" });
+    }
+  });
+
+  // Delete course
+  app.delete("/api/admin/courses/:id", authenticateAdminToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const courseId = parseInt(req.params.id);
+      await storage.deleteCourseAdmin(courseId);
+      res.json({ message: "Course deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting course:", error);
+      res.status(500).json({ message: "Failed to delete course" });
+    }
+  });
+
+  // Admin questions management
+  app.get("/api/admin/courses/:id/questions", authenticateAdminToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const courseId = parseInt(req.params.id);
+      const questions = await storage.getQuestionsForAdmin(courseId);
+      res.json(questions);
+    } catch (error) {
+      console.error("Error fetching questions:", error);
+      res.status(500).json({ message: "Failed to fetch questions" });
+    }
+  });
+
+  // Create question
+  app.post("/api/admin/questions", authenticateAdminToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const question = await storage.createQuestionAdmin(req.body);
+      res.json(question);
+    } catch (error) {
+      console.error("Error creating question:", error);
+      res.status(500).json({ message: "Failed to create question" });
+    }
+  });
+
+  // Update question
+  app.put("/api/admin/questions/:id", authenticateAdminToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const questionId = parseInt(req.params.id);
+      const question = await storage.updateQuestionAdmin(questionId, req.body);
+      res.json(question);
+    } catch (error) {
+      console.error("Error updating question:", error);
+      res.status(500).json({ message: "Failed to update question" });
+    }
+  });
+
+  // Delete question
+  app.delete("/api/admin/questions/:id", authenticateAdminToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const questionId = parseInt(req.params.id);
+      await storage.deleteQuestionAdmin(questionId);
+      res.json({ message: "Question deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting question:", error);
+      res.status(500).json({ message: "Failed to delete question" });
+    }
+  });
+
+  // Admin exam attempts
+  app.get("/api/admin/exam-attempts", authenticateAdminToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const examAttempts = await storage.getExamAttemptsForAdmin();
+      res.json(examAttempts);
+    } catch (error) {
+      console.error("Error fetching exam attempts:", error);
+      res.status(500).json({ message: "Failed to fetch exam attempts" });
+    }
+  });
+
+  // Admin detailed analytics
+  app.get("/api/admin/detailed-analytics", authenticateAdminToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const analytics = await storage.getDetailedAnalytics();
+      res.json(analytics);
+    } catch (error) {
+      console.error("Error fetching detailed analytics:", error);
+      res.status(500).json({ message: "Failed to fetch detailed analytics" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
