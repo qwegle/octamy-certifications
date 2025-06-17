@@ -129,10 +129,7 @@ export default function EnhancedCheckout() {
   // Create address mutation
   const createAddressMutation = useMutation({
     mutationFn: async (data: AddressFormData) => {
-      return await apiRequest("/api/user/addresses", {
-        method: "POST",
-        body: JSON.stringify(data),
-      });
+      return await apiRequest("/api/user/addresses", "POST", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/user/addresses"] });
@@ -155,10 +152,7 @@ export default function EnhancedCheckout() {
   // Update address mutation
   const updateAddressMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: AddressFormData }) => {
-      return await apiRequest(`/api/user/addresses/${id}`, {
-        method: "PUT",
-        body: JSON.stringify(data),
-      });
+      return await apiRequest(`/api/user/addresses/${id}`, "PUT", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/user/addresses"] });
@@ -182,9 +176,7 @@ export default function EnhancedCheckout() {
   // Delete address mutation
   const deleteAddressMutation = useMutation({
     mutationFn: async (id: number) => {
-      return await apiRequest(`/api/user/addresses/${id}`, {
-        method: "DELETE",
-      });
+      return await apiRequest(`/api/user/addresses/${id}`, "DELETE");
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/user/addresses"] });
