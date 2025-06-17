@@ -1574,16 +1574,110 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Certificate payment required" });
       }
 
-      // HTML-based certificate download - users can print to PDF
+      // Get course details for the certificate
+      const course = await storage.getCourse(certificate.courseId);
+      if (!course) {
+        return res.status(404).json({ message: "Course not found" });
+      }
+
+      // Prepare certificate data for the new professional design
+      const certificateData = {
+        certificateId: certificate.certificateId,
+        studentName: certificate.studentName,
+        courseName: course.title,
+        completionDate: new Date(certificate.createdAt).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        }),
+        score: certificate.score,
+        courseDuration: `${course.duration} Hours`,
+        issueDate: new Date(certificate.createdAt).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        })
+      };
+
+      // Check if PDF download is requested
+      const format = req.query.format;
       
-      // Generate ultra-premium certificate HTML with luxury design
-      const certificateHtml = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <meta charset="UTF-8">
-          <style>
-            @import url('https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700;800&display=swap');
+      if (format === 'pdf') {
+        // Generate PDF using the new professional design
+        const { generateCertificatePDF } = await import('./utils/certificateGenerator');
+        const pdfBuffer = await generateCertificatePDF(certificateData);
+        
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="certificate-${certificateId}.pdf"`);
+        res.send(pdfBuffer);
+      } else {
+        // Return HTML version for viewing using the new professional design
+        const { generateCertificateHTML } = await import('./utils/certificateGenerator');
+        const certificateHtml = generateCertificateHTML(certificateData);
+        
+        res.setHeader('Content-Type', 'text/html');
+        res.setHeader('Content-Disposition', `inline; filename="certificate-${certificateId}.html"`);
+        res.send(certificateHtml);
+      }
+    } catch (error) {
+      console.error("Certificate download error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Notifications endpoint
+  app.get("/api/notifications", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const notifications = await storage.getUserNotifications(userId);
+      res.json(notifications);
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+      res.status(500).json({ message: "Failed to fetch notifications" });
+    }
+  });
+
+  // Mark notification as read
+  app.put("/api/notifications/:id/read", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.userId;
+      const notificationId = parseInt(req.params.id);
+      
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      await storage.markNotificationAsRead(notificationId, userId);
+      res.json({ message: "Notification marked as read" });
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+      res.status(500).json({ message: "Failed to mark notification as read" });
+    }
+  });
+
+  // Mark all notifications as read
+  app.put("/api/notifications/read-all", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      await storage.markAllNotificationsAsRead(userId);
+      res.json({ message: "All notifications marked as read" });
+    } catch (error) {
+      console.error("Error marking all notifications as read:", error);
+      res.status(500).json({ message: "Failed to mark all notifications as read" });
+    }
+  });
+
+  // Recommendations endpoint
+  app.get("/api/recommendations", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
             
             * { margin: 0; padding: 0; box-sizing: border-box; }
             

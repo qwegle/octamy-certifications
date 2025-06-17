@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { storage } from '../storage';
-import { generateCertificatePDF } from '../utils/certificateGenerator';
+import { generateCertificateHTML, generateCertificatePDF } from '../utils/certificateGenerator';
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -91,11 +91,49 @@ export class CertificateController {
         return res.status(404).json({ message: "Certificate not found" });
       }
 
-      const htmlContent = generateCertificateHTML(certificate);
+      // Get course details for the certificate
+      const course = await storage.getCourse(certificate.courseId);
+      if (!course) {
+        return res.status(404).json({ message: "Course not found" });
+      }
+
+      // Prepare certificate data for the new professional design
+      const certificateData = {
+        certificateId: certificate.certificateId,
+        studentName: certificate.studentName,
+        courseName: course.title,
+        completionDate: new Date(certificate.createdAt).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        }),
+        score: certificate.score,
+        courseDuration: `${course.duration} Hours`,
+        issueDate: new Date(certificate.createdAt).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        })
+      };
+
+      // Check if PDF download is requested
+      const format = req.query.format;
       
-      res.setHeader('Content-Type', 'text/html');
-      res.setHeader('Content-Disposition', `inline; filename="certificate-${certificateId}.html"`);
-      res.send(htmlContent);
+      if (format === 'pdf') {
+        // Generate PDF using the new professional design
+        const pdfBuffer = await generateCertificatePDF(certificateData);
+        
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="certificate-${certificateId}.pdf"`);
+        res.send(pdfBuffer);
+      } else {
+        // Return HTML version for viewing
+        const htmlContent = generateCertificateHTML(certificateData);
+        
+        res.setHeader('Content-Type', 'text/html');
+        res.setHeader('Content-Disposition', `inline; filename="certificate-${certificateId}.html"`);
+        res.send(htmlContent);
+      }
     } catch (error) {
       console.error("Download certificate error:", error);
       res.status(500).json({ message: "Internal server error" });
