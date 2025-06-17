@@ -254,6 +254,10 @@ Octamy is a comprehensive professional certification platform built as a full-st
 
 ```
 Changelog:
+- June 17, 2025: Enhanced certificate design with signature integration and professional styling using Poppins font family
+- June 17, 2025: Updated both frontend and server-side certificate generators with authentic Nitikesh Pattanayak signature
+- June 17, 2025: Applied specific styling requirements including #1f2138 color scheme, bordered course names, and 70px footer margins
+- June 17, 2025: Positioned badge text at 68% and sized certification logos to 55px height for optimal presentation
 - June 17, 2025: Created comprehensive sponsor support system with interactive payment page, team showcase, and PayUMoney integration
 - June 17, 2025: Added sponsor page to navigation with "Support Us" links in desktop and mobile headers
 - June 17, 2025: Built sponsors database table with payment tracking and transaction status management
