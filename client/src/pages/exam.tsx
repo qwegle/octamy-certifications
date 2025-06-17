@@ -11,6 +11,7 @@ import { apiRequest } from '@/lib/queryClient';
 import { useAuth } from '@/lib/auth';
 import Header from '@/components/header';
 import ExamTimer from '@/components/exam-timer';
+import OctamyMascot from '@/components/OctamyMascot';
 import type { Course, Question } from '@shared/schema';
 import { AlertTriangle } from 'lucide-react';
 
