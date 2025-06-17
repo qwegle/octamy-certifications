@@ -510,6 +510,37 @@ export class DatabaseStorage implements IStorage {
     return result.length;
   }
 
+  async getUserCertificateForCourse(userId: number | null, courseId: number, userEmail?: string | null): Promise<Certificate | null> {
+    try {
+      let whereCondition;
+      
+      if (userId) {
+        whereCondition = and(
+          eq(certificates.userId, userId),
+          eq(certificates.courseId, courseId)
+        );
+      } else if (userEmail) {
+        whereCondition = and(
+          eq(certificates.userEmail, userEmail),
+          eq(certificates.courseId, courseId)
+        );
+      } else {
+        return null;
+      }
+
+      const result = await db
+        .select()
+        .from(certificates)
+        .where(whereCondition)
+        .limit(1);
+
+      return result[0] || null;
+    } catch (error) {
+      console.error("Error getting user certificate for course:", error);
+      return null;
+    }
+  }
+
   // Payment operations
   async createPayment(insertPayment: InsertPayment): Promise<Payment> {
     const [payment] = await db
