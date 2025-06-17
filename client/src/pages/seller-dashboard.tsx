@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useSellerAuth } from "@/lib/sellerAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -82,6 +82,11 @@ export default function SellerDashboard() {
   }, [seller, token]);
 
   const fetchDashboardData = async () => {
+    if (!token) {
+      window.location.href = '/seller-auth';
+      return;
+    }
+
     try {
       const response = await fetch("/api/sellers/dashboard", {
         headers: {
@@ -94,24 +99,27 @@ export default function SellerDashboard() {
         setDashboardData(data);
       } else if (response.status === 401 || response.status === 403) {
         toast({
-          title: "Authentication Error", 
-          description: "Please log in again to continue",
+          title: "Session Expired", 
+          description: "Redirecting to login...",
           variant: "destructive",
         });
         logout();
-        window.location.href = '/seller-auth';
+        setTimeout(() => {
+          window.location.href = '/seller-auth';
+        }, 1000);
       } else {
+        const errorData = await response.json().catch(() => ({ message: "Unknown error" }));
         toast({
           title: "Error",
-          description: "Failed to fetch dashboard data",
+          description: errorData.message || "Failed to fetch dashboard data",
           variant: "destructive",
         });
       }
     } catch (error) {
       console.error("Error fetching dashboard:", error);
       toast({
-        title: "Error",
-        description: "Failed to load dashboard",
+        title: "Connection Error",
+        description: "Please check your connection and try again",
         variant: "destructive",
       });
     } finally {
