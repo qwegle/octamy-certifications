@@ -8,24 +8,15 @@ interface CertificateData {
   completionDate: Date;
   passingScore: number;
   userScore: number;
-  badge?: string;
-}
-
-function getBadgeImage(badge: string): string {
-  const badgeLower = badge.toLowerCase();
-  if (badgeLower.includes('gold')) {
-    return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iNTAiIGN5PSI1MCIgcj0iNDUiIGZpbGw9IiNEQUFGMzciIHN0cm9rZT0iI0I4OTMzMCIgc3Ryb2tlLXdpZHRoPSIyIi8+PHRleHQgeD0iNTAiIHk9IjQwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSIjMDAwIj5HT0xEPC90ZXh0Pjx0ZXh0IHg9IjUwIiB5PSI2MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjgiIGZpbGw9IiMwMDAiPkFXQVJEPC90ZXh0Pjwvdmc+';
-  } else if (badgeLower.includes('silver')) {
-    return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iNTAiIGN5PSI1MCIgcj0iNDUiIGZpbGw9IiNDMEM0Q0EiIHN0cm9rZT0iIzk5QTNBRCIgc3Ryb2tlLXdpZHRoPSIyIi8+PHRleHQgeD0iNTAiIHk9IjQwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTAiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSIjMDAwIj5TSUxWRVI8L3RleHQ+PHRleHQgeD0iNTAiIHk9IjYwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iOCIgZmlsbD0iIzAwMCI+QVdBUkQ8L3RleHQ+PC9zdmc+';
-  } else if (badgeLower.includes('bronze')) {
-    return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iNTAiIGN5PSI1MCIgcj0iNDUiIGZpbGw9IiNDRDdGMzIiIHN0cm9rZT0iI0E2NkQyQiIgc3Ryb2tlLXdpZHRoPSIyIi8+PHRleHQgeD0iNTAiIHk9IjQwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTAiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSIjMDAwIj5CUk9OWkU8L3RleHQ+PHRleHQgeD0iNTAiIHk9IjYwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iOCIgZmlsbD0iIzAwMCI+QVdBUkQ8L3RleHQ+PC9zdmc+';
-  } else if (badgeLower.includes('platinum')) {
-    return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iNTAiIGN5PSI1MCIgcj0iNDUiIGZpbGw9IiNFNUU1RTUiIHN0cm9rZT0iI0JCQkJCQiIgc3Ryb2tlLXdpZHRoPSIyIi8+PHRleHQgeD0iNTAiIHk9IjM1IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iOCIgZm9udC13ZWlnaHQ9ImJvbGQiIGZpbGw9IiMwMDAiPlBMQVRJTlVNPC90ZXh0Pjx0ZXh0IHg9IjUwIiB5PSI2MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjgiIGZpbGw9IiMwMDAiPkFXQVJEPC90ZXh0Pjwvdmc+';
-  }
-  return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iNTAiIGN5PSI1MCIgcj0iNDUiIGZpbGw9IiNEQUFGMzciIHN0cm9rZT0iI0I4OTMzMCIgc3Ryb2tlLXdpZHRoPSIyIi8+PHRleHQgeD0iNTAiIHk9IjQwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSIjMDAwIj5HR09MRDwvdGV4dD48dGV4dCB4PSI1MCIgeT0iNjAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSI4IiBmaWxsPSIjMDAwIj5BV0FSRDI8L3RleHQ+PC9zdmc+';
+  courseLevel?: string;
 }
 
 function generateCertificateHTML(data: CertificateData): string {
+  const courseLevel = data.courseLevel || 'Beginner';
+  const issueDate = new Date(data.issueDate);
+  const expiryDate = new Date(issueDate);
+  expiryDate.setFullYear(expiryDate.getFullYear() + 3); // 3 years validity
+
   return `
     <!DOCTYPE html>
     <html lang="en">
@@ -33,176 +24,292 @@ function generateCertificateHTML(data: CertificateData): string {
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>Professional Certificate</title>
-      <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
       <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap');
+        
         * {
           margin: 0;
           padding: 0;
           box-sizing: border-box;
         }
         
-        @page {
-          size: A4 landscape;
-          margin: 0;
-        }
-        
         body {
-          font-family: 'Inter', sans-serif;
-          background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          min-height: 100vh;
+          font-family: 'Playfair Display', serif;
+          background: #f8f9fa;
           padding: 20px;
+          line-height: 1.6;
         }
         
         .certificate-container {
-          width: 1100px;
-          height: 750px;
-          background: white;
-          position: relative;
+          width: 297mm;
+          height: 210mm;
+          margin: 0 auto;
+          background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
           border: 8px solid #000;
-          box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+          border-radius: 16px;
+          position: relative;
           overflow: hidden;
+          box-shadow: 0 20px 40px rgba(0,0,0,0.1);
         }
         
         .certificate-border {
           position: absolute;
-          top: 20px;
-          left: 20px;
-          right: 20px;
-          bottom: 20px;
-          border: 3px solid #d4af37;
-          background: linear-gradient(135deg, #fafafa 0%, #ffffff 100%);
+          inset: 20px;
+          border: 2px solid #c0c0c0;
+          border-radius: 8px;
+          background: radial-gradient(circle at 0% 0%, #c0c0c0 2px, transparent 2px),
+                      radial-gradient(circle at 100% 0%, #c0c0c0 2px, transparent 2px),
+                      radial-gradient(circle at 0% 100%, #c0c0c0 2px, transparent 2px),
+                      radial-gradient(circle at 100% 100%, #c0c0c0 2px, transparent 2px);
+          background-size: 40px 40px;
+          background-position: top left, top right, bottom left, bottom right;
+          background-repeat: no-repeat;
         }
         
         .decorative-corners {
           position: absolute;
-          width: 60px;
-          height: 60px;
-          background: linear-gradient(45deg, #d4af37, #f4d03f);
-          clip-path: polygon(0 0, 100% 0, 0 100%);
+          width: 120px;
+          height: 120px;
+          background: linear-gradient(45deg, #c0c0c0 1px, transparent 1px 20px, transparent);
         }
         
         .decorative-corners.top-left {
           top: 30px;
           left: 30px;
+          clip-path: polygon(0 0, 100% 0, 0 100%);
         }
         
         .decorative-corners.top-right {
           top: 30px;
           right: 30px;
-          transform: rotate(90deg);
+          clip-path: polygon(100% 0, 100% 100%, 0 0);
         }
         
         .decorative-corners.bottom-left {
           bottom: 30px;
           left: 30px;
-          transform: rotate(-90deg);
+          clip-path: polygon(0 0, 100% 100%, 0 100%);
         }
         
         .decorative-corners.bottom-right {
           bottom: 30px;
           right: 30px;
-          transform: rotate(180deg);
+          clip-path: polygon(100% 0, 100% 100%, 0 100%);
         }
         
         .certificate-content {
-          position: absolute;
-          top: 50px;
-          left: 50px;
-          right: 50px;
-          bottom: 50px;
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
-          text-align: center;
-          z-index: 2;
-        }
-        
-        .certificate-header {
-          margin-bottom: 20px;
-        }
-        
-        .certificate-title {
-          font-family: 'Playfair Display', serif;
-          font-size: 48px;
-          font-weight: 700;
-          color: #000;
-          margin-bottom: 10px;
-          letter-spacing: 2px;
-        }
-        
-        .certificate-subtitle {
-          font-size: 18px;
-          color: #666;
-          font-weight: 300;
-          letter-spacing: 1px;
-        }
-        
-        .certificate-body {
-          flex: 1;
+          position: relative;
+          z-index: 10;
+          padding: 60px;
+          height: 100%;
           display: flex;
           flex-direction: column;
           justify-content: center;
-          padding: 40px 0;
+          text-align: center;
         }
         
-        .recipient-text {
-          font-size: 20px;
-          color: #333;
+        .company-header {
+          margin-bottom: 40px;
+        }
+        
+        .company-logo {
+          display: inline-block;
+          background: linear-gradient(145deg, #000000, #333333);
+          color: white;
+          padding: 20px 40px;
           margin-bottom: 20px;
-          font-weight: 300;
+          clip-path: polygon(10% 0%, 90% 0%, 100% 25%, 100% 75%, 90% 100%, 10% 100%, 0% 75%, 0% 25%);
+        }
+        
+        .company-name {
+          font-size: 48px;
+          font-weight: 700;
+          letter-spacing: 8px;
+          font-family: 'Playfair Display', serif;
+        }
+        
+        .company-tagline {
+          font-size: 14px;
+          font-weight: 500;
+          color: #666;
+          letter-spacing: 4px;
+          text-transform: uppercase;
+          font-family: 'Inter', sans-serif;
+        }
+        
+        .certificate-title {
+          font-size: 72px;
+          font-weight: 600;
+          color: #000;
+          margin: 30px 0;
+          letter-spacing: 12px;
+          text-transform: uppercase;
+          font-family: 'Playfair Display', serif;
+          position: relative;
+        }
+        
+        .certificate-title::before {
+          content: '';
+          position: absolute;
+          top: -10px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 80px;
+          height: 4px;
+          background: linear-gradient(90deg, #000, #c0c0c0, #000);
+        }
+        
+        .certificate-title::after {
+          content: '';
+          position: absolute;
+          bottom: -10px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 120px;
+          height: 2px;
+          background: linear-gradient(90deg, transparent, #c0c0c0, transparent);
+        }
+        
+        .certificate-subtitle {
+          font-size: 28px;
+          color: #666;
+          font-style: italic;
+          margin-bottom: 40px;
+          font-family: 'Playfair Display', serif;
+        }
+        
+        .awarded-text {
+          font-size: 20px;
+          color: #666;
+          margin-bottom: 30px;
+          font-style: italic;
+          font-family: 'Playfair Display', serif;
         }
         
         .recipient-name {
-          font-family: 'Playfair Display', serif;
-          font-size: 42px;
-          font-weight: 700;
+          font-size: 56px;
+          font-weight: 600;
           color: #000;
-          margin: 20px 0;
-          padding: 0 20px;
-          border-bottom: 3px solid #d4af37;
-          display: inline-block;
+          margin: 30px 0;
+          font-family: 'Playfair Display', serif;
+          position: relative;
+          padding: 20px 0;
+        }
+        
+        .recipient-name::before,
+        .recipient-name::after {
+          content: '';
+          position: absolute;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 400px;
+          height: 1px;
+          background: linear-gradient(90deg, transparent, #c0c0c0, transparent);
+        }
+        
+        .recipient-name::before {
+          top: 0;
+        }
+        
+        .recipient-name::after {
+          bottom: 0;
+        }
+        
+        .completion-text {
+          font-size: 18px;
+          color: #666;
+          margin: 30px 0;
+          line-height: 1.8;
+          font-family: 'Playfair Display', serif;
+        }
+        
+        .course-name {
+          font-size: 36px;
+          font-weight: 600;
+          color: #000;
+          margin: 30px 0;
+          padding: 20px 40px;
+          border: 2px solid #c0c0c0;
+          border-radius: 8px;
+          background: linear-gradient(145deg, rgba(192,192,192,0.1) 0%, rgba(192,192,192,0.05) 100%);
+          font-family: 'Playfair Display', serif;
+          text-transform: uppercase;
+          letter-spacing: 2px;
+        }
+        
+        .achievement-section {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          gap: 40px;
+          margin: 40px 0;
+        }
+        
+        .badge-container {
+          position: relative;
+          width: 120px;
+          height: 120px;
+        }
+        
+        .badge-image {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+        }
+        
+        .badge-text {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          color: white;
+          font-size: 12px;
+          font-weight: 700;
+          text-align: center;
+          font-family: 'Inter', sans-serif;
+          text-transform: uppercase;
           letter-spacing: 1px;
         }
         
-        .course-text {
-          font-size: 18px;
-          color: #333;
-          margin: 30px 0;
-          line-height: 1.6;
-          font-weight: 400;
+        .achievement-details {
+          background: linear-gradient(145deg, #000000, #333333);
+          color: white;
+          padding: 20px 40px;
+          border-radius: 8px;
+          box-shadow: 0 6px 12px rgba(0,0,0,0.3);
         }
         
-        .course-title {
+        .achievement-score {
+          font-size: 24px;
+          font-weight: 700;
+          margin-bottom: 5px;
           font-family: 'Playfair Display', serif;
-          font-size: 28px;
-          font-weight: 600;
-          color: #000;
-          margin: 10px 0;
-          letter-spacing: 0.5px;
         }
         
-        .performance-section {
-          margin: 25px 0;
-          padding: 20px;
-          background: rgba(212, 175, 55, 0.1);
-          border-radius: 10px;
-          border: 1px solid #d4af37;
-        }
-        
-        .score-text {
-          font-size: 16px;
-          color: #333;
-          font-weight: 500;
+        .achievement-label {
+          font-size: 12px;
+          color: #ccc;
+          font-family: 'Inter', sans-serif;
+          text-transform: uppercase;
+          letter-spacing: 1px;
         }
         
         .certificate-footer {
           display: flex;
           justify-content: space-between;
           align-items: end;
-          margin-top: 40px;
+          margin-top: 50px;
+          padding-top: 30px;
+          border-top: 2px solid #c0c0c0;
+          background: linear-gradient(90deg, transparent, rgba(192,192,192,0.1), transparent);
+        }
+        
+        .certificate-details {
+          text-align: left;
+          font-size: 14px;
+          color: #666;
+          line-height: 1.6;
+          font-family: 'Inter', sans-serif;
         }
         
         .signature-section {
@@ -214,13 +321,14 @@ function generateCertificateHTML(data: CertificateData): string {
           width: 200px;
           height: 1px;
           background: #000;
-          margin: 40px auto 10px;
+          margin: 0 auto 10px;
         }
         
         .signature-title {
           font-size: 14px;
           color: #666;
           font-weight: 500;
+          font-family: 'Inter', sans-serif;
         }
         
         .signature-name {
@@ -228,13 +336,7 @@ function generateCertificateHTML(data: CertificateData): string {
           color: #000;
           font-weight: 600;
           margin-top: 5px;
-        }
-        
-        .certificate-details {
-          text-align: right;
-          font-size: 12px;
-          color: #666;
-          line-height: 1.5;
+          font-family: 'Playfair Display', serif;
         }
         
         .watermark {
@@ -243,129 +345,29 @@ function generateCertificateHTML(data: CertificateData): string {
           left: 50%;
           transform: translate(-50%, -50%) rotate(-45deg);
           font-size: 120px;
-          color: rgba(212, 175, 55, 0.05);
+          color: rgba(192, 192, 192, 0.05);
           font-weight: 700;
           z-index: 1;
           pointer-events: none;
-        }
-        
-        .logo-section {
-          position: absolute;
-          top: 80px;
-          left: 80px;
-          display: flex;
-          align-items: center;
-          gap: 15px;
-        }
-        
-        .company-logo {
-          width: 60px;
-          height: 60px;
-          border-radius: 8px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          overflow: hidden;
-        }
-        
-        .company-logo img {
-          width: 100%;
-          height: 100%;
-          object-fit: contain;
-        }
-        
-        .badge-container {
-          display: flex;
-          justify-content: center;
-          margin: 20px 0;
-        }
-        
-        .achievement-badge {
-          width: 80px;
-          height: 80px;
-          object-fit: contain;
+          font-family: 'Playfair Display', serif;
         }
         
         .certification-logos {
+          position: absolute;
+          bottom: 20px;
+          left: 50%;
+          transform: translateX(-50%);
           display: flex;
-          justify-content: center;
+          gap: 20px;
           align-items: center;
-          gap: 30px;
-          margin-top: 20px;
-          padding: 20px;
-          border-top: 2px solid #d4af37;
+          z-index: 10;
         }
         
-        .cert-logo {
+        .certification-logos img {
           height: 40px;
           width: auto;
           object-fit: contain;
-        }
-        
-        .company-info {
-          text-align: left;
-        }
-        
-        .company-name {
-          font-size: 18px;
-          font-weight: 700;
-          color: #000;
-          margin-bottom: 2px;
-        }
-        
-        .company-tagline {
-          font-size: 12px;
-          color: #666;
-          font-weight: 400;
-        }
-        
-        .verification-qr {
-          position: absolute;
-          top: 80px;
-          right: 80px;
-          text-align: center;
-        }
-        
-        .qr-code {
-          width: 80px;
-          height: 80px;
-          background: #f0f0f0;
-          border: 2px solid #d4af37;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          margin: 0 auto 8px;
-          font-size: 10px;
-          color: #666;
-        }
-        
-        .qr-text {
-          font-size: 10px;
-          color: #666;
-          font-weight: 500;
-        }
-        
-        .iso-badges {
-          position: absolute;
-          bottom: 80px;
-          left: 80px;
-          display: flex;
-          gap: 10px;
-        }
-        
-        .iso-badge {
-          width: 50px;
-          height: 50px;
-          background: #000;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: white;
-          font-size: 8px;
-          font-weight: 600;
-          text-align: center;
-          line-height: 1.1;
+          opacity: 0.8;
         }
       </style>
     </head>
@@ -379,66 +381,103 @@ function generateCertificateHTML(data: CertificateData): string {
           
           <div class="watermark">OCTAMY</div>
           
-          <div class="logo-section">
-            <div class="company-logo">
-              <img src="https://octamy.com/storage/optionbuilder/uploads/554402-14-2025_0143pmoctamy_logo_black.png" alt="Octamy Logo" />
-            </div>
-            <div class="company-info">
-              <div class="company-name">Octamy Solutions</div>
-              <div class="company-tagline">Professional Excellence</div>
-            </div>
-          </div>
-          
-          <div class="verification-qr">
-            <div class="qr-code">QR CODE</div>
-            <div class="qr-text">Verify Online</div>
-          </div>
-          
           <div class="certificate-content">
-            <div class="certificate-header">
-              <div class="certificate-title">CERTIFICATE</div>
-              <div class="certificate-subtitle">OF PROFESSIONAL ACHIEVEMENT</div>
+            <div class="company-header">
+              <div class="company-logo">
+                <div class="company-name">OCTAMY</div>
+              </div>
+              <div class="company-tagline">Solutions Private Limited</div>
+              <div style="font-size: 12px; color: #999; font-style: italic; margin-top: 5px;">Authorized Certification Body</div>
             </div>
             
-            <div class="certificate-body">
-              <div class="recipient-text">This is to certify that</div>
-              <div class="recipient-name">${data.userName}</div>
-              
-              <div class="course-text">
-                has successfully completed the professional certification program
+            <div class="certificate-title">Certificate</div>
+            <div class="certificate-subtitle">of Professional Excellence</div>
+            
+            <div class="awarded-text">This is to certify that</div>
+            
+            <div class="recipient-name">${data.userName || 'Student Name'}</div>
+            
+            <div class="completion-text">
+              has successfully demonstrated mastery and completed the comprehensive<br />
+              professional certification program
+            </div>
+            
+            <div class="course-name">${data.courseTitle || 'Course Title'}</div>
+            
+            <div class="achievement-section">
+              <div class="badge-container">
+                <svg width="120" height="120" viewBox="0 0 120 120" class="badge-image">
+                  <defs>
+                    <linearGradient id="shieldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" style="stop-color:#4a4a4a;stop-opacity:1" />
+                      <stop offset="50%" style="stop-color:#2a2a2a;stop-opacity:1" />
+                      <stop offset="100%" style="stop-color:#1a1a1a;stop-opacity:1" />
+                    </linearGradient>
+                    <linearGradient id="ribbonGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" style="stop-color:#888;stop-opacity:1" />
+                      <stop offset="50%" style="stop-color:#666;stop-opacity:1" />
+                      <stop offset="100%" style="stop-color:#555;stop-opacity:1" />
+                    </linearGradient>
+                  </defs>
+                  
+                  <!-- Shield Shape -->
+                  <path d="M60 10 L100 30 L100 60 Q100 80 85 95 Q70 105 60 110 Q50 105 35 95 Q20 80 20 60 L20 30 Z" 
+                        fill="url(#shieldGradient)" stroke="#fff" stroke-width="2"/>
+                  
+                  <!-- Inner Circle -->
+                  <circle cx="60" cy="45" r="15" fill="#fff" stroke="#333" stroke-width="1"/>
+                  
+                  <!-- Sunburst pattern around circle -->
+                  <g transform="translate(60,45)">
+                    <g stroke="#fff" stroke-width="1" fill="none">
+                      <circle r="20" opacity="0.3"/>
+                      <path d="M0,-25 L0,-20 M0,20 L0,25 M25,0 L20,0 M-20,0 L-25,0" stroke-width="2"/>
+                      <path d="M17.6,-17.6 L14.1,-14.1 M-14.1,14.1 L-17.6,17.6 M17.6,17.6 L14.1,14.1 M-14.1,-14.1 L-17.6,-17.6" stroke-width="1.5"/>
+                    </g>
+                  </g>
+                  
+                  <!-- Ribbon banners -->
+                  <path d="M20 70 Q35 65 50 70 Q60 72 70 70 Q85 65 100 70 L95 85 Q80 80 65 85 Q60 87 55 85 Q40 80 25 85 Z" 
+                        fill="url(#ribbonGradient)" stroke="#333" stroke-width="1" opacity="0.8"/>
+                  
+                  <path d="M25 85 Q40 80 55 85 Q60 87 65 85 Q80 80 95 85 L90 95 Q75 90 60 95 Q45 90 30 95 Z" 
+                        fill="url(#ribbonGradient)" stroke="#333" stroke-width="1" opacity="0.6"/>
+                  
+                  <!-- Ribbon ends -->
+                  <path d="M20 70 L15 85 L25 80 Z" fill="url(#ribbonGradient)" opacity="0.9"/>
+                  <path d="M100 70 L105 85 L95 80 Z" fill="url(#ribbonGradient)" opacity="0.9"/>
+                </svg>
+                <div class="badge-text">${courseLevel.toUpperCase()}</div>
               </div>
-              <div class="course-title">${data.courseTitle}</div>
               
-              <div class="performance-section">
-                <div class="badge-container">
-                  <img src="${getBadgeImage(data.badge || 'gold')}" alt="${data.badge || 'Gold'} Badge" class="achievement-badge" />
-                </div>
-                <div class="score-text">
-                  Score Achieved: ${data.userScore}% | Passing Score: ${data.passingScore}%
-                </div>
+              <div class="achievement-details">
+                <div class="achievement-score">Score Achieved: ${data.userScore || 0}%</div>
+                <div class="achievement-label">Passing Score: ${data.passingScore || 70}%</div>
               </div>
             </div>
             
             <div class="certificate-footer">
+              <div class="certificate-details">
+                <div><strong>Certificate ID:</strong> ${data.certificateId}</div>
+                <div><strong>Issue Date:</strong> ${new Date(data.issueDate).toLocaleDateString()}</div>
+                <div><strong>Completion Date:</strong> ${new Date(data.completionDate).toLocaleDateString()}</div>
+                <div><strong>Valid Until:</strong> ${expiryDate.toLocaleDateString()}</div>
+                <div><strong>Status:</strong> Valid Internationally</div>
+              </div>
+              
               <div class="signature-section">
                 <div class="signature-line"></div>
                 <div class="signature-title">Director</div>
                 <div class="signature-name">Octamy Solutions</div>
               </div>
-              
-              <div class="certificate-details">
-                <div>Certificate ID: ${data.certificateId}</div>
-                <div>Issue Date: ${new Date(data.issueDate).toLocaleDateString()}</div>
-                <div>Completion Date: ${new Date(data.completionDate).toLocaleDateString()}</div>
-                <div>Valid Internationally</div>
-              </div>
             </div>
           </div>
           
           <div class="certification-logos">
-            <img src="https://images.seeklogo.com/logo-png/55/2/iso-certified-company-stamp-logo-png_seeklogo-556487.png" alt="ISO Certified" class="cert-logo" />
-            <img src="https://static.vecteezy.com/system/resources/previews/019/909/405/non_2x/make-in-india-transparent-make-in-india-free-free-png.png" alt="Make in India" class="cert-logo" />
-            <img src="https://sudikshya.com/wp-content/uploads/2024/08/startup-and-odisha-combo.png" alt="Startup Odisha" class="cert-logo" />
+            <img src="https://images.seeklogo.com/logo-png/55/2/iso-certified-company-stamp-logo-png_seeklogo-556487.png" alt="ISO Certified" />
+            <img src="https://static.vecteezy.com/system/resources/previews/019/909/405/non_2x/make-in-india-transparent-make-in-india-free-free-png.png" alt="Make in India" />
+            <img src="https://sudikshya.com/wp-content/uploads/2024/08/startup-and-odisha-combo.png" alt="Startup Odisha" />
+            <img src="https://octamy.com/storage/optionbuilder/uploads/554402-14-2025_0143pmoctamy_logo_black.png" alt="Octamy Logo" />
           </div>
         </div>
       </div>
@@ -463,7 +502,7 @@ export async function generateCertificatePDF(data: CertificateData): Promise<Buf
       format: 'A4',
       landscape: true,
       printBackground: true,
-      margin: { top: 0, right: 0, bottom: 0, left: 0 }
+      margin: { top: '10px', right: '10px', bottom: '10px', left: '10px' }
     });
 
     return Buffer.from(pdf);
@@ -519,122 +558,59 @@ export async function generateInvoicePDF(data: {
         }
         
         .company-info h1 {
+          margin: 0;
           font-size: 28px;
-          font-weight: bold;
-          margin: 0 0 5px 0;
           color: #000;
         }
         
         .company-info p {
-          margin: 2px 0;
+          margin: 5px 0;
           color: #666;
-          font-size: 14px;
         }
         
-        .invoice-details {
+        .invoice-info {
           text-align: right;
         }
         
-        .invoice-number {
+        .invoice-info h2 {
+          margin: 0;
           font-size: 24px;
-          font-weight: bold;
-          color: #000;
-          margin-bottom: 10px;
-        }
-        
-        .invoice-date {
-          color: #666;
-          font-size: 14px;
-        }
-        
-        .billing-section {
-          display: flex;
-          justify-content: space-between;
-          margin-bottom: 40px;
-        }
-        
-        .billing-info h3 {
-          font-size: 16px;
-          font-weight: bold;
-          margin-bottom: 10px;
           color: #000;
         }
         
-        .billing-info p {
-          margin: 5px 0;
-          color: #333;
-          font-size: 14px;
+        .customer-info {
+          margin-bottom: 30px;
         }
         
-        .items-table {
+        .invoice-details {
           width: 100%;
           border-collapse: collapse;
           margin-bottom: 30px;
         }
         
-        .items-table th {
-          background: #000;
-          color: white;
-          padding: 15px;
-          text-align: left;
-          font-weight: bold;
-        }
-        
-        .items-table td {
-          padding: 15px;
-          border-bottom: 1px solid #eee;
-        }
-        
-        .items-table .amount {
-          text-align: right;
-          font-weight: bold;
-        }
-        
-        .total-section {
-          display: flex;
-          justify-content: flex-end;
-          margin-bottom: 40px;
-        }
-        
-        .total-table {
-          min-width: 300px;
-        }
-        
-        .total-table tr td {
-          padding: 8px 15px;
-          text-align: right;
-        }
-        
-        .total-table .total-label {
-          font-weight: bold;
+        .invoice-details th,
+        .invoice-details td {
+          border: 1px solid #ddd;
+          padding: 12px;
           text-align: left;
         }
         
-        .total-table .grand-total {
-          background: #000;
-          color: white;
-          font-weight: bold;
-          font-size: 18px;
-        }
-        
-        .payment-info {
+        .invoice-details th {
           background: #f8f9fa;
-          padding: 20px;
-          border-left: 4px solid #000;
-          margin-bottom: 30px;
+          font-weight: bold;
         }
         
-        .payment-info h3 {
-          margin-top: 0;
-          color: #000;
+        .total-row {
+          font-weight: bold;
+          background: #f0f0f0;
         }
         
         .footer {
-          text-align: center;
-          color: #666;
-          font-size: 12px;
-          border-top: 1px solid #eee;
+          margin-top: 40px;
           padding-top: 20px;
+          border-top: 1px solid #ddd;
+          color: #666;
+          font-size: 14px;
         }
       </style>
     </head>
@@ -642,90 +618,54 @@ export async function generateInvoicePDF(data: {
       <div class="invoice-container">
         <div class="invoice-header">
           <div class="company-info">
-            <h1>Octamy Solutions</h1>
-            <p>Professional Excellence in Certification</p>
-            <p>support@octamy.com</p>
-            <p>www.octamy.com</p>
+            <h1>OCTAMY SOLUTIONS</h1>
+            <p>Professional Certificate Provider</p>
+            <p>Email: info@octamy.com</p>
           </div>
-          <div class="invoice-details">
-            <div class="invoice-number">INVOICE</div>
-            <div class="invoice-date">${data.date.toLocaleDateString()}</div>
-          </div>
-        </div>
-        
-        <div class="billing-section">
-          <div class="billing-info">
-            <h3>Bill To:</h3>
-            <p><strong>${data.customerName}</strong></p>
-            <p>${data.customerEmail}</p>
-          </div>
-          <div class="billing-info">
-            <h3>Payment Details:</h3>
-            <p>Transaction ID: ${data.transactionId}</p>
-            <p>Payment Method: ${data.paymentMethod}</p>
-            <p>Status: Completed</p>
+          <div class="invoice-info">
+            <h2>INVOICE</h2>
+            <p><strong>Invoice #:</strong> ${data.transactionId}</p>
+            <p><strong>Date:</strong> ${data.date.toLocaleDateString()}</p>
           </div>
         </div>
         
-        <table class="items-table">
+        <div class="customer-info">
+          <h3>Bill To:</h3>
+          <p><strong>${data.customerName}</strong></p>
+          <p>${data.customerEmail}</p>
+        </div>
+        
+        <table class="invoice-details">
           <thead>
             <tr>
               <th>Description</th>
-              <th>Course</th>
-              <th class="amount">Amount</th>
+              <th>Amount</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td>Digital Certificate</td>
-              <td>${data.courseTitle}</td>
-              <td class="amount">₹${data.certificateAmount}</td>
-            </tr>
-            ${data.includesPhysicalCopy ? `
-            <tr>
-              <td>Physical Certificate Shipping</td>
-              <td>Premium Paper & Delivery</td>
-              <td class="amount">₹${data.shippingAmount}</td>
-            </tr>
-            ` : ''}
-          </tbody>
-        </table>
-        
-        <div class="total-section">
-          <table class="total-table">
-            <tr>
-              <td class="total-label">Subtotal:</td>
+              <td>Digital Certificate - ${data.courseTitle}</td>
               <td>₹${data.certificateAmount}</td>
             </tr>
             ${data.includesPhysicalCopy ? `
             <tr>
-              <td class="total-label">Shipping:</td>
+              <td>Physical Certificate Shipping</td>
               <td>₹${data.shippingAmount}</td>
             </tr>
             ` : ''}
-            <tr>
-              <td class="total-label">Tax:</td>
-              <td>₹0.00</td>
+          </tbody>
+          <tfoot>
+            <tr class="total-row">
+              <td><strong>Total Amount</strong></td>
+              <td><strong>₹${data.amount}</strong></td>
             </tr>
-            <tr class="grand-total">
-              <td class="total-label">Total:</td>
-              <td>₹${data.amount}</td>
-            </tr>
-          </table>
-        </div>
-        
-        <div class="payment-info">
-          <h3>Payment Information</h3>
-          <p><strong>Status:</strong> Payment Completed Successfully</p>
-          <p><strong>Certificate:</strong> Available for immediate download</p>
-          ${data.includesPhysicalCopy ? '<p><strong>Physical Copy:</strong> Will be shipped within 7-10 business days</p>' : ''}
-          <p><strong>Verification:</strong> Certificate can be verified online using the certificate ID</p>
-        </div>
+          </tfoot>
+        </table>
         
         <div class="footer">
-          <p>© 2025 Octamy Solutions. All rights reserved.</p>
-          <p>This is a computer-generated invoice. No signature required.</p>
-          <p>For queries, contact support@octamy.com</p>
+          <p><strong>Payment Method:</strong> ${data.paymentMethod}</p>
+          <p><strong>Payment Status:</strong> Completed</p>
+          <p>Thank you for choosing Octamy Solutions for your professional certification needs.</p>
         </div>
       </div>
     </body>

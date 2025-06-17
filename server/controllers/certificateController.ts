@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { storage } from '../storage';
-import { generateCertificateHTML, generateCertificatePDF } from '../utils/certificateGenerator';
+import { generateCertificateHTML, generateCertificatePDF } from '../utils/certificateGenerator.js';
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -106,7 +106,7 @@ export class CertificateController {
         completionDate: certificate.issuedAt || new Date(),
         passingScore: course.passingScore,
         userScore: certificate.score,
-        badge: certificate.score >= 90 ? 'Gold' : certificate.score >= 80 ? 'Silver' : certificate.score >= 70 ? 'Bronze' : 'Participation'
+        courseLevel: course.level || 'Beginner'
       };
 
       // Check if PDF download is requested
