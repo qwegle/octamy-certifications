@@ -7,6 +7,7 @@ import Header from '@/components/header';
 import Footer from '@/components/footer';
 import { QrCode, Download, Share2, Trophy, Calendar, Award, CheckCircle, XCircle } from 'lucide-react';
 import type { Certificate } from '@shared/schema';
+import certificateBackground from '@/assets/certificate-background.png';
 
 export default function CertificateView() {
   const { certificateId } = useParams();
@@ -124,10 +125,13 @@ export default function CertificateView() {
             `}</style>
             
             <div 
-              className="w-full h-auto relative bg-gradient-to-br from-white via-gray-50 to-white"
+              className="w-full h-auto relative bg-gradient-to-br from-white via-gray-50 to-white certificate-content"
               style={{ 
                 aspectRatio: '1.414/1',
-                background: 'linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%)',
+                background: `linear-gradient(145deg, rgba(255,255,255,0.9) 0%, rgba(248,249,250,0.9) 100%), url(${certificateBackground})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
                 border: '8px solid #000',
                 borderRadius: '16px',
                 boxShadow: '0 40px 80px rgba(0,0,0,0.4)'
