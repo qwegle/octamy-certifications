@@ -47,6 +47,11 @@ export function SellerAuthProvider({ children }: { children: ReactNode }) {
       if (response.ok) {
         const data = await response.json();
         setSeller(data.seller);
+      } else if (response.status === 401 || response.status === 403) {
+        // Token expired or invalid - clear and force re-login
+        localStorage.removeItem("sellerToken");
+        setToken(null);
+        setSeller(null);
       } else {
         localStorage.removeItem("sellerToken");
         setToken(null);
