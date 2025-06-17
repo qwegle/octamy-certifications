@@ -22,7 +22,7 @@ function generateCertificateHTML(data: CertificateData): string {
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>Professional Certificate - ${data.certificateId}</title>
-      <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+      <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
       <style>
         * {
           margin: 0;
@@ -31,7 +31,7 @@ function generateCertificateHTML(data: CertificateData): string {
         }
         
         body {
-          font-family: 'Inter', sans-serif;
+          font-family: 'Poppins', sans-serif;
           background: white;
           margin: 0;
           padding: 0;
@@ -305,14 +305,19 @@ function generateCertificateHTML(data: CertificateData): string {
         
         .bottom-section {
           position: absolute;
-          bottom: 70px;
+          bottom: 20px;
           left: 0;
           right: 0;
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: 0 40px;
+          padding: 0 100px;
+          margin-bottom: 20px;
           z-index: 10;
+        }
+        
+        .footer-section {
+          margin-bottom: 50px;
         }
         
         .expiry-info {
@@ -366,15 +371,15 @@ function generateCertificateHTML(data: CertificateData): string {
           <div class="certificate-content">
             <div class="header-section">
               <div class="company-logo">
-                <div class="company-name">OCTAMY</div>
+                <img src="https://octamy.com/storage/optionbuilder/uploads/554402-14-2025_0143pmoctamy_logo_black.png" alt="Octamy Logo" style="height: 50px;">
               </div>
               <div class="company-tagline">Solutions Private Limited</div>
-              <div style="font-size: 10px; color: #999; font-style: italic;">Authorized Certification Body</div>
+              <div style="font-size: 10px; color: #999; font-style: italic;">An ISO Certified Company</div>
             </div>
             
             <!-- Badge positioned in top right -->
             <div class="badge-container">
-              <svg width="120" height="120" viewBox="0 0 120 120" class="badge-image">
+              <svg width="160" height="160" viewBox="0 0 120 120" class="badge-image">
                 <defs>
                   <linearGradient id="shieldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" style="stop-color:#4a4a4a;stop-opacity:1" />
@@ -461,7 +466,6 @@ function generateCertificateHTML(data: CertificateData): string {
               <img src="https://images.seeklogo.com/logo-png/55/2/iso-certified-company-stamp-logo-png_seeklogo-556487.png" alt="ISO Certified" />
               <img src="https://static.vecteezy.com/system/resources/previews/019/909/405/non_2x/make-in-india-transparent-make-in-india-free-free-png.png" alt="Make in India" />
               <img src="https://sudikshya.com/wp-content/uploads/2024/08/startup-and-odisha-combo.png" alt="Startup Odisha" />
-              <img src="https://octamy.com/storage/optionbuilder/uploads/554402-14-2025_0143pmoctamy_logo_black.png" alt="Octamy Logo" />
             </div>
           </div>
         </div>
