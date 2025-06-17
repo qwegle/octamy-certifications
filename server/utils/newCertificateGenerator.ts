@@ -468,7 +468,7 @@ function generateCertificateHTML(data: CertificateData): string {
               
               <div class="signature-section">
                 <img 
-                  src="./attached_assets/Nitikesh_signature_1750177747117.png" 
+                  src="./attached_assets/nitikesh-signature.svg" 
                   alt="Nitikesh Pattanayak Signature" 
                   class="signature-image"
                 />
@@ -487,8 +487,8 @@ function generateCertificateHTML(data: CertificateData): string {
             </div>
             
             <div class="certification-logos">
-              <img src="./attached_assets/64180 (1)_1750158023564.png" alt="ISO Certified" />
-              <img src="./attached_assets/image_1750156610131.png" alt="Make in India" />
+              <img src="./attached_assets/iso-certified.svg" alt="ISO Certified" />
+              <img src="./attached_assets/make-in-india.svg" alt="Make in India" />
             </div>
           </div>
         </div>

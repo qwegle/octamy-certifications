@@ -397,7 +397,7 @@ export default function CertificateView() {
                 <div className="text-left">
                   {/* Signature Image */}
                   <img 
-                    src="/attached_assets/Nitikesh_signature_1750177747117.png" 
+                    src="/attached_assets/nitikesh-signature.svg" 
                     alt="Nitikesh Pattanayak Signature" 
                     className="mb-2 h-12 w-auto"
                     style={{ height: '48px', width: 'auto', marginBottom: '8px' }}
@@ -476,7 +476,7 @@ export default function CertificateView() {
                 {/* Certification Logos */}
                 <div className="certification-logos flex justify-center items-center gap-8 mt-10 pt-6 border-t-2 border-yellow-500">
                   <img 
-                    src="https://images.seeklogo.com/logo-png/55/2/iso-certified-company-stamp-logo-png_seeklogo-556487.png" 
+                    src="/attached_assets/iso-certified.svg" 
                     alt="ISO Certified" 
                     style={{ 
                       height: '55px',
@@ -485,7 +485,7 @@ export default function CertificateView() {
                     }} 
                   />
                   <img 
-                    src="https://static.vecteezy.com/system/resources/previews/019/909/405/non_2x/make-in-india-transparent-make-in-india-free-free-png.png" 
+                    src="/attached_assets/make-in-india.svg" 
                     alt="Make in India" 
                     style={{ 
                       height: '55px',

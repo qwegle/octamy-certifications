@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <defs>
+    <style>
+      .text { font-family: Arial, sans-serif; font-weight: bold; text-anchor: middle; }
+      .large-text { font-size: 14px; }
+      .medium-text { font-size: 10px; }
+      .small-text { font-size: 8px; }
+    </style>
+  </defs>
+  
+  <!-- Outer circle -->
+  <circle cx="60" cy="60" r="58" fill="#1f4e79" stroke="#000" stroke-width="2"/>
+  
+  <!-- Inner circle -->
+  <circle cx="60" cy="60" r="45" fill="none" stroke="#fff" stroke-width="1"/>
+  
+  <!-- ISO text -->
+  <text x="60" y="35" class="text large-text" fill="#fff">ISO</text>
+  <text x="60" y="50" class="text medium-text" fill="#fff">CERTIFIED</text>
+  <text x="60" y="63" class="text medium-text" fill="#fff">COMPANY</text>
+  
+  <!-- Certificate symbol -->
+  <rect x="45" y="70" width="30" height="20" fill="#fff" stroke="#1f4e79" stroke-width="1"/>
+  <text x="60" y="82" class="text small-text" fill="#1f4e79">CERT</text>
+  
+  <!-- Bottom text -->
+  <text x="60" y="100" class="text small-text" fill="#fff">QUALITY ASSURED</text>
+</svg>

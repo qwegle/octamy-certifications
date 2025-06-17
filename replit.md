@@ -104,15 +104,17 @@ Octamy is a comprehensive professional certification platform built as a full-st
 
 ## Recent Updates
 
-### Certificate Design Enhancement with Signature Integration (June 17, 2025)
+### Certificate Design Enhancement with SVG Asset Integration (June 17, 2025)
 - **Enhanced certificate styling** with professional Poppins font family and refined typography
-- **Integrated authentic signature** of Nitikesh Pattanayak (Director of Certification) into certificate design
-- **Updated certificate elements** including recipient name, course name, completion text, and footer sections
-- **Professional color scheme** using #1f2138 for primary text and improved visual hierarchy
-- **Signature positioning** above signature line with proper sizing and placement
-- **Certification logos** sized to 55px height for optimal presentation and authenticity
+- **Created reliable SVG assets** replacing external image URLs for consistent loading
+- **Professional SVG logos** for ISO certification and Make in India branding
+- **Stylized SVG signature** for Nitikesh Pattanayak with handwritten flourishes
+- **Fixed certificate styling issues** including recipient name margins and footer spacing
+- **Updated certificate elements** with 70px footer margin and proper text formatting
+- **Removed italic styling** from "An ISO Certified Company" text for better readability
+- **Synchronized both generators** to use identical SVG assets and styling
+- **Improved performance** by using local SVG files instead of external URLs
 - **Badge styling** with precise positioning and professional verification elements
-- **Footer section** enhanced with 70px margin and proper certificate details formatting
 
 ### PayUMoney Payment System Fix (June 17, 2025)
 - **Fixed critical payment flow issue** where certificates were created as already paid (isPaid: true)

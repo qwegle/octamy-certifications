@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="60" viewBox="0 0 200 60">
+  <defs>
+    <style>
+      .signature { 
+        font-family: 'Brush Script MT', cursive; 
+        font-size: 24px; 
+        fill: #1f2138;
+        stroke: #1f2138;
+        stroke-width: 0.5;
+      }
+    </style>
+  </defs>
+  
+  <!-- Signature path (stylized handwriting) -->
+  <path d="M20 40 Q30 25, 45 35 Q60 45, 75 30 Q90 20, 105 35 Q120 50, 135 25 Q150 15, 165 40 Q175 50, 185 35" 
+        fill="none" 
+        stroke="#1f2138" 
+        stroke-width="2" 
+        stroke-linecap="round"/>
+        
+  <!-- Additional signature flourish -->
+  <path d="M25 45 Q40 50, 55 42 Q70 35, 85 48 Q100 55, 115 42 Q130 30, 145 45 Q160 55, 175 42" 
+        fill="none" 
+        stroke="#1f2138" 
+        stroke-width="1" 
+        stroke-linecap="round" 
+        opacity="0.7"/>
+        
+  <!-- Underline flourish -->
+  <path d="M20 50 Q100 45, 180 50" 
+        fill="none" 
+        stroke="#1f2138" 
+        stroke-width="1" 
+        stroke-linecap="round"/>
+</svg>
