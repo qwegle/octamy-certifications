@@ -389,118 +389,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Certificate routes
+  // Certificate routes - This endpoint should NOT create certificates automatically
+  // Certificates should only be created after successful PayUMoney payment
   app.post("/api/certificates/create", optionalAuth, async (req: AuthenticatedRequest, res: Response) => {
-    try {
-      const { examAttemptId } = req.body;
-      
-      const examAttempt = await storage.getExamAttempt(examAttemptId);
-      if (!examAttempt) {
-        return res.status(404).json({ message: "Exam attempt not found" });
-      }
-      
-      if (!examAttempt.passed) {
-        return res.status(400).json({ message: "Exam not passed" });
-      }
-      
-      const course = await storage.getCourse(examAttempt.courseId);
-      if (!course) {
-        return res.status(404).json({ message: "Course not found" });
-      }
-
-      // Check if user already has a certificate for this course
-      const existingCertificate = await storage.getUserCertificateForCourse(
-        examAttempt.userId || null, 
-        examAttempt.courseId,
-        examAttempt.userEmail
-      );
-
-      if (existingCertificate) {
-        // If new score is higher, update existing certificate
-        if (examAttempt.score > existingCertificate.score) {
-          const badge = getBadgeFromScore(examAttempt.score);
-          
-          const updatedCertificate = await storage.updateCertificate(existingCertificate.id, {
-            examAttemptId,
-            score: examAttempt.score,
-            badge,
-            isPaid: false, // User needs to pay for new certificate
-            retakeCount: existingCertificate.retakeCount + 1
-          });
-          
-          return res.json(updatedCertificate);
-        } else {
-          // Prevent certificate purchase if score is same or lower
-          return res.status(400).json({ 
-            message: `You scored ${examAttempt.score}% but need to score higher than your previous best of ${existingCertificate.score}% to purchase a new certificate.`,
-            score: examAttempt.score,
-            previousBest: existingCertificate.score,
-            canPurchase: false
-          });
-        }
-      }
-      
-      // Generate certificate ID
-      const certificateId = `OCT-${new Date().getFullYear()}-${course.title.replace(/\s+/g, '').toUpperCase().slice(0, 3)}-${Date.now()}`;
-      
-      // Calculate badge based on score
-      const badge = getBadgeFromScore(examAttempt.score);
-      
-      // Generate unique certificate number
-      const certificateNumber = generateCertificateNumber();
-      
-      // CERTIFICATE CREATION LOGIC:
-      // Only create certificates for exam attempts that actually passed
-      // This uses the same logic as exam submission:
-      // - First time: Must have scored ≥50%
-      // - Retakes: Must have scored higher than previous best
-      
-      if (!examAttempt.passed) {
-        // Get user's exam history to provide helpful error message
-        let errorMessage = `Certificate can only be created for passing exam attempts. Current score: ${examAttempt.score}%`;
-        
-        if (req.user?.userId) {
-          const userAttempts = await storage.getExamAttemptsByUserAndCourse(req.user.userId, examAttempt.courseId);
-          const otherAttempts = userAttempts.filter(attempt => attempt.id !== examAttempt.id);
-          
-          if (otherAttempts.length > 0) {
-            const previousBest = Math.max(...otherAttempts.map(attempt => attempt.score));
-            errorMessage = `This is a retake attempt. You scored ${examAttempt.score}% but need to score higher than your previous best of ${previousBest}% to get a certificate.`;
-          } else {
-            errorMessage = `This is your first attempt. You scored ${examAttempt.score}% but need at least 50% to get a certificate.`;
-          }
-        }
-        
-        return res.status(400).json({ 
-          message: errorMessage,
-          score: examAttempt.score,
-          passed: false
-        });
-      }
-
-      // Create new certificate
-      const certificate = await storage.createCertificate({
-        certificateId,
-        examAttemptId,
-        courseId: examAttempt.courseId,
-        userId: req.user?.userId || null,
-        userEmail: examAttempt.userEmail,
-        userName: examAttempt.userName,
-        courseTitle: course.title,
-        score: examAttempt.score,
-        badge,
-        certificateNumber,
-        expiresAt: calculateExpiryDate(),
-        businessName: req.body.businessName || null, // For business certificates
-        retakeCount: 0,
-        isPaid: false, // User needs to pay for certificate
-      });
-      
-      res.json(certificate);
-    } catch (error) {
-      console.error("Error creating certificate:", error);
-      res.status(500).json({ message: "Failed to create certificate" });
-    }
+    return res.status(400).json({ 
+      message: "Certificates can only be created through payment. Please complete your purchase through PayUMoney.",
+      requiresPayment: true
+    });
   });
 
   // Get certificate by ID (certificate ID string, not database ID)
@@ -602,7 +497,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Check if user has certificate for specific course
+  // Check if user has certificate for specific course - only return if paid
   app.get("/api/user/certificate-for-course/:courseId", optionalAuth, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const courseId = parseInt(req.params.courseId);
@@ -615,7 +510,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       
       if (certificate) {
-        res.json(certificate);
+        // Only return certificate if payment has been completed
+        if (certificate.isPaid) {
+          res.json(certificate);
+        } else {
+          res.status(402).json({ 
+            message: "Certificate payment required",
+            certificateId: certificate.id,
+            requiresPayment: true
+          });
+        }
       } else {
         res.status(404).json({ message: "No certificate found for this course" });
       }
