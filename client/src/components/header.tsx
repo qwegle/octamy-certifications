@@ -1,101 +1,64 @@
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/lib/auth";
+import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 
 export default function Header() {
-  const { user, logout } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const [location] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const logout = () => {
+    localStorage.removeItem('authToken');
+    window.location.href = '/';
+  };
 
   const isActive = (path: string) => location === path;
 
   return (
-    <header className="bg-white border-b border-octamy-gray-200 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+    <header className="bg-black text-white sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-6 py-4">
+        <div className="flex justify-between items-center">
           {/* Logo */}
           <Link href="/" className="flex items-center">
-            <span className="text-2xl font-bold text-octamy-black">octamy</span>
+            <span className="text-2xl font-bold">OCTAMY</span>
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex space-x-8">
-            <Link
-              href="/"
-              className={`font-medium transition-colors ${
-                isActive("/")
-                  ? "text-octamy-black"
-                  : "text-octamy-gray-600 hover:text-octamy-black"
-              }`}
-            >
-              Courses
-            </Link>
-            <Link
-              href="/verify"
-              className={`font-medium transition-colors ${
-                isActive("/verify")
-                  ? "text-octamy-black"
-                  : "text-octamy-gray-600 hover:text-octamy-black"
-              }`}
-            >
-              Verify Certificate
-            </Link>
-            {user && (
-              <Link
-                href="/dashboard"
-                className={`font-medium transition-colors ${
-                  isActive("/dashboard")
-                    ? "text-octamy-black"
-                    : "text-octamy-gray-600 hover:text-octamy-black"
-                }`}
-              >
-                Dashboard
-              </Link>
-            )}
-            {user?.isAdmin && (
-              <Link
-                href="/admin"
-                className={`font-medium transition-colors ${
-                  isActive("/admin")
-                    ? "text-octamy-black"
-                    : "text-octamy-gray-600 hover:text-octamy-black"
-                }`}
-              >
-                Admin
-              </Link>
-            )}
+          <nav className="hidden md:flex space-x-6">
+            <Link href="/courses" className="hover:text-gray-300">Courses</Link>
+            <Link href="/virtual-internships" className="hover:text-gray-300">Internships</Link>
+            <Link href="/business-certifications" className="hover:text-gray-300">Business Pricing</Link>
+            <Link href="/partners" className="hover:text-gray-300">Partners</Link>
+            <Link href="/help-center" className="hover:text-gray-300">Help</Link>
           </nav>
 
           {/* Auth Buttons */}
-          <div className="hidden md:flex items-center space-x-4">
-            {user ? (
-              <div className="flex items-center space-x-4">
-                <span className="text-octamy-gray-600">Welcome, {user.name}</span>
-                <Button
-                  variant="outline"
-                  onClick={logout}
-                  className="text-octamy-gray-600 hover:text-octamy-black"
-                >
-                  Logout
-                </Button>
-              </div>
-            ) : (
+          <div className="flex items-center space-x-4">
+            {!isLoading && !isAuthenticated ? (
               <>
                 <Link href="/auth">
-                  <Button
-                    variant="ghost"
-                    className="text-octamy-gray-600 hover:text-octamy-black"
-                  >
+                  <Button variant="outline" className="border-white text-white hover:bg-white hover:text-black">
                     Login
                   </Button>
                 </Link>
-                <Link href="/auth?mode=register">
-                  <Button className="bg-octamy-black text-white hover:bg-octamy-gray-800">
-                    Sign Up
+                <Link href="/demo-certificate">
+                  <Button className="bg-white text-black hover:bg-gray-200">
+                    View Demo Certificate
                   </Button>
                 </Link>
+              </>
+            ) : (
+              <>
+                <Link href="/dashboard">
+                  <Button variant="outline" className="border-white text-white hover:bg-white hover:text-black">
+                    Dashboard
+                  </Button>
+                </Link>
+                <Button onClick={logout} className="bg-white text-black hover:bg-gray-200">
+                  Logout
+                </Button>
               </>
             )}
           </div>
@@ -115,67 +78,73 @@ export default function Header() {
 
         {/* Mobile Navigation */}
         {mobileMenuOpen && (
-          <div className="md:hidden bg-white border-t border-octamy-gray-200">
+          <div className="md:hidden bg-black border-t border-gray-700">
             <div className="px-4 py-4 space-y-2">
               <Link
-                href="/"
-                className="block text-octamy-gray-600 hover:text-octamy-black font-medium py-2"
+                href="/courses"
+                className="block text-white hover:text-gray-300 font-medium py-2"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Courses
               </Link>
               <Link
-                href="/verify"
-                className="block text-octamy-gray-600 hover:text-octamy-black font-medium py-2"
+                href="/virtual-internships"
+                className="block text-white hover:text-gray-300 font-medium py-2"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Verify Certificate
+                Internships
               </Link>
-              {user && (
-                <Link
-                  href="/dashboard"
-                  className="block text-octamy-gray-600 hover:text-octamy-black font-medium py-2"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Dashboard
-                </Link>
-              )}
-              {user?.isAdmin && (
-                <Link
-                  href="/admin"
-                  className="block text-octamy-gray-600 hover:text-octamy-black font-medium py-2"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Admin
-                </Link>
-              )}
-              <div className="pt-4 border-t border-octamy-gray-200">
-                {user ? (
+              <Link
+                href="/business-certifications"
+                className="block text-white hover:text-gray-300 font-medium py-2"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Business Pricing
+              </Link>
+              <Link
+                href="/partners"
+                className="block text-white hover:text-gray-300 font-medium py-2"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Partners
+              </Link>
+              <Link
+                href="/help-center"
+                className="block text-white hover:text-gray-300 font-medium py-2"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Help
+              </Link>
+              <div className="pt-4 border-t border-gray-700">
+                {!isLoading && !isAuthenticated ? (
                   <div className="space-y-2">
-                    <div className="text-octamy-gray-600 py-2">Welcome, {user.name}</div>
+                    <Link href="/auth" onClick={() => setMobileMenuOpen(false)}>
+                      <Button variant="outline" className="w-full border-white text-white hover:bg-white hover:text-black">
+                        Login
+                      </Button>
+                    </Link>
+                    <Link href="/demo-certificate" onClick={() => setMobileMenuOpen(false)}>
+                      <Button className="w-full bg-white text-black hover:bg-gray-200">
+                        View Demo Certificate
+                      </Button>
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)}>
+                      <Button variant="outline" className="w-full border-white text-white hover:bg-white hover:text-black">
+                        Dashboard
+                      </Button>
+                    </Link>
                     <Button
-                      variant="outline"
                       onClick={() => {
                         logout();
                         setMobileMenuOpen(false);
                       }}
-                      className="w-full"
+                      className="w-full bg-white text-black hover:bg-gray-200"
                     >
                       Logout
                     </Button>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    <Link href="/auth" onClick={() => setMobileMenuOpen(false)}>
-                      <Button variant="ghost" className="w-full">
-                        Login
-                      </Button>
-                    </Link>
-                    <Link href="/auth?mode=register" onClick={() => setMobileMenuOpen(false)}>
-                      <Button className="w-full bg-octamy-black text-white hover:bg-octamy-gray-800">
-                        Sign Up
-                      </Button>
-                    </Link>
                   </div>
                 )}
               </div>
