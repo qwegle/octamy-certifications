@@ -201,7 +201,7 @@ function generateCertificateHTML(data: CertificateData): string {
           font-size: 28px;
           font-weight: 600;
           color: #1f2138;
-          margin: 15px 0;
+          margin: 0;
           font-family: 'Poppins', serif;
           position: relative;
           padding: 10px 0;
@@ -238,7 +238,7 @@ function generateCertificateHTML(data: CertificateData): string {
           font-size: 20px;
           font-weight: 600;
           color: #1f2138;
-          margin: 15px 0;
+          margin: 5px 0;
           padding: 12px 25px;
           border: 2px solid #000000;
           border-radius: 6px;
@@ -459,7 +459,7 @@ function generateCertificateHTML(data: CertificateData): string {
             </div>
             
             <div class="footer-section">
-              <div class="certificate-details">
+              <div class="certificate-details" style="margin-left: 30px;">
                 <div><strong>Certificate ID:</strong> ${data.certificateId}</div>
                 <div><strong>Issue Date:</strong> ${new Date(data.issueDate).toLocaleDateString()}</div>
                 <div><strong>Expiry Date:</strong> ${expiryDate.toLocaleDateString()}</div>

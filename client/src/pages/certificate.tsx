@@ -305,7 +305,8 @@ export default function CertificateView() {
                       color: '#1f2138',
                       fontFamily: "'Poppins', serif",
                       position: 'relative',
-                      padding: '10px 0'
+                      padding: '10px 0',
+                      margin: '0'
                     }}
                   >
                     <div 
@@ -339,7 +340,7 @@ export default function CertificateView() {
                       fontSize: '20px',
                       fontWeight: '600',
                       color: '#1f2138',
-                      margin: '15px 0',
+                      margin: '5px 0',
                       padding: '12px 25px',
                       border: '2px solid #000000',
                       borderRadius: '6px',
