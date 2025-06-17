@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BookOpen, Clock, Trophy, Target, Star, Users, TrendingUp, CheckCircle, Lock, Play, Zap, Brain, Code, Shield } from "lucide-react";
+import { BookOpen, Clock, Trophy, Target, Star, Users, TrendingUp, CheckCircle, Lock, Play, Zap, Brain, Code, Shield, ArrowRight, GitBranch, Network, TreePine, Workflow, Lightbulb } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
@@ -39,8 +39,22 @@ interface UserLearningPath {
   learningPath: LearningPath;
 }
 
+interface Course {
+  id: number;
+  title: string;
+  description: string;
+  level: string;
+  duration: number;
+  price: string;
+  categoryId: number;
+  category: {
+    name: string;
+  };
+}
+
 interface Recommendation {
   courseId: number;
+  course: Course;
   score: string;
   reason: string;
   metadata: {
@@ -50,6 +64,17 @@ interface Recommendation {
     popularityScore?: number;
     trendingScore?: number;
   };
+}
+
+interface PathTreeNode {
+  id: number;
+  title: string;
+  level: number;
+  isCompleted: boolean;
+  isUnlocked: boolean;
+  prerequisites: number[];
+  children: PathTreeNode[];
+  course?: Course;
 }
 
 export default function LearningPaths() {
@@ -73,6 +98,12 @@ export default function LearningPaths() {
     queryKey: ["/api/recommendations/learning-paths"],
   });
 
+  // Get course recommendations for enrolled learning paths
+  const { data: enrolledPathRecommendations = [], isLoading: enrolledRecsLoading } = useQuery({
+    queryKey: ["/api/recommendations/enrolled-paths"],
+    enabled: userPaths.length > 0,
+  });
+
   const enrollMutation = useMutation({
     mutationFn: async (learningPathId: number) => {
       return apiRequest("POST", `/api/learning-paths/${learningPathId}/enroll`, {});
@@ -93,6 +124,132 @@ export default function LearningPaths() {
     },
   });
 
+  const formatDuration = (minutes: number) => {
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
+  };
+
+  // Generate unique tree structure for each learning path
+  const generateTreeStructure = (path: LearningPath, userPath?: UserLearningPath): PathTreeNode[] => {
+    const completedCourses = userPath?.completedCourses || [];
+    
+    // Different tree structures based on learning path type
+    switch (path.title) {
+      case "AI & Machine Learning Mastery":
+        return [
+          {
+            id: 1, title: "Python Fundamentals", level: 1, 
+            isCompleted: completedCourses.includes(1), isUnlocked: true, 
+            prerequisites: [], children: [
+              { id: 2, title: "Data Science Basics", level: 2, isCompleted: completedCourses.includes(2), isUnlocked: completedCourses.includes(1), prerequisites: [1], children: [] },
+              { id: 3, title: "Statistics & Probability", level: 2, isCompleted: completedCourses.includes(3), isUnlocked: completedCourses.includes(1), prerequisites: [1], children: [] }
+            ]
+          },
+          {
+            id: 4, title: "Machine Learning", level: 2,
+            isCompleted: completedCourses.includes(4), isUnlocked: completedCourses.includes(2) && completedCourses.includes(3),
+            prerequisites: [2, 3], children: [
+              { id: 5, title: "Deep Learning", level: 3, isCompleted: completedCourses.includes(5), isUnlocked: completedCourses.includes(4), prerequisites: [4], children: [] },
+              { id: 6, title: "NLP Advanced", level: 3, isCompleted: completedCourses.includes(6), isUnlocked: completedCourses.includes(4), prerequisites: [4], children: [] }
+            ]
+          }
+        ];
+        
+      case "Full-Stack Development Pro":
+        return [
+          {
+            id: 7, title: "HTML/CSS/JS", level: 1,
+            isCompleted: completedCourses.includes(7), isUnlocked: true,
+            prerequisites: [], children: [
+              { id: 8, title: "React Fundamentals", level: 2, isCompleted: completedCourses.includes(8), isUnlocked: completedCourses.includes(7), prerequisites: [7], children: [] },
+              { id: 9, title: "Node.js Basics", level: 2, isCompleted: completedCourses.includes(9), isUnlocked: completedCourses.includes(7), prerequisites: [7], children: [] }
+            ]
+          },
+          {
+            id: 10, title: "Full-Stack Projects", level: 3,
+            isCompleted: completedCourses.includes(10), isUnlocked: completedCourses.includes(8) && completedCourses.includes(9),
+            prerequisites: [8, 9], children: [
+              { id: 11, title: "Deployment & DevOps", level: 4, isCompleted: completedCourses.includes(11), isUnlocked: completedCourses.includes(10), prerequisites: [10], children: [] }
+            ]
+          }
+        ];
+        
+      case "Business Leadership Excellence":
+        return [
+          {
+            id: 12, title: "Management Basics", level: 1,
+            isCompleted: completedCourses.includes(12), isUnlocked: true,
+            prerequisites: [], children: [
+              { id: 13, title: "Team Leadership", level: 2, isCompleted: completedCourses.includes(13), isUnlocked: completedCourses.includes(12), prerequisites: [12], children: [] },
+              { id: 14, title: "Strategic Planning", level: 2, isCompleted: completedCourses.includes(14), isUnlocked: completedCourses.includes(12), prerequisites: [12], children: [] }
+            ]
+          },
+          {
+            id: 15, title: "Executive Skills", level: 3,
+            isCompleted: completedCourses.includes(15), isUnlocked: completedCourses.includes(13) && completedCourses.includes(14),
+            prerequisites: [13, 14], children: []
+          }
+        ];
+        
+      default:
+        // Generic tree structure for other paths
+        return [
+          {
+            id: 16, title: "Foundation", level: 1,
+            isCompleted: completedCourses.includes(16), isUnlocked: true,
+            prerequisites: [], children: [
+              { id: 17, title: "Intermediate", level: 2, isCompleted: completedCourses.includes(17), isUnlocked: completedCourses.includes(16), prerequisites: [16], children: [] },
+              { id: 18, title: "Advanced", level: 3, isCompleted: completedCourses.includes(18), isUnlocked: completedCourses.includes(17), prerequisites: [17], children: [] }
+            ]
+          }
+        ];
+    }
+  };
+
+  // Render tree node recursively
+  const renderTreeNode = (node: PathTreeNode, depth = 0): JSX.Element => {
+    const getNodeIcon = () => {
+      if (node.isCompleted) return <CheckCircle className="w-5 h-5 text-green-600" />;
+      if (!node.isUnlocked) return <Lock className="w-5 h-5 text-gray-400" />;
+      return <Play className="w-5 h-5 text-blue-600" />;
+    };
+
+    return (
+      <motion.div
+        key={node.id}
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: depth * 0.1 }}
+        className={`mb-2`}
+        style={{ marginLeft: `${depth * 24}px` }}
+      >
+        <div className={`flex items-center p-3 rounded-lg border transition-all ${
+          node.isCompleted ? 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800' :
+          node.isUnlocked ? 'bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800 hover:shadow-md cursor-pointer' :
+          'bg-gray-50 border-gray-200 dark:bg-gray-800 dark:border-gray-700'
+        }`}>
+          {getNodeIcon()}
+          <div className="ml-3 flex-1">
+            <div className="font-medium text-sm">{node.title}</div>
+            <div className="text-xs text-gray-500">Level {node.level}</div>
+          </div>
+          {node.prerequisites.length > 0 && (
+            <Badge variant="outline" className="text-xs">
+              Requires: {node.prerequisites.length} course{node.prerequisites.length > 1 ? 's' : ''}
+            </Badge>
+          )}
+        </div>
+        
+        {node.children.length > 0 && (
+          <div className="ml-4 mt-2 pl-4 border-l-2 border-gray-200 dark:border-gray-700">
+            {node.children.map(child => renderTreeNode(child, depth + 1))}
+          </div>
+        )}
+      </motion.div>
+    );
+  };
+
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty.toLowerCase()) {
       case "beginner":
@@ -106,12 +263,7 @@ export default function LearningPaths() {
     }
   };
 
-  const formatDuration = (hours: number) => {
-    if (hours < 24) return `${hours}h`;
-    const days = Math.floor(hours / 24);
-    const remainingHours = hours % 24;
-    return remainingHours > 0 ? `${days}d ${remainingHours}h` : `${days}d`;
-  };
+
 
   return (
     <div className="min-h-screen bg-white dark:bg-black">
@@ -400,56 +552,103 @@ export default function LearningPaths() {
                   </Button>
                 </div>
               ) : (
-                userPaths.map((userPath: UserLearningPath) => (
-                  <Card key={userPath.id} className="border-gray-200 dark:border-gray-800">
-                    <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <CardTitle className="text-lg text-black dark:text-white">
-                            {userPath.learningPath.title}
-                          </CardTitle>
-                          <CardDescription className="text-gray-600 dark:text-gray-400 mt-1">
-                            {userPath.learningPath.category?.name || 'Professional'}
-                          </CardDescription>
+                userPaths.map((userPath: UserLearningPath) => {
+                  const treeNodes = generateTreeStructure(userPath.learningPath, userPath);
+                  
+                  return (
+                    <Card key={userPath.id} className="border-gray-200 dark:border-gray-800">
+                      <CardHeader>
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <CardTitle className="text-lg text-black dark:text-white">
+                              {userPath.learningPath.title}
+                            </CardTitle>
+                            <CardDescription className="text-gray-600 dark:text-gray-400 mt-1">
+                              {userPath.learningPath.category?.name || 'Professional'}
+                            </CardDescription>
+                          </div>
+                          {userPath.completedAt && (
+                            <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                              <CheckCircle className="w-3 h-3 mr-1" />
+                              Completed
+                            </Badge>
+                          )}
                         </div>
-                        {userPath.completedAt && (
-                          <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                            <CheckCircle className="w-3 h-3 mr-1" />
-                            Completed
-                          </Badge>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-600 dark:text-gray-400">Progress</span>
+                            <span className="text-black dark:text-white font-medium">
+                              {Math.round(userPath.progress)}%
+                            </span>
+                          </div>
+                          <Progress value={userPath.progress} className="h-2" />
+                        </div>
+
+                        {/* Unique Tree View for this Learning Path */}
+                        <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
+                          <div className="flex items-center gap-2 mb-3">
+                            <TreePine className="w-4 h-4 text-green-600" />
+                            <span className="text-sm font-medium">Learning Path Tree</span>
+                          </div>
+                          <div className="space-y-1">
+                            {treeNodes.map(node => renderTreeNode(node))}
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
+                          <div className="flex items-center gap-1">
+                            <Trophy className="w-4 h-4" />
+                            {userPath.completedCourses?.length || 0}/{userPath.learningPath.courseIds?.length || 0} completed
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Clock className="w-4 h-4" />
+                            {formatDuration(userPath.learningPath.estimatedDuration)}
+                          </div>
+                        </div>
+
+                        {/* Personalized Course Recommendations */}
+                        {enrolledPathRecommendations.length > 0 && (
+                          <div className="border-t pt-3">
+                            <div className="flex items-center gap-2 mb-2">
+                              <Lightbulb className="w-4 h-4 text-yellow-500" />
+                              <span className="text-sm font-medium">Recommended for You</span>
+                            </div>
+                            <div className="space-y-2">
+                              {enrolledPathRecommendations
+                                .filter((rec: Recommendation) => rec.metadata?.categoryMatch || rec.score > '0.7')
+                                .slice(0, 2)
+                                .map((rec: Recommendation, idx: number) => (
+                                <motion.div 
+                                  key={idx}
+                                  initial={{ opacity: 0, y: 10 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  transition={{ delay: idx * 0.1 }}
+                                  className="flex items-center justify-between p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg"
+                                >
+                                  <div className="flex-1">
+                                    <div className="text-sm font-medium">{rec.course?.title || `Course ${rec.courseId}`}</div>
+                                    <div className="text-xs text-gray-500">{rec.reason}</div>
+                                  </div>
+                                  <Badge variant="secondary" className="text-xs">
+                                    {Math.round(parseFloat(rec.score) * 100)}% match
+                                  </Badge>
+                                </motion.div>
+                              ))}
+                            </div>
+                          </div>
                         )}
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-600 dark:text-gray-400">Progress</span>
-                          <span className="text-black dark:text-white font-medium">
-                            {Math.round(userPath.progress)}%
-                          </span>
-                        </div>
-                        <Progress value={userPath.progress} className="h-2" />
-                      </div>
 
-                      <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
-                        <div className="flex items-center gap-1">
-                          <Trophy className="w-4 h-4" />
-                          {userPath.completedCourses?.length || 0}/{userPath.learningPath.courseIds?.length || 0} completed
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Clock className="w-4 h-4" />
-                          {formatDuration(userPath.learningPath.estimatedDuration)}
-                        </div>
-                      </div>
-
-                      <Button
-                        className="w-full bg-black text-white hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200"
-                      >
-                        Continue Learning
-                      </Button>
-                    </CardContent>
-                  </Card>
-                ))
+                        <Button
+                          className="w-full bg-black text-white hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200"
+                        >
+                          Continue Learning
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  );
+                })
               )}
             </div>
           </TabsContent>
