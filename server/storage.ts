@@ -88,7 +88,10 @@ export interface IStorage {
 
   // Category operations
   getCategories(): Promise<Category[]>;
+  getAllCategoriesWithCounts(): Promise<(Category & { courseCount: number })[]>;
   createCategory(category: InsertCategory): Promise<Category>;
+  updateCategory(id: number, updates: Partial<InsertCategory>): Promise<Category | undefined>;
+  deleteCategory(id: number): Promise<boolean>;
 
   // Course operations
   getCourses(categoryId?: number): Promise<(Course & { category: Category })[]>;

@@ -2625,6 +2625,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin category management routes
+  app.post("/api/admin/categories", authenticateAdminToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { name, description } = req.body;
+      
+      if (!name || !description) {
+        return res.status(400).json({ message: "Name and description are required" });
+      }
+
+      const category = await storage.createCategory({ name, description });
+      res.status(201).json(category);
+    } catch (error) {
+      console.error("Error creating category:", error);
+      res.status(500).json({ message: "Failed to create category" });
+    }
+  });
+
+  app.put("/api/admin/categories/:id", authenticateAdminToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const categoryId = parseInt(req.params.id);
+      const { name, description } = req.body;
+      
+      if (!name || !description) {
+        return res.status(400).json({ message: "Name and description are required" });
+      }
+
+      const category = await storage.updateCategory(categoryId, { name, description });
+      if (!category) {
+        return res.status(404).json({ message: "Category not found" });
+      }
+
+      res.json(category);
+    } catch (error) {
+      console.error("Error updating category:", error);
+      res.status(500).json({ message: "Failed to update category" });
+    }
+  });
+
+  app.delete("/api/admin/categories/:id", authenticateAdminToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const categoryId = parseInt(req.params.id);
+      
+      // Check if category has courses
+      const coursesInCategory = await storage.getCoursesByCategory(categoryId);
+      if (coursesInCategory.length > 0) {
+        return res.status(400).json({ 
+          message: `Cannot delete category. It has ${coursesInCategory.length} courses assigned to it.` 
+        });
+      }
+
+      const deleted = await storage.deleteCategory(categoryId);
+      if (!deleted) {
+        return res.status(404).json({ message: "Category not found" });
+      }
+
+      res.json({ message: "Category deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting category:", error);
+      res.status(500).json({ message: "Failed to delete category" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

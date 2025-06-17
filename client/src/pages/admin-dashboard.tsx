@@ -462,7 +462,97 @@ function CourseForm({ course, onCancel, onSuccess }: { course?: any; onCancel: (
   );
 }
 
+// Inline CategoryForm component
+function CategoryForm({ category, onCancel, onSuccess }: { category?: any; onCancel: () => void; onSuccess: () => void }) {
+  const { toast } = useToast();
+  const isEditing = !!category;
 
+  const form = useForm<CategoryFormData>({
+    resolver: zodResolver(categorySchema),
+    defaultValues: {
+      name: category?.name || "",
+      description: category?.description || ""
+    }
+  });
+
+  // Create/Update category mutation
+  const categoryMutation = useMutation({
+    mutationFn: async (data: CategoryFormData) => {
+      const url = isEditing ? `/api/admin/categories/${category.id}` : "/api/admin/categories";
+      const method = isEditing ? "PUT" : "POST";
+      return await apiRequest(method, url, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/categories"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/courses"] });
+      toast({
+        title: "Success",
+        description: `Category ${isEditing ? 'updated' : 'created'} successfully`
+      });
+      onSuccess();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || `Failed to ${isEditing ? 'update' : 'create'} category`,
+        variant: "destructive"
+      });
+    }
+  });
+
+  const onSubmit = (data: CategoryFormData) => {
+    categoryMutation.mutate(data);
+  };
+
+  return (
+    <div className="w-full max-w-2xl mx-auto">
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Category Name</FormLabel>
+                <FormControl>
+                  <Input placeholder="e.g., Artificial Intelligence" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Description</FormLabel>
+                <FormControl>
+                  <Textarea 
+                    placeholder="Brief description of this category..."
+                    className="min-h-[100px]"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className="flex gap-4 pt-4">
+            <Button type="submit" disabled={categoryMutation.isPending}>
+              {categoryMutation.isPending ? "Saving..." : (isEditing ? "Update Category" : "Create Category")}
+            </Button>
+            <Button type="button" variant="outline" onClick={onCancel}>
+              Cancel
+            </Button>
+          </div>
+        </form>
+      </Form>
+    </div>
+  );
+}
 
 interface ExamAttempt {
   id: number;
@@ -648,6 +738,34 @@ export default function AdminDashboard() {
       });
     },
   });
+
+  // Category deletion mutation
+  const deleteCategory = useMutation({
+    mutationFn: async (categoryId: number) => {
+      const response = await apiRequest("DELETE", `/api/admin/categories/${categoryId}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/categories"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/courses"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/analytics"] });
+      toast({
+        title: "Category Deleted",
+        description: "Category has been deleted successfully.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete category",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleDeleteCategory = (categoryId: number) => {
+    deleteCategory.mutate(categoryId);
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("adminToken");
