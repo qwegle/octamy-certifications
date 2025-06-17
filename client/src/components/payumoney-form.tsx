@@ -14,6 +14,7 @@ interface PayUMoneyFormProps {
   courseTitle: string;
   includesPhysicalCopy?: boolean;
   selectedAddressId?: number | null;
+  sellerCode?: string | null;
   onSuccess: () => void;
 }
 
@@ -26,6 +27,7 @@ export default function PayUMoneyForm({
   courseTitle,
   includesPhysicalCopy = false,
   selectedAddressId = null,
+  sellerCode = null,
   onSuccess
 }: PayUMoneyFormProps) {
   const [isLoading, setIsLoading] = useState(false);
@@ -46,7 +48,8 @@ export default function PayUMoneyForm({
         failureUrl: `${window.location.origin}/payment/failure`,
         includesPhysicalCopy,
         selectedAddressId,
-        amount
+        amount,
+        sellerCode // Pass seller code for partner commission tracking
       });
 
       const data = await response.json();

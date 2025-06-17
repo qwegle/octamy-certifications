@@ -81,8 +81,24 @@ export default function EnhancedCheckout() {
   const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
   const [showAddressDialog, setShowAddressDialog] = useState(false);
   const [editingAddress, setEditingAddress] = useState<Address | null>(null);
+  const [referralCode, setReferralCode] = useState<string | null>(null);
 
   const courseId = params?.courseId ? parseInt(params.courseId) : null;
+
+  // Extract referral code from localStorage or URL parameters
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const ref = urlParams.get('ref');
+    if (ref) {
+      setReferralCode(ref);
+      localStorage.setItem('referralCode', ref);
+    } else {
+      const storedRef = localStorage.getItem('referralCode');
+      if (storedRef) {
+        setReferralCode(storedRef);
+      }
+    }
+  }, []);
 
   // Fetch course details
   const { data: course, isLoading: courseLoading } = useQuery<Course>({
@@ -246,13 +262,14 @@ export default function EnhancedCheckout() {
         amount: totalAmount,
         includesPhysicalCopy,
         shippingAddressId: includesPhysicalCopy ? selectedAddressId : null,
+        sellerCode: referralCode, // Include referral code for partner commissions
       };
 
       // Store payment data in sessionStorage for the payment page
       sessionStorage.setItem('paymentData', JSON.stringify(paymentData));
       
       // Navigate to payment page with certificate ID
-      navigate(`/payment/${existingCertificate.id}?amount=${totalAmount}&physical=${includesPhysicalCopy}&address=${selectedAddressId || ''}`);
+      navigate(`/payment/${existingCertificate.id}?amount=${totalAmount}&physical=${includesPhysicalCopy}&address=${selectedAddressId || ''}&ref=${referralCode || ''}`);
     } else {
       // Redirect to exam if no certificate exists
       toast({
