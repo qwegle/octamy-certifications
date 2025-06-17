@@ -179,6 +179,18 @@ export interface IStorage {
   getUserAchievements(userId: number, includeDetails?: boolean): Promise<(UserAchievement & { achievement?: Achievement })[]>;
   unlockAchievement(userId: number, achievementId: number, metadata?: any): Promise<UserAchievement>;
   checkAndUnlockAchievements(userId: number, courseId?: number): Promise<UserAchievement[]>;
+
+  // Learning Path operations
+  getLearningPaths(filters?: { categoryId?: number; difficulty?: string }): Promise<(LearningPath & { category: Category })[]>;
+  createLearningPath(learningPath: InsertLearningPath): Promise<LearningPath>;
+  getUserLearningPaths(userId: number): Promise<(UserLearningPath & { learningPath: LearningPath & { category: Category } })[]>;
+  enrollInLearningPath(enrollment: InsertUserLearningPath): Promise<UserLearningPath>;
+  updateLearningPathProgress(userId: number, learningPathId: number, updates: Partial<InsertUserLearningPath>): Promise<UserLearningPath>;
+  
+  // Skill Assessment operations
+  createSkillAssessment(assessment: InsertSkillAssessment): Promise<SkillAssessment>;
+  getUserSkillAssessments(userId: number, categoryId?: number): Promise<SkillAssessment[]>;
+  getValidSkillAssessment(userId: number, categoryId: number): Promise<SkillAssessment | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -964,6 +976,131 @@ export class DatabaseStorage implements IStorage {
     }
     
     return newAchievements;
+  }
+
+  // Learning Path operations
+  async getLearningPaths(filters?: { categoryId?: number; difficulty?: string }): Promise<(LearningPath & { category: Category })[]> {
+    let query = db
+      .select()
+      .from(learningPaths)
+      .leftJoin(categories, eq(learningPaths.categoryId, categories.id))
+      .where(eq(learningPaths.isActive, true));
+
+    if (filters?.categoryId) {
+      query = query.where(eq(learningPaths.categoryId, filters.categoryId));
+    }
+    
+    if (filters?.difficulty) {
+      query = query.where(eq(learningPaths.difficulty, filters.difficulty));
+    }
+
+    const results = await query.orderBy(desc(learningPaths.createdAt));
+    return results.map(row => ({
+      ...row.learning_paths,
+      category: row.categories!
+    })) as (LearningPath & { category: Category })[];
+  }
+
+  async createLearningPath(learningPath: InsertLearningPath): Promise<LearningPath> {
+    const [result] = await db
+      .insert(learningPaths)
+      .values(learningPath)
+      .returning();
+    return result;
+  }
+
+  async getUserLearningPaths(userId: number): Promise<(UserLearningPath & { learningPath: LearningPath & { category: Category } })[]> {
+    const results = await db
+      .select()
+      .from(userLearningPaths)
+      .leftJoin(learningPaths, eq(userLearningPaths.learningPathId, learningPaths.id))
+      .leftJoin(categories, eq(learningPaths.categoryId, categories.id))
+      .where(eq(userLearningPaths.userId, userId))
+      .orderBy(desc(userLearningPaths.createdAt));
+
+    return results.map(row => ({
+      ...row.user_learning_paths,
+      learningPath: {
+        ...row.learning_paths!,
+        category: row.categories!
+      }
+    })) as (UserLearningPath & { learningPath: LearningPath & { category: Category } })[];
+  }
+
+  async enrollInLearningPath(enrollment: InsertUserLearningPath): Promise<UserLearningPath> {
+    // Check if user is already enrolled
+    const existing = await db
+      .select()
+      .from(userLearningPaths)
+      .where(and(
+        eq(userLearningPaths.userId, enrollment.userId),
+        eq(userLearningPaths.learningPathId, enrollment.learningPathId)
+      ));
+
+    if (existing.length > 0) {
+      throw new Error('User is already enrolled in this learning path');
+    }
+
+    const [result] = await db
+      .insert(userLearningPaths)
+      .values(enrollment)
+      .returning();
+    return result;
+  }
+
+  async updateLearningPathProgress(userId: number, learningPathId: number, updates: Partial<InsertUserLearningPath>): Promise<UserLearningPath> {
+    const [result] = await db
+      .update(userLearningPaths)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(and(
+        eq(userLearningPaths.userId, userId),
+        eq(userLearningPaths.learningPathId, learningPathId)
+      ))
+      .returning();
+
+    if (!result) {
+      throw new Error('Learning path enrollment not found');
+    }
+    return result;
+  }
+
+  // Skill Assessment operations
+  async createSkillAssessment(assessment: InsertSkillAssessment): Promise<SkillAssessment> {
+    const [result] = await db
+      .insert(skillAssessments)
+      .values(assessment)
+      .returning();
+    return result;
+  }
+
+  async getUserSkillAssessments(userId: number, categoryId?: number): Promise<SkillAssessment[]> {
+    let query = db
+      .select()
+      .from(skillAssessments)
+      .where(eq(skillAssessments.userId, userId));
+
+    if (categoryId) {
+      query = query.where(eq(skillAssessments.categoryId, categoryId));
+    }
+
+    return await query.orderBy(desc(skillAssessments.createdAt));
+  }
+
+  async getValidSkillAssessment(userId: number, categoryId: number): Promise<SkillAssessment | undefined> {
+    const [assessment] = await db
+      .select()
+      .from(skillAssessments)
+      .where(and(
+        eq(skillAssessments.userId, userId),
+        eq(skillAssessments.categoryId, categoryId)
+      ))
+      .orderBy(desc(skillAssessments.createdAt));
+
+    // Check if assessment is still valid
+    if (assessment && assessment.validUntil && new Date() < assessment.validUntil) {
+      return assessment;
+    }
+    return undefined;
   }
 }
 
