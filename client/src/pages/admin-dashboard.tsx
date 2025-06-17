@@ -1097,7 +1097,9 @@ export default function AdminDashboard() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {partners.map((partner: Partner) => (
+                        {partners
+                          .slice((partnersPage - 1) * itemsPerPage, partnersPage * itemsPerPage)
+                          .map((partner: Partner) => (
                           <TableRow key={partner.id}>
                             <TableCell className="font-medium">{partner.name}</TableCell>
                             <TableCell>{partner.email}</TableCell>
@@ -1187,6 +1189,108 @@ export default function AdminDashboard() {
                         ))}
                       </TableBody>
                     </Table>
+                    {transactions.length > itemsPerPage && (
+                      <div className="flex justify-center gap-2 mt-4">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setTransactionsPage(Math.max(1, transactionsPage - 1))}
+                          disabled={transactionsPage === 1}
+                        >
+                          Previous
+                        </Button>
+                        <span className="flex items-center px-3 text-sm">
+                          Page {transactionsPage} of {Math.ceil(transactions.length / itemsPerPage)}
+                        </span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setTransactionsPage(Math.min(Math.ceil(transactions.length / itemsPerPage), transactionsPage + 1))}
+                          disabled={transactionsPage >= Math.ceil(transactions.length / itemsPerPage)}
+                        >
+                          Next
+                        </Button>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+            </TabsContent>
+
+            <TabsContent value="partners" className="space-y-4">
+              {partnersLoading ? (
+                <div className="text-center py-8">Loading partners...</div>
+              ) : (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Partner Management</CardTitle>
+                    <CardDescription>Manage partner applications and approvals</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Name</TableHead>
+                          <TableHead>Email</TableHead>
+                          <TableHead>Phone</TableHead>
+                          <TableHead>Earnings</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {partners
+                          .slice((partnersPage - 1) * itemsPerPage, partnersPage * itemsPerPage)
+                          .map((partner: Partner) => (
+                          <TableRow key={partner.id}>
+                            <TableCell className="font-medium">{partner.name}</TableCell>
+                            <TableCell>{partner.email}</TableCell>
+                            <TableCell>{partner.phone || "N/A"}</TableCell>
+                            <TableCell>₹{partner.totalEarnings || 0}</TableCell>
+                            <TableCell>
+                              <Badge variant={partner.isApproved ? "default" : "secondary"}>
+                                {partner.isApproved ? "Approved" : "Pending"}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex gap-2">
+                                {!partner.isApproved && (
+                                  <Button size="sm" onClick={() => handleApprovePartner(partner.id)}>
+                                    Approve
+                                  </Button>
+                                )}
+                                <Button size="sm" variant="outline">
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                    {partners.length > itemsPerPage && (
+                      <div className="flex justify-center gap-2 mt-4">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setPartnersPage(Math.max(1, partnersPage - 1))}
+                          disabled={partnersPage === 1}
+                        >
+                          Previous
+                        </Button>
+                        <span className="flex items-center px-3 text-sm">
+                          Page {partnersPage} of {Math.ceil(partners.length / itemsPerPage)}
+                        </span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setPartnersPage(Math.min(Math.ceil(partners.length / itemsPerPage), partnersPage + 1))}
+                          disabled={partnersPage >= Math.ceil(partners.length / itemsPerPage)}
+                        >
+                          Next
+                        </Button>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               )}
