@@ -1,5 +1,5 @@
-import { pgTable, text, serial, integer, boolean, timestamp, decimal, json } from "drizzle-orm/pg-core";
-import { relations } from "drizzle-orm";
+import { pgTable, text, varchar, serial, integer, boolean, timestamp, decimal, json, index, jsonb } from "drizzle-orm/pg-core";
+import { relations, eq, desc, and, asc } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -307,12 +307,12 @@ export const userActivity = pgTable("user_activity", {
 // Learning Paths for Personalized Course Sequences (matches actual database schema)
 export const learningPaths = pgTable("learning_paths", {
   id: serial("id").primaryKey(),
-  title: text("title").notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
   description: text("description").notNull(),
-  difficulty: text("difficulty").notNull(), // beginner, intermediate, advanced
+  difficulty: varchar("difficulty", { length: 50 }).notNull(), // beginner, intermediate, advanced
   estimatedDuration: integer("estimated_duration").notNull(), // in hours
-  courseIds: json("course_ids").$type<number[]>().notNull(), // ordered course IDs
-  prerequisites: json("prerequisites").$type<number[]>().default([]),
+  courseIds: integer("course_ids").array().notNull(), // ordered course IDs
+  prerequisites: integer("prerequisites").array().default([]),
   categoryId: integer("category_id").references(() => categories.id).notNull(),
   isActive: boolean("is_active").default(true).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -324,7 +324,7 @@ export const userLearningPaths = pgTable("user_learning_paths", {
   userId: integer("user_id").references(() => users.id).notNull(),
   learningPathId: integer("learning_path_id").references(() => learningPaths.id).notNull(),
   progress: integer("progress").notNull().default(0), // percentage 0-100
-  completedCourses: json("completed_courses").$type<number[]>().default([]),
+  completedCourses: integer("completed_courses").array().default([]),
   enrolledAt: timestamp("enrolled_at").defaultNow().notNull(),
   completedAt: timestamp("completed_at"),
   isActive: boolean("is_active").default(true).notNull(),
@@ -774,8 +774,6 @@ export type InsertUserActivity = z.infer<typeof insertUserActivitySchema>;
 // Learning Path Insert Schemas
 export const insertLearningPathSchema = createInsertSchema(learningPaths).omit({
   id: true,
-  createdAt: true,
-  updatedAt: true,
 });
 
 export const insertUserLearningPathSchema = createInsertSchema(userLearningPaths).omit({

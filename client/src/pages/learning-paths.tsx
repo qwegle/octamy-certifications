@@ -75,10 +75,7 @@ export default function LearningPaths() {
 
   const enrollMutation = useMutation({
     mutationFn: async (learningPathId: number) => {
-      await apiRequest(`/api/learning-paths/enroll`, {
-        method: "POST",
-        body: JSON.stringify({ learningPathId }),
-      });
+      return apiRequest("POST", `/api/learning-paths/${learningPathId}/enroll`, {});
     },
     onSuccess: () => {
       toast({
