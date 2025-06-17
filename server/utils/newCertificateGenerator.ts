@@ -13,7 +13,7 @@ export interface CertificateData {
 
 function generateCertificateHTML(data: CertificateData): string {
   const expiryDate = new Date(data.issueDate);
-  expiryDate.setFullYear(expiryDate.getFullYear() + 3);
+  expiryDate.setFullYear(expiryDate.getFullYear() + 2);
 
   return `
     <!DOCTYPE html>
@@ -462,7 +462,7 @@ function generateCertificateHTML(data: CertificateData): string {
               <div class="certificate-details">
                 <div><strong>Certificate ID:</strong> ${data.certificateId}</div>
                 <div><strong>Issue Date:</strong> ${new Date(data.issueDate).toLocaleDateString()}</div>
-                <div><strong>Completion Date:</strong> ${new Date(data.completionDate).toLocaleDateString()}</div>
+                <div><strong>Expiry Date:</strong> ${expiryDate.toLocaleDateString()}</div>
                 <div><strong>Status:</strong> Valid Internationally</div>
               </div>
               

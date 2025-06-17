@@ -411,13 +411,21 @@ export default function CertificateView() {
                       className="text-xs text-gray-500 mb-2 uppercase tracking-widest font-semibold"
                       style={{ fontFamily: "'Inter', sans-serif", letterSpacing: '2px' }}
                     >
-                      Validity
+                      Expiry Date
                     </div>
                     <div 
                       className="text-lg font-semibold text-gray-700 tracking-wide"
                       style={{ fontFamily: "'Crimson Text', serif", letterSpacing: '1px' }}
                     >
-                      Lifetime
+                      {(() => {
+                        const expiryDate = new Date(certificate.issuedAt);
+                        expiryDate.setFullYear(expiryDate.getFullYear() + 2);
+                        return expiryDate.toLocaleDateString('en-US', { 
+                          year: 'numeric', 
+                          month: 'long', 
+                          day: 'numeric' 
+                        });
+                      })()}
                     </div>
                   </div>
                 </div>
