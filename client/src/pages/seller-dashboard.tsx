@@ -544,7 +544,7 @@ export default function SellerDashboard() {
                 variant="ghost"
                 onClick={() => {
                   setShowShareModal(false);
-                  setGeneratedUrl("");
+                  setGeneratedUrls({});
                   setSelectedItem(null);
                 }}
                 className="text-gray-500 hover:text-black"

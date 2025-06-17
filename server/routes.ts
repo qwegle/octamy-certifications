@@ -712,50 +712,160 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Open Graph image generation for social sharing
+  app.get("/api/og-image/course/:courseId", async (req: Request, res: Response) => {
+    try {
+      const courseId = parseInt(req.params.courseId);
+      const course = await storage.getCourse(courseId);
+      
+      if (!course) {
+        return res.status(404).json({ message: "Course not found" });
+      }
+
+      // Generate SVG-based Open Graph image
+      const ogImageSvg = `
+        <svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#000000;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#333333;stop-opacity:1" />
+            </linearGradient>
+          </defs>
+          
+          <!-- Background -->
+          <rect width="1200" height="630" fill="url(#bg)"/>
+          
+          <!-- Content Area -->
+          <rect x="60" y="60" width="1080" height="510" fill="#ffffff" rx="20"/>
+          
+          <!-- Header -->
+          <rect x="60" y="60" width="1080" height="120" fill="#000000" rx="20"/>
+          <text x="120" y="135" font-family="Arial, sans-serif" font-size="36" font-weight="bold" fill="#ffffff">
+            OCTAMY PROFESSIONAL CERTIFICATIONS
+          </text>
+          
+          <!-- Course Title -->
+          <text x="120" y="250" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#000000">
+            ${course.title.length > 40 ? course.title.substring(0, 40) + '...' : course.title}
+          </text>
+          
+          <!-- Course Description -->
+          <text x="120" y="320" font-family="Arial, sans-serif" font-size="24" fill="#333333">
+            ${course.description ? (course.description.length > 80 ? course.description.substring(0, 80) + '...' : course.description) : 'Professional certification course'}
+          </text>
+          
+          <!-- Price and Duration -->
+          <rect x="120" y="380" width="200" height="60" fill="#000000" rx="10"/>
+          <text x="140" y="420" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="#ffffff">
+            ₹${course.price}
+          </text>
+          
+          <rect x="340" y="380" width="250" height="60" fill="#f0f0f0" rx="10"/>
+          <text x="360" y="420" font-family="Arial, sans-serif" font-size="24" fill="#333333">
+            ${course.duration} minutes
+          </text>
+          
+          <!-- Certificate Badge -->
+          <circle cx="1000" cy="350" r="80" fill="#FFD700"/>
+          <text x="1000" y="340" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#000000" text-anchor="middle">
+            CERTIFIED
+          </text>
+          <text x="1000" y="365" font-family="Arial, sans-serif" font-size="14" fill="#000000" text-anchor="middle">
+            COURSE
+          </text>
+          
+          <!-- Call to Action -->
+          <text x="120" y="520" font-family="Arial, sans-serif" font-size="20" fill="#666666">
+            Join thousands of professionals advancing their careers
+          </text>
+        </svg>
+      `;
+
+      res.setHeader('Content-Type', 'image/svg+xml');
+      res.setHeader('Cache-Control', 'public, max-age=86400'); // Cache for 24 hours
+      res.send(ogImageSvg);
+    } catch (error) {
+      console.error("Error generating OG image:", error);
+      res.status(500).json({ message: "Failed to generate image" });
+    }
+  });
+
   // Generate referral URLs for partners
   app.post("/api/sellers/generate-referral-url", authenticateSellerToken, async (req: SellerAuthenticatedRequest, res: Response) => {
     try {
       const { type, itemId } = req.body; // type: 'course', 'internship', 'business'
       const sellerId = req.seller!.sellerId;
       
-      // Generate unique referral code
-      const referralCode = `${sellerId}-${type}-${itemId}-${Date.now()}`;
-      
+      // Get item details for SEO optimization
+      let item;
       let baseUrl = '';
+      let itemType = '';
+      
       switch (type) {
         case 'course':
-          const course = await storage.getCourse(itemId);
-          if (!course) {
+          item = await storage.getCourse(itemId);
+          if (!item) {
             return res.status(404).json({ message: "Course not found" });
           }
-          baseUrl = `/courses/${course.slug}`;
+          baseUrl = `/courses/${item.slug}`;
+          itemType = 'Professional Course';
           break;
         case 'internship':
-          const internship = await storage.getCourse(itemId);
-          if (!internship || !internship.isInternship) {
+          item = await storage.getCourse(itemId);
+          if (!item || !item.isInternship) {
             return res.status(404).json({ message: "Internship not found" });
           }
-          baseUrl = `/virtual-internships/${internship.slug}`;
+          baseUrl = `/virtual-internships/${item.slug}`;
+          itemType = 'Virtual Internship';
           break;
         case 'business':
-          const businessCert = await storage.getCourse(itemId);
-          if (!businessCert || !businessCert.isBusiness) {
+          item = await storage.getCourse(itemId);
+          if (!item || !item.isBusiness) {
             return res.status(404).json({ message: "Business certification not found" });
           }
-          baseUrl = `/business-certifications/${businessCert.slug}`;
+          baseUrl = `/business-certifications/${item.slug}`;
+          itemType = 'Business Certification';
           break;
         default:
           return res.status(400).json({ message: "Invalid type" });
       }
+
+      // Generate unique referral code
+      const referralCode = `${sellerId}-${type}-${itemId}-${Date.now()}`;
       
       const referralUrl = `${req.protocol}://${req.get('host')}${baseUrl}?ref=${referralCode}`;
+      
+      // Generate comprehensive SEO metadata for better social sharing
+      const seoMetadata = {
+        title: `${item.title} - ${itemType} | Octamy`,
+        description: item.description || `Professional ${itemType.toLowerCase()} certification with industry-recognized credentials. Join thousands of professionals advancing their careers with Octamy.`,
+        image: `${req.protocol}://${req.get('host')}/api/og-image/course/${item.id}`,
+        url: referralUrl,
+        type: 'website',
+        siteName: 'Octamy Professional Certifications',
+        locale: 'en_US',
+        price: `₹${item.price}`,
+        currency: 'INR',
+        availability: 'in stock',
+        category: itemType,
+        brand: 'Octamy Solutions'
+      };
       
       res.json({
         referralUrl,
         referralCode,
         type,
         itemId,
-        sellerId
+        sellerId,
+        seoMetadata,
+        itemDetails: {
+          title: item.title,
+          description: item.description,
+          price: item.price,
+          type: itemType,
+          duration: `${item.duration} minutes`,
+          level: item.level
+        }
       });
     } catch (error) {
       console.error("Error generating referral URL:", error);
