@@ -206,15 +206,27 @@ export default function CertificateView() {
                   </div>
                   
                   <div 
-                    className="text-sm font-medium text-gray-600 uppercase tracking-widest mb-4"
-                    style={{ fontFamily: "'Inter', sans-serif", letterSpacing: '4px' }}
+                    className="company-tagline text-sm font-medium uppercase tracking-widest mb-4"
+                    style={{ 
+                      fontSize: '12px',
+                      color: '#000000',
+                      marginBottom: '5px',
+                      fontFamily: "'Poppins', sans-serif",
+                      letterSpacing: '4px'
+                    }}
                   >
                     Solutions Private Limited
                   </div>
                   
                   <div 
-                    className="text-xs text-gray-500 italic tracking-wide"
-                    style={{ fontFamily: "'Crimson Text', serif", letterSpacing: '1px' }}
+                    className="text-xs tracking-wide"
+                    style={{ 
+                      fontSize: '10px',
+                      color: '#000',
+                      fontStyle: 'italic',
+                      fontFamily: "'Poppins', sans-serif",
+                      letterSpacing: '1px'
+                    }}
                   >
                     Authorized Certification Body
                   </div>
@@ -234,19 +246,12 @@ export default function CertificateView() {
                       className="absolute -top-4 left-1/2 transform -translate-x-1/2 w-20 h-1"
                       style={{ background: 'linear-gradient(90deg, #d4af37, #f4e09d, #d4af37)' }}
                     ></div>
-                    Certificate
+                    Certificate of Completion
                     <div 
                       className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 w-28 h-0.5"
                       style={{ background: 'linear-gradient(90deg, transparent, #d4af37, transparent)' }}
                     ></div>
                   </h1>
-                  
-                  <p 
-                    className="text-3xl text-gray-600 italic tracking-wide"
-                    style={{ fontFamily: "'Crimson Text', serif", letterSpacing: '2px' }}
-                  >
-                    of Professional Excellence
-                  </p>
                 </div>
                 
                 {/* Content */}

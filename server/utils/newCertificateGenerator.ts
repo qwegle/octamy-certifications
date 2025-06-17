@@ -139,9 +139,9 @@ function generateCertificateHTML(data: CertificateData): string {
         
         .company-tagline {
           font-size: 12px;
-          color: #666;
+          color: #000000;
           margin-bottom: 5px;
-          font-family: 'Inter', sans-serif;
+          font-family: 'Poppins', sans-serif;
         }
         
         .main-content {
@@ -159,7 +159,7 @@ function generateCertificateHTML(data: CertificateData): string {
           margin: 15px 0;
           letter-spacing: 6px;
           text-transform: uppercase;
-          font-family: 'Playfair Display', serif;
+          font-family: 'Poppins', sans-serif;
           position: relative;
         }
         
@@ -179,7 +179,7 @@ function generateCertificateHTML(data: CertificateData): string {
           color: #666;
           font-style: italic;
           margin-bottom: 20px;
-          font-family: 'Playfair Display', serif;
+          font-family: 'Poppins', sans-serif;
         }
         
         .awarded-text {
