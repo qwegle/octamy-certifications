@@ -35,6 +35,7 @@ import EnhancedCheckout from "@/pages/EnhancedCheckout";
 import Courses from "@/pages/courses";
 import VirtualInternships from "@/pages/virtual-internships";
 import BusinessCertificationsPage from "@/pages/business-certifications";
+import LearningPaths from "@/pages/learning-paths";
 
 function Router() {
   return (
@@ -44,6 +45,7 @@ function Router() {
       <Route path="/courses" component={Courses} />
       <Route path="/virtual-internships" component={VirtualInternships} />
       <Route path="/business-certifications" component={BusinessCertificationsPage} />
+      <Route path="/learning-paths" component={LearningPaths} />
       <Route path="/exam/:courseId" component={Exam} />
       <Route path="/checkout/:courseId" component={EnhancedCheckout} />
       <Route path="/payment/:certificateId" component={Payment} />

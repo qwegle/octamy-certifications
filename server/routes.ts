@@ -2230,6 +2230,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Learning Path Routes
+  app.get("/api/learning-paths", LearningPathController.getLearningPaths);
+  app.get("/api/user/learning-paths", authenticateToken, LearningPathController.getUserLearningPaths);
+  app.post("/api/learning-paths/enroll", authenticateToken, LearningPathController.enrollInLearningPath);
+  app.get("/api/recommendations/personalized", authenticateToken, LearningPathController.generatePersonalizedRecommendations);
+  app.get("/api/recommendations/learning-paths", authenticateToken, LearningPathController.getLearningPathRecommendations);
+  app.post("/api/skill-assessments", authenticateToken, LearningPathController.createSkillAssessment);
+
   const httpServer = createServer(app);
   return httpServer;
 }

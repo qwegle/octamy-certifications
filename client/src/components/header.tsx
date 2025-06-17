@@ -28,6 +28,7 @@ export default function Header() {
           {/* Desktop Navigation */}
           <nav className="hidden md:flex space-x-6">
             <Link href="/courses" className="hover:text-gray-300">Courses</Link>
+            <Link href="/learning-paths" className="hover:text-gray-300">Learning Paths</Link>
             <Link href="/virtual-internships" className="hover:text-gray-300">Internships</Link>
             <Link href="/business-certifications" className="hover:text-gray-300">Business Pricing</Link>
             <Link href="/partners" className="hover:text-gray-300">Partners</Link>
