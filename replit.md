@@ -273,20 +273,19 @@ Octamy is a comprehensive professional certification platform built as a full-st
 - **Payment flow end-to-end working** - from exam completion through PayUMoney gateway to certificate activation
 - **Database consistency maintained** - all payment records properly created without column errors
 
-### Certificate View Page Fixed and Shareable Links Implementation (June 18, 2025)
-- **Completely rebuilt certificate view page** using proper certificate generator design matching server-side templates
-- **Fixed broken certificate display** with professional styling, decorative borders, and proper layout structure
-- **Added Octamy logo integration** using image_1750054456482.png from assets folder as requested
-- **Created shareable certificate route** at `/certificate/<certificatenumber>` for easy sharing and downloading
-- **Fixed PDF generation system** - installed Chrome and configured Puppeteer for reliable PDF downloads
-- **Added share functionality to dashboard** - Share buttons now copy shareable links to clipboard with native sharing API
-- **Enhanced certificate sharing** - certificates include download, print, and share controls with responsive design
-- **Professional certificate display** - shareable certificates use existing generator templates for consistent styling
-- **Security-protected sharing** - only paid certificates can be accessed through shareable links
-- **Social media integration** - Open Graph tags added for better sharing appearance on social platforms
-- **Mobile-responsive sharing** - share controls adapt to mobile devices with proper positioning
-- **Certificate verification** - shareable links maintain certificate authenticity and verification status
-- **Reliable PDF downloads** - Chrome executable properly configured for consistent certificate PDF generation
+### Certificate View Page with Iframe Integration (June 18, 2025)
+- **Rebuilt certificate view page with iframe approach** - displays `/api/certificates/<id>/download` directly in iframe for authentic viewing
+- **Professional authentication design** - hero section with Octamy Solutions branding and verification status badges
+- **Comprehensive certificate sidebar** - detailed information including recipient, course, scores, verification status, and authenticity checks
+- **Enhanced download functionality** - PDF downloads with proper filename format and error handling using Puppeteer backend
+- **Improved print system** - direct iframe printing with fallback to new window approach for landscape PDF printing
+- **Smart share functionality** - formatted share text with achievement details, scores, and verification URL
+- **Security overlay system** - visual blocking for unpaid/expired certificates while maintaining verification information
+- **Blockchain verification branding** - authenticity indicators showing ISO certification, digital signatures, and global recognition
+- **Octamy logo integration** - using image_1750054456482.png from assets folder in professional header design
+- **Mobile-responsive layout** - grid system with sidebar information and centered certificate display
+- **Status-based interactions** - buttons disabled for invalid certificates with clear user feedback
+- **Professional certificate presentation** - authentic appearance verified by Octamy Solutions Private Limited
 
 ### Seller Authentication and Sharing URLs Fixed (June 18, 2025)
 - **Fixed seller authentication system** - resolved automatic logout issues and Vite middleware conflicts
