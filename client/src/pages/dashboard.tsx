@@ -195,7 +195,7 @@ export default function Dashboard() {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => window.open(`/certificates/${certificate.certificateId}`, '_blank')}
+                        onClick={() => window.open(`/certificate/${certificate.certificateId}`, '_blank')}
                         className="flex-1"
                       >
                         <Eye className="w-4 h-4 mr-1" />

@@ -12,6 +12,7 @@ import { getBadgeFromScore, generateCertificateNumber, calculateExpiryDate } fro
 import apiRoutes from "./routes/index";
 import certificateRoutes from "./routes/certificateRoutes";
 import { emailService } from "./utils/emailService";
+import { generateCertificateHTML } from "./utils/certificateGenerator";
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -1425,7 +1426,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         email,
         subject,
         message,
-        submittedAt: new Date(),
         status: 'new'
       });
 
