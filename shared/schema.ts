@@ -27,6 +27,27 @@ export const insertSponsorSchema = createInsertSchema(sponsors).omit({
 export type InsertSponsor = z.infer<typeof insertSponsorSchema>;
 export type Sponsor = typeof sponsors.$inferSelect;
 
+// Contact submissions table for contact form
+export const contactSubmissions = pgTable("contact_submissions", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  email: text("email").notNull(),
+  subject: text("subject").notNull(),
+  message: text("message").notNull(),
+  status: text("status").default("new").notNull(), // new, read, responded
+  submittedAt: timestamp("submitted_at").defaultNow().notNull(),
+  respondedAt: timestamp("responded_at"),
+  adminNotes: text("admin_notes"),
+});
+
+export const insertContactSubmissionSchema = createInsertSchema(contactSubmissions).omit({
+  id: true,
+  submittedAt: true,
+});
+
+export type InsertContactSubmission = z.infer<typeof insertContactSubmissionSchema>;
+export type ContactSubmission = typeof contactSubmissions.$inferSelect;
+
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   email: text("email").notNull().unique(),

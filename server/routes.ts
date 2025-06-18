@@ -1314,6 +1314,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin sponsors endpoint
+  app.get('/api/admin/sponsors', authenticateAdminToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const sponsors = await storage.getAllSponsors();
+      res.json(sponsors);
+    } catch (error) {
+      console.error('Error fetching sponsors:', error);
+      res.status(500).json({ message: 'Failed to fetch sponsors' });
+    }
+  });
+
+  // Admin contact submissions endpoint
+  app.get('/api/admin/contacts', authenticateAdminToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const contacts = await storage.getAllContactSubmissions();
+      res.json(contacts);
+    } catch (error) {
+      console.error('Error fetching contact submissions:', error);
+      res.status(500).json({ message: 'Failed to fetch contact submissions' });
+    }
+  });
+
   // Register API routes (includes certificate routes)
   app.use('/api', apiRoutes);
 
@@ -1344,6 +1366,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Get user certificates error:", error);
       res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Public API endpoint for recent certificates (for landing page)
+  app.get("/api/recent-certificates", async (req: Request, res: Response) => {
+    try {
+      const certificates = await storage.getRecentCertificates(10); // Get 10 most recent certificates
+      res.json(certificates);
+    } catch (error) {
+      console.error("Error fetching recent certificates:", error);
+      res.status(500).json({ message: "Failed to fetch recent certificates" });
+    }
+  });
+
+  // Contact form submission endpoint
+  app.post("/api/contact", async (req: Request, res: Response) => {
+    try {
+      const { name, email, subject, message } = req.body;
+      
+      if (!name || !email || !subject || !message) {
+        return res.status(400).json({ message: "All fields are required" });
+      }
+
+      // Store contact form submission
+      await storage.createContactSubmission({
+        name,
+        email,
+        subject,
+        message,
+        submittedAt: new Date(),
+        status: 'new'
+      });
+
+      res.json({ message: "Contact form submitted successfully" });
+    } catch (error) {
+      console.error("Error submitting contact form:", error);
+      res.status(500).json({ message: "Failed to submit contact form" });
     }
   });
 

@@ -25,28 +25,14 @@ import CourseCard from "@/components/course-card";
 import { useAuth } from "@/hooks/useAuth";
 import type { Category, Course } from "@shared/schema";
 
-// Certificate Slider Component
+// Certificate Slider Component with infinite auto-scroll
 function CertificateSlider() {
-  const certificates = [
-    {
-      name: "Sarah Johnson",
-      course: "AI Fundamentals",
-      badge: "Gold",
-      company: "Tech Corp",
-    },
-    {
-      name: "Michael Chen",
-      course: "Data Science",
-      badge: "Platinum",
-      company: "DataFlow Inc",
-    },
-    {
-      name: "Emma Davis",
-      course: "Machine Learning",
-      badge: "Silver",
-      company: "ML Solutions",
-    },
-  ];
+  const { data: certificates = [] } = useQuery<any[]>({
+    queryKey: ["/api/recent-certificates"],
+  });
+
+  // Duplicate certificates for seamless infinite scroll
+  const duplicatedCertificates = certificates.length > 0 ? [...certificates, ...certificates] : [];
 
   return (
     <div className="bg-black text-white py-8">
@@ -57,31 +43,64 @@ function CertificateSlider() {
             Join thousands of professionals who have earned their certificates
           </p>
         </div>
-        <div className="flex overflow-x-auto space-x-6 pb-4">
-          {certificates.map((cert, index) => (
-            <div
-              key={index}
-              className="flex-shrink-0 bg-gray-900 rounded-lg p-6 min-w-[300px]"
-            >
-              <div className="flex items-center space-x-3 mb-3">
-                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center">
-                  <Award className="w-6 h-6 text-black" />
+        
+        {certificates.length > 0 ? (
+          <div className="relative overflow-hidden">
+            <div className="flex space-x-6 animate-scroll-left">
+              {duplicatedCertificates.map((cert, index) => (
+                <div
+                  key={`${cert.name}-${cert.course}-${index}`}
+                  className="flex-shrink-0 bg-gray-900 rounded-lg p-6 min-w-[300px]"
+                >
+                  <div className="flex items-center space-x-3 mb-3">
+                    <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center">
+                      <Award className="w-6 h-6 text-black" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold">{cert.name}</h4>
+                      <p className="text-sm text-gray-400">{cert.company}</p>
+                    </div>
+                  </div>
+                  <p className="text-sm mb-2">
+                    Certified in{" "}
+                    <span className="font-semibold">{cert.course}</span>
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <Badge
+                      variant="outline"
+                      className="border-white text-white"
+                    >
+                      {cert.badge} Badge
+                    </Badge>
+                    <span className="text-xs text-gray-400">
+                      Score: ••%
+                    </span>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="font-semibold">{cert.name}</h4>
-                  <p className="text-sm text-gray-400">{cert.company}</p>
-                </div>
-              </div>
-              <p className="text-sm mb-2">
-                Certified in{" "}
-                <span className="font-semibold">{cert.course}</span>
-              </p>
-              <Badge variant="outline" className="border-white text-white">
-                {cert.badge} Badge
-              </Badge>
+              ))}
             </div>
-          ))}
-        </div>
+          </div>
+        ) : (
+          // Loading placeholder
+          <div className="flex overflow-x-auto space-x-6 pb-4">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <div
+                key={index}
+                className="flex-shrink-0 bg-gray-900 rounded-lg p-6 min-w-[300px] animate-pulse"
+              >
+                <div className="flex items-center space-x-3 mb-3">
+                  <div className="w-12 h-12 bg-gray-700 rounded-full"></div>
+                  <div>
+                    <div className="h-4 bg-gray-700 rounded w-24 mb-2"></div>
+                    <div className="h-3 bg-gray-700 rounded w-16"></div>
+                  </div>
+                </div>
+                <div className="h-3 bg-gray-700 rounded w-32 mb-2"></div>
+                <div className="h-6 bg-gray-700 rounded w-20"></div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
