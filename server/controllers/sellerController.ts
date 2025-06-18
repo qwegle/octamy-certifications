@@ -212,7 +212,8 @@ export class SellerController {
         return res.status(401).json({ message: "Unauthorized" });
       }
 
-      const { courseId } = req.body;
+      const { type, itemId, courseId } = req.body;
+      const targetCourseId = courseId || itemId;
 
       // Get seller to get referral code
       const seller = await storage.getSeller(sellerId);
@@ -222,7 +223,7 @@ export class SellerController {
 
       // Generate referral URL
       const baseUrl = `${req.protocol}://${req.get('host')}`;
-      const referralUrl = `${baseUrl}/course/${courseId}?ref=${seller.referralCode}`;
+      const referralUrl = `${baseUrl}/course/${targetCourseId}?ref=${seller.referralCode}`;
 
       res.json({
         referralUrl,
