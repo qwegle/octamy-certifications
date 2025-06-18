@@ -4,10 +4,12 @@ import { Course, Category } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Clock, Users, Award, Star, ChevronRight } from "lucide-react";
+import { Clock, Users, Award, Star, ChevronRight, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useLocation } from "wouter";
 import { useEffect, useState } from "react";
+// Using available image from assets
+import octamyLogo from "@assets/image_1750156610131.png";
 
 export default function CourseDetail() {
   const { slug } = useParams();
@@ -108,13 +110,13 @@ export default function CourseDetail() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
+      <div className="min-h-screen bg-white dark:bg-black">
         <div className="container mx-auto px-4 py-8">
           <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded mb-4"></div>
-            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
-            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded mb-8"></div>
-            <div className="h-64 bg-gray-200 dark:bg-gray-700 rounded"></div>
+            <div className="h-8 bg-gray-200 dark:bg-gray-800 rounded mb-4"></div>
+            <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded mb-2"></div>
+            <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded mb-8"></div>
+            <div className="h-64 bg-gray-200 dark:bg-gray-800 rounded"></div>
           </div>
         </div>
       </div>
@@ -123,12 +125,15 @@ export default function CourseDetail() {
 
   if (!course) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
+      <div className="min-h-screen bg-white dark:bg-black">
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Course Not Found</h1>
-            <p className="text-gray-600 dark:text-gray-300 mb-8">The course you're looking for doesn't exist.</p>
-            <Button onClick={() => setLocation("/")}>
+            <h1 className="text-4xl font-bold text-black dark:text-white mb-4">Course Not Found</h1>
+            <p className="text-gray-600 dark:text-gray-400 mb-8">The course you're looking for doesn't exist.</p>
+            <Button 
+              onClick={() => setLocation("/")}
+              className="bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200"
+            >
               Back to Home
             </Button>
           </div>
@@ -138,27 +143,50 @@ export default function CourseDetail() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-white dark:bg-black">
       {/* Header */}
-      <header className="bg-white dark:bg-gray-900 shadow-sm border-b border-gray-200 dark:border-gray-700">
+      <header className="bg-white dark:bg-black shadow-sm border-b border-black dark:border-white">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <Button variant="ghost" onClick={() => setLocation("/")}>
-                <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">Octamy</span>
+              <Button 
+                variant="ghost" 
+                onClick={() => setLocation("/")}
+                className="hover:bg-gray-100 dark:hover:bg-gray-900"
+              >
+                <span className="text-2xl font-bold text-black dark:text-white">Octamy</span>
               </Button>
               <ChevronRight className="h-4 w-4 text-gray-400" />
-              <Badge variant="secondary">{course.category.name}</Badge>
+              <Badge 
+                variant="outline" 
+                className="border-black dark:border-white text-black dark:text-white"
+              >
+                {course.category.name}
+              </Badge>
               <ChevronRight className="h-4 w-4 text-gray-400" />
               <span className="text-sm text-gray-600 dark:text-gray-400">{course.title}</span>
             </div>
             <div className="flex items-center space-x-4">
+              <Button 
+                variant="ghost" 
+                onClick={() => setLocation("/")}
+                className="hover:bg-gray-100 dark:hover:bg-gray-900"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back
+              </Button>
               {user ? (
-                <Button onClick={() => setLocation("/dashboard")}>
+                <Button 
+                  onClick={() => setLocation("/dashboard")}
+                  className="bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200"
+                >
                   Dashboard
                 </Button>
               ) : (
-                <Button onClick={() => setLocation("/auth")}>
+                <Button 
+                  onClick={() => setLocation("/auth")}
+                  className="bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200"
+                >
                   Sign In
                 </Button>
               )}
@@ -172,22 +200,28 @@ export default function CourseDetail() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Course Details */}
           <div className="lg:col-span-2">
-            <Card className="mb-6">
+            <Card className="mb-6 border-black dark:border-white">
               <CardHeader>
                 <div className="flex items-center justify-between mb-4">
-                  <Badge variant="outline" className="bg-blue-50 text-blue-700 dark:bg-blue-900 dark:text-blue-300">
+                  <Badge 
+                    variant="outline" 
+                    className="border-black dark:border-white text-black dark:text-white"
+                  >
                     {course.category.name}
                   </Badge>
                   {course.isInternship && (
-                    <Badge variant="secondary" className="bg-green-50 text-green-700 dark:bg-green-900 dark:text-green-300">
+                    <Badge 
+                      variant="outline" 
+                      className="border-green-600 text-green-600 dark:border-green-400 dark:text-green-400"
+                    >
                       Virtual Internship
                     </Badge>
                   )}
                 </div>
-                <CardTitle className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                <CardTitle className="text-3xl font-bold text-black dark:text-white mb-2">
                   {course.title}
                 </CardTitle>
-                <CardDescription className="text-lg text-gray-600 dark:text-gray-300">
+                <CardDescription className="text-lg text-gray-600 dark:text-gray-400">
                   {course.description}
                 </CardDescription>
               </CardHeader>
@@ -246,29 +280,29 @@ export default function CourseDetail() {
                 </div>
 
                 {course.isInternship && (
-                  <div className="bg-green-50 dark:bg-green-900 border border-green-200 dark:border-green-700 rounded-lg p-6 mb-6">
-                    <h3 className="text-lg font-semibold text-green-800 dark:text-green-200 mb-3">
+                  <div className="bg-gray-50 dark:bg-gray-900 border-2 border-green-600 dark:border-green-400 rounded-lg p-6 mb-6">
+                    <h3 className="text-lg font-semibold text-green-600 dark:text-green-400 mb-3">
                       Virtual Internship Program
                     </h3>
-                    <p className="text-green-700 dark:text-green-300 mb-4">
+                    <p className="text-gray-700 dark:text-gray-300 mb-4">
                       This is a virtual internship program where you'll receive a professional internship certificate 
                       after completing the assessment. You can customize the duration and dates for your certificate.
                     </p>
-                    <ul className="space-y-2 text-green-700 dark:text-green-300">
+                    <ul className="space-y-2 text-gray-700 dark:text-gray-300">
                       <li className="flex items-start space-x-2">
-                        <ChevronRight className="h-4 w-4 mt-0.5" />
+                        <ChevronRight className="h-4 w-4 mt-0.5 text-green-600 dark:text-green-400" />
                         <span>Flexible duration (1-12 months)</span>
                       </li>
                       <li className="flex items-start space-x-2">
-                        <ChevronRight className="h-4 w-4 mt-0.5" />
+                        <ChevronRight className="h-4 w-4 mt-0.5 text-green-600 dark:text-green-400" />
                         <span>Customizable start and end dates</span>
                       </li>
                       <li className="flex items-start space-x-2">
-                        <ChevronRight className="h-4 w-4 mt-0.5" />
+                        <ChevronRight className="h-4 w-4 mt-0.5 text-green-600 dark:text-green-400" />
                         <span>Professional internship certificate</span>
                       </li>
                       <li className="flex items-start space-x-2">
-                        <ChevronRight className="h-4 w-4 mt-0.5" />
+                        <ChevronRight className="h-4 w-4 mt-0.5 text-green-600 dark:text-green-400" />
                         <span>Verifiable credentials</span>
                       </li>
                     </ul>
@@ -280,9 +314,9 @@ export default function CourseDetail() {
 
           {/* Sidebar */}
           <div className="lg:col-span-1">
-            <Card className="sticky top-8">
+            <Card className="sticky top-8 border-black dark:border-white">
               <CardHeader>
-                <CardTitle className="text-center">
+                <CardTitle className="text-center text-black dark:text-white">
                   Get Certified Today
                 </CardTitle>
                 <div className="text-center">
@@ -296,13 +330,13 @@ export default function CourseDetail() {
                         <div className="text-sm text-green-600 font-medium">
                           Save ₹{(parseFloat(course.originalPrice) - parseFloat(course.price)).toFixed(0)}
                         </div>
-                        <div className="bg-red-100 text-red-800 px-2 py-0.5 rounded text-xs font-semibold">
+                        <div className="bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-0.5 rounded text-xs font-semibold">
                           {Math.round(((parseFloat(course.originalPrice) - parseFloat(course.price)) / parseFloat(course.originalPrice)) * 100)}% OFF
                         </div>
                       </div>
                     </div>
                   ) : (
-                    <span className="text-3xl font-bold text-blue-600">₹{course.price}</span>
+                    <span className="text-3xl font-bold text-black dark:text-white">₹{course.price}</span>
                   )}
                   <p className="text-sm text-gray-600 dark:text-gray-400">One-time payment</p>
                 </div>
@@ -310,7 +344,7 @@ export default function CourseDetail() {
               <CardContent className="space-y-4">
                 <Button 
                   onClick={handleGetCertified}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                  className="w-full bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200"
                   size="lg"
                 >
                   {course.isInternship ? "Start Internship Assessment" : "Start Assessment"}
@@ -322,23 +356,23 @@ export default function CourseDetail() {
                   </p>
                 </div>
 
-                <div className="border-t pt-4">
-                  <h4 className="font-semibold mb-2">This certification includes:</h4>
+                <div className="border-t border-black dark:border-white pt-4">
+                  <h4 className="font-semibold mb-2 text-black dark:text-white">This certification includes:</h4>
                   <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                     <li className="flex items-center space-x-2">
-                      <Award className="h-4 w-4 text-green-600" />
+                      <Award className="h-4 w-4 text-black dark:text-white" />
                       <span>Official certificate</span>
                     </li>
                     <li className="flex items-center space-x-2">
-                      <Users className="h-4 w-4 text-green-600" />
+                      <Users className="h-4 w-4 text-black dark:text-white" />
                       <span>Industry recognition</span>
                     </li>
                     <li className="flex items-center space-x-2">
-                      <Star className="h-4 w-4 text-green-600" />
+                      <Star className="h-4 w-4 text-black dark:text-white" />
                       <span>2-year validity</span>
                     </li>
                     <li className="flex items-center space-x-2">
-                      <Clock className="h-4 w-4 text-green-600" />
+                      <Clock className="h-4 w-4 text-black dark:text-white" />
                       <span>Instant results</span>
                     </li>
                   </ul>
