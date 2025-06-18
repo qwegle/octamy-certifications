@@ -149,6 +149,21 @@ function EnhancedAdminDashboard() {
     } catch (error) {
       console.error('Error fetching admin data:', error);
       const errorMessage = error instanceof Error ? error.message : "Failed to fetch admin data";
+      
+      // Check if receiving HTML instead of JSON (authentication redirect)
+      if (errorMessage.includes('Unexpected token') || errorMessage.includes('<!DOCTYPE')) {
+        toast({
+          title: "Authentication Error",
+          description: "Session expired. Please login again.",
+          variant: "destructive",
+        });
+        localStorage.removeItem('adminToken');
+        setTimeout(() => {
+          window.location.href = '/admin/login';
+        }, 2000);
+        return;
+      }
+      
       toast({
         title: "Error",
         description: errorMessage,

@@ -39,12 +39,14 @@ const authenticateAdminToken = (req: AuthenticatedRequest, res: Response, next: 
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET) as any;
-    if (!decoded.isAdmin) {
+    // Check for either isAdmin flag or role === 'admin'
+    if (!decoded.isAdmin && decoded.role !== 'admin') {
       return res.status(403).json({ message: 'Admin access required' });
     }
     req.user = decoded;
     next();
   } catch (error) {
+    console.error('Admin token verification error:', error);
     return res.status(403).json({ message: 'Invalid or expired token' });
   }
 };
@@ -102,6 +104,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
   if (process.env.NODE_ENV === "development") {
     await seedDatabase();
   }
+
+  // Admin login endpoint
+  app.post('/api/admin/login', async (req: Request, res: Response) => {
+    try {
+      const { email, password } = req.body;
+
+      if (!email || !password) {
+        return res.status(400).json({ message: 'Email and password are required' });
+      }
+
+      // Find admin user
+      const user = await storage.getUserByEmail(email);
+      if (!user || !user.isAdmin) {
+        return res.status(401).json({ message: 'Invalid admin credentials' });
+      }
+
+      // Verify password
+      const isValidPassword = await bcrypt.compare(password, user.password);
+      if (!isValidPassword) {
+        return res.status(401).json({ message: 'Invalid admin credentials' });
+      }
+
+      // Generate JWT token with both isAdmin and role for compatibility
+      const token = jwt.sign(
+        { 
+          userId: user.id, 
+          email: user.email, 
+          isAdmin: true, 
+          role: 'admin' 
+        },
+        JWT_SECRET,
+        { expiresIn: '7d' }
+      );
+
+      res.json({
+        message: "Admin login successful",
+        token,
+        user: { 
+          id: user.id, 
+          email: user.email, 
+          name: user.name, 
+          isAdmin: user.isAdmin 
+        }
+      });
+    } catch (error) {
+      console.error("Admin login error:", error);
+      res.status(500).json({ message: "Login failed" });
+    }
+  });
 
   // Direct seller authentication routes (bypass routing issues)
   app.post('/api/sellers/login', async (req: Request, res: Response) => {
