@@ -57,7 +57,7 @@ export default function PaymentSuccess() {
                   <Button
                     variant="outline"
                     className="w-full"
-                    onClick={() => setLocation(`/certificates/${certificateId}`)}
+                    onClick={() => window.open(`/api/certificates/${certificateId}/download`, '_blank')}
                   >
                     <Download className="w-4 h-4 mr-2" />
                     Download Certificate
@@ -69,6 +69,16 @@ export default function PaymentSuccess() {
                 <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
                   Please check your email for the certificate download link.
                 </p>
+                {certificateId && (
+                  <Button
+                    variant="outline"
+                    className="w-full mb-3"
+                    onClick={() => window.open(`/api/certificates/${certificateId}/download`, '_blank')}
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    Download Certificate
+                  </Button>
+                )}
                 <Button
                   variant="outline"
                   className="w-full"
