@@ -1572,7 +1572,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
         </div>
         <script>
           function downloadPDF() {
-            window.open('/api/certificates/${certificateNumber}/download?format=pdf', '_blank');
+            // Try API download first, fallback to print-to-PDF
+            fetch('/api/certificates/${certificateNumber}/download?format=pdf')
+              .then(response => {
+                if (response.ok) {
+                  return response.blob();
+                } else {
+                  // Fallback: open print dialog with instructions
+                  if (confirm('PDF generation is currently unavailable. Would you like to print this certificate instead? You can choose "Save as PDF" in the print dialog.')) {
+                    window.print();
+                  }
+                  throw new Error('PDF generation failed');
+                }
+              })
+              .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = 'certificate-${certificateNumber}.pdf';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+              })
+              .catch(error => {
+                console.error('Download failed:', error);
+              });
           }
           function printCert() {
             window.print();
