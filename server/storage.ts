@@ -639,6 +639,27 @@ export class DatabaseStorage implements IStorage {
     return seller || undefined;
   }
 
+  async getSellerConversions(sellerId: number): Promise<any[]> {
+    const seller = await this.getSeller(sellerId);
+    if (!seller) return [];
+
+    // Get all successful payments made through this seller's referral code
+    const conversions = await db
+      .select({
+        id: payments.id,
+        amount: payments.amount,
+        commissionAmount: sql`CAST(${payments.amount} AS DECIMAL) * CAST(${seller.commissionRate} AS DECIMAL) / 100`.as('commissionAmount'),
+        courseTitle: courses.title,
+        createdAt: payments.createdAt
+      })
+      .from(payments)
+      .leftJoin(courses, eq(payments.courseId, courses.id))
+      .where(eq(payments.status, 'success'))
+      .orderBy(desc(payments.createdAt));
+
+    return conversions;
+  }
+
   async getSellerByEmail(email: string): Promise<Seller | undefined> {
     const [seller] = await db.select().from(sellers).where(eq(sellers.email, email));
     return seller || undefined;

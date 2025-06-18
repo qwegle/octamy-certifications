@@ -271,7 +271,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Calculate totals based on actual conversions (sales)
       const totalConversions = conversions.length;
-      const totalCommission = conversions.reduce((sum, conv) => sum + parseFloat(conv.commissionAmount), 0);
+      const totalCommission = conversions.reduce((sum: number, conv: any) => sum + parseFloat(conv.commissionAmount), 0);
       const pendingWithdrawals = withdrawals
         .filter(w => w.status === 'pending')
         .reduce((sum, w) => sum + parseFloat(w.amount), 0);
@@ -288,7 +288,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         totalConversions,
         totalCommission: totalCommission.toFixed(2),
         pendingWithdrawals: pendingWithdrawals.toFixed(2),
-        recentSales: conversions.slice(0, 5).map(conv => ({
+        recentSales: conversions.slice(0, 5).map((conv: any) => ({
           id: conv.id,
           courseTitle: conv.courseTitle,
           amount: conv.amount,

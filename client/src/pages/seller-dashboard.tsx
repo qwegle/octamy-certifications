@@ -398,8 +398,8 @@ export default function SellerDashboard() {
               <div className="flex items-center">
                 <Users className="h-8 w-8 text-black" />
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Total Sales</p>
-                  <p className="text-2xl font-bold text-black">{dashboardData.totalSales}</p>
+                  <p className="text-sm font-medium text-gray-600">Total Conversions</p>
+                  <p className="text-2xl font-bold text-black">{dashboardData.totalConversions || 0}</p>
                 </div>
               </div>
             </CardContent>
@@ -518,16 +518,18 @@ export default function SellerDashboard() {
                     <tr className="border-b border-gray-200">
                       <th className="text-left p-3">Date</th>
                       <th className="text-left p-3">Course</th>
+                      <th className="text-left p-3">Sale Amount</th>
                       <th className="text-left p-3">Commission</th>
                       <th className="text-left p-3">Status</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {dashboardData.recentSales.map((sale) => (
+                    {dashboardData.recentSales.slice(0, 5).map((sale) => (
                       <tr key={sale.id} className="border-b border-gray-100">
                         <td className="p-3">{new Date(sale.createdAt).toLocaleDateString()}</td>
                         <td className="p-3">{sale.courseTitle || 'Unknown Course'}</td>
-                        <td className="p-3">₹{sale.commission}</td>
+                        <td className="p-3">₹{sale.amount}</td>
+                        <td className="p-3">₹{sale.commissionAmount}</td>
                         <td className="p-3">
                           <Badge variant={sale.status === 'paid' ? 'default' : 'secondary'}>
                             {sale.status}
