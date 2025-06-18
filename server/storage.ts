@@ -419,6 +419,8 @@ export class DatabaseStorage implements IStorage {
     return result || undefined;
   }
 
+
+
   async createCourse(insertCourse: InsertCourse): Promise<Course> {
     const [course] = await db
       .insert(courses)
