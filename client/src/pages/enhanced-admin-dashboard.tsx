@@ -31,7 +31,7 @@ export default function EnhancedAdminDashboard() {
 
   const handleLogout = () => {
     localStorage.removeItem('adminToken');
-    window.location.href = '/admin-login';
+    window.location.href = '/admin/login';
   };
 
   const fetchData = async (searchFilters = {}) => {
@@ -159,17 +159,35 @@ export default function EnhancedAdminDashboard() {
       <div className="container mx-auto p-6">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-            <p className="text-gray-400 mt-2">Manage your platform and monitor performance</p>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Enhanced Admin Dashboard</h1>
+            <p className="text-gray-400 mt-2">Advanced analytics and comprehensive platform management</p>
           </div>
-          <Button
-            variant="outline"
-            onClick={() => fetchData()}
-            className="border-white text-white hover:bg-white hover:text-black"
-          >
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Refresh
-          </Button>
+          <div className="flex items-center space-x-3">
+            <Button
+              onClick={() => window.location.href = '/admin'}
+              variant="outline"
+              className="border-white text-white hover:bg-white hover:text-black"
+            >
+              <Users className="h-4 w-4 mr-2" />
+              Standard Version
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => fetchData()}
+              className="border-white text-white hover:bg-white hover:text-black"
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh
+            </Button>
+            <Button 
+              onClick={handleLogout}
+              variant="outline"
+              className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
+            >
+              <Users className="h-4 w-4 mr-2" />
+              Logout
+            </Button>
+          </div>
         </div>
 
         <Tabs defaultValue="overview" className="space-y-6">

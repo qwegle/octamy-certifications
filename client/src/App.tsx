@@ -52,6 +52,7 @@ function Router() {
       <Route path="/sponsor" component={SponsorPage} />
       <Route path="/admin/login" component={AdminLogin} />
       <Route path="/admin/dashboard" component={AdminDashboard} />
+      <Route path="/enhanced-admin" component={() => import("./pages/enhanced-admin-dashboard").then(m => m.default)} />
       <Route path="/exam/:courseId" component={Exam} />
       <Route path="/checkout/:courseId" component={EnhancedCheckout} />
       <Route path="/payment/:certificateId" component={Payment} />
