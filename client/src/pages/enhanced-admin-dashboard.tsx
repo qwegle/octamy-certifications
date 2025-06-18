@@ -27,6 +27,13 @@ function EnhancedAdminDashboard() {
     partners: '',
     examAttempts: ''
   });
+  const [searchFilters, setSearchFilters] = useState({
+    courses: '',
+    customers: '',
+    transactions: '',
+    partners: '',
+    examAttempts: ''
+  });
   const { toast } = useToast();
 
   const handleLogout = () => {
