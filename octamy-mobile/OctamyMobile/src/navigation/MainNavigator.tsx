@@ -11,6 +11,12 @@ import CoursesScreen from '../screens/main/CoursesScreen';
 import CertificatesScreen from '../screens/main/CertificatesScreen';
 import ProfileScreen from '../screens/main/ProfileScreen';
 
+// Additional screens
+import CourseDetailScreen from '../screens/course/CourseDetailScreen';
+import ExamScreen from '../screens/exam/ExamScreen';
+import ExamResultScreen from '../screens/exam/ExamResultScreen';
+import CertificateViewScreen from '../screens/certificate/CertificateViewScreen';
+
 const Tab = createBottomTabNavigator<TabParamList>();
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -65,6 +71,44 @@ const MainNavigator: React.FC = () => {
         name="Home"
         component={TabNavigator}
         options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="CourseDetailScreen"
+        component={CourseDetailScreen}
+        options={{
+          title: 'Course Details',
+          headerStyle: { backgroundColor: APP_CONFIG.PRIMARY_COLOR },
+          headerTintColor: APP_CONFIG.SECONDARY_COLOR,
+        }}
+      />
+      <Stack.Screen
+        name="ExamScreen"
+        component={ExamScreen}
+        options={{
+          title: 'Exam',
+          headerStyle: { backgroundColor: APP_CONFIG.PRIMARY_COLOR },
+          headerTintColor: APP_CONFIG.SECONDARY_COLOR,
+          headerLeft: () => null, // Disable back button during exam
+        }}
+      />
+      <Stack.Screen
+        name="ExamResultScreen"
+        component={ExamResultScreen}
+        options={{
+          title: 'Exam Results',
+          headerStyle: { backgroundColor: APP_CONFIG.PRIMARY_COLOR },
+          headerTintColor: APP_CONFIG.SECONDARY_COLOR,
+          headerLeft: () => null, // Disable back button on results
+        }}
+      />
+      <Stack.Screen
+        name="CertificateViewScreen"
+        component={CertificateViewScreen}
+        options={{
+          title: 'Certificate',
+          headerStyle: { backgroundColor: APP_CONFIG.PRIMARY_COLOR },
+          headerTintColor: APP_CONFIG.SECONDARY_COLOR,
+        }}
       />
     </Stack.Navigator>
   );

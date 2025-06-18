@@ -1,38 +1,87 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { useAppDispatch, useAppSelector } from '../../store';
+import { fetchCourses } from '../../store/slices/coursesSlice';
+import { fetchUserCertificates } from '../../store/slices/certificatesSlice';
 import { APP_CONFIG } from '../../constants/api';
 
-const HomeScreen: React.FC = () => {
+interface HomeScreenProps {
+  navigation: any;
+}
+
+const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
+  const dispatch = useAppDispatch();
+  const { user, isAuthenticated } = useAppSelector((state) => state.auth);
+  const { courses } = useAppSelector((state) => state.courses);
+  const { certificates } = useAppSelector((state) => state.certificates);
+
+  useEffect(() => {
+    dispatch(fetchCourses());
+    if (isAuthenticated) {
+      dispatch(fetchUserCertificates());
+    }
+  }, [dispatch, isAuthenticated]);
+
+  const navigateToCourses = () => {
+    navigation.navigate('Courses');
+  };
+
+  const navigateToCertificates = () => {
+    navigation.navigate('Certificates');
+  };
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Welcome to {APP_CONFIG.NAME}</Text>
+        <Text style={styles.title}>
+          Welcome{isAuthenticated && user ? `, ${user.name}` : ''}!
+        </Text>
         <Text style={styles.subtitle}>Professional Certification Platform</Text>
       </View>
+
+      {isAuthenticated && (
+        <View style={styles.statsSection}>
+          <View style={styles.statCard}>
+            <Text style={styles.statNumber}>{certificates.length}</Text>
+            <Text style={styles.statLabel}>Certificates</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Text style={styles.statNumber}>{courses.length}</Text>
+            <Text style={styles.statLabel}>Available Courses</Text>
+          </View>
+        </View>
+      )}
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Quick Actions</Text>
         
-        <TouchableOpacity style={styles.actionCard}>
+        <TouchableOpacity style={styles.actionCard} onPress={navigateToCourses}>
           <Text style={styles.actionTitle}>Browse Courses</Text>
           <Text style={styles.actionDescription}>Explore professional certification courses</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.actionCard}>
-          <Text style={styles.actionTitle}>View Certificates</Text>
-          <Text style={styles.actionDescription}>Access your earned certificates</Text>
-        </TouchableOpacity>
+        {isAuthenticated && (
+          <TouchableOpacity style={styles.actionCard} onPress={navigateToCertificates}>
+            <Text style={styles.actionTitle}>View Certificates</Text>
+            <Text style={styles.actionDescription}>Access your earned certificates</Text>
+          </TouchableOpacity>
+        )}
 
         <TouchableOpacity style={styles.actionCard}>
-          <Text style={styles.actionTitle}>Take Practice Exam</Text>
-          <Text style={styles.actionDescription}>Test your knowledge with practice questions</Text>
+          <Text style={styles.actionTitle}>Featured Courses</Text>
+          <Text style={styles.actionDescription}>Check out our most popular certifications</Text>
         </TouchableOpacity>
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Recent Activity</Text>
-        <View style={styles.emptyState}>
-          <Text style={styles.emptyStateText}>No recent activity</Text>
+        <Text style={styles.sectionTitle}>Platform Features</Text>
+        <View style={styles.featureList}>
+          <Text style={styles.featureItem}>✓ Professional Certifications</Text>
+          <Text style={styles.featureItem}>✓ Timed Examinations</Text>
+          <Text style={styles.featureItem}>✓ Verified Certificates</Text>
+          <Text style={styles.featureItem}>✓ Multiple Choice Questions</Text>
+          <Text style={styles.featureItem}>✓ Instant Results</Text>
+          <Text style={styles.featureItem}>✓ PDF Certificate Download</Text>
         </View>
       </View>
     </ScrollView>
@@ -97,6 +146,40 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: APP_CONFIG.SECONDARY_COLOR,
     opacity: 0.6,
+  },
+  statsSection: {
+    flexDirection: 'row',
+    paddingHorizontal: 20,
+    gap: 12,
+    marginBottom: 20,
+  },
+  statCard: {
+    flex: 1,
+    backgroundColor: '#1a1a1a',
+    borderRadius: 8,
+    padding: 16,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#333',
+  },
+  statNumber: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: APP_CONFIG.ACCENT_COLOR,
+    marginBottom: 4,
+  },
+  statLabel: {
+    fontSize: 14,
+    color: APP_CONFIG.SECONDARY_COLOR,
+    opacity: 0.8,
+  },
+  featureList: {
+    gap: 8,
+  },
+  featureItem: {
+    fontSize: 16,
+    color: APP_CONFIG.SECONDARY_COLOR,
+    opacity: 0.9,
   },
 });
 
