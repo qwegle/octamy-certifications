@@ -769,7 +769,7 @@ export class DatabaseStorage implements IStorage {
         courseId: referralClicks.courseId,
         courseTitle: courses.title,
         clicks: count(),
-        conversions: sql<number>`COUNT(CASE WHEN ${referralClicks.isConverted} = true THEN 1 END)`,
+        conversions: sql<number>`COUNT(CASE WHEN is_converted = true THEN 1 END)`,
         latestClick: sql<Date>`MAX(${referralClicks.clickedAt})`,
       })
       .from(referralClicks)
