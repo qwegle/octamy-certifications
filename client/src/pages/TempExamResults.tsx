@@ -70,62 +70,12 @@ export default function TempExamResults() {
     }
   };
 
-  const handleProceedToPayment = async () => {
+  const handleProceedToPayment = () => {
     if (!results) return;
     
-    try {
-      setLoading(true);
-      
-      // Directly initiate PayUMoney payment
-      const paymentData = {
-        tempExamId,
-        courseId: results.course.id,
-        amount: results.course.price,
-        certificateAmount: results.course.price,
-        shippingAmount: "0.00",
-        includesPhysicalCopy: false,
-        selectedAddressId: null,
-        status: "pending",
-        paymentMethod: "payumoney"
-      };
-
-      const response = await apiRequest("POST", "/api/payment/initiate", paymentData);
-      const data = await response.json();
-      
-      if (data.success && data.paymentForm) {
-        // Create and submit the PayUMoney form directly
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = data.paymentForm.action;
-        
-        // Add all form fields
-        Object.entries(data.paymentForm.fields).forEach(([key, value]) => {
-          const input = document.createElement('input');
-          input.type = 'hidden';
-          input.name = key;
-          input.value = value as string;
-          form.appendChild(input);
-        });
-        
-        document.body.appendChild(form);
-        form.submit();
-      } else {
-        toast({
-          title: "Payment Error",
-          description: "Failed to initialize payment. Please try again.",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      console.error("Payment error:", error);
-      toast({
-        title: "Payment Error",
-        description: "Failed to initialize payment. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
+    // Navigate to payment with temporary exam data
+    const paymentUrl = `/payment?tempExamId=${tempExamId}&courseId=${results.course.id}`;
+    navigate(paymentUrl);
   };
 
   const formatTime = (seconds: number) => {
