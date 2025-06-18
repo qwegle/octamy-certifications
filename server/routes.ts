@@ -849,7 +849,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Verify hash
       if (!payuMoneyService.verifyHash(responseData)) {
         console.error("Hash verification failed for transaction:", responseData.txnid);
-        return res.redirect(`${req.protocol}://${req.get('host')}/payment-failed?error=hash_verification_failed`);
+        const courseId = parseInt(responseData.udf1);
+        return res.redirect(`${req.protocol}://${req.get('host')}/payment-failed?error=hash_verification_failed&courseId=${courseId}`);
       }
 
       const status = payuMoneyService.getPaymentStatus(responseData);
@@ -865,14 +866,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const payment = await storage.getPayment(paymentDbId);
         if (!payment) {
           console.error("Payment not found for ID:", paymentDbId);
-          return res.redirect(`${req.protocol}://${req.get('host')}/payment-failed?error=payment_not_found`);
+          return res.redirect(`${req.protocol}://${req.get('host')}/payment-failed?error=payment_not_found&courseId=${courseId}`);
         }
 
         // Get temporary exam data from memory
         const examData = (global as any).tempExamData?.[tempExamId];
         if (!examData) {
           console.error("Temporary exam data not found for ID:", tempExamId);
-          return res.redirect(`${req.protocol}://${req.get('host')}/payment-failed?error=exam_data_expired`);
+          return res.redirect(`${req.protocol}://${req.get('host')}/payment-failed?error=exam_data_expired&courseId=${courseId}`);
         }
 
         // CRITICAL: NOW CREATE EXAM ATTEMPT AND CERTIFICATE AFTER SUCCESSFUL PAYMENT
@@ -1007,7 +1008,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.redirect(`${req.protocol}://${req.get('host')}/payment-success?txnid=${responseData.txnid}&certificateId=${certificate.certificateId}`);
       
       } else {
-        res.redirect(`${req.protocol}://${req.get('host')}/payment-failed?txnid=${responseData.txnid}&error=${responseData.error_Message || 'payment_failed'}`);
+        const courseId = parseInt(responseData.udf1);
+        const paymentDbId = parseInt(responseData.udf2);
+        
+        // Get payment record to find certificate ID if it exists
+        const payment = await storage.getPayment(paymentDbId);
+        const certificateParam = payment?.certificateId ? `&certificateId=${payment.certificateId}` : '';
+        
+        res.redirect(`${req.protocol}://${req.get('host')}/payment-failed?txnid=${responseData.txnid}&error=${responseData.error_Message || 'payment_failed'}&courseId=${courseId}${certificateParam}`);
       }
     } catch (error) {
       console.error("Error processing payment success:", error);
@@ -1019,8 +1027,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/payment/failure", async (req: Request, res: Response) => {
     try {
       const responseData = req.body;
+      const courseId = parseInt(responseData.udf1);
+      const paymentDbId = parseInt(responseData.udf2);
       
-      res.redirect(`${req.protocol}://${req.get('host')}/payment-failed?txnid=${responseData.txnid}&error=${responseData.error_Message || 'payment_failed'}`);
+      // Get payment record to find certificate ID if it exists
+      let certificateParam = '';
+      try {
+        const payment = await storage.getPayment(paymentDbId);
+        if (payment?.certificateId) {
+          certificateParam = `&certificateId=${payment.certificateId}`;
+        }
+      } catch (err) {
+        console.log("Could not fetch payment record for failure redirect");
+      }
+      
+      res.redirect(`${req.protocol}://${req.get('host')}/payment-failed?txnid=${responseData.txnid}&error=${responseData.error_Message || 'payment_failed'}&courseId=${courseId}${certificateParam}`);
     } catch (error) {
       console.error("Error processing payment failure:", error);
       res.redirect(`${req.protocol}://${req.get('host')}/payment-failed?error=processing_error`);

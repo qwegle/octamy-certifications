@@ -8,13 +8,20 @@ export default function PaymentFailed() {
   const [, setLocation] = useLocation();
   const [transactionId, setTransactionId] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string>('');
+  const [certificateId, setCertificateId] = useState<string>('');
+  const [courseId, setCourseId] = useState<string>('');
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const txnid = urlParams.get('txnid');
     const error = urlParams.get('error');
+    const certId = urlParams.get('certificateId');
+    const course = urlParams.get('courseId');
     
     if (txnid) setTransactionId(txnid);
+    if (certId) setCertificateId(certId);
+    if (course) setCourseId(course);
+    
     if (error) {
       switch (error) {
         case 'hash_verification_failed':
@@ -25,6 +32,9 @@ export default function PaymentFailed() {
           break;
         case 'payment_failed':
           setErrorMessage('Payment was declined. Please check your payment details.');
+          break;
+        case 'exam_data_expired':
+          setErrorMessage('Your exam session has expired. Please retake the exam.');
           break;
         default:
           setErrorMessage('Payment failed. Please try again.');
@@ -60,7 +70,15 @@ export default function PaymentFailed() {
           <div className="space-y-3">
             <Button
               className="w-full"
-              onClick={() => setLocation('/courses')}
+              onClick={() => {
+                if (certificateId) {
+                  setLocation(`/payment/${certificateId}`);
+                } else if (courseId) {
+                  setLocation(`/checkout/${courseId}`);
+                } else {
+                  setLocation('/courses');
+                }
+              }}
             >
               <RefreshCw className="w-4 h-4 mr-2" />
               Try Again
