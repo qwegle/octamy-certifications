@@ -147,16 +147,16 @@ export default function Exam() {
     onSuccess: async (response) => {
       const result = await response.json();
       
-      if (result.passed) {
-        // Navigate to exam results page instead of creating certificate immediately
-        // Certificate will be created only after successful payment
-        setLocation(`/exam-results/${result.examAttemptId}`);
+      // Always redirect to temporary exam results page (payment-first approach)
+      // User will see results and then be prompted to pay regardless of pass/fail
+      if (result.tempExamId) {
+        setLocation(`/exam-results-temp/${result.tempExamId}`);
       } else {
-        // Show failure message if exam failed
+        // Fallback for any edge cases
         toast({
-          title: "Exam Failed", 
-          description: `You scored ${result.score}%. You need ${result.passingThreshold || 60}% to pass. Please try again.`,
-          variant: "destructive",
+          title: result.passed ? "Exam Completed" : "Exam Failed",
+          description: result.message || `You scored ${result.score}%.`,
+          variant: result.passed ? "default" : "destructive",
         });
       }
     },
