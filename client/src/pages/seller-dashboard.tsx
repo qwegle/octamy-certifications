@@ -30,14 +30,16 @@ interface DashboardData {
     totalEarnings: string;
     pendingEarnings: string;
   };
-  totalSales: number;
+  totalConversions: number;
   totalCommission: string;
   pendingWithdrawals: string;
   recentSales: Array<{
     id: number;
     courseTitle: string;
+    amount: string;
     commissionAmount: string;
     createdAt: string;
+    status: string;
   }>;
   withdrawalHistory: Array<{
     id: number;

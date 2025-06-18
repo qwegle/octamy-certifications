@@ -264,12 +264,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Seller not found" });
       }
 
-      const sales = await storage.getSalesBySeller(sellerId);
+      // Get successful payments (conversions) made through this seller's referral code
+      const conversions = await storage.getSellerConversions(sellerId);
       const withdrawals = await storage.getWithdrawalsBySeller(sellerId);
       const clickAnalytics = await storage.getSellerClickAnalytics(sellerId);
 
-      const totalSales = sales.length;
-      const totalCommission = sales.reduce((sum, sale) => sum + parseFloat(sale.commission), 0);
+      // Calculate totals based on actual conversions (sales)
+      const totalConversions = conversions.length;
+      const totalCommission = conversions.reduce((sum, conv) => sum + parseFloat(conv.commissionAmount), 0);
       const pendingWithdrawals = withdrawals
         .filter(w => w.status === 'pending')
         .reduce((sum, w) => sum + parseFloat(w.amount), 0);
@@ -283,17 +285,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
           totalEarnings: seller.totalEarnings || "0.00",
           pendingEarnings: seller.pendingEarnings || "0.00"
         },
-        totalSales,
+        totalConversions,
         totalCommission: totalCommission.toFixed(2),
         pendingWithdrawals: pendingWithdrawals.toFixed(2),
-        recentSales: sales.slice(0, 5).map(sale => ({
-          id: sale.id,
-          courseTitle: 'Demo Course', // Default course title since courseTitle not in schema
-          commissionAmount: sale.commission,
-          createdAt: sale.createdAt.toISOString(),
-          status: sale.status
+        recentSales: conversions.slice(0, 5).map(conv => ({
+          id: conv.id,
+          courseTitle: conv.courseTitle,
+          amount: conv.amount,
+          commissionAmount: conv.commissionAmount,
+          createdAt: conv.createdAt.toISOString(),
+          status: 'paid'
         })),
-        withdrawalHistory: withdrawals.slice(0, 5),
+        withdrawalHistory: withdrawals.slice(0, 5).map(w => ({
+          id: w.id,
+          amount: w.amount,
+          status: w.status,
+          createdAt: w.createdAt.toISOString()
+        })),
         clickAnalytics
       });
     } catch (error: any) {
