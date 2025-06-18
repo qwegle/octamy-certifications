@@ -10,6 +10,7 @@ import { LearningPathController } from './controllers/learningPathController';
 import { payuMoneyService } from "./payumoney";
 import { getBadgeFromScore, generateCertificateNumber, calculateExpiryDate } from "./utils";
 import apiRoutes from "./routes/index";
+import certificateRoutes from "./routes/certificateRoutes";
 import { emailService } from "./utils/emailService";
 
 interface AuthenticatedRequest extends Request {
@@ -1144,6 +1145,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: 'Failed to fetch withdrawals' });
     }
   });
+
+  // Register API routes (includes certificate routes)
+  app.use('/api', apiRoutes);
 
   const httpServer = createServer(app);
   return httpServer;
