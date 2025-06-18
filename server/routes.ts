@@ -829,14 +829,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const payment = await storage.createPayment({
         userId: req.user?.userId || null,
         courseId: examData.courseId,
-        certificateId: null, // No certificate yet - created after payment
+        transactionId: txnid,
+        paymentMethod: "payumoney",
         amount: formattedAmount,
         certificateAmount: baseAmount.toFixed(2),
         shippingAmount: shippingCost.toFixed(2),
         includesPhysicalCopy,
-        status: "pending",
-        paymentMethod: "payumoney",
-        transactionId: txnid
+        currency: "INR",
+        status: "pending"
       });
 
       const baseUrl = `${req.protocol}://${req.get('host')}`;
