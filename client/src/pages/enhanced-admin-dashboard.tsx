@@ -8,7 +8,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { apiRequest } from "@/lib/queryClient";
 import { format } from "date-fns";
-import { Users, BookOpen, DollarSign, FileText, TrendingUp, Activity, Search, Filter, RefreshCw, Eye, Edit, Trash2 } from "lucide-react";
+import { 
+  Users, BookOpen, DollarSign, FileText, TrendingUp, Activity, Search, Filter, RefreshCw, Eye, Edit, Trash2,
+  ChevronDown, ChevronRight, User, Calendar, Clock, MapPin, Phone, Mail, CreditCard
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 function EnhancedAdminDashboard() {

@@ -1792,6 +1792,85 @@ export class DatabaseStorage implements IStorage {
       .limit(limit);
   }
 
+  // Get detailed transaction information with nested data
+  async getTransactionDetails(transactionId: number) {
+    // Get basic transaction info
+    const [transaction] = await db
+      .select()
+      .from(payments)
+      .where(eq(payments.id, transactionId));
+
+    if (!transaction) {
+      throw new Error('Transaction not found');
+    }
+
+    // Get certificate details if available
+    let certificate = null;
+    if (transaction.certificateId) {
+      const [cert] = await db
+        .select()
+        .from(certificates)
+        .where(eq(certificates.id, transaction.certificateId));
+      certificate = cert;
+    }
+
+    // Get course details if certificate has courseId
+    let course = null;
+    if (certificate?.courseId) {
+      const [courseData] = await db
+        .select({
+          id: courses.id,
+          title: courses.title,
+          description: courses.description,
+          duration: courses.duration,
+          price: courses.price,
+          level: courses.level,
+          categoryName: sql`(SELECT name FROM categories WHERE id = ${courses.categoryId})`.as('categoryName')
+        })
+        .from(courses)
+        .where(eq(courses.id, certificate.courseId));
+      course = courseData;
+    }
+
+    // Get customer details if transaction has userId
+    let customer = null;
+    if (transaction.userId) {
+      const [userData] = await db
+        .select({
+          id: users.id,
+          name: users.name,
+          email: users.email,
+          phone: users.phone,
+          createdAt: users.createdAt
+        })
+        .from(users)
+        .where(eq(users.id, transaction.userId));
+      customer = userData;
+    }
+
+    // Get delivery address if transaction includes physical copy
+    let address = null;
+    if (transaction.includesPhysicalCopy && transaction.selectedAddressId) {
+      const [addressData] = await db
+        .select()
+        .from(userAddresses)
+        .where(eq(userAddresses.id, transaction.selectedAddressId));
+      address = addressData;
+    }
+
+    return {
+      transaction,
+      certificate,
+      course,
+      customer,
+      address,
+      paymentGateway: 'PayUMoney',
+      paymentMethod: transaction.paymentMethod,
+      gatewayTransactionId: transaction.gatewayTransactionId,
+      completedAt: transaction.updatedAt
+    };
+  }
+
   // Get all sellers for admin with detailed information
   async getAllSellersForAdmin(limit = 1000, search?: string) {
     let query = db.select({

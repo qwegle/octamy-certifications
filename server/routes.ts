@@ -2390,11 +2390,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin transactions route
   app.get("/api/admin/transactions", authenticateAdminToken, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const transactions = await storage.getRecentTransactions();
+      const search = req.query.search as string;
+      const transactions = await storage.getAllPaymentsForAdmin(1000, search);
       res.json(transactions);
     } catch (error) {
       console.error("Error fetching transactions:", error);
       res.status(500).json({ message: "Failed to fetch transactions" });
+    }
+  });
+
+  // Get detailed transaction information
+  app.get("/api/admin/transactions/:id/details", authenticateAdminToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const transactionId = parseInt(req.params.id);
+      const details = await storage.getTransactionDetails(transactionId);
+      res.json(details);
+    } catch (error) {
+      console.error("Error fetching transaction details:", error);
+      res.status(500).json({ message: "Failed to fetch transaction details" });
     }
   });
 
