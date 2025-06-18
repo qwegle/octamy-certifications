@@ -57,6 +57,9 @@ function EnhancedAdminDashboard() {
           description: "Admin token not found. Please login again.",
           variant: "destructive",
         });
+        setTimeout(() => {
+          window.location.href = '/admin/login';
+        }, 2000);
         return;
       }
 
@@ -70,10 +73,12 @@ function EnhancedAdminDashboard() {
       if (analyticsResponse.ok) {
         const analyticsData = await analyticsResponse.json();
         setAnalytics(analyticsData);
+      } else if (analyticsResponse.status === 401) {
+        throw new Error('Authentication failed - please login again');
       }
 
       // Fetch categories with course count
-      const categoriesResponse = await fetch('/api/admin/categories', { headers });
+      const categoriesResponse = await fetch('/api/categories', { headers });
       if (categoriesResponse.ok) {
         const categoriesData = await categoriesResponse.json();
         setCategories(categoriesData);
@@ -136,11 +141,20 @@ function EnhancedAdminDashboard() {
 
     } catch (error) {
       console.error('Error fetching admin data:', error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to fetch admin data";
       toast({
         title: "Error",
-        description: "Failed to fetch admin data",
+        description: errorMessage,
         variant: "destructive",
       });
+      
+      // If authentication error, redirect to login
+      if (errorMessage.includes('401') || errorMessage.includes('Unauthorized')) {
+        localStorage.removeItem('adminToken');
+        setTimeout(() => {
+          window.location.href = '/admin/login';
+        }, 2000);
+      }
     } finally {
       setLoading(false);
     }
@@ -187,6 +201,18 @@ function EnhancedAdminDashboard() {
   };
 
   useEffect(() => {
+    const token = localStorage.getItem('adminToken');
+    if (!token) {
+      toast({
+        title: "Authentication Required",
+        description: "Please login to access admin dashboard",
+        variant: "destructive",
+      });
+      setTimeout(() => {
+        window.location.href = '/admin/login';
+      }, 2000);
+      return;
+    }
     fetchData();
   }, []);
 
