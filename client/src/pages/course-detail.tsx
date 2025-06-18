@@ -8,8 +8,8 @@ import { Clock, Users, Award, Star, ChevronRight, ArrowLeft } from "lucide-react
 import { useAuth } from "@/lib/auth";
 import { useLocation } from "wouter";
 import { useEffect, useState } from "react";
-import octamyLogoDark from "@assets/image_1750054456482.jpg";
-import octamyLogoLight from "@assets/image_1750054465427.jpg";
+// Using available image from assets
+import octamyLogo from "@assets/image_1750156610131.png";
 
 export default function CourseDetail() {
   const { slug } = useParams();
@@ -154,16 +154,7 @@ export default function CourseDetail() {
                 onClick={() => setLocation("/")}
                 className="hover:bg-gray-100 dark:hover:bg-gray-900"
               >
-                <img 
-                  src={octamyLogoDark} 
-                  alt="Octamy" 
-                  className="h-8 dark:hidden"
-                />
-                <img 
-                  src={octamyLogoLight} 
-                  alt="Octamy" 
-                  className="h-8 hidden dark:block"
-                />
+                <span className="text-2xl font-bold text-black dark:text-white">Octamy</span>
               </Button>
               <ChevronRight className="h-4 w-4 text-gray-400" />
               <Badge 
