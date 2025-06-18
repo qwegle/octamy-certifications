@@ -249,6 +249,14 @@ Octamy is a comprehensive professional certification platform built as a full-st
 - **Admin seller management** for approval/rejection of partner accounts
 - **Commission calculation and tracking** with pending/paid status management
 
+### Authentication System Fixes and Certificate Dashboard Restoration (June 18, 2025)
+- **Fixed user registration and login system** - resolved JWT authentication conflicts and endpoint routing issues
+- **Added dual endpoint support** - both `/api/login` and `/api/auth/login` routes working for Replit and local development
+- **Certificate dashboard restoration** - user certificates now properly displaying in dashboard after authentication fixes
+- **JWT token validation fixed** - improved error handling and token verification middleware
+- **Database certificate creation** - added complete test certificates for user verification and dashboard testing
+- **Endpoint compatibility** - registration endpoints `/api/register` and `/api/auth/register` both functional
+
 ### Complete Payment System Restoration (June 18, 2025)
 - **Fixed critical payment processing failure** - resolved all payment initiation errors from database schema mismatches
 - **Corrected database schema conflicts** - removed non-existent gatewayResponse column references causing 500 errors
