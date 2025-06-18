@@ -419,81 +419,7 @@ export class DatabaseStorage implements IStorage {
     return result || undefined;
   }
 
-  async createCourse(insertCourse: InsertCourse): Promise<Course> {
-    const [course] = await db
-      .insert(courses)
-      .values(insertCourse)
-      .returning();
-    return course;
-  }
 
-  async updateCourse(id: number, updates: Partial<InsertCourse>): Promise<Course> {
-    const [course] = await db
-      .update(courses)
-      .set(updates)
-      .where(eq(courses.id, id))
-      .returning();
-    return course;
-  }
-
-  async deleteCourse(id: number): Promise<void> {
-    await db.delete(courses).where(eq(courses.id, id));
-  }
-
-  // Question operations
-  async getQuestionsByCourse(courseId: number): Promise<Question[]> {
-    return await db
-      .select()
-      .from(questions)
-      .where(and(eq(questions.courseId, courseId), eq(questions.isActive, true)));
-  }
-
-  async createQuestion(insertQuestion: InsertQuestion): Promise<Question> {
-    const [question] = await db
-      .insert(questions)
-      .values(insertQuestion as any)
-      .returning();
-    return question;
-  }
-
-  async updateQuestion(id: number, updates: Partial<InsertQuestion>): Promise<Question> {
-    const [question] = await db
-      .update(questions)
-      .set(updates as any)
-      .where(eq(questions.id, id))
-      .returning();
-    return question;
-  }
-
-  async deleteQuestion(id: number): Promise<void> {
-    await db.update(questions).set({ isActive: false }).where(eq(questions.id, id));
-  }
-
-  // Exam attempt operations
-  async createExamAttempt(insertAttempt: InsertExamAttempt): Promise<ExamAttempt> {
-    const [attempt] = await db
-      .insert(examAttempts)
-      .values(insertAttempt)
-      .returning();
-    return attempt;
-  }
-
-  async getExamAttempt(id: number): Promise<ExamAttempt | undefined> {
-    const [attempt] = await db.select().from(examAttempts).where(eq(examAttempts.id, id));
-    return attempt || undefined;
-  }
-
-  async getExamAttemptsByUserAndCourse(userEmail: string, courseId: number): Promise<ExamAttempt[]> {
-    const results = await db
-      .select()
-      .from(examAttempts)
-      .where(and(
-        eq(examAttempts.userEmail, userEmail),
-        eq(examAttempts.courseId, courseId)
-      ))
-      .orderBy(desc(examAttempts.createdAt));
-    return results;
-  }
 
   async getUserExamAttempts(userId: number, courseId?: number): Promise<ExamAttempt[]> {
     const query = db
@@ -583,20 +509,7 @@ export class DatabaseStorage implements IStorage {
       .where(eq(certificates.id, id));
   }
 
-  // Get all exam attempts for a specific user and course
-  // Used to determine if user is retaking and what their previous best score was
-  async getExamAttemptsByUserAndCourse(userId: number, courseId: number): Promise<ExamAttempt[]> {
-    return await db
-      .select()
-      .from(examAttempts)
-      .where(
-        and(
-          eq(examAttempts.userId, userId),
-          eq(examAttempts.courseId, courseId)
-        )
-      )
-      .orderBy(desc(examAttempts.createdAt)); // Most recent first
-  }
+
 
   async getUserCertificateForCourse(userId: number | null, courseId: number, userEmail: string): Promise<Certificate | undefined> {
     const [certificate] = await db

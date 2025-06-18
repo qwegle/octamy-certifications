@@ -608,6 +608,8 @@ export const skillAssessmentsRelations = relations(skillAssessments, ({ one }) =
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
   createdAt: true,
+}).extend({
+  phone: z.string().optional()
 });
 
 export const insertCategorySchema = createInsertSchema(categories).omit({
