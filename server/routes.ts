@@ -57,14 +57,17 @@ const authenticateToken = (req: AuthenticatedRequest, res: Response, next: NextF
   const token = authHeader && authHeader.split(' ')[1];
 
   if (!token) {
-    return res.sendStatus(401);
+    return res.status(401).json({ message: "No token provided" });
   }
 
-  jwt.verify(token, JWT_SECRET, (err: any, user: any) => {
-    if (err) return res.sendStatus(403);
-    req.user = user;
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET) as any;
+    req.user = decoded;
     next();
-  });
+  } catch (err) {
+    console.error("JWT verification error:", err);
+    return res.status(403).json({ message: "Invalid token" });
+  }
 };
 
 // Optional auth middleware
