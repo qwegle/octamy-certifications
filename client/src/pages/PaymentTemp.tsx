@@ -60,9 +60,10 @@ export default function PaymentTemp() {
   const paymentMutation = useMutation({
     mutationFn: async (paymentData: any) => {
       const response = await apiRequest("POST", "/api/payment/initiate", paymentData);
-      return response;
+      return response.json();
     },
     onSuccess: (data) => {
+      console.log('Payment initiation response:', data);
       if (data.success && data.paymentForm) {
         setPaymentForm(data.paymentForm);
       } else {
