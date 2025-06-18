@@ -874,6 +874,32 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(withdrawalRequests.createdAt));
   }
 
+  // Sponsor operations
+  async createSponsor(sponsorData: InsertSponsor): Promise<Sponsor> {
+    const [sponsor] = await db
+      .insert(sponsors)
+      .values(sponsorData)
+      .returning();
+    return sponsor;
+  }
+
+  async getAllSponsors(): Promise<Sponsor[]> {
+    return await db.select().from(sponsors).orderBy(desc(sponsors.createdAt));
+  }
+
+  async updateSponsorPaymentStatus(id: number, status: string, transactionId?: string): Promise<Sponsor> {
+    const [result] = await db
+      .update(sponsors)
+      .set({
+        paymentStatus: status,
+        ...(transactionId && { transactionId }),
+        updatedAt: new Date()
+      })
+      .where(eq(sponsors.id, id))
+      .returning();
+    return result;
+  }
+
   async updateWithdrawalStatus(id: number, status: string, adminNotes?: string): Promise<void> {
     const updates: any = { status };
     if (adminNotes) updates.adminNotes = adminNotes;

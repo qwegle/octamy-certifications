@@ -215,6 +215,38 @@ export default function SponsorPage() {
       </div>
 
       <div className="max-w-6xl mx-auto px-4 py-16">
+        {/* Success/Error Messages */}
+        {typeof window !== 'undefined' && (
+          <>
+            {new URLSearchParams(window.location.search).get('success') && (
+              <Card className="mb-8 border-green-200 bg-green-50">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3">
+                    <CheckCircle className="w-6 h-6 text-green-600" />
+                    <div>
+                      <h3 className="font-semibold text-green-800">Payment Successful!</h3>
+                      <p className="text-green-700">Thank you for your generous support. Your contribution helps us build better educational tools.</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+            {new URLSearchParams(window.location.search).get('error') && (
+              <Card className="mb-8 border-red-200 bg-red-50">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3">
+                    <Heart className="w-6 h-6 text-red-600" />
+                    <div>
+                      <h3 className="font-semibold text-red-800">Payment Failed</h3>
+                      <p className="text-red-700">There was an issue processing your payment. Please try again.</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </>
+        )}
+
         {/* Sponsorship Form */}
         <Card className="mb-16 border-2 border-black">
           <CardHeader className="bg-black text-white">
