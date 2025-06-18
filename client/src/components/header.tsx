@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
-
+import octamyLogoDark from "@/assets/image_1750054456482.png";
+import octamyLogoLight from "@/assets/image_1750054465427.png";
 export default function Header() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const [location] = useLocation();
@@ -22,7 +23,15 @@ export default function Header() {
         <div className="flex justify-between items-center">
           {/* Logo */}
           <Link href="/" className="flex items-center">
-            <span className="text-2xl font-bold">OCTAMY</span>
+            <span className="text-2xl font-bold">
+              <Link href="/" className="text-2xl font-bold">
+                <img
+                  src={octamyLogoLight}
+                  alt="Octamy"
+                  className="h-8 dark:block"
+                />
+              </Link>
+            </span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -71,7 +80,7 @@ export default function Header() {
                 <Link href="/dashboard">
                   <Button
                     variant="outline"
-                    className="border-white text-white hover:bg-white hover:text-black"
+                    className="border-white text-white hover:bg-white hover:text-black bg-black"
                   >
                     Dashboard
                   </Button>
@@ -172,7 +181,7 @@ export default function Header() {
                     >
                       <Button
                         variant="outline"
-                        className="w-full border-white text-black hover:bg-white hover:text-black"
+                        className="w-full border-white text-black hover:bg-white hover:text-black bg-black"
                       >
                         Dashboard
                       </Button>
