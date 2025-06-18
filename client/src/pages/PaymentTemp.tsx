@@ -108,13 +108,13 @@ export default function PaymentTemp() {
       const paymentData = {
         tempExamId,
         courseId: parseInt(courseId!),
-        userEmail: tempExamData?.userEmail || '',
-        userName: tempExamData?.userName || '',
+        userEmail: (tempExamData as any)?.userEmail || '',
+        userName: (tempExamData as any)?.userName || '',
         userPhone: "",
         sellerCode: "",
         includesPhysicalCopy,
         selectedAddressId,
-        amount: courseData?.price || '0'
+        amount: (courseData as any)?.price || '0'
       };
 
       const response = await apiRequest("POST", "/api/payment/initiate", paymentData);
@@ -186,7 +186,7 @@ export default function PaymentTemp() {
     );
   }
 
-  if (!examResults.passed) {
+  if (!(tempExamData as any)?.passed) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
         <Header />
@@ -197,7 +197,7 @@ export default function PaymentTemp() {
               <p className="text-muted-foreground mb-4">
                 You need to pass the exam before purchasing a certificate.
               </p>
-              <Button onClick={() => navigate(`/course/${courseData?.slug || courseId}`)} className="w-full">
+              <Button onClick={() => navigate(`/course/${(courseData as any)?.slug || courseId}`)} className="w-full">
                 Retake Exam
               </Button>
             </CardContent>
@@ -209,7 +209,7 @@ export default function PaymentTemp() {
 
 
 
-  const baseAmount = parseFloat(courseData?.price || '0');
+  const baseAmount = parseFloat((courseData as any)?.price || '0');
   const shippingCost = includesPhysicalCopy ? 50 : 0;
   const totalAmount = baseAmount + shippingCost;
 
@@ -223,7 +223,7 @@ export default function PaymentTemp() {
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold mb-2">Complete Your Purchase</h1>
             <p className="text-muted-foreground">
-              Get your verified certificate for {courseData?.title || 'Course'}
+              Get your verified certificate for {(courseData as any)?.title || 'Course'}
             </p>
           </div>
 
@@ -245,15 +245,15 @@ export default function PaymentTemp() {
                         Professional Certificate
                       </h3>
                       <p className="text-blue-700 dark:text-blue-300">
-                        {courseData?.title || 'Course'}
+                        {(courseData as any)?.title || 'Course'}
                       </p>
                       <p className="text-sm text-blue-600 dark:text-blue-400">
-                        Awarded to: {tempExamData?.userName || 'Unknown'}
+                        Awarded to: {(tempExamData as any)?.userName || 'Unknown'}
                       </p>
                       <div className="flex justify-center gap-4 text-sm text-blue-600 dark:text-blue-400">
-                        <span>Score: {tempExamData?.score || 0}%</span>
+                        <span>Score: {(tempExamData as any)?.score || 0}%</span>
                         <span>•</span>
-                        <span>Grade: {tempExamData?.score >= 90 ? 'A+' : tempExamData?.score >= 80 ? 'A' : 'B+'}</span>
+                        <span>Grade: {(tempExamData as any)?.score >= 90 ? 'A+' : (tempExamData as any)?.score >= 80 ? 'A' : 'B+'}</span>
                       </div>
                     </div>
                   </div>
@@ -291,15 +291,15 @@ export default function PaymentTemp() {
                   <div className="flex justify-between">
                     <span>Digital Certificate</span>
                     <span className="font-medium">
-                      {courseData?.isOnSale && courseData?.originalPrice ? (
+                      {(courseData as any)?.isOnSale && (courseData as any)?.originalPrice ? (
                         <div className="text-right">
                           <span className="line-through text-muted-foreground mr-2">
-                            ₹{courseData.originalPrice}
+                            ₹{(courseData as any).originalPrice}
                           </span>
-                          <span className="text-green-600">₹{courseData.price}</span>
+                          <span className="text-green-600">₹{(courseData as any).price}</span>
                         </div>
                       ) : (
-                        <span>₹{courseData?.price || 0}</span>
+                        <span>₹{(courseData as any)?.price || 0}</span>
                       )}
                     </span>
                   </div>
