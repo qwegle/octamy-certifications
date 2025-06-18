@@ -11,7 +11,7 @@ import { format } from "date-fns";
 import { Users, BookOpen, DollarSign, FileText, TrendingUp, Activity, Search, Filter, RefreshCw, Eye, Edit, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-export default function EnhancedAdminDashboard() {
+function EnhancedAdminDashboard() {
   const [analytics, setAnalytics] = useState<any>(null);
   const [courses, setCourses] = useState<any[]>([]);
   const [examAttempts, setExamAttempts] = useState<any[]>([]);
@@ -648,3 +648,5 @@ export default function EnhancedAdminDashboard() {
     </div>
   );
 }
+
+export default EnhancedAdminDashboard;
