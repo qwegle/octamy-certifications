@@ -103,6 +103,102 @@ export async function registerRoutes(app: Express): Promise<Server> {
     await seedDatabase();
   }
 
+  // Direct seller authentication routes (bypass routing issues)
+  app.post('/api/sellers/login', async (req: Request, res: Response) => {
+    try {
+      const { email, password } = req.body;
+
+      if (!email || !password) {
+        return res.status(400).json({ message: "Email and password are required" });
+      }
+
+      const seller = await storage.getSellerByEmail(email);
+      if (!seller) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+
+      const isValidPassword = await bcrypt.compare(password, seller.password);
+      if (!isValidPassword) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+
+      if (!seller.isActive) {
+        return res.status(401).json({ message: "Account is deactivated" });
+      }
+
+      const token = jwt.sign(
+        { sellerId: seller.id, email: seller.email },
+        JWT_SECRET,
+        { expiresIn: '7d' }
+      );
+
+      res.json({
+        message: "Login successful",
+        token,
+        seller: {
+          id: seller.id,
+          email: seller.email,
+          name: seller.name,
+          isApproved: seller.isApproved,
+          totalEarnings: seller.totalEarnings || "0",
+          pendingEarnings: seller.pendingEarnings || "0"
+        }
+      });
+    } catch (error: any) {
+      console.error("Seller login error:", error);
+      res.status(500).json({ message: "Login failed", error: error.message });
+    }
+  });
+
+  app.post('/api/sellers/register', async (req: Request, res: Response) => {
+    try {
+      const { email, password, name, phone } = req.body;
+
+      if (!email || !password || !name) {
+        return res.status(400).json({ message: "Email, password, and name are required" });
+      }
+      
+      const existingSeller = await storage.getSellerByEmail(email);
+      if (existingSeller) {
+        return res.status(400).json({ message: "Seller already exists with this email" });
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      const seller = await storage.createSeller({
+        email,
+        password: hashedPassword,
+        name,
+        phone,
+        isApproved: false,
+        isActive: true,
+        referralCode: `REF${Date.now()}${Math.random().toString(36).substr(2, 9)}`.toUpperCase()
+      });
+
+      const token = jwt.sign(
+        { sellerId: seller.id, email: seller.email },
+        JWT_SECRET,
+        { expiresIn: '7d' }
+      );
+
+      res.status(201).json({
+        message: "Seller registered successfully",
+        token,
+        seller: {
+          id: seller.id,
+          email: seller.email,
+          name: seller.name,
+          isApproved: seller.isApproved,
+          totalEarnings: seller.totalEarnings || "0",
+          pendingEarnings: seller.pendingEarnings || "0"
+        }
+      });
+    } catch (error: any) {
+      console.error("Seller registration error:", error);
+      res.status(500).json({ message: "Registration failed", error: error.message });
+    }
+  });
+
   // API routes (from routes/index.ts)
   app.use(apiRoutes);
 
