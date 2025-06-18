@@ -32,8 +32,9 @@ function CertificateSlider() {
   });
 
   // Duplicate certificates for seamless infinite scroll
-  const duplicatedCertificates = certificates.length > 0 ? [...certificates, ...certificates] : [];
-
+  const duplicatedCertificates =
+    certificates.length > 0 ? [...certificates, ...certificates] : [];
+  console.log(duplicatedCertificates);
   return (
     <div className="bg-black text-white py-8">
       <div className="max-w-7xl mx-auto px-6">
@@ -43,7 +44,7 @@ function CertificateSlider() {
             Join thousands of professionals who have earned their certificates
           </p>
         </div>
-        
+
         {certificates.length > 0 ? (
           <div className="relative overflow-hidden">
             <div className="flex space-x-6 animate-scroll-left">
@@ -72,9 +73,7 @@ function CertificateSlider() {
                     >
                       {cert.badge} Badge
                     </Badge>
-                    <span className="text-xs text-gray-400">
-                      Score: ••%
-                    </span>
+                    <span className="text-xs text-gray-400">Score: ••%</span>
                   </div>
                 </div>
               ))}
@@ -390,7 +389,7 @@ export default function Landing() {
               </CardContent>
             </Card>
           </div>
-          <Link href="/sponsors">
+          <Link href="/sponsor">
             <Button size="lg" className="bg-white text-black hover:bg-gray-200">
               Support Our Project
             </Button>
