@@ -335,10 +335,20 @@ function EnhancedAdminDashboard() {
                           </TableCell>
                           <TableCell>
                             <div className="flex space-x-1">
-                              <Button variant="outline" size="sm" className="bg-white text-black border-gray-300 hover:bg-gray-100">
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                className="bg-white text-black border-gray-300 hover:bg-gray-100"
+                                onClick={() => window.open(`/course/${course.slug}`, '_blank')}
+                              >
                                 <Eye className="h-3 w-3" />
                               </Button>
-                              <Button variant="outline" size="sm" className="bg-white text-black border-gray-300 hover:bg-gray-100">
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                className="bg-white text-black border-gray-300 hover:bg-gray-100"
+                                onClick={() => window.location.href = `/admin/courses/${course.id}/edit`}
+                              >
                                 <Edit className="h-3 w-3" />
                               </Button>
                             </div>
