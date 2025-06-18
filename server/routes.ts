@@ -939,7 +939,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const course = await storage.getCourse(courseId);
             if (course) {
               // Use actual payment amount (not course price) for commission calculation
-              const actualPaymentAmount = parseFloat(amount);
+              const actualPaymentAmount = parseFloat(responseData.amount);
               const commissionAmount = (actualPaymentAmount * parseFloat(seller.commissionRate)) / 100;
               console.log(`Creating sale record: Commission ${commissionAmount} for course ${course.title} (actual payment: ${actualPaymentAmount})`);
               
@@ -959,12 +959,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
               }
 
               // Update seller's total earnings
-              const currentEarnings = parseFloat(seller.totalEarnings || "0");
+              const currentEarnings = parseFloat(seller.totalCommissionEarned || "0");
               const newEarnings = currentEarnings + commissionAmount;
               console.log(`Updating seller earnings from ${currentEarnings} to ${newEarnings}`);
               
               await storage.updateSeller(seller.id, {
-                totalEarnings: newEarnings.toString()
+                totalCommissionEarned: newEarnings.toString()
               });
             }
           } else {
