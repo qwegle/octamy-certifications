@@ -1347,6 +1347,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Public API endpoint for recent certificates (for landing page)
+  app.get("/api/recent-certificates", async (req: Request, res: Response) => {
+    try {
+      const certificates = await storage.getRecentCertificates(6); // Get 6 most recent certificates
+      res.json(certificates);
+    } catch (error) {
+      console.error("Error fetching recent certificates:", error);
+      res.status(500).json({ message: "Failed to fetch recent certificates" });
+    }
+  });
+
+  // Contact form submission endpoint
+  app.post("/api/contact", async (req: Request, res: Response) => {
+    try {
+      const { name, email, subject, message } = req.body;
+      
+      if (!name || !email || !subject || !message) {
+        return res.status(400).json({ message: "All fields are required" });
+      }
+
+      // Store contact form submission
+      await storage.createContactSubmission({
+        name,
+        email,
+        subject,
+        message,
+        submittedAt: new Date(),
+        status: 'new'
+      });
+
+      res.json({ message: "Contact form submitted successfully" });
+    } catch (error) {
+      console.error("Error submitting contact form:", error);
+      res.status(500).json({ message: "Failed to submit contact form" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
