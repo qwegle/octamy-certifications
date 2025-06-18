@@ -320,19 +320,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Get correct answers from session mapping
       const correctAnswersMapping = (global as any).questionMappings?.[sessionId] || {};
+      console.log('DEBUG - Session ID:', sessionId);
+      console.log('DEBUG - Correct answers mapping:', correctAnswersMapping);
       
-      // Transform answers array to Record<string, number> format
+      // Transform answers to Record<string, number> format
       const answersRecord: Record<string, number> = {};
       if (Array.isArray(answers)) {
+        // Array format: [{questionId: 123, selectedOption: 1}, ...]
         answers.forEach((answer: any) => {
           if (answer.questionId && answer.selectedOption !== undefined) {
             answersRecord[answer.questionId.toString()] = answer.selectedOption;
           }
         });
-      } else {
-        // If answers is already in the correct format
-        Object.assign(answersRecord, answers);
+      } else if (typeof answers === 'object' && answers !== null) {
+        // Object format: {questionId: selectedOption, ...}
+        for (const [questionId, selectedOption] of Object.entries(answers)) {
+          if (selectedOption !== undefined && selectedOption !== null) {
+            answersRecord[questionId.toString()] = Number(selectedOption);
+          }
+        }
       }
+      
+      console.log('DEBUG - Raw answers received:', answers);
+      console.log('DEBUG - Answers format detected:', Array.isArray(answers) ? 'array' : typeof answers);
+      
+      console.log('DEBUG - User answers:', answersRecord);
 
       // Calculate score using session-specific correct answers
       let correctAnswers = 0;
@@ -340,10 +352,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       for (const [questionId, userAnswer] of Object.entries(answersRecord)) {
         const correctAnswer = correctAnswersMapping[parseInt(questionId)];
+        console.log(`DEBUG - Question ${questionId}: User answer ${userAnswer}, Correct answer ${correctAnswer}`);
         if (correctAnswer !== undefined && correctAnswer === userAnswer) {
           correctAnswers++;
+          console.log(`DEBUG - Question ${questionId} marked as CORRECT`);
+        } else {
+          console.log(`DEBUG - Question ${questionId} marked as INCORRECT`);
         }
       }
+      
+      console.log('DEBUG - Total correct answers:', correctAnswers, 'out of', totalQuestions);
       
       // Clean up session data
       if ((global as any).questionMappings?.[sessionId]) {
