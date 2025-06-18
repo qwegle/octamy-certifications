@@ -69,12 +69,19 @@ function EnhancedAdminDashboard() {
       };
 
       // Fetch analytics
+      console.log('Fetching analytics with token:', token);
       const analyticsResponse = await fetch('/api/admin/analytics', { headers });
+      console.log('Analytics response status:', analyticsResponse.status);
       if (analyticsResponse.ok) {
         const analyticsData = await analyticsResponse.json();
+        console.log('Analytics data received:', analyticsData);
         setAnalytics(analyticsData);
       } else if (analyticsResponse.status === 401) {
         throw new Error('Authentication failed - please login again');
+      } else {
+        const errorText = await analyticsResponse.text();
+        console.log('Analytics error response:', errorText);
+        throw new Error(`Failed to fetch analytics: ${analyticsResponse.status}`);
       }
 
       // Fetch categories with course count
@@ -202,9 +209,10 @@ function EnhancedAdminDashboard() {
 
   useEffect(() => {
     const token = localStorage.getItem('adminToken');
+    console.log('Admin token found:', !!token);
     if (!token) {
       toast({
-        title: "Authentication Required",
+        title: "Authentication Required", 
         description: "Please login to access admin dashboard",
         variant: "destructive",
       });
