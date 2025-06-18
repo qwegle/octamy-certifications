@@ -152,6 +152,11 @@ export interface IStorage {
   getAllWithdrawals(): Promise<WithdrawalRequest[]>;
   updateWithdrawalStatus(id: number, status: string, adminNotes?: string): Promise<void>;
   
+  // Sponsor operations
+  createSponsor(sponsorData: InsertSponsor): Promise<Sponsor>;
+  getAllSponsors(): Promise<Sponsor[]>;
+  updateSponsorPaymentStatus(id: number, status: string, transactionId?: string): Promise<Sponsor>;
+  
   // Additional payment operations for PayUMoney
   getAllPayments(): Promise<Payment[]>;
   updatePaymentStatus(transactionId: string, status: string, paymentResponse: any): Promise<void>;
