@@ -202,6 +202,13 @@ Octamy is a comprehensive professional certification platform built as a full-st
 - **Enhanced checkout page** with dual certificate options (digital-only vs digital + physical)
 - **Default address management** with user-friendly address selection interface
 
+### Admin Sponsor and Contact Management System (June 18, 2025)
+- **Sponsor management dashboard** with comprehensive sponsor details including payment amounts, names, emails, and messages
+- **Contact form administration** allowing admins to view and manage all customer support requests and inquiries
+- **Enhanced admin dashboard** with dedicated tabs for sponsors and contact submissions with search functionality
+- **Payment status tracking** for sponsor contributions with transaction ID monitoring
+- **Contact status management** with new, read, and responded status tracking for customer support workflow
+
 ### Comprehensive Admin Dashboard with Customer and Course Management (June 17, 2025)
 - **Complete admin authentication system** with secure adminToken-based access control
 - **Customer management interface** showing registration data, purchase history, certificate counts, and spending analytics
