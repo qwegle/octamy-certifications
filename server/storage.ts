@@ -1147,7 +1147,7 @@ export class DatabaseStorage implements IStorage {
           progress: userAchievements.progress,
           metadata: userAchievements.metadata,
           isViewed: userAchievements.isViewed,
-          isNotified: userAchievements.isNotified,
+          isViewed: userAchievements.isViewed,
           achievement: achievements
         })
         .from(userAchievements)
@@ -1482,7 +1482,7 @@ export class DatabaseStorage implements IStorage {
       sellerId: withdrawalRequests.sellerId,
       amount: withdrawalRequests.amount,
       status: withdrawalRequests.status,
-      requestedAt: withdrawalRequests.requestedAt,
+      requestedAt: withdrawalRequests.createdAt,
       processedAt: withdrawalRequests.processedAt,
       sellerName: sellers.name,
       sellerEmail: sellers.email,
@@ -1807,11 +1807,13 @@ export class DatabaseStorage implements IStorage {
 
     // Get delivery address if transaction includes physical copy
     let address = null;
-    if (transaction.includesPhysicalCopy && transaction.selectedAddressId) {
+    if (transaction.shippingAmount && parseInt(transaction.shippingAmount) > 0) {
       const [addressData] = await db
         .select()
         .from(userAddresses)
-        .where(eq(userAddresses.id, transaction.selectedAddressId));
+        .where(eq(userAddresses.userId, transaction.userId || 0))
+        .orderBy(desc(userAddresses.createdAt))
+        .limit(1);
       address = addressData;
     }
 
@@ -1823,8 +1825,8 @@ export class DatabaseStorage implements IStorage {
       address,
       paymentGateway: 'PayUMoney',
       paymentMethod: transaction.paymentMethod,
-      gatewayTransactionId: transaction.gatewayTransactionId,
-      completedAt: transaction.updatedAt
+      gatewayTransactionId: transaction.payumoney_txnid || transaction.razorpayPaymentId,
+      completedAt: transaction.createdAt
     };
   }
 
