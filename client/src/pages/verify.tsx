@@ -112,7 +112,7 @@ export default function Verify() {
                         <User className="w-5 h-5 text-gray-500" />
                         <div>
                           <p className="text-sm text-gray-500">Recipient</p>
-                          <p className="font-semibold">{certificate?.userName || 'N/A'}</p>
+                          <p className="font-semibold">{certificate?.certificate?.userName || certificate?.userName || 'N/A'}</p>
                         </div>
                       </div>
                       
@@ -120,7 +120,7 @@ export default function Verify() {
                         <BookOpen className="w-5 h-5 text-gray-500" />
                         <div>
                           <p className="text-sm text-gray-500">Course</p>
-                          <p className="font-semibold">{certificate?.courseTitle || 'N/A'}</p>
+                          <p className="font-semibold">{certificate?.certificate?.courseTitle || certificate?.courseTitle || 'N/A'}</p>
                         </div>
                       </div>
                       
@@ -129,7 +129,7 @@ export default function Verify() {
                         <div>
                           <p className="text-sm text-gray-500">Achievement</p>
                           <Badge className="bg-yellow-500 text-black font-bold">
-                            {certificate?.badge?.toUpperCase() || 'N/A'}
+                            {(certificate?.certificate?.badge || certificate?.badge)?.toUpperCase() || 'N/A'}
                           </Badge>
                         </div>
                       </div>
@@ -141,7 +141,7 @@ export default function Verify() {
                         <div>
                           <p className="text-sm text-gray-500">Issue Date</p>
                           <p className="font-semibold">
-                            {certificate?.createdAt ? new Date(certificate.createdAt).toLocaleDateString() : 'N/A'}
+                            {(certificate?.certificate?.issuedAt || certificate?.issuedAt || certificate?.createdAt) ? new Date(certificate?.certificate?.issuedAt || certificate?.issuedAt || certificate?.createdAt).toLocaleDateString() : 'N/A'}
                           </p>
                         </div>
                       </div>
@@ -151,7 +151,7 @@ export default function Verify() {
                         <div>
                           <p className="text-sm text-gray-500">Valid Until</p>
                           <p className="font-semibold">
-                            {certificate?.expiresAt ? new Date(certificate.expiresAt).toLocaleDateString() : 'N/A'}
+                            {(certificate?.certificate?.expiresAt || certificate?.expiresAt) ? new Date(certificate?.certificate?.expiresAt || certificate?.expiresAt).toLocaleDateString() : 'N/A'}
                           </p>
                         </div>
                       </div>
@@ -160,7 +160,7 @@ export default function Verify() {
                         <CheckCircle className="w-5 h-5 text-gray-500" />
                         <div>
                           <p className="text-sm text-gray-500">Certificate Number</p>
-                          <p className="font-mono text-sm">{certificate?.certificateNumber || 'N/A'}</p>
+                          <p className="font-mono text-sm">{certificate?.certificate?.certificateId || certificate?.certificateId || certificate?.certificateNumber || 'N/A'}</p>
                         </div>
                       </div>
                     </div>
