@@ -822,12 +822,16 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
-  async getSellerSales(sellerId: number): Promise<Sale[]> {
+  async getSalesBySeller(sellerId: number): Promise<Sale[]> {
     return await db
       .select()
       .from(sales)
       .where(eq(sales.sellerId, sellerId))
       .orderBy(desc(sales.createdAt));
+  }
+
+  async getSellerSales(sellerId: number): Promise<Sale[]> {
+    return this.getSalesBySeller(sellerId);
   }
 
   async updateSaleCommission(id: number, status: string): Promise<void> {
@@ -846,12 +850,16 @@ export class DatabaseStorage implements IStorage {
     return request;
   }
 
-  async getSellerWithdrawals(sellerId: number): Promise<WithdrawalRequest[]> {
+  async getWithdrawalsBySeller(sellerId: number): Promise<WithdrawalRequest[]> {
     return await db
       .select()
       .from(withdrawalRequests)
       .where(eq(withdrawalRequests.sellerId, sellerId))
       .orderBy(desc(withdrawalRequests.createdAt));
+  }
+
+  async getSellerWithdrawals(sellerId: number): Promise<WithdrawalRequest[]> {
+    return this.getWithdrawalsBySeller(sellerId);
   }
 
   async getAllWithdrawals(): Promise<WithdrawalRequest[]> {
