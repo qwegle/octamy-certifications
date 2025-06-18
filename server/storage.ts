@@ -220,6 +220,7 @@ export class DatabaseStorage implements IStorage {
       name: users.name,
       email: users.email,
       password: users.password,
+      phone: users.phone,
       isAdmin: users.isAdmin,
       createdAt: users.createdAt
     }).from(users).where(eq(users.id, id));

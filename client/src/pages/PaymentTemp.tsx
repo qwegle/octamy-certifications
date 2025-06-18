@@ -105,13 +105,16 @@ export default function PaymentTemp() {
     }
 
     try {
+      // Get referral code from localStorage
+      const referralCode = localStorage.getItem('referralCode');
+      
       const paymentData = {
         tempExamId,
         courseId: parseInt(courseId!),
         userEmail: (tempExamData as any)?.userEmail || '',
         userName: (tempExamData as any)?.userName || '',
         userPhone: "",
-        sellerCode: "",
+        sellerCode: referralCode || "",
         includesPhysicalCopy,
         selectedAddressId,
         amount: (courseData as any)?.price || '0'
