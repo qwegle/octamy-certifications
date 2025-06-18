@@ -74,22 +74,40 @@ export default function CertificateView() {
     }
   };
 
-  const handleShare = () => {
+  const handleShare = async () => {
     const shareText = `I've earned a professional certificate in ${certificate?.courseTitle}! 
 Score: ${certificate?.score}% 
 Verified by Octamy Solutions Private Limited
 View certificate: ${window.location.href}`;
 
     if (navigator.share) {
-      navigator.share({
-        title: `Certificate - ${certificate?.courseTitle}`,
-        text: shareText,
-        url: window.location.href
-      });
+      try {
+        await navigator.share({
+          title: `Certificate - ${certificate?.courseTitle}`,
+          text: shareText,
+          url: window.location.href
+        });
+      } catch (error) {
+        // User canceled share or share failed
+        if ((error as Error).name !== 'AbortError') {
+          console.error('Share failed:', error);
+          // Fallback to clipboard
+          fallbackToClipboard(shareText);
+        }
+      }
     } else {
-      navigator.clipboard.writeText(shareText).then(() => {
-        alert('Certificate details copied to clipboard!');
-      });
+      fallbackToClipboard(shareText);
+    }
+  };
+
+  const fallbackToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      alert('Certificate details copied to clipboard!');
+    } catch (error) {
+      console.error('Clipboard failed:', error);
+      // Final fallback - show text in alert for manual copy
+      alert(`Please copy this text manually:\n\n${text}`);
     }
   };
 
