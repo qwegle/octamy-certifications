@@ -37,6 +37,20 @@
   --octamy-gray-900: hsl(0, 0%, 0%);
 }
 
+/* Certificate Auto-Scroll Animation */
+@keyframes scroll-left {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-scroll-left {
+  animation: scroll-left 30s linear infinite;
+}
+
 .dark {
   --background: hsl(0, 0%, 0%);
   --foreground: hsl(0, 0%, 100%);

@@ -1372,7 +1372,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Public API endpoint for recent certificates (for landing page)
   app.get("/api/recent-certificates", async (req: Request, res: Response) => {
     try {
-      const certificates = await storage.getRecentCertificates(6); // Get 6 most recent certificates
+      const certificates = await storage.getRecentCertificates(10); // Get 10 most recent certificates
       res.json(certificates);
     } catch (error) {
       console.error("Error fetching recent certificates:", error);
