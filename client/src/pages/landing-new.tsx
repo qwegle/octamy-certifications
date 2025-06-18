@@ -221,12 +221,14 @@ export default function Landing() {
             leaderboard.
           </p>
           <div className="flex justify-center space-x-4">
-            <Button
-              size="lg"
-              className="bg-black text-white hover:bg-gray-800 px-8 py-4 text-lg"
-            >
-              Start Learning <ArrowRight className="ml-2 w-5 h-5" />
-            </Button>
+            <Link href="/courses">
+              <Button
+                size="lg"
+                className="bg-black text-white hover:bg-gray-800 px-8 py-4 text-lg"
+              >
+                Start Learning <ArrowRight className="ml-2 w-5 h-5" />
+              </Button>
+            </Link>
             <Link href="/partners">
               <Button
                 variant="outline"

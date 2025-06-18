@@ -52,7 +52,7 @@ export default function Verify() {
               />
             </Link>
             <div className="hidden md:flex space-x-6">
-              <Link href="/" className="hover:text-gray-300">
+              <Link href="/courses" className="hover:text-gray-300">
                 Courses
               </Link>
               <Link href="/partners" className="hover:text-gray-300">
@@ -154,7 +154,11 @@ export default function Verify() {
                         <User className="w-5 h-5 text-gray-500" />
                         <div>
                           <p className="text-sm text-gray-500">Recipient</p>
-                          <p className="font-semibold">{certificate?.certificate?.userName || certificate?.userName || 'N/A'}</p>
+                          <p className="font-semibold">
+                            {certificate?.certificate?.userName ||
+                              certificate?.userName ||
+                              "N/A"}
+                          </p>
                         </div>
                       </div>
 
@@ -162,7 +166,11 @@ export default function Verify() {
                         <BookOpen className="w-5 h-5 text-gray-500" />
                         <div>
                           <p className="text-sm text-gray-500">Course</p>
-                          <p className="font-semibold">{certificate?.certificate?.courseTitle || certificate?.courseTitle || 'N/A'}</p>
+                          <p className="font-semibold">
+                            {certificate?.certificate?.courseTitle ||
+                              certificate?.courseTitle ||
+                              "N/A"}
+                          </p>
                         </div>
                       </div>
 
@@ -171,7 +179,10 @@ export default function Verify() {
                         <div>
                           <p className="text-sm text-gray-500">Achievement</p>
                           <Badge className="bg-yellow-500 text-black font-bold">
-                            {(certificate?.certificate?.badge || certificate?.badge)?.toUpperCase() || 'N/A'}
+                            {(
+                              certificate?.certificate?.badge ||
+                              certificate?.badge
+                            )?.toUpperCase() || "N/A"}
                           </Badge>
                         </div>
                       </div>
@@ -183,7 +194,15 @@ export default function Verify() {
                         <div>
                           <p className="text-sm text-gray-500">Issue Date</p>
                           <p className="font-semibold">
-                            {(certificate?.certificate?.issuedAt || certificate?.issuedAt || certificate?.createdAt) ? new Date(certificate?.certificate?.issuedAt || certificate?.issuedAt || certificate?.createdAt).toLocaleDateString() : 'N/A'}
+                            {certificate?.certificate?.issuedAt ||
+                            certificate?.issuedAt ||
+                            certificate?.createdAt
+                              ? new Date(
+                                  certificate?.certificate?.issuedAt ||
+                                    certificate?.issuedAt ||
+                                    certificate?.createdAt
+                                ).toLocaleDateString()
+                              : "N/A"}
                           </p>
                         </div>
                       </div>
@@ -193,7 +212,13 @@ export default function Verify() {
                         <div>
                           <p className="text-sm text-gray-500">Valid Until</p>
                           <p className="font-semibold">
-                            {(certificate?.certificate?.expiresAt || certificate?.expiresAt) ? new Date(certificate?.certificate?.expiresAt || certificate?.expiresAt).toLocaleDateString() : 'N/A'}
+                            {certificate?.certificate?.expiresAt ||
+                            certificate?.expiresAt
+                              ? new Date(
+                                  certificate?.certificate?.expiresAt ||
+                                    certificate?.expiresAt
+                                ).toLocaleDateString()
+                              : "N/A"}
                           </p>
                         </div>
                       </div>
@@ -201,8 +226,15 @@ export default function Verify() {
                       <div className="flex items-center space-x-3">
                         <CheckCircle className="w-5 h-5 text-gray-500" />
                         <div>
-                          <p className="text-sm text-gray-500">Certificate Number</p>
-                          <p className="font-mono text-sm">{certificate?.certificate?.certificateId || certificate?.certificateId || certificate?.certificateNumber || 'N/A'}</p>
+                          <p className="text-sm text-gray-500">
+                            Certificate Number
+                          </p>
+                          <p className="font-mono text-sm">
+                            {certificate?.certificate?.certificateId ||
+                              certificate?.certificateId ||
+                              certificate?.certificateNumber ||
+                              "N/A"}
+                          </p>
                         </div>
                       </div>
                     </div>
