@@ -24,7 +24,8 @@ import {
 import CourseCard from "@/components/course-card";
 import { useAuth } from "@/hooks/useAuth";
 import type { Category, Course } from "@shared/schema";
-
+import octamyLogoDark from "@/assets/image_1750054456482.png";
+import octamyLogoLight from "@/assets/image_1750054465427.png";
 // Certificate Slider Component with infinite auto-scroll
 function CertificateSlider() {
   const { data: certificates = [] } = useQuery<any[]>({
@@ -135,7 +136,11 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-8">
             <Link href="/" className="text-2xl font-bold">
-              OCTAMY
+              <img
+                src={octamyLogoLight}
+                alt="Octamy"
+                className="h-8 dark:block"
+              />
             </Link>
             <div className="hidden md:flex space-x-6">
               <Link href="/courses" className="hover:text-gray-300">
@@ -181,7 +186,7 @@ export default function Landing() {
                 <Link href="/dashboard">
                   <Button
                     variant="outline"
-                    className="border-white text-white hover:bg-white hover:text-black"
+                    className="border-white text-white hover:bg-white hover:text-black bg-black"
                   >
                     Dashboard
                   </Button>
