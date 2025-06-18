@@ -375,8 +375,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // User authentication
-  app.post("/api/register", async (req, res) => {
+  // Registration endpoint - support both /api/register and /api/auth/register for compatibility
+  const registerHandler = async (req: Request, res: Response) => {
     try {
       const { name, email, password, phone } = req.body;
       
@@ -420,9 +420,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Registration error:", error);
       res.status(500).json({ message: "Registration failed" });
     }
-  });
+  };
 
-  app.post("/api/login", async (req, res) => {
+  app.post("/api/register", registerHandler);
+  app.post("/api/auth/register", registerHandler);
+
+  // Login endpoint - support both /api/login and /api/auth/login for compatibility
+  const loginHandler = async (req: Request, res: Response) => {
     try {
       const { email, password } = req.body;
       
@@ -462,7 +466,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Login error:", error);
       res.status(500).json({ message: "Login failed" });
     }
-  });
+  };
+
+  app.post("/api/login", loginHandler);
+  app.post("/api/auth/login", loginHandler);
 
   app.get("/api/user", authenticateToken, async (req: AuthenticatedRequest, res) => {
     try {
