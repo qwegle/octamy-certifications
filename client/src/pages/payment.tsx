@@ -37,6 +37,12 @@ export default function Payment() {
     enabled: !!certificateId,
   });
 
+  // Fetch course details to get pricing information
+  const { data: course } = useQuery({
+    queryKey: [`/api/courses/${certificate?.courseId}`],
+    enabled: !!certificate?.courseId,
+  });
+
   // Fetch user addresses
   const { data: addresses = [] } = useQuery<Address[]>({
     queryKey: ["/api/user/addresses"],
@@ -154,7 +160,16 @@ export default function Payment() {
                           Download high-quality PDF certificate
                         </p>
                       </div>
-                      <span className="font-semibold">₹99</span>
+                      <div className="text-right">
+                        {course?.isOnSale && course?.originalPrice ? (
+                          <>
+                            <span className="line-through text-gray-400 text-sm">₹{course.originalPrice}</span>
+                            <span className="ml-2 text-green-600 font-semibold">₹{course.price}</span>
+                          </>
+                        ) : (
+                          <span className="font-semibold">₹{course?.price || '99'}</span>
+                        )}
+                      </div>
                     </div>
 
                     {/* Physical + Digital Option */}
@@ -173,7 +188,16 @@ export default function Payment() {
                           Premium paper certificate shipped to your address
                         </p>
                       </div>
-                      <span className="font-semibold">₹149</span>
+                      <div className="text-right">
+                        {course?.isOnSale && course?.originalPrice ? (
+                          <>
+                            <span className="line-through text-gray-400 text-sm">₹{(parseFloat(course.originalPrice) + 50).toFixed(0)}</span>
+                            <span className="ml-2 text-green-600 font-semibold">₹{(parseFloat(course.price) + 50).toFixed(0)}</span>
+                          </>
+                        ) : (
+                          <span className="font-semibold">₹{(parseFloat(course?.price || '99') + 50).toFixed(0)}</span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -221,7 +245,16 @@ export default function Payment() {
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <span>Digital Certificate</span>
-                      <span>₹99.00</span>
+                      <div className="text-right">
+                        {course?.isOnSale && course?.originalPrice ? (
+                          <>
+                            <span className="line-through text-gray-400 text-sm">₹{course.originalPrice}</span>
+                            <span className="ml-2 text-green-600 font-medium">₹{course.price}</span>
+                          </>
+                        ) : (
+                          <span>₹{course?.price || '99.00'}</span>
+                        )}
+                      </div>
                     </div>
                     {includesPhysicalCopy && (
                       <div className="flex justify-between">
@@ -231,7 +264,7 @@ export default function Payment() {
                     )}
                     <div className="flex justify-between font-semibold text-lg pt-2 border-t">
                       <span>Total</span>
-                      <span>₹{includesPhysicalCopy ? 149 : 99}.00</span>
+                      <span>₹{((parseFloat(course?.price || '99') + (includesPhysicalCopy ? 50 : 0))).toFixed(2)}</span>
                     </div>
                   </div>
                 </div>
@@ -240,7 +273,7 @@ export default function Payment() {
                 <PayUMoneyForm
                   certificateId={certificateId!}
                   courseId={certificate.courseId}
-                  amount={includesPhysicalCopy ? "149" : "99"}
+                  amount={(parseFloat(course?.price || '99') + (includesPhysicalCopy ? 50 : 0)).toFixed(2)}
                   userEmail={certificate.userEmail}
                   userName={certificate.userName}
                   courseTitle={certificate.courseTitle}

@@ -1333,8 +1333,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const txnid = payuMoneyService.generateTransactionId();
       
-      // Calculate total amount based on physical copy selection - use original price for payment
-      const baseAmount = parseFloat(amount || course.originalPrice || course.price);
+      // Calculate total amount based on physical copy selection - use current price for payment
+      const baseAmount = parseFloat(amount || course.price);
       const shippingCost = includesPhysicalCopy ? 50 : 0;
       const totalAmount = baseAmount + shippingCost;
       const formattedAmount = payuMoneyService.formatAmount(totalAmount.toString());

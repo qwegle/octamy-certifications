@@ -255,39 +255,28 @@ export default function EnhancedCheckout() {
     const totalAmount = basePrice + shippingCost;
 
     try {
-      // First create a certificate for this course after exam pass
-      // This creates an unpaid certificate that will be activated after PayUMoney payment
-      const certificateResponse = await apiRequest('POST', '/api/certificates/create', {
-        courseId: course.id
-      });
-
-      if (certificateResponse.ok) {
-        const certificate = await certificateResponse.json();
+      // Check if user has passed the exam first
+      const examStatusResponse = await apiRequest('GET', `/api/courses/${course.id}/exam-status`);
+      
+      if (examStatusResponse.ok) {
+        const examStatus = await examStatusResponse.json();
         
-        // Prepare payment data
-        const paymentData = {
-          courseId: course.id,
-          certificateId: certificate.id,
-          amount: totalAmount,
-          includesPhysicalCopy,
-          shippingAddressId: includesPhysicalCopy ? selectedAddressId : null,
-          sellerCode: referralCode,
-        };
+        if (examStatus.hasPassed) {
+          // User has passed, proceed directly to payment with exam attempt ID
+          const paymentData = {
+            courseId: course.id,
+            examAttemptId: examStatus.latestAttemptId,
+            amount: totalAmount,
+            includesPhysicalCopy,
+            shippingAddressId: includesPhysicalCopy ? selectedAddressId : null,
+            sellerCode: referralCode,
+          };
 
-        // Store payment data in sessionStorage
-        sessionStorage.setItem('paymentData', JSON.stringify(paymentData));
-        
-        // Navigate to payment page
-        navigate(`/payment/${certificate.id}?amount=${totalAmount}&physical=${includesPhysicalCopy}&address=${selectedAddressId || ''}&ref=${referralCode || ''}`);
-      } else {
-        const error = await certificateResponse.json();
-        if (error.requiresPayment) {
-          // Certificate creation blocked - user needs to complete payment first
-          toast({
-            title: "Payment Required",
-            description: "Complete your payment through PayUMoney to get your certificate.",
-            variant: "destructive",
-          });
+          // Store payment data in sessionStorage
+          sessionStorage.setItem('paymentData', JSON.stringify(paymentData));
+          
+          // Navigate to payment page with exam attempt ID
+          navigate(`/payment/exam/${examStatus.latestAttemptId}?amount=${totalAmount}&physical=${includesPhysicalCopy}&address=${selectedAddressId || ''}&ref=${referralCode || ''}`);
         } else {
           // User needs to take exam first
           toast({
@@ -297,6 +286,14 @@ export default function EnhancedCheckout() {
           });
           navigate(`/exam/${course.id}`);
         }
+      } else {
+        // User needs to take exam first
+        toast({
+          title: "Complete Exam First", 
+          description: "You need to take and pass the exam before purchasing a certificate.",
+          variant: "destructive",
+        });
+        navigate(`/exam/${course.id}`);
       }
     } catch (error) {
       toast({
