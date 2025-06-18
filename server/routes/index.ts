@@ -7,9 +7,10 @@ import certificateRoutes from './certificateRoutes';
 
 const router = Router();
 
-// Mount route modules
+// Mount route modules with proper API prefixing
 router.use('/auth', authRoutes);
-router.use('/courses', courseRoutes);
+// Remove /courses mounting to prevent conflict with frontend routing
+// router.use('/courses', courseRoutes);
 router.use('/exam', examRoutes);
 router.use('/certificates', certificateRoutes);
 // Remove seller routes mounting - handled directly in main routes.ts

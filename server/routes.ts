@@ -1170,6 +1170,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Register API routes (includes certificate routes)
   app.use('/api', apiRoutes);
 
+  // Catch-all handler: send back React's index.html file for non-API routes
+  // This ensures that client-side routing works for direct URL access
+  app.get('*', (req, res, next) => {
+    // Skip API routes - they should have been handled above
+    if (req.path.startsWith('/api')) {
+      return next();
+    }
+    
+    // Let Vite handle frontend routing in development
+    // The vite middleware will serve the React app
+    next();
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
