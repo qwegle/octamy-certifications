@@ -40,6 +40,8 @@ import SponsorPage from "@/pages/sponsor";
 import AdminLogin from "@/pages/admin-login";
 import AdminDashboard from "@/pages/admin-dashboard";
 import EnhancedAdminDashboard from "@/pages/enhanced-admin-dashboard";
+import TempExamResults from "@/pages/TempExamResults";
+import PaymentTemp from "@/pages/PaymentTemp";
 
 function Router() {
   return (
@@ -55,6 +57,8 @@ function Router() {
       <Route path="/admin/dashboard" component={AdminDashboard} />
       <Route path="/enhanced-admin" component={EnhancedAdminDashboard} />
       <Route path="/exam/:courseId" component={Exam} />
+      <Route path="/exam-results-temp/:tempExamId" component={TempExamResults} />
+      <Route path="/payment" component={PaymentTemp} />
       <Route path="/checkout/:courseId" component={EnhancedCheckout} />
       <Route path="/payment/:certificateId" component={Payment} />
       <Route path="/internship-payment/:certificateId" component={InternshipPayment} />
