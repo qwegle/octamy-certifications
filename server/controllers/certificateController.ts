@@ -94,6 +94,11 @@ export class CertificateController {
         return res.status(404).json({ message: "Certificate not found" });
       }
 
+      // Check if certificate is paid (security check)
+      if (!certificate.isPaid) {
+        return res.status(403).json({ message: "Certificate access denied. Payment required." });
+      }
+
       // Get course details for the certificate
       const course = await storage.getCourse(certificate.courseId);
       if (!course) {
