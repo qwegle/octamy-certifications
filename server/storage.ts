@@ -1659,9 +1659,9 @@ export class DatabaseStorage implements IStorage {
     return question;
   }
 
-  // Get all exam attempts for admin
-  async getAllExamAttempts() {
-    return await db.select({
+  // Get all exam attempts for admin with search and limit
+  async getAllExamAttempts(limit = 1000, search?: string) {
+    let query = db.select({
       id: examAttempts.id,
       userId: examAttempts.userId,
       courseId: examAttempts.courseId,
@@ -1671,16 +1671,32 @@ export class DatabaseStorage implements IStorage {
       totalQuestions: examAttempts.totalQuestions,
       timeTaken: examAttempts.timeTaken,
       createdAt: examAttempts.createdAt,
-      courseTitle: sql`(SELECT title FROM courses WHERE id = ${examAttempts.courseId})`.as('courseTitle'),
-      passed: examAttempts.passed
+      courseTitle: courses.title,
+      passed: sql`CASE WHEN ${examAttempts.score} >= ${courses.passingScore} THEN true ELSE false END`.as('passed')
     })
     .from(examAttempts)
-    .orderBy(desc(examAttempts.createdAt));
+    .leftJoin(courses, eq(examAttempts.courseId, courses.id));
+
+    if (search) {
+      query = query.where(
+        or(
+          ilike(examAttempts.userName, `%${search}%`),
+          ilike(examAttempts.userEmail, `%${search}%`),
+          ilike(courses.title, `%${search}%`),
+          eq(examAttempts.id, isNaN(parseInt(search)) ? -1 : parseInt(search)),
+          eq(examAttempts.userId, isNaN(parseInt(search)) ? -1 : parseInt(search))
+        )
+      );
+    }
+
+    return await query
+      .orderBy(desc(examAttempts.createdAt))
+      .limit(limit);
   }
 
-  // Admin course management
-  async getAllCoursesForAdmin() {
-    return await db.select({
+  // Admin course management with comprehensive data
+  async getAllCoursesForAdmin(limit = 1000, search?: string) {
+    let query = db.select({
       id: courses.id,
       title: courses.title,
       description: courses.description,
@@ -1697,23 +1713,159 @@ export class DatabaseStorage implements IStorage {
       isInternship: courses.isInternship,
       createdAt: courses.createdAt,
       enrollmentCount: sql`(
-        SELECT COUNT(*) FROM exam_attempts 
+        SELECT COUNT(DISTINCT user_email) FROM exam_attempts 
         WHERE course_id = ${courses.id}
       )`.as('enrollmentCount'),
       certificateCount: sql`(
         SELECT COUNT(*) FROM certificates 
-        WHERE course_id = ${courses.id}
+        WHERE course_id = ${courses.id} AND is_paid = true
       )`.as('certificateCount'),
       revenue: sql`(
-        SELECT COALESCE(SUM(CAST(amount AS DECIMAL)), 0)
-        FROM payments p
-        JOIN certificates c ON p.certificate_id = c.id
-        WHERE c.course_id = ${courses.id} AND p.status = 'success'
+        SELECT COALESCE(SUM(CAST(certificate_amount AS DECIMAL)), 0)
+        FROM payments 
+        WHERE course_id = ${courses.id} AND status = 'completed'
       )`.as('revenue')
     })
     .from(courses)
-    .leftJoin(categories, eq(courses.categoryId, categories.id))
-    .orderBy(desc(courses.createdAt));
+    .leftJoin(categories, eq(courses.categoryId, categories.id));
+
+    if (search) {
+      query = query.where(
+        or(
+          ilike(courses.title, `%${search}%`),
+          ilike(courses.description, `%${search}%`),
+          ilike(categories.name, `%${search}%`),
+          eq(courses.id, isNaN(parseInt(search)) ? -1 : parseInt(search))
+        )
+      );
+    }
+
+    return await query
+      .orderBy(desc(courses.createdAt))
+      .limit(limit);
+  }
+
+  // Add categories with course count method
+  async getCategoriesWithCourseCount() {
+    return await db.select({
+      id: categories.id,
+      name: categories.name,
+      description: categories.description,
+      slug: categories.slug,
+      icon: categories.icon,
+      createdAt: categories.createdAt,
+      courseCount: sql`(
+        SELECT COUNT(*) FROM courses WHERE category_id = ${categories.id}
+      )`.as('courseCount')
+    })
+    .from(categories)
+    .orderBy(categories.name);
+  }
+
+  // Get all payments for admin with detailed information
+  async getAllPaymentsForAdmin(limit = 1000, search?: string) {
+    let query = db.select({
+      id: payments.id,
+      transactionId: payments.transactionId,
+      amount: payments.amount,
+      certificateAmount: payments.certificateAmount,
+      status: payments.status,
+      paymentMethod: payments.paymentMethod,
+      createdAt: payments.createdAt,
+      courseTitle: sql`(SELECT title FROM courses WHERE id = ${payments.courseId})`.as('courseTitle'),
+      userName: sql`COALESCE((SELECT name FROM users WHERE id = ${payments.userId}), 'Guest User')`.as('userName'),
+      userEmail: sql`COALESCE((SELECT email FROM users WHERE id = ${payments.userId}), 'No Email')`.as('userEmail'),
+      certificateId: payments.certificateId
+    })
+    .from(payments);
+
+    if (search) {
+      query = query.where(
+        or(
+          ilike(payments.transactionId, `%${search}%`),
+          eq(payments.id, isNaN(parseInt(search)) ? -1 : parseInt(search))
+        )
+      );
+    }
+
+    return await query
+      .orderBy(desc(payments.createdAt))
+      .limit(limit);
+  }
+
+  // Get all sellers for admin with detailed information
+  async getAllSellersForAdmin(limit = 1000, search?: string) {
+    let query = db.select({
+      id: sellers.id,
+      name: sellers.name,
+      email: sellers.email,
+      phone: sellers.phone,
+      referralCode: sellers.referralCode,
+      isApproved: sellers.isApproved,
+      isActive: sellers.isActive,
+      commissionRate: sellers.commissionRate,
+      totalEarnings: sellers.totalEarnings,
+      pendingEarnings: sellers.pendingEarnings,
+      createdAt: sellers.createdAt,
+      clickCount: sql`(
+        SELECT COUNT(*) FROM referral_clicks WHERE seller_id = ${sellers.id}
+      )`.as('clickCount'),
+      conversionCount: sql`(
+        SELECT COUNT(*) FROM sales WHERE seller_id = ${sellers.id}
+      )`.as('conversionCount')
+    })
+    .from(sellers);
+
+    if (search) {
+      query = query.where(
+        or(
+          ilike(sellers.name, `%${search}%`),
+          ilike(sellers.email, `%${search}%`),
+          ilike(sellers.referralCode, `%${search}%`),
+          eq(sellers.id, isNaN(parseInt(search)) ? -1 : parseInt(search))
+        )
+      );
+    }
+
+    return await query
+      .orderBy(desc(sellers.createdAt))
+      .limit(limit);
+  }
+
+  // Get customers for admin with detailed information
+  async getCustomersForAdmin(limit = 1000, search?: string) {
+    let query = db.select({
+      id: users.id,
+      name: users.name,
+      email: users.email,
+      isAdmin: users.isAdmin,
+      createdAt: users.createdAt,
+      certificateCount: sql`(
+        SELECT COUNT(*) FROM certificates WHERE user_email = ${users.email} AND is_paid = true
+      )`.as('certificateCount'),
+      totalSpent: sql`(
+        SELECT COALESCE(SUM(CAST(certificate_amount AS DECIMAL)), 0)
+        FROM payments WHERE user_id = ${users.id} AND status = 'completed'
+      )`.as('totalSpent'),
+      examAttempts: sql`(
+        SELECT COUNT(*) FROM exam_attempts WHERE user_id = ${users.id}
+      )`.as('examAttempts')
+    })
+    .from(users);
+
+    if (search) {
+      query = query.where(
+        or(
+          ilike(users.name, `%${search}%`),
+          ilike(users.email, `%${search}%`),
+          eq(users.id, isNaN(parseInt(search)) ? -1 : parseInt(search))
+        )
+      );
+    }
+
+    return await query
+      .orderBy(desc(users.createdAt))
+      .limit(limit);
   }
 
   // Get questions for a course (admin)
