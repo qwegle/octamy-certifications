@@ -959,8 +959,7 @@ export class DatabaseStorage implements IStorage {
     await db
       .update(payments)
       .set({ 
-        status,
-        gatewayResponse: paymentResponse
+        status
       })
       .where(eq(payments.transactionId, transactionId));
   }
