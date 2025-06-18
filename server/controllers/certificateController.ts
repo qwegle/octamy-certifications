@@ -78,15 +78,13 @@ export class CertificateController {
         return res.status(404).json({ message: "Certificate not found" });
       }
 
-      // Check if this is an API request or browser request
-      const acceptHeader = req.headers.accept || '';
-      
-      if (acceptHeader.includes('application/json')) {
-        // API request - return JSON
-        res.json(certificate);
-      } else {
-        // Browser request - return HTML certificate preview page
-        const certificatePreviewHTML = `
+      // Always return JSON for API requests - React Query sends proper headers
+      res.json(certificate);
+    } catch (error) {
+      console.error("Get certificate error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  }
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -261,13 +259,6 @@ export class CertificateController {
                 showFallback();
             }
         });
-    </script>
-</body>
-</html>`;
-        
-        res.setHeader('Content-Type', 'text/html');
-        res.send(certificatePreviewHTML);
-      }
     } catch (error) {
       console.error("Get certificate error:", error);
       res.status(500).json({ message: "Internal server error" });
