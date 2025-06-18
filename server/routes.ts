@@ -217,7 +217,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const clickAnalytics = await storage.getSellerClickAnalytics(sellerId);
 
       const totalSales = sales.length;
-      const totalCommission = sales.reduce((sum, sale) => sum + parseFloat(sale.commissionAmount), 0);
+      const totalCommission = sales.reduce((sum, sale) => sum + parseFloat(sale.commission), 0);
       const pendingWithdrawals = withdrawals
         .filter(w => w.status === 'pending')
         .reduce((sum, w) => sum + parseFloat(w.amount), 0);
@@ -244,8 +244,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // API routes (from routes/index.ts)
+  // API routes (from routes/index.ts) - MOVED BEFORE seller routes to prevent conflicts
   app.use(apiRoutes);
+
+  // Add missing seller routes AFTER API routes to ensure they are properly registered
+  app.get('/api/sellers/shareable-items', authenticateSellerToken, async (req: SellerAuthenticatedRequest, res: Response) => {
+    try {
+      const sellerId = req.seller?.sellerId;
+      if (!sellerId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      // Get all courses that can be shared
+      const courses = await storage.getAllCourses();
+      
+      const shareableItems = {
+        courses: courses.map(course => ({
+          id: course.id,
+          title: course.title,
+          description: course.description,
+          price: course.price,
+          originalPrice: course.originalPrice,
+          category: course.category
+        }))
+      };
+
+      res.json(shareableItems);
+    } catch (error: any) {
+      console.error("Shareable items error:", error);
+      res.status(500).json({ message: "Failed to fetch shareable items" });
+    }
+  });
+
+  app.post('/api/sellers/generate-referral-url', authenticateSellerToken, async (req: SellerAuthenticatedRequest, res: Response) => {
+    try {
+      const sellerId = req.seller?.sellerId;
+      if (!sellerId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const { type, itemId, courseId } = req.body;
+      const targetCourseId = courseId || itemId;
+
+      // Get seller to get referral code
+      const seller = await storage.getSeller(sellerId);
+      if (!seller) {
+        return res.status(404).json({ message: "Seller not found" });
+      }
+
+      // Generate referral URL
+      const baseUrl = `${req.protocol}://${req.get('host')}`;
+      const referralUrl = `${baseUrl}/course/${targetCourseId}?ref=${seller.referralCode}`;
+
+      res.json({
+        referralUrl,
+        referralCode: seller.referralCode
+      });
+    } catch (error: any) {
+      console.error("Generate referral URL error:", error);
+      res.status(500).json({ message: "Failed to generate referral URL" });
+    }
+  });
 
   // User authentication
   app.post("/api/register", async (req, res) => {

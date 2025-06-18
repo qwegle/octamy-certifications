@@ -3,7 +3,7 @@ import authRoutes from './authRoutes';
 import courseRoutes from './courseRoutes';
 import examRoutes from './examRoutes';
 import certificateRoutes from './certificateRoutes';
-import sellerRoutes from './sellerRoutes';
+// Remove sellerRoutes import to prevent conflicts - seller routes are handled directly in main routes.ts
 
 const router = Router();
 
@@ -12,6 +12,6 @@ router.use('/auth', authRoutes);
 router.use('/courses', courseRoutes);
 router.use('/exam', examRoutes);
 router.use('/certificates', certificateRoutes);
-router.use('/sellers', sellerRoutes);
+// Remove seller routes mounting - handled directly in main routes.ts
 
 export default router;
