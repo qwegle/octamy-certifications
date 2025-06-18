@@ -22,20 +22,26 @@ function EnhancedAdminDashboard() {
   const [customers, setCustomers] = useState<any[]>([]);
   const [transactions, setTransactions] = useState<any[]>([]);
   const [partners, setPartners] = useState<any[]>([]);
+  const [sponsors, setSponsors] = useState<any[]>([]);
+  const [contactSubmissions, setContactSubmissions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerms, setSearchTerms] = useState({
     courses: '',
     customers: '',
     transactions: '',
     partners: '',
-    examAttempts: ''
+    examAttempts: '',
+    sponsors: '',
+    contacts: ''
   });
   const [searchFilters, setSearchFilters] = useState({
     courses: '',
     customers: '',
     transactions: '',
     partners: '',
-    examAttempts: ''
+    examAttempts: '',
+    sponsors: '',
+    contacts: ''
   });
   const [expandedTransactions, setExpandedTransactions] = useState<Set<number>>(new Set());
   const [transactionDetails, setTransactionDetails] = useState<Record<number, any>>({});
@@ -923,6 +929,160 @@ function EnhancedAdminDashboard() {
                           </TableCell>
                           <TableCell className="text-gray-300">{Math.floor(attempt.timeTaken / 60)}m {attempt.timeTaken % 60}s</TableCell>
                           <TableCell className="text-gray-300">{format(new Date(attempt.createdAt), 'MMM dd, yyyy HH:mm')}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Sponsors Tab */}
+          <TabsContent value="sponsors" className="space-y-6">
+            <Card className="bg-gray-900 border-gray-800">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center justify-between">
+                  <span className="flex items-center gap-2">
+                    <DollarSign className="w-5 h-5" />
+                    Sponsor Management
+                  </span>
+                  <Badge variant="outline" className="text-white border-gray-600">
+                    {sponsors.length} Total
+                  </Badge>
+                </CardTitle>
+                <CardDescription className="text-gray-400">
+                  Monitor and manage sponsor contributions and payments
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center space-x-2 mb-4">
+                  <Search className="w-4 h-4 text-gray-400" />
+                  <Input
+                    placeholder="Search sponsors by name or email..."
+                    value={searchTerms.sponsors}
+                    onChange={(e) => handleSearch('sponsors', e.target.value)}
+                    className="flex-1 bg-gray-800 border-gray-700 text-white"
+                  />
+                </div>
+                <div className="rounded-md border border-gray-800 max-h-96 overflow-y-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="border-gray-800 hover:bg-gray-800">
+                        <TableHead className="text-gray-300">ID</TableHead>
+                        <TableHead className="text-gray-300">Name</TableHead>
+                        <TableHead className="text-gray-300">Email</TableHead>
+                        <TableHead className="text-gray-300">Amount</TableHead>
+                        <TableHead className="text-gray-300">Message</TableHead>
+                        <TableHead className="text-gray-300">Payment Status</TableHead>
+                        <TableHead className="text-gray-300">Transaction ID</TableHead>
+                        <TableHead className="text-gray-300">Date</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {sponsors
+                        .filter(sponsor => 
+                          !searchTerms.sponsors || 
+                          sponsor.name.toLowerCase().includes(searchTerms.sponsors.toLowerCase()) ||
+                          sponsor.email.toLowerCase().includes(searchTerms.sponsors.toLowerCase())
+                        )
+                        .map((sponsor) => (
+                        <TableRow key={sponsor.id} className="border-gray-800 hover:bg-gray-800">
+                          <TableCell className="font-mono text-sm text-white">{sponsor.id}</TableCell>
+                          <TableCell className="text-white">{sponsor.name}</TableCell>
+                          <TableCell className="text-gray-300">{sponsor.email}</TableCell>
+                          <TableCell className="text-white font-medium">₹{sponsor.amount}</TableCell>
+                          <TableCell className="text-gray-300 max-w-xs truncate">{sponsor.message}</TableCell>
+                          <TableCell>
+                            <Badge variant={sponsor.paymentStatus === 'completed' ? "default" : sponsor.paymentStatus === 'pending' ? "secondary" : "destructive"} 
+                                   className={sponsor.paymentStatus === 'completed' ? "bg-green-600" : sponsor.paymentStatus === 'pending' ? "bg-yellow-600" : "bg-red-600"}>
+                              {sponsor.paymentStatus}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-gray-300 font-mono text-xs">{sponsor.transactionId || 'N/A'}</TableCell>
+                          <TableCell className="text-gray-300">{format(new Date(sponsor.createdAt), 'MMM dd, yyyy HH:mm')}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Contact Requests Tab */}
+          <TabsContent value="contacts" className="space-y-6">
+            <Card className="bg-gray-900 border-gray-800">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center justify-between">
+                  <span className="flex items-center gap-2">
+                    <Mail className="w-5 h-5" />
+                    Contact Requests
+                  </span>
+                  <Badge variant="outline" className="text-white border-gray-600">
+                    {contactSubmissions.length} Total
+                  </Badge>
+                </CardTitle>
+                <CardDescription className="text-gray-400">
+                  Manage customer support requests and inquiries
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center space-x-2 mb-4">
+                  <Search className="w-4 h-4 text-gray-400" />
+                  <Input
+                    placeholder="Search contacts by name or email..."
+                    value={searchTerms.contacts}
+                    onChange={(e) => handleSearch('contacts', e.target.value)}
+                    className="flex-1 bg-gray-800 border-gray-700 text-white"
+                  />
+                </div>
+                <div className="rounded-md border border-gray-800 max-h-96 overflow-y-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="border-gray-800 hover:bg-gray-800">
+                        <TableHead className="text-gray-300">ID</TableHead>
+                        <TableHead className="text-gray-300">Name</TableHead>
+                        <TableHead className="text-gray-300">Email</TableHead>
+                        <TableHead className="text-gray-300">Subject</TableHead>
+                        <TableHead className="text-gray-300">Message</TableHead>
+                        <TableHead className="text-gray-300">Status</TableHead>
+                        <TableHead className="text-gray-300">Submitted</TableHead>
+                        <TableHead className="text-gray-300">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {contactSubmissions
+                        .filter(contact => 
+                          !searchTerms.contacts || 
+                          contact.name.toLowerCase().includes(searchTerms.contacts.toLowerCase()) ||
+                          contact.email.toLowerCase().includes(searchTerms.contacts.toLowerCase()) ||
+                          contact.subject.toLowerCase().includes(searchTerms.contacts.toLowerCase())
+                        )
+                        .map((contact) => (
+                        <TableRow key={contact.id} className="border-gray-800 hover:bg-gray-800">
+                          <TableCell className="font-mono text-sm text-white">{contact.id}</TableCell>
+                          <TableCell className="text-white">{contact.name}</TableCell>
+                          <TableCell className="text-gray-300">{contact.email}</TableCell>
+                          <TableCell className="text-white font-medium">{contact.subject}</TableCell>
+                          <TableCell className="text-gray-300 max-w-xs truncate">{contact.message}</TableCell>
+                          <TableCell>
+                            <Badge variant={contact.status === 'responded' ? "default" : contact.status === 'read' ? "secondary" : "destructive"} 
+                                   className={contact.status === 'responded' ? "bg-green-600" : contact.status === 'read' ? "bg-yellow-600" : "bg-gray-600"}>
+                              {contact.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-gray-300">{format(new Date(contact.submittedAt), 'MMM dd, yyyy HH:mm')}</TableCell>
+                          <TableCell>
+                            <div className="flex space-x-1">
+                              <Button variant="ghost" size="sm" className="text-blue-400 hover:text-blue-300 hover:bg-gray-800">
+                                <Eye className="w-4 h-4" />
+                              </Button>
+                              <Button variant="ghost" size="sm" className="text-green-400 hover:text-green-300 hover:bg-gray-800">
+                                <Mail className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>

@@ -1314,6 +1314,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin sponsors endpoint
+  app.get('/api/admin/sponsors', authenticateAdminToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const sponsors = await storage.getAllSponsors();
+      res.json(sponsors);
+    } catch (error) {
+      console.error('Error fetching sponsors:', error);
+      res.status(500).json({ message: 'Failed to fetch sponsors' });
+    }
+  });
+
+  // Admin contact submissions endpoint
+  app.get('/api/admin/contacts', authenticateAdminToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const contacts = await storage.getAllContactSubmissions();
+      res.json(contacts);
+    } catch (error) {
+      console.error('Error fetching contact submissions:', error);
+      res.status(500).json({ message: 'Failed to fetch contact submissions' });
+    }
+  });
+
   // Register API routes (includes certificate routes)
   app.use('/api', apiRoutes);
 
