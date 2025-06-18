@@ -29,6 +29,11 @@ export default function EnhancedAdminDashboard() {
   });
   const { toast } = useToast();
 
+  const handleLogout = () => {
+    localStorage.removeItem('adminToken');
+    window.location.href = '/admin-login';
+  };
+
   const fetchData = async (searchFilters = {}) => {
     try {
       setLoading(true);
