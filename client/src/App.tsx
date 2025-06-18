@@ -42,6 +42,7 @@ import AdminDashboard from "@/pages/admin-dashboard";
 import EnhancedAdminDashboard from "@/pages/enhanced-admin-dashboard";
 import TempExamResults from "@/pages/TempExamResults";
 import PaymentTemp from "@/pages/PaymentTemp";
+import Contact from "@/pages/contact";
 
 function Router() {
   return (
@@ -85,6 +86,7 @@ function Router() {
       <Route path="/demo-internship-certificate" component={DemoInternshipCertificate} />
       <Route path="/business-certificates" component={BusinessCertificates} />
       <Route path="/internship/:slug" component={InternshipForm} />
+      <Route path="/contact" component={Contact} />
       <Route component={NotFound} />
     </Switch>
   );

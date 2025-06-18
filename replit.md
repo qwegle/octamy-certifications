@@ -202,6 +202,20 @@ Octamy is a comprehensive professional certification platform built as a full-st
 - **Enhanced checkout page** with dual certificate options (digital-only vs digital + physical)
 - **Default address management** with user-friendly address selection interface
 
+### Admin Sponsor and Contact Management System (June 18, 2025)
+- **Sponsor management dashboard** with comprehensive sponsor details including payment amounts, names, emails, and messages
+- **Contact form administration** allowing admins to view and manage all customer support requests and inquiries
+- **Enhanced admin dashboard** with dedicated tabs for sponsors and contact submissions with search functionality
+- **Payment status tracking** for sponsor contributions with transaction ID monitoring
+- **Contact status management** with new, read, and responded status tracking for customer support workflow
+
+### Landing Page Certificate Display Enhancement (June 18, 2025)
+- **Fixed certificate display duplicates** - removed duplicate "Certified in" text appearing twice in certificate cards
+- **Added infinite horizontal auto-scroll** - smooth 30-second loop animation for professional certificate showcase
+- **Limited to latest 10 certificates** - API now returns only the 10 most recent certifications for optimal performance
+- **Blurred out scores for privacy** - certificate scores now display as "••%" to protect user privacy while maintaining professional appearance
+- **Seamless infinite scroll implementation** - duplicated certificate array creates continuous scrolling without visible breaks
+
 ### Comprehensive Admin Dashboard with Customer and Course Management (June 17, 2025)
 - **Complete admin authentication system** with secure adminToken-based access control
 - **Customer management interface** showing registration data, purchase history, certificate counts, and spending analytics
@@ -234,6 +248,21 @@ Octamy is a comprehensive professional certification platform built as a full-st
 - **UPI and bank account withdrawal** system with admin approval workflow
 - **Admin seller management** for approval/rejection of partner accounts
 - **Commission calculation and tracking** with pending/paid status management
+
+### Authentication System Fixes and Certificate Dashboard Restoration (June 18, 2025)
+- **Fixed user registration and login system** - resolved JWT authentication conflicts and endpoint routing issues
+- **Added dual endpoint support** - both `/api/login` and `/api/auth/login` routes working for Replit and local development
+- **Certificate dashboard restoration** - user certificates now properly displaying in dashboard after authentication fixes
+- **JWT token validation fixed** - improved error handling and token verification middleware
+- **Database certificate creation** - added complete test certificates for user verification and dashboard testing
+- **Endpoint compatibility** - registration endpoints `/api/register` and `/api/auth/register` both functional
+
+### Git Merge Conflict Resolution and System Stability (June 18, 2025)
+- **Resolved critical Git merge conflicts** - completely fixed all merge conflict markers in verify.tsx preventing repository operations
+- **Certificate verification system restored** - verification page now properly handles both nested and flat API response structures
+- **Application stability maintained** - workflow successfully restarted and running on port 5000 after conflict resolution
+- **Data structure compatibility** - certificate display works with certificate.certificate.* and direct certificate.* properties
+- **Repository pull operations enabled** - Git conflicts no longer blocking development workflow updates
 
 ### Complete Payment System Restoration (June 18, 2025)
 - **Fixed critical payment processing failure** - resolved all payment initiation errors from database schema mismatches

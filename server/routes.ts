@@ -57,14 +57,17 @@ const authenticateToken = (req: AuthenticatedRequest, res: Response, next: NextF
   const token = authHeader && authHeader.split(' ')[1];
 
   if (!token) {
-    return res.sendStatus(401);
+    return res.status(401).json({ message: "No token provided" });
   }
 
-  jwt.verify(token, JWT_SECRET, (err: any, user: any) => {
-    if (err) return res.sendStatus(403);
-    req.user = user;
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET) as any;
+    req.user = decoded;
     next();
-  });
+  } catch (err) {
+    console.error("JWT verification error:", err);
+    return res.status(403).json({ message: "Invalid token" });
+  }
 };
 
 // Optional auth middleware
@@ -372,36 +375,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // User authentication
-  app.post("/api/register", async (req, res) => {
+  // Registration endpoint - support both /api/register and /api/auth/register for compatibility
+  const registerHandler = async (req: Request, res: Response) => {
     try {
-      const { name, email, password, phone } = insertUserSchema.parse(req.body);
+      const { name, email, password, phone } = req.body;
+      
+      if (!name || !email || !password) {
+        return res.status(400).json({ message: "Name, email, and password are required" });
+      }
       
       const existingUser = await storage.getUserByEmail(email);
       if (existingUser) {
         return res.status(400).json({ message: "User already exists" });
       }
 
-      const hashedPassword = password ? await bcrypt.hash(password, 10) : null;
+      const hashedPassword = await bcrypt.hash(password, 10);
       const user = await storage.createUser({
         name,
         email,
         password: hashedPassword,
-        phone
+        phone: phone || null
       });
 
+      const token = jwt.sign(
+        { 
+          userId: user.id, 
+          email: user.email,
+          isAdmin: user.isAdmin || false 
+        },
+        JWT_SECRET,
+        { expiresIn: "24h" }
+      );
+
       res.status(201).json({ 
-        id: user.id, 
-        name: user.name, 
-        email: user.email 
+        token,
+        user: {
+          id: user.id, 
+          name: user.name, 
+          email: user.email,
+          isAdmin: user.isAdmin || false
+        }
       });
     } catch (error) {
       console.error("Registration error:", error);
-      res.status(400).json({ message: "Invalid user data" });
+      res.status(500).json({ message: "Registration failed" });
     }
-  });
+  };
 
-  app.post("/api/login", async (req, res) => {
+  app.post("/api/register", registerHandler);
+  app.post("/api/auth/register", registerHandler);
+
+  // Login endpoint - support both /api/login and /api/auth/login for compatibility
+  const loginHandler = async (req: Request, res: Response) => {
     try {
       const { email, password } = req.body;
       
@@ -441,7 +466,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Login error:", error);
       res.status(500).json({ message: "Login failed" });
     }
-  });
+  };
+
+  app.post("/api/login", loginHandler);
+  app.post("/api/auth/login", loginHandler);
 
   app.get("/api/user", authenticateToken, async (req: AuthenticatedRequest, res) => {
     try {
@@ -1314,6 +1342,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin sponsors endpoint
+  app.get('/api/admin/sponsors', authenticateAdminToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const sponsors = await storage.getAllSponsors();
+      res.json(sponsors);
+    } catch (error) {
+      console.error('Error fetching sponsors:', error);
+      res.status(500).json({ message: 'Failed to fetch sponsors' });
+    }
+  });
+
+  // Admin contact submissions endpoint
+  app.get('/api/admin/contacts', authenticateAdminToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const contacts = await storage.getAllContactSubmissions();
+      res.json(contacts);
+    } catch (error) {
+      console.error('Error fetching contact submissions:', error);
+      res.status(500).json({ message: 'Failed to fetch contact submissions' });
+    }
+  });
+
   // Register API routes (includes certificate routes)
   app.use('/api', apiRoutes);
 
@@ -1339,11 +1389,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Unauthorized" });
       }
 
+      console.log("Fetching certificates for user ID:", userId);
       const certificates = await storage.getUserCertificates(userId);
+      console.log("Found certificates:", certificates.length);
       res.json(certificates);
     } catch (error) {
       console.error("Get user certificates error:", error);
       res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Public API endpoint for recent certificates (for landing page)
+  app.get("/api/recent-certificates", async (req: Request, res: Response) => {
+    try {
+      const certificates = await storage.getRecentCertificates(10); // Get 10 most recent certificates
+      res.json(certificates);
+    } catch (error) {
+      console.error("Error fetching recent certificates:", error);
+      res.status(500).json({ message: "Failed to fetch recent certificates" });
+    }
+  });
+
+  // Contact form submission endpoint
+  app.post("/api/contact", async (req: Request, res: Response) => {
+    try {
+      const { name, email, subject, message } = req.body;
+      
+      if (!name || !email || !subject || !message) {
+        return res.status(400).json({ message: "All fields are required" });
+      }
+
+      // Store contact form submission
+      await storage.createContactSubmission({
+        name,
+        email,
+        subject,
+        message,
+        submittedAt: new Date(),
+        status: 'new'
+      });
+
+      res.json({ message: "Contact form submitted successfully" });
+    } catch (error) {
+      console.error("Error submitting contact form:", error);
+      res.status(500).json({ message: "Failed to submit contact form" });
     }
   });
 

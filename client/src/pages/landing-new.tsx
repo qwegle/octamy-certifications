@@ -24,30 +24,18 @@ import {
 import CourseCard from "@/components/course-card";
 import { useAuth } from "@/hooks/useAuth";
 import type { Category, Course } from "@shared/schema";
-
-// Certificate Slider Component
+import octamyLogoDark from "@/assets/image_1750054456482.png";
+import octamyLogoLight from "@/assets/image_1750054465427.png";
+// Certificate Slider Component with infinite auto-scroll
 function CertificateSlider() {
-  const certificates = [
-    {
-      name: "Sarah Johnson",
-      course: "AI Fundamentals",
-      badge: "Gold",
-      company: "Tech Corp",
-    },
-    {
-      name: "Michael Chen",
-      course: "Data Science",
-      badge: "Platinum",
-      company: "DataFlow Inc",
-    },
-    {
-      name: "Emma Davis",
-      course: "Machine Learning",
-      badge: "Silver",
-      company: "ML Solutions",
-    },
-  ];
+  const { data: certificates = [] } = useQuery<any[]>({
+    queryKey: ["/api/recent-certificates"],
+  });
 
+  // Duplicate certificates for seamless infinite scroll
+  const duplicatedCertificates =
+    certificates.length > 0 ? [...certificates, ...certificates] : [];
+  console.log(duplicatedCertificates);
   return (
     <div className="bg-black text-white py-8">
       <div className="max-w-7xl mx-auto px-6">
@@ -57,31 +45,62 @@ function CertificateSlider() {
             Join thousands of professionals who have earned their certificates
           </p>
         </div>
-        <div className="flex overflow-x-auto space-x-6 pb-4">
-          {certificates.map((cert, index) => (
-            <div
-              key={index}
-              className="flex-shrink-0 bg-gray-900 rounded-lg p-6 min-w-[300px]"
-            >
-              <div className="flex items-center space-x-3 mb-3">
-                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center">
-                  <Award className="w-6 h-6 text-black" />
+
+        {certificates.length > 0 ? (
+          <div className="relative overflow-hidden">
+            <div className="flex space-x-6 animate-scroll-left">
+              {duplicatedCertificates.map((cert, index) => (
+                <div
+                  key={`${cert.name}-${cert.course}-${index}`}
+                  className="flex-shrink-0 bg-gray-900 rounded-lg p-6 min-w-[300px]"
+                >
+                  <div className="flex items-center space-x-3 mb-3">
+                    <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center">
+                      <Award className="w-6 h-6 text-black" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold">{cert.name}</h4>
+                      <p className="text-sm text-gray-400">{cert.company}</p>
+                    </div>
+                  </div>
+                  <p className="text-sm mb-2">
+                    Certified in{" "}
+                    <span className="font-semibold">{cert.course}</span>
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <Badge
+                      variant="outline"
+                      className="border-white text-white"
+                    >
+                      {cert.badge} Badge
+                    </Badge>
+                    <span className="text-xs text-gray-400">Score: ••%</span>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="font-semibold">{cert.name}</h4>
-                  <p className="text-sm text-gray-400">{cert.company}</p>
-                </div>
-              </div>
-              <p className="text-sm mb-2">
-                Certified in{" "}
-                <span className="font-semibold">{cert.course}</span>
-              </p>
-              <Badge variant="outline" className="border-white text-white">
-                {cert.badge} Badge
-              </Badge>
+              ))}
             </div>
-          ))}
-        </div>
+          </div>
+        ) : (
+          // Loading placeholder
+          <div className="flex overflow-x-auto space-x-6 pb-4">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <div
+                key={index}
+                className="flex-shrink-0 bg-gray-900 rounded-lg p-6 min-w-[300px] animate-pulse"
+              >
+                <div className="flex items-center space-x-3 mb-3">
+                  <div className="w-12 h-12 bg-gray-700 rounded-full"></div>
+                  <div>
+                    <div className="h-4 bg-gray-700 rounded w-24 mb-2"></div>
+                    <div className="h-3 bg-gray-700 rounded w-16"></div>
+                  </div>
+                </div>
+                <div className="h-3 bg-gray-700 rounded w-32 mb-2"></div>
+                <div className="h-6 bg-gray-700 rounded w-20"></div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -117,7 +136,11 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-8">
             <Link href="/" className="text-2xl font-bold">
-              OCTAMY
+              <img
+                src={octamyLogoLight}
+                alt="Octamy"
+                className="h-8 dark:block"
+              />
             </Link>
             <div className="hidden md:flex space-x-6">
               <Link href="/courses" className="hover:text-gray-300">
@@ -163,7 +186,7 @@ export default function Landing() {
                 <Link href="/dashboard">
                   <Button
                     variant="outline"
-                    className="border-white text-white hover:bg-white hover:text-black"
+                    className="border-white text-white hover:bg-white hover:text-black bg-black"
                   >
                     Dashboard
                   </Button>
@@ -198,12 +221,14 @@ export default function Landing() {
             leaderboard.
           </p>
           <div className="flex justify-center space-x-4">
-            <Button
-              size="lg"
-              className="bg-black text-white hover:bg-gray-800 px-8 py-4 text-lg"
-            >
-              Start Learning <ArrowRight className="ml-2 w-5 h-5" />
-            </Button>
+            <Link href="/courses">
+              <Button
+                size="lg"
+                className="bg-black text-white hover:bg-gray-800 px-8 py-4 text-lg"
+              >
+                Start Learning <ArrowRight className="ml-2 w-5 h-5" />
+              </Button>
+            </Link>
             <Link href="/partners">
               <Button
                 variant="outline"
@@ -371,7 +396,7 @@ export default function Landing() {
               </CardContent>
             </Card>
           </div>
-          <Link href="/sponsors">
+          <Link href="/sponsor">
             <Button size="lg" className="bg-white text-black hover:bg-gray-200">
               Support Our Project
             </Button>
