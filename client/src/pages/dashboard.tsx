@@ -209,6 +209,26 @@ export default function Dashboard() {
                         <Download className="w-4 h-4 mr-1" />
                         Download
                       </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          const shareUrl = `${window.location.origin}/certificate/${certificate.certificateId}`;
+                          if (navigator.share) {
+                            navigator.share({
+                              title: `Professional Certificate - ${certificate.userName}`,
+                              text: `Certificate of completion for ${certificate.courseTitle}`,
+                              url: shareUrl
+                            });
+                          } else {
+                            navigator.clipboard.writeText(shareUrl);
+                            alert('Shareable link copied to clipboard!');
+                          }
+                        }}
+                        className="border-octamy-gray-300 text-octamy-gray-700 hover:bg-octamy-gray-200"
+                      >
+                        🔗 Share
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
