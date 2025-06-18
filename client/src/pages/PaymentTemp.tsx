@@ -108,13 +108,13 @@ export default function PaymentTemp() {
       const paymentData = {
         tempExamId,
         courseId: parseInt(courseId!),
-        userEmail: examResults.userEmail,
-        userName: examResults.userName,
+        userEmail: tempExamData?.userEmail || '',
+        userName: tempExamData?.userName || '',
         userPhone: "",
         sellerCode: "",
         includesPhysicalCopy,
         selectedAddressId,
-        amount: course.price
+        amount: courseData?.price || '0'
       };
 
       const response = await apiRequest("POST", "/api/payment/initiate", paymentData);
@@ -223,7 +223,7 @@ export default function PaymentTemp() {
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold mb-2">Complete Your Purchase</h1>
             <p className="text-muted-foreground">
-              Get your verified certificate for {course.title}
+              Get your verified certificate for {courseData?.title || 'Course'}
             </p>
           </div>
 
@@ -245,15 +245,15 @@ export default function PaymentTemp() {
                         Professional Certificate
                       </h3>
                       <p className="text-blue-700 dark:text-blue-300">
-                        {course.title}
+                        {courseData?.title || 'Course'}
                       </p>
                       <p className="text-sm text-blue-600 dark:text-blue-400">
-                        Awarded to: {examResults.userName}
+                        Awarded to: {tempExamData?.userName || 'Unknown'}
                       </p>
                       <div className="flex justify-center gap-4 text-sm text-blue-600 dark:text-blue-400">
-                        <span>Score: {examResults.score}%</span>
+                        <span>Score: {tempExamData?.score || 0}%</span>
                         <span>•</span>
-                        <span>Grade: {examResults.score >= 90 ? 'A+' : examResults.score >= 80 ? 'A' : 'B+'}</span>
+                        <span>Grade: {tempExamData?.score >= 90 ? 'A+' : tempExamData?.score >= 80 ? 'A' : 'B+'}</span>
                       </div>
                     </div>
                   </div>
@@ -291,15 +291,15 @@ export default function PaymentTemp() {
                   <div className="flex justify-between">
                     <span>Digital Certificate</span>
                     <span className="font-medium">
-                      {course.isOnSale && course.originalPrice ? (
+                      {courseData?.isOnSale && courseData?.originalPrice ? (
                         <div className="text-right">
                           <span className="line-through text-muted-foreground mr-2">
-                            ₹{course.originalPrice}
+                            ₹{courseData.originalPrice}
                           </span>
-                          <span className="text-green-600">₹{course.price}</span>
+                          <span className="text-green-600">₹{courseData.price}</span>
                         </div>
                       ) : (
-                        <span>₹{course.price}</span>
+                        <span>₹{courseData?.price || 0}</span>
                       )}
                     </span>
                   </div>
