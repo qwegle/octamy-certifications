@@ -12,23 +12,36 @@ interface CourseCardProps {
   viewMode?: "grid" | "list";
 }
 
-export default function CourseCard({ course, certifiedCount = 0, rating = 4.8, viewMode = "grid" }: CourseCardProps) {
+export default function CourseCard({
+  course,
+  certifiedCount = 10,
+  rating = 4.8,
+  viewMode = "grid",
+}: CourseCardProps) {
   return (
-    <Card className={`group hover:shadow-lg transition-all duration-300 border-2 hover:border-black relative ${
-      viewMode === "list" ? "flex flex-row" : ""
-    }`}>
+    <Card
+      className={`group hover:shadow-lg transition-all duration-300 border-2 hover:border-black relative ${
+        viewMode === "list" ? "flex flex-row" : ""
+      }`}
+    >
       <div className={`${viewMode === "list" ? "w-64 flex-shrink-0" : ""}`}>
         <div className="aspect-video bg-gradient-to-br from-gray-900 to-black rounded-t-lg relative overflow-hidden">
           <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center">
             <Award className="h-12 w-12 text-white" />
           </div>
           <div className="absolute top-4 left-4">
-            <Badge variant="secondary" className="bg-white text-black font-bold">
+            <Badge
+              variant="secondary"
+              className="bg-white text-black font-bold"
+            >
               {course.category.name}
             </Badge>
           </div>
           <div className="absolute top-4 right-4 flex gap-2">
-            <Badge variant="outline" className="bg-black text-white border-white">
+            <Badge
+              variant="outline"
+              className="bg-black text-white border-white"
+            >
               {course.duration} mins
             </Badge>
             {course.isOnSale && (
@@ -39,7 +52,7 @@ export default function CourseCard({ course, certifiedCount = 0, rating = 4.8, v
           </div>
         </div>
       </div>
-      
+
       <div className={`${viewMode === "list" ? "flex-1" : ""}`}>
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between gap-2">
@@ -55,7 +68,7 @@ export default function CourseCard({ course, certifiedCount = 0, rating = 4.8, v
             {course.description}
           </p>
         </CardHeader>
-        
+
         <CardContent className="pt-0">
           <div className="space-y-3">
             <div className="flex items-center gap-4 text-sm text-gray-600">
@@ -65,28 +78,42 @@ export default function CourseCard({ course, certifiedCount = 0, rating = 4.8, v
               </div>
               <div className="flex items-center gap-1">
                 <Users className="h-4 w-4" />
-                {certifiedCount} certified
+                {certifiedCount}+ certified
               </div>
               <div className="flex items-center gap-1">
                 <Award className="h-4 w-4" />
                 {course.level || "All Levels"}
               </div>
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div className="space-y-1">
                 {course.isOnSale && course.originalPrice ? (
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-2xl font-bold text-red-600">₹{course.price}</span>
-                      <span className="text-lg text-gray-500 line-through">₹{course.originalPrice}</span>
+                      <span className="text-2xl font-bold text-red-600">
+                        ₹{course.price}
+                      </span>
+                      <span className="text-lg text-gray-500 line-through">
+                        ₹{course.originalPrice}
+                      </span>
                     </div>
                     <div className="flex items-center gap-2">
                       <div className="text-sm text-green-600 font-medium">
-                        Save ₹{(parseFloat(course.originalPrice) - parseFloat(course.price)).toFixed(0)}
+                        Save ₹
+                        {(
+                          parseFloat(course.originalPrice) -
+                          parseFloat(course.price)
+                        ).toFixed(0)}
                       </div>
                       <div className="bg-red-100 text-red-800 px-2 py-0.5 rounded text-xs font-semibold">
-                        {Math.round(((parseFloat(course.originalPrice) - parseFloat(course.price)) / parseFloat(course.originalPrice)) * 100)}% OFF
+                        {Math.round(
+                          ((parseFloat(course.originalPrice) -
+                            parseFloat(course.price)) /
+                            parseFloat(course.originalPrice)) *
+                            100
+                        )}
+                        % OFF
                       </div>
                     </div>
                   </div>

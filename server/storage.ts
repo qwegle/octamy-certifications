@@ -15,6 +15,7 @@ import {
   userLearningPaths,
   skillAssessments,
   sponsors,
+  contactSubmissions,
   type User, 
   type InsertUser,
   type UserAddress,
@@ -47,6 +48,8 @@ import {
   type InsertSkillAssessment,
   type Sponsor,
   type InsertSponsor,
+  type ContactSubmission,
+  type InsertContactSubmission,
   userPreferences,
   notifications,
   courseRecommendations,
@@ -195,6 +198,12 @@ export interface IStorage {
   createAchievement(achievement: InsertAchievement): Promise<Achievement>;
   getUserAchievements(userId: number, includeDetails?: boolean): Promise<(UserAchievement & { achievement?: Achievement })[]>;
   unlockAchievement(userId: number, achievementId: number, metadata?: any): Promise<UserAchievement>;
+
+  // Recent certificates and contact form operations
+  getRecentCertificates(limit?: number): Promise<any[]>;
+  createContactSubmission(submission: InsertContactSubmission): Promise<ContactSubmission>;
+  getAllContactSubmissions(): Promise<ContactSubmission[]>;
+  updateContactSubmissionStatus(id: number, status: string, adminNotes?: string): Promise<ContactSubmission>;
   checkAndUnlockAchievements(userId: number, courseId?: number): Promise<UserAchievement[]>;
 
   // Learning Path operations
@@ -994,6 +1003,60 @@ export class DatabaseStorage implements IStorage {
       ...seller,
       conversionRate: seller.clickCount > 0 ? (seller.conversionCount / seller.clickCount) * 100 : 0
     }));
+  }
+
+  // Recent certificates for landing page
+  async getRecentCertificates(limit: number = 10): Promise<any[]> {
+    const recentCerts = await db
+      .select({
+        userName: certificates.userName,
+        courseTitle: certificates.courseTitle,
+        badge: certificates.badge,
+        issuedAt: certificates.issuedAt,
+        score: certificates.score
+      })
+      .from(certificates)
+      .where(and(eq(certificates.isPaid, true), eq(certificates.isActive, true)))
+      .orderBy(desc(certificates.issuedAt))
+      .limit(limit);
+
+    return recentCerts.map(cert => ({
+      name: cert.userName,
+      course: cert.courseTitle,
+      badge: cert.badge,
+      company: "Professional", // Generic company name for privacy
+      issuedAt: cert.issuedAt,
+      score: cert.score
+    }));
+  }
+
+  // Contact form operations
+  async createContactSubmission(submission: InsertContactSubmission): Promise<ContactSubmission> {
+    const [result] = await db
+      .insert(contactSubmissions)
+      .values(submission)
+      .returning();
+    return result;
+  }
+
+  async getAllContactSubmissions(): Promise<ContactSubmission[]> {
+    return await db
+      .select()
+      .from(contactSubmissions)
+      .orderBy(desc(contactSubmissions.submittedAt));
+  }
+
+  async updateContactSubmissionStatus(id: number, status: string, adminNotes?: string): Promise<ContactSubmission> {
+    const [result] = await db
+      .update(contactSubmissions)
+      .set({
+        status,
+        ...(adminNotes && { adminNotes }),
+        ...(status === 'responded' && { respondedAt: new Date() })
+      })
+      .where(eq(contactSubmissions.id, id))
+      .returning();
+    return result;
   }
 
   async updateSellerApproval(sellerId: number, approved: boolean): Promise<void> {
