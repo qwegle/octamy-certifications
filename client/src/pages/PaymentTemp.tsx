@@ -84,11 +84,18 @@ export default function PaymentTemp() {
   });
 
   useEffect(() => {
+    console.log('PaymentTemp URL params:', { tempExamId, courseId, location });
     if (!tempExamId || !courseId) {
+      console.error('Missing required parameters:', { tempExamId, courseId });
+      toast({
+        title: "Error",
+        description: "Missing payment parameters. Please try taking the exam again.",
+        variant: "destructive",
+      });
       navigate('/');
       return;
     }
-  }, [tempExamId, courseId]);
+  }, [tempExamId, courseId, location]);
 
   useEffect(() => {
     if (addresses.length > 0 && !selectedAddressId) {
