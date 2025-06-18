@@ -279,6 +279,7 @@ export default function Payment() {
                   courseTitle={certificate.courseTitle}
                   includesPhysicalCopy={includesPhysicalCopy}
                   selectedAddressId={selectedAddressId}
+                  sellerCode={localStorage.getItem('referralCode')}
                   onSuccess={handlePaymentSuccess}
                 />
               </CardContent>

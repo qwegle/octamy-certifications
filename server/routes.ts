@@ -947,8 +947,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Don't fail the entire payment flow if email fails
         }
 
-        // Redirect to success page with certificate ID
-        res.redirect(`${req.protocol}://${req.get('host')}/payment-success?txnid=${responseData.txnid}&certificateId=${certificate.certificateId}`);
+        // Redirect to certificate download page directly
+        res.redirect(`${req.protocol}://${req.get('host')}/api/certificates/${certificate.certificateId}/download`);
       
       } else {
         res.redirect(`${req.protocol}://${req.get('host')}/payment-failed?txnid=${responseData.txnid}&error=${responseData.error_Message || 'payment_failed'}`);
