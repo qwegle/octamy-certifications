@@ -136,7 +136,8 @@ function EnhancedAdminDashboard() {
 
   const handleSearch = (tab: string, term: string) => {
     setSearchTerms(prev => ({ ...prev, [tab]: term }));
-    fetchData({ [tab]: term });
+    // Update search filters without triggering restart
+    setSearchFilters(prev => ({ ...prev, [tab]: term }));
   };
 
   useEffect(() => {
@@ -173,7 +174,7 @@ function EnhancedAdminDashboard() {
             </Button>
             <Button
               variant="outline"
-              onClick={() => fetchData()}
+              onClick={() => window.location.reload()}
               className="border-white text-white hover:bg-white hover:text-black"
             >
               <RefreshCw className="h-4 w-4 mr-2" />
@@ -267,7 +268,7 @@ function EnhancedAdminDashboard() {
                           <h3 className="font-medium text-white">{category.name}</h3>
                           <p className="text-sm text-gray-400">{category.description}</p>
                         </div>
-                        <Badge variant="secondary" className="bg-gray-800 text-white">{category.courseCount} courses</Badge>
+                        <Badge variant="secondary" className="bg-gray-800 text-white">{courses.filter(c => c.categoryId === category.id).length} courses</Badge>
                       </div>
                     ))}
                   </div>
@@ -294,8 +295,8 @@ function EnhancedAdminDashboard() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => fetchData()}
-                    className="border-gray-700 text-white hover:bg-gray-800"
+                    onClick={() => window.location.reload()}
+                    className="bg-white text-black border-gray-300 hover:bg-gray-100"
                   >
                     <RefreshCw className="h-4 w-4" />
                   </Button>
@@ -334,10 +335,10 @@ function EnhancedAdminDashboard() {
                           </TableCell>
                           <TableCell>
                             <div className="flex space-x-1">
-                              <Button variant="outline" size="sm" className="border-gray-700 text-white hover:bg-gray-800">
+                              <Button variant="outline" size="sm" className="bg-white text-black border-gray-300 hover:bg-gray-100">
                                 <Eye className="h-3 w-3" />
                               </Button>
-                              <Button variant="outline" size="sm" className="border-gray-700 text-white hover:bg-gray-800">
+                              <Button variant="outline" size="sm" className="bg-white text-black border-gray-300 hover:bg-gray-100">
                                 <Edit className="h-3 w-3" />
                               </Button>
                             </div>
@@ -369,8 +370,8 @@ function EnhancedAdminDashboard() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => fetchData()}
-                    className="border-gray-700 text-white hover:bg-gray-800"
+                    onClick={() => window.location.reload()}
+                    className="bg-white text-black border-gray-300 hover:bg-gray-100"
                   >
                     <RefreshCw className="h-4 w-4" />
                   </Button>
@@ -433,8 +434,8 @@ function EnhancedAdminDashboard() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => fetchData()}
-                    className="border-gray-700 text-white hover:bg-gray-800"
+                    onClick={() => window.location.reload()}
+                    className="bg-white text-black border-gray-300 hover:bg-gray-100"
                   >
                     <RefreshCw className="h-4 w-4" />
                   </Button>
@@ -510,8 +511,8 @@ function EnhancedAdminDashboard() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => fetchData()}
-                    className="border-gray-700 text-white hover:bg-gray-800"
+                    onClick={() => window.location.reload()}
+                    className="bg-white text-black border-gray-300 hover:bg-gray-100"
                   >
                     <RefreshCw className="h-4 w-4" />
                   </Button>
@@ -558,10 +559,10 @@ function EnhancedAdminDashboard() {
                           </TableCell>
                           <TableCell>
                             <div className="flex space-x-1">
-                              <Button variant="outline" size="sm" className="border-gray-700 text-white hover:bg-gray-800">
+                              <Button variant="outline" size="sm" className="bg-white text-black border-gray-300 hover:bg-gray-100">
                                 <Eye className="h-3 w-3" />
                               </Button>
-                              <Button variant="outline" size="sm" className="border-gray-700 text-white hover:bg-gray-800">
+                              <Button variant="outline" size="sm" className="bg-white text-black border-gray-300 hover:bg-gray-100">
                                 <Edit className="h-3 w-3" />
                               </Button>
                             </div>
@@ -593,8 +594,8 @@ function EnhancedAdminDashboard() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => fetchData()}
-                    className="border-gray-700 text-white hover:bg-gray-800"
+                    onClick={() => window.location.reload()}
+                    className="bg-white text-black border-gray-300 hover:bg-gray-100"
                   >
                     <RefreshCw className="h-4 w-4" />
                   </Button>
