@@ -39,6 +39,7 @@ import LearningPaths from "@/pages/learning-paths";
 import SponsorPage from "@/pages/sponsor";
 import AdminLogin from "@/pages/admin-login";
 import AdminDashboard from "@/pages/admin-dashboard";
+import EnhancedAdminDashboard from "@/pages/enhanced-admin-dashboard";
 
 function Router() {
   return (
@@ -52,7 +53,7 @@ function Router() {
       <Route path="/sponsor" component={SponsorPage} />
       <Route path="/admin/login" component={AdminLogin} />
       <Route path="/admin/dashboard" component={AdminDashboard} />
-      <Route path="/enhanced-admin" component={() => import("./pages/enhanced-admin-dashboard").then(m => m.default)} />
+      <Route path="/enhanced-admin" component={EnhancedAdminDashboard} />
       <Route path="/exam/:courseId" component={Exam} />
       <Route path="/checkout/:courseId" component={EnhancedCheckout} />
       <Route path="/payment/:certificateId" component={Payment} />
@@ -61,7 +62,7 @@ function Router() {
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/progress" component={Progress} />
       <Route path="/preferences" component={Preferences} />
-      <Route path="/admin" component={Admin} />
+      <Route path="/admin" component={AdminDashboard} />
       <Route path="/verify" component={Verify} />
       <Route path="/verify/:certificateId" component={Verify} />
       <Route path="/certificates/:certificateId" component={Certificate} />

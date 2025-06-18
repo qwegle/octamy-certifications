@@ -796,6 +796,15 @@ export default function AdminDashboard() {
               </div>
             </div>
             <div className="flex items-center space-x-4">
+              <Button
+                onClick={() => setLocation("/enhanced-admin")}
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2 border-green-600 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20"
+              >
+                <TrendingUp className="h-4 w-4" />
+                Enhanced Version
+              </Button>
               <Button variant="outline" size="sm" onClick={() => setLocation("/")}>
                 <Eye className="w-4 h-4 mr-2" />
                 View Site
