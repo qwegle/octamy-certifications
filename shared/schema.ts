@@ -128,7 +128,7 @@ export const payments = pgTable("payments", {
   paymentMethod: text("payment_method").default("payumoney").notNull(),
   razorpayPaymentId: text("razorpay_payment_id"),
   razorpayOrderId: text("razorpay_order_id"),
-  gatewayResponse: text("gateway_response"),
+
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
   currency: text("currency").default("INR").notNull(),
   status: text("status").notNull(),
