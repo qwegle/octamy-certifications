@@ -1367,6 +1367,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Register API routes (includes certificate routes)
   app.use('/api', apiRoutes);
+  app.use('/api/certificates', certificateRoutes);
 
   // Catch-all handler: send back React's index.html file for non-API routes
   // This ensures that client-side routing works for direct URL access
