@@ -1379,7 +1379,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Unauthorized" });
       }
 
+      console.log("Fetching certificates for user ID:", userId);
       const certificates = await storage.getUserCertificates(userId);
+      console.log("Found certificates:", certificates.length);
       res.json(certificates);
     } catch (error) {
       console.error("Get user certificates error:", error);
