@@ -896,13 +896,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 status: "completed"
               });
 
-              // Update seller earnings  
+              // Update referral conversion
+              if (userId) {
+                await storage.updateReferralConversion(sellerCode, courseId, userId);
+              }
+
+              // Update seller's total earnings
               const currentEarnings = parseFloat(seller.totalEarnings || "0");
               const newEarnings = currentEarnings + commissionAmount;
               console.log(`Updating seller earnings from ${currentEarnings} to ${newEarnings}`);
               
               await storage.updateSeller(seller.id, {
-                pendingEarnings: newEarnings.toString()
+                totalEarnings: newEarnings.toString()
               });
             }
           } else {
