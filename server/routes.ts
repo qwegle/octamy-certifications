@@ -933,15 +933,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           if (seller && seller.isApproved) {
             const course = await storage.getCourse(courseId);
             if (course) {
-              const originalPrice = parseFloat(course.originalPrice || course.price);
-              const commissionAmount = (originalPrice * parseFloat(seller.commissionRate)) / 100;
-              console.log(`Creating sale record: Commission ${commissionAmount} for course ${course.title} (original price: ${originalPrice})`);
+              // Use current price (not original price) for commission calculation
+              const currentPrice = parseFloat(course.price);
+              const commissionAmount = (currentPrice * parseFloat(seller.commissionRate)) / 100;
+              console.log(`Creating sale record: Commission ${commissionAmount} for course ${course.title} (current price: ${currentPrice})`);
               
               await storage.createSale({
                 sellerId: seller.id,
                 courseId: courseId,
                 certificateId: certificate.id,
-                amount: originalPrice.toString(),
+                amount: currentPrice.toString(),
                 commission: commissionAmount.toString(),
                 referralCode: sellerCode,
                 status: "completed"

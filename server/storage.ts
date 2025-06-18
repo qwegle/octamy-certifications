@@ -796,8 +796,20 @@ export class DatabaseStorage implements IStorage {
 
   async getSalesBySeller(sellerId: number): Promise<Sale[]> {
     return await db
-      .select()
+      .select({
+        id: sales.id,
+        sellerId: sales.sellerId,
+        courseId: sales.courseId,
+        certificateId: sales.certificateId,
+        amount: sales.amount,
+        commission: sales.commission,
+        referralCode: sales.referralCode,
+        status: sales.status,
+        createdAt: sales.createdAt,
+        courseTitle: courses.title
+      })
       .from(sales)
+      .leftJoin(courses, eq(sales.courseId, courses.id))
       .where(eq(sales.sellerId, sellerId))
       .orderBy(desc(sales.createdAt));
   }
