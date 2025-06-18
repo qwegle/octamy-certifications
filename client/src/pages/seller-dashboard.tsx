@@ -29,30 +29,25 @@ interface DashboardData {
     isApproved: boolean;
     totalEarnings: string;
     pendingEarnings: string;
-    commissionRate: string;
   };
-  sales: Array<{
+  totalSales: number;
+  totalCommission: string;
+  pendingWithdrawals: string;
+  recentSales: Array<{
     id: number;
-    amount: string;
-    commission: string;
-    status: string;
-    referralCode: string;
+    courseTitle: string;
+    commissionAmount: string;
     createdAt: string;
   }>;
-  withdrawals: Array<{
+  withdrawalHistory: Array<{
     id: number;
     amount: string;
     status: string;
     createdAt: string;
   }>;
-  analytics: {
-    totalSales: number;
-    totalCommission: number;
-    pendingWithdrawals: number;
-  };
-  clickAnalytics?: {
+  clickAnalytics: {
     totalClicks: number;
-    totalConversions: number;
+    totalConversions: string;
     conversionRate: number;
     courseWiseAnalytics: Array<{
       courseId: number;
@@ -402,7 +397,7 @@ export default function SellerDashboard() {
                 <Users className="h-8 w-8 text-black" />
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Total Sales</p>
-                  <p className="text-2xl font-bold text-black">{dashboardData.analytics.totalSales}</p>
+                  <p className="text-2xl font-bold text-black">{dashboardData.totalSales}</p>
                 </div>
               </div>
             </CardContent>
@@ -414,7 +409,7 @@ export default function SellerDashboard() {
                 <CreditCard className="h-8 w-8 text-black" />
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Commission Rate</p>
-                  <p className="text-2xl font-bold text-black">{dashboardData.seller.commissionRate}%</p>
+                  <p className="text-2xl font-bold text-black">10%</p>
                 </div>
               </div>
             </CardContent>
@@ -514,7 +509,7 @@ export default function SellerDashboard() {
             <CardTitle>Recent Sales</CardTitle>
           </CardHeader>
           <CardContent>
-            {dashboardData.sales.length > 0 ? (
+            {dashboardData.recentSales.length > 0 ? (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
@@ -526,11 +521,11 @@ export default function SellerDashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {dashboardData.sales.map((sale) => (
+                    {dashboardData.recentSales.map((sale) => (
                       <tr key={sale.id} className="border-b border-gray-100">
                         <td className="p-3">{new Date(sale.createdAt).toLocaleDateString()}</td>
-                        <td className="p-3">₹{sale.amount}</td>
-                        <td className="p-3">₹{sale.commission}</td>
+                        <td className="p-3">₹{sale.courseTitle}</td>
+                        <td className="p-3">₹{sale.commissionAmount}</td>
                         <td className="p-3">
                           <Badge variant={sale.status === 'paid' ? 'default' : 'secondary'}>
                             {sale.status}
@@ -556,7 +551,7 @@ export default function SellerDashboard() {
             <CardTitle>Withdrawal History</CardTitle>
           </CardHeader>
           <CardContent>
-            {dashboardData.withdrawals.length > 0 ? (
+            {dashboardData.withdrawalHistory.length > 0 ? (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
@@ -567,7 +562,7 @@ export default function SellerDashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {dashboardData.withdrawals.map((withdrawal) => (
+                    {dashboardData.withdrawalHistory.map((withdrawal) => (
                       <tr key={withdrawal.id} className="border-b border-gray-100">
                         <td className="p-3">{new Date(withdrawal.createdAt).toLocaleDateString()}</td>
                         <td className="p-3">₹{withdrawal.amount}</td>
