@@ -34,7 +34,7 @@ export default function PaymentTemp() {
   const [paymentForm, setPaymentForm] = useState<any>(null);
 
   // Extract parameters from URL
-  const urlParams = new URLSearchParams(location.split('?')[1] || '');
+  const urlParams = new URLSearchParams(window.location.search);
   const tempExamId = urlParams.get('tempExamId');
   const courseId = urlParams.get('courseId');
 

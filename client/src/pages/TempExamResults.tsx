@@ -72,8 +72,11 @@ export default function TempExamResults() {
   const handleProceedToPayment = () => {
     if (!results) return;
     
+    console.log('Proceeding to payment with:', { tempExamId, courseId: results.course.id });
     // Navigate to payment with temporary exam data
-    navigate(`/payment?tempExamId=${tempExamId}&courseId=${results.course.id}`);
+    const paymentUrl = `/payment?tempExamId=${tempExamId}&courseId=${results.course.id}`;
+    console.log('Payment URL:', paymentUrl);
+    navigate(paymentUrl);
   };
 
   const formatTime = (seconds: number) => {
