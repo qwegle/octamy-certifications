@@ -1111,6 +1111,111 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Sponsor support endpoint
+  app.post("/api/sponsors", async (req: Request, res: Response) => {
+    try {
+      const { name, email, amount, message, isAnonymous } = req.body;
+      
+      if (!name || !email || !amount || amount < 1) {
+        return res.status(400).json({ message: "Missing required fields or invalid amount" });
+      }
+
+      // Generate unique transaction ID
+      const transactionId = payuMoneyService.generateTransactionId();
+
+      // Create sponsor record
+      const sponsor = await storage.createSponsor({
+        name,
+        email,
+        amount: parseInt(amount),
+        message: message || null,
+        paymentMethod: 'payumoney',
+        transactionId,
+        paymentStatus: 'pending',
+        isAnonymous: isAnonymous || false
+      });
+
+      // Prepare PayUMoney payment data
+      const paymentData = {
+        txnid: transactionId,
+        amount: amount.toString(),
+        productinfo: `Sponsorship Support - ${name}`,
+        firstname: name,
+        email: email,
+        phone: '',
+        surl: `${req.protocol}://${req.get('host')}/api/sponsors/payment/success`,
+        furl: `${req.protocol}://${req.get('host')}/api/sponsors/payment/failure`,
+        udf1: sponsor.id.toString(),
+        udf2: '',
+        udf3: '',
+        udf4: '',
+        udf5: ''
+      };
+
+      // Generate payment form
+      const paymentForm = payuMoneyService.generatePaymentForm(paymentData);
+
+      res.json({
+        success: true,
+        sponsorId: sponsor.id,
+        payment: {
+          action: paymentForm.action,
+          fields: paymentForm.fields
+        }
+      });
+    } catch (error) {
+      console.error("Error creating sponsor:", error);
+      res.status(500).json({ message: "Failed to process sponsorship" });
+    }
+  });
+
+  // Sponsor payment success callback
+  app.post("/api/sponsors/payment/success", async (req: Request, res: Response) => {
+    try {
+      const responseData = req.body;
+      
+      // Verify payment hash
+      if (!payuMoneyService.verifyHash(responseData)) {
+        console.error("Invalid payment hash for sponsor payment");
+        return res.redirect(`${req.protocol}://${req.get('host')}/sponsors?error=invalid_hash`);
+      }
+
+      const status = payuMoneyService.getPaymentStatus(responseData);
+      
+      if (status === 'success') {
+        const sponsorId = parseInt(responseData.udf1);
+        
+        // Update sponsor payment status
+        await storage.updateSponsorPaymentStatus(sponsorId, 'success', responseData.txnid);
+        
+        res.redirect(`${req.protocol}://${req.get('host')}/sponsors?success=true&txnid=${responseData.txnid}`);
+      } else {
+        const sponsorId = parseInt(responseData.udf1);
+        await storage.updateSponsorPaymentStatus(sponsorId, 'failed', responseData.txnid);
+        
+        res.redirect(`${req.protocol}://${req.get('host')}/sponsors?error=payment_failed&txnid=${responseData.txnid}`);
+      }
+    } catch (error) {
+      console.error("Error processing sponsor payment success:", error);
+      res.redirect(`${req.protocol}://${req.get('host')}/sponsors?error=processing_error`);
+    }
+  });
+
+  // Sponsor payment failure callback  
+  app.post("/api/sponsors/payment/failure", async (req: Request, res: Response) => {
+    try {
+      const responseData = req.body;
+      const sponsorId = parseInt(responseData.udf1);
+      
+      await storage.updateSponsorPaymentStatus(sponsorId, 'failed', responseData.txnid);
+      
+      res.redirect(`${req.protocol}://${req.get('host')}/sponsors?error=payment_failed&txnid=${responseData.txnid}`);
+    } catch (error) {
+      console.error("Error processing sponsor payment failure:", error);
+      res.redirect(`${req.protocol}://${req.get('host')}/sponsors?error=processing_error`);
+    }
+  });
+
   // Referral tracking API
   app.post("/api/referral/track-click", async (req: Request, res: Response) => {
     try {
