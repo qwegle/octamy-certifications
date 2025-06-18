@@ -515,7 +515,7 @@ export default function SellerDashboard() {
                   <thead>
                     <tr className="border-b border-gray-200">
                       <th className="text-left p-3">Date</th>
-                      <th className="text-left p-3">Amount</th>
+                      <th className="text-left p-3">Course</th>
                       <th className="text-left p-3">Commission</th>
                       <th className="text-left p-3">Status</th>
                     </tr>
@@ -524,7 +524,7 @@ export default function SellerDashboard() {
                     {dashboardData.recentSales.map((sale) => (
                       <tr key={sale.id} className="border-b border-gray-100">
                         <td className="p-3">{new Date(sale.createdAt).toLocaleDateString()}</td>
-                        <td className="p-3">₹{sale.courseTitle}</td>
+                        <td className="p-3">{sale.courseTitle}</td>
                         <td className="p-3">₹{sale.commissionAmount}</td>
                         <td className="p-3">
                           <Badge variant={sale.status === 'paid' ? 'default' : 'secondary'}>
