@@ -73,7 +73,7 @@ function CertificateSlider() {
                       {cert.badge} Badge
                     </Badge>
                     <span className="text-xs text-gray-400">
-                      Score: {cert.score}%
+                      Score: ••%
                     </span>
                   </div>
                 </div>
