@@ -31,7 +31,7 @@ export default function PaymentTemp() {
   const { toast } = useToast();
   const [includesPhysicalCopy, setIncludesPhysicalCopy] = useState(false);
   const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
-  const [paymentForm, setPaymentForm] = useState<any>(null);
+
 
   // Extract parameters from URL
   const urlParams = new URLSearchParams(window.location.search);
@@ -56,33 +56,7 @@ export default function PaymentTemp() {
     retry: false,
   });
 
-  // Payment initiation mutation
-  const paymentMutation = useMutation({
-    mutationFn: async (paymentData: any) => {
-      const response = await apiRequest("POST", "/api/payment/initiate", paymentData);
-      return response.json();
-    },
-    onSuccess: (data) => {
-      console.log('Payment initiation response:', data);
-      if (data.success && data.paymentForm) {
-        setPaymentForm(data.paymentForm);
-      } else {
-        toast({
-          title: "Payment Error",
-          description: "Failed to initialize payment. Please try again.",
-          variant: "destructive",
-        });
-      }
-    },
-    onError: (error: any) => {
-      console.error("Payment initiation error:", error);
-      toast({
-        title: "Payment Error",
-        description: error.message || "Failed to initialize payment",
-        variant: "destructive",
-      });
-    },
-  });
+
 
   useEffect(() => {
     console.log('PaymentTemp URL params:', { tempExamId, courseId, location });
@@ -107,7 +81,7 @@ export default function PaymentTemp() {
     }
   }, [addresses, selectedAddressId]);
 
-  const handlePayment = () => {
+  const handlePayment = async () => {
     if (!examResults || !course || !tempExamId) {
       toast({
         title: "Error",
@@ -126,19 +100,54 @@ export default function PaymentTemp() {
       return;
     }
 
-    const paymentData = {
-      tempExamId,
-      courseId: parseInt(courseId!),
-      userEmail: examResults.userEmail,
-      userName: examResults.userName,
-      userPhone: "",
-      sellerCode: "",
-      includesPhysicalCopy,
-      selectedAddressId,
-      amount: course.price
-    };
+    try {
+      const paymentData = {
+        tempExamId,
+        courseId: parseInt(courseId!),
+        userEmail: examResults.userEmail,
+        userName: examResults.userName,
+        userPhone: "",
+        sellerCode: "",
+        includesPhysicalCopy,
+        selectedAddressId,
+        amount: course.price
+      };
 
-    paymentMutation.mutate(paymentData);
+      const response = await apiRequest("POST", "/api/payment/initiate", paymentData);
+      const data = await response.json();
+      
+      if (data.success && data.paymentForm) {
+        // Create and submit the PayUMoney form directly
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = data.paymentForm.action;
+        
+        // Add all form fields
+        Object.entries(data.paymentForm.fields).forEach(([key, value]) => {
+          const input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = key;
+          input.value = value as string;
+          form.appendChild(input);
+        });
+        
+        document.body.appendChild(form);
+        form.submit();
+      } else {
+        toast({
+          title: "Payment Error",
+          description: "Failed to initialize payment. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Payment error:", error);
+      toast({
+        title: "Payment Error",
+        description: "Failed to initialize payment. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   if (examLoading || courseLoading) {
@@ -369,11 +378,11 @@ export default function PaymentTemp() {
                 {/* Payment Button */}
                 <Button 
                   onClick={handlePayment}
-                  disabled={paymentMutation.isPending || (includesPhysicalCopy && !selectedAddressId)}
+                  disabled={includesPhysicalCopy && !selectedAddressId}
                   size="lg" 
                   className="w-full"
                 >
-                  {paymentMutation.isPending ? "Processing..." : `Pay ₹${totalAmount}`}
+                  Pay ₹{totalAmount}
                 </Button>
 
                 <div className="text-xs text-center text-muted-foreground">
