@@ -286,7 +286,24 @@ export default function CourseDetail() {
                   Get Certified Today
                 </CardTitle>
                 <div className="text-center">
-                  <span className="text-3xl font-bold text-blue-600">₹{course.price}</span>
+                  {course.isOnSale && course.originalPrice ? (
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-center gap-3">
+                        <span className="text-3xl font-bold text-red-600">₹{course.price}</span>
+                        <span className="text-xl text-gray-500 line-through">₹{course.originalPrice}</span>
+                      </div>
+                      <div className="flex items-center justify-center gap-2">
+                        <div className="text-sm text-green-600 font-medium">
+                          Save ₹{(parseFloat(course.originalPrice) - parseFloat(course.price)).toFixed(0)}
+                        </div>
+                        <div className="bg-red-100 text-red-800 px-2 py-0.5 rounded text-xs font-semibold">
+                          {Math.round(((parseFloat(course.originalPrice) - parseFloat(course.price)) / parseFloat(course.originalPrice)) * 100)}% OFF
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <span className="text-3xl font-bold text-blue-600">₹{course.price}</span>
+                  )}
                   <p className="text-sm text-gray-600 dark:text-gray-400">One-time payment</p>
                 </div>
               </CardHeader>

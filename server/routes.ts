@@ -1333,8 +1333,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const txnid = payuMoneyService.generateTransactionId();
       
-      // Calculate total amount based on physical copy selection
-      const baseAmount = parseFloat(amount || course.price);
+      // Calculate total amount based on physical copy selection - use original price for payment
+      const baseAmount = parseFloat(amount || course.originalPrice || course.price);
       const shippingCost = includesPhysicalCopy ? 50 : 0;
       const totalAmount = baseAmount + shippingCost;
       const formattedAmount = payuMoneyService.formatAmount(totalAmount.toString());
@@ -1455,14 +1455,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
             if (seller && seller.isApproved) {
               const course = await storage.getCourse(courseId);
               if (course) {
-                const commissionAmount = (parseFloat(course.price) * parseFloat(seller.commissionRate)) / 100;
-                console.log(`Creating sale record: Commission ${commissionAmount} for course ${course.title} (${course.price})`);
+                const originalPrice = parseFloat(course.originalPrice || course.price);
+                const commissionAmount = (originalPrice * parseFloat(seller.commissionRate)) / 100;
+                console.log(`Creating sale record: Commission ${commissionAmount} for course ${course.title} (original price: ${originalPrice})`);
                 
                 await storage.createSale({
                   sellerId: seller.id,
                   courseId: courseId,
                   certificateId: certificate.id,
-                  amount: course.price,
+                  amount: originalPrice.toString(),
                   commission: commissionAmount.toString(),
                   referralCode: sellerCode,
                   status: "completed"
