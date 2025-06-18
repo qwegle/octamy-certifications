@@ -689,7 +689,7 @@ export class DatabaseStorage implements IStorage {
       return;
     }
 
-    // Check if this click already exists for this IP/user agent to prevent duplicate tracking
+    // Check for rapid duplicate clicks (within 30 seconds) to prevent spam
     const existingClick = await db.select()
       .from(referralClicks)
       .where(
@@ -697,13 +697,13 @@ export class DatabaseStorage implements IStorage {
           eq(referralClicks.referralCode, clickData.referralCode),
           eq(referralClicks.courseId, clickData.courseId),
           eq(referralClicks.ipAddress, clickData.ipAddress || ''),
-          sql`${referralClicks.clickedAt} > NOW() - INTERVAL '1 hour'`
+          sql`${referralClicks.clickedAt} > NOW() - INTERVAL '30 seconds'`
         )
       )
       .limit(1);
 
     if (existingClick.length > 0) {
-      console.log('Duplicate click detected, skipping tracking');
+      console.log('Duplicate click detected (within 30 seconds), skipping tracking');
       return;
     }
 
