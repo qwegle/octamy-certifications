@@ -458,7 +458,7 @@ function EnhancedAdminDashboard() {
                       <TableRow className="border-gray-800 hover:bg-gray-800">
                         <TableHead className="text-gray-300">ID</TableHead>
                         <TableHead className="text-gray-300">Transaction ID</TableHead>
-                        <TableHead className="text-gray-300">User</TableHead>
+                        <TableHead className="text-gray-300">Customer</TableHead>
                         <TableHead className="text-gray-300">Course</TableHead>
                         <TableHead className="text-gray-300">Amount</TableHead>
                         <TableHead className="text-gray-300">Certificate Amount</TableHead>
@@ -474,8 +474,8 @@ function EnhancedAdminDashboard() {
                           <TableCell className="font-mono text-sm text-white">{transaction.transactionId}</TableCell>
                           <TableCell>
                             <div>
-                              <div className="font-medium text-white">{transaction.userName}</div>
-                              <div className="text-sm text-gray-400">{transaction.userEmail}</div>
+                              <div className="font-medium text-white">{transaction.userName || 'N/A'}</div>
+                              <div className="text-sm text-gray-400">{transaction.userEmail || transaction.customerEmail || 'N/A'}</div>
                             </div>
                           </TableCell>
                           <TableCell className="text-gray-300">{transaction.courseTitle}</TableCell>
