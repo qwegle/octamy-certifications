@@ -352,6 +352,18 @@ Octamy is a comprehensive professional certification platform built as a full-st
 - **Database connection** setup for local PostgreSQL instances
 - **Port management** solutions for development conflicts
 
+## Local Development Documentation (June 18, 2025)
+- **Complete local setup guide** with platform-specific instructions for Windows, macOS, and Linux environments
+- **Comprehensive troubleshooting section** covering common issues like port conflicts, database connections, and import.meta.url errors
+- **Environment configuration template** with all required variables and secure defaults for development
+- **Quick start guide** for 5-minute setup with essential commands and verification checklist
+- **Complete API reference documentation** with all endpoints, request/response examples, and authentication details
+- **Phase 5 advanced features documentation** covering analytics, security, performance optimization, and enterprise features
+- **Mobile app integration guide** with local API configuration and testing instructions
+- **Production deployment guidance** with environment variables, security configurations, and monitoring setup
+- **Developer workflow documentation** with Git workflow, database changes, and code quality standards
+- **API testing examples** with curl commands, JavaScript implementations, and React Hook patterns
+
 ## Changelog
 
 ```
