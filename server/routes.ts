@@ -1436,6 +1436,180 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Shareable certificate route - displays certificate in smaller format for sharing
+  app.get("/certificate/:certificateNumber", async (req: Request, res: Response) => {
+    try {
+      const certificateNumber = req.params.certificateNumber;
+      const certificate = await storage.getCertificateByCertificateId(certificateNumber);
+      
+      if (!certificate) {
+        return res.status(404).send(`
+          <html>
+            <head><title>Certificate Not Found</title></head>
+            <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
+              <h1>Certificate Not Found</h1>
+              <p>The certificate with ID "${certificateNumber}" could not be found.</p>
+              <a href="/">Return to Home</a>
+            </body>
+          </html>
+        `);
+      }
+
+      // Check if certificate is paid (security check)
+      if (!certificate.isPaid) {
+        return res.status(403).send(`
+          <html>
+            <head><title>Certificate Access Denied</title></head>
+            <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
+              <h1>Certificate Access Denied</h1>
+              <p>This certificate requires payment to be accessed.</p>
+              <a href="/">Return to Home</a>
+            </body>
+          </html>
+        `);
+      }
+
+      // Get course details for the certificate
+      const course = await storage.getCourse(certificate.courseId);
+      if (!course) {
+        return res.status(404).send(`
+          <html>
+            <head><title>Course Not Found</title></head>
+            <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
+              <h1>Course Not Found</h1>
+              <p>The course associated with this certificate could not be found.</p>
+              <a href="/">Return to Home</a>
+            </body>
+          </html>
+        `);
+      }
+
+      // Get exam attempt for completion date
+      let examAttempt = null;
+      if (certificate.examAttemptId) {
+        examAttempt = await storage.getExamAttempt(certificate.examAttemptId);
+      }
+
+      // Prepare certificate data using existing generator
+      const certificateData = {
+        certificateId: certificate.certificateId || 'N/A',
+        userName: certificate.userName || 'Certificate Holder',
+        courseTitle: course.title || 'Professional Course',
+        issueDate: certificate.issuedAt || new Date(),
+        completionDate: examAttempt?.createdAt || certificate.issuedAt || new Date(),
+        passingScore: course.passingScore || 50,
+        userScore: certificate.score || 0,
+        courseLevel: course.level || 'Beginner'
+      };
+
+      // Generate HTML using existing certificate generator
+      const htmlContent = generateCertificateHTML(certificateData);
+      
+      // Add sharing and download functionality to the HTML
+      const shareableHtml = htmlContent.replace(
+        '</head>',
+        `
+        <meta property="og:title" content="Professional Certificate - ${certificateData.userName}">
+        <meta property="og:description" content="Certificate of completion for ${certificateData.courseTitle}">
+        <meta property="og:type" content="website">
+        <meta name="description" content="Professional certificate issued by Octamy Solutions">
+        <style>
+          .share-controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            gap: 10px;
+            flex-direction: column;
+            background: rgba(255,255,255,0.95);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+          }
+          .share-btn {
+            padding: 8px 16px;
+            background: #000;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+          }
+          .share-btn:hover {
+            background: #333;
+          }
+          @media print {
+            .share-controls { display: none; }
+          }
+          @media (max-width: 768px) {
+            .certificate-container {
+              width: 100vw !important;
+              height: auto !important;
+              transform: scale(0.4);
+              transform-origin: top left;
+            }
+            .share-controls {
+              position: relative;
+              margin-bottom: 20px;
+              flex-direction: row;
+              justify-content: center;
+            }
+          }
+        </style>
+        </head>`
+      ).replace(
+        '<body>',
+        `<body>
+        <div class="share-controls">
+          <button class="share-btn" onclick="downloadPDF()">📄 Download PDF</button>
+          <button class="share-btn" onclick="printCert()">🖨️ Print</button>
+          <button class="share-btn" onclick="shareCert()">🔗 Share</button>
+        </div>
+        <script>
+          function downloadPDF() {
+            window.open('/api/certificates/${certificateNumber}/download?format=pdf', '_blank');
+          }
+          function printCert() {
+            window.print();
+          }
+          function shareCert() {
+            if (navigator.share) {
+              navigator.share({
+                title: 'Professional Certificate - ${certificateData.userName}',
+                text: 'Certificate of completion for ${certificateData.courseTitle}',
+                url: window.location.href
+              });
+            } else {
+              navigator.clipboard.writeText(window.location.href);
+              alert('Certificate link copied to clipboard!');
+            }
+          }
+        </script>`
+      );
+
+      res.setHeader('Content-Type', 'text/html');
+      res.send(shareableHtml);
+      
+    } catch (error) {
+      console.error("Shareable certificate error:", error);
+      res.status(500).send(`
+        <html>
+          <head><title>Error</title></head>
+          <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
+            <h1>Internal Server Error</h1>
+            <p>An error occurred while loading the certificate.</p>
+            <a href="/">Return to Home</a>
+          </body>
+        </html>
+      `);
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
