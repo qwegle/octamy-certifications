@@ -1437,7 +1437,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Shareable certificate route - displays certificate in smaller format for sharing
-  app.get("/certificate/:certificateNumber", async (req: Request, res: Response) => {
+  app.get("/api/certificate/:certificateNumber", async (req: Request, res: Response) => {
     try {
       const certificateNumber = req.params.certificateNumber;
       const certificate = await storage.getCertificateByCertificateId(certificateNumber);
