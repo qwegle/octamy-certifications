@@ -1,11 +1,11 @@
 import { useParams } from 'wouter';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import Header from '@/components/header';
 import Footer from '@/components/footer';
-import { QrCode, Download, Share2, Trophy, Calendar, Award, CheckCircle, XCircle, Printer } from 'lucide-react';
+import { CertificateActions } from '@/components/CertificateActions';
+import { QrCode, Trophy, Calendar, Award, CheckCircle, XCircle } from 'lucide-react';
 import type { Certificate } from '@shared/schema';
 import certificateBackground from '@/assets/certificate-background.png';
 
