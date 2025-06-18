@@ -285,7 +285,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         totalSales,
         totalCommission: totalCommission.toFixed(2),
         pendingWithdrawals: pendingWithdrawals.toFixed(2),
-        recentSales: sales.slice(0, 5),
+        recentSales: sales.slice(0, 5).map(sale => ({
+          ...sale,
+          courseTitle: sale.courseTitle || 'Unknown Course'
+        })),
         withdrawalHistory: withdrawals.slice(0, 5),
         clickAnalytics
       });
@@ -1053,14 +1056,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Missing referral code or course ID" });
       }
 
+      console.log(`Tracking click: Code=${referralCode}, Course=${courseId}`);
+
       // Track the referral click
       await storage.trackReferralClick({
         referralCode,
         courseId: parseInt(courseId),
-        ipAddress: req.ip || req.connection?.remoteAddress,
-        userAgent: req.get('User-Agent')
+        ipAddress: req.ip || req.connection?.remoteAddress || 'unknown',
+        userAgent: req.get('User-Agent') || 'unknown'
       });
 
+      console.log(`Click tracked successfully for code: ${referralCode}`);
       res.json({ success: true });
     } catch (error) {
       console.error("Error tracking referral click:", error);

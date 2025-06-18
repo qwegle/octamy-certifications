@@ -524,8 +524,8 @@ export default function SellerDashboard() {
                     {dashboardData.recentSales.map((sale) => (
                       <tr key={sale.id} className="border-b border-gray-100">
                         <td className="p-3">{new Date(sale.createdAt).toLocaleDateString()}</td>
-                        <td className="p-3">{sale.courseTitle}</td>
-                        <td className="p-3">₹{sale.commissionAmount}</td>
+                        <td className="p-3">{sale.courseTitle || 'Unknown Course'}</td>
+                        <td className="p-3">₹{sale.commission}</td>
                         <td className="p-3">
                           <Badge variant={sale.status === 'paid' ? 'default' : 'secondary'}>
                             {sale.status}
