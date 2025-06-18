@@ -1067,6 +1067,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Enhanced Admin Dashboard endpoints
+  app.get('/api/admin/analytics', authenticateAdminToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const analytics = await storage.getAdminAnalytics();
+      res.json(analytics);
+    } catch (error) {
+      console.error('Error fetching admin analytics:', error);
+      res.status(500).json({ message: 'Failed to fetch analytics' });
+    }
+  });
+
+  app.get('/api/admin/customers', authenticateAdminToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const customers = await storage.getCustomersForAdmin();
+      res.json(customers);
+    } catch (error) {
+      console.error('Error fetching customers:', error);
+      res.status(500).json({ message: 'Failed to fetch customers' });
+    }
+  });
+
+  app.get('/api/admin/courses', authenticateAdminToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const courses = await storage.getCoursesForAdmin();
+      res.json(courses);
+    } catch (error) {
+      console.error('Error fetching admin courses:', error);
+      res.status(500).json({ message: 'Failed to fetch courses' });
+    }
+  });
+
+  app.get('/api/admin/exam-attempts', authenticateAdminToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const examAttempts = await storage.getExamAttemptsForAdmin();
+      res.json(examAttempts);
+    } catch (error) {
+      console.error('Error fetching exam attempts:', error);
+      res.status(500).json({ message: 'Failed to fetch exam attempts' });
+    }
+  });
+
+  app.get('/api/admin/transactions', authenticateAdminToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const transactions = await storage.getTransactionsForAdmin();
+      res.json(transactions);
+    } catch (error) {
+      console.error('Error fetching transactions:', error);
+      res.status(500).json({ message: 'Failed to fetch transactions' });
+    }
+  });
+
+  app.get('/api/admin/partners', authenticateAdminToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const partners = await storage.getPartnersForAdmin();
+      res.json(partners);
+    } catch (error) {
+      console.error('Error fetching partners:', error);
+      res.status(500).json({ message: 'Failed to fetch partners' });
+    }
+  });
+
+  app.get('/api/admin/withdrawals', authenticateAdminToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const withdrawals = await storage.getAllWithdrawals();
+      res.json(withdrawals);
+    } catch (error) {
+      console.error('Error fetching withdrawals:', error);
+      res.status(500).json({ message: 'Failed to fetch withdrawals' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

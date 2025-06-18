@@ -1457,6 +1457,92 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
+  // Get customers for admin dashboard
+  async getCustomersForAdmin() {
+    return await db.select({
+      id: users.id,
+      name: users.name,
+      email: users.email,
+      phone: users.phone,
+      isAdmin: users.isAdmin,
+      createdAt: users.createdAt,
+      certificateCount: sql`(SELECT COUNT(*) FROM certificates WHERE user_id = ${users.id})::int`.as('certificateCount'),
+      totalSpent: sql`COALESCE((SELECT SUM(CAST(certificate_amount AS DECIMAL)) FROM payments WHERE user_id = ${users.id} AND status = 'completed'), 0)::int`.as('totalSpent')
+    })
+    .from(users)
+    .orderBy(desc(users.createdAt))
+    .limit(100);
+  }
+
+  // Get courses for admin dashboard
+  async getCoursesForAdmin() {
+    return await db.select({
+      id: courses.id,
+      title: courses.title,
+      description: courses.description,
+      slug: courses.slug,
+      categoryId: courses.categoryId,
+      duration: courses.duration,
+      passingScore: courses.passingScore,
+      price: courses.price,
+      originalPrice: courses.originalPrice,
+      isOnSale: courses.isOnSale,
+      level: courses.level,
+      isActive: courses.isActive,
+      isInternship: courses.isInternship,
+      createdAt: courses.createdAt,
+      enrollmentCount: sql`(SELECT COUNT(*) FROM exam_attempts WHERE course_id = ${courses.id})::int`.as('enrollmentCount'),
+      revenue: sql`COALESCE((SELECT SUM(CAST(certificate_amount AS DECIMAL)) FROM payments p JOIN certificates c ON p.certificate_id = c.id WHERE c.course_id = ${courses.id} AND p.status = 'completed'), 0)::int`.as('revenue'),
+      categoryName: categories.name
+    })
+    .from(courses)
+    .leftJoin(categories, eq(courses.categoryId, categories.id))
+    .orderBy(desc(courses.createdAt))
+    .limit(100);
+  }
+
+  // Get transactions for admin dashboard
+  async getTransactionsForAdmin() {
+    return await db.select({
+      id: payments.id,
+      certificateId: certificates.certificateId,
+      amount: payments.certificateAmount,
+      status: payments.status,
+      createdAt: payments.createdAt,
+      userName: users.name,
+      userEmail: users.email,
+      courseTitle: courses.title,
+      transactionId: payments.transactionId,
+      paymentMethod: payments.paymentMethod
+    })
+    .from(payments)
+    .leftJoin(certificates, eq(payments.certificateId, certificates.id))
+    .leftJoin(users, eq(payments.userId, users.id))
+    .leftJoin(courses, eq(certificates.courseId, courses.id))
+    .orderBy(desc(payments.createdAt))
+    .limit(100);
+  }
+
+  // Get partners for admin dashboard
+  async getPartnersForAdmin() {
+    return await db.select({
+      id: sellers.id,
+      name: sellers.name,
+      email: sellers.email,
+      isApproved: sellers.isApproved,
+      isActive: sellers.isActive,
+      createdAt: sellers.createdAt,
+      totalEarnings: sellers.totalEarnings,
+      pendingEarnings: sellers.pendingEarnings,
+      referralCode: sellers.referralCode,
+      clickCount: sql`(SELECT COUNT(*) FROM referral_clicks WHERE referral_code = ${sellers.referralCode})::int`.as('clickCount'),
+      salesCount: sql`(SELECT COUNT(*) FROM sales WHERE seller_id = ${sellers.id})::int`.as('salesCount')
+    })
+    .from(sellers)
+    .orderBy(desc(sellers.createdAt))
+    .limit(100);
+  }
+
   // Get all sellers with detailed analytics
   async getAllSellers() {
     const sellersWithStats = await db.select({
