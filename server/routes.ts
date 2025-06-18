@@ -375,29 +375,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // User authentication
   app.post("/api/register", async (req, res) => {
     try {
-      const { name, email, password, phone } = insertUserSchema.parse(req.body);
+      const { name, email, password, phone } = req.body;
+      
+      if (!name || !email || !password) {
+        return res.status(400).json({ message: "Name, email, and password are required" });
+      }
       
       const existingUser = await storage.getUserByEmail(email);
       if (existingUser) {
         return res.status(400).json({ message: "User already exists" });
       }
 
-      const hashedPassword = password ? await bcrypt.hash(password, 10) : null;
+      const hashedPassword = await bcrypt.hash(password, 10);
       const user = await storage.createUser({
         name,
         email,
         password: hashedPassword,
-        phone
+        phone: phone || null
       });
 
+      const token = jwt.sign(
+        { 
+          userId: user.id, 
+          email: user.email,
+          isAdmin: user.isAdmin || false 
+        },
+        JWT_SECRET,
+        { expiresIn: "24h" }
+      );
+
       res.status(201).json({ 
-        id: user.id, 
-        name: user.name, 
-        email: user.email 
+        token,
+        user: {
+          id: user.id, 
+          name: user.name, 
+          email: user.email,
+          isAdmin: user.isAdmin || false
+        }
       });
     } catch (error) {
       console.error("Registration error:", error);
-      res.status(400).json({ message: "Invalid user data" });
+      res.status(500).json({ message: "Registration failed" });
     }
   });
 
