@@ -51,7 +51,7 @@ export class ExamController {
       const mastered = score >= 90;
       
       // Anti-cheating validation
-      const minTimePerQuestion = 2;
+      const minTimePerQuestion = 1;
       const expectedMinTime = totalQuestions * minTimePerQuestion;
       if (finalTimeTaken < expectedMinTime) {
         return res.status(400).json({ 
