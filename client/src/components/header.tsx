@@ -10,8 +10,8 @@ export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const logout = () => {
-    localStorage.removeItem('authToken');
-    window.location.href = '/';
+    localStorage.removeItem("authToken");
+    window.location.href = "/";
   };
 
   const isActive = (path: string) => location === path;
@@ -27,12 +27,25 @@ export default function Header() {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex space-x-6">
-            <Link href="/courses" className="hover:text-gray-300">Courses</Link>
-            <Link href="/learning-paths" className="hover:text-gray-300">Learning Paths</Link>
-            <Link href="/virtual-internships" className="hover:text-gray-300">Internships</Link>
-            <Link href="/sponsor" className="hover:text-gray-300">Sponsors</Link>
-            <Link href="/partners" className="hover:text-gray-300">Partners</Link>
-            <Link href="/help-center" className="hover:text-gray-300">Help</Link>
+            <Link href="/courses" className="hover:text-gray-300">
+              Courses
+            </Link>
+            {/* <Link href="/learning-paths" className="hover:text-gray-300">Learning Paths</Link> */}
+            <Link href="/virtual-internships" className="hover:text-gray-300">
+              Internships
+            </Link>
+            <Link href="/sponsor" className="hover:text-gray-300">
+              Sponsors
+            </Link>
+            <Link
+              href="/business-certifications"
+              className="hover:text-gray-300"
+            >
+              Business
+            </Link>
+            <Link href="/help-center" className="hover:text-gray-300">
+              Help
+            </Link>
           </nav>
 
           {/* Auth Buttons */}
@@ -40,24 +53,33 @@ export default function Header() {
             {!isLoading && !isAuthenticated ? (
               <>
                 <Link href="/auth">
-                  <Button variant="outline" className="border-white text-white hover:bg-white hover:text-black">
+                  <Button
+                    variant="outline"
+                    className="border-black text-black hover:bg-white hover:text-black"
+                  >
                     Login
                   </Button>
                 </Link>
-                <Link href="/demo-certificate">
+                <Link href="/seller-auth">
                   <Button className="bg-white text-black hover:bg-gray-200">
-                    View Demo Certificate
+                    Become a Reseller
                   </Button>
                 </Link>
               </>
             ) : (
               <>
                 <Link href="/dashboard">
-                  <Button variant="outline" className="border-white text-white hover:bg-white hover:text-black">
+                  <Button
+                    variant="outline"
+                    className="border-white text-white hover:bg-white hover:text-black"
+                  >
                     Dashboard
                   </Button>
                 </Link>
-                <Button onClick={logout} className="bg-white text-black hover:bg-gray-200">
+                <Button
+                  onClick={logout}
+                  className="bg-white text-black hover:bg-gray-200"
+                >
                   Logout
                 </Button>
               </>
@@ -110,11 +132,10 @@ export default function Header() {
                 Sponsors
               </Link>
               <Link
-                href="/partners"
-                className="block text-white hover:text-gray-300 font-medium py-2"
-                onClick={() => setMobileMenuOpen(false)}
+                href="/business-certifications"
+                className="hover:text-gray-300"
               >
-                Partners
+                Business
               </Link>
               <Link
                 href="/help-center"
@@ -127,20 +148,32 @@ export default function Header() {
                 {!isLoading && !isAuthenticated ? (
                   <div className="space-y-2">
                     <Link href="/auth" onClick={() => setMobileMenuOpen(false)}>
-                      <Button variant="outline" className="w-full border-white text-white hover:bg-white hover:text-black">
+                      <Button
+                        variant="outline"
+                        className="w-full border-black text-black hover:bg-white hover:text-black"
+                      >
                         Login
                       </Button>
                     </Link>
-                    <Link href="/demo-certificate" onClick={() => setMobileMenuOpen(false)}>
+                    <Link
+                      href="/seller-auth"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
                       <Button className="w-full bg-white text-black hover:bg-gray-200">
-                        View Demo Certificate
+                        Become Reseller
                       </Button>
                     </Link>
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)}>
-                      <Button variant="outline" className="w-full border-white text-white hover:bg-white hover:text-black">
+                    <Link
+                      href="/dashboard"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <Button
+                        variant="outline"
+                        className="w-full border-white text-black hover:bg-white hover:text-black"
+                      >
                         Dashboard
                       </Button>
                     </Link>
