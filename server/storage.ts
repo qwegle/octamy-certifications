@@ -429,26 +429,7 @@ export class DatabaseStorage implements IStorage {
       .where(and(eq(questions.courseId, courseId), eq(questions.isActive, true)));
   }
 
-  async createQuestion(insertQuestion: InsertQuestion): Promise<Question> {
-    const [question] = await db
-      .insert(questions)
-      .values(insertQuestion as any)
-      .returning();
-    return question;
-  }
 
-  async updateQuestion(id: number, updates: Partial<InsertQuestion>): Promise<Question> {
-    const [question] = await db
-      .update(questions)
-      .set(updates as any)
-      .where(eq(questions.id, id))
-      .returning();
-    return question;
-  }
-
-  async deleteQuestion(id: number): Promise<void> {
-    await db.update(questions).set({ isActive: false }).where(eq(questions.id, id));
-  }
 
   // Exam attempt operations
   async createExamAttempt(insertAttempt: InsertExamAttempt): Promise<ExamAttempt> {
@@ -518,7 +499,7 @@ export class DatabaseStorage implements IStorage {
       .from(examAttempts)
       .where(
         and(
-          eq(examAttempts.userId, userId),
+          eq(examAttempts.userEmail, userEmail),
           eq(examAttempts.courseId, courseId)
         )
       )
