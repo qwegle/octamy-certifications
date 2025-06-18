@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
+import { Link } from "wouter";
 import {
   Card,
   CardContent,
@@ -30,7 +31,8 @@ import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 import { useAuth } from "@/lib/auth";
 // Using available image from assets
-import octamyLogo from "@assets/image_1750156610131.png";
+import octamyLogoDark from "@/assets/image_1750054456482.png";
+import octamyLogoLight from "@/assets/image_1750054465427.png";
 
 const PRESET_AMOUNTS = [1, 10, 100, 1000, 10000, 100000, 1000000];
 
@@ -225,7 +227,13 @@ export default function SponsorPage() {
                 className="hover:bg-gray-100 dark:hover:bg-gray-900"
               >
                 <span className="text-2xl font-bold text-black dark:text-white">
-                  Octamy
+                  <Link href="/" className="text-2xl font-bold">
+                    <img
+                      src={octamyLogoDark}
+                      alt="Octamy"
+                      className="h-8 dark:none"
+                    />
+                  </Link>
                 </span>
               </Button>
             </div>
