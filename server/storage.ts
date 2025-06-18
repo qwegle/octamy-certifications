@@ -71,7 +71,7 @@ import {
   referralClicks
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, count, sql } from "drizzle-orm";
+import { eq, and, desc, count, sql, or, asc, ilike } from "drizzle-orm";
 
 export interface IStorage {
   // User operations
@@ -1753,7 +1753,6 @@ export class DatabaseStorage implements IStorage {
       description: categories.description,
       slug: categories.slug,
       icon: categories.icon,
-      createdAt: categories.createdAt,
       courseCount: sql`(
         SELECT COUNT(*) FROM courses WHERE category_id = ${categories.id}
       )`.as('courseCount')
@@ -1865,6 +1864,38 @@ export class DatabaseStorage implements IStorage {
 
     return await query
       .orderBy(desc(users.createdAt))
+      .limit(limit);
+  }
+
+  // Fix exam attempts method name and add proper search
+  async getAllExamAttempts(limit = 1000, search?: string) {
+    let query = db.select({
+      id: examAttempts.id,
+      userId: examAttempts.userId,
+      courseId: examAttempts.courseId,
+      userEmail: examAttempts.userEmail,
+      userName: examAttempts.userName,
+      score: examAttempts.score,
+      totalQuestions: examAttempts.totalQuestions,
+      timeTaken: examAttempts.timeTaken,
+      createdAt: examAttempts.createdAt,
+      courseTitle: sql`(SELECT title FROM courses WHERE id = ${examAttempts.courseId})`.as('courseTitle'),
+      passed: sql`CASE WHEN ${examAttempts.score} >= (SELECT passing_score FROM courses WHERE id = ${examAttempts.courseId}) THEN true ELSE false END`.as('passed')
+    })
+    .from(examAttempts);
+
+    if (search) {
+      query = query.where(
+        or(
+          ilike(examAttempts.userEmail, `%${search}%`),
+          ilike(examAttempts.userName, `%${search}%`),
+          eq(examAttempts.id, isNaN(parseInt(search)) ? -1 : parseInt(search))
+        )
+      );
+    }
+
+    return await query
+      .orderBy(desc(examAttempts.createdAt))
       .limit(limit);
   }
 

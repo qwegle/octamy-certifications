@@ -2665,6 +2665,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin categories with course count
+  app.get("/api/admin/categories", authenticateAdminToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const categories = await storage.getCategoriesWithCourseCount();
+      res.json(categories);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+      res.status(500).json({ message: "Failed to fetch categories" });
+    }
+  });
+
   // Admin detailed analytics
   app.get("/api/admin/detailed-analytics", authenticateAdminToken, async (req: AuthenticatedRequest, res: Response) => {
     try {
