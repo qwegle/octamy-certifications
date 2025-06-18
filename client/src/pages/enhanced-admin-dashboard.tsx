@@ -34,6 +34,8 @@ function EnhancedAdminDashboard() {
     partners: '',
     examAttempts: ''
   });
+  const [expandedTransactions, setExpandedTransactions] = useState<Set<number>>(new Set());
+  const [transactionDetails, setTransactionDetails] = useState<Record<number, any>>({});
   const { toast } = useToast();
 
   const handleLogout = () => {
@@ -145,6 +147,40 @@ function EnhancedAdminDashboard() {
     setSearchTerms(prev => ({ ...prev, [tab]: term }));
     // Update search filters without triggering restart
     setSearchFilters(prev => ({ ...prev, [tab]: term }));
+  };
+
+  const toggleTransactionExpansion = async (transactionId: number) => {
+    const newExpanded = new Set(expandedTransactions);
+    
+    if (newExpanded.has(transactionId)) {
+      newExpanded.delete(transactionId);
+    } else {
+      newExpanded.add(transactionId);
+      
+      // Fetch detailed transaction information if not already loaded
+      if (!transactionDetails[transactionId]) {
+        try {
+          const token = localStorage.getItem('adminToken');
+          const response = await fetch(`/api/admin/transactions/${transactionId}/details`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          
+          if (response.ok) {
+            const details = await response.json();
+            setTransactionDetails(prev => ({
+              ...prev,
+              [transactionId]: details
+            }));
+          }
+        } catch (error) {
+          console.error('Failed to fetch transaction details:', error);
+        }
+      }
+    }
+    
+    setExpandedTransactions(newExpanded);
   };
 
   useEffect(() => {
@@ -476,32 +512,214 @@ function EnhancedAdminDashboard() {
                     </TableHeader>
                     <TableBody>
                       {transactions.map((transaction) => (
-                        <TableRow key={transaction.id} className="border-gray-800 hover:bg-gray-800">
-                          <TableCell className="font-mono text-sm text-white">{transaction.id}</TableCell>
-                          <TableCell className="font-mono text-sm text-white">{transaction.transactionId}</TableCell>
-                          <TableCell>
-                            <div>
-                              <div className="font-medium text-white">{transaction.userName || 'N/A'}</div>
-                              <div className="text-sm text-gray-400">{transaction.userEmail || transaction.customerEmail || 'N/A'}</div>
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-gray-300">{transaction.courseTitle}</TableCell>
-                          <TableCell className="text-white">₹{transaction.amount}</TableCell>
-                          <TableCell className="text-white">₹{transaction.certificateAmount}</TableCell>
-                          <TableCell>
-                            <Badge variant={
-                              transaction.status === 'success' ? "default" : 
-                              transaction.status === 'failed' ? "destructive" : "secondary"
-                            } className={
-                              transaction.status === 'success' ? "bg-green-600" : 
-                              transaction.status === 'failed' ? "bg-red-600" : "bg-gray-600"
-                            }>
-                              {transaction.status}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-gray-300">{transaction.paymentMethod}</TableCell>
-                          <TableCell className="text-gray-300">{format(new Date(transaction.createdAt || new Date()), 'MMM dd, yyyy HH:mm')}</TableCell>
-                        </TableRow>
+                        <>
+                          <TableRow 
+                            key={transaction.id} 
+                            className="border-gray-800 hover:bg-gray-800 cursor-pointer"
+                            onClick={() => toggleTransactionExpansion(transaction.id)}
+                          >
+                            <TableCell className="font-mono text-sm text-white">
+                              <div className="flex items-center gap-2">
+                                {expandedTransactions.has(transaction.id) ? 
+                                  <ChevronDown className="h-4 w-4" /> : 
+                                  <ChevronRight className="h-4 w-4" />
+                                }
+                                {transaction.id}
+                              </div>
+                            </TableCell>
+                            <TableCell className="font-mono text-sm text-white">{transaction.transactionId}</TableCell>
+                            <TableCell>
+                              <div>
+                                <div className="font-medium text-white">{transaction.userName || 'N/A'}</div>
+                                <div className="text-sm text-gray-400">{transaction.userEmail || transaction.customerEmail || 'N/A'}</div>
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-gray-300">{transaction.courseTitle}</TableCell>
+                            <TableCell className="text-white">₹{transaction.amount}</TableCell>
+                            <TableCell className="text-white">₹{transaction.certificateAmount}</TableCell>
+                            <TableCell>
+                              <Badge variant={
+                                transaction.status === 'success' ? "default" : 
+                                transaction.status === 'failed' ? "destructive" : "secondary"
+                              } className={
+                                transaction.status === 'success' ? "bg-green-600" : 
+                                transaction.status === 'failed' ? "bg-red-600" : "bg-gray-600"
+                              }>
+                                {transaction.status}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-gray-300">{transaction.paymentMethod}</TableCell>
+                            <TableCell className="text-gray-300">{format(new Date(transaction.createdAt || new Date()), 'MMM dd, yyyy HH:mm')}</TableCell>
+                          </TableRow>
+                          
+                          {expandedTransactions.has(transaction.id) && (
+                            <TableRow className="border-gray-800">
+                              <TableCell colSpan={9} className="bg-gray-800/50 p-0">
+                                <div className="p-6 space-y-6">
+                                  {transactionDetails[transaction.id] ? (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                      {/* Customer Information */}
+                                      <Card className="bg-gray-900 border-gray-700">
+                                        <CardHeader className="pb-3">
+                                          <CardTitle className="text-white text-sm flex items-center gap-2">
+                                            <User className="h-4 w-4" />
+                                            Customer Details
+                                          </CardTitle>
+                                        </CardHeader>
+                                        <CardContent className="space-y-2">
+                                          <div className="flex items-center gap-2 text-sm">
+                                            <User className="h-3 w-3 text-gray-400" />
+                                            <span className="text-white">{transactionDetails[transaction.id].customer?.name || 'N/A'}</span>
+                                          </div>
+                                          <div className="flex items-center gap-2 text-sm">
+                                            <Mail className="h-3 w-3 text-gray-400" />
+                                            <span className="text-gray-300">{transactionDetails[transaction.id].customer?.email || 'N/A'}</span>
+                                          </div>
+                                          <div className="flex items-center gap-2 text-sm">
+                                            <Phone className="h-3 w-3 text-gray-400" />
+                                            <span className="text-gray-300">{transactionDetails[transaction.id].customer?.phone || 'N/A'}</span>
+                                          </div>
+                                          <div className="flex items-center gap-2 text-sm">
+                                            <Calendar className="h-3 w-3 text-gray-400" />
+                                            <span className="text-gray-300">
+                                              Joined {transactionDetails[transaction.id].customer?.createdAt ? 
+                                                format(new Date(transactionDetails[transaction.id].customer.createdAt), 'MMM dd, yyyy') : 'N/A'}
+                                            </span>
+                                          </div>
+                                        </CardContent>
+                                      </Card>
+
+                                      {/* Course Information */}
+                                      <Card className="bg-gray-900 border-gray-700">
+                                        <CardHeader className="pb-3">
+                                          <CardTitle className="text-white text-sm flex items-center gap-2">
+                                            <BookOpen className="h-4 w-4" />
+                                            Course Details
+                                          </CardTitle>
+                                        </CardHeader>
+                                        <CardContent className="space-y-2">
+                                          <div className="text-sm">
+                                            <span className="text-white font-medium">{transactionDetails[transaction.id].course?.title || 'N/A'}</span>
+                                          </div>
+                                          <div className="flex items-center gap-2 text-sm">
+                                            <Clock className="h-3 w-3 text-gray-400" />
+                                            <span className="text-gray-300">{transactionDetails[transaction.id].course?.duration || 0} minutes</span>
+                                          </div>
+                                          <div className="flex items-center gap-2 text-sm">
+                                            <DollarSign className="h-3 w-3 text-gray-400" />
+                                            <span className="text-gray-300">₹{transactionDetails[transaction.id].course?.price || 0}</span>
+                                          </div>
+                                          <div className="text-sm">
+                                            <span className="text-gray-400">Category: </span>
+                                            <span className="text-gray-300">{transactionDetails[transaction.id].course?.categoryName || 'N/A'}</span>
+                                          </div>
+                                          <div className="text-sm">
+                                            <span className="text-gray-400">Level: </span>
+                                            <span className="text-gray-300">{transactionDetails[transaction.id].course?.level || 'N/A'}</span>
+                                          </div>
+                                        </CardContent>
+                                      </Card>
+
+                                      {/* Payment Information */}
+                                      <Card className="bg-gray-900 border-gray-700">
+                                        <CardHeader className="pb-3">
+                                          <CardTitle className="text-white text-sm flex items-center gap-2">
+                                            <CreditCard className="h-4 w-4" />
+                                            Payment Details
+                                          </CardTitle>
+                                        </CardHeader>
+                                        <CardContent className="space-y-2">
+                                          <div className="flex items-center gap-2 text-sm">
+                                            <span className="text-gray-400">Gateway:</span>
+                                            <span className="text-white">{transactionDetails[transaction.id].paymentGateway || 'PayUMoney'}</span>
+                                          </div>
+                                          <div className="flex items-center gap-2 text-sm">
+                                            <span className="text-gray-400">Method:</span>
+                                            <span className="text-gray-300">{transactionDetails[transaction.id].paymentMethod || 'N/A'}</span>
+                                          </div>
+                                          <div className="flex items-center gap-2 text-sm">
+                                            <span className="text-gray-400">Gateway ID:</span>
+                                            <span className="text-gray-300 font-mono text-xs">{transactionDetails[transaction.id].gatewayTransactionId || 'N/A'}</span>
+                                          </div>
+                                          <div className="flex items-center gap-2 text-sm">
+                                            <Calendar className="h-3 w-3 text-gray-400" />
+                                            <span className="text-gray-300">
+                                              {transactionDetails[transaction.id].completedAt ? 
+                                                format(new Date(transactionDetails[transaction.id].completedAt), 'MMM dd, yyyy HH:mm') : 'N/A'}
+                                            </span>
+                                          </div>
+                                        </CardContent>
+                                      </Card>
+
+                                      {/* Certificate Information */}
+                                      {transactionDetails[transaction.id].certificate && (
+                                        <Card className="bg-gray-900 border-gray-700">
+                                          <CardHeader className="pb-3">
+                                            <CardTitle className="text-white text-sm flex items-center gap-2">
+                                              <BookOpen className="h-4 w-4" />
+                                              Certificate Details
+                                            </CardTitle>
+                                          </CardHeader>
+                                          <CardContent className="space-y-2">
+                                            <div className="flex items-center gap-2 text-sm">
+                                              <span className="text-gray-400">ID:</span>
+                                              <span className="text-white font-mono text-xs">{transactionDetails[transaction.id].certificate.certificateId}</span>
+                                            </div>
+                                            <div className="flex items-center gap-2 text-sm">
+                                              <span className="text-gray-400">Score:</span>
+                                              <span className="text-white">{transactionDetails[transaction.id].certificate.score}%</span>
+                                            </div>
+                                            <div className="flex items-center gap-2 text-sm">
+                                              <span className="text-gray-400">Issued:</span>
+                                              <span className="text-gray-300">
+                                                {format(new Date(transactionDetails[transaction.id].certificate.issuedAt), 'MMM dd, yyyy')}
+                                              </span>
+                                            </div>
+                                            <div className="flex items-center gap-2 text-sm">
+                                              <span className="text-gray-400">Status:</span>
+                                              <Badge variant="default" className="bg-green-600 text-xs">
+                                                {transactionDetails[transaction.id].certificate.isPaid ? 'Paid' : 'Unpaid'}
+                                              </Badge>
+                                            </div>
+                                          </CardContent>
+                                        </Card>
+                                      )}
+
+                                      {/* Address Information */}
+                                      {transactionDetails[transaction.id].address && (
+                                        <Card className="bg-gray-900 border-gray-700">
+                                          <CardHeader className="pb-3">
+                                            <CardTitle className="text-white text-sm flex items-center gap-2">
+                                              <MapPin className="h-4 w-4" />
+                                              Delivery Address
+                                            </CardTitle>
+                                          </CardHeader>
+                                          <CardContent className="space-y-1">
+                                            <div className="text-sm text-white">{transactionDetails[transaction.id].address.fullName}</div>
+                                            <div className="text-sm text-gray-300">{transactionDetails[transaction.id].address.addressLine1}</div>
+                                            {transactionDetails[transaction.id].address.addressLine2 && (
+                                              <div className="text-sm text-gray-300">{transactionDetails[transaction.id].address.addressLine2}</div>
+                                            )}
+                                            <div className="text-sm text-gray-300">
+                                              {transactionDetails[transaction.id].address.city}, {transactionDetails[transaction.id].address.state} {transactionDetails[transaction.id].address.pincode}
+                                            </div>
+                                            <div className="text-sm text-gray-300">{transactionDetails[transaction.id].address.country}</div>
+                                            <div className="text-sm text-gray-400">Ph: {transactionDetails[transaction.id].address.phone}</div>
+                                          </CardContent>
+                                        </Card>
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <div className="flex items-center justify-center py-8">
+                                      <div className="animate-spin w-6 h-6 border-2 border-white border-t-transparent rounded-full"></div>
+                                      <span className="ml-2 text-gray-300">Loading transaction details...</span>
+                                    </div>
+                                  )}
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          )}
+                        </>
                       ))}
                     </TableBody>
                   </Table>
