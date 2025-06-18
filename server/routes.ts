@@ -702,7 +702,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               console.log(`Updating seller earnings from ${currentEarnings} to ${newEarnings}`);
               
               await storage.updateSeller(seller.id, {
-                totalEarnings: newEarnings.toString()
+                pendingEarnings: newEarnings.toString()
               });
             }
           } else {

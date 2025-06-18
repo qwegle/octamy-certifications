@@ -1147,7 +1147,6 @@ export class DatabaseStorage implements IStorage {
           progress: userAchievements.progress,
           metadata: userAchievements.metadata,
           isViewed: userAchievements.isViewed,
-          isViewed: userAchievements.isViewed,
           achievement: achievements
         })
         .from(userAchievements)
