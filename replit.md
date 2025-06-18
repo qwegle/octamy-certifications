@@ -247,6 +247,7 @@ Octamy is a comprehensive professional certification platform built as a full-st
 - **Commission tracking system restored** - fixed referral click tracking API endpoint and commission calculation logic
 - **Conversion tracking implemented** - referral clicks now properly convert to sales when payments are completed
 - **Analytics dashboard functional** - seller dashboard showing real-time click data and commission tracking
+- **Partner login credentials fixed** - updated partner@octamy.com password hash to work with "password"
 
 ### Black and White Cred-Style Branding (June 16, 2025)
 - **Complete UI redesign** with black and white Cred-inspired aesthetic
