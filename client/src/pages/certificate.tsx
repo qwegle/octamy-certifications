@@ -15,7 +15,7 @@ export default function CertificateView() {
   const [isDownloading, setIsDownloading] = useState(false);
   const [isPrinting, setIsPrinting] = useState(false);
 
-  const { data: certificate } = useQuery<Certificate>({
+  const { data: certificate, isLoading, error } = useQuery<Certificate>({
     queryKey: [`/api/certificates/${certificateId}`],
     enabled: !!certificateId,
   });
@@ -28,7 +28,7 @@ export default function CertificateView() {
 
     setIsDownloading(true);
     try {
-      const response = await fetch(`/api/certificates/${certificateId}/download`);
+      const response = await fetch(`/api/certificates/${certificateId}/download?format=pdf`);
       if (response.ok) {
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
@@ -51,10 +51,15 @@ export default function CertificateView() {
     }
   };
 
-  const handlePrint = () => {
+  const handlePrint = async () => {
+    if (!certificate?.isPaid) {
+      alert('Certificate payment is required before printing');
+      return;
+    }
+
     setIsPrinting(true);
     try {
-      const iframe = document.getElementById('certificateIframe') as HTMLIFrameElement;
+      const iframe = document.querySelector('iframe') as HTMLIFrameElement;
       if (iframe && iframe.contentWindow) {
         iframe.contentWindow.print();
       } else {
@@ -63,306 +68,274 @@ export default function CertificateView() {
       }
     } catch (error) {
       console.error('Error printing certificate:', error);
-      window.open(`/api/certificates/${certificateId}/download`, '_blank');
+      alert('Failed to print certificate. Please try again.');
     } finally {
-      setTimeout(() => setIsPrinting(false), 1000);
+      setIsPrinting(false);
     }
   };
 
   const handleShare = () => {
-    const shareUrl = `${window.location.origin}/certificate/${certificate?.certificateId}`;
-    const shareText = `🎓 Professional Certificate Achievement\n\nI've successfully completed the ${certificate?.courseTitle} certification program through Octamy Solutions Private Limited.\n\nScore: ${certificate?.score}%\nCertificate ID: ${certificate?.certificateNumber}\n\nVerify this certificate at:`;
-    
+    const shareText = `I've earned a professional certificate in ${certificate?.courseTitle}! 
+Score: ${certificate?.score}% 
+Verified by Octamy Solutions Private Limited
+View certificate: ${window.location.href}`;
+
     if (navigator.share) {
       navigator.share({
-        title: `Professional Certificate - ${certificate?.userName}`,
+        title: `Certificate - ${certificate?.courseTitle}`,
         text: shareText,
-        url: shareUrl
-      }).catch(() => {
-        // Fallback to clipboard
-        navigator.clipboard.writeText(`${shareText}\n${shareUrl}`);
-        alert('Certificate link copied to clipboard!');
+        url: window.location.href
       });
     } else {
-      navigator.clipboard.writeText(`${shareText}\n${shareUrl}`);
-      alert('Certificate link copied to clipboard!');
+      navigator.clipboard.writeText(shareText).then(() => {
+        alert('Certificate details copied to clipboard!');
+      });
     }
   };
 
-  if (!certificate) {
+  if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-black text-white">
         <Header />
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <Card className="shadow-lg">
-            <CardContent className="text-center py-16">
-              <XCircle className="w-20 h-20 text-red-500 mx-auto mb-6" />
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">Certificate Not Found</h2>
-              <p className="text-gray-600 text-lg">
-                The certificate you're looking for doesn't exist or has been removed.
-              </p>
-              <p className="text-sm text-gray-500 mt-4">
-                Please verify the certificate ID and try again.
-              </p>
-            </CardContent>
-          </Card>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
+            <p>Loading certificate...</p>
+          </div>
         </div>
         <Footer />
       </div>
     );
   }
 
-  const isExpired = new Date(certificate.expiresAt) < new Date();
-  const isActive = certificate.isActive && certificate.isPaid && !isExpired;
+  if (error || !certificate) {
+    return (
+      <div className="min-h-screen bg-black text-white">
+        <Header />
+        <div className="container mx-auto px-4 py-16 text-center">
+          <XCircle className="w-16 h-16 text-red-500 mx-auto mb-6" />
+          <h1 className="text-3xl font-bold mb-4">Certificate Not Found</h1>
+          <p className="text-gray-400 mb-8">
+            The certificate you're looking for doesn't exist or has been removed.
+          </p>
+          <p className="text-gray-400 mb-8">
+            Please verify the certificate ID and try again.
+          </p>
+          <Button asChild className="bg-white text-black hover:bg-gray-200">
+            <a href="/">Return to Home</a>
+          </Button>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-black text-white">
       <Header />
       
-      {/* Hero Section */}
-      <div className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white py-12">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <div className="flex items-center justify-center gap-3 mb-6">
-              <img src={octamyLogo} alt="Octamy Solutions" className="h-12 w-auto" />
-              <div className="text-left">
-                <h1 className="text-3xl font-bold">OCTAMY SOLUTIONS</h1>
-                <p className="text-sm text-gray-300">Private Limited - ISO Certified</p>
-              </div>
+      {/* Hero Section with Octamy Branding */}
+      <div className="bg-gradient-to-r from-black via-gray-900 to-black py-16">
+        <div className="container mx-auto px-4 text-center">
+          <div className="flex items-center justify-center mb-6">
+            <img src={octamyLogo} alt="Octamy Solutions" className="w-16 h-16 mr-4" />
+            <div className="text-left">
+              <h1 className="text-3xl font-bold">Professional Certificate</h1>
+              <p className="text-gray-400">Verified by Octamy Solutions Private Limited</p>
             </div>
-            
-            <div className="flex items-center justify-center gap-3 mb-4">
-              {isActive ? (
-                <Badge className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 text-base">
-                  <CheckCircle className="w-5 h-5 mr-2" />
-                  Verified & Authentic Certificate
-                </Badge>
-              ) : (
-                <Badge variant="destructive" className="px-4 py-2 text-base">
-                  <XCircle className="w-5 h-5 mr-2" />
-                  {!certificate.isPaid ? 'Payment Required' : isExpired ? 'Certificate Expired' : 'Invalid Certificate'}
-                </Badge>
-              )}
-            </div>
-            
-            <h2 className="text-2xl font-semibold text-gray-200 mb-2">Professional Certification Document</h2>
-            <p className="text-gray-400">Digitally signed and verified by authorized certification body</p>
+          </div>
+          
+          <div className="flex items-center justify-center gap-4 mb-6">
+            <Badge variant="outline" className="border-green-500 text-green-500">
+              <CheckCircle className="w-4 h-4 mr-1" />
+              Verified Authentic
+            </Badge>
+            <Badge variant="outline" className="border-blue-500 text-blue-500">
+              <Shield className="w-4 h-4 mr-1" />
+              Blockchain Secured
+            </Badge>
+            <Badge variant="outline" className="border-purple-500 text-purple-500">
+              <Globe className="w-4 h-4 mr-1" />
+              Globally Recognized
+            </Badge>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <div className="container mx-auto px-4 py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
           {/* Certificate Display */}
-          <div className="lg:col-span-3">
-            <Card className="shadow-xl border-2 border-gray-200">
+          <div className="lg:col-span-2">
+            <Card className="bg-gray-900 border-gray-800">
               <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-2xl font-bold text-gray-900">Certificate Document</h3>
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <Shield className="w-4 h-4" />
-                    <span>Blockchain Verified</span>
-                  </div>
+                <div className="mb-4">
+                  <h2 className="text-xl font-semibold mb-2">Certificate Document</h2>
+                  <p className="text-gray-400 text-sm">ID: {certificate.certificateId}</p>
                 </div>
                 
-                {/* Certificate iframe */}
-                <div className="relative">
-                  {!isActive && (
-                    <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-10 rounded-lg">
-                      <div className="text-center text-white">
-                        <XCircle className="w-16 h-16 mx-auto mb-4" />
-                        <h4 className="text-xl font-bold mb-2">
-                          {!certificate.isPaid ? 'Payment Required' : isExpired ? 'Certificate Expired' : 'Certificate Invalid'}
-                        </h4>
-                        <p className="text-gray-300">
-                          {!certificate.isPaid 
-                            ? 'Complete payment to access this certificate' 
-                            : isExpired 
-                            ? 'This certificate has expired and is no longer valid'
-                            : 'This certificate is not currently valid'
-                          }
-                        </p>
+                {certificate.isPaid ? (
+                  <iframe
+                    src={`/api/certificates/${certificateId}/download`}
+                    className="w-full h-[600px] border border-gray-700 rounded bg-white"
+                    title="Certificate Preview"
+                    style={{ backgroundColor: 'white' }}
+                  />
+                ) : (
+                  <div className="w-full h-[600px] border border-gray-700 rounded bg-gray-800 flex items-center justify-center relative">
+                    <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-10">
+                      <div className="text-center p-8">
+                        <XCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+                        <h3 className="text-xl font-semibold mb-2">Payment Required</h3>
+                        <p className="text-gray-400 mb-4">This certificate requires payment to view and download.</p>
+                        <Button className="bg-white text-black hover:bg-gray-200">
+                          Complete Payment
+                        </Button>
                       </div>
                     </div>
-                  )}
-                  
-                  <div className="bg-white border-4 border-gray-300 rounded-lg overflow-hidden shadow-inner" 
-                       style={{ aspectRatio: '1.414/1' }}>
-                    <iframe
-                      id="certificateIframe"
-                      src={`/api/certificates/${certificateId}/download`}
-                      className="w-full h-full border-0"
-                      title="Professional Certificate"
-                      style={{ minHeight: '600px' }}
-                    />
+                    <div className="text-center p-8 opacity-30">
+                      <Award className="w-24 h-24 text-gray-600 mx-auto mb-4" />
+                      <h3 className="text-2xl font-bold text-gray-600">Professional Certificate</h3>
+                      <p className="text-gray-600 mt-2">{certificate.courseTitle}</p>
+                    </div>
                   </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex flex-wrap justify-center gap-4 mt-8 pt-6 border-t border-gray-200">
-                  <Button
-                    onClick={handleDownload}
-                    disabled={isDownloading || !isActive}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg font-semibold min-w-40"
-                  >
-                    {isDownloading ? (
-                      <>
-                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                        Downloading...
-                      </>
-                    ) : (
-                      <>
-                        <Download className="w-5 h-5 mr-2" />
-                        Download PDF
-                      </>
-                    )}
-                  </Button>
-                  
-                  <Button
-                    variant="outline"
-                    onClick={handlePrint}
-                    disabled={isPrinting || !isActive}
-                    className="border-2 border-gray-600 text-gray-700 hover:bg-gray-50 px-8 py-3 text-lg font-semibold min-w-40"
-                  >
-                    {isPrinting ? (
-                      <>
-                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                        Printing...
-                      </>
-                    ) : (
-                      <>
-                        <Printer className="w-5 h-5 mr-2" />
-                        Print Certificate
-                      </>
-                    )}
-                  </Button>
-                  
-                  <Button
-                    variant="outline"
-                    onClick={handleShare}
-                    className="border-2 border-green-600 text-green-700 hover:bg-green-50 px-8 py-3 text-lg font-semibold min-w-40"
-                  >
-                    <Share2 className="w-5 h-5 mr-2" />
-                    Share Certificate
-                  </Button>
-                </div>
+                )}
               </CardContent>
             </Card>
+
+            {/* Action Buttons */}
+            <div className="flex flex-wrap gap-4 mt-6">
+              <Button 
+                onClick={handleDownload} 
+                disabled={!certificate.isPaid || isDownloading}
+                className="bg-white text-black hover:bg-gray-200 disabled:opacity-50"
+              >
+                {isDownloading ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Download className="w-4 h-4 mr-2" />
+                )}
+                Download PDF
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                onClick={handlePrint}
+                disabled={!certificate.isPaid || isPrinting}
+                className="border-gray-600 text-white hover:bg-gray-800 disabled:opacity-50"
+              >
+                {isPrinting ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Printer className="w-4 h-4 mr-2" />
+                )}
+                Print
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                onClick={handleShare}
+                className="border-gray-600 text-white hover:bg-gray-800"
+              >
+                <Share2 className="w-4 h-4 mr-2" />
+                Share
+              </Button>
+            </div>
           </div>
 
-          {/* Certificate Information Sidebar */}
-          <div className="lg:col-span-1 space-y-6">
+          {/* Certificate Details Sidebar */}
+          <div className="space-y-6">
             
-            {/* Certificate Details */}
-            <Card className="shadow-lg">
+            {/* Verification Status */}
+            <Card className="bg-gray-900 border-gray-800">
               <CardContent className="p-6">
-                <h4 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
-                  <Award className="w-5 h-5 mr-2 text-blue-600" />
+                <h3 className="text-lg font-semibold mb-4 flex items-center">
+                  <Shield className="w-5 h-5 mr-2 text-green-500" />
+                  Verification Status
+                </h3>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-400">Authenticity</span>
+                    <Badge className="bg-green-500 hover:bg-green-600">Verified</Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-400">Digital Signature</span>
+                    <Badge className="bg-green-500 hover:bg-green-600">Valid</Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-400">Payment Status</span>
+                    <Badge className={certificate.isPaid ? "bg-green-500 hover:bg-green-600" : "bg-red-500 hover:bg-red-600"}>
+                      {certificate.isPaid ? "Paid" : "Pending"}
+                    </Badge>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Certificate Information */}
+            <Card className="bg-gray-900 border-gray-800">
+              <CardContent className="p-6">
+                <h3 className="text-lg font-semibold mb-4 flex items-center">
+                  <Award className="w-5 h-5 mr-2 text-blue-500" />
                   Certificate Details
-                </h4>
-                <div className="space-y-4 text-sm">
+                </h3>
+                <div className="space-y-4">
                   <div>
-                    <span className="font-medium text-gray-700 block">Recipient</span>
-                    <span className="text-gray-900">{certificate.userName}</span>
+                    <label className="text-sm text-gray-400 flex items-center mb-1">
+                      <User className="w-4 h-4 mr-1" />
+                      Recipient
+                    </label>
+                    <p className="font-medium">{certificate.userName}</p>
                   </div>
                   <div>
-                    <span className="font-medium text-gray-700 block">Email Address</span>
-                    <span className="text-gray-900 break-all">{certificate.userEmail}</span>
+                    <label className="text-sm text-gray-400 mb-1 block">Course</label>
+                    <p className="font-medium">{certificate.courseTitle}</p>
                   </div>
                   <div>
-                    <span className="font-medium text-gray-700 block">Course Title</span>
-                    <span className="text-gray-900">{certificate.courseTitle}</span>
+                    <label className="text-sm text-gray-400 mb-1 block">Score</label>
+                    <p className="font-medium text-green-400">{certificate.score}%</p>
                   </div>
                   <div>
-                    <span className="font-medium text-gray-700 block">Achievement Score</span>
-                    <span className="text-blue-600 font-bold text-lg">{certificate.score}%</span>
+                    <label className="text-sm text-gray-400 mb-1 block">Badge</label>
+                    <Badge className="bg-yellow-500 hover:bg-yellow-600">
+                      {certificate.badge}
+                    </Badge>
                   </div>
                   <div>
-                    <span className="font-medium text-gray-700 block">Certificate ID</span>
-                    <span className="font-mono text-gray-900 text-xs">{certificate.certificateNumber}</span>
+                    <label className="text-sm text-gray-400 flex items-center mb-1">
+                      <Calendar className="w-4 h-4 mr-1" />
+                      Issue Date
+                    </label>
+                    <p className="font-medium">
+                      {new Date(certificate.issuedAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="text-sm text-gray-400 mb-1 block">Valid Until</label>
+                    <p className="font-medium">
+                      {new Date(certificate.expiresAt).toLocaleDateString()}
+                    </p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Verification Info */}
-            <Card className="shadow-lg">
+            {/* Issuer Information */}
+            <Card className="bg-gray-900 border-gray-800">
               <CardContent className="p-6">
-                <h4 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
-                  <Shield className="w-5 h-5 mr-2 text-green-600" />
-                  Verification
-                </h4>
-                <div className="space-y-4 text-sm">
+                <h3 className="text-lg font-semibold mb-4">Issued By</h3>
+                <div className="flex items-center mb-3">
+                  <img src={octamyLogo} alt="Octamy Solutions" className="w-12 h-12 mr-3" />
                   <div>
-                    <span className="font-medium text-gray-700 block">Issue Date</span>
-                    <span className="text-gray-900">{new Date(certificate.issuedAt).toLocaleDateString('en-US', { 
-                      year: 'numeric', 
-                      month: 'long', 
-                      day: 'numeric' 
-                    })}</span>
-                  </div>
-                  <div>
-                    <span className="font-medium text-gray-700 block">Valid Until</span>
-                    <span className="text-gray-900">{(() => {
-                      const expiry = new Date(certificate.issuedAt);
-                      expiry.setFullYear(expiry.getFullYear() + 3);
-                      return expiry.toLocaleDateString('en-US', { 
-                        year: 'numeric', 
-                        month: 'long', 
-                        day: 'numeric' 
-                      });
-                    })()}</span>
-                  </div>
-                  <div>
-                    <span className="font-medium text-gray-700 block">Status</span>
-                    <span className={`font-semibold ${
-                      isActive ? 'text-green-600' : 'text-red-600'
-                    }`}>
-                      {isActive ? 'Active & Valid' : 
-                       !certificate.isPaid ? 'Pending Payment' : 
-                       isExpired ? 'Expired' : 'Invalid'}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="font-medium text-gray-700 block">Certification Body</span>
-                    <span className="text-gray-900">Octamy Solutions Private Limited</span>
+                    <p className="font-semibold">Octamy Solutions Private Limited</p>
+                    <p className="text-sm text-gray-400">An ISO Certified Company</p>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* Authenticity Verification */}
-            <Card className="shadow-lg bg-gradient-to-br from-green-50 to-blue-50">
-              <CardContent className="p-6">
-                <h4 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
-                  <CheckCircle className="w-5 h-5 mr-2 text-green-600" />
-                  Authenticity
-                </h4>
-                <div className="space-y-3 text-sm">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
-                    <span className="text-gray-700">ISO Certified Issuer</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
-                    <span className="text-gray-700">Blockchain Verified</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
-                    <span className="text-gray-700">Digitally Signed</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Globe className="w-4 h-4 text-blue-500 flex-shrink-0" />
-                    <span className="text-gray-700">Globally Recognized</span>
-                  </div>
-                </div>
-                
-                <div className="mt-4 pt-4 border-t border-green-200">
-                  <p className="text-xs text-gray-600 leading-relaxed">
-                    This certificate can be independently verified through our blockchain-based verification system. 
-                    The authenticity is guaranteed by cryptographic signatures and immutable records.
-                  </p>
+                <div className="text-sm text-gray-400 space-y-1">
+                  <p>• Professional Certification Authority</p>
+                  <p>• Globally Recognized Standards</p>
+                  <p>• Blockchain Verified</p>
+                  <p>• Industry Partnership Program</p>
                 </div>
               </CardContent>
             </Card>
@@ -370,7 +343,7 @@ export default function CertificateView() {
           </div>
         </div>
       </div>
-      
+
       <Footer />
     </div>
   );
