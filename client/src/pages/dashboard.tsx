@@ -32,6 +32,15 @@ export default function Dashboard() {
   // Debug logging for certificate data
   console.log('Dashboard certificates data:', { certificates, certificatesLoading, certificatesError });
 
+  // Show debug info if certificates are loading or failed
+  if (certificatesLoading) {
+    console.log('Loading certificates...');
+  }
+  
+  if (certificatesError) {
+    console.error('Certificate loading error:', certificatesError);
+  }
+
   const handleDownload = async (certificateId: string) => {
     try {
       // Open certificate in new tab for printing/saving as PDF
