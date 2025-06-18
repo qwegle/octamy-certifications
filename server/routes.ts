@@ -199,6 +199,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Direct seller dashboard route (bypass routing issues)
+  app.get('/api/sellers/dashboard', authenticateSellerToken, async (req: SellerAuthenticatedRequest, res: Response) => {
+    try {
+      const sellerId = req.seller?.sellerId;
+      if (!sellerId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const seller = await storage.getSeller(sellerId);
+      if (!seller) {
+        return res.status(404).json({ message: "Seller not found" });
+      }
+
+      const sales = await storage.getSalesBySeller(sellerId);
+      const withdrawals = await storage.getWithdrawalsBySeller(sellerId);
+      const clickAnalytics = await storage.getSellerClickAnalytics(sellerId);
+
+      const totalSales = sales.length;
+      const totalCommission = sales.reduce((sum, sale) => sum + parseFloat(sale.commissionAmount), 0);
+      const pendingWithdrawals = withdrawals
+        .filter(w => w.status === 'pending')
+        .reduce((sum, w) => sum + parseFloat(w.amount), 0);
+
+      res.json({
+        seller: {
+          id: seller.id,
+          email: seller.email,
+          name: seller.name,
+          isApproved: seller.isApproved,
+          totalEarnings: seller.totalEarnings || "0.00",
+          pendingEarnings: seller.pendingEarnings || "0.00"
+        },
+        totalSales,
+        totalCommission: totalCommission.toFixed(2),
+        pendingWithdrawals: pendingWithdrawals.toFixed(2),
+        recentSales: sales.slice(0, 5),
+        withdrawalHistory: withdrawals.slice(0, 5),
+        clickAnalytics
+      });
+    } catch (error: any) {
+      console.error("Dashboard error:", error);
+      res.status(500).json({ message: "Failed to fetch dashboard data" });
+    }
+  });
+
   // API routes (from routes/index.ts)
   app.use(apiRoutes);
 
