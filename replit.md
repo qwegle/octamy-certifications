@@ -242,6 +242,8 @@ Octamy is a comprehensive professional certification platform built as a full-st
 - **Updated parameter handling** - controller now accepts both `{type, itemId}` and `{courseId}` formats
 - **Seller dashboard fully functional** - registration, login, analytics, and URL generation working correctly
 - **Data structure alignment** - fixed frontend/backend field mapping for sales commission display
+- **Fixed null referral codes** - updated seller records with proper referral codes and authentication credentials
+- **Resolved route conflicts** - removed duplicate seller route registrations to prevent HTML/JSON response conflicts
 
 ### Black and White Cred-Style Branding (June 16, 2025)
 - **Complete UI redesign** with black and white Cred-inspired aesthetic
