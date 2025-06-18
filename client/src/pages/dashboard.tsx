@@ -15,7 +15,7 @@ export default function Dashboard() {
   const { user, token } = useAuth();
   const [, setLocation] = useLocation();
 
-  const { data: certificates = [] } = useQuery<Certificate[]>({
+  const { data: certificates = [], isLoading: certificatesLoading, error: certificatesError } = useQuery<Certificate[]>({
     queryKey: ['/api/user/certificates'],
     enabled: !!user && !!token,
     queryFn: async () => {
@@ -28,6 +28,9 @@ export default function Dashboard() {
       return response.json();
     },
   });
+
+  // Debug logging for certificate data
+  console.log('Dashboard certificates data:', { certificates, certificatesLoading, certificatesError });
 
   const handleDownload = async (certificateId: string) => {
     try {

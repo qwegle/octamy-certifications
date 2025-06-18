@@ -1225,6 +1225,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     next();
   });
 
+  // User certificates endpoint - CRITICAL FOR DASHBOARD
+  app.get("/api/user/certificates", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const certificates = await storage.getUserCertificates(userId);
+      res.json(certificates);
+    } catch (error) {
+      console.error("Get user certificates error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
