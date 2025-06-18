@@ -4,8 +4,23 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Search, Award, Users, TrendingUp, ChevronRight, Star, CheckCircle, ArrowRight } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Search,
+  Award,
+  Users,
+  TrendingUp,
+  ChevronRight,
+  Star,
+  CheckCircle,
+  ArrowRight,
+} from "lucide-react";
 import CourseCard from "@/components/course-card";
 import { useAuth } from "@/hooks/useAuth";
 import type { Category, Course } from "@shared/schema";
@@ -17,20 +32,20 @@ function CertificateSlider() {
       name: "Sarah Johnson",
       course: "AI Fundamentals",
       badge: "Gold",
-      company: "Tech Corp"
+      company: "Tech Corp",
     },
     {
       name: "Michael Chen",
       course: "Data Science",
       badge: "Platinum",
-      company: "DataFlow Inc"
+      company: "DataFlow Inc",
     },
     {
       name: "Emma Davis",
       course: "Machine Learning",
       badge: "Silver",
-      company: "ML Solutions"
-    }
+      company: "ML Solutions",
+    },
   ];
 
   return (
@@ -38,11 +53,16 @@ function CertificateSlider() {
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-8">
           <h3 className="text-2xl font-bold">Recent Certifications</h3>
-          <p className="text-gray-400 mt-2">Join thousands of professionals who have earned their certificates</p>
+          <p className="text-gray-400 mt-2">
+            Join thousands of professionals who have earned their certificates
+          </p>
         </div>
         <div className="flex overflow-x-auto space-x-6 pb-4">
           {certificates.map((cert, index) => (
-            <div key={index} className="flex-shrink-0 bg-gray-900 rounded-lg p-6 min-w-[300px]">
+            <div
+              key={index}
+              className="flex-shrink-0 bg-gray-900 rounded-lg p-6 min-w-[300px]"
+            >
               <div className="flex items-center space-x-3 mb-3">
                 <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center">
                   <Award className="w-6 h-6 text-black" />
@@ -52,7 +72,10 @@ function CertificateSlider() {
                   <p className="text-sm text-gray-400">{cert.company}</p>
                 </div>
               </div>
-              <p className="text-sm mb-2">Certified in <span className="font-semibold">{cert.course}</span></p>
+              <p className="text-sm mb-2">
+                Certified in{" "}
+                <span className="font-semibold">{cert.course}</span>
+              </p>
               <Badge variant="outline" className="border-white text-white">
                 {cert.badge} Badge
               </Badge>
@@ -78,10 +101,12 @@ export default function Landing() {
   });
 
   const filteredCourses = courses.filter((course) => {
-    const matchesSearch = !searchQuery || 
+    const matchesSearch =
+      !searchQuery ||
       course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       course.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = !selectedCategory || course.categoryId === selectedCategory;
+    const matchesCategory =
+      !selectedCategory || course.categoryId === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
@@ -91,33 +116,55 @@ export default function Landing() {
       <nav className="bg-black text-white px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-8">
-            <Link href="/" className="text-2xl font-bold">OCTAMY</Link>
+            <Link href="/" className="text-2xl font-bold">
+              OCTAMY
+            </Link>
             <div className="hidden md:flex space-x-6">
-              <Link href="/courses" className="hover:text-gray-300">Courses</Link>
-              <Link href="/virtual-internships" className="hover:text-gray-300">Internships</Link>
-              <Link href="/business-certifications" className="hover:text-gray-300">Business Pricing</Link>
-              <Link href="/partners" className="hover:text-gray-300">Partners</Link>
-              <Link href="/help-center" className="hover:text-gray-300">Help</Link>
+              <Link href="/courses" className="hover:text-gray-300">
+                Courses
+              </Link>
+              <Link href="/virtual-internships" className="hover:text-gray-300">
+                Internships
+              </Link>
+              {/* <Link href="/business-certifications" className="hover:text-gray-300">Business Pricing</Link> */}
+              <Link href="/sponsor" className="hover:text-gray-300">
+                Sponsors
+              </Link>
+              <Link
+                href="/business-certifications"
+                className="hover:text-gray-300"
+              >
+                Business
+              </Link>
+              <Link href="/help-center" className="hover:text-gray-300">
+                Help
+              </Link>
             </div>
           </div>
           <div className="flex items-center space-x-4">
             {!isLoading && !isAuthenticated ? (
               <>
                 <Link href="/auth">
-                  <Button variant="outline" className="border-white text-white hover:bg-white hover:text-black">
+                  <Button
+                    variant="outline"
+                    className="border-white text-black hover:bg-white hover:text-black"
+                  >
                     Login
                   </Button>
                 </Link>
-                <Link href="/demo-certificate">
+                <Link href="/seller-auth">
                   <Button className="bg-white text-black hover:bg-gray-200">
-                    View Demo Certificate
+                    Become a Reseller
                   </Button>
                 </Link>
               </>
             ) : (
               <>
                 <Link href="/dashboard">
-                  <Button variant="outline" className="border-white text-white hover:bg-white hover:text-black">
+                  <Button
+                    variant="outline"
+                    className="border-white text-white hover:bg-white hover:text-black"
+                  >
                     Dashboard
                   </Button>
                 </Link>
@@ -141,17 +188,28 @@ export default function Landing() {
           <h1 className="text-6xl font-bold text-black mb-6">
             PROFESSIONAL
             <br />
-            <span className="bg-black text-white px-4 py-2 inline-block mt-2">CERTIFICATION</span>
+            <span className="bg-black text-white px-4 py-2 inline-block mt-2">
+              CERTIFICATION
+            </span>
           </h1>
           <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            Earn verified certificates from industry experts. Build your credibility with performance-based badges and join our global leaderboard.
+            Earn verified certificates from industry experts. Build your
+            credibility with performance-based badges and join our global
+            leaderboard.
           </p>
           <div className="flex justify-center space-x-4">
-            <Button size="lg" className="bg-black text-white hover:bg-gray-800 px-8 py-4 text-lg">
+            <Button
+              size="lg"
+              className="bg-black text-white hover:bg-gray-800 px-8 py-4 text-lg"
+            >
               Start Learning <ArrowRight className="ml-2 w-5 h-5" />
             </Button>
             <Link href="/partners">
-              <Button variant="outline" size="lg" className="border-black text-black hover:bg-black hover:text-white px-8 py-4 text-lg">
+              <Button
+                variant="outline"
+                size="lg"
+                className="border-black text-black hover:bg-black hover:text-white px-8 py-4 text-lg"
+              >
                 Become a Partner
               </Button>
             </Link>
@@ -192,7 +250,9 @@ export default function Landing() {
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-black mb-6">Choose Your Learning Path</h2>
+            <h2 className="text-4xl font-bold text-black mb-6">
+              Choose Your Learning Path
+            </h2>
             <div className="max-w-md mx-auto">
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
@@ -212,16 +272,26 @@ export default function Landing() {
             <Button
               variant={selectedCategory === null ? "default" : "outline"}
               onClick={() => setSelectedCategory(null)}
-              className={selectedCategory === null ? "bg-black text-white" : "border-black text-black hover:bg-black hover:text-white"}
+              className={
+                selectedCategory === null
+                  ? "bg-black text-white"
+                  : "border-black text-black hover:bg-black hover:text-white"
+              }
             >
               All Categories
             </Button>
             {categories.map((category) => (
               <Button
                 key={category.id}
-                variant={selectedCategory === category.id ? "default" : "outline"}
+                variant={
+                  selectedCategory === category.id ? "default" : "outline"
+                }
                 onClick={() => setSelectedCategory(category.id)}
-                className={selectedCategory === category.id ? "bg-black text-white" : "border-black text-black hover:bg-black hover:text-white"}
+                className={
+                  selectedCategory === category.id
+                    ? "bg-black text-white"
+                    : "border-black text-black hover:bg-black hover:text-white"
+                }
               >
                 {category.name}
               </Button>
@@ -237,7 +307,9 @@ export default function Landing() {
 
           {filteredCourses.length === 0 && (
             <div className="text-center py-12">
-              <p className="text-gray-600 text-lg">No courses found matching your criteria.</p>
+              <p className="text-gray-600 text-lg">
+                No courses found matching your criteria.
+              </p>
             </div>
           )}
         </div>
@@ -248,37 +320,54 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-6 text-center">
           <h2 className="text-4xl font-bold mb-6">Business Certifications</h2>
           <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-            Get your entire team certified. Business certificates include company branding and bulk pricing.
+            Get your entire team certified. Business certificates include
+            company branding and bulk pricing.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             <Card className="bg-gray-900 border-gray-700 text-white">
               <CardHeader>
-                <CardTitle className="text-white">Team Certifications</CardTitle>
-                <CardDescription className="text-gray-300">Certify your entire team under your company name</CardDescription>
+                <CardTitle className="text-white">
+                  Team Certifications
+                </CardTitle>
+                <CardDescription className="text-gray-300">
+                  Certify your entire team under your company name
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <CheckCircle className="w-12 h-12 text-green-400 mb-4" />
-                <p className="text-sm">Company-branded certificates with business validation</p>
+                <p className="text-sm">
+                  Company-branded certificates with business validation
+                </p>
               </CardContent>
             </Card>
             <Card className="bg-gray-900 border-gray-700 text-white">
               <CardHeader>
                 <CardTitle className="text-white">Bulk Pricing</CardTitle>
-                <CardDescription className="text-gray-300">Special rates for organizations</CardDescription>
+                <CardDescription className="text-gray-300">
+                  Special rates for organizations
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <TrendingUp className="w-12 h-12 text-blue-400 mb-4" />
-                <p className="text-sm">Volume discounts for teams of 10+ employees</p>
+                <p className="text-sm">
+                  Volume discounts for teams of 10+ employees
+                </p>
               </CardContent>
             </Card>
             <Card className="bg-gray-900 border-gray-700 text-white">
               <CardHeader>
-                <CardTitle className="text-white">Analytics Dashboard</CardTitle>
-                <CardDescription className="text-gray-300">Track team progress and performance</CardDescription>
+                <CardTitle className="text-white">
+                  Analytics Dashboard
+                </CardTitle>
+                <CardDescription className="text-gray-300">
+                  Track team progress and performance
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <Users className="w-12 h-12 text-purple-400 mb-4" />
-                <p className="text-sm">Real-time insights into team certification progress</p>
+                <p className="text-sm">
+                  Real-time insights into team certification progress
+                </p>
               </CardContent>
             </Card>
           </div>
@@ -293,9 +382,12 @@ export default function Landing() {
       {/* Badge System Section */}
       <section className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-6 text-center">
-          <h2 className="text-4xl font-bold text-black mb-6">Performance-Based Badges</h2>
+          <h2 className="text-4xl font-bold text-black mb-6">
+            Performance-Based Badges
+          </h2>
           <p className="text-xl text-gray-600 mb-12 max-w-2xl mx-auto">
-            Earn badges based on your exam performance. Show your expertise level to employers.
+            Earn badges based on your exam performance. Show your expertise
+            level to employers.
           </p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             <div className="text-center">
@@ -336,29 +428,65 @@ export default function Landing() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
               <h3 className="text-2xl font-bold mb-4">OCTAMY</h3>
-              <p className="text-gray-400">Professional certification platform for the modern workforce.</p>
+              <p className="text-gray-400">
+                Professional certification platform for the modern workforce.
+              </p>
             </div>
             <div>
               <h4 className="font-semibold mb-4">Courses</h4>
               <ul className="space-y-2 text-gray-400">
-                <li><Link href="/" className="hover:text-white">AI & Machine Learning</Link></li>
-                <li><Link href="/" className="hover:text-white">Development</Link></li>
-                <li><Link href="/" className="hover:text-white">Business</Link></li>
-                <li><Link href="/" className="hover:text-white">Data Science</Link></li>
+                <li>
+                  <Link href="/" className="hover:text-white">
+                    AI & Machine Learning
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/" className="hover:text-white">
+                    Development
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/" className="hover:text-white">
+                    Business
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/" className="hover:text-white">
+                    Data Science
+                  </Link>
+                </li>
               </ul>
             </div>
             <div>
               <h4 className="font-semibold mb-4">Company</h4>
               <ul className="space-y-2 text-gray-400">
-                <li><Link href="/help-center" className="hover:text-white">Help Center</Link></li>
-                <li><Link href="/partners" className="hover:text-white">Partners</Link></li>
-                <li><Link href="/privacy-policy" className="hover:text-white">Privacy Policy</Link></li>
-                <li><Link href="/terms-of-service" className="hover:text-white">Terms of Service</Link></li>
+                <li>
+                  <Link href="/help-center" className="hover:text-white">
+                    Help Center
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/partners" className="hover:text-white">
+                    Partners
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/privacy-policy" className="hover:text-white">
+                    Privacy Policy
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/terms-of-service" className="hover:text-white">
+                    Terms of Service
+                  </Link>
+                </li>
               </ul>
             </div>
             <div>
               <h4 className="font-semibold mb-4">Connect</h4>
-              <p className="text-gray-400 mb-4">ISO Certified by Octamy Solutions Private Limited</p>
+              <p className="text-gray-400 mb-4">
+                ISO Certified by Octamy Solutions Private Limited
+              </p>
               <div className="flex space-x-4">
                 <Star className="w-5 h-5 text-yellow-400" />
                 <Star className="w-5 h-5 text-yellow-400" />
@@ -369,7 +497,9 @@ export default function Landing() {
             </div>
           </div>
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2025 Octamy Solutions Private Limited. All rights reserved.</p>
+            <p>
+              &copy; 2025 Octamy Solutions Private Limited. All rights reserved.
+            </p>
           </div>
         </div>
       </footer>
