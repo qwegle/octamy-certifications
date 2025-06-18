@@ -50,6 +50,10 @@ export default function PaymentTemp() {
     enabled: !!courseId,
   });
 
+  // Type-safe data access
+  const tempExamData = examResults || {};
+  const courseData = course || {};
+
   // Fetch user addresses
   const { data: addresses = [] } = useQuery<Address[]>({
     queryKey: ["/api/user/addresses"],
@@ -193,7 +197,7 @@ export default function PaymentTemp() {
               <p className="text-muted-foreground mb-4">
                 You need to pass the exam before purchasing a certificate.
               </p>
-              <Button onClick={() => navigate(`/course/${course.slug}`)} className="w-full">
+              <Button onClick={() => navigate(`/course/${courseData?.slug || courseId}`)} className="w-full">
                 Retake Exam
               </Button>
             </CardContent>
@@ -203,18 +207,9 @@ export default function PaymentTemp() {
     );
   }
 
-  if (paymentForm) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
-        <Header />
-        <div className="container mx-auto px-4 py-8">
-          <PayUMoneyForm paymentForm={paymentForm} />
-        </div>
-      </div>
-    );
-  }
 
-  const baseAmount = parseFloat(course.price);
+
+  const baseAmount = parseFloat(courseData?.price || '0');
   const shippingCost = includesPhysicalCopy ? 50 : 0;
   const totalAmount = baseAmount + shippingCost;
 
