@@ -774,7 +774,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const txnid = payuMoneyService.generateTransactionId();
       
       // Calculate total amount based on physical copy selection - use current price for payment
-      const baseAmount = parseFloat(amount || course.price);
+      const baseAmount = parseFloat(course.price);
       const shippingCost = includesPhysicalCopy ? 50 : 0;
       const totalAmount = baseAmount + shippingCost;
       const formattedAmount = payuMoneyService.formatAmount(totalAmount.toString());
@@ -959,12 +959,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
               }
 
               // Update seller's total earnings
-              const currentEarnings = parseFloat(seller.totalCommissionEarned || "0");
+              const currentEarnings = parseFloat(seller.totalEarnings || "0");
               const newEarnings = currentEarnings + commissionAmount;
               console.log(`Updating seller earnings from ${currentEarnings} to ${newEarnings}`);
               
               await storage.updateSeller(seller.id, {
-                totalCommissionEarned: newEarnings.toString()
+                totalEarnings: newEarnings.toString()
               });
             }
           } else {
