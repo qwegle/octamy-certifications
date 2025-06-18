@@ -674,17 +674,28 @@ export class DatabaseStorage implements IStorage {
     ipAddress?: string;
     userAgent?: string;
   }): Promise<void> {
-    // Extract seller ID from referral code (format: sellerId-type-itemId-timestamp)
-    const sellerIdMatch = clickData.referralCode.match(/^(\d+)-/);
-    if (!sellerIdMatch) {
-      console.error('Invalid referral code format:', clickData.referralCode);
+    // Find seller by referral code directly
+    const seller = await this.getSellerByReferralCode(clickData.referralCode);
+    if (!seller) {
+      console.error('Seller not found for referral code:', clickData.referralCode);
       return;
     }
-    
-    const sellerId = parseInt(sellerIdMatch[1]);
-    const seller = await this.getSeller(sellerId);
-    if (!seller) {
-      console.error('Seller not found for ID:', sellerId);
+
+    // Check if this click already exists for this IP/user agent to prevent duplicate tracking
+    const existingClick = await db.select()
+      .from(referralClicks)
+      .where(
+        and(
+          eq(referralClicks.referralCode, clickData.referralCode),
+          eq(referralClicks.courseId, clickData.courseId),
+          eq(referralClicks.ipAddress, clickData.ipAddress || ''),
+          sql`${referralClicks.clickedAt} > NOW() - INTERVAL '1 hour'`
+        )
+      )
+      .limit(1);
+
+    if (existingClick.length > 0) {
+      console.log('Duplicate click detected, skipping tracking');
       return;
     }
 
@@ -695,10 +706,12 @@ export class DatabaseStorage implements IStorage {
       ipAddress: clickData.ipAddress,
       userAgent: clickData.userAgent,
     });
+
+    console.log(`Tracked referral click for seller ${seller.id}, course ${clickData.courseId}`);
   }
 
   async updateReferralConversion(referralCode: string, courseId: number, userId: number): Promise<void> {
-    await db
+    const result = await db
       .update(referralClicks)
       .set({
         converted: true,
@@ -712,6 +725,8 @@ export class DatabaseStorage implements IStorage {
           eq(referralClicks.converted, false)
         )
       );
+
+    console.log(`Updated referral conversion for code ${referralCode}, course ${courseId}, user ${userId}`);
   }
 
   async getSellerClickAnalytics(sellerId: number): Promise<{
