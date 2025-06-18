@@ -421,6 +421,61 @@ export class DatabaseStorage implements IStorage {
 
 
 
+  // Question operations
+  async getQuestionsByCourse(courseId: number): Promise<Question[]> {
+    return await db
+      .select()
+      .from(questions)
+      .where(and(eq(questions.courseId, courseId), eq(questions.isActive, true)));
+  }
+
+  async createQuestion(insertQuestion: InsertQuestion): Promise<Question> {
+    const [question] = await db
+      .insert(questions)
+      .values(insertQuestion as any)
+      .returning();
+    return question;
+  }
+
+  async updateQuestion(id: number, updates: Partial<InsertQuestion>): Promise<Question> {
+    const [question] = await db
+      .update(questions)
+      .set(updates as any)
+      .where(eq(questions.id, id))
+      .returning();
+    return question;
+  }
+
+  async deleteQuestion(id: number): Promise<void> {
+    await db.update(questions).set({ isActive: false }).where(eq(questions.id, id));
+  }
+
+  // Exam attempt operations
+  async createExamAttempt(insertAttempt: InsertExamAttempt): Promise<ExamAttempt> {
+    const [attempt] = await db
+      .insert(examAttempts)
+      .values(insertAttempt)
+      .returning();
+    return attempt;
+  }
+
+  async getExamAttempt(id: number): Promise<ExamAttempt | undefined> {
+    const [attempt] = await db.select().from(examAttempts).where(eq(examAttempts.id, id));
+    return attempt || undefined;
+  }
+
+  async getExamAttemptsByUserAndCourse(userId: number, courseId: number): Promise<ExamAttempt[]> {
+    const results = await db
+      .select()
+      .from(examAttempts)
+      .where(and(
+        eq(examAttempts.userId, userId),
+        eq(examAttempts.courseId, courseId)
+      ))
+      .orderBy(desc(examAttempts.createdAt));
+    return results;
+  }
+
   async getUserExamAttempts(userId: number, courseId?: number): Promise<ExamAttempt[]> {
     const query = db
       .select()
@@ -463,7 +518,7 @@ export class DatabaseStorage implements IStorage {
       .from(examAttempts)
       .where(
         and(
-          eq(examAttempts.userEmail, userEmail),
+          eq(examAttempts.userId, userId),
           eq(examAttempts.courseId, courseId)
         )
       )

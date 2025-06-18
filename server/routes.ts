@@ -378,7 +378,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (previousAttempts.length > 0) {
           isRetake = true;
           // Find the highest score from previous attempts
-          previousBestScore = Math.max(...previousAttempts.map(attempt => attempt.score));
+          previousBestScore = Math.max(...previousAttempts.map((attempt: any) => attempt.score));
         }
       }
       
