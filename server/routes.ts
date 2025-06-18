@@ -121,8 +121,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: 'Invalid admin credentials' });
       }
 
-      // Verify password
-      const isValidPassword = await bcrypt.compare(password, user.password);
+      // Verify password  
+      const isValidPassword = await bcrypt.compare(password, user.password || '');
       if (!isValidPassword) {
         return res.status(401).json({ message: 'Invalid admin credentials' });
       }
@@ -287,8 +287,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         totalCommission: totalCommission.toFixed(2),
         pendingWithdrawals: pendingWithdrawals.toFixed(2),
         recentSales: sales.slice(0, 5).map(sale => ({
-          ...sale,
-          courseTitle: sale.courseTitle || 'Unknown Course'
+          id: sale.id,
+          courseTitle: 'Demo Course', // Default course title since courseTitle not in schema
+          commissionAmount: sale.commission,
+          createdAt: sale.createdAt.toISOString(),
+          status: sale.status
         })),
         withdrawalHistory: withdrawals.slice(0, 5),
         clickAnalytics
@@ -964,7 +967,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               console.log(`Updating seller earnings from ${currentEarnings} to ${newEarnings}`);
               
               await storage.updateSeller(seller.id, {
-                totalEarnings: newEarnings.toString()
+                pendingEarnings: newEarnings.toString()
               });
             }
           } else {

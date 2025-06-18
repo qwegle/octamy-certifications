@@ -960,8 +960,7 @@ export class DatabaseStorage implements IStorage {
       .update(payments)
       .set({ 
         status,
-        gatewayResponse: paymentResponse,
-        updatedAt: new Date()
+        gatewayResponse: paymentResponse
       })
       .where(eq(payments.transactionId, transactionId));
   }
