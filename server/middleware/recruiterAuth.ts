@@ -21,7 +21,8 @@ export const authenticateRecruiterToken = (
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
+    const jwtSecret = process.env.JWT_SECRET || 'fallback-secret-for-development';
+    const decoded = jwt.verify(token, jwtSecret) as any;
     req.recruiter = {
       recruiterId: decoded.recruiterId,
       email: decoded.email,

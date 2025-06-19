@@ -70,9 +70,10 @@ export class RecruiterController {
         .returning();
 
       // Generate JWT token
+      const jwtSecret = process.env.JWT_SECRET || 'fallback-secret-for-development';
       const token = jwt.sign(
         { recruiterId: newRecruiter.id, email: newRecruiter.email },
-        process.env.JWT_SECRET!,
+        jwtSecret,
         { expiresIn: "7d" }
       );
 
@@ -115,9 +116,10 @@ export class RecruiterController {
       }
 
       // Generate JWT token
+      const jwtSecret = process.env.JWT_SECRET || 'fallback-secret-for-development';
       const token = jwt.sign(
         { recruiterId: recruiter.id, email: recruiter.email },
-        process.env.JWT_SECRET!,
+        jwtSecret,
         { expiresIn: "7d" }
       );
 

@@ -2,10 +2,10 @@
 
 ## Test Recruiter Accounts
 
-### Account 1: Demo Recruiter (Primary Test Account)
-- **Email**: `demo@recruiter.com`
+### Account 1: Test Recruiter (Primary Test Account)
+- **Email**: `test@recruiter.com`
 - **Password**: `password123`
-- **Company**: Demo Tech Corp
+- **Company**: Test Tech Corp
 - **Role**: Technical Recruiter
 - **Industry**: Technology
 - **Company Size**: Medium (51-200 employees)
@@ -28,10 +28,18 @@
 
 ## How to Access Recruiter Portal
 
-1. **Navigate to**: `/recruiter-auth`
+1. **Navigate to**: `/recruiter-auth` 
 2. **Click**: "Login" tab
 3. **Enter credentials** from above
 4. **Access**: Full recruiter dashboard with candidate search and AI assessment review
+
+## Quick Test Steps
+
+1. Visit `/recruiter-auth`
+2. Login with `test@recruiter.com` / `password123`
+3. Navigate through the recruiter dashboard
+4. Search for candidates who completed AI assessments
+5. Review AI conversation logs and technical evaluations
 
 ## AI Interactive Courses Available
 

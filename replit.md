@@ -280,6 +280,10 @@ Octamy is a comprehensive professional certification platform built as a full-st
 - **Interactive exam interface** with real-time AI conversations, progress tracking, and comprehensive results
 - **Candidate profile enhancement** with CV upload, skills tracking, and recruitment readiness indicators
 - **Professional recruiter interface** designed as primary selling point with advanced filtering and AI insights
+- **Working test credentials** - Demo recruiter account: demo@recruiter.com / password123
+- **Three AI interactive courses** - Algorithm Mastery, Full Stack Interview, System Design & Architecture
+- **Complete question database** - 6 AI interactive questions across technical domains with evaluation criteria
+- **JWT authentication fixed** - Recruiter registration and login system fully functional
 
 ### Authentication System Fixes and Certificate Dashboard Restoration (June 18, 2025)
 - **Fixed user registration and login system** - resolved JWT authentication conflicts and endpoint routing issues
