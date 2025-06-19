@@ -1637,6 +1637,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Recruiter Portal Routes
+  app.post('/api/recruiters/register', recruiterController.register.bind(recruiterController));
+  app.post('/api/recruiters/login', recruiterController.login.bind(recruiterController));
+  app.get('/api/recruiters/dashboard', authenticateRecruiterToken, recruiterController.getDashboard.bind(recruiterController));
+  app.get('/api/recruiters/candidates/search', authenticateRecruiterToken, recruiterController.searchCandidates.bind(recruiterController));
+  app.get('/api/recruiters/candidates/:userId', authenticateRecruiterToken, recruiterController.getCandidateDetails.bind(recruiterController));
+  app.post('/api/recruiters/candidates/shortlist', authenticateRecruiterToken, recruiterController.shortlistCandidate.bind(recruiterController));
+  app.put('/api/recruiters/candidates/status/:shortlistId', authenticateRecruiterToken, recruiterController.updateCandidateStatus.bind(recruiterController));
+  app.get('/api/recruiters/shortlisted', authenticateRecruiterToken, recruiterController.getShortlistedCandidates.bind(recruiterController));
+
+  // AI Interactive Exam Routes
+  app.post('/api/ai-exam/:courseId/start', optionalAuth, aiExamController.startAiExam.bind(aiExamController));
+  app.post('/api/ai-exam/conversation', optionalAuth, aiExamController.processAiConversation.bind(aiExamController));
+  app.post('/api/ai-exam/submit', optionalAuth, aiExamController.submitAiExam.bind(aiExamController));
+  app.get('/api/ai-exam/results/:examAttemptId', optionalAuth, aiExamController.getAiExamResults.bind(aiExamController));
+
+  // Seed AI Interactive Questions (Development only)
+  app.post('/api/admin/seed-ai-questions', authenticateAdminToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const result = await seedAiInteractiveQuestions();
+      res.json({
+        message: "AI Interactive questions seeded successfully",
+        ...result
+      });
+    } catch (error) {
+      console.error("Seed AI questions error:", error);
+      res.status(500).json({ error: "Failed to seed AI questions" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

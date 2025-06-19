@@ -326,6 +326,31 @@ export const aiConversations = pgTable("ai_conversations", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Schema types for new recruiter tables
+export const insertRecruiterSchema = createInsertSchema(recruiters).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertCandidateShortlistSchema = createInsertSchema(candidateShortlists).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAiConversationSchema = createInsertSchema(aiConversations).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertRecruiter = z.infer<typeof insertRecruiterSchema>;
+export type Recruiter = typeof recruiters.$inferSelect;
+export type InsertCandidateShortlist = z.infer<typeof insertCandidateShortlistSchema>;
+export type CandidateShortlist = typeof candidateShortlists.$inferSelect;
+export type InsertAiConversation = z.infer<typeof insertAiConversationSchema>;
+export type AiConversation = typeof aiConversations.$inferSelect;
+
 
 
 // Click tracking for partner referral links
