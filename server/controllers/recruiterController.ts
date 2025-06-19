@@ -43,6 +43,11 @@ export class RecruiterController {
         return res.status(400).json({ error: "Recruiter already exists" });
       }
 
+      // Validate required fields
+      if (!email || !password || !firstName || !lastName || !companyName || !jobTitle) {
+        return res.status(400).json({ error: "Missing required fields" });
+      }
+
       // Hash password
       const hashedPassword = await bcrypt.hash(password, 12);
 
