@@ -13,6 +13,10 @@ import apiRoutes from "./routes/index";
 import certificateRoutes from "./routes/certificateRoutes";
 import { emailService } from "./utils/emailService";
 import { generateCertificateHTML } from "./utils/certificateGenerator";
+import { recruiterController } from "./controllers/recruiterController";
+import { aiExamController } from "./controllers/aiExamController";
+import { authenticateRecruiterToken } from "./middleware/recruiterAuth";
+import { createAiCourses } from "./seeds/createAiCourses";
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -1656,14 +1660,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Seed AI Interactive Questions (Development only)
   app.post('/api/admin/seed-ai-questions', authenticateAdminToken, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const result = await seedAiInteractiveQuestions();
+      const result = await createAiCourses();
       res.json({
-        message: "AI Interactive questions seeded successfully",
+        message: "AI Interactive courses created successfully",
         ...result
       });
     } catch (error) {
-      console.error("Seed AI questions error:", error);
-      res.status(500).json({ error: "Failed to seed AI questions" });
+      console.error("Seed AI courses error:", error);
+      res.status(500).json({ error: "Failed to seed AI courses" });
     }
   });
 
