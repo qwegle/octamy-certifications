@@ -2,17 +2,25 @@
 
 ## Test Recruiter Accounts
 
-### Account 1: TechCorp Solutions
-- **Email**: `recruiter@techcorp.com`
+### Account 1: Demo Recruiter (Primary Test Account)
+- **Email**: `demo@recruiter.com`
+- **Password**: `password123`
+- **Company**: Demo Tech Corp
+- **Role**: Technical Recruiter
+- **Industry**: Technology
+- **Company Size**: Medium (51-200 employees)
+
+### Account 2: TechCorp Solutions
+- **Email**: `sarah@techcorp.com`
 - **Password**: `password123`
 - **Company**: TechCorp Solutions
 - **Role**: Senior Technical Recruiter
 - **Industry**: Technology
-- **Company Size**: Medium (51-200 employees)
+- **Company Size**: Large (201-1000 employees)
 
-### Account 2: InnovateAI
+### Account 3: InnovateAI
 - **Email**: `hr@innovateai.com`
-- **Password**: `secure123`
+- **Password**: `password123`
 - **Company**: InnovateAI
 - **Role**: Head of Talent Acquisition
 - **Industry**: Artificial Intelligence
