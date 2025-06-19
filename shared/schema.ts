@@ -48,31 +48,6 @@ export const insertContactSubmissionSchema = createInsertSchema(contactSubmissio
 export type InsertContactSubmission = z.infer<typeof insertContactSubmissionSchema>;
 export type ContactSubmission = typeof contactSubmissions.$inferSelect;
 
-// New schema types for recruiters and AI functionality
-export const insertRecruiterSchema = createInsertSchema(recruiters).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-export const insertCandidateShortlistSchema = createInsertSchema(candidateShortlists).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-export const insertAiConversationSchema = createInsertSchema(aiConversations).omit({
-  id: true,
-  createdAt: true,
-});
-
-export type InsertRecruiter = z.infer<typeof insertRecruiterSchema>;
-export type Recruiter = typeof recruiters.$inferSelect;
-export type InsertCandidateShortlist = z.infer<typeof insertCandidateShortlistSchema>;
-export type CandidateShortlist = typeof candidateShortlists.$inferSelect;
-export type InsertAiConversation = z.infer<typeof insertAiConversationSchema>;
-export type AiConversation = typeof aiConversations.$inferSelect;
-
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   email: text("email").notNull().unique(),
