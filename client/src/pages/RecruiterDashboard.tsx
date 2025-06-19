@@ -288,7 +288,7 @@ export default function RecruiterDashboard() {
                         <SelectValue placeholder="Any level" />
                       </SelectTrigger>
                       <SelectContent className="bg-gray-800 border-gray-700">
-                        <SelectItem value="">Any level</SelectItem>
+                        <SelectItem value="any">Any level</SelectItem>
                         <SelectItem value="fresher">Fresher</SelectItem>
                         <SelectItem value="junior">Junior</SelectItem>
                         <SelectItem value="mid">Mid-level</SelectItem>
@@ -316,7 +316,7 @@ export default function RecruiterDashboard() {
                         <SelectValue placeholder="Any type" />
                       </SelectTrigger>
                       <SelectContent className="bg-gray-800 border-gray-700">
-                        <SelectItem value="">Any type</SelectItem>
+                        <SelectItem value="any">Any type</SelectItem>
                         <SelectItem value="ai_interactive">AI Interactive</SelectItem>
                         <SelectItem value="standard">Standard</SelectItem>
                       </SelectContent>
