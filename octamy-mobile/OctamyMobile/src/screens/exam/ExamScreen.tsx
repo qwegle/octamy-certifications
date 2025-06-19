@@ -28,7 +28,9 @@ const ExamScreen: React.FC<ExamScreenProps> = ({ route, navigation }) => {
     answers, 
     timeRemaining, 
     isSubmitting,
-    currentCourse 
+    currentCourse,
+    isLoading,
+    error
   } = useAppSelector((state) => state.exam);
   const { isAuthenticated, user } = useAppSelector((state) => state.auth);
   const { courseId } = route.params;
@@ -95,13 +97,52 @@ const ExamScreen: React.FC<ExamScreenProps> = ({ route, navigation }) => {
     });
   };
 
+  // Show loading state
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text style={styles.loadingText}>Loading exam...</Text>
+      </View>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text style={styles.errorText}>Error: {error}</Text>
+        <TouchableOpacity 
+          style={styles.retryButton}
+          onPress={() => dispatch(fetchExamQuestions(courseId))}
+        >
+          <Text style={styles.retryButtonText}>Retry</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  // Add null checking for questions array
+  if (!questions || questions.length === 0) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text style={styles.loadingText}>No questions available</Text>
+        <TouchableOpacity 
+          style={styles.retryButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Text style={styles.retryButtonText}>Go Back</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
   const currentQuestion = questions[currentQuestionIndex];
   const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
 
   if (!currentQuestion) {
     return (
       <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>Loading exam...</Text>
+        <Text style={styles.loadingText}>Loading question...</Text>
       </View>
     );
   }
@@ -114,7 +155,7 @@ const ExamScreen: React.FC<ExamScreenProps> = ({ route, navigation }) => {
         </View>
         <View style={styles.progressContainer}>
           <Text style={styles.progressText}>
-            Question {currentQuestionIndex + 1} of {questions.length}
+            Question {currentQuestionIndex + 1} of {questions?.length || 0}
           </Text>
           <View style={styles.progressBar}>
             <View style={[styles.progressFill, { width: `${progress}%` }]} />
@@ -126,7 +167,7 @@ const ExamScreen: React.FC<ExamScreenProps> = ({ route, navigation }) => {
         <Text style={styles.questionText}>{currentQuestion.questionText}</Text>
 
         <View style={styles.optionsContainer}>
-          {currentQuestion.options.map((option, index) => (
+          {currentQuestion.options?.map((option, index) => (
             <TouchableOpacity
               key={index}
               style={[
@@ -155,7 +196,7 @@ const ExamScreen: React.FC<ExamScreenProps> = ({ route, navigation }) => {
           <Text style={styles.navButtonText}>Previous</Text>
         </TouchableOpacity>
 
-        {currentQuestionIndex === questions.length - 1 ? (
+        {currentQuestionIndex === (questions?.length || 1) - 1 ? (
           <TouchableOpacity
             style={[styles.submitButton, isSubmitting && styles.disabledButton]}
             onPress={handleSubmitExam}
@@ -293,6 +334,23 @@ const styles = StyleSheet.create({
   },
   disabledButton: {
     opacity: 0.5,
+  },
+  errorText: {
+    fontSize: 18,
+    color: '#ff4444',
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  retryButton: {
+    backgroundColor: APP_CONFIG.ACCENT_COLOR,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: APP_CONFIG.PRIMARY_COLOR,
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 

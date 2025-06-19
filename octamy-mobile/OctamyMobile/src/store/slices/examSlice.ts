@@ -30,7 +30,12 @@ const initialState: ExamState = {
 export const fetchExamQuestions = createAsyncThunk(
   'exam/fetchQuestions',
   async (courseId: number) => {
-    return await apiService.get<Question[]>(API_ENDPOINTS.EXAM_QUESTIONS(courseId));
+    try {
+      const response = await apiService.get<{ questions: Question[] }>(API_ENDPOINTS.EXAM_QUESTIONS(courseId));
+      return response.questions || response; // Handle both response formats
+    } catch (error) {
+      throw new Error('Failed to fetch exam questions');
+    }
   }
 );
 
@@ -117,8 +122,10 @@ const examSlice = createSlice({
       })
       .addCase(fetchExamQuestions.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.questions = action.payload;
-        state.answers = new Array(action.payload.length).fill(-1);
+        const questions = Array.isArray(action.payload) ? action.payload : action.payload.questions || [];
+        state.questions = questions;
+        state.answers = new Array(questions.length).fill(-1);
+        state.timeRemaining = questions.length > 0 ? 60 * 60 : 0; // 60 minutes default
       })
       .addCase(fetchExamQuestions.rejected, (state, action) => {
         state.isLoading = false;
