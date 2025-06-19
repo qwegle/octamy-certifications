@@ -46,6 +46,7 @@ import Contact from "@/pages/contact";
 import RecruiterAuth from "@/pages/RecruiterAuth";
 import RecruiterDashboard from "@/pages/RecruiterDashboard";
 import AiInteractiveExam from "@/pages/AiInteractiveExam";
+import AiExamResults from "@/pages/AiExamResults";
 
 function Router() {
   return (
@@ -93,6 +94,7 @@ function Router() {
       <Route path="/recruiter-auth" component={RecruiterAuth} />
       <Route path="/recruiter" component={RecruiterDashboard} />
       <Route path="/ai-exam/:courseId" component={AiInteractiveExam} />
+      <Route path="/ai-exam-results/:examAttemptId" component={AiExamResults} />
       <Route component={NotFound} />
     </Switch>
   );
