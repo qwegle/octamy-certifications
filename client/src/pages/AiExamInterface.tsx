@@ -52,17 +52,23 @@ export default function AiExamInterface() {
   useEffect(() => {
     const startExam = async () => {
       try {
+        console.log("Starting AI exam for course:", courseId);
         const data = await apiRequest(`/api/ai-exam/${courseId}/start`, {
           method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
           body: JSON.stringify({
             userEmail: "anonymous@example.com",
             userName: "Anonymous User"
           })
         });
 
+        console.log("Exam data received:", data);
         setExamData(data);
         setIsLoading(false);
       } catch (error) {
+        console.error("Failed to start exam:", error);
         toast({
           title: "Error",
           description: "Failed to start exam. Please try again.",
