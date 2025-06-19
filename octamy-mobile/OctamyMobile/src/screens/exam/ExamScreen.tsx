@@ -335,6 +335,23 @@ const styles = StyleSheet.create({
   disabledButton: {
     opacity: 0.5,
   },
+  errorText: {
+    fontSize: 18,
+    color: '#ff4444',
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  retryButton: {
+    backgroundColor: APP_CONFIG.ACCENT_COLOR,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: APP_CONFIG.PRIMARY_COLOR,
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
 });
 
 export default ExamScreen;
