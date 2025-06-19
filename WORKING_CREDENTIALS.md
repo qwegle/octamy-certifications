@@ -10,10 +10,10 @@
 - **Role**: Technical Recruiter
 
 ### Secondary Test Account  
-- **Email**: `test2@recruiter.com`
+- **Email**: `testfix@recruiter.com`
 - **Password**: `password123`
-- **Status**: ✅ Registration and Login Working
-- **Company**: Test Corp
+- **Status**: ✅ Registration and Login Working (URL validation fixed)
+- **Company**: Fix Corp
 - **Role**: Recruiter
 
 ## ✅ AVAILABLE AI INTERACTIVE COURSES
