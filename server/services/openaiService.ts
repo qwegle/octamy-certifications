@@ -1,9 +1,9 @@
 import OpenAI from "openai";
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-const openai = new OpenAI({ 
+const openai = process.env.OPENAI_API_KEY ? new OpenAI({ 
   apiKey: process.env.OPENAI_API_KEY 
-});
+}) : null;
 
 export interface AiEvaluationResult {
   score: number;
@@ -35,6 +35,9 @@ export class OpenAIService {
     shouldContinue: boolean;
     currentEvaluation?: AiEvaluationResult;
   }> {
+    if (!openai) {
+      throw new Error("OpenAI API key not configured. Please provide OPENAI_API_KEY to enable AI interactive features.");
+    }
     const systemPrompt = `You are an expert technical interviewer conducting an AI-powered assessment. 
 
 SCENARIO: ${scenario}
@@ -94,6 +97,9 @@ CONVERSATION RULES:
     conversationHistory: ConversationTurn[],
     evaluationCriteria: string[]
   ): Promise<AiEvaluationResult> {
+    if (!openai) {
+      throw new Error("OpenAI API key not configured");
+    }
     const evaluationPrompt = `Evaluate this technical interview conversation:
 
 SCENARIO: ${scenario}
@@ -153,6 +159,9 @@ SCORING GUIDELINES:
     evaluationCriteria: string[];
     expectedKeywords: string[];
   }[]> {
+    if (!openai) {
+      throw new Error("OpenAI API key not configured");
+    }
     const prompt = `Generate 3 AI interactive interview questions for a ${difficulty} level ${courseTitle} course in ${category}.
 
 Each question should:
@@ -201,6 +210,16 @@ Focus on real-world applications and problem-solving.`;
     skillGaps: string[];
     summary: string;
   }> {
+    if (!openai) {
+      // Return a fallback analysis when OpenAI is not available
+      return {
+        overallRating: Math.min(10, Math.max(1, Math.round((examResults.reduce((sum, result) => sum + (result.score || 0), 0) / examResults.length) / 10))),
+        technicalStrengths: userProfile.skills || [],
+        recommendedRoles: [userProfile.preferredJobTitle || "Software Developer"],
+        skillGaps: ["OpenAI analysis not available"],
+        summary: `Candidate with ${userProfile.experienceLevel || 'unknown'} experience level. Completed ${examResults.length} assessment(s).`
+      };
+    }
     const analysisPrompt = `Analyze this candidate's technical profile:
 
 CANDIDATE PROFILE:
