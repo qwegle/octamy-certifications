@@ -93,7 +93,7 @@ function Router() {
       <Route path="/contact" component={Contact} />
       <Route path="/recruiter-auth" component={RecruiterAuth} />
       <Route path="/recruiter" component={RecruiterDashboard} />
-      <Route path="/ai-exam/:courseId" component={AiExamInterface} />
+      <Route path="/ai-exam/:courseId" component={SimpleAiExam} />
       <Route path="/ai-exam-results/:examAttemptId" component={AiExamResults} />
       <Route component={NotFound} />
     </Switch>
