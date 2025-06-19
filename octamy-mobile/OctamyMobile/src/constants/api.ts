@@ -8,8 +8,8 @@ export const API_CONFIG = {
 // API Endpoints
 export const API_ENDPOINTS = {
   // Auth
-  LOGIN: '/api/auth/login',
-  REGISTER: '/api/auth/register',
+  LOGIN: '/api/login',
+  REGISTER: '/api/register',
   USER: '/api/user',
 
   // Courses
