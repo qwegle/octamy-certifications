@@ -37,8 +37,7 @@ export class AiExamController {
         .from(questions)
         .where(and(
           eq(questions.courseId, Number(courseId)),
-          eq(questions.questionType, 'ai_interactive'),
-          eq(questions.isActive, true)
+          eq(questions.questionType, 'ai_interactive')
         ));
 
       if (aiQuestions.length === 0) {
@@ -71,9 +70,9 @@ export class AiExamController {
         questions: aiQuestions.map(q => ({
           id: q.id,
           question: q.question,
-          scenario: q.aiScenario,
-          maxPoints: q.maxPoints,
-          difficulty: q.difficulty,
+          scenario: q.aiScenario || 'Technical interview scenario',
+          maxPoints: q.maxPoints || 100,
+          difficulty: q.difficulty || 'medium',
         })),
         instructions: course.aiInstructions,
       });

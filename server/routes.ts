@@ -569,6 +569,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Shuffle options within each question and track correct answer
       const questionsWithShuffledOptions = limitedQuestions.map(q => {
+        // Handle AI interactive questions that don't have options
+        if (!q.options || q.questionType === 'ai_interactive') {
+          return {
+            id: q.id,
+            question: q.question,
+            options: [],
+            correctAnswer: null,
+            difficulty: q.difficulty || 'medium',
+            questionType: q.questionType || 'multiple_choice',
+            aiScenario: q.aiScenario,
+            maxPoints: q.maxPoints || 100
+          };
+        }
+        
         const originalOptions = [...q.options];
         const correctAnswerText = originalOptions[q.correctAnswer];
         

@@ -10,11 +10,11 @@
 - **Role**: Technical Recruiter
 
 ### Secondary Test Account  
-- **Email**: `demo2@recruiter.com`
+- **Email**: `test2@recruiter.com`
 - **Password**: `password123`
-- **Status**: ✅ Registration Confirmed Working
-- **Company**: Demo Tech Corp
-- **Role**: Technical Recruiter
+- **Status**: ✅ Registration and Login Working
+- **Company**: Test Corp
+- **Role**: Recruiter
 
 ## ✅ AVAILABLE AI INTERACTIVE COURSES
 
@@ -47,10 +47,17 @@ The system has **3 AI-powered interactive courses** ready for testing:
 ## 🎯 QUICK TEST FLOW
 
 1. **Access Portal**: Go to `/recruiter-auth`
-2. **Login**: Use `test@recruiter.com` / `password123`
+2. **Login**: Use `test@recruiter.com` / `password123` OR `test2@recruiter.com` / `password123`
 3. **Dashboard**: View recruiter analytics and metrics
 4. **Search**: Filter candidates by AI assessment results
-5. **AI Courses**: Test interactive technical interviews
+5. **AI Courses**: Test interactive technical interviews at `/ai-exam/74`, `/ai-exam/75`, `/ai-exam/76`
+
+## 🔧 RECENT FIXES
+
+- Fixed AI exam initialization - now properly starts with questions
+- Resolved question fetching error for AI interactive courses  
+- Fixed recruiter registration URL validation issues
+- AI exam system working: examAttemptId created successfully
 
 ## 🔧 TECHNICAL STATUS
 
