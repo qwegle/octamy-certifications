@@ -67,6 +67,8 @@ The system has **3 AI-powered interactive courses** ready for testing:
 - ✅ AI interactive courses configured
 - ✅ Questions with evaluation criteria added
 - ✅ OpenAI integration ready (with API key)
+- ✅ AI exam initialization working (examAttemptId generation confirmed)
+- ✅ Question fetching route fixed for AI interactive courses
 
 ## 📊 DATABASE CONFIRMATION
 

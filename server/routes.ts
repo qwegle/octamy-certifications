@@ -600,7 +600,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           id: q.id,
           question: q.question,
           options: shuffledOptions,
-          correctAnswer: newCorrectAnswer
+          correctAnswer: newCorrectAnswer,
+          difficulty: q.difficulty || 'medium',
+          questionType: q.questionType || 'multiple_choice',
+          aiScenario: q.aiScenario,
+          maxPoints: q.maxPoints || 100
         };
       });
       
