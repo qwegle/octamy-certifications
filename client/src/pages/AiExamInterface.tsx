@@ -218,31 +218,39 @@ export default function AiExamInterface() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              <div>
-                <h3 className="font-semibold text-lg mb-2">{currentQuestion.question}</h3>
-                <p className="text-gray-700 leading-relaxed">{currentQuestion.scenario}</p>
+            <div className="space-y-6">
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                <h3 className="font-semibold text-xl mb-3 text-gray-900">{currentQuestion.question}</h3>
+                <div className="prose prose-gray max-w-none">
+                  <p className="text-gray-700 leading-relaxed text-base">{currentQuestion.scenario}</p>
+                </div>
               </div>
               
-              <div>
-                <label className="block text-sm font-medium mb-2">
+              <div className="space-y-3">
+                <label className="block text-sm font-medium text-gray-700">
                   Your Answer:
                 </label>
                 <Textarea
                   value={currentAnswer}
                   onChange={(e) => handleAnswerChange(e.target.value)}
                   placeholder="Write whatever you feel about this question. Explain your approach, reasoning, algorithm choice, trade-offs, or any solution you have in mind. The AI will analyze your technical understanding and problem-solving skills."
-                  className="min-h-[200px] resize-none"
+                  className="min-h-[250px] resize-none border-2 border-gray-300 focus:border-blue-500 p-4 text-base"
+                  rows={12}
                 />
-                <p className="text-xs text-gray-500 mt-2">
-                  Share your thoughts freely - there's no wrong way to approach this. The AI evaluates your reasoning process and technical understanding.
-                </p>
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                  <p className="text-sm text-blue-700 font-medium mb-1">
+                    💡 Tips for AI Evaluation:
+                  </p>
+                  <p className="text-xs text-blue-600">
+                    Share your thoughts freely - explain your reasoning, discuss different approaches, mention time/space complexity, and consider edge cases. The AI evaluates your technical understanding and problem-solving methodology.
+                  </p>
+                </div>
               </div>
               
               {currentAnswer.trim() && (
-                <div className="flex items-center gap-2 text-green-600 text-sm">
+                <div className="flex items-center gap-2 text-green-600 text-sm bg-green-50 border border-green-200 rounded-lg p-2">
                   <CheckCircle className="h-4 w-4" />
-                  Answer recorded
+                  <span className="font-medium">Answer recorded ({currentAnswer.trim().length} characters)</span>
                 </div>
               )}
             </div>
