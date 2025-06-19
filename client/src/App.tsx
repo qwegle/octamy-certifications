@@ -45,7 +45,7 @@ import PaymentTemp from "@/pages/PaymentTemp";
 import Contact from "@/pages/contact";
 import RecruiterAuth from "@/pages/RecruiterAuth";
 import RecruiterDashboard from "@/pages/RecruiterDashboard";
-import AiInteractiveExam from "@/pages/AiInteractiveExam";
+import AiExamInterface from "@/pages/AiExamInterface";
 import AiExamResults from "@/pages/AiExamResults";
 
 function Router() {
