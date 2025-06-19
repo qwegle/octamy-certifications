@@ -230,10 +230,20 @@ export default function Verify() {
                             Certificate Number
                           </p>
                           <p className="font-mono text-sm">
-                            {certificate?.certificate?.certificateId ||
-                              certificate?.certificateId ||
-                              certificate?.certificateNumber ||
-                              "N/A"}
+                            <Link
+                              to={`/certificate/${
+                                certificate?.certificate?.certificateId ||
+                                certificate?.certificateId ||
+                                certificate?.certificateNumber ||
+                                "N/A"
+                              }`}
+                              className="text-blue-600 hover:text-blue-800 hover:underline"
+                            >
+                              {certificate?.certificate?.certificateId ||
+                                certificate?.certificateId ||
+                                certificate?.certificateNumber ||
+                                "N/A"}
+                            </Link>
                           </p>
                         </div>
                       </div>
