@@ -312,7 +312,7 @@ export default function RecruiterAuth() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-white">Company Size</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <Select onValueChange={field.onChange} value={field.value || "small"}>
                             <FormControl>
                               <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
                                 <SelectValue placeholder="Select company size" />
