@@ -25,10 +25,10 @@ const registerSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters"),
   lastName: z.string().min(2, "Last name must be at least 2 characters"),
   companyName: z.string().min(2, "Company name is required"),
-  companyWebsite: z.string().optional(),
+  companyWebsite: z.string().optional().or(z.literal("")),
   jobTitle: z.string().min(2, "Job title is required"),
   phone: z.string().optional(),
-  linkedinUrl: z.string().optional(),
+  linkedinUrl: z.string().optional().or(z.literal("")),
   companySize: z.enum(["startup", "small", "medium", "large", "enterprise"]),
   industry: z.string().min(2, "Industry is required"),
 });
@@ -61,7 +61,7 @@ export default function RecruiterAuth() {
       jobTitle: "",
       phone: "",
       linkedinUrl: "",
-      companySize: "small",
+      companySize: "small" as const,
       industry: "",
     },
   });
