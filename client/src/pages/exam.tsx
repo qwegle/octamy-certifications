@@ -353,19 +353,72 @@ export default function Exam() {
             <div>
               <h3 className="text-xl font-semibold mb-6">{currentQ.question}</h3>
               
-              <RadioGroup
-                value={answers[currentQ.id.toString()]?.toString() || ''}
-                onValueChange={(value) => handleAnswerChange(currentQ.id.toString(), value)}
-              >
-                {currentQ.options.map((option: string, index: number) => (
-                  <div key={index} className="flex items-center space-x-2 p-4 border border-octamy-gray-300 rounded-lg hover:bg-octamy-gray-50 transition-colors">
-                    <RadioGroupItem value={index.toString()} id={`option-${index}`} />
-                    <Label htmlFor={`option-${index}`} className="flex-1 cursor-pointer">
-                      {option}
-                    </Label>
+              {/* Show scenario for AI interactive questions */}
+              {currentQ.scenario && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                  <h4 className="font-medium text-blue-900 mb-2">Scenario:</h4>
+                  <p className="text-blue-800 text-sm">{currentQ.scenario}</p>
+                </div>
+              )}
+              
+              {/* Conditional rendering based on question type */}
+              {currentQ.options && currentQ.options.length > 0 ? (
+                // Standard multiple choice question
+                <RadioGroup
+                  value={answers[currentQ.id.toString()]?.toString() || ''}
+                  onValueChange={(value) => handleAnswerChange(currentQ.id.toString(), value)}
+                >
+                  {currentQ.options.map((option: string, index: number) => (
+                    <div key={index} className="flex items-center space-x-2 p-4 border border-octamy-gray-300 rounded-lg hover:bg-octamy-gray-50 transition-colors">
+                      <RadioGroupItem value={index.toString()} id={`option-${index}`} />
+                      <Label htmlFor={`option-${index}`} className="flex-1 cursor-pointer">
+                        {option}
+                      </Label>
+                    </div>
+                  ))}
+                </RadioGroup>
+              ) : (
+                // AI interactive question with textarea
+                <div className="space-y-4">
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                    <div className="flex items-center mb-2">
+                      <span className="text-lg mr-2">🤖</span>
+                      <h4 className="font-medium text-yellow-900">AI Interactive Assessment</h4>
+                    </div>
+                    <p className="text-yellow-800 text-sm">
+                      Provide a detailed written explanation of your approach. The AI will evaluate your technical knowledge, 
+                      problem-solving skills, and communication clarity.
+                    </p>
                   </div>
-                ))}
-              </RadioGroup>
+                  
+                  <div>
+                    <label htmlFor="ai-answer" className="block text-sm font-medium text-gray-700 mb-2">
+                      Your Answer:
+                    </label>
+                    <textarea
+                      id="ai-answer"
+                      rows={12}
+                      className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-octamy-primary focus:border-transparent resize-none"
+                      placeholder="Write your detailed explanation here... Be specific about your approach, reasoning, and implementation details."
+                      value={answers[currentQ.id.toString()] || ""}
+                      onChange={(e) => handleAnswerChange(currentQ.id.toString(), e.target.value)}
+                    />
+                    <div className="mt-2 text-sm text-gray-500">
+                      Current length: {(answers[currentQ.id.toString()] || "").length} characters
+                    </div>
+                  </div>
+                  
+                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                    <h5 className="font-medium text-gray-900 mb-2">Evaluation Criteria:</h5>
+                    <ul className="text-sm text-gray-600 space-y-1">
+                      <li>• Technical accuracy and depth of knowledge</li>
+                      <li>• Problem-solving approach and methodology</li>
+                      <li>• Code structure and best practices (if applicable)</li>
+                      <li>• Clear communication and explanation</li>
+                    </ul>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="flex justify-between items-center pt-6 border-t">
