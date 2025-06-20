@@ -26,6 +26,7 @@ import certificateRoutes from "./routes/certificateRoutes";
 import { emailService } from "./utils/emailService";
 import { generateCertificateHTML } from "./utils/certificateGenerator";
 import { pool } from "./db";
+import { openaiService } from "./services/openaiService";
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -38,6 +39,16 @@ interface SellerAuthenticatedRequest extends Request {
   seller?: {
     sellerId: number;
     email: string;
+  };
+}
+export interface AiEvaluationResult {
+  score: number; // 0-1 scale
+  improvementSuggestions: string;
+  swotAnalysis: {
+    strengths: { description: string; score: number };
+    weaknesses: { description: string; score: number };
+    opportunities: { description: string; score: number };
+    threats: { description: string; score: number };
   };
 }
 
@@ -140,46 +151,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }
 
   app.post(
-  "/api/admin/partners/:partner_id/approve",
-  authenticateAdminToken,
-  async (req: Request, res: Response) => {
-    try {
-      console.log("work");
+    "/api/admin/partners/:partner_id/approve",
+    authenticateAdminToken,
+    async (req: Request, res: Response) => {
+      try {
+        console.log("work");
 
-      const { partner_id } = req.params;
+        const { partner_id } = req.params;
 
-      if (!partner_id) {
-        return res.status(400).json({ message: "Partner ID is required" });
+        if (!partner_id) {
+          return res.status(400).json({ message: "Partner ID is required" });
+        }
+
+        // Always use parameterized queries to prevent SQL injection
+        const result = await pool.query(`SELECT * FROM sellers WHERE id = $1`, [
+          partner_id,
+        ]);
+
+        const partner = result.rows[0];
+
+        if (!partner) {
+          return res.status(404).json({ message: "Partner not found" });
+        }
+
+        if (partner.is_approved) {
+          return res.status(400).json({ message: "User is already a partner" });
+        }
+
+        await pool.query(
+          `UPDATE sellers SET is_approved = true WHERE id = $1`,
+          [partner_id]
+        );
+
+        res
+          .status(200)
+          .json({ message: "Partner approved successfully", partner_id });
+      } catch (error) {
+        console.error("Error approving partner:", error);
+        res.status(500).json({ message: "Internal Server Error" });
       }
-
-      // Always use parameterized queries to prevent SQL injection
-      const result = await pool.query(
-        `SELECT * FROM sellers WHERE id = $1`,
-        [partner_id]
-      );
-
-      const partner = result.rows[0];
-
-      if (!partner) {
-        return res.status(404).json({ message: "Partner not found" });
-      }
-
-      if (partner.is_approved) {
-        return res.status(400).json({ message: "User is already a partner" });
-      }
-
-      await pool.query(
-        `UPDATE sellers SET is_approved = true WHERE id = $1`,
-        [partner_id]
-      );
-
-      res.status(200).json({ message: "Partner approved successfully", partner_id });
-    } catch (error) {
-      console.error("Error approving partner:", error);
-      res.status(500).json({ message: "Internal Server Error" });
     }
-  }
-);
+  );
 
   // Admin login endpoint
   app.post("/api/admin/login", async (req: Request, res: Response) => {
@@ -661,67 +673,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
         parseInt(req.params.id)
       );
 
-      // Use Fisher-Yates shuffle for proper randomization
-      const shuffled = [...questions];
-      for (let i = shuffled.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-      }
-
-      // Select random number of questions (10-15) for variety
-      const questionCount = Math.floor(Math.random() * 6) + 10; // 10 to 15 questions
-      const limitedQuestions = shuffled.slice(
-        0,
-        Math.min(questionCount, questions.length)
+      // Separate AI interactive questions from multiple choice
+      const mcQuestions = questions.filter(
+        (q) => q.questionType === "multiple_choice"
+      );
+      const aiQuestions = questions.filter(
+        (q) => q.questionType === "ai_interactive"
       );
 
-      // Shuffle options within each question and track correct answer
-      const questionsWithShuffledOptions = limitedQuestions.map((q) => {
-        const originalOptions = [...q.options];
-        const correctAnswerText = originalOptions[q.correctAnswer];
+      // Process multiple choice questions (your existing logic)
+      const processedMCQuestions = processMultipleChoiceQuestions(mcQuestions);
 
-        // Shuffle options
-        const shuffledOptions = [...q.options];
-        for (let i = shuffledOptions.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [shuffledOptions[i], shuffledOptions[j]] = [
-            shuffledOptions[j],
-            shuffledOptions[i],
-          ];
-        }
+      // Process AI interactive questions (simpler format)
+      const processedAIQuestions = aiQuestions.map((q) => ({
+        id: q.id,
+        question: q.question,
+        questionType: q.questionType,
+        scenario: q.aiScenario, // Include scenario if exists
+        // No options needed for AI questions
+      }));
 
-        // Find new position of correct answer
-        const newCorrectAnswer = shuffledOptions.findIndex(
-          (option) => option === correctAnswerText
-        );
+      // Combine both question types
+      const allQuestions = [...processedMCQuestions, ...processedAIQuestions];
 
-        return {
-          id: q.id,
-          question: q.question,
-          options: shuffledOptions,
-          correctAnswer: newCorrectAnswer,
-        };
-      });
+      // Shuffle all questions together
+      const shuffledQuestions = shuffleArray(allQuestions);
 
-      // Store the question mapping using provided session ID
+      // Store question mappings (only MC questions have correct answers)
       const finalSessionId =
         sessionId || `session_${Date.now()}_${Math.random()}`;
       (global as any).questionMappings = (global as any).questionMappings || {};
       (global as any).questionMappings[finalSessionId] =
-        questionsWithShuffledOptions.reduce((acc: any, q) => {
+        processedMCQuestions.reduce((acc: any, q) => {
           acc[q.id] = q.correctAnswer;
           return acc;
         }, {});
 
-      // Remove correct answers from response
-      const questionsWithoutAnswers = questionsWithShuffledOptions.map((q) => ({
-        id: q.id,
-        question: q.question,
-        options: q.options,
-      }));
-
       res.json({
-        questions: questionsWithoutAnswers,
+        questions: shuffledQuestions.map((q) => ({
+          id: q.id,
+          question: q.question,
+          ...(q.questionType === "multiple_choice" && { options: q.options }),
+          questionType: q.questionType,
+          ...(q.scenario && { scenario: q.scenario }),
+        })),
         sessionId: finalSessionId,
       });
     } catch (error) {
@@ -729,6 +724,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch questions" });
     }
   });
+
+  // Helper function for MC questions
+  function processMultipleChoiceQuestions(questions: Question[]) {
+    return questions.map((q) => {
+      const originalOptions = [...q.options];
+      const correctAnswerText = originalOptions[q.correctAnswer];
+
+      // Shuffle options
+      const shuffledOptions = [...q.options];
+      for (let i = shuffledOptions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffledOptions[i], shuffledOptions[j]] = [
+          shuffledOptions[j],
+          shuffledOptions[i],
+        ];
+      }
+
+      // Find new position of correct answer
+      const newCorrectAnswer = shuffledOptions.findIndex(
+        (option) => option === correctAnswerText
+      );
+
+      return {
+        id: q.id,
+        question: q.question,
+        options: shuffledOptions,
+        correctAnswer: newCorrectAnswer,
+        questionType: q.questionType,
+      };
+    });
+  }
+
+  // Generic array shuffler
+  function shuffleArray(array: any[]) {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  }
 
   // EXAM SUBMISSION ENDPOINT - PAYMENT-FIRST APPROACH
   // This endpoint calculates exam results but DOES NOT save to database until payment is completed
@@ -753,12 +789,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Get correct answers from session mapping
         const correctAnswersMapping =
           (global as any).questionMappings?.[sessionId] || {};
-
+        console.log("Processing answer:", answers);
         // Transform answers to Record<string, number> format
-        const answersRecord: Record<string, number> = {};
+        const answersRecord: Record<string, string | number> = {};
         if (Array.isArray(answers)) {
           // Array format: [{questionId: 123, selectedOption: 1}, ...]
           answers.forEach((answer: any) => {
+            // Ensure questionId and selectedOption are defined
             if (answer.questionId && answer.selectedOption !== undefined) {
               answersRecord[answer.questionId.toString()] =
                 answer.selectedOption;
@@ -768,7 +805,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Object format: {questionId: selectedOption, ...}
           for (const [questionId, selectedOption] of Object.entries(answers)) {
             if (selectedOption !== undefined && selectedOption !== null) {
-              answersRecord[questionId.toString()] = Number(selectedOption);
+              answersRecord[questionId.toString()] = selectedOption;
             }
           }
         }
@@ -776,11 +813,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Calculate score using session-specific correct answers
         let correctAnswers = 0;
         const totalQuestions = Object.keys(answersRecord).length;
-
+        const aiEvaluations: Record<number, AiEvaluationResult> = {}; // Plain object
         for (const [questionId, userAnswer] of Object.entries(answersRecord)) {
           const correctAnswer = correctAnswersMapping[parseInt(questionId)];
-          if (correctAnswer !== undefined && correctAnswer === userAnswer) {
-            correctAnswers++;
+          const question = await storage.getQuestionById(parseInt(questionId));
+          if (!question) continue;
+          if (question.questionType === "multiple_choice") {
+            if (
+              question.correctAnswer !== undefined &&
+              question.correctAnswer === userAnswer
+            ) {
+              correctAnswers++;
+            }
+          } else if (question.questionType === "ai_interactive") {
+            //call openai service to validate answer
+            try {
+              console.log(
+                `Evaluating AI question ${questionId} with answer:`,
+                userAnswer
+              );
+              // Call OpenAI service to evaluate the answer
+              const evaluation = await openaiService.evaluateQuestionAnswer(
+                question.question, // The question text
+                userAnswer.toString(), // Convert answer to string if it isn't already
+                question.aiEvaluationCriteria || [
+                  // Use provided criteria or default
+                  "Accuracy of content",
+                  "Completeness of response",
+                  "Technical correctness",
+                  "Clarity of explanation",
+                ]
+              );
+              console.log(
+                `AI evaluation for question ${questionId}:`,
+                evaluation
+              );
+              // Consider the answer correct if score meets passing threshold (e.g., 0.5)
+              // if (evaluation.score >= 0.5) {
+              //   correctAnswers++;
+              // }
+              correctAnswers += evaluation.score; // Convert to percentage
+              // Optional: Store the detailed evaluation if needed
+              aiEvaluations[questionId] = evaluation;
+            } catch (error) {
+              console.error(
+                `Failed to evaluate AI question ${questionId}:`,
+                error
+              );
+              // Consider how you want to handle evaluation failures
+              // You might count it as incorrect or implement a retry mechanism
+            }
           }
         }
 
@@ -871,6 +953,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Additional information for developers and frontend logic
           isRetake,
           previousBestScore,
+          evaluation: aiEvaluations,
           passingThreshold: passingScore, // What score was needed to pass
           message: passed
             ? `Congratulations! You passed with ${score}%`

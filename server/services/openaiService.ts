@@ -27,8 +27,8 @@ export class OpenAIService {
   private openai: OpenAI | null;
 
   constructor() {
-    this.openai = process.env.OPENAI_API_KEY 
-      ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY }) 
+    this.openai = process.env.OPEN_API_KEY
+      ? new OpenAI({ apiKey: process.env.OPEN_API_KEY })
       : null;
   }
 
@@ -51,7 +51,7 @@ QUESTION: ${question}
 ANSWER: ${answer}
 
 EVALUATION CRITERIA:
-${evaluationCriteria.map((c, i) => `${i+1}. ${c}`).join('\n')}
+${evaluationCriteria.map((c, i) => `${i + 1}. ${c}`).join("\n")}
 
 Respond with ONLY this JSON structure:
 {
@@ -69,11 +69,12 @@ Respond with ONLY this JSON structure:
       const response = await this.openai.chat.completions.create({
         model: "gpt-3.5-turbo",
         messages: [
-          { 
-            role: "system", 
-            content: "You are an evaluator that provides strict JSON output for Q&A assessments." 
+          {
+            role: "system",
+            content:
+              "You are an evaluator that provides strict JSON output for Q&A assessments.",
           },
-          { role: "user", content: evaluationPrompt }
+          { role: "user", content: evaluationPrompt },
         ],
         temperature: 0.3,
         max_tokens: 500,
@@ -83,33 +84,53 @@ Respond with ONLY this JSON structure:
       if (!content) throw new Error("No evaluation content received");
 
       const result = JSON.parse(content);
-      
+
       // Validate and normalize response
       return {
         score: this.clampScore(result.score),
-        improvementSuggestions: result.improvementSuggestions || "No suggestions provided",
+        improvementSuggestions:
+          result.improvementSuggestions || "No suggestions provided",
         swotAnalysis: {
-          strengths: this.validateSwotItem(result.swotAnalysis?.strengths, "strengths"),
-          weaknesses: this.validateSwotItem(result.swotAnalysis?.weaknesses, "weaknesses"),
-          opportunities: this.validateSwotItem(result.swotAnalysis?.opportunities, "opportunities"),
-          threats: this.validateSwotItem(result.swotAnalysis?.threats, "threats")
-        }
+          strengths: this.validateSwotItem(
+            result.swotAnalysis?.strengths,
+            "strengths"
+          ),
+          weaknesses: this.validateSwotItem(
+            result.swotAnalysis?.weaknesses,
+            "weaknesses"
+          ),
+          opportunities: this.validateSwotItem(
+            result.swotAnalysis?.opportunities,
+            "opportunities"
+          ),
+          threats: this.validateSwotItem(
+            result.swotAnalysis?.threats,
+            "threats"
+          ),
+        },
       };
     } catch (error) {
       console.error("Evaluation error:", error);
-      throw new Error(`Evaluation failed: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(
+        `Evaluation failed: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
     }
   }
 
   private clampScore(score: unknown): number {
-    const num = typeof score === 'number' ? score : parseFloat(score) || 0;
+    const num = typeof score === "number" ? score : parseFloat(score) || 0;
     return Math.max(0, Math.min(1, Number(num.toFixed(1))));
   }
 
-  private validateSwotItem(item: any, type: string): { description: string; score: number } {
+  private validateSwotItem(
+    item: any,
+    type: string
+  ): { description: string; score: number } {
     return {
       description: item?.description || `No ${type} identified`,
-      score: this.clampScore(item?.score ?? 0)
+      score: this.clampScore(item?.score ?? 0),
     };
   }
 }
