@@ -1,19 +1,19 @@
-import { useState, useEffect } from 'react';
-import { useParams, useLocation } from 'wouter';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Label } from '@/components/ui/label';
-import { Progress } from '@/components/ui/progress';
-import { useToast } from '@/hooks/use-toast';
-import { apiRequest } from '@/lib/queryClient';
-import { useAuth } from '@/lib/auth';
-import Header from '@/components/header';
-import ExamTimer from '@/components/exam-timer';
+import { useState, useEffect } from "react";
+import { useParams, useLocation } from "wouter";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
+import { useAuth } from "@/lib/auth";
+import Header from "@/components/header";
+import ExamTimer from "@/components/exam-timer";
 
-import type { Course, Question } from '@shared/schema';
-import { AlertTriangle } from 'lucide-react';
+import type { Course, Question } from "@shared/schema";
+import { AlertTriangle } from "lucide-react";
 
 interface ExamQuestion {
   id: number;
@@ -29,15 +29,15 @@ export default function Exam() {
   const queryClient = useQueryClient();
 
   const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, number>>({});
+  const [answers, setAnswers] = useState<Record<string, string | number>>({});
   const [examStarted, setExamStarted] = useState(false);
   const [examStartTime, setExamStartTime] = useState<number>(0);
-  const [sessionId, setSessionId] = useState<string>('');
+  const [sessionId, setSessionId] = useState<string>("");
   const [tabSwitches, setTabSwitches] = useState(0);
   const [isWindowFocused, setIsWindowFocused] = useState(true);
   const [userInfo, setUserInfo] = useState({
-    name: user?.name || '',
-    email: user?.email || ''
+    name: user?.name || "",
+    email: user?.email || "",
   });
 
   const { data: course } = useQuery<Course>({
@@ -45,20 +45,23 @@ export default function Exam() {
     enabled: !!courseId,
   });
 
-  const { data: questionsData } = useQuery<{questions: ExamQuestion[], sessionId: string}>({
+  const { data: questionsData } = useQuery<{
+    questions: ExamQuestion[];
+    sessionId: string;
+  }>({
     queryKey: [`/api/courses/${courseId}/questions`, sessionId],
     queryFn: async () => {
       const response = await fetch(`/api/courses/${courseId}/questions`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          sessionId: sessionId || `session_${Date.now()}_${Math.random()}`
+          sessionId: sessionId || `session_${Date.now()}_${Math.random()}`,
         }),
       });
       if (!response.ok) {
-        throw new Error('Failed to fetch questions');
+        throw new Error("Failed to fetch questions");
       }
       return response.json();
     },
@@ -80,11 +83,12 @@ export default function Exam() {
 
     const handleVisibilityChange = () => {
       if (document.hidden && isWindowFocused) {
-        setTabSwitches(prev => prev + 1);
+        setTabSwitches((prev) => prev + 1);
         setIsWindowFocused(false);
         toast({
           title: "Warning",
-          description: "Tab switching detected. Excessive tab switching may result in exam termination.",
+          description:
+            "Tab switching detected. Excessive tab switching may result in exam termination.",
           variant: "destructive",
         });
       } else if (!document.hidden && !isWindowFocused) {
@@ -94,7 +98,7 @@ export default function Exam() {
 
     const handleBlur = () => {
       if (isWindowFocused) {
-        setTabSwitches(prev => prev + 1);
+        setTabSwitches((prev) => prev + 1);
         setIsWindowFocused(false);
       }
     };
@@ -112,41 +116,42 @@ export default function Exam() {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Prevent F12, Ctrl+Shift+I, Ctrl+U, Ctrl+Shift+J
       if (
-        e.key === 'F12' ||
-        (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) ||
-        (e.ctrlKey && e.key === 'u')
+        e.key === "F12" ||
+        (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "J")) ||
+        (e.ctrlKey && e.key === "u")
       ) {
         e.preventDefault();
         toast({
           title: "Action Blocked",
-          description: "Developer tools and view source are disabled during the exam.",
+          description:
+            "Developer tools and view source are disabled during the exam.",
           variant: "destructive",
         });
       }
     };
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    window.addEventListener('blur', handleBlur);
-    window.addEventListener('focus', handleFocus);
-    document.addEventListener('contextmenu', handleContextMenu);
-    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("blur", handleBlur);
+    window.addEventListener("focus", handleFocus);
+    document.addEventListener("contextmenu", handleContextMenu);
+    document.addEventListener("keydown", handleKeyDown);
 
     return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('blur', handleBlur);
-      window.removeEventListener('focus', handleFocus);
-      document.removeEventListener('contextmenu', handleContextMenu);
-      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("blur", handleBlur);
+      window.removeEventListener("focus", handleFocus);
+      document.removeEventListener("contextmenu", handleContextMenu);
+      document.removeEventListener("keydown", handleKeyDown);
     };
   }, [examStarted, isWindowFocused, toast]);
 
   const submitExamMutation = useMutation({
     mutationFn: async (examData: any) => {
-      return apiRequest('POST', '/api/exam/submit', examData);
+      return apiRequest("POST", "/api/exam/submit", examData);
     },
     onSuccess: async (response) => {
       const result = await response.json();
-      
+
       // Always redirect to temporary exam results page (payment-first approach)
       // User will see results and then be prompted to pay regardless of pass/fail
       if (result.tempExamId) {
@@ -178,30 +183,31 @@ export default function Exam() {
       });
       return;
     }
-    
+
     setExamStarted(true);
     setExamStartTime(Date.now());
   };
 
-  const handleAnswerChange = (questionId: string, answer: string) => {
-    setAnswers(prev => ({
+  const handleAnswerChange = (questionId: string, answer: number |string) => {
+    setAnswers((prev) => ({
       ...prev,
-      [questionId]: parseInt(answer)
+      [questionId]: answer,
     }));
   };
 
   const handleSubmit = () => {
     const timeTaken = Math.floor((Date.now() - examStartTime) / 1000);
-    
+
     // Anti-cheating: Check for excessive tab switching
     if (tabSwitches > 5) {
       toast({
         title: "Exam Terminated",
-        description: "Excessive tab switching detected. Your exam has been flagged for review.",
+        description:
+          "Excessive tab switching detected. Your exam has been flagged for review.",
         variant: "destructive",
       });
     }
-    
+
     submitExamMutation.mutate({
       courseId: parseInt(courseId!),
       answers,
@@ -221,7 +227,8 @@ export default function Exam() {
     handleSubmit();
   };
 
-  const progress = questions.length > 0 ? ((currentQuestion + 1) / questions.length) * 100 : 0;
+  const progress =
+    questions.length > 0 ? ((currentQuestion + 1) / questions.length) * 100 : 0;
   const answeredCount = Object.keys(answers).length;
 
   if (!examStarted) {
@@ -238,7 +245,8 @@ export default function Exam() {
             <CardContent className="space-y-6">
               <div className="text-center space-y-4">
                 <p className="text-lg text-octamy-gray-600">
-                  You are about to take the certification exam for {course?.title}.
+                  You are about to take the certification exam for{" "}
+                  {course?.title}.
                 </p>
                 <div className="bg-octamy-gray-50 p-6 rounded-lg">
                   <h3 className="font-semibold mb-4">Exam Instructions:</h3>
@@ -247,7 +255,10 @@ export default function Exam() {
                     <li>• Questions: 10-15 multiple choice questions</li>
                     <li>• Passing Score: 50% or higher</li>
                     <li>• You cannot pause or restart the exam once started</li>
-                    <li>• Certificate fee: ₹{course?.price} (payable after passing)</li>
+                    <li>
+                      • Certificate fee: ₹{course?.price} (payable after
+                      passing)
+                    </li>
                   </ul>
                 </div>
               </div>
@@ -262,7 +273,12 @@ export default function Exam() {
                         id="name"
                         type="text"
                         value={userInfo.name}
-                        onChange={(e) => setUserInfo(prev => ({ ...prev, name: e.target.value }))}
+                        onChange={(e) =>
+                          setUserInfo((prev) => ({
+                            ...prev,
+                            name: e.target.value,
+                          }))
+                        }
                         className="w-full mt-1 px-3 py-2 border border-octamy-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-octamy-black"
                         placeholder="Enter your full name"
                       />
@@ -273,7 +289,12 @@ export default function Exam() {
                         id="email"
                         type="email"
                         value={userInfo.email}
-                        onChange={(e) => setUserInfo(prev => ({ ...prev, email: e.target.value }))}
+                        onChange={(e) =>
+                          setUserInfo((prev) => ({
+                            ...prev,
+                            email: e.target.value,
+                          }))
+                        }
                         className="w-full mt-1 px-3 py-2 border border-octamy-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-octamy-black"
                         placeholder="Enter your email address"
                       />
@@ -335,7 +356,7 @@ export default function Exam() {
             </div>
             <Progress value={progress} className="w-full" />
           </CardHeader>
-          
+
           <CardContent className="space-y-6">
             {/* Anti-cheating warning */}
             {tabSwitches > 0 && (
@@ -343,55 +364,142 @@ export default function Exam() {
                 <div className="flex items-center">
                   <AlertTriangle className="h-5 w-5 text-red-500 mr-2" />
                   <p className="text-sm text-red-700">
-                    Tab switching detected ({tabSwitches} times). 
-                    {tabSwitches > 3 && <span className="font-semibold"> Warning: Excessive switching may result in exam termination.</span>}
+                    Tab switching detected ({tabSwitches} times).
+                    {tabSwitches > 3 && (
+                      <span className="font-semibold">
+                        {" "}
+                        Warning: Excessive switching may result in exam
+                        termination.
+                      </span>
+                    )}
                   </p>
                 </div>
               </div>
             )}
-            
+
             <div>
-              <h3 className="text-xl font-semibold mb-6">{currentQ.question}</h3>
-              
-              <RadioGroup
-                value={answers[currentQ.id.toString()]?.toString() || ''}
-                onValueChange={(value) => handleAnswerChange(currentQ.id.toString(), value)}
-              >
-                {currentQ.options.map((option: string, index: number) => (
-                  <div key={index} className="flex items-center space-x-2 p-4 border border-octamy-gray-300 rounded-lg hover:bg-octamy-gray-50 transition-colors">
-                    <RadioGroupItem value={index.toString()} id={`option-${index}`} />
-                    <Label htmlFor={`option-${index}`} className="flex-1 cursor-pointer">
-                      {option}
-                    </Label>
+              <h3 className="text-xl font-semibold mb-6">
+                {currentQ.question}
+              </h3>
+
+              {currentQ.options && currentQ.options.length > 0 ? (
+                <RadioGroup
+                  value={answers[currentQ.id.toString()]?.toString() || ""}
+                  onValueChange={(value) =>
+                    handleAnswerChange(currentQ.id.toString(), value)
+                  }
+                >
+                  {currentQ.options.map((option: string, index: number) => (
+                    <div
+                      key={index}
+                      className="flex items-center space-x-2 p-4 border border-octamy-gray-300 rounded-lg hover:bg-octamy-gray-50 transition-colors"
+                    >
+                      <RadioGroupItem
+                        value={index.toString()}
+                        id={`option-${index}`}
+                      />
+                      <Label
+                        htmlFor={`option-${index}`}
+                        className="flex-1 cursor-pointer"
+                      >
+                        {option}
+                      </Label>
+                    </div>
+                  ))}
+                </RadioGroup>
+              ) : (
+                // AI interactive question with textarea
+                <div className="space-y-4">
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                    <div className="flex items-center mb-2">
+                      <span className="text-lg mr-2">🤖</span>
+                      <h4 className="font-medium text-yellow-900">
+                        AI Interactive Assessment
+                      </h4>
+                    </div>
+                    <p className="text-yellow-800 text-sm">
+                      Provide a detailed written explanation of your approach.
+                      The AI will evaluate your technical knowledge,
+                      problem-solving skills, and communication clarity.
+                    </p>
                   </div>
-                ))}
-              </RadioGroup>
+
+                  <div>
+                    <label
+                      htmlFor="ai-answer"
+                      className="block text-sm font-medium text-gray-700 mb-2"
+                    >
+                      Your Answer:
+                    </label>
+                    <textarea
+                      id="ai-answer"
+                      rows={12}
+                      className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-octamy-primary focus:border-transparent resize-none"
+                      placeholder="Write your detailed explanation here... Be specific about your approach, reasoning, and implementation details."
+                      value={answers[currentQ.id.toString()] || ""}
+                      onChange={(e) =>
+                        handleAnswerChange(
+                          currentQ.id.toString(),
+                          e.target.value
+                        )
+                      }
+                    />
+                    <div className="mt-2 text-sm text-gray-500">
+                      Current length:{" "}
+                      {(answers[currentQ.id.toString()] || "").length}{" "}
+                      characters
+                    </div>
+                  </div>
+
+                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                    <h5 className="font-medium text-gray-900 mb-2">
+                      Evaluation Criteria:
+                    </h5>
+                    <ul className="text-sm text-gray-600 space-y-1">
+                      <li>• Technical accuracy and depth of knowledge</li>
+                      <li>• Problem-solving approach and methodology</li>
+                      <li>
+                        • Code structure and best practices (if applicable)
+                      </li>
+                      <li>• Clear communication and explanation</li>
+                    </ul>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="flex justify-between items-center pt-6 border-t">
               <Button
                 variant="outline"
-                onClick={() => setCurrentQuestion(prev => Math.max(0, prev - 1))}
+                onClick={() =>
+                  setCurrentQuestion((prev) => Math.max(0, prev - 1))
+                }
                 disabled={currentQuestion === 0}
               >
                 Previous
               </Button>
-              
+
               <div className="text-sm text-octamy-gray-500">
                 {answeredCount}/{questions.length} answered
               </div>
-              
+
               {currentQuestion === questions.length - 1 ? (
                 <Button
                   onClick={handleSubmit}
                   disabled={submitExamMutation.isPending}
                   className="bg-octamy-black text-white hover:bg-octamy-gray-800"
                 >
-                  {submitExamMutation.isPending ? 'Submitting...' : 'Submit Exam'}
+                  {submitExamMutation.isPending
+                    ? "Submitting..."
+                    : "Submit Exam"}
                 </Button>
               ) : (
                 <Button
-                  onClick={() => setCurrentQuestion(prev => Math.min(questions.length - 1, prev + 1))}
+                  onClick={() =>
+                    setCurrentQuestion((prev) =>
+                      Math.min(questions.length - 1, prev + 1)
+                    )
+                  }
                   className="bg-octamy-black text-white hover:bg-octamy-gray-800"
                 >
                   Next Question
@@ -401,8 +509,6 @@ export default function Exam() {
           </CardContent>
         </Card>
       </div>
-      
-
     </div>
   );
 }

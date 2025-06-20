@@ -1,4 +1,16 @@
-import { pgTable, text, varchar, serial, integer, boolean, timestamp, decimal, json, index, jsonb } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  varchar,
+  serial,
+  integer,
+  boolean,
+  timestamp,
+  decimal,
+  json,
+  index,
+  jsonb,
+} from "drizzle-orm/pg-core";
 import { relations, eq, desc, and, asc } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -40,12 +52,16 @@ export const contactSubmissions = pgTable("contact_submissions", {
   adminNotes: text("admin_notes"),
 });
 
-export const insertContactSubmissionSchema = createInsertSchema(contactSubmissions).omit({
+export const insertContactSubmissionSchema = createInsertSchema(
+  contactSubmissions
+).omit({
   id: true,
   submittedAt: true,
 });
 
-export type InsertContactSubmission = z.infer<typeof insertContactSubmissionSchema>;
+export type InsertContactSubmission = z.infer<
+  typeof insertContactSubmissionSchema
+>;
 export type ContactSubmission = typeof contactSubmissions.$inferSelect;
 
 export const users = pgTable("users", {
@@ -56,11 +72,27 @@ export const users = pgTable("users", {
   phone: text("phone"),
   isAdmin: boolean("is_admin").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+  cvFileName: text("cv_file_name"),
+  cvFilePath: text("cv_file_path"),
+  dateOfBirth: text("date_of_birth"),
+  location: text("location"),
+  linkedinUrl: text("linkedin_url"),
+  githubUrl: text("github_url"),
+  portfolioUrl: text("portfolio_url"),
+  bio: text("bio"),
+  isOpenToWork: boolean("is_open_to_work").default(false).notNull(),
+  preferredJobTitle: text("preferred_job_title"),
+  experienceLevel: text("experience_level"), // fresher, junior, mid, senior, lead
+  skills: text("skills").array(),
+  expectedSalary: text("expected_salary"),
+  noticePeriod: text("notice_period"),
 });
 
 export const userAddresses = pgTable("user_addresses", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").references(() => users.id).notNull(),
+  userId: integer("user_id")
+    .references(() => users.id)
+    .notNull(),
   type: text("type").notNull().default("shipping"), // shipping, billing
   fullName: text("full_name").notNull(),
   addressLine1: text("address_line1").notNull(),
@@ -88,10 +120,14 @@ export const courses = pgTable("courses", {
   title: text("title").notNull(),
   description: text("description").notNull(),
   slug: text("slug").notNull().unique(),
-  categoryId: integer("category_id").references(() => categories.id).notNull(),
+  categoryId: integer("category_id")
+    .references(() => categories.id)
+    .notNull(),
   duration: integer("duration").notNull(), // in minutes
   passingScore: integer("passing_score").default(50).notNull(),
-  price: decimal("price", { precision: 10, scale: 2 }).default("199.00").notNull(),
+  price: decimal("price", { precision: 10, scale: 2 })
+    .default("199.00")
+    .notNull(),
   originalPrice: decimal("original_price", { precision: 10, scale: 2 }),
   isOnSale: boolean("is_on_sale").default(false).notNull(),
   saleEndDate: timestamp("sale_end_date"),
@@ -101,21 +137,35 @@ export const courses = pgTable("courses", {
   metaTitle: text("meta_title"),
   metaDescription: text("meta_description"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+  courseType: text("course_type").default("standard").notNull(), // standard, ai_interactive
+  isPreferred: boolean("is_preferred").default(false).notNull(), // preferred by recruiters
+  aiSystemPrompt: text("ai_system_prompt"), // System prompt for AI conversations
+  aiInstructions: text("ai_instructions"), // Instructions for AI evaluation
 });
 
 export const questions = pgTable("questions", {
   id: serial("id").primaryKey(),
-  courseId: integer("course_id").references(() => courses.id).notNull(),
+  courseId: integer("course_id")
+    .references(() => courses.id)
+    .notNull(),
   question: text("question").notNull(),
   options: json("options").$type<string[]>().notNull(),
   correctAnswer: integer("correct_answer").notNull(),
   isActive: boolean("is_active").default(true).notNull(),
+  questionType: text("question_type").default("multiple_choice").notNull(), // multiple_choice, ai_interactive
+  aiScenario: text("ai_scenario"), // Detailed scenario for AI questions
+  aiEvaluationCriteria: json("ai_evaluation_criteria").$type<string[]>(), // Evaluation criteria for AI
+  expectedKeywords: text("expected_keywords").array(), // Keywords to look for in responses
+  maxPoints: integer("max_points").default(100).notNull(), // Points for this question
+  difficulty: text("difficulty").default("medium").notNull(), // easy, medium, hard
 });
 
 export const examAttempts = pgTable("exam_attempts", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").references(() => users.id),
-  courseId: integer("course_id").references(() => courses.id).notNull(),
+  courseId: integer("course_id")
+    .references(() => courses.id)
+    .notNull(),
   userEmail: text("user_email").notNull(),
   userName: text("user_name").notNull(),
   score: integer("score").notNull(),
@@ -134,8 +184,12 @@ export const examAttempts = pgTable("exam_attempts", {
 export const certificates = pgTable("certificates", {
   id: serial("id").primaryKey(),
   certificateId: text("certificate_id").notNull().unique(),
-  examAttemptId: integer("exam_attempt_id").references(() => examAttempts.id).notNull(),
-  courseId: integer("course_id").references(() => courses.id).notNull(),
+  examAttemptId: integer("exam_attempt_id")
+    .references(() => examAttempts.id)
+    .notNull(),
+  courseId: integer("course_id")
+    .references(() => courses.id)
+    .notNull(),
   userId: integer("user_id").references(() => users.id),
   userEmail: text("user_email").notNull(),
   userName: text("user_name").notNull(),
@@ -153,11 +207,15 @@ export const certificates = pgTable("certificates", {
   businessName: text("business_name"),
   badge: text("badge").notNull(), // bronze, silver, gold, platinum
   certificateNumber: text("certificate_number").notNull().unique(),
-  issuedBy: text("issued_by").default("Octamy Solutions Private Limited").notNull(),
+  issuedBy: text("issued_by")
+    .default("Octamy Solutions Private Limited")
+    .notNull(),
   retakeCount: integer("retake_count").default(0).notNull(),
   // Physical certificate shipping
   needsPhysicalCopy: boolean("needs_physical_copy").default(false).notNull(),
-  shippingAddressId: integer("shipping_address_id").references(() => userAddresses.id),
+  shippingAddressId: integer("shipping_address_id").references(
+    () => userAddresses.id
+  ),
   shippingStatus: text("shipping_status").default("not_required"), // not_required, pending, processing, shipped, delivered
   trackingNumber: text("tracking_number"),
   shippedAt: timestamp("shipped_at"),
@@ -178,15 +236,24 @@ export const payments = pgTable("payments", {
   currency: text("currency").default("INR").notNull(),
   status: text("status").notNull(),
   // Physical certificate shipping
-  certificateAmount: decimal("certificate_amount", { precision: 10, scale: 2 }).notNull(),
-  shippingAmount: decimal("shipping_amount", { precision: 10, scale: 2 }).default("0.00").notNull(),
-  includesPhysicalCopy: boolean("includes_physical_copy").default(false).notNull(),
+  certificateAmount: decimal("certificate_amount", {
+    precision: 10,
+    scale: 2,
+  }).notNull(),
+  shippingAmount: decimal("shipping_amount", { precision: 10, scale: 2 })
+    .default("0.00")
+    .notNull(),
+  includesPhysicalCopy: boolean("includes_physical_copy")
+    .default(false)
+    .notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const internshipApplications = pgTable("internship_applications", {
   id: serial("id").primaryKey(),
-  certificateId: integer("certificate_id").references(() => certificates.id).notNull(),
+  certificateId: integer("certificate_id")
+    .references(() => certificates.id)
+    .notNull(),
   applicantName: text("applicant_name").notNull(),
   dateOfBirth: text("date_of_birth").notNull(),
   startDate: text("start_date").notNull(),
@@ -204,9 +271,15 @@ export const sellers = pgTable("sellers", {
   referralCode: text("referral_code").unique(),
   isApproved: boolean("is_approved").default(false).notNull(),
   isActive: boolean("is_active").default(true).notNull(),
-  commissionRate: decimal("commission_rate", { precision: 5, scale: 2 }).default("10.00").notNull(),
-  totalEarnings: decimal("total_earnings", { precision: 10, scale: 2 }).default("0.00").notNull(),
-  pendingEarnings: decimal("pending_earnings", { precision: 10, scale: 2 }).default("0.00").notNull(),
+  commissionRate: decimal("commission_rate", { precision: 5, scale: 2 })
+    .default("10.00")
+    .notNull(),
+  totalEarnings: decimal("total_earnings", { precision: 10, scale: 2 })
+    .default("0.00")
+    .notNull(),
+  pendingEarnings: decimal("pending_earnings", { precision: 10, scale: 2 })
+    .default("0.00")
+    .notNull(),
   upiId: text("upi_id"),
   bankAccountNumber: text("bank_account_number"),
   bankIFSC: text("bank_ifsc"),
@@ -217,9 +290,15 @@ export const sellers = pgTable("sellers", {
 
 export const sales = pgTable("sales", {
   id: serial("id").primaryKey(),
-  sellerId: integer("seller_id").references(() => sellers.id).notNull(),
-  certificateId: integer("certificate_id").references(() => certificates.id).notNull(),
-  courseId: integer("course_id").references(() => courses.id).notNull(),
+  sellerId: integer("seller_id")
+    .references(() => sellers.id)
+    .notNull(),
+  certificateId: integer("certificate_id")
+    .references(() => certificates.id)
+    .notNull(),
+  courseId: integer("course_id")
+    .references(() => courses.id)
+    .notNull(),
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
   commission: decimal("commission", { precision: 10, scale: 2 }).notNull(),
   status: text("status").default("pending").notNull(), // pending, paid
@@ -229,7 +308,9 @@ export const sales = pgTable("sales", {
 
 export const withdrawalRequests = pgTable("withdrawal_requests", {
   id: serial("id").primaryKey(),
-  sellerId: integer("seller_id").references(() => sellers.id).notNull(),
+  sellerId: integer("seller_id")
+    .references(() => sellers.id)
+    .notNull(),
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
   status: text("status").default("pending").notNull(), // pending, approved, rejected, processed
   upiId: text("upi_id"),
@@ -242,13 +323,15 @@ export const withdrawalRequests = pgTable("withdrawal_requests", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-
-
 // Click tracking for partner referral links
 export const referralClicks = pgTable("referral_clicks", {
   id: serial("id").primaryKey(),
-  sellerId: integer("seller_id").references(() => sellers.id).notNull(),
-  courseId: integer("course_id").references(() => courses.id).notNull(),
+  sellerId: integer("seller_id")
+    .references(() => sellers.id)
+    .notNull(),
+  courseId: integer("course_id")
+    .references(() => courses.id)
+    .notNull(),
   referralCode: text("referral_code").notNull(),
   ipAddress: text("ip_address"),
   userAgent: text("user_agent"),
@@ -261,7 +344,9 @@ export const referralClicks = pgTable("referral_clicks", {
 // Leaderboard table for gamification
 export const leaderboard = pgTable("leaderboard", {
   id: serial("id").primaryKey(),
-  courseId: integer("course_id").references(() => courses.id).notNull(),
+  courseId: integer("course_id")
+    .references(() => courses.id)
+    .notNull(),
   userId: integer("user_id").references(() => users.id),
   userName: text("user_name").notNull(),
   userEmail: text("user_email").notNull(),
@@ -275,32 +360,40 @@ export const leaderboard = pgTable("leaderboard", {
 // Smart Notifications for Course Recommendations
 export const userPreferences = pgTable("user_preferences", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").references(() => users.id).notNull(),
-  preferredCategories: json("preferred_categories").$type<string[]>().default([]),
+  userId: integer("user_id")
+    .references(() => users.id)
+    .notNull(),
+  preferredCategories: json("preferred_categories")
+    .$type<string[]>()
+    .default([]),
   skillLevel: text("skill_level").default("novice").notNull(), // novice, intermediate, advanced, expert
   learningGoals: json("learning_goals").$type<string[]>().default([]),
-  notificationSettings: json("notification_settings").$type<{
-    email: boolean;
-    push: boolean;
-    frequency: 'daily' | 'weekly' | 'monthly';
-    courseRecommendations: boolean;
-    newCourses: boolean;
-    achievements: boolean;
-  }>().default({
-    email: true,
-    push: true,
-    frequency: 'weekly',
-    courseRecommendations: true,
-    newCourses: true,
-    achievements: true
-  }),
+  notificationSettings: json("notification_settings")
+    .$type<{
+      email: boolean;
+      push: boolean;
+      frequency: "daily" | "weekly" | "monthly";
+      courseRecommendations: boolean;
+      newCourses: boolean;
+      achievements: boolean;
+    }>()
+    .default({
+      email: true,
+      push: true,
+      frequency: "weekly",
+      courseRecommendations: true,
+      newCourses: true,
+      achievements: true,
+    }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 export const notifications = pgTable("notifications", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").references(() => users.id).notNull(),
+  userId: integer("user_id")
+    .references(() => users.id)
+    .notNull(),
   type: text("type").notNull(), // course_recommendation, new_course, achievement, reminder
   title: text("title").notNull(),
   message: text("message").notNull(),
@@ -308,7 +401,7 @@ export const notifications = pgTable("notifications", {
     courseId?: number;
     certificateId?: string;
     actionUrl?: string;
-    priority?: 'low' | 'medium' | 'high';
+    priority?: "low" | "medium" | "high";
   }>(),
   isRead: boolean("is_read").default(false).notNull(),
   isDelivered: boolean("is_delivered").default(false).notNull(),
@@ -319,8 +412,12 @@ export const notifications = pgTable("notifications", {
 
 export const courseRecommendations = pgTable("course_recommendations", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").references(() => users.id).notNull(),
-  courseId: integer("course_id").references(() => courses.id).notNull(),
+  userId: integer("user_id")
+    .references(() => users.id)
+    .notNull(),
+  courseId: integer("course_id")
+    .references(() => courses.id)
+    .notNull(),
   reason: text("reason").notNull(), // based_on_category, skill_progression, popular, trending
   score: decimal("score", { precision: 3, scale: 2 }).notNull(), // 0.00 to 1.00
   metadata: json("metadata").$type<{
@@ -337,7 +434,9 @@ export const courseRecommendations = pgTable("course_recommendations", {
 
 export const userActivity = pgTable("user_activity", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").references(() => users.id).notNull(),
+  userId: integer("user_id")
+    .references(() => users.id)
+    .notNull(),
   activityType: text("activity_type").notNull(), // course_view, exam_start, exam_complete, certificate_download
   entityId: integer("entity_id"), // courseId, examAttemptId, certificateId
   entityType: text("entity_type"), // course, exam, certificate
@@ -360,7 +459,9 @@ export const learningPaths = pgTable("learning_paths", {
   estimatedDuration: integer("estimated_duration").notNull(), // in hours
   courseIds: integer("course_ids").array().notNull(), // ordered course IDs
   prerequisites: integer("prerequisites").array().default([]),
-  categoryId: integer("category_id").references(() => categories.id).notNull(),
+  categoryId: integer("category_id")
+    .references(() => categories.id)
+    .notNull(),
   isActive: boolean("is_active").default(true).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
@@ -368,8 +469,12 @@ export const learningPaths = pgTable("learning_paths", {
 
 export const userLearningPaths = pgTable("user_learning_paths", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").references(() => users.id).notNull(),
-  learningPathId: integer("learning_path_id").references(() => learningPaths.id).notNull(),
+  userId: integer("user_id")
+    .references(() => users.id)
+    .notNull(),
+  learningPathId: integer("learning_path_id")
+    .references(() => learningPaths.id)
+    .notNull(),
   progress: integer("progress").notNull().default(0), // percentage 0-100
   completedCourses: integer("completed_courses").array().default([]),
   enrolledAt: timestamp("enrolled_at").defaultNow().notNull(),
@@ -379,8 +484,12 @@ export const userLearningPaths = pgTable("user_learning_paths", {
 
 export const skillAssessments = pgTable("skill_assessments", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").references(() => users.id).notNull(),
-  categoryId: integer("category_id").references(() => categories.id).notNull(),
+  userId: integer("user_id")
+    .references(() => users.id)
+    .notNull(),
+  categoryId: integer("category_id")
+    .references(() => categories.id)
+    .notNull(),
   skillLevel: text("skill_level").notNull(), // novice, intermediate, advanced, expert
   strengths: json("strengths").$type<string[]>().default([]),
   weaknesses: json("weaknesses").$type<string[]>().default([]),
@@ -398,8 +507,12 @@ export const skillAssessments = pgTable("skill_assessments", {
 // Course progress tracking
 export const userCourseProgress = pgTable("user_course_progress", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").references(() => users.id).notNull(),
-  courseId: integer("course_id").references(() => courses.id).notNull(),
+  userId: integer("user_id")
+    .references(() => users.id)
+    .notNull(),
+  courseId: integer("course_id")
+    .references(() => courses.id)
+    .notNull(),
   status: text("status").notNull().default("not_started"), // not_started, in_progress, completed, failed
   progressPercentage: integer("progress_percentage").notNull().default(0),
   timeSpent: integer("time_spent").notNull().default(0), // in minutes
@@ -421,12 +534,20 @@ export const achievements = pgTable("achievements", {
   icon: text("icon").notNull(),
   category: text("category").notNull(), // completion, performance, engagement, special
   tier: text("tier").notNull(), // bronze, silver, gold, platinum, diamond
-  criteria: json("criteria").$type<{
-    type: 'completion_count' | 'score' | 'time_spent' | 'streak' | 'perfect_score' | 'speed';
-    threshold: number;
-    courseId?: number;
-    categoryId?: number;
-  }>().notNull(),
+  criteria: json("criteria")
+    .$type<{
+      type:
+        | "completion_count"
+        | "score"
+        | "time_spent"
+        | "streak"
+        | "perfect_score"
+        | "speed";
+      threshold: number;
+      courseId?: number;
+      categoryId?: number;
+    }>()
+    .notNull(),
   points: integer("points").notNull().default(10),
   rarity: text("rarity").notNull().default("common"), // common, rare, epic, legendary
   isActive: boolean("is_active").notNull().default(true),
@@ -436,8 +557,12 @@ export const achievements = pgTable("achievements", {
 // User achievements tracking
 export const userAchievements = pgTable("user_achievements", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").references(() => users.id).notNull(),
-  achievementId: integer("achievement_id").references(() => achievements.id).notNull(),
+  userId: integer("user_id")
+    .references(() => users.id)
+    .notNull(),
+  achievementId: integer("achievement_id")
+    .references(() => achievements.id)
+    .notNull(),
   unlockedAt: timestamp("unlocked_at").defaultNow().notNull(),
   progress: integer("progress").notNull().default(100), // 0-100 for partial achievements
   metadata: json("metadata").$type<{
@@ -488,31 +613,37 @@ export const coursesRelations = relations(courses, ({ one, many }) => ({
   userProgress: many(userCourseProgress),
 }));
 
-export const userCourseProgressRelations = relations(userCourseProgress, ({ one }) => ({
-  user: one(users, {
-    fields: [userCourseProgress.userId],
-    references: [users.id],
-  }),
-  course: one(courses, {
-    fields: [userCourseProgress.courseId],
-    references: [courses.id],
-  }),
-}));
+export const userCourseProgressRelations = relations(
+  userCourseProgress,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [userCourseProgress.userId],
+      references: [users.id],
+    }),
+    course: one(courses, {
+      fields: [userCourseProgress.courseId],
+      references: [courses.id],
+    }),
+  })
+);
 
 export const achievementsRelations = relations(achievements, ({ many }) => ({
   userAchievements: many(userAchievements),
 }));
 
-export const userAchievementsRelations = relations(userAchievements, ({ one }) => ({
-  user: one(users, {
-    fields: [userAchievements.userId],
-    references: [users.id],
-  }),
-  achievement: one(achievements, {
-    fields: [userAchievements.achievementId],
-    references: [achievements.id],
-  }),
-}));
+export const userAchievementsRelations = relations(
+  userAchievements,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [userAchievements.userId],
+      references: [users.id],
+    }),
+    achievement: one(achievements, {
+      fields: [userAchievements.achievementId],
+      references: [achievements.id],
+    }),
+  })
+);
 
 export const questionsRelations = relations(questions, ({ one }) => ({
   course: one(courses, {
@@ -552,12 +683,15 @@ export const paymentsRelations = relations(payments, ({ one }) => ({
   }),
 }));
 
-export const internshipApplicationsRelations = relations(internshipApplications, ({ one }) => ({
-  certificate: one(certificates, {
-    fields: [internshipApplications.certificateId],
-    references: [certificates.id],
-  }),
-}));
+export const internshipApplicationsRelations = relations(
+  internshipApplications,
+  ({ one }) => ({
+    certificate: one(certificates, {
+      fields: [internshipApplications.certificateId],
+      references: [certificates.id],
+    }),
+  })
+);
 
 export const sellersRelations = relations(sellers, ({ many }) => ({
   sales: many(sales),
@@ -579,20 +713,26 @@ export const salesRelations = relations(sales, ({ one }) => ({
   }),
 }));
 
-export const withdrawalRequestsRelations = relations(withdrawalRequests, ({ one }) => ({
-  seller: one(sellers, {
-    fields: [withdrawalRequests.sellerId],
-    references: [sellers.id],
-  }),
-}));
+export const withdrawalRequestsRelations = relations(
+  withdrawalRequests,
+  ({ one }) => ({
+    seller: one(sellers, {
+      fields: [withdrawalRequests.sellerId],
+      references: [sellers.id],
+    }),
+  })
+);
 
 // Smart Notifications Relations
-export const userPreferencesRelations = relations(userPreferences, ({ one }) => ({
-  user: one(users, {
-    fields: [userPreferences.userId],
-    references: [users.id],
-  }),
-}));
+export const userPreferencesRelations = relations(
+  userPreferences,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [userPreferences.userId],
+      references: [users.id],
+    }),
+  })
+);
 
 export const notificationsRelations = relations(notifications, ({ one }) => ({
   user: one(users, {
@@ -601,16 +741,19 @@ export const notificationsRelations = relations(notifications, ({ one }) => ({
   }),
 }));
 
-export const courseRecommendationsRelations = relations(courseRecommendations, ({ one }) => ({
-  user: one(users, {
-    fields: [courseRecommendations.userId],
-    references: [users.id],
-  }),
-  course: one(courses, {
-    fields: [courseRecommendations.courseId],
-    references: [courses.id],
-  }),
-}));
+export const courseRecommendationsRelations = relations(
+  courseRecommendations,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [courseRecommendations.userId],
+      references: [users.id],
+    }),
+    course: one(courses, {
+      fields: [courseRecommendations.courseId],
+      references: [courses.id],
+    }),
+  })
+);
 
 export const userActivityRelations = relations(userActivity, ({ one }) => ({
   user: one(users, {
@@ -620,44 +763,55 @@ export const userActivityRelations = relations(userActivity, ({ one }) => ({
 }));
 
 // Learning Path Relations
-export const learningPathsRelations = relations(learningPaths, ({ one, many }) => ({
-  category: one(categories, {
-    fields: [learningPaths.categoryId],
-    references: [categories.id],
-  }),
+export const learningPathsRelations = relations(
+  learningPaths,
+  ({ one, many }) => ({
+    category: one(categories, {
+      fields: [learningPaths.categoryId],
+      references: [categories.id],
+    }),
 
-  userPaths: many(userLearningPaths),
-}));
+    userPaths: many(userLearningPaths),
+  })
+);
 
-export const userLearningPathsRelations = relations(userLearningPaths, ({ one }) => ({
-  user: one(users, {
-    fields: [userLearningPaths.userId],
-    references: [users.id],
-  }),
-  learningPath: one(learningPaths, {
-    fields: [userLearningPaths.learningPathId],
-    references: [learningPaths.id],
-  }),
-}));
+export const userLearningPathsRelations = relations(
+  userLearningPaths,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [userLearningPaths.userId],
+      references: [users.id],
+    }),
+    learningPath: one(learningPaths, {
+      fields: [userLearningPaths.learningPathId],
+      references: [learningPaths.id],
+    }),
+  })
+);
 
-export const skillAssessmentsRelations = relations(skillAssessments, ({ one }) => ({
-  user: one(users, {
-    fields: [skillAssessments.userId],
-    references: [users.id],
-  }),
-  category: one(categories, {
-    fields: [skillAssessments.categoryId],
-    references: [categories.id],
-  }),
-}));
+export const skillAssessmentsRelations = relations(
+  skillAssessments,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [skillAssessments.userId],
+      references: [users.id],
+    }),
+    category: one(categories, {
+      fields: [skillAssessments.categoryId],
+      references: [categories.id],
+    }),
+  })
+);
 
 // Insert schemas
-export const insertUserSchema = createInsertSchema(users).omit({
-  id: true,
-  createdAt: true,
-}).extend({
-  phone: z.string().optional()
-});
+export const insertUserSchema = createInsertSchema(users)
+  .omit({
+    id: true,
+    createdAt: true,
+  })
+  .extend({
+    phone: z.string().optional(),
+  });
 
 export const insertCategorySchema = createInsertSchema(categories).omit({
   id: true,
@@ -668,11 +822,13 @@ export const insertCourseSchema = createInsertSchema(courses).omit({
   createdAt: true,
 });
 
-export const insertQuestionSchema = createInsertSchema(questions).omit({
-  id: true,
-}).extend({
-  options: z.array(z.string()),
-});
+export const insertQuestionSchema = createInsertSchema(questions)
+  .omit({
+    id: true,
+  })
+  .extend({
+    options: z.array(z.string()),
+  });
 
 export const insertExamAttemptSchema = createInsertSchema(examAttempts).omit({
   id: true,
@@ -689,7 +845,9 @@ export const insertPaymentSchema = createInsertSchema(payments).omit({
   createdAt: true,
 });
 
-export const insertUserCourseProgressSchema = createInsertSchema(userCourseProgress).omit({
+export const insertUserCourseProgressSchema = createInsertSchema(
+  userCourseProgress
+).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
@@ -700,7 +858,9 @@ export const insertAchievementSchema = createInsertSchema(achievements).omit({
   createdAt: true,
 });
 
-export const insertUserAchievementSchema = createInsertSchema(userAchievements).omit({
+export const insertUserAchievementSchema = createInsertSchema(
+  userAchievements
+).omit({
   id: true,
   unlockedAt: true,
 });
@@ -730,7 +890,9 @@ export type InsertCertificate = z.infer<typeof insertCertificateSchema>;
 export type Payment = typeof payments.$inferSelect;
 export type InsertPayment = z.infer<typeof insertPaymentSchema>;
 
-export const insertInternshipApplicationSchema = createInsertSchema(internshipApplications).omit({
+export const insertInternshipApplicationSchema = createInsertSchema(
+  internshipApplications
+).omit({
   id: true,
   createdAt: true,
 });
@@ -747,7 +909,9 @@ export const insertSaleSchema = createInsertSchema(sales).omit({
   createdAt: true,
 });
 
-export const insertWithdrawalRequestSchema = createInsertSchema(withdrawalRequests).omit({
+export const insertWithdrawalRequestSchema = createInsertSchema(
+  withdrawalRequests
+).omit({
   id: true,
   createdAt: true,
   processedAt: true,
@@ -759,15 +923,21 @@ export const insertLeaderboardSchema = createInsertSchema(leaderboard).omit({
 });
 
 export type InternshipApplication = typeof internshipApplications.$inferSelect;
-export type InsertInternshipApplication = z.infer<typeof insertInternshipApplicationSchema>;
+export type InsertInternshipApplication = z.infer<
+  typeof insertInternshipApplicationSchema
+>;
 export type Seller = typeof sellers.$inferSelect;
 export type InsertSeller = z.infer<typeof insertSellerSchema>;
 export type Sale = typeof sales.$inferSelect;
 export type InsertSale = z.infer<typeof insertSaleSchema>;
 export type WithdrawalRequest = typeof withdrawalRequests.$inferSelect;
-export type InsertWithdrawalRequest = z.infer<typeof insertWithdrawalRequestSchema>;
+export type InsertWithdrawalRequest = z.infer<
+  typeof insertWithdrawalRequestSchema
+>;
 
-export const insertReferralClickSchema = createInsertSchema(referralClicks).omit({
+export const insertReferralClickSchema = createInsertSchema(
+  referralClicks
+).omit({
   id: true,
   clickedAt: true,
 });
@@ -789,7 +959,9 @@ export type UserAchievement = typeof userAchievements.$inferSelect;
 export type InsertUserAchievement = typeof userAchievements.$inferInsert;
 
 // Smart Notifications Insert Schemas
-export const insertUserPreferencesSchema = createInsertSchema(userPreferences).omit({
+export const insertUserPreferencesSchema = createInsertSchema(
+  userPreferences
+).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
@@ -800,7 +972,9 @@ export const insertNotificationSchema = createInsertSchema(notifications).omit({
   createdAt: true,
 });
 
-export const insertCourseRecommendationSchema = createInsertSchema(courseRecommendations).omit({
+export const insertCourseRecommendationSchema = createInsertSchema(
+  courseRecommendations
+).omit({
   id: true,
   createdAt: true,
 });
@@ -816,7 +990,9 @@ export type InsertUserPreferences = z.infer<typeof insertUserPreferencesSchema>;
 export type Notification = typeof notifications.$inferSelect;
 export type InsertNotification = z.infer<typeof insertNotificationSchema>;
 export type CourseRecommendation = typeof courseRecommendations.$inferSelect;
-export type InsertCourseRecommendation = z.infer<typeof insertCourseRecommendationSchema>;
+export type InsertCourseRecommendation = z.infer<
+  typeof insertCourseRecommendationSchema
+>;
 export type UserActivity = typeof userActivity.$inferSelect;
 export type InsertUserActivity = z.infer<typeof insertUserActivitySchema>;
 
@@ -825,11 +1001,15 @@ export const insertLearningPathSchema = createInsertSchema(learningPaths).omit({
   id: true,
 });
 
-export const insertUserLearningPathSchema = createInsertSchema(userLearningPaths).omit({
+export const insertUserLearningPathSchema = createInsertSchema(
+  userLearningPaths
+).omit({
   id: true,
 });
 
-export const insertSkillAssessmentSchema = createInsertSchema(skillAssessments).omit({
+export const insertSkillAssessmentSchema = createInsertSchema(
+  skillAssessments
+).omit({
   id: true,
   createdAt: true,
 });
@@ -838,6 +1018,8 @@ export const insertSkillAssessmentSchema = createInsertSchema(skillAssessments).
 export type LearningPath = typeof learningPaths.$inferSelect;
 export type InsertLearningPath = z.infer<typeof insertLearningPathSchema>;
 export type UserLearningPath = typeof userLearningPaths.$inferSelect;
-export type InsertUserLearningPath = z.infer<typeof insertUserLearningPathSchema>;
+export type InsertUserLearningPath = z.infer<
+  typeof insertUserLearningPathSchema
+>;
 export type SkillAssessment = typeof skillAssessments.$inferSelect;
 export type InsertSkillAssessment = z.infer<typeof insertSkillAssessmentSchema>;
