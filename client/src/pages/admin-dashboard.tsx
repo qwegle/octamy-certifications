@@ -1,15 +1,58 @@
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -19,25 +62,25 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
-import { 
-  Shield, 
-  Users, 
-  DollarSign, 
-  TrendingUp, 
-  Eye, 
-  Check, 
-  X, 
-  BookOpen, 
-  GraduationCap, 
-  BarChart3, 
-  UserCheck, 
-  Download, 
-  Plus, 
-  Edit, 
+import {
+  Shield,
+  Users,
+  DollarSign,
+  TrendingUp,
+  Eye,
+  Check,
+  X,
+  BookOpen,
+  GraduationCap,
+  BarChart3,
+  UserCheck,
+  Download,
+  Plus,
+  Edit,
   Trash2,
   LogOut,
   MousePointer,
-  Award
+  Award,
 } from "lucide-react";
 
 interface Analytics {
@@ -139,13 +182,16 @@ const courseSchema = z.object({
   slug: z.string().min(1, "Slug is required"),
   categoryId: z.number().min(1, "Category is required"),
   duration: z.number().min(1, "Duration must be at least 1 minute"),
-  passingScore: z.number().min(1).max(100, "Passing score must be between 1-100"),
+  passingScore: z
+    .number()
+    .min(1)
+    .max(100, "Passing score must be between 1-100"),
   price: z.string().min(1, "Price is required"),
   originalPrice: z.string().optional(),
   isOnSale: z.boolean().default(false),
   level: z.enum(["Beginner", "Intermediate", "Advanced"]),
   isActive: z.boolean().default(true),
-  isInternship: z.boolean().default(false)
+  isInternship: z.boolean().default(false),
 });
 
 type CourseFormData = z.infer<typeof courseSchema>;
@@ -153,13 +199,21 @@ type CourseFormData = z.infer<typeof courseSchema>;
 // Category form schema
 const categorySchema = z.object({
   name: z.string().min(1, "Category name is required"),
-  description: z.string().min(1, "Description is required")
+  description: z.string().min(1, "Description is required"),
 });
 
 type CategoryFormData = z.infer<typeof categorySchema>;
 
 // Inline CourseForm component
-function CourseForm({ course, onCancel, onSuccess }: { course?: any; onCancel: () => void; onSuccess: () => void }) {
+function CourseForm({
+  course,
+  onCancel,
+  onSuccess,
+}: {
+  course?: any;
+  onCancel: () => void;
+  onSuccess: () => void;
+}) {
   const { toast } = useToast();
   const isEditing = !!course;
 
@@ -177,19 +231,21 @@ function CourseForm({ course, onCancel, onSuccess }: { course?: any; onCancel: (
       isOnSale: course?.isOnSale || false,
       level: course?.level || "Beginner",
       isActive: course?.isActive !== false,
-      isInternship: course?.isInternship || false
-    }
+      isInternship: course?.isInternship || false,
+    },
   });
 
   // Fetch categories
   const { data: categories = [] } = useQuery<Category[]>({
-    queryKey: ["/api/categories"]
+    queryKey: ["/api/categories"],
   });
 
   // Create/Update course mutation
   const courseMutation = useMutation({
     mutationFn: async (data: CourseFormData) => {
-      const url = isEditing ? `/api/admin/courses/${course.id}` : "/api/admin/courses";
+      const url = isEditing
+        ? `/api/admin/courses/${course.id}`
+        : "/api/admin/courses";
       const method = isEditing ? "PUT" : "POST";
       return await apiRequest(method, url, data);
     },
@@ -197,23 +253,25 @@ function CourseForm({ course, onCancel, onSuccess }: { course?: any; onCancel: (
       queryClient.invalidateQueries({ queryKey: ["/api/admin/courses"] });
       toast({
         title: "Success",
-        description: `Course ${isEditing ? 'updated' : 'created'} successfully`
+        description: `Course ${isEditing ? "updated" : "created"} successfully`,
       });
       onSuccess();
     },
     onError: (error: any) => {
       toast({
         title: "Error",
-        description: error.message || `Failed to ${isEditing ? 'update' : 'create'} course`,
-        variant: "destructive"
+        description:
+          error.message ||
+          `Failed to ${isEditing ? "update" : "create"} course`,
+        variant: "destructive",
       });
-    }
+    },
   });
 
   const onSubmit = (data: CourseFormData) => {
     // Generate slug from title if not provided
     if (!data.slug && data.title) {
-      data.slug = data.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      data.slug = data.title.toLowerCase().replace(/[^a-z0-9]+/g, "-");
     }
     courseMutation.mutate(data);
   };
@@ -221,7 +279,7 @@ function CourseForm({ course, onCancel, onSuccess }: { course?: any; onCancel: (
   const handleTitleChange = (title: string) => {
     form.setValue("title", title);
     if (!form.getValues("slug")) {
-      const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-");
       form.setValue("slug", slug);
     }
   };
@@ -238,7 +296,7 @@ function CourseForm({ course, onCancel, onSuccess }: { course?: any; onCancel: (
                 <FormItem>
                   <FormLabel>Course Title</FormLabel>
                   <FormControl>
-                    <Input 
+                    <Input
                       placeholder="e.g., Advanced AI Development"
                       {...field}
                       onChange={(e) => handleTitleChange(e.target.value)}
@@ -270,7 +328,10 @@ function CourseForm({ course, onCancel, onSuccess }: { course?: any; onCancel: (
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Category</FormLabel>
-                  <Select onValueChange={(value) => field.onChange(parseInt(value))} value={field.value?.toString()}>
+                  <Select
+                    onValueChange={(value) => field.onChange(parseInt(value))}
+                    value={field.value?.toString()}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select a category" />
@@ -278,7 +339,10 @@ function CourseForm({ course, onCancel, onSuccess }: { course?: any; onCancel: (
                     </FormControl>
                     <SelectContent>
                       {categories.map((category: Category) => (
-                        <SelectItem key={category.id} value={category.id.toString()}>
+                        <SelectItem
+                          key={category.id}
+                          value={category.id.toString()}
+                        >
                           {category.name}
                         </SelectItem>
                       ))}
@@ -319,8 +383,8 @@ function CourseForm({ course, onCancel, onSuccess }: { course?: any; onCancel: (
                 <FormItem>
                   <FormLabel>Duration (minutes)</FormLabel>
                   <FormControl>
-                    <Input 
-                      type="number" 
+                    <Input
+                      type="number"
                       placeholder="30"
                       {...field}
                       onChange={(e) => field.onChange(parseInt(e.target.value))}
@@ -338,8 +402,8 @@ function CourseForm({ course, onCancel, onSuccess }: { course?: any; onCancel: (
                 <FormItem>
                   <FormLabel>Passing Score (%)</FormLabel>
                   <FormControl>
-                    <Input 
-                      type="number" 
+                    <Input
+                      type="number"
                       placeholder="60"
                       min="1"
                       max="100"
@@ -389,7 +453,7 @@ function CourseForm({ course, onCancel, onSuccess }: { course?: any; onCancel: (
               <FormItem>
                 <FormLabel>Description</FormLabel>
                 <FormControl>
-                  <Textarea 
+                  <Textarea
                     placeholder="Detailed course description..."
                     className="min-h-[100px]"
                     {...field}
@@ -408,10 +472,15 @@ function CourseForm({ course, onCancel, onSuccess }: { course?: any; onCancel: (
                 <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                   <div className="space-y-0.5">
                     <FormLabel className="text-base">On Sale</FormLabel>
-                    <FormDescription>Mark this course as on sale</FormDescription>
+                    <FormDescription>
+                      Mark this course as on sale
+                    </FormDescription>
                   </div>
                   <FormControl>
-                    <Switch checked={field.value} onCheckedChange={field.onChange} />
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
                   </FormControl>
                 </FormItem>
               )}
@@ -424,10 +493,15 @@ function CourseForm({ course, onCancel, onSuccess }: { course?: any; onCancel: (
                 <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                   <div className="space-y-0.5">
                     <FormLabel className="text-base">Active</FormLabel>
-                    <FormDescription>Make course available to users</FormDescription>
+                    <FormDescription>
+                      Make course available to users
+                    </FormDescription>
                   </div>
                   <FormControl>
-                    <Switch checked={field.value} onCheckedChange={field.onChange} />
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
                   </FormControl>
                 </FormItem>
               )}
@@ -443,7 +517,10 @@ function CourseForm({ course, onCancel, onSuccess }: { course?: any; onCancel: (
                     <FormDescription>Mark as internship course</FormDescription>
                   </div>
                   <FormControl>
-                    <Switch checked={field.value} onCheckedChange={field.onChange} />
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
                   </FormControl>
                 </FormItem>
               )}
@@ -452,7 +529,11 @@ function CourseForm({ course, onCancel, onSuccess }: { course?: any; onCancel: (
 
           <div className="flex gap-4 pt-4">
             <Button type="submit" disabled={courseMutation.isPending}>
-              {courseMutation.isPending ? "Saving..." : (isEditing ? "Update Course" : "Create Course")}
+              {courseMutation.isPending
+                ? "Saving..."
+                : isEditing
+                ? "Update Course"
+                : "Create Course"}
             </Button>
             <Button type="button" variant="outline" onClick={onCancel}>
               Cancel
@@ -465,7 +546,15 @@ function CourseForm({ course, onCancel, onSuccess }: { course?: any; onCancel: (
 }
 
 // Inline CategoryForm component
-function CategoryForm({ category, onCancel, onSuccess }: { category?: any; onCancel: () => void; onSuccess: () => void }) {
+function CategoryForm({
+  category,
+  onCancel,
+  onSuccess,
+}: {
+  category?: any;
+  onCancel: () => void;
+  onSuccess: () => void;
+}) {
   const { toast } = useToast();
   const isEditing = !!category;
 
@@ -473,14 +562,16 @@ function CategoryForm({ category, onCancel, onSuccess }: { category?: any; onCan
     resolver: zodResolver(categorySchema),
     defaultValues: {
       name: category?.name || "",
-      description: category?.description || ""
-    }
+      description: category?.description || "",
+    },
   });
 
   // Create/Update category mutation
   const categoryMutation = useMutation({
     mutationFn: async (data: CategoryFormData) => {
-      const url = isEditing ? `/api/admin/categories/${category.id}` : "/api/admin/categories";
+      const url = isEditing
+        ? `/api/admin/categories/${category.id}`
+        : "/api/admin/categories";
       const method = isEditing ? "PUT" : "POST";
       return await apiRequest(method, url, data);
     },
@@ -489,17 +580,21 @@ function CategoryForm({ category, onCancel, onSuccess }: { category?: any; onCan
       queryClient.invalidateQueries({ queryKey: ["/api/admin/courses"] });
       toast({
         title: "Success",
-        description: `Category ${isEditing ? 'updated' : 'created'} successfully`
+        description: `Category ${
+          isEditing ? "updated" : "created"
+        } successfully`,
       });
       onSuccess();
     },
     onError: (error: any) => {
       toast({
         title: "Error",
-        description: error.message || `Failed to ${isEditing ? 'update' : 'create'} category`,
-        variant: "destructive"
+        description:
+          error.message ||
+          `Failed to ${isEditing ? "update" : "create"} category`,
+        variant: "destructive",
       });
-    }
+    },
   });
 
   const onSubmit = (data: CategoryFormData) => {
@@ -517,7 +612,10 @@ function CategoryForm({ category, onCancel, onSuccess }: { category?: any; onCan
               <FormItem>
                 <FormLabel>Category Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="e.g., Artificial Intelligence" {...field} />
+                  <Input
+                    placeholder="e.g., Artificial Intelligence"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -531,7 +629,7 @@ function CategoryForm({ category, onCancel, onSuccess }: { category?: any; onCan
               <FormItem>
                 <FormLabel>Description</FormLabel>
                 <FormControl>
-                  <Textarea 
+                  <Textarea
                     placeholder="Brief description of this category..."
                     className="min-h-[100px]"
                     {...field}
@@ -544,7 +642,11 @@ function CategoryForm({ category, onCancel, onSuccess }: { category?: any; onCan
 
           <div className="flex gap-4 pt-4">
             <Button type="submit" disabled={categoryMutation.isPending}>
-              {categoryMutation.isPending ? "Saving..." : (isEditing ? "Update Category" : "Create Category")}
+              {categoryMutation.isPending
+                ? "Saving..."
+                : isEditing
+                ? "Update Category"
+                : "Create Category"}
             </Button>
             <Button type="button" variant="outline" onClick={onCancel}>
               Cancel
@@ -606,12 +708,14 @@ export default function AdminDashboard() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("overview");
-  const [selectedCourse, setSelectedCourse] = useState<AdminCourse | null>(null);
+  const [selectedCourse, setSelectedCourse] = useState<AdminCourse | null>(
+    null
+  );
   const [isCreatingCourse, setIsCreatingCourse] = useState(false);
   const [showCourseForm, setShowCourseForm] = useState(false);
   const [editingCourse, setEditingCourse] = useState<AdminCourse | null>(null);
   const [isEditingCourse, setIsEditingCourse] = useState(false);
-  
+
   // Pagination states
   const [customersPage, setCustomersPage] = useState(1);
   const [coursesPage, setCoursesPage] = useState(1);
@@ -633,72 +737,132 @@ export default function AdminDashboard() {
   const [isCreatingCategory, setIsCreatingCategory] = useState(false);
 
   // Fetch analytics data
-  const { data: analytics = {}, isLoading: analyticsLoading } = useQuery<Analytics>({
-    queryKey: ["/api/admin/analytics"],
-  });
+  const { data: analytics = {}, isLoading: analyticsLoading } =
+    useQuery<Analytics>({
+      queryKey: ["/api/admin/analytics"],
+    });
 
   // Fetch categories data
-  const { data: categories = [], isLoading: categoriesLoading } = useQuery<Category[]>({
+  const { data: categories = [], isLoading: categoriesLoading } = useQuery<
+    Category[]
+  >({
     queryKey: ["/api/categories"],
   });
 
   // Fetch customers data
-  const { data: customers = [], isLoading: customersLoading } = useQuery<Customer[]>({
+  const { data: customers = [], isLoading: customersLoading } = useQuery<
+    Customer[]
+  >({
     queryKey: ["/api/admin/customers"],
   });
 
-  // Fetch admin courses data  
-  const { data: adminCourses = [], isLoading: adminCoursesLoading } = useQuery<AdminCourse[]>({
+  // Fetch admin courses data
+  const { data: adminCourses = [], isLoading: adminCoursesLoading } = useQuery<
+    AdminCourse[]
+  >({
     queryKey: ["/api/admin/courses"],
   });
 
   // Fetch exam attempts data
-  const { data: examAttempts = [], isLoading: examAttemptsLoading } = useQuery<ExamAttempt[]>({
+  const { data: examAttempts = [], isLoading: examAttemptsLoading } = useQuery<
+    ExamAttempt[]
+  >({
     queryKey: ["/api/admin/exam-attempts"],
   });
 
   // Fetch transactions data
-  const { data: transactions = [], isLoading: transactionsLoading } = useQuery<Transaction[]>({
+  const { data: transactions = [], isLoading: transactionsLoading } = useQuery<
+    Transaction[]
+  >({
     queryKey: ["/api/admin/transactions"],
   });
 
   // Fetch partners data
-  const { data: partners = [], isLoading: partnersLoading } = useQuery<Partner[]>({
+  const { data: partners = [], isLoading: partnersLoading } = useQuery<
+    Partner[]
+  >({
     queryKey: ["/api/admin/partners"],
   });
 
   // Fetch withdrawals data
-  const { data: withdrawals = [], isLoading: withdrawalsLoading } = useQuery<WithdrawalRequest[]>({
+  const { data: withdrawals = [], isLoading: withdrawalsLoading } = useQuery<
+    WithdrawalRequest[]
+  >({
     queryKey: ["/api/admin/withdrawals"],
   });
 
   // Partner approval mutation
-  const approvePartnerMutation = useMutation({
-    mutationFn: async ({ partnerId, approved }: { partnerId: number; approved: boolean }) => {
-      const response = await apiRequest("POST", `/api/admin/partners/${partnerId}/approve`, { approved });
-      return response.json();
-    },
-    onSuccess: () => {
+  // const approvePartnerMutation = useMutation({
+  //   mutationFn: async ({ partnerId, approved }: { partnerId: number; approved: boolean }) => {
+  //     const response = await apiRequest("POST", `/api/admin/partners/${partnerId}/approve`, { approved });
+  //     return response.json();
+  //   },
+  //   onSuccess: () => {
+  //     queryClient.invalidateQueries({ queryKey: ["/api/admin/partners"] });
+  //     queryClient.invalidateQueries({ queryKey: ["/api/admin/analytics"] });
+  //     toast({
+  //       title: "Partner Updated",
+  //       description: "Partner status has been updated successfully.",
+  //     });
+  //   },
+  //   onError: (error: any) => {
+  //     toast({
+  //       title: "Error",
+  //       description: error.message || "Failed to update partner status",
+  //       variant: "destructive",
+  //     });
+  //   },
+  // });
+  
+  const [approveLoading, setApproveLoading] = useState(false);
+  async function approvePartner(partnerId: number, approved: boolean) {
+    try {
+      setApproveLoading(true);
+      const response = await apiRequest(
+        "POST",
+        `/api/admin/partners/${partnerId}/approve`,
+        { approved }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to update partner status");
+      }
+
+      const data = await response.json();
+      
       queryClient.invalidateQueries({ queryKey: ["/api/admin/partners"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/analytics"] });
       toast({
         title: "Partner Updated",
         description: "Partner status has been updated successfully.",
       });
-    },
-    onError: (error: any) => {
+
+      return data;
+    } catch (error: any) {
       toast({
         title: "Error",
         description: error.message || "Failed to update partner status",
         variant: "destructive",
       });
-    },
-  });
+    } finally {
+      setApproveLoading(false);
+    }
+  }
 
   // Withdrawal processing mutation
   const processWithdrawalMutation = useMutation({
-    mutationFn: async ({ withdrawalId, status }: { withdrawalId: number; status: string }) => {
-      const response = await apiRequest("POST", `/api/admin/withdrawals/${withdrawalId}/process`, { status });
+    mutationFn: async ({
+      withdrawalId,
+      status,
+    }: {
+      withdrawalId: number;
+      status: string;
+    }) => {
+      const response = await apiRequest(
+        "POST",
+        `/api/admin/withdrawals/${withdrawalId}/process`,
+        { status }
+      );
       return response.json();
     },
     onSuccess: () => {
@@ -721,7 +885,10 @@ export default function AdminDashboard() {
   // Course deletion mutation
   const deleteCourse = useMutation({
     mutationFn: async (courseId: number) => {
-      const response = await apiRequest("DELETE", `/api/admin/courses/${courseId}`);
+      const response = await apiRequest(
+        "DELETE",
+        `/api/admin/courses/${courseId}`
+      );
       return response.json();
     },
     onSuccess: () => {
@@ -744,7 +911,10 @@ export default function AdminDashboard() {
   // Category deletion mutation
   const deleteCategory = useMutation({
     mutationFn: async (categoryId: number) => {
-      const response = await apiRequest("DELETE", `/api/admin/categories/${categoryId}`);
+      const response = await apiRequest(
+        "DELETE",
+        `/api/admin/categories/${categoryId}`
+      );
       return response.json();
     },
     onSuccess: () => {
@@ -791,8 +961,12 @@ export default function AdminDashboard() {
             <div className="flex items-center space-x-3">
               <Shield className="w-8 h-8 text-blue-600" />
               <div>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Admin Dashboard</h1>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Octamy Platform Administration</p>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                  Admin Dashboard
+                </h1>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Octamy Platform Administration
+                </p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
@@ -805,7 +979,11 @@ export default function AdminDashboard() {
                 <TrendingUp className="h-4 w-4" />
                 Enhanced Version
               </Button>
-              <Button variant="outline" size="sm" onClick={() => setLocation("/")}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setLocation("/")}
+              >
                 <Eye className="w-4 h-4 mr-2" />
                 View Site
               </Button>
@@ -821,7 +999,7 @@ export default function AdminDashboard() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="space-y-6">
-          <Tabs defaultValue="overview" className="space-y-4">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
             <TabsList className="grid w-full grid-cols-7">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="customers">Customers</TabsTrigger>
@@ -837,11 +1015,15 @@ export default function AdminDashboard() {
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+                    <CardTitle className="text-sm font-medium">
+                      Total Users
+                    </CardTitle>
                     <Users className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{analytics?.totalUsers || 0}</div>
+                    <div className="text-2xl font-bold">
+                      {analytics?.totalUsers || 0}
+                    </div>
                     <p className="text-xs text-muted-foreground">
                       Registered customers
                     </p>
@@ -849,11 +1031,15 @@ export default function AdminDashboard() {
                 </Card>
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Total Courses</CardTitle>
+                    <CardTitle className="text-sm font-medium">
+                      Total Courses
+                    </CardTitle>
                     <BookOpen className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{analytics?.totalCourses || 0}</div>
+                    <div className="text-2xl font-bold">
+                      {analytics?.totalCourses || 0}
+                    </div>
                     <p className="text-xs text-muted-foreground">
                       Available courses
                     </p>
@@ -861,11 +1047,15 @@ export default function AdminDashboard() {
                 </Card>
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Certificates Issued</CardTitle>
+                    <CardTitle className="text-sm font-medium">
+                      Certificates Issued
+                    </CardTitle>
                     <GraduationCap className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{analytics?.totalCertificates || 0}</div>
+                    <div className="text-2xl font-bold">
+                      {analytics?.totalCertificates || 0}
+                    </div>
                     <p className="text-xs text-muted-foreground">
                       Paid certificates
                     </p>
@@ -873,11 +1063,15 @@ export default function AdminDashboard() {
                 </Card>
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+                    <CardTitle className="text-sm font-medium">
+                      Total Revenue
+                    </CardTitle>
                     <DollarSign className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">₹{analytics?.totalRevenue || 0}</div>
+                    <div className="text-2xl font-bold">
+                      ₹{analytics?.totalRevenue || 0}
+                    </div>
                     <p className="text-xs text-muted-foreground">
                       Platform earnings
                     </p>
@@ -897,9 +1091,12 @@ export default function AdminDashboard() {
                         <div key={customer.id} className="flex items-center">
                           <UserCheck className="h-4 w-4 text-muted-foreground" />
                           <div className="ml-4 space-y-1">
-                            <p className="text-sm font-medium leading-none">{customer.name}</p>
+                            <p className="text-sm font-medium leading-none">
+                              {customer.name}
+                            </p>
                             <p className="text-sm text-muted-foreground">
-                              {customer.email} • {customer.certificateCount} certificates
+                              {customer.email} • {customer.certificateCount}{" "}
+                              certificates
                             </p>
                           </div>
                         </div>
@@ -918,9 +1115,12 @@ export default function AdminDashboard() {
                         <div key={course.id} className="flex items-center">
                           <BookOpen className="h-4 w-4 text-muted-foreground" />
                           <div className="ml-4 space-y-1">
-                            <p className="text-sm font-medium leading-none">{course.title}</p>
+                            <p className="text-sm font-medium leading-none">
+                              {course.title}
+                            </p>
                             <p className="text-sm text-muted-foreground">
-                              {course.enrollmentCount} enrollments • ₹{course.revenue} revenue
+                              {course.enrollmentCount} enrollments • ₹
+                              {course.revenue} revenue
                             </p>
                           </div>
                         </div>
@@ -938,7 +1138,9 @@ export default function AdminDashboard() {
                 <Card>
                   <CardHeader>
                     <CardTitle>Customer Management</CardTitle>
-                    <CardDescription>Manage registered users and their activity</CardDescription>
+                    <CardDescription>
+                      Manage registered users and their activity
+                    </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <Table>
@@ -955,26 +1157,39 @@ export default function AdminDashboard() {
                       </TableHeader>
                       <TableBody>
                         {customers
-                          .slice((customersPage - 1) * itemsPerPage, customersPage * itemsPerPage)
+                          .slice(
+                            (customersPage - 1) * itemsPerPage,
+                            customersPage * itemsPerPage
+                          )
                           .map((customer: Customer) => (
-                          <TableRow key={customer.id}>
-                            <TableCell className="font-medium">{customer.name}</TableCell>
-                            <TableCell>{customer.email}</TableCell>
-                            <TableCell>{customer.certificateCount}</TableCell>
-                            <TableCell>₹{customer.totalSpent}</TableCell>
-                            <TableCell>{new Date(customer.createdAt).toLocaleDateString()}</TableCell>
-                            <TableCell>
-                              <Badge variant={customer.isAdmin ? "destructive" : "default"}>
-                                {customer.isAdmin ? "Admin" : "Customer"}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>
-                              <Button size="sm" variant="outline">
-                                <Eye className="h-4 w-4" />
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
+                            <TableRow key={customer.id}>
+                              <TableCell className="font-medium">
+                                {customer.name}
+                              </TableCell>
+                              <TableCell>{customer.email}</TableCell>
+                              <TableCell>{customer.certificateCount}</TableCell>
+                              <TableCell>₹{customer.totalSpent}</TableCell>
+                              <TableCell>
+                                {new Date(
+                                  customer.createdAt
+                                ).toLocaleDateString()}
+                              </TableCell>
+                              <TableCell>
+                                <Badge
+                                  variant={
+                                    customer.isAdmin ? "destructive" : "default"
+                                  }
+                                >
+                                  {customer.isAdmin ? "Admin" : "Customer"}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                <Button size="sm" variant="outline">
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          ))}
                       </TableBody>
                     </Table>
                   </CardContent>
@@ -987,9 +1202,14 @@ export default function AdminDashboard() {
                 <CardHeader className="flex flex-row items-center justify-between">
                   <div>
                     <CardTitle>Category Management</CardTitle>
-                    <CardDescription>Manage course categories and organization</CardDescription>
+                    <CardDescription>
+                      Manage course categories and organization
+                    </CardDescription>
                   </div>
-                  <Dialog open={isCreatingCategory} onOpenChange={setIsCreatingCategory}>
+                  <Dialog
+                    open={isCreatingCategory}
+                    onOpenChange={setIsCreatingCategory}
+                  >
                     <DialogTrigger asChild>
                       <Button>
                         <Plus className="h-4 w-4 mr-2" />
@@ -1025,14 +1245,20 @@ export default function AdminDashboard() {
                             <div className="font-medium">{category.name}</div>
                           </TableCell>
                           <TableCell>
-                            <div className="text-sm text-muted-foreground">{category.description}</div>
+                            <div className="text-sm text-muted-foreground">
+                              {category.description}
+                            </div>
                           </TableCell>
                           <TableCell>
-                            <Badge variant="secondary">{category.courseCount || 0} courses</Badge>
+                            <Badge variant="secondary">
+                              {category.courseCount || 0} courses
+                            </Badge>
                           </TableCell>
                           <TableCell>
                             <div className="text-sm text-muted-foreground">
-                              {new Date(category.createdAt).toLocaleDateString()}
+                              {new Date(
+                                category.createdAt
+                              ).toLocaleDateString()}
                             </div>
                           </TableCell>
                           <TableCell>
@@ -1062,20 +1288,30 @@ export default function AdminDashboard() {
                                 </AlertDialogTrigger>
                                 <AlertDialogContent>
                                   <AlertDialogHeader>
-                                    <AlertDialogTitle>Delete Category</AlertDialogTitle>
+                                    <AlertDialogTitle>
+                                      Delete Category
+                                    </AlertDialogTitle>
                                     <AlertDialogDescription>
-                                      Are you sure you want to delete "{category.name}"? This action cannot be undone.
+                                      Are you sure you want to delete "
+                                      {category.name}"? This action cannot be
+                                      undone.
                                       {category.courseCount > 0 && (
                                         <div className="mt-2 text-red-600">
-                                          Warning: This category has {category.courseCount} courses. They will need to be reassigned.
+                                          Warning: This category has{" "}
+                                          {category.courseCount} courses. They
+                                          will need to be reassigned.
                                         </div>
                                       )}
                                     </AlertDialogDescription>
                                   </AlertDialogHeader>
                                   <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogCancel>
+                                      Cancel
+                                    </AlertDialogCancel>
                                     <AlertDialogAction
-                                      onClick={() => handleDeleteCategory(category.id)}
+                                      onClick={() =>
+                                        handleDeleteCategory(category.id)
+                                      }
                                       className="bg-red-600 hover:bg-red-700"
                                     >
                                       Delete
@@ -1102,9 +1338,14 @@ export default function AdminDashboard() {
                     <CardHeader className="flex flex-row items-center justify-between">
                       <div>
                         <CardTitle>Course Management</CardTitle>
-                        <CardDescription>Manage courses, pricing, and content</CardDescription>
+                        <CardDescription>
+                          Manage courses, pricing, and content
+                        </CardDescription>
                       </div>
-                      <Dialog open={isCreatingCourse} onOpenChange={setIsCreatingCourse}>
+                      <Dialog
+                        open={isCreatingCourse}
+                        onOpenChange={setIsCreatingCourse}
+                      >
                         <DialogTrigger asChild>
                           <Button>
                             <Plus className="h-4 w-4 mr-2" />
@@ -1138,107 +1379,155 @@ export default function AdminDashboard() {
                         </TableHeader>
                         <TableBody>
                           {adminCourses
-                            .slice((coursesPage - 1) * itemsPerPage, coursesPage * itemsPerPage)
+                            .slice(
+                              (coursesPage - 1) * itemsPerPage,
+                              coursesPage * itemsPerPage
+                            )
                             .map((course: AdminCourse) => (
-                            <TableRow key={course.id}>
-                              <TableCell>
-                                <div>
-                                  <div className="font-medium">{course.title}</div>
-                                  <div className="text-sm text-muted-foreground">{course.duration} min • {course.passingScore}% pass</div>
-                                </div>
-                              </TableCell>
-                              <TableCell>{course.category?.name || 'Unknown'}</TableCell>
-                              <TableCell>
-                                <div>
-                                  <span className="font-medium">₹{course.price}</span>
-                                  {course.isOnSale && course.originalPrice && (
-                                    <span className="text-sm text-muted-foreground line-through ml-2">₹{course.originalPrice}</span>
-                                  )}
-                                  {course.isOnSale && (
-                                    <Badge variant="secondary" className="ml-2 text-xs">SALE</Badge>
-                                  )}
-                                </div>
-                              </TableCell>
-                              <TableCell>{course.enrollmentCount}</TableCell>
-                              <TableCell>{course.certificateCount}</TableCell>
-                              <TableCell>₹{course.revenue}</TableCell>
-                              <TableCell>
-                                <div className="flex gap-1">
-                                  <Badge variant={course.isActive ? "default" : "secondary"}>
-                                    {course.isActive ? "Active" : "Inactive"}
-                                  </Badge>
-                                  {course.isInternship && (
-                                    <Badge variant="outline">Internship</Badge>
-                                  )}
-                                </div>
-                              </TableCell>
-                              <TableCell>
-                                <div className="flex gap-2">
-                                  <Button 
-                                    size="sm" 
-                                    variant="outline"
-                                    onClick={() => setLocation(`/courses/${course.slug}`)}
-                                  >
-                                    <Eye className="h-4 w-4" />
-                                  </Button>
-                                  <Dialog open={isEditingCourse && selectedCourse?.id === course.id} onOpenChange={(open) => {
-                                    setIsEditingCourse(open);
-                                    if (!open) setSelectedCourse(null);
-                                  }}>
-                                    <DialogTrigger asChild>
-                                      <Button 
-                                        size="sm" 
-                                        variant="outline"
-                                        onClick={() => setSelectedCourse(course)}
+                              <TableRow key={course.id}>
+                                <TableCell>
+                                  <div>
+                                    <div className="font-medium">
+                                      {course.title}
+                                    </div>
+                                    <div className="text-sm text-muted-foreground">
+                                      {course.duration} min •{" "}
+                                      {course.passingScore}% pass
+                                    </div>
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  {course.category?.name || "Unknown"}
+                                </TableCell>
+                                <TableCell>
+                                  <div>
+                                    <span className="font-medium">
+                                      ₹{course.price}
+                                    </span>
+                                    {course.isOnSale &&
+                                      course.originalPrice && (
+                                        <span className="text-sm text-muted-foreground line-through ml-2">
+                                          ₹{course.originalPrice}
+                                        </span>
+                                      )}
+                                    {course.isOnSale && (
+                                      <Badge
+                                        variant="secondary"
+                                        className="ml-2 text-xs"
                                       >
-                                        <Edit className="h-4 w-4" />
-                                      </Button>
-                                    </DialogTrigger>
-                                    <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                                      <DialogHeader>
-                                        <DialogTitle>Edit Course</DialogTitle>
-                                      </DialogHeader>
-                                      <CourseForm
-                                        course={selectedCourse}
-                                        onCancel={() => {
-                                          setIsEditingCourse(false);
-                                          setSelectedCourse(null);
-                                        }}
-                                        onSuccess={() => {
-                                          setIsEditingCourse(false);
-                                          setSelectedCourse(null);
-                                        }}
-                                      />
-                                    </DialogContent>
-                                  </Dialog>
-                                  <AlertDialog>
-                                    <AlertDialogTrigger asChild>
-                                      <Button size="sm" variant="outline">
-                                        <Trash2 className="h-4 w-4" />
-                                      </Button>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                      <AlertDialogHeader>
-                                        <AlertDialogTitle>Delete Course</AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                          Are you sure you want to delete "{course.title}"? This action cannot be undone and will remove all associated questions and exam attempts.
-                                        </AlertDialogDescription>
-                                      </AlertDialogHeader>
-                                      <AlertDialogFooter>
-                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                        <AlertDialogAction
-                                          onClick={() => deleteCourse.mutate(course.id)}
-                                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                        SALE
+                                      </Badge>
+                                    )}
+                                  </div>
+                                </TableCell>
+                                <TableCell>{course.enrollmentCount}</TableCell>
+                                <TableCell>{course.certificateCount}</TableCell>
+                                <TableCell>₹{course.revenue}</TableCell>
+                                <TableCell>
+                                  <div className="flex gap-1">
+                                    <Badge
+                                      variant={
+                                        course.isActive
+                                          ? "default"
+                                          : "secondary"
+                                      }
+                                    >
+                                      {course.isActive ? "Active" : "Inactive"}
+                                    </Badge>
+                                    {course.isInternship && (
+                                      <Badge variant="outline">
+                                        Internship
+                                      </Badge>
+                                    )}
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  <div className="flex gap-2">
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() =>
+                                        setLocation(`/courses/${course.slug}`)
+                                      }
+                                    >
+                                      <Eye className="h-4 w-4" />
+                                    </Button>
+                                    <Dialog
+                                      open={
+                                        isEditingCourse &&
+                                        selectedCourse?.id === course.id
+                                      }
+                                      onOpenChange={(open) => {
+                                        setIsEditingCourse(open);
+                                        if (!open) setSelectedCourse(null);
+                                      }}
+                                    >
+                                      <DialogTrigger asChild>
+                                        <Button
+                                          size="sm"
+                                          variant="outline"
+                                          onClick={() =>
+                                            setSelectedCourse(course)
+                                          }
                                         >
-                                          Delete Course
-                                        </AlertDialogAction>
-                                      </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                  </AlertDialog>
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                          ))}
+                                          <Edit className="h-4 w-4" />
+                                        </Button>
+                                      </DialogTrigger>
+                                      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                                        <DialogHeader>
+                                          <DialogTitle>Edit Course</DialogTitle>
+                                        </DialogHeader>
+                                        <CourseForm
+                                          course={selectedCourse}
+                                          onCancel={() => {
+                                            setIsEditingCourse(false);
+                                            setSelectedCourse(null);
+                                          }}
+                                          onSuccess={() => {
+                                            setIsEditingCourse(false);
+                                            setSelectedCourse(null);
+                                          }}
+                                        />
+                                      </DialogContent>
+                                    </Dialog>
+                                    <AlertDialog>
+                                      <AlertDialogTrigger asChild>
+                                        <Button size="sm" variant="outline">
+                                          <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                      </AlertDialogTrigger>
+                                      <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                          <AlertDialogTitle>
+                                            Delete Course
+                                          </AlertDialogTitle>
+                                          <AlertDialogDescription>
+                                            Are you sure you want to delete "
+                                            {course.title}"? This action cannot
+                                            be undone and will remove all
+                                            associated questions and exam
+                                            attempts.
+                                          </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                          <AlertDialogCancel>
+                                            Cancel
+                                          </AlertDialogCancel>
+                                          <AlertDialogAction
+                                            onClick={() =>
+                                              deleteCourse.mutate(course.id)
+                                            }
+                                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                          >
+                                            Delete Course
+                                          </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                      </AlertDialogContent>
+                                    </AlertDialog>
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            ))}
                         </TableBody>
                       </Table>
                       {adminCourses.length > itemsPerPage && (
@@ -1246,19 +1535,32 @@ export default function AdminDashboard() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => setCoursesPage(Math.max(1, coursesPage - 1))}
+                            onClick={() =>
+                              setCoursesPage(Math.max(1, coursesPage - 1))
+                            }
                             disabled={coursesPage === 1}
                           >
                             Previous
                           </Button>
                           <span className="flex items-center px-3 text-sm">
-                            Page {coursesPage} of {Math.ceil(adminCourses.length / itemsPerPage)}
+                            Page {coursesPage} of{" "}
+                            {Math.ceil(adminCourses.length / itemsPerPage)}
                           </span>
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => setCoursesPage(Math.min(Math.ceil(adminCourses.length / itemsPerPage), coursesPage + 1))}
-                            disabled={coursesPage >= Math.ceil(adminCourses.length / itemsPerPage)}
+                            onClick={() =>
+                              setCoursesPage(
+                                Math.min(
+                                  Math.ceil(adminCourses.length / itemsPerPage),
+                                  coursesPage + 1
+                                )
+                              )
+                            }
+                            disabled={
+                              coursesPage >=
+                              Math.ceil(adminCourses.length / itemsPerPage)
+                            }
                           >
                             Next
                           </Button>
@@ -1277,7 +1579,9 @@ export default function AdminDashboard() {
                 <Card>
                   <CardHeader>
                     <CardTitle>Exam Management</CardTitle>
-                    <CardDescription>Monitor exam attempts and results</CardDescription>
+                    <CardDescription>
+                      Monitor exam attempts and results
+                    </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <Table>
@@ -1294,38 +1598,60 @@ export default function AdminDashboard() {
                       </TableHeader>
                       <TableBody>
                         {examAttempts
-                          .slice((examsPage - 1) * itemsPerPage, examsPage * itemsPerPage)
+                          .slice(
+                            (examsPage - 1) * itemsPerPage,
+                            examsPage * itemsPerPage
+                          )
                           .map((attempt: ExamAttempt) => (
-                          <TableRow key={attempt.id}>
-                            <TableCell>
-                              <div>
-                                <div className="font-medium">{attempt.userName}</div>
-                                <div className="text-sm text-muted-foreground">{attempt.userEmail}</div>
-                              </div>
-                            </TableCell>
-                            <TableCell>{attempt.courseTitle}</TableCell>
-                            <TableCell>
-                              <span className="font-medium">
-                                {attempt.score}/{attempt.totalQuestions}
-                              </span>
-                              <span className="text-sm text-muted-foreground ml-2">
-                                ({Math.round((attempt.score / attempt.totalQuestions) * 100)}%)
-                              </span>
-                            </TableCell>
-                            <TableCell>
-                              <Badge variant={attempt.passed ? "default" : "destructive"}>
-                                {attempt.passed ? "Passed" : "Failed"}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>{Math.round(attempt.timeTaken / 60)} min</TableCell>
-                            <TableCell>{new Date(attempt.createdAt).toLocaleDateString()}</TableCell>
-                            <TableCell>
-                              <Button size="sm" variant="outline">
-                                <Eye className="h-4 w-4" />
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
+                            <TableRow key={attempt.id}>
+                              <TableCell>
+                                <div>
+                                  <div className="font-medium">
+                                    {attempt.userName}
+                                  </div>
+                                  <div className="text-sm text-muted-foreground">
+                                    {attempt.userEmail}
+                                  </div>
+                                </div>
+                              </TableCell>
+                              <TableCell>{attempt.courseTitle}</TableCell>
+                              <TableCell>
+                                <span className="font-medium">
+                                  {attempt.score}/{attempt.totalQuestions}
+                                </span>
+                                <span className="text-sm text-muted-foreground ml-2">
+                                  (
+                                  {Math.round(
+                                    (attempt.score / attempt.totalQuestions) *
+                                      100
+                                  )}
+                                  %)
+                                </span>
+                              </TableCell>
+                              <TableCell>
+                                <Badge
+                                  variant={
+                                    attempt.passed ? "default" : "destructive"
+                                  }
+                                >
+                                  {attempt.passed ? "Passed" : "Failed"}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                {Math.round(attempt.timeTaken / 60)} min
+                              </TableCell>
+                              <TableCell>
+                                {new Date(
+                                  attempt.createdAt
+                                ).toLocaleDateString()}
+                              </TableCell>
+                              <TableCell>
+                                <Button size="sm" variant="outline">
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          ))}
                       </TableBody>
                     </Table>
                   </CardContent>
@@ -1340,7 +1666,9 @@ export default function AdminDashboard() {
                 <Card>
                   <CardHeader>
                     <CardTitle>Partner Management</CardTitle>
-                    <CardDescription>Approve and manage affiliate partners</CardDescription>
+                    <CardDescription>
+                      Approve and manage affiliate partners
+                    </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <Table>
@@ -1357,39 +1685,54 @@ export default function AdminDashboard() {
                       </TableHeader>
                       <TableBody>
                         {partners
-                          .slice((partnersPage - 1) * itemsPerPage, partnersPage * itemsPerPage)
+                          .slice(
+                            (partnersPage - 1) * itemsPerPage,
+                            partnersPage * itemsPerPage
+                          )
                           .map((partner: Partner) => (
-                          <TableRow key={partner.id}>
-                            <TableCell className="font-medium">{partner.name}</TableCell>
-                            <TableCell>{partner.email}</TableCell>
-                            <TableCell>{partner.phone || "N/A"}</TableCell>
-                            <TableCell>
-                              <Badge variant="outline">{partner.referralCode}</Badge>
-                            </TableCell>
-                            <TableCell>
-                              <Badge variant={partner.isApproved ? "default" : "secondary"}>
-                                {partner.isApproved ? "Approved" : "Pending"}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>₹{partner.totalEarnings || 0}</TableCell>
-                            <TableCell>
-                              <div className="flex gap-2">
-                                {!partner.isApproved && (
-                                  <Button
-                                    size="sm"
-                                    onClick={() => approvePartnerMutation.mutate({ partnerId: partner.id, approved: true })}
-                                    disabled={approvePartnerMutation.isPending}
-                                  >
-                                    <Check className="h-4 w-4" />
+                            <TableRow key={partner.id}>
+                              <TableCell className="font-medium">
+                                {partner.name}
+                              </TableCell>
+                              <TableCell>{partner.email}</TableCell>
+                              <TableCell>{partner.phone || "N/A"}</TableCell>
+                              <TableCell>
+                                <Badge variant="outline">
+                                  {partner.referralCode}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                <Badge
+                                  variant={
+                                    partner.isApproved ? "default" : "secondary"
+                                  }
+                                >
+                                  {partner.isApproved ? "Approved" : "Pending"}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                ₹{partner.totalEarnings || 0}
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex gap-2">
+                                  {!partner.isApproved && (
+                                    <Button
+                                      size="sm"
+                                      onClick={() =>
+                                        approvePartner(partner.id, true)
+                                      }
+                                      disabled={approveLoading}
+                                    >
+                                      <Check className="h-4 w-4" />
+                                    </Button>
+                                  )}
+                                  <Button size="sm" variant="outline">
+                                    <Eye className="h-4 w-4" />
                                   </Button>
-                                )}
-                                <Button size="sm" variant="outline">
-                                  <Eye className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))}
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))}
                       </TableBody>
                     </Table>
                   </CardContent>
@@ -1404,7 +1747,9 @@ export default function AdminDashboard() {
                 <Card>
                   <CardHeader>
                     <CardTitle>Recent Transactions</CardTitle>
-                    <CardDescription>Monitor payment transactions</CardDescription>
+                    <CardDescription>
+                      Monitor payment transactions
+                    </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <Table>
@@ -1420,32 +1765,51 @@ export default function AdminDashboard() {
                       </TableHeader>
                       <TableBody>
                         {transactions
-                          .slice((transactionsPage - 1) * itemsPerPage, transactionsPage * itemsPerPage)
+                          .slice(
+                            (transactionsPage - 1) * itemsPerPage,
+                            transactionsPage * itemsPerPage
+                          )
                           .map((transaction: Transaction) => (
-                          <TableRow key={transaction.id}>
-                            <TableCell className="font-medium">{transaction.transactionId}</TableCell>
-                            <TableCell>₹{transaction.amount}</TableCell>
-                            <TableCell>
-                              <Badge variant={
-                                transaction.status === "completed" ? "default" : 
-                                transaction.status === "success" ? "default" : 
-                                transaction.status === "pending" ? "secondary" : "destructive"
-                              } className={
-                                transaction.status === "completed" ? "bg-green-100 text-green-800 hover:bg-green-200" :
-                                transaction.status === "success" ? "bg-green-100 text-green-800 hover:bg-green-200" : ""
-                              }>
-                                {transaction.status}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>{transaction.certificateId}</TableCell>
-                            <TableCell>{new Date(transaction.createdAt).toLocaleDateString()}</TableCell>
-                            <TableCell>
-                              <Button size="sm" variant="outline">
-                                <Eye className="h-4 w-4" />
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
+                            <TableRow key={transaction.id}>
+                              <TableCell className="font-medium">
+                                {transaction.transactionId}
+                              </TableCell>
+                              <TableCell>₹{transaction.amount}</TableCell>
+                              <TableCell>
+                                <Badge
+                                  variant={
+                                    transaction.status === "completed"
+                                      ? "default"
+                                      : transaction.status === "success"
+                                      ? "default"
+                                      : transaction.status === "pending"
+                                      ? "secondary"
+                                      : "destructive"
+                                  }
+                                  className={
+                                    transaction.status === "completed"
+                                      ? "bg-green-100 text-green-800 hover:bg-green-200"
+                                      : transaction.status === "success"
+                                      ? "bg-green-100 text-green-800 hover:bg-green-200"
+                                      : ""
+                                  }
+                                >
+                                  {transaction.status}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>{transaction.certificateId}</TableCell>
+                              <TableCell>
+                                {new Date(
+                                  transaction.createdAt
+                                ).toLocaleDateString()}
+                              </TableCell>
+                              <TableCell>
+                                <Button size="sm" variant="outline">
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          ))}
                       </TableBody>
                     </Table>
                     {transactions.length > itemsPerPage && (
@@ -1453,19 +1817,34 @@ export default function AdminDashboard() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => setTransactionsPage(Math.max(1, transactionsPage - 1))}
+                          onClick={() =>
+                            setTransactionsPage(
+                              Math.max(1, transactionsPage - 1)
+                            )
+                          }
                           disabled={transactionsPage === 1}
                         >
                           Previous
                         </Button>
                         <span className="flex items-center px-3 text-sm">
-                          Page {transactionsPage} of {Math.ceil(transactions.length / itemsPerPage)}
+                          Page {transactionsPage} of{" "}
+                          {Math.ceil(transactions.length / itemsPerPage)}
                         </span>
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => setTransactionsPage(Math.min(Math.ceil(transactions.length / itemsPerPage), transactionsPage + 1))}
-                          disabled={transactionsPage >= Math.ceil(transactions.length / itemsPerPage)}
+                          onClick={() =>
+                            setTransactionsPage(
+                              Math.min(
+                                Math.ceil(transactions.length / itemsPerPage),
+                                transactionsPage + 1
+                              )
+                            )
+                          }
+                          disabled={
+                            transactionsPage >=
+                            Math.ceil(transactions.length / itemsPerPage)
+                          }
                         >
                           Next
                         </Button>
@@ -1483,7 +1862,9 @@ export default function AdminDashboard() {
                 <Card>
                   <CardHeader>
                     <CardTitle>Partner Management</CardTitle>
-                    <CardDescription>Manage partner applications and approvals</CardDescription>
+                    <CardDescription>
+                      Manage partner applications and approvals
+                    </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <Table>
@@ -1499,32 +1880,48 @@ export default function AdminDashboard() {
                       </TableHeader>
                       <TableBody>
                         {partners
-                          .slice((partnersPage - 1) * itemsPerPage, partnersPage * itemsPerPage)
+                          .slice(
+                            (partnersPage - 1) * itemsPerPage,
+                            partnersPage * itemsPerPage
+                          )
                           .map((partner: Partner) => (
-                          <TableRow key={partner.id}>
-                            <TableCell className="font-medium">{partner.name}</TableCell>
-                            <TableCell>{partner.email}</TableCell>
-                            <TableCell>{partner.phone || "N/A"}</TableCell>
-                            <TableCell>₹{partner.totalEarnings || 0}</TableCell>
-                            <TableCell>
-                              <Badge variant={partner.isApproved ? "default" : "secondary"}>
-                                {partner.isApproved ? "Approved" : "Pending"}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex gap-2">
-                                {!partner.isApproved && (
-                                  <Button size="sm" onClick={() => handleApprovePartner(partner.id)}>
-                                    Approve
+                            <TableRow key={partner.id}>
+                              <TableCell className="font-medium">
+                                {partner.name}
+                              </TableCell>
+                              <TableCell>{partner.email}</TableCell>
+                              <TableCell>{partner.phone || "N/A"}</TableCell>
+                              <TableCell>
+                                ₹{partner.totalEarnings || 0}
+                              </TableCell>
+                              <TableCell>
+                                <Badge
+                                  variant={
+                                    partner.isApproved ? "default" : "secondary"
+                                  }
+                                >
+                                  {partner.isApproved ? "Approved" : "Pending"}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex gap-2">
+                                  {!partner.isApproved && (
+                                    <Button
+                                      size="sm"
+                                      onClick={() =>
+                                        handleApprovePartner(partner.id)
+                                      }
+                                    >
+                                      Approve
+                                    </Button>
+                                  )}
+                                  <Button size="sm" variant="outline">
+                                    <Eye className="h-4 w-4" />
                                   </Button>
-                                )}
-                                <Button size="sm" variant="outline">
-                                  <Eye className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))}
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))}
                       </TableBody>
                     </Table>
                     {partners.length > itemsPerPage && (
@@ -1532,19 +1929,32 @@ export default function AdminDashboard() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => setPartnersPage(Math.max(1, partnersPage - 1))}
+                          onClick={() =>
+                            setPartnersPage(Math.max(1, partnersPage - 1))
+                          }
                           disabled={partnersPage === 1}
                         >
                           Previous
                         </Button>
                         <span className="flex items-center px-3 text-sm">
-                          Page {partnersPage} of {Math.ceil(partners.length / itemsPerPage)}
+                          Page {partnersPage} of{" "}
+                          {Math.ceil(partners.length / itemsPerPage)}
                         </span>
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => setPartnersPage(Math.min(Math.ceil(partners.length / itemsPerPage), partnersPage + 1))}
-                          disabled={partnersPage >= Math.ceil(partners.length / itemsPerPage)}
+                          onClick={() =>
+                            setPartnersPage(
+                              Math.min(
+                                Math.ceil(partners.length / itemsPerPage),
+                                partnersPage + 1
+                              )
+                            )
+                          }
+                          disabled={
+                            partnersPage >=
+                            Math.ceil(partners.length / itemsPerPage)
+                          }
                         >
                           Next
                         </Button>
