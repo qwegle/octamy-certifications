@@ -55,6 +55,21 @@ export const users = pgTable("users", {
   name: text("name").notNull(),
   phone: text("phone"),
   isAdmin: boolean("is_admin").default(false).notNull(),
+  // CV and profile fields for recruiters
+  cvFileName: text("cv_file_name"),
+  cvFilePath: text("cv_file_path"),
+  dateOfBirth: text("date_of_birth"),
+  location: text("location"),
+  linkedinUrl: text("linkedin_url"),
+  githubUrl: text("github_url"),
+  portfolioUrl: text("portfolio_url"),
+  bio: text("bio"),
+  isOpenToWork: boolean("is_open_to_work").default(false).notNull(),
+  preferredJobTitle: text("preferred_job_title"),
+  experienceLevel: text("experience_level"), // fresher, junior, mid, senior, lead
+  skills: text("skills").array(),
+  expectedSalary: text("expected_salary"),
+  noticePeriod: text("notice_period"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -100,6 +115,11 @@ export const courses = pgTable("courses", {
   isInternship: boolean("is_internship").default(false).notNull(),
   metaTitle: text("meta_title"),
   metaDescription: text("meta_description"),
+  // AI Interactive Course fields
+  courseType: text("course_type").default("standard").notNull(), // standard, ai_interactive
+  isPreferred: boolean("is_preferred").default(false).notNull(), // preferred by recruiters
+  aiSystemPrompt: text("ai_system_prompt"), // System prompt for AI conversations
+  aiInstructions: text("ai_instructions"), // Instructions for AI evaluation
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -107,9 +127,16 @@ export const questions = pgTable("questions", {
   id: serial("id").primaryKey(),
   courseId: integer("course_id").references(() => courses.id).notNull(),
   question: text("question").notNull(),
-  options: json("options").$type<string[]>().notNull(),
-  correctAnswer: integer("correct_answer").notNull(),
+  options: json("options").$type<string[]>(), // null for AI interactive questions
+  correctAnswer: integer("correct_answer"), // null for AI interactive questions
   isActive: boolean("is_active").default(true).notNull(),
+  // AI Interactive Question fields
+  questionType: text("question_type").default("multiple_choice").notNull(), // multiple_choice, ai_interactive
+  aiScenario: text("ai_scenario"), // Detailed scenario for AI questions
+  aiEvaluationCriteria: json("ai_evaluation_criteria").$type<string[]>(), // Evaluation criteria for AI
+  expectedKeywords: text("expected_keywords").array(), // Keywords to look for in responses
+  maxPoints: integer("max_points").default(100).notNull(), // Points for this question
+  difficulty: text("difficulty").default("medium").notNull(), // easy, medium, hard
 });
 
 export const examAttempts = pgTable("exam_attempts", {
@@ -120,7 +147,7 @@ export const examAttempts = pgTable("exam_attempts", {
   userName: text("user_name").notNull(),
   score: integer("score").notNull(),
   totalQuestions: integer("total_questions").notNull(),
-  answers: json("answers").$type<Record<string, number>>().notNull(),
+  answers: json("answers").$type<Record<string, any>>().notNull(), // Updated to support AI responses
   timeTaken: integer("time_taken").notNull(), // in seconds
   passed: boolean("passed").notNull(),
   mastered: boolean("mastered").default(false).notNull(),
@@ -128,6 +155,11 @@ export const examAttempts = pgTable("exam_attempts", {
   ipAddress: text("ip_address"),
   userAgent: text("user_agent"),
   tabSwitches: integer("tab_switches").default(0).notNull(),
+  // AI Interactive Exam fields
+  aiConversationLog: json("ai_conversation_log").$type<any[]>(), // Log of AI conversations
+  aiTotalScore: integer("ai_total_score"), // AI-calculated total score
+  aiAnalysis: text("ai_analysis"), // AI's analysis of the candidate
+  recruitmentReady: boolean("recruitment_ready").default(false).notNull(), // Ready for recruiter review
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -241,6 +273,83 @@ export const withdrawalRequests = pgTable("withdrawal_requests", {
   processedAt: timestamp("processed_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+// Recruiters table for the recruiter portal
+export const recruiters = pgTable("recruiters", {
+  id: serial("id").primaryKey(),
+  email: text("email").notNull().unique(),
+  password: text("password").notNull(),
+  firstName: text("first_name").notNull(),
+  lastName: text("last_name").notNull(),
+  companyName: text("company_name").notNull(),
+  companyWebsite: text("company_website"),
+  jobTitle: text("job_title").notNull(),
+  phone: text("phone"),
+  linkedinUrl: text("linkedin_url"),
+  companySize: text("company_size"), // startup, small, medium, large, enterprise
+  industry: text("industry"),
+  isVerified: boolean("is_verified").default(false).notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  subscriptionPlan: text("subscription_plan").default("free").notNull(), // free, basic, premium, enterprise
+  subscriptionExpiresAt: timestamp("subscription_expires_at"),
+  profileCompleteness: integer("profile_completeness").default(0).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Candidate shortlists for recruiters
+export const candidateShortlists = pgTable("candidate_shortlists", {
+  id: serial("id").primaryKey(),
+  recruiterId: integer("recruiter_id").references(() => recruiters.id).notNull(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  examAttemptId: integer("exam_attempt_id").references(() => examAttempts.id).notNull(),
+  status: text("status").default("interested").notNull(), // interested, contacted, interviewing, hired, rejected
+  notes: text("notes"),
+  interviewScheduled: timestamp("interview_scheduled"),
+  contactedAt: timestamp("contacted_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// AI conversation history for interactive exams
+export const aiConversations = pgTable("ai_conversations", {
+  id: serial("id").primaryKey(),
+  examAttemptId: integer("exam_attempt_id").references(() => examAttempts.id).notNull(),
+  questionId: integer("question_id").references(() => questions.id).notNull(),
+  conversationHistory: json("conversation_history").$type<any[]>().notNull(),
+  userResponse: text("user_response").notNull(),
+  aiEvaluation: text("ai_evaluation").notNull(),
+  scoreAwarded: integer("score_awarded").notNull(),
+  maxScore: integer("max_score").notNull(),
+  evaluationCriteria: json("evaluation_criteria").$type<string[]>().notNull(),
+  keywordsFound: text("keywords_found").array(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Schema types for new recruiter tables
+export const insertRecruiterSchema = createInsertSchema(recruiters).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertCandidateShortlistSchema = createInsertSchema(candidateShortlists).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAiConversationSchema = createInsertSchema(aiConversations).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertRecruiter = z.infer<typeof insertRecruiterSchema>;
+export type Recruiter = typeof recruiters.$inferSelect;
+export type InsertCandidateShortlist = z.infer<typeof insertCandidateShortlistSchema>;
+export type CandidateShortlist = typeof candidateShortlists.$inferSelect;
+export type InsertAiConversation = z.infer<typeof insertAiConversationSchema>;
+export type AiConversation = typeof aiConversations.$inferSelect;
 
 
 

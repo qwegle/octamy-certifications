@@ -13,6 +13,10 @@ import apiRoutes from "./routes/index";
 import certificateRoutes from "./routes/certificateRoutes";
 import { emailService } from "./utils/emailService";
 import { generateCertificateHTML } from "./utils/certificateGenerator";
+import { recruiterController } from "./controllers/recruiterController";
+import { aiExamController } from "./controllers/aiExamController";
+import { authenticateRecruiterToken } from "./middleware/recruiterAuth";
+import { createAiCourses } from "./seeds/createAiCourses";
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -565,6 +569,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Shuffle options within each question and track correct answer
       const questionsWithShuffledOptions = limitedQuestions.map(q => {
+        // Handle AI interactive questions that don't have options
+        if (!q.options || q.questionType === 'ai_interactive') {
+          return {
+            id: q.id,
+            question: q.question,
+            options: [],
+            correctAnswer: null,
+            difficulty: q.difficulty || 'medium',
+            questionType: q.questionType || 'multiple_choice',
+            aiScenario: q.aiScenario,
+            maxPoints: q.maxPoints || 100
+          };
+        }
+        
         const originalOptions = [...q.options];
         const correctAnswerText = originalOptions[q.correctAnswer];
         
@@ -582,7 +600,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           id: q.id,
           question: q.question,
           options: shuffledOptions,
-          correctAnswer: newCorrectAnswer
+          correctAnswer: newCorrectAnswer,
+          difficulty: q.difficulty || 'medium',
+          questionType: q.questionType || 'multiple_choice',
+          aiScenario: q.aiScenario,
+          maxPoints: q.maxPoints || 100
         };
       });
       
@@ -1634,6 +1656,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
           </body>
         </html>
       `);
+    }
+  });
+
+  // Recruiter Portal Routes
+  app.post('/api/recruiters/register', recruiterController.register.bind(recruiterController));
+  app.post('/api/recruiters/login', recruiterController.login.bind(recruiterController));
+  app.get('/api/recruiters/dashboard', authenticateRecruiterToken, recruiterController.getDashboard.bind(recruiterController));
+  app.get('/api/recruiters/candidates/search', authenticateRecruiterToken, recruiterController.searchCandidates.bind(recruiterController));
+  app.get('/api/recruiters/candidates/:userId', authenticateRecruiterToken, recruiterController.getCandidateDetails.bind(recruiterController));
+  app.post('/api/recruiters/candidates/shortlist', authenticateRecruiterToken, recruiterController.shortlistCandidate.bind(recruiterController));
+  app.put('/api/recruiters/candidates/status/:shortlistId', authenticateRecruiterToken, recruiterController.updateCandidateStatus.bind(recruiterController));
+  app.get('/api/recruiters/shortlisted', authenticateRecruiterToken, recruiterController.getShortlistedCandidates.bind(recruiterController));
+
+  // AI Interactive Exam Routes
+  app.post('/api/ai-exam/:courseId/start', optionalAuth, aiExamController.startAiExam.bind(aiExamController));
+  app.post('/api/ai-exam/conversation', optionalAuth, aiExamController.processAiConversation.bind(aiExamController));
+  app.post('/api/ai-exam/submit', optionalAuth, aiExamController.submitAiExam.bind(aiExamController));
+  app.get('/api/ai-exam/results/:examAttemptId', optionalAuth, aiExamController.getAiExamResults.bind(aiExamController));
+
+  // Seed AI Interactive Questions (Development only)
+  app.post('/api/admin/seed-ai-questions', authenticateAdminToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const result = await createAiCourses();
+      res.json({
+        message: "AI Interactive courses created successfully",
+        ...result
+      });
+    } catch (error) {
+      console.error("Seed AI courses error:", error);
+      res.status(500).json({ error: "Failed to seed AI courses" });
     }
   });
 

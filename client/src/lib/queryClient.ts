@@ -7,36 +7,72 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
-export async function apiRequest(
+export async function apiRequest(url: string, options: RequestInit = {}): Promise<any> {
+  // Ensure url is a string before using string methods
+  const urlString = String(url || '');
+  
+  // Use admin token for admin routes, recruiter token for recruiter routes, regular token for others
+  const isAdminRoute = urlString.includes('/admin');
+  const isRecruiterRoute = urlString.includes('/recruiters');
+  
+  let token;
+  if (isAdminRoute) {
+    token = localStorage.getItem('adminToken');
+  } else if (isRecruiterRoute) {
+    token = localStorage.getItem('recruiterToken');
+  } else {
+    token = localStorage.getItem('authToken') || localStorage.getItem('token');
+  }
+    
+  const config: RequestInit = {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...(token && { Authorization: `Bearer ${token}` }),
+      ...options.headers,
+    },
+  };
+
+  const response = await fetch(urlString, config);
+  
+  if (!response.ok) {
+    const errorText = await response.text();
+    let errorMessage = `${response.status}: ${response.statusText}`;
+    
+    try {
+      const errorData = JSON.parse(errorText);
+      errorMessage = errorData.message || errorMessage;
+    } catch {
+      errorMessage = errorText || errorMessage;
+    }
+    
+    throw new Error(errorMessage);
+  }
+
+  const contentType = response.headers.get("content-type");
+  if (contentType && contentType.includes("application/json")) {
+    return response.json();
+  }
+  
+  return response.text();
+}
+
+// Legacy method support for backward compatibility
+export async function legacyApiRequest(
   method: string,
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
-  // Use admin token for admin routes, regular token for others
-  const isAdminRoute = url.includes('/admin');
-  const token = isAdminRoute 
-    ? localStorage.getItem('adminToken') 
-    : localStorage.getItem('authToken');
-    
-  const headers: Record<string, string> = {};
-  
-  if (data) {
-    headers["Content-Type"] = "application/json";
-  }
-  
-  if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
-  }
-
-  const res = await fetch(url, {
+  const options: RequestInit = {
     method,
-    headers,
     body: data ? JSON.stringify(data) : undefined,
-    credentials: "include",
+  };
+  
+  const result = await apiRequest(url, options);
+  return new Response(JSON.stringify(result), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' }
   });
-
-  await throwIfResNotOk(res);
-  return res;
 }
 
 type UnauthorizedBehavior = "returnNull" | "throw";

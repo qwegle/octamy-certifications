@@ -175,6 +175,11 @@ export default function Landing() {
                     Login
                   </Button>
                 </Link>
+                <Link href="/recruiter-auth">
+                  <Button variant="outline" className="border-purple-500 text-purple-400 hover:bg-purple-500 hover:text-white mr-2">
+                    For Recruiters
+                  </Button>
+                </Link>
                 <Link href="/seller-auth">
                   <Button className="bg-white text-black hover:bg-gray-200">
                     Become a Reseller
