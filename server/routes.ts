@@ -2044,6 +2044,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get interview responses with audio transcription
+  app.get("/api/interview-responses/:interviewId", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const interviewId = parseInt(req.params.interviewId);
+      
+      // Verify interview ownership
+      const interview = await storage.getInterviewById(interviewId);
+      if (!interview || interview.userId !== req.user!.userId) {
+        return res.status(403).json({ error: 'Access denied' });
+      }
+      
+      // Get responses with questions
+      const responses = await db
+        .select({
+          id: interviewResponses.id,
+          questionId: interviewResponses.questionId,
+          audioTranscription: interviewResponses.audioTranscription,
+          screenAnalysis: interviewResponses.screenAnalysis,
+          timeSpent: interviewResponses.timeSpent,
+          aiScore: interviewResponses.aiScore,
+          aiAnalysis: interviewResponses.aiAnalysis,
+          introductionScore: interviewResponses.introductionScore,
+          technicalScore: interviewResponses.technicalScore,
+          question: interviewQuestions.question,
+          questionType: interviewQuestions.questionType,
+        })
+        .from(interviewResponses)
+        .innerJoin(interviewQuestions, eq(interviewResponses.questionId, interviewQuestions.id))
+        .where(eq(interviewResponses.interviewId, interviewId));
+      
+      res.json(responses);
+    } catch (error) {
+      console.error("Error fetching interview responses:", error);
+      res.status(500).json({ error: "Failed to fetch responses" });
+    }
+  });
+
   // Import and add new routes
   // Add user interviews endpoint with detailed logging
   app.get("/api/user/interviews", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {

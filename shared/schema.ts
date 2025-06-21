@@ -801,6 +801,7 @@ export const interviewQuestions = pgTable("interview_questions", {
   question: text("question").notNull(),
   technology: text("technology").notNull(), // React, Node.js, Python, etc.
   difficulty: text("difficulty").notNull(), // beginner, intermediate, advanced
+  questionType: text("question_type").notNull().default('interview'), // 'interview', 'practical', 'handson'
   timeLimit: integer("time_limit").notNull(), // time in seconds
   isActive: boolean("is_active").default(true).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -840,7 +841,8 @@ export const interviewResponses = pgTable("interview_responses", {
   interviewId: integer("interview_id").references(() => interviews.id).notNull(),
   questionId: integer("question_id").references(() => interviewQuestions.id).notNull(),
   videoSegmentUrl: text("video_segment_url"), // Cloudinary URL for this question's video
-  audioTranscription: text("audio_transcription"),
+  audioTranscription: text("audio_transcription"), // Audio transcription from video only
+  screenAnalysis: text("screen_analysis"), // AI analysis of screen recording for practical questions
   eyeTrackingData: jsonb("eye_tracking_data").$type<{
     averageFocus: number;
     lookAwayCount: number;
@@ -849,6 +851,8 @@ export const interviewResponses = pgTable("interview_responses", {
   timeSpent: integer("time_spent"), // in seconds
   aiScore: integer("ai_score"), // individual question score
   aiAnalysis: text("ai_analysis"),
+  introductionScore: integer("introduction_score"), // Score for self-introduction (0-20)
+  technicalScore: integer("technical_score"), // Score for technical content (0-80)
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

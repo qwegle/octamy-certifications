@@ -1,26 +1,17 @@
 import { useState, useEffect, useRef } from 'react';
-import { useParams, useLocation } from 'wouter';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useParams } from 'wouter';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { useAuth } from '@/lib/auth';
-import Header from '@/components/header';
-import { 
-  Video, 
-  VideoOff, 
-  Mic, 
-  MicOff, 
-  Clock, 
-  Eye,
-  AlertTriangle,
-  CheckCircle,
-  ArrowRight,
-  ArrowLeft
-} from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/lib/auth';
+import { 
+  CheckCircle, ArrowRight, ArrowLeft, Clock, MessageSquare, Monitor, 
+  Download, Video, VideoOff, Mic, MicOff, AlertTriangle 
+} from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+// Header component replaced with inline navigation
 
 interface InterviewQuestion {
   id: number;
@@ -38,238 +29,48 @@ interface Interview {
   title: string;
   status: string;
   questions?: InterviewQuestion[];
+  videoUrl?: string;
+  screenRecordingUrl?: string;
+  score?: number;
+  grade?: string;
+  aiSummary?: string;
+  swotAnalysis?: string;
 }
 
 export default function InterviewSession() {
   const { id } = useParams();
   const { user, token } = useAuth();
-  const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   
+  // State management
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<number, string>>({});
-  const [timeRemaining, setTimeRemaining] = useState(0);
-  const [questionTimers, setQuestionTimers] = useState<Record<number, number>>({});
+  const [timeElapsed, setTimeElapsed] = useState(0);
+  const [timeRemaining, setTimeRemaining] = useState(3600); // 1 hour
+  const [tabSwitches, setTabSwitches] = useState(0);
   const [isRecording, setIsRecording] = useState(false);
+  const [isScreenRecording, setIsScreenRecording] = useState(false);
   const [videoEnabled, setVideoEnabled] = useState(true);
   const [audioEnabled, setAudioEnabled] = useState(true);
-  const [tabSwitches, setTabSwitches] = useState(0);
-  const [isScreenRecording, setIsScreenRecording] = useState(false);
+  
+  // Recording references
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const screenRecorderRef = useRef<MediaRecorder | null>(null);
   const [videoChunks, setVideoChunks] = useState<Blob[]>([]);
   const [screenChunks, setScreenChunks] = useState<Blob[]>([]);
-  
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Fetch interview details
-  const { data: interview, isLoading } = useQuery<Interview>({
-    queryKey: [`/api/interviews/${id}`],
-    enabled: !!user && !!token && !!id,
-    queryFn: async () => {
-      const response = await fetch(`/api/interviews/${id}`, {
-        headers: { 'Authorization': `Bearer ${token}` },
-      });
-      if (!response.ok) throw new Error('Failed to fetch interview');
-      return response.json();
-    },
+  // Fetch interview data
+  const { data: interview, isLoading } = useQuery({
+    queryKey: ['/api/interviews', id],
+    queryFn: () => fetch(`/api/interviews/${id}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    }).then(res => res.json()),
+    enabled: !!token && !!id
   });
 
-  const currentQuestion = interview?.questions?.[currentQuestionIndex];
-
-  // Start video recording only during active interview
-  useEffect(() => {
-    if (!currentQuestion || interview?.status === 'completed') return;
-
-    const startRecording = async () => {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ 
-          video: videoEnabled, 
-          audio: audioEnabled 
-        });
-        
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-        }
-
-        const mediaRecorder = new MediaRecorder(stream);
-        mediaRecorderRef.current = mediaRecorder;
-        
-        // Collect video chunks
-        mediaRecorder.ondataavailable = (event) => {
-          if (event.data.size > 0) {
-            setVideoChunks(prev => [...prev, event.data]);
-          }
-        };
-        
-        mediaRecorder.start();
-        setIsRecording(true);
-      } catch (error) {
-        console.error('Error starting recording:', error);
-        toast({
-          title: 'Recording Error',
-          description: 'Could not start video/audio recording',
-          variant: 'destructive',
-        });
-      }
-    };
-
-    startRecording();
-
-    return () => {
-      if (mediaRecorderRef.current) {
-        mediaRecorderRef.current.stop();
-      }
-    };
-  }, [currentQuestion, videoEnabled, audioEnabled]);
-
-  // Timer countdown with question-specific persistence
-  useEffect(() => {
-    if (currentQuestion) {
-      // Set timer from stored time or default
-      const timeLimit = currentQuestion.isHandsOn ? 1800 : currentQuestion.timeLimit;
-      const storedTime = questionTimers[currentQuestion.id];
-      
-      if (storedTime === undefined) {
-        setTimeRemaining(timeLimit);
-        setQuestionTimers(prev => ({ ...prev, [currentQuestion.id]: timeLimit }));
-      } else {
-        setTimeRemaining(storedTime);
-      }
-    }
-  }, [currentQuestion?.id]);
-
-  useEffect(() => {
-    if (timeRemaining > 0 && currentQuestion) {
-      timerRef.current = setTimeout(() => {
-        const newTime = timeRemaining - 1;
-        setTimeRemaining(newTime);
-        setQuestionTimers(prev => ({ ...prev, [currentQuestion.id]: newTime }));
-      }, 1000);
-    } else if (timeRemaining === 0 && currentQuestion) {
-      handleNextQuestion();
-    }
-
-    return () => {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-      }
-    };
-  }, [timeRemaining, currentQuestion]);
-
-  // Tab switch detection and cleanup - only for active interviews
-  useEffect(() => {
-    // Don't track tab switches if interview is completed
-    if (interview?.status === 'completed') return;
-
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        setTabSwitches(prev => prev + 1);
-        toast({
-          title: 'Tab Switch Detected',
-          description: 'Please stay on this tab during the interview',
-          variant: 'destructive',
-        });
-      }
-    };
-
-    const handleBeforeUnload = () => {
-      cleanupMedia();
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    
-    return () => {
-      cleanupMedia();
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-    };
-  }, [interview?.status]);
-
-  const handleAnswerChange = (answer: string) => {
-    if (currentQuestion) {
-      setAnswers(prev => ({
-        ...prev,
-        [currentQuestion.id]: answer
-      }));
-    }
-  };
-
-  const handleNextQuestion = () => {
-    // Start screen recording for hands-on questions automatically
-    if (interview?.questions && currentQuestionIndex < interview.questions.length - 1) {
-      const nextQuestion = interview.questions[currentQuestionIndex + 1];
-      setCurrentQuestionIndex(prev => prev + 1);
-      
-      // Auto-start screen recording for hands-on questions
-      if (nextQuestion?.isHandsOn && !isScreenRecording) {
-        setTimeout(() => startScreenRecording(), 100);
-      }
-    } else {
-      submitInterview();
-    }
-  };
-
-  const handlePrevQuestion = () => {
-    if (currentQuestionIndex > 0) {
-      setCurrentQuestionIndex(prev => prev - 1);
-    }
-  };
-
-  // Cleanup function for camera and recording
-  const cleanupMedia = () => {
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-      mediaRecorderRef.current.stop();
-    }
-    if (screenRecorderRef.current && screenRecorderRef.current.state !== 'inactive') {
-      screenRecorderRef.current.stop();
-    }
-    if (videoRef.current && videoRef.current.srcObject) {
-      const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
-      tracks.forEach(track => track.stop());
-      videoRef.current.srcObject = null;
-    }
-    setIsRecording(false);
-    setIsScreenRecording(false);
-  };
-
-  // Start screen recording for hands-on questions
-  const startScreenRecording = async () => {
-    try {
-      const screenStream = await navigator.mediaDevices.getDisplayMedia({
-        video: true,
-        audio: true
-      });
-      
-      const mediaRecorder = new MediaRecorder(screenStream);
-      screenRecorderRef.current = mediaRecorder;
-      
-      // Collect screen recording chunks
-      mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          setScreenChunks(prev => [...prev, event.data]);
-        }
-      };
-      
-      mediaRecorder.start();
-      setIsScreenRecording(true);
-      
-      toast({
-        title: 'Screen Recording Started',
-        description: 'Your screen is now being recorded for this hands-on question',
-      });
-    } catch (error) {
-      console.error('Error starting screen recording:', error);
-      toast({
-        title: 'Screen Recording Failed',
-        description: 'Unable to start screen recording. Please try again.',
-        variant: 'destructive',
-      });
-    }
-  };
-
+  // Submit interview mutation
   const submitInterviewMutation = useMutation({
     mutationFn: async () => {
       // Stop recording and prepare videos
@@ -316,39 +117,165 @@ export default function InterviewSession() {
         }
       }
       
+      // Submit the interview
       const response = await fetch(`/api/interviews/${id}/submit`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           answers,
           tabSwitches,
-          completedAt: new Date(),
+          completedAt: new Date().toISOString(),
           videoUrl,
-          screenRecordingUrl,
+          screenRecordingUrl
         }),
       });
-      if (!response.ok) throw new Error('Failed to submit interview');
+      
+      if (!response.ok) {
+        throw new Error('Failed to submit interview');
+      }
+      
       return response.json();
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       toast({
-        title: 'Interview Submitted',
-        description: 'Your interview has been submitted successfully',
+        title: "Interview Submitted",
+        description: "Your interview has been submitted successfully!",
       });
-      // Redirect to results page after successful submission
-      window.location.href = `/interviews/${data.id}`;
+      queryClient.invalidateQueries({ queryKey: ['/api/interviews', id] });
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Submit error:', error);
       toast({
-        title: 'Submission Failed',
-        description: 'Failed to submit interview. Please try again.',
-        variant: 'destructive',
+        title: "Submission Failed",
+        description: "Failed to submit interview. Please try again.",
+        variant: "destructive",
       });
-    },
+    }
   });
+
+  // Timer effect
+  useEffect(() => {
+    if (interview?.status === 'in_progress') {
+      const timer = setInterval(() => {
+        setTimeElapsed(prev => prev + 1);
+        setTimeRemaining(prev => Math.max(0, prev - 1));
+      }, 1000);
+      
+      return () => clearInterval(timer);
+    }
+  }, [interview?.status]);
+
+  // Tab switch detection
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden && interview?.status === 'in_progress') {
+        setTabSwitches(prev => prev + 1);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [interview?.status]);
+
+  // Media recording functions
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: videoEnabled,
+        audio: audioEnabled
+      });
+      
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+      
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          setVideoChunks(prev => [...prev, event.data]);
+        }
+      };
+      
+      mediaRecorder.start();
+      setIsRecording(true);
+    } catch (error) {
+      console.error('Error starting recording:', error);
+      toast({
+        title: "Recording Error",
+        description: "Failed to start recording. Please check your camera permissions.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const startScreenRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getDisplayMedia({
+        video: true,
+        audio: true
+      });
+      
+      const screenRecorder = new MediaRecorder(stream);
+      screenRecorderRef.current = screenRecorder;
+      
+      screenRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          setScreenChunks(prev => [...prev, event.data]);
+        }
+      };
+      
+      screenRecorder.start();
+      setIsScreenRecording(true);
+      
+      // Stop screen recording when user stops sharing
+      stream.getVideoTracks()[0].onended = () => {
+        setIsScreenRecording(false);
+        screenRecorder.stop();
+      };
+    } catch (error) {
+      console.error('Error starting screen recording:', error);
+      toast({
+        title: "Screen Recording Error",
+        description: "Failed to start screen recording. Please check your permissions.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const cleanupMedia = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+    }
+    
+    if (screenRecorderRef.current && isScreenRecording) {
+      screenRecorderRef.current.stop();
+      setIsScreenRecording(false);
+    }
+    
+    if (videoRef.current?.srcObject) {
+      const stream = videoRef.current.srcObject as MediaStream;
+      stream.getTracks().forEach(track => track.stop());
+    }
+  };
+
+  // Navigation functions
+  const handleNextQuestion = () => {
+    if (currentQuestionIndex < (interview?.questions?.length || 0) - 1) {
+      setCurrentQuestionIndex(prev => prev + 1);
+    }
+  };
+
+  const handlePreviousQuestion = () => {
+    if (currentQuestionIndex > 0) {
+      setCurrentQuestionIndex(prev => prev - 1);
+    }
+  };
 
   const submitInterview = () => {
     submitInterviewMutation.mutate();
@@ -383,188 +310,174 @@ export default function InterviewSession() {
     );
   }
 
-  // Show results if interview is completed - disable recording and tab tracking
-  if (interview && interview.status === 'completed') {
+  if (!interview) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-white">
         <Header />
-        <div className="container mx-auto px-4 py-8">
-          <div className="max-w-4xl mx-auto">
-            {/* Results Header */}
-            <Card className="mb-8">
-              <CardContent className="p-8 text-center">
-                <CheckCircle className="mx-auto h-16 w-16 text-green-500 mb-4" />
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">Interview Completed!</h1>
-                <p className="text-xl text-gray-600 mb-6">{interview.title}</p>
-                
-                {/* Score Display */}
-                <div className="bg-gradient-to-r from-blue-50 to-green-50 rounded-xl p-6 mb-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <p className="text-4xl font-bold text-blue-600 mb-2">{interview.score || 0}/100</p>
-                      <p className="text-gray-600">Overall Score</p>
-                    </div>
-                    <div>
-                      <p className="text-4xl font-bold text-green-600 mb-2">{interview.grade || 'N/A'}</p>
-                      <p className="text-gray-600">Grade</p>
-                    </div>
-                  </div>
-                </div>
+        <div className="max-w-4xl mx-auto px-4 py-12 text-center">
+          <h2 className="text-2xl font-bold mb-4">Interview Not Found</h2>
+        </div>
+      </div>
+    );
+  }
 
-                {/* Action Buttons */}
-                <div className="flex gap-4 justify-center">
-                  <Button onClick={() => setLocation('/ai-interviews')}>
-                    <ArrowLeft className="w-4 h-4 mr-2" />
-                    Back to Interviews
-                  </Button>
-                  <Button variant="outline" onClick={() => window.print()}>
-                    Print Results
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+  const currentQuestion = interview?.questions?.[currentQuestionIndex];
 
-            {/* Interview Details */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+  // Show results if interview is completed
+  if (interview.status === 'completed') {
+    return (
+      <div className="min-h-screen bg-white">
+        <Header />
+        <div className="max-w-6xl mx-auto px-4 py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Results Summary */}
+            <div>
               <Card>
                 <CardHeader>
-                  <CardTitle>Interview Summary</CardTitle>
+                  <CardTitle className="flex items-center gap-2">
+                    <CheckCircle className="w-6 h-6 text-green-600" />
+                    Interview Completed
+                  </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div>
-                      <p className="text-sm text-gray-600">Technology</p>
-                      <p className="font-semibold">{interview.technology}</p>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="text-center p-4 bg-blue-50 rounded-lg">
+                      <div className="text-2xl font-bold text-blue-600">{interview.score || 0}%</div>
+                      <div className="text-sm text-gray-600">Score</div>
                     </div>
-                    <div>
-                      <p className="text-sm text-gray-600">Status</p>
-                      <Badge className="bg-green-100 text-green-800">Completed</Badge>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-600">Completed At</p>
-                      <p className="font-semibold">
-                        {interview.completedAt ? new Date(interview.completedAt).toLocaleString() : 'Not available'}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-600">Questions Answered</p>
-                      <p className="font-semibold">{interview.questions?.length || 0}</p>
+                    <div className="text-center p-4 bg-green-50 rounded-lg">
+                      <div className="text-2xl font-bold text-green-600">{interview.grade || 'N/A'}</div>
+                      <div className="text-sm text-gray-600">Grade</div>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Performance Insights</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {interview.aiSummary ? (
-                      <div>
-                        <p className="text-sm text-gray-600">AI Analysis</p>
-                        <p className="text-sm">{interview.aiSummary}</p>
+                  {interview.aiSummary && (
+                    <div>
+                      <p className="text-sm text-gray-600 mb-2">AI Summary</p>
+                      <div className="bg-gray-50 p-3 rounded border text-sm">
+                        <p>{interview.aiSummary}</p>
                       </div>
-                    ) : (
-                      <p className="text-gray-500">Detailed analysis will be available soon.</p>
-                    )}
-                    
-                    {interview.swotAnalysis && (
-                      <div>
-                        <p className="text-sm text-gray-600">SWOT Analysis</p>
-                        <p className="text-sm">{interview.swotAnalysis}</p>
-                      </div>
-                    )}
+                    </div>
+                  )}
 
-                    {/* Video Recordings Section */}
-                    {(interview.videoUrl || interview.screenRecordingUrl) && (
-                      <div>
-                        <p className="text-sm text-gray-600 mb-3">Recordings</p>
-                        <div className="space-y-3">
-                          {interview.videoUrl && (
-                            <div>
-                              <p className="text-xs text-gray-500 mb-1">Camera Recording</p>
-                              <div className="space-y-2">
-                                <video 
-                                  controls 
-                                  className="w-full max-w-sm rounded border"
-                                  preload="metadata"
-                                  crossOrigin="anonymous"
-                                  onError={() => console.error('Video playback error')}
-                                >
-                                  <source src={interview.videoUrl} type="video/webm;codecs=vp9,opus" />
-                                  <source src={interview.videoUrl} type="video/webm;codecs=vp8,vorbis" />
-                                  <source src={interview.videoUrl} type="video/webm" />
-                                  <source src={interview.videoUrl} type="video/mp4" />
-                                  Your browser does not support video playback.
-                                </video>
-                                <Button 
-                                  variant="outline" 
-                                  size="sm"
-                                  onClick={() => window.open(interview.videoUrl, '_blank')}
-                                  className="w-full"
-                                >
-                                  Download Video
-                                </Button>
-                              </div>
-                            </div>
-                          )}
-                          
-                          {interview.screenRecordingUrl && (
-                            <div>
-                              <p className="text-xs text-gray-500 mb-1">Screen Recording (Hands-on)</p>
-                              <div className="space-y-2">
-                                <video 
-                                  controls 
-                                  className="w-full max-w-sm rounded border"
-                                  preload="metadata"
-                                  crossOrigin="anonymous"
-                                  onError={() => console.error('Screen recording playback error')}
-                                >
-                                  <source src={interview.screenRecordingUrl} type="video/webm;codecs=vp9,opus" />
-                                  <source src={interview.screenRecordingUrl} type="video/webm;codecs=vp8,vorbis" />
-                                  <source src={interview.screenRecordingUrl} type="video/webm" />
-                                  <source src={interview.screenRecordingUrl} type="video/mp4" />
-                                  Your browser does not support video playback.
-                                </video>
-                                <Button 
-                                  variant="outline" 
-                                  size="sm"
-                                  onClick={() => window.open(interview.screenRecordingUrl, '_blank')}
-                                  className="w-full"
-                                >
-                                  Download Screen Recording
-                                </Button>
-                              </div>
-                            </div>
-                          )}
-                        </div>
+                  {interview.swotAnalysis && (
+                    <div>
+                      <p className="text-sm text-gray-600 mb-2">SWOT Analysis</p>
+                      <div className="bg-blue-50 p-3 rounded border text-sm">
+                        <p>{interview.swotAnalysis}</p>
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
+
+                  {/* Video Recordings Section */}
+                  {(interview.videoUrl || interview.screenRecordingUrl) && (
+                    <div>
+                      <p className="text-sm text-gray-600 mb-3">Recordings</p>
+                      <div className="space-y-3">
+                        {interview.videoUrl && (
+                          <div>
+                            <p className="text-xs text-gray-500 mb-1">Camera Recording</p>
+                            <div className="space-y-2">
+                              <video 
+                                controls 
+                                className="w-full max-w-sm rounded border"
+                                preload="metadata"
+                                playsInline
+                                onError={(e) => {
+                                  console.error('Video playback error:', e);
+                                  const video = e.target as HTMLVideoElement;
+                                  video.style.display = 'none';
+                                  const errorDiv = document.createElement('div');
+                                  errorDiv.className = 'p-4 bg-red-50 text-red-700 rounded border text-sm';
+                                  errorDiv.textContent = 'Video format not supported by browser. Please download to view.';
+                                  video.parentNode?.insertBefore(errorDiv, video.nextSibling);
+                                }}
+                              >
+                                <source src={interview.videoUrl} type="video/mp4" />
+                                <source src={interview.videoUrl} type="video/webm" />
+                                Your browser does not support video playback.
+                              </video>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => {
+                                  const a = document.createElement('a');
+                                  a.href = interview.videoUrl!;
+                                  a.download = 'interview-video.mp4';
+                                  a.click();
+                                }}
+                                className="w-full"
+                              >
+                                <Download className="w-4 h-4 mr-2" />
+                                Download Camera Video
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {interview.screenRecordingUrl && (
+                          <div>
+                            <p className="text-xs text-gray-500 mb-1">Screen Recording (Hands-on)</p>
+                            <div className="space-y-2">
+                              <video 
+                                controls 
+                                className="w-full max-w-sm rounded border"
+                                preload="metadata"
+                                playsInline
+                                onError={(e) => {
+                                  console.error('Screen recording playback error:', e);
+                                  const video = e.target as HTMLVideoElement;
+                                  video.style.display = 'none';
+                                  const errorDiv = document.createElement('div');
+                                  errorDiv.className = 'p-4 bg-red-50 text-red-700 rounded border text-sm';
+                                  errorDiv.textContent = 'Screen recording format not supported. Please download to view.';
+                                  video.parentNode?.insertBefore(errorDiv, video.nextSibling);
+                                }}
+                              >
+                                <source src={interview.screenRecordingUrl} type="video/mp4" />
+                                <source src={interview.screenRecordingUrl} type="video/webm" />
+                                Your browser does not support video playback.
+                              </video>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => {
+                                  const a = document.createElement('a');
+                                  a.href = interview.screenRecordingUrl!;
+                                  a.download = 'interview-screen-recording.mp4';
+                                  a.click();
+                                }}
+                                className="w-full"
+                              >
+                                <Download className="w-4 h-4 mr-2" />
+                                Download Screen Recording
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
+
+            {/* Audio Transcription and Detailed Analysis */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Interview Responses & Analysis</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <InterviewResponsesDisplay interviewId={interview.id} />
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
     );
   }
 
-  if (!interview || !currentQuestion) {
-    return (
-      <div className="min-h-screen bg-white">
-        <Header />
-        <div className="max-w-4xl mx-auto px-4 py-12 text-center">
-          <h2 className="text-2xl font-bold mb-4">Interview Not Found</h2>
-          <Button onClick={() => setLocation('/ai-interviews')}>
-            Back to Interviews
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
+  // Show active interview interface
   const progress = interview.questions ? ((currentQuestionIndex + 1) / interview.questions.length) * 100 : 0;
 
   return (
@@ -630,6 +543,16 @@ export default function InterviewSession() {
                   </div>
                 )}
                 
+                {!isRecording && (
+                  <Button
+                    onClick={startRecording}
+                    size="sm"
+                    className="mt-2 w-full"
+                  >
+                    Start Recording
+                  </Button>
+                )}
+                
                 {tabSwitches > 0 && (
                   <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded">
                     <div className="flex items-center text-yellow-800">
@@ -646,98 +569,197 @@ export default function InterviewSession() {
 
           {/* Question Panel */}
           <div className="lg:col-span-2">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>{currentQuestion.title}</CardTitle>
-                  <Badge className={
-                    currentQuestion.difficulty === 'beginner' ? 'bg-green-100 text-green-800' :
-                    currentQuestion.difficulty === 'intermediate' ? 'bg-yellow-100 text-yellow-800' :
-                    'bg-red-100 text-red-800'
-                  }>
-                    {currentQuestion.difficulty}
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Screen Recording Warning for Hands-on Questions */}
-                {currentQuestion.isHandsOn && (
-                  <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
-                    <div className="flex items-start gap-3">
-                      <AlertTriangle className="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <h4 className="font-medium text-orange-800 mb-1">Screen Recording Notice</h4>
-                        <p className="text-sm text-orange-700">
-                          This is a hands-on coding question. Your screen will be recorded during this question to evaluate your problem-solving approach and coding skills. Please ensure you're ready to share your screen before proceeding.
-                        </p>
-                        {!isScreenRecording && (
-                          <Button
-                            onClick={startScreenRecording}
-                            size="sm"
-                            className="mt-2 bg-orange-600 hover:bg-orange-700"
-                          >
-                            Start Screen Recording
-                          </Button>
-                        )}
-                        {isScreenRecording && (
-                          <div className="flex items-center mt-2 text-orange-700">
-                            <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse mr-2" />
-                            <span className="text-sm font-medium">Screen Recording Active</span>
-                          </div>
-                        )}
+            {currentQuestion && (
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle>{currentQuestion.title}</CardTitle>
+                    <Badge className={
+                      currentQuestion.difficulty === 'beginner' ? 'bg-green-100 text-green-800' :
+                      currentQuestion.difficulty === 'intermediate' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-red-100 text-red-800'
+                    }>
+                      {currentQuestion.difficulty}
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Screen Recording Warning for Hands-on Questions */}
+                  {currentQuestion.isHandsOn && (
+                    <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                      <div className="flex items-start gap-3">
+                        <AlertTriangle className="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0" />
+                        <div>
+                          <h4 className="font-medium text-orange-800 mb-1">Screen Recording Notice</h4>
+                          <p className="text-sm text-orange-700">
+                            This is a hands-on coding question. Your screen will be recorded during this question to evaluate your problem-solving approach and coding skills.
+                          </p>
+                          {!isScreenRecording && (
+                            <Button
+                              onClick={startScreenRecording}
+                              size="sm"
+                              className="mt-2 bg-orange-600 hover:bg-orange-700"
+                            >
+                              Start Screen Recording
+                            </Button>
+                          )}
+                          {isScreenRecording && (
+                            <div className="flex items-center mt-2 text-orange-700">
+                              <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse mr-2" />
+                              Screen recording in progress
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
-
-                <div className="p-4 bg-gray-50 rounded-lg">
-                  <p className="text-gray-800 leading-relaxed">
-                    {currentQuestion.question}
-                  </p>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2">Your Answer:</label>
-                  <Textarea
-                    value={answers[currentQuestion.id] || ''}
-                    onChange={(e) => handleAnswerChange(e.target.value)}
-                    placeholder="Type your answer here..."
-                    rows={8}
-                    className="w-full"
-                  />
-                </div>
-
-                <div className="flex justify-between">
-                  <Button
-                    variant="outline"
-                    onClick={handlePrevQuestion}
-                    disabled={currentQuestionIndex === 0}
-                  >
-                    <ArrowLeft className="w-4 h-4 mr-2" />
-                    Previous
-                  </Button>
-
-                  {currentQuestionIndex === (interview.questions?.length || 1) - 1 ? (
-                    <Button 
-                      onClick={submitInterview}
-                      disabled={submitInterviewMutation.isPending}
-                      className="bg-green-600 hover:bg-green-700"
-                    >
-                      <CheckCircle className="w-4 h-4 mr-2" />
-                      {submitInterviewMutation.isPending ? 'Submitting...' : 'Submit Interview'}
-                    </Button>
-                  ) : (
-                    <Button onClick={handleNextQuestion}>
-                      Next
-                      <ArrowRight className="w-4 h-4 ml-2" />
-                    </Button>
                   )}
-                </div>
-              </CardContent>
-            </Card>
+
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <p className="text-gray-900 whitespace-pre-wrap">{currentQuestion.question}</p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Your Answer
+                    </label>
+                    <textarea
+                      value={answers[currentQuestionIndex] || ''}
+                      onChange={(e) => setAnswers(prev => ({
+                        ...prev,
+                        [currentQuestionIndex]: e.target.value
+                      }))}
+                      className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      rows={8}
+                      placeholder="Type your answer here..."
+                    />
+                  </div>
+
+                  {/* Navigation */}
+                  <div className="flex justify-between items-center pt-4">
+                    <Button 
+                      onClick={handlePreviousQuestion}
+                      disabled={currentQuestionIndex === 0}
+                      variant="outline"
+                    >
+                      <ArrowLeft className="w-4 h-4 mr-2" />
+                      Previous
+                    </Button>
+
+                    {currentQuestionIndex === (interview.questions?.length || 1) - 1 ? (
+                      <Button 
+                        onClick={submitInterview}
+                        disabled={submitInterviewMutation.isPending}
+                        className="bg-green-600 hover:bg-green-700"
+                      >
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        {submitInterviewMutation.isPending ? 'Submitting...' : 'Submit Interview'}
+                      </Button>
+                    ) : (
+                      <Button onClick={handleNextQuestion}>
+                        Next
+                        <ArrowRight className="w-4 h-4 ml-2" />
+                      </Button>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </div>
       </div>
     </div>
   );
 }
+
+// Component to display interview responses with audio transcription
+const InterviewResponsesDisplay = ({ interviewId }: { interviewId: number }) => {
+  const { data: responses, isLoading } = useQuery({
+    queryKey: ['/api/interview-responses', interviewId],
+    queryFn: () => fetch(`/api/interview-responses/${interviewId}`, {
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+    }).then(res => res.json()),
+  });
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
+  if (!responses || responses.length === 0) {
+    return (
+      <div className="text-center py-8 text-gray-500">
+        <p>No detailed responses available yet.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {responses.map((response: any, index: number) => (
+        <div key={response.id} className="border rounded-lg p-4">
+          <div className="flex justify-between items-start mb-3">
+            <h4 className="font-medium text-gray-900">Question {index + 1}</h4>
+            <div className="text-right">
+              <span className="text-sm text-gray-500">Total Score: </span>
+              <span className="font-semibold text-blue-600">{response.aiScore || 'N/A'}/100</span>
+            </div>
+          </div>
+          
+          {/* Score Breakdown */}
+          {(response.introductionScore || response.technicalScore) && (
+            <div className="mb-3 grid grid-cols-2 gap-4">
+              {response.introductionScore && (
+                <div className="text-center p-2 bg-green-50 rounded">
+                  <div className="text-sm font-medium text-green-700">Introduction</div>
+                  <div className="text-lg font-bold text-green-600">{response.introductionScore}/20</div>
+                </div>
+              )}
+              {response.technicalScore && (
+                <div className="text-center p-2 bg-blue-50 rounded">
+                  <div className="text-sm font-medium text-blue-700">Technical</div>
+                  <div className="text-lg font-bold text-blue-600">{response.technicalScore}/{response.introductionScore ? '80' : '100'}</div>
+                </div>
+              )}
+            </div>
+          )}
+          
+          {response.audioTranscription && (
+            <div className="mb-3">
+              <p className="text-sm text-gray-600 mb-1">Audio Transcription:</p>
+              <div className="bg-gray-50 p-3 rounded border text-sm">
+                {response.audioTranscription}
+              </div>
+            </div>
+          )}
+          
+          {response.screenAnalysis && (
+            <div className="mb-3">
+              <p className="text-sm text-gray-600 mb-1">Screen Recording Analysis:</p>
+              <div className="bg-orange-50 p-3 rounded border text-sm">
+                {response.screenAnalysis}
+              </div>
+            </div>
+          )}
+          
+          {response.aiAnalysis && (
+            <div className="mb-3">
+              <p className="text-sm text-gray-600 mb-1">AI Technical Analysis:</p>
+              <div className="bg-blue-50 p-3 rounded border text-sm">
+                {response.aiAnalysis}
+              </div>
+            </div>
+          )}
+          
+          {response.timeSpent && (
+            <div className="text-xs text-gray-500">
+              Time spent: {Math.floor(response.timeSpent / 60)}m {response.timeSpent % 60}s
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+};
