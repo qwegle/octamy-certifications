@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/lib/auth';
 import { 
   Clock, 
   Video, 
@@ -19,7 +20,8 @@ import {
   Brain,
   FileText,
   Target,
-  Download
+  Download,
+  User
 } from 'lucide-react';
 
 interface InterviewQuestion {
@@ -50,6 +52,7 @@ export default function InterviewSession() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   
   const [interviewStarted, setInterviewStarted] = useState(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -299,7 +302,15 @@ export default function InterviewSession() {
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="text-xl">{interview.title}</CardTitle>
-                  <p className="text-gray-600 mt-1">Technology: {interview.technology}</p>
+                  <div className="flex items-center gap-4 mt-1">
+                    <p className="text-gray-600">Technology: {interview.technology}</p>
+                    {user && (
+                      <div className="flex items-center gap-1 text-gray-600">
+                        <User className="w-4 h-4" />
+                        <span>{user.name}</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <div className="text-right">
                   <div className="text-3xl font-bold text-gray-900">{interview.score || 0}/100</div>
