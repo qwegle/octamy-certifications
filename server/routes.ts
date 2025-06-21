@@ -1785,13 +1785,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const userId = parseInt(responseData.udf1);
         const technology = responseData.udf2;
         
-        // Get pending interview data
-        const pendingInterview = (global as any).pendingInterviews?.[txnid];
+        // Check if interview already exists to prevent duplicates
+        const existingInterview = await db
+          .select()
+          .from(interviews)
+          .where(eq(interviews.paymentId, txnid))
+          .limit(1);
         
-        if (pendingInterview) {
+        if (existingInterview.length === 0) {
           // Create actual interview record in database
           const [interview] = await db.insert(interviews).values({
-            userId: userId ? parseInt(userId) : null,
+            userId: userId,
             technology,
             status: 'pending',
             paymentId: txnid,
@@ -1802,7 +1806,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
             createdAt: new Date(),
           }).returning();
           
-          // Clean up pending interview
+          console.log(`Interview created successfully: ID ${interview.id}, User ${userId}, Technology ${technology}`);
+        } else {
+          console.log(`Interview already exists for transaction ${txnid}, skipping creation`);
+        }
+        
+        // Clean up pending interview if exists
+        if ((global as any).pendingInterviews?.[txnid]) {
           delete (global as any).pendingInterviews[txnid];
         }
         
@@ -2030,14 +2040,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Import and add new routes
-  // Add user interviews endpoint
+  // Add user interviews endpoint with detailed logging
   app.get("/api/user/interviews", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
     try {
+      console.log(`Fetching interviews for user ID: ${req.user!.userId}`);
+      
       const userInterviews = await db
         .select()
         .from(interviews) 
         .where(eq(interviews.userId, req.user!.userId))
         .orderBy(desc(interviews.createdAt));
+      
+      console.log(`Found ${userInterviews.length} interviews for user ${req.user!.userId}`);
       
       res.json(userInterviews);
     } catch (error) {
