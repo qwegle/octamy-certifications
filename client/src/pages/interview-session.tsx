@@ -118,7 +118,7 @@ export default function InterviewSession() {
     startRecording();
     
     // Auto-start screen recording for hands-on questions
-    if (currentQuestion.isHandsOn && !isScreenRecording) {
+    if (currentQuestion?.isHandsOn && !isScreenRecording) {
       setTimeout(() => startScreenRecording(), 1000);
     }
 

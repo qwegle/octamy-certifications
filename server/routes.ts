@@ -11,6 +11,8 @@ import { db } from "./db";
 import { LearningPathController } from './controllers/learningPathController';
 import { payuMoneyService } from "./payumoney";
 import { getBadgeFromScore, generateCertificateNumber, calculateExpiryDate } from "./utils";
+import { v2 as cloudinary } from 'cloudinary';
+import multer from 'multer';
 import apiRoutes from "./routes/index";
 import certificateRoutes from "./routes/certificateRoutes";
 import { emailService } from "./utils/emailService";
@@ -106,12 +108,14 @@ const authenticateSellerToken = (req: SellerAuthenticatedRequest, res: Response,
   }
 };
 
-// Configure Cloudinary
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+// Configure Cloudinary only if credentials are provided
+if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET) {
+  cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+  });
+}
 
 // Configure multer for file uploads
 const upload = multer({ 
@@ -1989,6 +1993,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const recordingType = req.body.type || 'video';
       const publicId = `interviews/${interviewId}-${recordingType}-${Date.now()}`;
       
+      // Check if Cloudinary is configured
+      if (!process.env.CLOUDINARY_CLOUD_NAME) {
+        return res.status(500).json({ error: 'Cloudinary not configured' });
+      }
+
       // Upload to Cloudinary
       const uploadResult = await new Promise((resolve, reject) => {
         cloudinary.uploader.upload_stream(
