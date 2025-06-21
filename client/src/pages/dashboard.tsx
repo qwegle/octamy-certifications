@@ -109,6 +109,27 @@ export default function Dashboard() {
   // Users need to complete payment to activate these certificates
   const unpaidCertificates = certificates.filter(cert => !cert.isPaid);
 
+  // Calculate money saved (difference between original price and paid price)
+  const moneySaved = certificates.reduce((total, cert) => {
+    if (cert.isPaid) {
+      const originalPrice = 199; // Assuming original price is ₹199
+      const paidPrice = 99; // User paid ₹99
+      return total + (originalPrice - paidPrice);
+    }
+    return total;
+  }, 0);
+
+  // Calculate average score
+  const averageScore = certificates.length > 0 
+    ? Math.round(certificates.reduce((acc, cert) => acc + cert.score, 0) / certificates.length)
+    : 0;
+
+  // Get recent interviews (last 3)
+  const recentInterviews = userInterviews
+    .filter(interview => interview.status === 'completed')
+    .sort((a, b) => new Date(b.completedAt!).getTime() - new Date(a.completedAt!).getTime())
+    .slice(0, 3);
+
   return (
     <div className="min-h-screen bg-white">
       <Header />
