@@ -290,7 +290,12 @@ export default function InterviewSession() {
   if (!user) {
     return (
       <div className="min-h-screen bg-white">
-        <Header />
+        {/* Login Required Header */}
+        <header className="bg-white shadow-sm border-b border-gray-200">
+          <div className="container mx-auto px-4 py-4">
+            <h1 className="text-2xl font-bold text-black">Octamy | AI Interview</h1>
+          </div>
+        </header>
         <div className="max-w-4xl mx-auto px-4 py-12 text-center">
           <h2 className="text-2xl font-bold mb-4">Login Required</h2>
           <p>Please log in to access the interview.</p>
