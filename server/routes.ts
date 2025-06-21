@@ -5,7 +5,7 @@ import { seedDatabase } from "./seed";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { z } from "zod";
-import { insertUserSchema, insertExamAttemptSchema, insertCertificateSchema, insertSellerSchema, insertSaleSchema, insertWithdrawalRequestSchema, insertSponsorSchema, interviewQuestions } from "@shared/schema";
+import { insertUserSchema, insertExamAttemptSchema, insertCertificateSchema, insertSellerSchema, insertSaleSchema, insertWithdrawalRequestSchema, insertSponsorSchema, interviewQuestions, interviews, users as usersTable } from "@shared/schema";
 import { eq } from "drizzle-orm";
 import { db } from "./db";
 import { LearningPathController } from './controllers/learningPathController';
@@ -1671,13 +1671,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const txnid = `INT${Date.now()}${Math.random().toString(36).substr(2, 9)}`;
       
       // Get user details
-      const user = await storage.getUserById(req.user!.userId);
+      const userResult = await db.select().from(usersTable).where(eq(usersTable.id, req.user!.userId));
+      const user = userResult[0];
       if (!user) {
         return res.status(404).json({ error: 'User not found' });
       }
 
       // For demo purposes, create interview directly (skip payment gateway for now)
-      const interview = await storage.createInterview({
+      const [interview] = await db.insert(interviews).values({
         userId: req.user!.userId,
         technology,
         status: 'available',
@@ -1685,7 +1686,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         title: `${technology} Technical Interview`,
         isPaid: true,
         amount: 99,
-      });
+        createdAt: new Date(),
+      }).returning();
 
       // Simulate payment success response
       res.json({

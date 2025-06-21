@@ -142,13 +142,25 @@ export default function AIInterviews() {
     <div className="min-h-screen bg-white">
       <Header />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Back to Dashboard Button */}
+        <div className="mb-8">
+          <Button 
+            variant="outline" 
+            onClick={() => setLocation('/dashboard')}
+            className="flex items-center gap-2 hover:bg-gray-50"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Dashboard
+          </Button>
+        </div>
+
         {/* Header Section */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-octamy-black mb-2">
             AI Interviews
           </h1>
           <p className="text-xl text-octamy-gray-600">
-            Practice technical interviews with AI-powered assessment
+            Practice technical interviews with AI-powered assessment and boost your career prospects
           </p>
         </div>
 
