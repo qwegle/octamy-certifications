@@ -355,35 +355,37 @@ export default function InterviewSession() {
                 {interview.videoUrl && (
                   <div>
                     <h4 className="font-semibold mb-2">Video Recording</h4>
-                    {interview.videoUrl.startsWith('http') ? (
-                      <div className="relative">
-                        <video 
-                          controls 
-                          className="w-full max-w-2xl rounded-lg shadow-lg"
-                          poster="/api/placeholder/800/450"
-                          preload="metadata"
-                        >
-                          <source src={interview.videoUrl} type="video/mp4" />
-                          <source src={interview.videoUrl} type="video/webm" />
-                          <source src={interview.videoUrl} type="video/ogg" />
-                          <p className="text-gray-600 p-4">
-                            Your browser does not support video playback. 
-                            <a href={interview.videoUrl} download className="text-blue-600 hover:underline ml-1">
-                              Download the video file
-                            </a>
-                          </p>
-                        </video>
-                      </div>
-                    ) : (
-                      <div className="bg-gray-100 p-4 rounded-lg border-2 border-dashed border-gray-300">
-                        <p className="text-gray-600 text-center">
-                          Video recording available: <span className="font-mono text-sm">{interview.videoUrl}</span>
+                    <div className="relative">
+                      <video 
+                        controls 
+                        className="w-full max-w-2xl rounded-lg shadow-lg"
+                        poster="/api/placeholder/800/450"
+                        preload="metadata"
+                        controlsList="nodownload"
+                        onError={(e) => {
+                          console.error('Video error:', e);
+                          e.currentTarget.style.display = 'none';
+                          const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                          if (fallback) fallback.style.display = 'block';
+                        }}
+                      >
+                        <source src={interview.videoUrl} type="video/mp4" />
+                        <source src={interview.videoUrl.replace(/\.[^/.]+$/, '.webm')} type="video/webm" />
+                        <source src={interview.videoUrl.replace(/\.[^/.]+$/, '.ogg')} type="video/ogg" />
+                        Your browser does not support the video tag.
+                      </video>
+                      <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200" style={{display: 'none'}}>
+                        <p className="text-yellow-800 text-center">
+                          Video format not supported by your browser. 
+                          <a href={interview.videoUrl} download className="text-blue-600 hover:underline ml-1">
+                            Download the video file
+                          </a>
                         </p>
-                        <p className="text-gray-500 text-sm text-center mt-2">
-                          Video file path stored in database - actual video playback would require proper file serving setup
+                        <p className="text-yellow-600 text-sm text-center mt-2">
+                          Try using Chrome, Firefox, or Safari for better video compatibility.
                         </p>
                       </div>
-                    )}
+                    </div>
                   </div>
                 )}
                 {interview.screenRecordingUrl && (
@@ -395,17 +397,30 @@ export default function InterviewSession() {
                         className="w-full max-w-2xl rounded-lg shadow-lg"
                         poster="/api/placeholder/800/450"
                         preload="metadata"
+                        controlsList="nodownload"
+                        onError={(e) => {
+                          console.error('Screen recording error:', e);
+                          e.currentTarget.style.display = 'none';
+                          const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                          if (fallback) fallback.style.display = 'block';
+                        }}
                       >
                         <source src={interview.screenRecordingUrl} type="video/mp4" />
-                        <source src={interview.screenRecordingUrl} type="video/webm" />
-                        <source src={interview.screenRecordingUrl} type="video/ogg" />
-                        <p className="text-gray-600 p-4">
-                          Your browser does not support video playback. 
+                        <source src={interview.screenRecordingUrl.replace(/\.[^/.]+$/, '.webm')} type="video/webm" />
+                        <source src={interview.screenRecordingUrl.replace(/\.[^/.]+$/, '.ogg')} type="video/ogg" />
+                        Your browser does not support the video tag.
+                      </video>
+                      <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200" style={{display: 'none'}}>
+                        <p className="text-yellow-800 text-center">
+                          Screen recording format not supported by your browser. 
                           <a href={interview.screenRecordingUrl} download className="text-blue-600 hover:underline ml-1">
                             Download the video file
                           </a>
                         </p>
-                      </video>
+                        <p className="text-yellow-600 text-sm text-center mt-2">
+                          Try using Chrome, Firefox, or Safari for better video compatibility.
+                        </p>
+                      </div>
                     </div>
                   </div>
                 )}
