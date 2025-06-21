@@ -238,6 +238,108 @@ export default function InterviewSession() {
     );
   }
 
+  // Show results if interview is completed
+  if (interview && interview.status === 'completed') {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="container mx-auto px-4 py-8">
+          <div className="max-w-4xl mx-auto">
+            {/* Results Header */}
+            <Card className="mb-8">
+              <CardContent className="p-8 text-center">
+                <CheckCircle className="mx-auto h-16 w-16 text-green-500 mb-4" />
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">Interview Completed!</h1>
+                <p className="text-xl text-gray-600 mb-6">{interview.title}</p>
+                
+                {/* Score Display */}
+                <div className="bg-gradient-to-r from-blue-50 to-green-50 rounded-xl p-6 mb-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <p className="text-4xl font-bold text-blue-600 mb-2">{interview.score || 0}/100</p>
+                      <p className="text-gray-600">Overall Score</p>
+                    </div>
+                    <div>
+                      <p className="text-4xl font-bold text-green-600 mb-2">{interview.grade || 'N/A'}</p>
+                      <p className="text-gray-600">Grade</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-4 justify-center">
+                  <Button onClick={() => setLocation('/ai-interviews')}>
+                    <ArrowLeft className="w-4 h-4 mr-2" />
+                    Back to Interviews
+                  </Button>
+                  <Button variant="outline" onClick={() => window.print()}>
+                    Print Results
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Interview Details */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Interview Summary</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-sm text-gray-600">Technology</p>
+                      <p className="font-semibold">{interview.technology}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Status</p>
+                      <Badge className="bg-green-100 text-green-800">Completed</Badge>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Completed At</p>
+                      <p className="font-semibold">
+                        {interview.completedAt ? new Date(interview.completedAt).toLocaleString() : 'Not available'}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Questions Answered</p>
+                      <p className="font-semibold">{interview.questions?.length || 0}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Performance Insights</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {interview.aiSummary ? (
+                      <div>
+                        <p className="text-sm text-gray-600">AI Analysis</p>
+                        <p className="text-sm">{interview.aiSummary}</p>
+                      </div>
+                    ) : (
+                      <p className="text-gray-500">Detailed analysis will be available soon.</p>
+                    )}
+                    
+                    {interview.swotAnalysis && (
+                      <div>
+                        <p className="text-sm text-gray-600">SWOT Analysis</p>
+                        <p className="text-sm">{interview.swotAnalysis}</p>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (!interview || !currentQuestion) {
     return (
       <div className="min-h-screen bg-white">

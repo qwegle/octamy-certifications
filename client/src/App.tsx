@@ -95,6 +95,7 @@ function Router() {
       <Route path="/profile-edit" component={ProfileEdit} />
       <Route path="/interview/:id" component={InterviewSession} />
       <Route path="/interviews/:id" component={InterviewSession} />
+      <Route path="/interview-results/:id" component={InterviewSession} />
       <Route path="/interviews/:id/payment" component={InterviewPayment} />
       <Route component={NotFound} />
     </Switch>
