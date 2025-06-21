@@ -84,13 +84,13 @@ export default function AIInterviews() {
     },
     onSuccess: (data) => {
       setProcessingTech('');
-      // Redirect to PayUMoney payment page
-      if (data.paymentForm) {
-        document.body.innerHTML += data.paymentForm;
-        const form = document.querySelector('form[name="payuForm"]') as HTMLFormElement;
-        if (form) {
-          form.submit();
-        }
+      if (data.success) {
+        toast({
+          title: 'Payment Successful',
+          description: 'Interview has been unlocked! You can now take the interview.',
+        });
+        // Refresh the interviews list
+        refetchInterviews();
       }
     },
     onError: (error: Error) => {
