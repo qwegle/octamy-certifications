@@ -110,6 +110,12 @@ export const questions = pgTable("questions", {
   options: json("options").$type<string[]>().notNull(),
   correctAnswer: integer("correct_answer").notNull(),
   isActive: boolean("is_active").default(true).notNull(),
+  questionType: text("question_type").default("multiple_choice").notNull(), // multiple_choice, ai_interactive
+  aiScenario: text("ai_scenario"), // Detailed scenario for AI questions
+  aiEvaluationCriteria: json("ai_evaluation_criteria").$type<string[]>(), // Evaluation criteria for AI
+  expectedKeywords: text("expected_keywords").array(), // Keywords to look for in responses
+  maxPoints: integer("max_points").default(100).notNull(), // Points for this question
+  difficulty: text("difficulty").default("medium").notNull(), // easy, medium, hard
 });
 
 export const examAttempts = pgTable("exam_attempts", {
