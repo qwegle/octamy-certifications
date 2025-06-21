@@ -788,6 +788,85 @@ export type InsertAchievement = typeof achievements.$inferInsert;
 export type UserAchievement = typeof userAchievements.$inferSelect;
 export type InsertUserAchievement = typeof userAchievements.$inferInsert;
 
+// AI Interview Tables
+export const interviewQuestions = pgTable("interview_questions", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  question: text("question").notNull(),
+  technology: text("technology").notNull(), // React, Node.js, Python, etc.
+  difficulty: text("difficulty").notNull(), // beginner, intermediate, advanced
+  timeLimit: integer("time_limit").notNull(), // time in seconds
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const interviews = pgTable("interviews", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  title: text("title").notNull(),
+  technology: text("technology").notNull(),
+  status: text("status").default("pending").notNull(), // pending, in_progress, completed, expired
+  totalQuestions: integer("total_questions").notNull(),
+  completedQuestions: integer("completed_questions").default(0).notNull(),
+  score: integer("score"), // out of 100
+  grade: text("grade"), // A+, A, B+, B, C+, C, D, F
+  videoUrl: text("video_url"), // Cloudinary URL
+  swotAnalysis: jsonb("swot_analysis").$type<{
+    strengths: string[];
+    weaknesses: string[];
+    opportunities: string[];
+    threats: string[];
+  }>(),
+  aiSummary: text("ai_summary"),
+  paymentStatus: text("payment_status").default("pending").notNull(), // pending, paid, failed
+  transactionId: text("transaction_id"),
+  paymentAmount: decimal("payment_amount", { precision: 10, scale: 2 }).default("99.00").notNull(),
+  startedAt: timestamp("started_at"),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const interviewResponses = pgTable("interview_responses", {
+  id: serial("id").primaryKey(),
+  interviewId: integer("interview_id").references(() => interviews.id).notNull(),
+  questionId: integer("question_id").references(() => interviewQuestions.id).notNull(),
+  videoSegmentUrl: text("video_segment_url"), // Cloudinary URL for this question's video
+  audioTranscription: text("audio_transcription"),
+  eyeTrackingData: jsonb("eye_tracking_data").$type<{
+    averageFocus: number;
+    lookAwayCount: number;
+    totalTime: number;
+  }>(),
+  timeSpent: integer("time_spent"), // in seconds
+  aiScore: integer("ai_score"), // individual question score
+  aiAnalysis: text("ai_analysis"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertInterviewQuestionSchema = createInsertSchema(interviewQuestions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertInterviewSchema = createInsertSchema(interviews).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertInterviewResponseSchema = createInsertSchema(interviewResponses).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertInterviewQuestion = z.infer<typeof insertInterviewQuestionSchema>;
+export type InterviewQuestion = typeof interviewQuestions.$inferSelect;
+export type InsertInterview = z.infer<typeof insertInterviewSchema>;
+export type Interview = typeof interviews.$inferSelect;
+export type InsertInterviewResponse = z.infer<typeof insertInterviewResponseSchema>;
+export type InterviewResponse = typeof interviewResponses.$inferSelect;
+
 // Smart Notifications Insert Schemas
 export const insertUserPreferencesSchema = createInsertSchema(userPreferences).omit({
   id: true,

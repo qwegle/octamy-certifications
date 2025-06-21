@@ -1637,6 +1637,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Import and add new routes
+  try {
+    const { default: interviewRoutes } = await import('./routes/interviews.js');
+    const { default: analyticsRoutes } = await import('./routes/analytics.js');
+    app.use('/api', interviewRoutes);
+    app.use('/api', analyticsRoutes);
+  } catch (error) {
+    console.log('Additional routes loading...');
+  }
+
   const httpServer = createServer(app);
   return httpServer;
 }

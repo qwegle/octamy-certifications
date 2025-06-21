@@ -28,6 +28,8 @@ import DemoBusinessCertificate from "@/pages/demo-business-certificate";
 import DemoInternshipCertificate from "@/pages/demo-internship-certificate";
 import BusinessCertificates from "@/pages/business-certificates";
 import InternshipForm from "@/pages/internship-form";
+import AIInterviews from "@/pages/ai-interviews";
+import ProfileEdit from "@/pages/profile-edit";
 import Verify from "@/pages/verify";
 import Preferences from "@/pages/preferences";
 import Progress from "@/pages/progress";
@@ -87,6 +89,8 @@ function Router() {
       <Route path="/business-certificates" component={BusinessCertificates} />
       <Route path="/internship/:slug" component={InternshipForm} />
       <Route path="/contact" component={Contact} />
+      <Route path="/ai-interviews" component={AIInterviews} />
+      <Route path="/profile-edit" component={ProfileEdit} />
       <Route component={NotFound} />
     </Switch>
   );

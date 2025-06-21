@@ -6,9 +6,9 @@ import { useAuth } from '@/lib/auth';
 import { Link, useLocation } from 'wouter';
 import Header from '@/components/header';
 import Footer from '@/components/footer';
-import { Download, Eye, Calendar, Trophy, Award, AlertCircle } from 'lucide-react';
+import { Download, Eye, Calendar, Trophy, Award, AlertCircle, Brain, TrendingUp } from 'lucide-react';
 import type { Certificate } from '@shared/schema';
-import { SmartNotifications } from '@/components/smart-notifications';
+import DashboardAnalytics from '@/components/dashboard-analytics';
 
 
 export default function Dashboard() {
@@ -109,9 +109,6 @@ export default function Dashboard() {
               <p className="text-xl text-octamy-gray-600">
                 Manage your certificates and track your progress
               </p>
-            </div>
-            <div className="flex items-center gap-4">
-              <SmartNotifications />
             </div>
           </div>
         </div>
@@ -327,6 +324,48 @@ export default function Dashboard() {
             </div>
           </div>
         )}
+
+        {/* Dashboard Analytics */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold text-octamy-black mb-6">Learning Analytics</h2>
+          <DashboardAnalytics />
+        </div>
+
+        {/* AI Interviews Section */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-bold text-octamy-black">AI Interviews</h2>
+            <Link href="/ai-interviews">
+              <Button className="bg-octamy-black text-white hover:bg-octamy-gray-800">
+                <Brain className="w-4 h-4 mr-2" />
+                Start Interview
+              </Button>
+            </Link>
+          </div>
+          <Card>
+            <CardContent className="p-6 text-center">
+              <Brain className="w-12 h-12 text-purple-600 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">Practice Technical Interviews</h3>
+              <p className="text-gray-600 mb-4">
+                Take AI-powered technical interviews with real-time feedback and analysis
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-blue-600">5-7</div>
+                  <div className="text-sm text-gray-500">Questions</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-green-600">45-60</div>
+                  <div className="text-sm text-gray-500">Minutes</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-purple-600">₹99</div>
+                  <div className="text-sm text-gray-500">Per Interview</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Empty State */}
         {certificates.length === 0 && (
