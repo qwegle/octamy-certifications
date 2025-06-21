@@ -340,7 +340,8 @@ export default function InterviewSession() {
         title: 'Interview Submitted',
         description: 'Your interview has been submitted successfully',
       });
-      setLocation(`/interviews/${data.id}`);
+      // Redirect to results page after successful submission
+      window.location.href = `/interviews/${data.id}`;
     },
     onError: () => {
       toast({
@@ -631,6 +632,36 @@ export default function InterviewSession() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
+                {/* Screen Recording Warning for Hands-on Questions */}
+                {currentQuestion.isHandsOn && (
+                  <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                    <div className="flex items-start gap-3">
+                      <AlertTriangle className="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <h4 className="font-medium text-orange-800 mb-1">Screen Recording Notice</h4>
+                        <p className="text-sm text-orange-700">
+                          This is a hands-on coding question. Your screen will be recorded during this question to evaluate your problem-solving approach and coding skills. Please ensure you're ready to share your screen before proceeding.
+                        </p>
+                        {!isScreenRecording && (
+                          <Button
+                            onClick={startScreenRecording}
+                            size="sm"
+                            className="mt-2 bg-orange-600 hover:bg-orange-700"
+                          >
+                            Start Screen Recording
+                          </Button>
+                        )}
+                        {isScreenRecording && (
+                          <div className="flex items-center mt-2 text-orange-700">
+                            <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse mr-2" />
+                            <span className="text-sm font-medium">Screen Recording Active</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <div className="p-4 bg-gray-50 rounded-lg">
                   <p className="text-gray-800 leading-relaxed">
                     {currentQuestion.question}
