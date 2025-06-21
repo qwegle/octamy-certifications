@@ -17,7 +17,11 @@ import {
   Play,
   CheckCircle,
   XCircle,
-  Eye
+  Eye,
+  ArrowLeft,
+  Star,
+  Users,
+  Briefcase
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import type { Interview, InterviewQuestion } from '@shared/schema';
@@ -262,9 +266,16 @@ export default function AIInterviews() {
                         <Button 
                           onClick={() => createInterviewMutation.mutate(tech)}
                           disabled={processingTech === tech}
-                          className="w-full bg-black text-white hover:bg-gray-800"
+                          className="w-full bg-black text-white hover:bg-gray-800 transition-all"
                         >
-                          {processingTech === tech ? 'Processing...' : 'Start Interview - ₹99'}
+                          {processingTech === tech ? (
+                            <div className="flex items-center gap-2">
+                              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                              Processing...
+                            </div>
+                          ) : (
+                            'Start Interview - ₹99'
+                          )}
                         </Button>
                       )}
                     </CardContent>
