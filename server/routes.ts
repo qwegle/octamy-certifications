@@ -1863,9 +1863,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ error: 'Access denied' });
       }
 
-      // Calculate score based on answers (simple scoring for now)
-      const questionCount = Object.keys(answers).length;
-      const score = Math.max(60, Math.min(100, 85 + Math.random() * 15 - tabSwitches * 2));
+      // Calculate score based on actual content quality
+      const totalQuestions = Object.keys(answers).length;
+      let validAnswers = 0;
+      
+      Object.values(answers).forEach((answer: any) => {
+        const answerText = answer ? answer.toString().trim().toLowerCase() : '';
+        // Only count meaningful answers
+        if (answerText && 
+            answerText.length > 10 && 
+            !answerText.includes("don't know") && 
+            !answerText.includes("skip") &&
+            !answerText.includes("no idea") &&
+            answerText !== "na" &&
+            answerText !== "n/a") {
+          validAnswers++;
+        }
+      });
+      
+      const score = totalQuestions > 0 ? Math.round((validAnswers / totalQuestions) * 100) : 0;
       
       // Determine grade
       let grade = 'F';
@@ -1877,6 +1893,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       else if (score >= 65) grade = 'C';
       else if (score >= 60) grade = 'D';
 
+      // Generate AI summary based on performance
+      const technology = interview.technology || 'the technology';
+      const aiSummary = score > 70 
+        ? `Strong performance with ${validAnswers}/${totalQuestions} well-answered questions. Demonstrated good understanding of ${technology}.`
+        : score > 40
+        ? `Moderate performance with ${validAnswers}/${totalQuestions} complete answers. Room for improvement in technical depth of ${technology}.`
+        : `Limited responses provided. Consider reviewing ${technology} fundamentals before retaking the interview.`;
+
       // Update interview with results
       await storage.updateInterview(interviewId, {
         status: 'completed',
@@ -1884,7 +1908,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         grade,
         completedAt: new Date(completedAt),
         tabSwitches,
-        answers: JSON.stringify(answers)
+        answers: JSON.stringify(answers),
+        aiSummary
       });
 
       res.json({

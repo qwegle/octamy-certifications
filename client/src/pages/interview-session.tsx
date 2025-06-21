@@ -131,7 +131,7 @@ export default function InterviewSession() {
     };
   }, [timeRemaining, currentQuestion]);
 
-  // Tab switch detection
+  // Tab switch detection and cleanup
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.hidden) {
@@ -144,8 +144,18 @@ export default function InterviewSession() {
       }
     };
 
+    const handleBeforeUnload = () => {
+      cleanupMedia();
+    };
+
     document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    
+    return () => {
+      cleanupMedia();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
   }, []);
 
   const handleAnswerChange = (answer: string) => {
@@ -172,8 +182,22 @@ export default function InterviewSession() {
     }
   };
 
+  // Cleanup function for camera and recording
+  const cleanupMedia = () => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      mediaRecorderRef.current.stop();
+    }
+    if (videoRef.current && videoRef.current.srcObject) {
+      const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
+      tracks.forEach(track => track.stop());
+      videoRef.current.srcObject = null;
+    }
+    setIsRecording(false);
+  };
+
   const submitInterviewMutation = useMutation({
     mutationFn: async () => {
+      cleanupMedia(); // Stop recording before submitting
       const response = await fetch(`/api/interviews/${id}/submit`, {
         method: 'POST',
         headers: {
@@ -194,7 +218,7 @@ export default function InterviewSession() {
         title: 'Interview Submitted',
         description: 'Your interview has been submitted successfully',
       });
-      setLocation(`/interview-results/${data.id}`);
+      setLocation(`/interviews/${data.id}`);
     },
     onError: () => {
       toast({
