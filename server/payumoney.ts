@@ -84,13 +84,14 @@ export class PayUMoneyService {
 
   constructor() {
     this.config = {
-      merchantId: process.env.PAYUMONEY_MERCHANT_ID!,
-      merchantKey: process.env.PAYUMONEY_MERCHANT_KEY!,
-      salt: process.env.PAYUMONEY_SALT!,
+      merchantId: process.env.PAYUMONEY_MERCHANT_ID || '',
+      merchantKey: process.env.PAYUMONEY_MERCHANT_KEY || '',
+      salt: process.env.PAYUMONEY_SALT || '',
       baseUrl: 'https://secure.payu.in/_payment'
     };
 
-    if (!this.config.merchantId || !this.config.merchantKey || !this.config.salt) {
+    // Only throw error in production
+    if (process.env.NODE_ENV === 'production' && (!this.config.merchantId || !this.config.merchantKey || !this.config.salt)) {
       throw new Error('PayUMoney configuration is incomplete. Please provide PAYUMONEY_MERCHANT_ID, PAYUMONEY_MERCHANT_KEY, and PAYUMONEY_SALT');
     }
   }
@@ -99,6 +100,10 @@ export class PayUMoneyService {
    * Generate hash for payment request
    */
   generateHash(paymentData: PaymentRequest): string {
+    if (!this.config.merchantKey || !this.config.salt) {
+      throw new Error('PayUMoney credentials not configured for payment processing');
+    }
+
     const {
       txnid,
       amount,
@@ -121,6 +126,10 @@ export class PayUMoneyService {
    * Verify hash for payment response
    */
   verifyHash(responseData: Partial<PaymentResponse>): boolean {
+    if (!this.config.merchantKey || !this.config.salt) {
+      throw new Error('PayUMoney credentials not configured for payment verification');
+    }
+
     const {
       status,
       firstname,
