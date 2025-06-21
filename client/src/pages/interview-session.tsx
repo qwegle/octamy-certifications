@@ -49,6 +49,7 @@ export default function InterviewSession() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [timeRemaining, setTimeRemaining] = useState(0);
+  const [questionTimers, setQuestionTimers] = useState<Record<number, number>>({});
   const [isRecording, setIsRecording] = useState(false);
   const [videoEnabled, setVideoEnabled] = useState(true);
   const [audioEnabled, setAudioEnabled] = useState(true);
@@ -115,7 +116,11 @@ export default function InterviewSession() {
     };
 
     startRecording();
-    setTimeRemaining(currentQuestion.timeLimit);
+    
+    // Auto-start screen recording for hands-on questions
+    if (currentQuestion.isHandsOn && !isScreenRecording) {
+      setTimeout(() => startScreenRecording(), 1000);
+    }
 
     return () => {
       if (mediaRecorderRef.current) {
@@ -124,14 +129,30 @@ export default function InterviewSession() {
     };
   }, [currentQuestion, videoEnabled, audioEnabled]);
 
-  // Timer countdown
+  // Timer countdown with question-specific persistence
   useEffect(() => {
-    if (timeRemaining > 0) {
+    if (currentQuestion) {
+      // Set timer from stored time or default
+      const timeLimit = currentQuestion.isHandsOn ? 1800 : currentQuestion.timeLimit;
+      const storedTime = questionTimers[currentQuestion.id];
+      
+      if (storedTime === undefined) {
+        setTimeRemaining(timeLimit);
+        setQuestionTimers(prev => ({ ...prev, [currentQuestion.id]: timeLimit }));
+      } else {
+        setTimeRemaining(storedTime);
+      }
+    }
+  }, [currentQuestion?.id]);
+
+  useEffect(() => {
+    if (timeRemaining > 0 && currentQuestion) {
       timerRef.current = setTimeout(() => {
-        setTimeRemaining(time => time - 1);
+        const newTime = timeRemaining - 1;
+        setTimeRemaining(newTime);
+        setQuestionTimers(prev => ({ ...prev, [currentQuestion.id]: newTime }));
       }, 1000);
     } else if (timeRemaining === 0 && currentQuestion) {
-      // Auto-advance to next question when time runs out
       handleNextQuestion();
     }
 
@@ -179,10 +200,16 @@ export default function InterviewSession() {
   };
 
   const handleNextQuestion = () => {
+    // Start screen recording for hands-on questions automatically
     if (interview?.questions && currentQuestionIndex < interview.questions.length - 1) {
+      const nextQuestion = interview.questions[currentQuestionIndex + 1];
       setCurrentQuestionIndex(prev => prev + 1);
+      
+      // Auto-start screen recording for hands-on questions
+      if (nextQuestion?.isHandsOn && !isScreenRecording) {
+        setTimeout(() => startScreenRecording(), 100);
+      }
     } else {
-      // Submit interview
       submitInterview();
     }
   };

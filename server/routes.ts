@@ -106,6 +106,19 @@ const authenticateSellerToken = (req: SellerAuthenticatedRequest, res: Response,
   }
 };
 
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+// Configure multer for file uploads
+const upload = multer({ 
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 100 * 1024 * 1024 } // 100MB limit
+});
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize database if in development
   if (process.env.NODE_ENV === "development") {
@@ -1958,8 +1971,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Upload interview recordings
-  app.post("/api/interviews/:id/upload-recording", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+  // Upload interview recordings to Cloudinary
+  app.post("/api/interviews/:id/upload-recording", authenticateToken, upload.single('video'), async (req: AuthenticatedRequest, res: Response) => {
     try {
       const interviewId = parseInt(req.params.id);
       
@@ -1969,18 +1982,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ error: 'Access denied' });
       }
       
-      // For now, we'll simulate the upload and return a mock URL
-      // In production, this would upload to cloud storage like AWS S3 or Cloudinary
+      if (!req.file) {
+        return res.status(400).json({ error: 'No video file provided' });
+      }
+      
       const recordingType = req.body.type || 'video';
-      const timestamp = Date.now();
-      const mockUrl = `/uploads/recordings/${interviewId}-${recordingType}-${timestamp}.webm`;
+      const publicId = `interviews/${interviewId}-${recordingType}-${Date.now()}`;
       
-      // Log the upload attempt for debugging
-      console.log(`Recording uploaded: Interview ${interviewId}, Type: ${recordingType}, URL: ${mockUrl}`);
+      // Upload to Cloudinary
+      const uploadResult = await new Promise((resolve, reject) => {
+        cloudinary.uploader.upload_stream(
+          {
+            resource_type: 'video',
+            public_id: publicId,
+            format: 'mp4',
+            transformation: [
+              { quality: 'auto', fetch_format: 'auto' }
+            ]
+          },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        ).end(req.file!.buffer);
+      });
       
-      res.json({ url: mockUrl, type: recordingType });
+      console.log(`Recording uploaded to Cloudinary: Interview ${interviewId}, Type: ${recordingType}`);
+      
+      res.json({ 
+        url: (uploadResult as any).secure_url, 
+        type: recordingType,
+        publicId: (uploadResult as any).public_id
+      });
     } catch (error) {
-      console.error("Error uploading recording:", error);
+      console.error("Error uploading recording to Cloudinary:", error);
       res.status(500).json({ error: "Failed to upload recording" });
     }
   });
