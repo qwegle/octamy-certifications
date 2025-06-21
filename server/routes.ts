@@ -6,7 +6,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { z } from "zod";
 import { insertUserSchema, insertExamAttemptSchema, insertCertificateSchema, insertSellerSchema, insertSaleSchema, insertWithdrawalRequestSchema, insertSponsorSchema, interviewQuestions, interviews, users as usersTable } from "@shared/schema";
-import { eq } from "drizzle-orm";
+import { desc, and, eq } from "drizzle-orm";
 import { db } from "./db";
 import { LearningPathController } from './controllers/learningPathController';
 import { payuMoneyService } from "./payumoney";
@@ -1677,25 +1677,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: 'User not found' });
       }
 
-      // For demo purposes, create interview directly (skip payment gateway for now)
-      const [interview] = await db.insert(interviews).values({
+      // Check if user already has this interview
+      const existingInterview = await db
+        .select()
+        .from(interviews)
+        .where(and(
+          eq(interviews.userId, req.user!.userId),
+          eq(interviews.technology, technology),
+          eq(interviews.paymentStatus, 'paid')
+        ))
+        .limit(1);
+
+      if (existingInterview.length > 0) {
+        return res.json({
+          success: true,
+          message: 'Interview already purchased',
+          interviewId: existingInterview[0].id,
+          alreadyPurchased: true,
+        });
+      }
+
+      // Prepare payment data for PayUMoney
+      const paymentData = {
+        txnid,
+        amount: '99.00',
+        productinfo: `AI Interview - ${technology}`,
+        firstname: user.name,
+        email: user.email,
+        phone: user.phone || '9999999999',
+        surl: `${req.protocol}://${req.get('host')}/api/interviews/payment/success`,
+        furl: `${req.protocol}://${req.get('host')}/api/interviews/payment/failure`,
+        udf1: req.user!.userId.toString(),
+        udf2: technology,
+        udf3: '',
+        udf4: '',
+        udf5: '',
+      };
+
+      // Store pending interview data temporarily
+      (global as any).pendingInterviews = (global as any).pendingInterviews || {};
+      (global as any).pendingInterviews[txnid] = {
         userId: req.user!.userId,
         technology,
-        status: 'available',
-        paymentId: txnid,
         title: `${technology} Technical Interview`,
-        isPaid: true,
-        amount: 99,
-        totalQuestions: 6,
-        createdAt: new Date(),
-      }).returning();
+      };
 
-      // Simulate payment success response
+      // Generate payment form for PayUMoney
+      const paymentForm = payuMoneyService.generatePaymentForm(paymentData);
+      
       res.json({
         success: true,
-        message: 'Payment completed successfully',
-        interviewId: interview.id,
-        redirect: `/ai-interviews?payment=success&technology=${technology}`,
+        paymentForm: paymentForm.formHtml,
+        transactionId: txnid,
+        redirectToPayment: true,
       });
     } catch (error) {
       console.error("Error initiating interview payment:", error);
@@ -1851,6 +1885,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Import and add new routes
+  // Add user interviews endpoint
+  app.get("/api/user/interviews", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userInterviews = await db
+        .select()
+        .from(interviews) 
+        .where(eq(interviews.userId, req.user!.userId))
+        .orderBy(desc(interviews.createdAt));
+      
+      res.json(userInterviews);
+    } catch (error) {
+      console.error("Error fetching user interviews:", error);
+      res.status(500).json({ error: "Failed to fetch interviews" });
+    }
+  });
+
   try {
     const { default: interviewRoutes } = await import('./routes/interviews.js');
     const { default: analyticsRoutes } = await import('./routes/analytics.js');

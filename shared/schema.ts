@@ -820,6 +820,7 @@ export const interviews = pgTable("interviews", {
   }>(),
   aiSummary: text("ai_summary"),
   paymentStatus: text("payment_status").default("pending").notNull(), // pending, paid, failed
+  paymentId: text("payment_id"),
   transactionId: text("transaction_id"),
   paymentAmount: decimal("payment_amount", { precision: 10, scale: 2 }).default("99.00").notNull(),
   startedAt: timestamp("started_at"),

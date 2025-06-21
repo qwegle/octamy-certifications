@@ -3,7 +3,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { useAuth } from '@/lib/auth';
+import { useAuth } from '@/hooks/useAuth';
 import { Link, useLocation } from 'wouter';
 import Header from '@/components/header';
 import Footer from '@/components/footer';
@@ -84,12 +84,27 @@ export default function AIInterviews() {
     },
     onSuccess: (data) => {
       setProcessingTech('');
-      if (data.success) {
+      if (data.redirectToPayment && data.paymentForm) {
+        // Create and submit PayUMoney form
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = data.paymentForm;
+        document.body.appendChild(tempDiv);
+        const form = tempDiv.querySelector('form') as HTMLFormElement;
+        if (form) {
+          form.submit();
+        }
+        document.body.removeChild(tempDiv);
+      } else if (data.alreadyPurchased) {
+        toast({
+          title: 'Already Purchased',
+          description: 'You have already purchased this interview.',
+        });
+        refetchInterviews();
+      } else if (data.success) {
         toast({
           title: 'Payment Successful',
-          description: 'Interview has been unlocked! You can now take the interview.',
+          description: 'Interview has been unlocked!',
         });
-        // Refresh the interviews list
         refetchInterviews();
       }
     },

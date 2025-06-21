@@ -123,7 +123,9 @@ export default function ProfileEdit() {
     },
     onSuccess: (data) => {
       if (data.success && data.user) {
-        updateUser({ ...user!, name: data.user.name, phone: data.user.phone });
+        if (updateUser) {
+          updateUser({ name: data.user.name, phone: data.user.phone });
+        }
         toast({
           title: 'Profile Updated',
           description: 'Your profile has been successfully updated.',
