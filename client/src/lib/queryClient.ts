@@ -16,7 +16,7 @@ export async function apiRequest(
   const isAdminRoute = url.includes('/admin');
   const token = isAdminRoute 
     ? localStorage.getItem('adminToken') 
-    : localStorage.getItem('authToken');
+    : localStorage.getItem('token');
     
   const headers: Record<string, string> = {};
   
@@ -49,7 +49,7 @@ export const getQueryFn: <T>(options: {
     const isAdminRoute = url.includes('/admin');
     const token = isAdminRoute 
       ? localStorage.getItem('adminToken') 
-      : localStorage.getItem('authToken');
+      : localStorage.getItem('token');
       
     const headers: Record<string, string> = {};
     

@@ -1773,15 +1773,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         if (pendingInterview) {
           // Create actual interview record in database
-          await storage.createInterview({
-            userId,
+          const [interview] = await db.insert(interviews).values({
+            userId: userId ? parseInt(userId) : null,
             technology,
-            status: 'available',
+            status: 'pending',
             paymentId: txnid,
             title: `${technology} Technical Interview`,
-            isPaid: true,
-            amount: 99,
-          });
+            paymentStatus: 'paid',
+            totalQuestions: 6,
+            paymentAmount: '99.00',
+            createdAt: new Date(),
+          }).returning();
           
           // Clean up pending interview
           delete (global as any).pendingInterviews[txnid];
