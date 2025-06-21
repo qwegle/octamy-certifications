@@ -91,16 +91,32 @@ export default function AIInterviews() {
     },
     onSuccess: (data) => {
       setProcessingTech('');
-      if (data.redirectToPayment && data.paymentForm) {
-        // Create and submit PayUMoney form
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = data.paymentForm;
-        document.body.appendChild(tempDiv);
-        const form = tempDiv.querySelector('form') as HTMLFormElement;
-        if (form) {
-          form.submit();
+      console.log('Payment response:', data);
+      
+      if (data.redirectToPayment) {
+        if (data.paymentForm) {
+          // Create and submit PayUMoney form
+          const tempDiv = document.createElement('div');
+          tempDiv.innerHTML = data.paymentForm;
+          document.body.appendChild(tempDiv);
+          const form = tempDiv.querySelector('form') as HTMLFormElement;
+          if (form) {
+            console.log('Submitting PayUMoney form');
+            form.submit();
+          } else {
+            console.error('No form found in payment response');
+          }
+          document.body.removeChild(tempDiv);
+        } else if (data.paymentUrl) {
+          // Direct redirect to payment URL
+          window.location.href = data.paymentUrl;
+        } else {
+          toast({
+            title: 'Payment Error',
+            description: 'Payment form not generated properly.',
+            variant: 'destructive',
+          });
         }
-        document.body.removeChild(tempDiv);
       } else if (data.alreadyPurchased) {
         toast({
           title: 'Already Purchased',

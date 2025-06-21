@@ -1739,9 +1739,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json({
         success: true,
-        paymentForm: paymentForm.formHtml,
+        paymentForm: paymentForm.html,
         transactionId: txnid,
         redirectToPayment: true,
+        paymentUrl: paymentForm.url,
       });
     } catch (error) {
       console.error("Error initiating interview payment:", error);
