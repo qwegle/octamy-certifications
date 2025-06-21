@@ -140,15 +140,19 @@ router.get('/user/profile', requireAuth, async (req, res) => {
 // Update user profile
 router.put('/user/profile', requireAuth, async (req, res) => {
   try {
-    const { name, email, phone, bio, company, position, linkedin, github } = req.body;
+    const { name, email, phone } = req.body;
+
+    // Validate required fields
+    if (!name || !email) {
+      return res.status(400).json({ error: 'Name and email are required' });
+    }
 
     const [updatedUser] = await db
       .update(users)
       .set({
-        name,
-        email,
-        phone,
-        // Note: bio, company, position, linkedin, github would need additional columns in users table
+        name: name.trim(),
+        email: email.trim(),
+        phone: phone?.trim() || null,
       })
       .where(eq(users.id, req.user!.id))
       .returning();
@@ -157,11 +161,23 @@ router.put('/user/profile', requireAuth, async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    res.json(updatedUser);
+    // Return success response
+    res.json({ 
+      success: true, 
+      message: 'Profile updated successfully',
+      user: {
+        id: updatedUser.id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        phone: updatedUser.phone
+      }
+    });
   } catch (error) {
     console.error('Error updating profile:', error);
     res.status(500).json({ error: 'Failed to update profile' });
   }
 });
+
+export default router;
 
 export default router;

@@ -9,7 +9,7 @@ import { useAuth } from '@/lib/auth';
 import { useLocation } from 'wouter';
 import Header from '@/components/header';
 import Footer from '@/components/footer';
-import { User, Save, ArrowLeft } from 'lucide-react';
+import { User, Save, ArrowLeft, Upload, FileText } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface UserProfile {
@@ -23,10 +23,18 @@ interface UserProfile {
   github?: string;
 }
 
+interface FileUploadResponse {
+  success: boolean;
+  fileUrl: string;
+  fileName: string;
+}
+
 export default function ProfileEdit() {
   const { user, token, updateUser } = useAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploadedCvUrl, setUploadedCvUrl] = useState<string>('');
   const [formData, setFormData] = useState<UserProfile>({
     name: user?.name || '',
     email: user?.email || '',
@@ -62,6 +70,40 @@ export default function ProfileEdit() {
     },
   });
 
+  // File upload mutation
+  const uploadFileMutation = useMutation({
+    mutationFn: async (file: File): Promise<FileUploadResponse> => {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('type', 'resume');
+      
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+      });
+      
+      if (!response.ok) throw new Error('Failed to upload file');
+      return response.json();
+    },
+    onSuccess: (data) => {
+      setUploadedCvUrl(data.fileUrl);
+      toast({
+        title: 'File Uploaded',
+        description: 'Your CV/Resume has been uploaded successfully.',
+      });
+    },
+    onError: () => {
+      toast({
+        title: 'Upload Failed',
+        description: 'Failed to upload file. Please try again.',
+        variant: 'destructive',
+      });
+    },
+  });
+
   // Update profile mutation
   const updateProfileMutation = useMutation({
     mutationFn: async (profileData: UserProfile) => {
@@ -73,21 +115,26 @@ export default function ProfileEdit() {
         },
         body: JSON.stringify(profileData),
       });
-      if (!response.ok) throw new Error('Failed to update profile');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update profile');
+      }
       return response.json();
     },
     onSuccess: (data) => {
-      updateUser({ ...user!, name: data.name, phone: data.phone });
-      toast({
-        title: 'Profile Updated',
-        description: 'Your profile has been successfully updated.',
-      });
-      setLocation('/dashboard');
+      if (data.success && data.user) {
+        updateUser({ ...user!, name: data.user.name, phone: data.user.phone });
+        toast({
+          title: 'Profile Updated',
+          description: 'Your profile has been successfully updated.',
+        });
+        setLocation('/dashboard');
+      }
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       toast({
         title: 'Update Failed',
-        description: 'Failed to update profile. Please try again.',
+        description: error.message || 'Failed to update profile. Please try again.',
         variant: 'destructive',
       });
     },
@@ -97,8 +144,62 @@ export default function ProfileEdit() {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+      if (!allowedTypes.includes(file.type)) {
+        toast({
+          title: 'Invalid File Type',
+          description: 'Please upload a PDF or Word document.',
+          variant: 'destructive',
+        });
+        return;
+      }
+      
+      // Validate file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: 'File Too Large',
+          description: 'File size should be less than 5MB.',
+          variant: 'destructive',
+        });
+        return;
+      }
+      
+      setSelectedFile(file);
+    }
+  };
+
+  const handleFileUpload = () => {
+    if (selectedFile) {
+      uploadFileMutation.mutate(selectedFile);
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Basic validation
+    if (!formData.name.trim()) {
+      toast({
+        title: 'Validation Error',
+        description: 'Name is required.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
+    if (!formData.email.trim()) {
+      toast({
+        title: 'Validation Error',
+        description: 'Email is required.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
     updateProfileMutation.mutate(formData);
   };
 
@@ -236,6 +337,68 @@ export default function ProfileEdit() {
                       onChange={(e) => handleInputChange('position', e.target.value)}
                       placeholder="Your job title"
                     />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* CV/Resume Upload */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <FileText className="mr-2 h-5 w-5" />
+                  CV/Resume Upload
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="cv-upload">Upload CV/Resume (PDF or Word format, max 5MB)</Label>
+                  <div className="mt-2 space-y-4">
+                    <Input
+                      id="cv-upload"
+                      type="file"
+                      accept=".pdf,.doc,.docx"
+                      onChange={handleFileChange}
+                      className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-black file:text-white hover:file:bg-gray-800"
+                    />
+                    
+                    {selectedFile && (
+                      <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div className="flex items-center">
+                          <FileText className="h-4 w-4 mr-2 text-gray-600" />
+                          <span className="text-sm font-medium">{selectedFile.name}</span>
+                          <span className="text-xs text-gray-500 ml-2">
+                            ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
+                          </span>
+                        </div>
+                        <Button
+                          type="button"
+                          size="sm"
+                          onClick={handleFileUpload}
+                          disabled={uploadFileMutation.isPending}
+                          className="bg-black text-white hover:bg-gray-800"
+                        >
+                          <Upload className="h-4 w-4 mr-1" />
+                          {uploadFileMutation.isPending ? 'Uploading...' : 'Upload'}
+                        </Button>
+                      </div>
+                    )}
+                    
+                    {uploadedCvUrl && (
+                      <div className="flex items-center p-3 bg-green-50 rounded-lg border border-green-200">
+                        <FileText className="h-4 w-4 mr-2 text-green-600" />
+                        <span className="text-sm text-green-800">CV uploaded successfully!</span>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          onClick={() => window.open(uploadedCvUrl, '_blank')}
+                          className="ml-auto border-green-300 text-green-700 hover:bg-green-100"
+                        >
+                          View
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </div>
               </CardContent>
