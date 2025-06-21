@@ -27,7 +27,7 @@ export default function AIInterviews() {
   const [selectedTechnology, setSelectedTechnology] = useState<string>('');
 
   // Fetch available technologies and interview questions
-  const { data: technologies = [] } = useQuery<string[]>({
+  const { data: technologies = [], isLoading: technologiesLoading, error: technologiesError } = useQuery<string[]>({
     queryKey: ['/api/interview-technologies'],
     enabled: !!user && !!token,
     queryFn: async () => {
@@ -35,7 +35,10 @@ export default function AIInterviews() {
         headers: { 'Authorization': `Bearer ${token}` },
       });
       if (!response.ok) throw new Error('Failed to fetch technologies');
-      return response.json();
+      const data = await response.json();
+      console.log('Technologies API response:', data);
+      console.log('Technologies count:', data.length);
+      return data;
     },
   });
 
@@ -186,38 +189,55 @@ export default function AIInterviews() {
           </Card>
         </div>
 
-        {/* Start New Interview */}
+        {/* Available Technologies */}
         <Card className="mb-8">
           <CardHeader>
             <CardTitle className="flex items-center">
               <Brain className="mr-2 h-5 w-5" />
-              Start New Interview
+              Available Technologies
             </CardTitle>
+            <p className="text-sm text-gray-600">
+              Choose a technology for your AI interview (₹99 per interview)
+            </p>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {technologies.map((tech) => (
-                <Card key={tech} className="cursor-pointer border-2 hover:border-octamy-primary transition-colors">
-                  <CardContent className="p-6 text-center">
-                    <h3 className="font-semibold text-lg mb-2">{tech}</h3>
-                    <p className="text-sm text-gray-600 mb-4">
-                      Technical interview for {tech} development
-                    </p>
-                    <div className="flex items-center justify-center text-sm text-gray-500 mb-4">
-                      <Clock className="mr-1 h-4 w-4" />
-                      5-7 questions • 45-60 min
-                    </div>
-                    <Button 
-                      onClick={() => createInterviewMutation.mutate(tech)}
-                      disabled={createInterviewMutation.isPending}
-                      className="w-full"
-                    >
-                      Start Interview - ₹99
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            {technologiesLoading ? (
+              <div className="text-center py-8">
+                <Brain className="mx-auto h-12 w-12 text-gray-400 animate-pulse" />
+                <h3 className="mt-2 text-sm font-medium text-gray-900">Loading technologies...</h3>
+                <p className="mt-1 text-sm text-gray-500">Fetching available interview technologies.</p>
+              </div>
+            ) : technologies.length === 0 ? (
+              <div className="text-center py-8">
+                <Brain className="mx-auto h-12 w-12 text-gray-400" />
+                <h3 className="mt-2 text-sm font-medium text-gray-900">No technologies available</h3>
+                <p className="mt-1 text-sm text-gray-500">Interview technologies are being set up.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {technologies.map((tech) => (
+                  <Card key={tech} className="cursor-pointer border-2 hover:border-black transition-colors">
+                    <CardContent className="p-6 text-center">
+                      <h3 className="font-semibold text-lg mb-2 text-black">{tech}</h3>
+                      <p className="text-sm text-gray-600 mb-4">
+                        Technical interview for {tech} development
+                      </p>
+                      <div className="flex items-center justify-center text-sm text-gray-500 mb-4">
+                        <Clock className="mr-1 h-4 w-4" />
+                        5-7 questions • 45-60 min
+                      </div>
+                      <Button 
+                        onClick={() => createInterviewMutation.mutate(tech)}
+                        disabled={createInterviewMutation.isPending}
+                        className="w-full bg-black text-white hover:bg-gray-800"
+                      >
+                        {createInterviewMutation.isPending ? 'Creating...' : 'Start Interview - ₹99'}
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
 
