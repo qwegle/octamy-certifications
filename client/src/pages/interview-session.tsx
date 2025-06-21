@@ -307,7 +307,11 @@ export default function InterviewSession() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-white">
-        <Header />
+        <header className="bg-white shadow-sm border-b border-gray-200">
+          <div className="container mx-auto px-4 py-4">
+            <h1 className="text-2xl font-bold text-black">Octamy | AI Interview</h1>
+          </div>
+        </header>
         <div className="max-w-4xl mx-auto px-4 py-12 text-center">
           <h2 className="text-2xl font-bold mb-4">Loading Interview...</h2>
         </div>
@@ -318,7 +322,11 @@ export default function InterviewSession() {
   if (!interview) {
     return (
       <div className="min-h-screen bg-white">
-        <Header />
+        <header className="bg-white shadow-sm border-b border-gray-200">
+          <div className="container mx-auto px-4 py-4">
+            <h1 className="text-2xl font-bold text-black">Octamy | AI Interview</h1>
+          </div>
+        </header>
         <div className="max-w-4xl mx-auto px-4 py-12 text-center">
           <h2 className="text-2xl font-bold mb-4">Interview Not Found</h2>
         </div>
@@ -332,7 +340,11 @@ export default function InterviewSession() {
   if (interview.status === 'completed') {
     return (
       <div className="min-h-screen bg-white">
-        <Header />
+        <header className="bg-white shadow-sm border-b border-gray-200">
+          <div className="container mx-auto px-4 py-4">
+            <h1 className="text-2xl font-bold text-black">Octamy | AI Interview Results</h1>
+          </div>
+        </header>
         <div className="max-w-6xl mx-auto px-4 py-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Results Summary */}
