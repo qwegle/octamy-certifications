@@ -19,12 +19,15 @@ import {
   XCircle,
   Eye
 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import type { Interview, InterviewQuestion } from '@shared/schema';
 
 export default function AIInterviews() {
   const { user, token } = useAuth();
   const [, setLocation] = useLocation();
   const [selectedTechnology, setSelectedTechnology] = useState<string>('');
+  const [processingTech, setProcessingTech] = useState<string>('');
+  const { toast } = useToast();
 
   // Fetch available technologies and interview questions
   const { data: technologies = [], isLoading: technologiesLoading, error: technologiesError } = useQuery<string[]>({
@@ -60,6 +63,7 @@ export default function AIInterviews() {
   // Create new interview mutation - redirect to payment
   const createInterviewMutation = useMutation({
     mutationFn: async (technology: string) => {
+      setProcessingTech(technology);
       const response = await fetch('/api/interviews/initiate-payment', {
         method: 'POST',
         headers: {
@@ -68,10 +72,14 @@ export default function AIInterviews() {
         },
         body: JSON.stringify({ technology }),
       });
-      if (!response.ok) throw new Error('Failed to initiate interview payment');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to initiate interview payment');
+      }
       return response.json();
     },
     onSuccess: (data) => {
+      setProcessingTech('');
       // Redirect to PayUMoney payment page
       if (data.paymentForm) {
         document.body.innerHTML += data.paymentForm;
@@ -81,8 +89,14 @@ export default function AIInterviews() {
         }
       }
     },
-    onError: (error) => {
+    onError: (error: Error) => {
+      setProcessingTech('');
       console.error('Interview payment initiation failed:', error);
+      toast({
+        title: 'Payment Failed',
+        description: error.message || 'Failed to initiate payment. Please try again.',
+        variant: 'destructive',
+      });
     },
   });
 
@@ -247,10 +261,10 @@ export default function AIInterviews() {
                       ) : (
                         <Button 
                           onClick={() => createInterviewMutation.mutate(tech)}
-                          disabled={createInterviewMutation.isPending}
+                          disabled={processingTech === tech}
                           className="w-full bg-black text-white hover:bg-gray-800"
                         >
-                          {createInterviewMutation.isPending ? 'Processing...' : 'Start Interview - ₹99'}
+                          {processingTech === tech ? 'Processing...' : 'Start Interview - ₹99'}
                         </Button>
                       )}
                     </CardContent>

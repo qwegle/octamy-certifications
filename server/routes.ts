@@ -1659,7 +1659,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Initiate interview payment
-  app.post("/api/interviews/initiate-payment", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+  app.post("/api/interviews/initiate-payment", async (req: Request, res: Response) => {
+    // Simple auth check
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+    
+    if (!token) {
+      return res.status(401).json({ error: 'No token provided' });
+    }
+    
+    let userId;
+    try {
+      const jwt = require('jsonwebtoken');
+      const decoded = jwt.verify(token, 'your-secret-key'); // Using same secret as auth
+      userId = decoded.userId;
+    } catch (error) {
+      return res.status(401).json({ error: 'Invalid token' });
+    }
     try {
       const { technology } = req.body;
       
@@ -1672,7 +1688,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Create interview record with pending payment
       const interviewData = {
-        userId: req.user!.userId,
+        userId: userId,
         technology,
         status: 'payment_pending' as const,
         paymentId: txnid,
@@ -1685,7 +1701,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       (global as any).pendingInterviews[txnid] = interviewData;
 
       // Get user details
-      const user = await storage.getUserById(req.user!.userId);
+      const user = await storage.getUserById(userId);
       if (!user) {
         return res.status(404).json({ error: 'User not found' });
       }
@@ -1700,7 +1716,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         phone: user.phone || '9999999999',
         surl: `${req.protocol}://${req.get('host')}/api/interviews/payment/success`,
         furl: `${req.protocol}://${req.get('host')}/api/interviews/payment/failure`,
-        udf1: req.user!.userId.toString(),
+        udf1: userId.toString(),
         udf2: technology,
         udf3: '',
         udf4: '',

@@ -1074,10 +1074,50 @@ export class DatabaseStorage implements IStorage {
   async updatePaymentStatus(transactionId: string, status: string, paymentResponse: any): Promise<void> {
     await db
       .update(payments)
-      .set({ 
-        status
+      .set({
+        status,
+        paymentResponse: JSON.stringify(paymentResponse),
+        updatedAt: new Date()
       })
       .where(eq(payments.transactionId, transactionId));
+  }
+
+  // Interview methods
+  async createInterview(data: any): Promise<any> {
+    const [interview] = await db.insert(interviews).values({
+      userId: data.userId,
+      technology: data.technology,
+      status: data.status || 'available',
+      paymentId: data.paymentId,
+      title: data.title,
+      isPaid: data.isPaid || false,
+      amount: data.amount || 0,
+      createdAt: new Date(),
+    }).returning();
+    
+    return interview;
+  }
+
+  async getInterviewById(id: number): Promise<any> {
+    const [interview] = await db
+      .select()
+      .from(interviews)
+      .where(eq(interviews.id, id));
+    
+    return interview;
+  }
+
+  async updateInterview(id: number, data: any): Promise<any> {
+    const [interview] = await db
+      .update(interviews)
+      .set({
+        ...data,
+        updatedAt: new Date(),
+      })
+      .where(eq(interviews.id, id))
+      .returning();
+    
+    return interview;
   }
 
   async getPaymentByTransactionId(transactionId: string): Promise<Payment | undefined> {
