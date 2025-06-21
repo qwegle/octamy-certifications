@@ -8,12 +8,38 @@ import {
   courses, 
   interviews 
 } from '../../shared/schema.js';
-import { requireAuth } from '../middleware/auth.js';
+import jwt from 'jsonwebtoken';
+
+const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
+
+interface AuthenticatedRequest extends Request {
+  user?: {
+    id: number;
+    email: string;
+  };
+}
+
+const requireAuth = (req: any, res: any, next: any) => {
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) {
+    return res.status(401).json({ message: 'No token provided' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET) as any;
+    req.user = { id: decoded.userId, email: decoded.email };
+    next();
+  } catch (error) {
+    return res.status(403).json({ message: 'Invalid token' });
+  }
+};
 
 const router = Router();
 
 // Get user analytics data
-router.get('/user/analytics', requireAuth, async (req, res) => {
+router.get('/user/analytics', requireAuth, async (req: any, res: any) => {
   try {
     const userId = req.user!.id;
 
@@ -109,7 +135,7 @@ router.get('/user/analytics', requireAuth, async (req, res) => {
 });
 
 // Get user profile data
-router.get('/user/profile', requireAuth, async (req, res) => {
+router.get('/user/profile', requireAuth, async (req: any, res: any) => {
   try {
     const [user] = await db
       .select({
@@ -138,7 +164,7 @@ router.get('/user/profile', requireAuth, async (req, res) => {
 });
 
 // Update user profile
-router.put('/user/profile', requireAuth, async (req, res) => {
+router.put('/user/profile', requireAuth, async (req: any, res: any) => {
   try {
     const { name, email, phone } = req.body;
 
@@ -177,7 +203,5 @@ router.put('/user/profile', requireAuth, async (req, res) => {
     res.status(500).json({ error: 'Failed to update profile' });
   }
 });
-
-export default router;
 
 export default router;

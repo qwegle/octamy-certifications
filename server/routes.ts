@@ -1686,6 +1686,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         title: `${technology} Technical Interview`,
         isPaid: true,
         amount: 99,
+        totalQuestions: 6,
         createdAt: new Date(),
       }).returning();
 
