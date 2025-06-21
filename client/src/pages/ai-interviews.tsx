@@ -57,8 +57,9 @@ export default function AIInterviews() {
     queryKey: ['/api/user/interviews'],
     enabled: !!user && !!token,
     queryFn: async () => {
+      const currentToken = localStorage.getItem('token');
       const response = await fetch('/api/user/interviews', {
-        headers: { 'Authorization': `Bearer ${token}` },
+        headers: { 'Authorization': `Bearer ${currentToken}` },
       });
       if (!response.ok) throw new Error('Failed to fetch interviews');
       return response.json();
@@ -69,17 +70,22 @@ export default function AIInterviews() {
   const createInterviewMutation = useMutation({
     mutationFn: async (technology: string) => {
       setProcessingTech(technology);
+      const currentToken = localStorage.getItem('token');
+      console.log('Current token for payment:', currentToken ? 'Token exists' : 'No token');
+      
       const response = await fetch('/api/interviews/initiate-payment', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `Bearer ${currentToken}`,
         },
         body: JSON.stringify({ technology }),
       });
+      
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to initiate interview payment');
+        console.error('Payment initiation failed:', errorData);
+        throw new Error(errorData.message || errorData.error || 'Failed to initiate interview payment');
       }
       return response.json();
     },
