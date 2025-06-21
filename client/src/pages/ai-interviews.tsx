@@ -317,68 +317,134 @@ export default function AIInterviews() {
         {/* Interview History */}
         <Card>
           <CardHeader>
-            <CardTitle>Interview History</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <Video className="w-5 h-5" />
+              Interview History
+            </CardTitle>
           </CardHeader>
           <CardContent>
             {userInterviews.length === 0 ? (
-              <div className="text-center py-8">
-                <Brain className="mx-auto h-12 w-12 text-gray-400" />
-                <h3 className="mt-2 text-sm font-medium text-gray-900">No interviews yet</h3>
-                <p className="mt-1 text-sm text-gray-500">Start your first AI interview to practice your skills.</p>
+              <div className="text-center py-12">
+                <Brain className="mx-auto h-16 w-16 text-gray-300" />
+                <h3 className="mt-4 text-lg font-medium text-gray-900">No interviews yet</h3>
+                <p className="mt-2 text-gray-500">Start your first AI interview to practice your skills and build your portfolio.</p>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {userInterviews.map((interview) => (
-                  <div key={interview.id} className="border rounded-lg p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-4">
-                        <div>
-                          <h3 className="font-medium">{interview.title}</h3>
-                          <p className="text-sm text-gray-500">{interview.technology}</p>
+                  <Card key={interview.id} className="border-2 hover:border-gray-300 transition-colors">
+                    <CardContent className="p-6">
+                      {/* Video Placeholder */}
+                      <div className="relative mb-4">
+                        <div className="aspect-video bg-gray-100 rounded-lg flex items-center justify-center">
+                          {interview.videoUrl ? (
+                            <video 
+                              className="w-full h-full object-cover rounded-lg"
+                              poster="/api/placeholder/400/225"
+                            >
+                              <source src={interview.videoUrl} type="video/mp4" />
+                            </video>
+                          ) : (
+                            <div className="text-center">
+                              <Video className="mx-auto h-12 w-12 text-gray-400" />
+                              <p className="text-sm text-gray-500 mt-2">
+                                {interview.status === 'completed' ? 'Video Processing' : 'No Video'}
+                              </p>
+                            </div>
+                          )}
                         </div>
-                        <Badge className={getStatusColor(interview.status)}>
+                        
+                        {/* Status Badge */}
+                        <Badge 
+                          className={`absolute top-2 right-2 ${getStatusColor(interview.status)}`}
+                        >
                           {interview.status.replace('_', ' ').toUpperCase()}
                         </Badge>
                       </div>
-                      
-                      <div className="flex items-center space-x-4">
-                        {interview.score && (
-                          <div className="text-center">
-                            <p className="text-lg font-bold">{interview.score}/100</p>
-                            <p className={`text-sm font-medium ${getGradeColor(interview.grade!)}`}>
-                              Grade {interview.grade}
+
+                      {/* Interview Details */}
+                      <div className="space-y-3">
+                        <div>
+                          <h3 className="font-semibold text-lg text-gray-900">{interview.title}</h3>
+                          <p className="text-gray-600">{interview.technology}</p>
+                        </div>
+
+                        {/* Score Display */}
+                        {interview.score ? (
+                          <div className="bg-gray-50 rounded-lg p-4">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <p className="text-2xl font-bold text-gray-900">{interview.score}/100</p>
+                                <p className="text-sm text-gray-600">Final Score</p>
+                              </div>
+                              <div className="text-right">
+                                <span className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${getGradeColor(interview.grade!)}`}>
+                                  Grade {interview.grade}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="bg-yellow-50 rounded-lg p-4">
+                            <p className="text-yellow-800 text-sm">
+                              {interview.paymentStatus === 'pending' ? 'Payment required to start' : 'Ready to begin'}
                             </p>
                           </div>
                         )}
-                        
-                        <div className="flex space-x-2">
+
+                        {/* Action Buttons */}
+                        <div className="flex gap-2 pt-2">
                           {interview.status === 'pending' && interview.paymentStatus === 'paid' && (
-                            <Button size="sm" onClick={() => setLocation(`/interviews/${interview.id}`)}>
-                              <Play className="mr-1 h-4 w-4" />
-                              Start
+                            <Button 
+                              className="flex-1"
+                              onClick={() => setLocation(`/interviews/${interview.id}`)}
+                            >
+                              <Play className="mr-2 h-4 w-4" />
+                              Start Interview
                             </Button>
                           )}
                           
                           {interview.status === 'pending' && interview.paymentStatus === 'pending' && (
-                            <Button size="sm" onClick={() => setLocation(`/interviews/${interview.id}/payment`)}>
+                            <Button 
+                              className="flex-1 bg-blue-600 hover:bg-blue-700"
+                              onClick={() => createInterviewMutation.mutate(interview.technology)}
+                            >
                               Pay ₹99
                             </Button>
                           )}
                           
                           {interview.status === 'completed' && (
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => setLocation(`/interviews/${interview.id}/results`)}
-                            >
-                              <Eye className="mr-1 h-4 w-4" />
-                              View Results
-                            </Button>
+                            <>
+                              <Button 
+                                variant="outline" 
+                                className="flex-1"
+                                onClick={() => setLocation(`/interviews/${interview.id}/results`)}
+                              >
+                                <Eye className="mr-2 h-4 w-4" />
+                                View Results
+                              </Button>
+                              {interview.videoUrl && (
+                                <Button 
+                                  variant="outline"
+                                  onClick={() => window.open(interview.videoUrl, '_blank')}
+                                >
+                                  <Video className="h-4 w-4" />
+                                </Button>
+                              )}
+                            </>
                           )}
                         </div>
+
+                        {/* Interview Date */}
+                        <p className="text-xs text-gray-500 pt-2">
+                          {interview.completedAt 
+                            ? `Completed on ${new Date(interview.completedAt).toLocaleDateString()}`
+                            : `Created on ${new Date(interview.createdAt).toLocaleDateString()}`
+                          }
+                        </p>
                       </div>
-                    </div>
-                  </div>
+                    </CardContent>
+                  </Card>
                 ))}
               </div>
             )}
