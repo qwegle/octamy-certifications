@@ -1659,7 +1659,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Initiate interview payment
-  app.post("/api/interviews/initiate-payment", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+  app.post("/api/interviews/initiate-payment", optionalAuth, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { technology } = req.body;
       
@@ -1670,23 +1670,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Generate transaction ID
       const txnid = `INT${Date.now()}${Math.random().toString(36).substr(2, 9)}`;
       
-      // Get user details
-      const userResult = await db.select().from(usersTable).where(eq(usersTable.id, req.user!.userId));
-      const user = userResult[0];
-      if (!user) {
-        return res.status(404).json({ error: 'User not found' });
+      // Get user details - handle both authenticated and guest users
+      let user = null;
+      let userId = null;
+      let userEmail = 'guest@octamy.com';
+      let userName = 'Guest User';
+
+      if (req.user?.userId) {
+        const userResult = await db.select().from(usersTable).where(eq(usersTable.id, req.user.userId));
+        user = userResult[0];
+        if (user) {
+          userId = user.id;
+          userEmail = user.email;
+          userName = user.name;
+        }
       }
 
-      // Check if user already has this interview
-      const existingInterview = await db
-        .select()
-        .from(interviews)
-        .where(and(
-          eq(interviews.userId, req.user!.userId),
-          eq(interviews.technology, technology),
-          eq(interviews.paymentStatus, 'paid')
-        ))
-        .limit(1);
+      // Check if user already has this interview (only for authenticated users)
+      let existingInterview: any[] = [];
+      if (userId) {
+        existingInterview = await db
+          .select()
+          .from(interviews)
+          .where(and(
+            eq(interviews.userId, userId),
+            eq(interviews.technology, technology),
+            eq(interviews.paymentStatus, 'paid')
+          ))
+          .limit(1);
+      }
 
       if (existingInterview.length > 0) {
         return res.json({
@@ -1702,12 +1714,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         txnid,
         amount: '99.00',
         productinfo: `AI Interview - ${technology}`,
-        firstname: user.name,
-        email: user.email,
-        phone: user.phone || '9999999999',
+        firstname: userName,
+        email: userEmail,
+        phone: user?.phone || '9999999999',
         surl: `${req.protocol}://${req.get('host')}/api/interviews/payment/success`,
         furl: `${req.protocol}://${req.get('host')}/api/interviews/payment/failure`,
-        udf1: req.user!.userId.toString(),
+        udf1: userId?.toString() || 'guest',
         udf2: technology,
         udf3: '',
         udf4: '',
