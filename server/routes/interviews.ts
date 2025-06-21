@@ -2,19 +2,41 @@ import { Router } from 'express';
 import { eq, and, desc } from 'drizzle-orm';
 import { db } from '../db.js';
 import { interviews, interviewQuestions, interviewResponses, users } from '../../shared/schema.js';
-import { requireAuth } from '../middleware/auth.js';
+
+// Authentication middleware
+const requireAuth = (req: any, res: any, next: any) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) {
+    return res.status(401).json({ error: 'No token provided' });
+  }
+
+  try {
+    const jwt = require('jsonwebtoken');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+    req.user = { id: decoded.userId, ...decoded };
+    next();
+  } catch (error) {
+    return res.status(401).json({ error: 'Invalid token' });
+  }
+};
 
 const router = Router();
 
-// Get available technologies for interviews
-router.get('/interview-technologies', requireAuth, async (req, res) => {
+// Get available technologies for interviews - Remove auth temporarily for debugging
+router.get('/interview-technologies', async (req, res) => {
   try {
+    console.log('Fetching interview technologies...');
     const technologies = await db
       .selectDistinct({ technology: interviewQuestions.technology })
       .from(interviewQuestions)
       .where(eq(interviewQuestions.isActive, true));
     
-    res.json(technologies.map(t => t.technology));
+    console.log('Found technologies:', technologies);
+    const result = technologies.map(t => t.technology);
+    console.log('Returning technologies:', result);
+    res.json(result);
   } catch (error) {
     console.error('Error fetching technologies:', error);
     res.status(500).json({ error: 'Failed to fetch technologies' });

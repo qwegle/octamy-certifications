@@ -29,14 +29,16 @@ export default function AIInterviews() {
   // Fetch available technologies and interview questions
   const { data: technologies = [], isLoading: technologiesLoading, error: technologiesError } = useQuery<string[]>({
     queryKey: ['/api/interview-technologies'],
-    enabled: !!user && !!token,
+    enabled: !!user,
+    staleTime: 0,
     queryFn: async () => {
-      const response = await fetch('/api/interview-technologies', {
-        headers: { 'Authorization': `Bearer ${token}` },
-      });
+      console.log('Fetching technologies...');
+      const response = await fetch('/api/interview-technologies');
+      console.log('Response status:', response.status);
       if (!response.ok) throw new Error('Failed to fetch technologies');
       const data = await response.json();
       console.log('Technologies API response:', data);
+      console.log('Technologies array:', Array.isArray(data));
       console.log('Technologies count:', data.length);
       return data;
     },

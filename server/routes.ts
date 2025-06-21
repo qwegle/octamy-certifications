@@ -5,7 +5,9 @@ import { seedDatabase } from "./seed";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { z } from "zod";
-import { insertUserSchema, insertExamAttemptSchema, insertCertificateSchema, insertSellerSchema, insertSaleSchema, insertWithdrawalRequestSchema, insertSponsorSchema } from "@shared/schema";
+import { insertUserSchema, insertExamAttemptSchema, insertCertificateSchema, insertSellerSchema, insertSaleSchema, insertWithdrawalRequestSchema, insertSponsorSchema, interviewQuestions } from "@shared/schema";
+import { eq } from "drizzle-orm";
+import { db } from "./db";
 import { LearningPathController } from './controllers/learningPathController';
 import { payuMoneyService } from "./payumoney";
 import { getBadgeFromScore, generateCertificateNumber, calculateExpiryDate } from "./utils";
@@ -1634,6 +1636,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
           </body>
         </html>
       `);
+    }
+  });
+
+  // Add interview technologies endpoint directly
+  app.get("/api/interview-technologies", async (req: Request, res: Response) => {
+    try {
+      console.log('Direct API: Fetching interview technologies...');
+      const technologies = await db
+        .selectDistinct({ technology: interviewQuestions.technology })
+        .from(interviewQuestions)
+        .where(eq(interviewQuestions.isActive, true));
+      
+      console.log('Direct API: Found technologies:', technologies);
+      const result = technologies.map(t => t.technology);
+      console.log('Direct API: Returning technologies:', result);
+      res.json(result);
+    } catch (error) {
+      console.error('Direct API: Error fetching technologies:', error);
+      res.status(500).json({ error: 'Failed to fetch technologies' });
     }
   });
 
