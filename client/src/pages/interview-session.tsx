@@ -29,6 +29,7 @@ interface InterviewQuestion {
   technology: string;
   difficulty: string;
   timeLimit: number;
+  isHandsOn?: boolean;
 }
 
 interface Interview {
@@ -52,6 +53,8 @@ export default function InterviewSession() {
   const [videoEnabled, setVideoEnabled] = useState(true);
   const [audioEnabled, setAudioEnabled] = useState(true);
   const [tabSwitches, setTabSwitches] = useState(0);
+  const [isScreenRecording, setIsScreenRecording] = useState(false);
+  const screenRecorderRef = useRef<MediaRecorder | null>(null);
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -72,9 +75,9 @@ export default function InterviewSession() {
 
   const currentQuestion = interview?.questions?.[currentQuestionIndex];
 
-  // Start video recording
+  // Start video recording only during active interview
   useEffect(() => {
-    if (!currentQuestion) return;
+    if (!currentQuestion || interview?.status === 'completed') return;
 
     const startRecording = async () => {
       try {
@@ -187,12 +190,44 @@ export default function InterviewSession() {
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
       mediaRecorderRef.current.stop();
     }
+    if (screenRecorderRef.current && screenRecorderRef.current.state !== 'inactive') {
+      screenRecorderRef.current.stop();
+    }
     if (videoRef.current && videoRef.current.srcObject) {
       const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
       tracks.forEach(track => track.stop());
       videoRef.current.srcObject = null;
     }
     setIsRecording(false);
+    setIsScreenRecording(false);
+  };
+
+  // Start screen recording for hands-on questions
+  const startScreenRecording = async () => {
+    try {
+      const screenStream = await navigator.mediaDevices.getDisplayMedia({
+        video: true,
+        audio: true
+      });
+      
+      const mediaRecorder = new MediaRecorder(screenStream);
+      screenRecorderRef.current = mediaRecorder;
+      
+      mediaRecorder.start();
+      setIsScreenRecording(true);
+      
+      toast({
+        title: 'Screen Recording Started',
+        description: 'Your screen is now being recorded for this hands-on question',
+      });
+    } catch (error) {
+      console.error('Error starting screen recording:', error);
+      toast({
+        title: 'Screen Recording Failed',
+        description: 'Unable to start screen recording. Please try again.',
+        variant: 'destructive',
+      });
+    }
   };
 
   const submitInterviewMutation = useMutation({

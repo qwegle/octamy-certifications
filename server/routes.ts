@@ -1828,13 +1828,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ error: 'Access denied' });
       }
 
-      // Get questions for this technology
+      // Get questions for this technology - ensure correct technology matching
       const questions = await db
         .select()
         .from(interviewQuestions)
         .where(eq(interviewQuestions.technology, interview.technology))
         .where(eq(interviewQuestions.isActive, true))
-        .limit(5); // Limit to 5 questions per interview
+        .limit(4); // 4 theory questions + 1 hands-on
+      
+      // Add one hands-on question for the specific technology
+      const handsOnQuestion = {
+        id: 999,
+        title: `${interview.technology} Hands-on Challenge`,
+        question: getHandsOnQuestion(interview.technology),
+        technology: interview.technology,
+        difficulty: 'practical',
+        timeLimit: 1800, // 30 minutes for hands-on
+        isHandsOn: true
+      };
+      
+      questions.push(handsOnQuestion);
+
+      // Helper function to get hands-on questions by technology
+      function getHandsOnQuestion(technology: string): string {
+        const handsOnQuestions: Record<string, string> = {
+          'Data Science': 'Create a Python script to analyze a CSV dataset. Load the data, perform basic statistics, create visualizations, and identify key insights. You may use pandas, matplotlib, seaborn, or any libraries you prefer.',
+          'React': 'Build a React component that fetches and displays a list of users from JSONPlaceholder API. Include search functionality, loading states, and error handling. You may use any React hooks and styling approach.',
+          'Node.js': 'Create a REST API with Express.js that manages a simple todo list. Implement GET, POST, PUT, DELETE endpoints with in-memory storage. Include input validation and error handling.',
+          'Python': 'Write a Python program that reads a text file, counts word frequency, and saves the results to a new file. Handle file operations gracefully and include basic text processing.',
+          'JavaScript': 'Create an interactive web page that fetches weather data from a public API and displays it with a search feature. Use vanilla JavaScript and include error handling.',
+          'Java': 'Create a Java class hierarchy for different types of vehicles. Implement inheritance, polymorphism, and demonstrate the functionality with a main method.',
+          'Database': 'Design and implement a simple database schema for a library management system. Create tables, relationships, and write SQL queries for common operations.',
+          'Machine Learning': 'Using any ML library, create a simple classification model on a public dataset. Include data preprocessing, model training, evaluation, and prediction examples.',
+          'Cloud Computing': 'Design a cloud architecture diagram for a simple web application. Explain the components, their interactions, and justify your technology choices.',
+          'Cybersecurity': 'Demonstrate basic security concepts by creating a simple password strength checker and explaining common vulnerabilities in web applications.',
+          'Default': 'Create a small project demonstrating your skills in this technology. You have 30 minutes to build something functional and explain your approach.'
+        };
+        
+        return handsOnQuestions[technology] || handsOnQuestions['Default'];
+      }
 
       res.json({
         ...interview,
