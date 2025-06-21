@@ -15,7 +15,11 @@ import {
   AlertTriangle, 
   ArrowLeft, 
   ArrowRight, 
-  CheckCircle 
+  CheckCircle,
+  Brain,
+  FileText,
+  Target,
+  Download
 } from 'lucide-react';
 
 interface InterviewQuestion {
@@ -240,28 +244,263 @@ export default function InterviewSession() {
     );
   }
 
-  // Show interview completion
+  // Fetch interview responses for completed interviews
+  const { data: responses } = useQuery({
+    queryKey: ['/api/interview-responses', interviewId],
+    queryFn: () => fetch(`/api/interview-responses/${interviewId}`, {
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+    }).then(res => res.json()),
+    enabled: !!interviewId && interview?.status === 'completed',
+  });
+
+  // Show interview completion with detailed results
   if (interview?.status === 'completed') {
+    const getGradeColor = (grade: string) => {
+      switch (grade) {
+        case 'A+': case 'A': return 'bg-green-100 text-green-800';
+        case 'B+': case 'B': return 'bg-blue-100 text-blue-800';
+        case 'C+': case 'C': return 'bg-yellow-100 text-yellow-800';
+        case 'D+': case 'D': return 'bg-orange-100 text-orange-800';
+        default: return 'bg-red-100 text-red-800';
+      }
+    };
+
+    const formatDate = (dateString: string) => {
+      return new Date(dateString).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    };
+
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-gray-50">
+        {/* Header */}
         <header className="bg-white shadow-sm border-b border-gray-200">
-          <div className="container mx-auto px-4 py-4">
-            <h1 className="text-2xl font-bold text-black">Interview Completed</h1>
+          <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+            <h1 className="text-2xl font-bold text-black">Interview Results</h1>
+            <Button 
+              variant="outline" 
+              onClick={() => navigate('/ai-interviews')}
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back to Interviews
+            </Button>
           </div>
         </header>
-        <div className="max-w-4xl mx-auto px-4 py-8">
+
+        <div className="max-w-6xl mx-auto px-4 py-8 space-y-6">
+          {/* Interview Overview */}
           <Card>
-            <CardContent className="text-center py-8">
-              <CheckCircle className="w-16 h-16 text-green-600 mx-auto mb-4" />
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Interview Submitted Successfully!</h2>
-              <p className="text-gray-600 mb-4">
-                Your responses are being processed by our AI system. You'll receive detailed feedback soon.
-              </p>
-              <Button onClick={() => navigate('/ai-interviews')}>
-                Back to Interviews
-              </Button>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-xl">{interview.title}</CardTitle>
+                  <p className="text-gray-600 mt-1">Technology: {interview.technology}</p>
+                </div>
+                <div className="text-right">
+                  <div className="text-3xl font-bold text-gray-900">{interview.score || 0}/100</div>
+                  <span className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${getGradeColor(interview.grade || 'F')}`}>
+                    Grade {interview.grade || 'F'}
+                  </span>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <p className="text-sm text-gray-600">Completed</p>
+                  <p className="font-semibold">{interview.completedAt ? formatDate(interview.completedAt) : 'N/A'}</p>
+                </div>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <p className="text-sm text-gray-600">Questions</p>
+                  <p className="font-semibold">{interview.totalQuestions || 0}</p>
+                </div>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <p className="text-sm text-gray-600">Payment Status</p>
+                  <p className="font-semibold capitalize">{interview.paymentStatus}</p>
+                </div>
+              </div>
             </CardContent>
           </Card>
+
+          {/* AI Summary */}
+          {interview.aiSummary && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Brain className="w-5 h-5" />
+                  AI Analysis Summary
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-700">{interview.aiSummary}</p>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Video & Screen Recording */}
+          {(interview.videoUrl || interview.screenRecordingUrl) && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Video className="w-5 h-5" />
+                  Recordings
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {interview.videoUrl && (
+                  <div>
+                    <h4 className="font-semibold mb-2">Video Recording</h4>
+                    <video 
+                      controls 
+                      className="w-full max-w-2xl rounded-lg shadow-lg"
+                      poster="/api/placeholder/800/450"
+                    >
+                      <source src={interview.videoUrl} type="video/mp4" />
+                      Your browser does not support the video tag.
+                    </video>
+                  </div>
+                )}
+                {interview.screenRecordingUrl && (
+                  <div>
+                    <h4 className="font-semibold mb-2">Screen Recording</h4>
+                    <video 
+                      controls 
+                      className="w-full max-w-2xl rounded-lg shadow-lg"
+                      poster="/api/placeholder/800/450"
+                    >
+                      <source src={interview.screenRecordingUrl} type="video/mp4" />
+                      Your browser does not support the video tag.
+                    </video>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Question-wise Analysis */}
+          {responses && responses.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="w-5 h-5" />
+                  Question-wise Analysis
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  {responses.map((response: any, index: number) => (
+                    <div key={response.id} className="border rounded-lg p-4">
+                      <div className="flex items-start justify-between mb-3">
+                        <h4 className="font-semibold text-lg">Question {index + 1}</h4>
+                        <div className="flex gap-2">
+                          {response.introductionScore && (
+                            <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">
+                              Intro: {response.introductionScore}%
+                            </span>
+                          )}
+                          {response.technicalScore && (
+                            <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">
+                              Technical: {response.technicalScore}%
+                            </span>
+                          )}
+                          {response.aiScore && (
+                            <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded text-sm">
+                              AI Score: {response.aiScore}/100
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      
+                      <div className="bg-gray-50 p-3 rounded mb-3">
+                        <p className="font-medium text-gray-900">{response.question}</p>
+                        {response.questionType && (
+                          <span className="inline-block mt-2 bg-gray-200 text-gray-700 px-2 py-1 rounded text-xs">
+                            {response.questionType}
+                          </span>
+                        )}
+                      </div>
+
+                      {response.audioTranscription && (
+                        <div className="mb-3">
+                          <h5 className="font-medium text-gray-700 mb-2">Your Response (Transcribed):</h5>
+                          <div className="bg-blue-50 p-3 rounded border-l-4 border-blue-400">
+                            <p className="text-gray-800">{response.audioTranscription}</p>
+                          </div>
+                        </div>
+                      )}
+
+                      {response.screenAnalysis && (
+                        <div className="mb-3">
+                          <h5 className="font-medium text-gray-700 mb-2">Screen Activity Analysis:</h5>
+                          <div className="bg-green-50 p-3 rounded border-l-4 border-green-400">
+                            <p className="text-gray-800">{response.screenAnalysis}</p>
+                          </div>
+                        </div>
+                      )}
+
+                      {response.aiAnalysis && (
+                        <div className="mb-3">
+                          <h5 className="font-medium text-gray-700 mb-2">AI Feedback:</h5>
+                          <div className="bg-yellow-50 p-3 rounded border-l-4 border-yellow-400">
+                            <p className="text-gray-800">{response.aiAnalysis}</p>
+                          </div>
+                        </div>
+                      )}
+
+                      {response.timeSpent && (
+                        <div className="text-sm text-gray-600">
+                          Time spent: {Math.round(response.timeSpent / 1000)}s
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* SWOT Analysis */}
+          {interview.swotAnalysis && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Target className="w-5 h-5" />
+                  SWOT Analysis
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-green-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-green-800 mb-2">Strengths</h4>
+                    <p className="text-green-700 text-sm">{interview.swotAnalysis}</p>
+                  </div>
+                  {/* Add more SWOT sections as needed */}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Action Buttons */}
+          <div className="flex gap-4 justify-center">
+            <Button 
+              onClick={() => navigate('/ai-interviews')} 
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              Back to Interviews
+            </Button>
+            <Button 
+              variant="outline"
+              onClick={() => window.print()}
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Print Results
+            </Button>
+          </div>
         </div>
       </div>
     );
