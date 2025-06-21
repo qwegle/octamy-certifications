@@ -25,8 +25,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const storedToken = localStorage.getItem('authToken');
-    const storedUser = localStorage.getItem('authUser');
+    const storedToken = localStorage.getItem('token');
+    const storedUser = localStorage.getItem('user');
     
     if (storedToken && storedUser) {
       setToken(storedToken);
@@ -41,8 +41,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     
     setToken(data.token);
     setUser(data.user);
-    localStorage.setItem('authToken', data.token);
-    localStorage.setItem('authUser', JSON.stringify(data.user));
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('user', JSON.stringify(data.user));
   };
 
   const register = async (email: string, password: string, name: string) => {
@@ -51,15 +51,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     
     setToken(data.token);
     setUser(data.user);
-    localStorage.setItem('authToken', data.token);
-    localStorage.setItem('authUser', JSON.stringify(data.user));
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('user', JSON.stringify(data.user));
   };
 
   const logout = () => {
     setToken(null);
     setUser(null);
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('authUser');
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
   };
 
   return (
