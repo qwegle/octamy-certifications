@@ -163,8 +163,11 @@ export default function InterviewSession() {
     };
   }, [timeRemaining, currentQuestion]);
 
-  // Tab switch detection and cleanup
+  // Tab switch detection and cleanup - only for active interviews
   useEffect(() => {
+    // Don't track tab switches if interview is completed
+    if (interview?.status === 'completed') return;
+
     const handleVisibilityChange = () => {
       if (document.hidden) {
         setTabSwitches(prev => prev + 1);
@@ -188,7 +191,7 @@ export default function InterviewSession() {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, []);
+  }, [interview?.status]);
 
   const handleAnswerChange = (answer: string) => {
     if (currentQuestion) {
@@ -385,7 +388,7 @@ export default function InterviewSession() {
     );
   }
 
-  // Show results if interview is completed
+  // Show results if interview is completed - disable recording and tab tracking
   if (interview && interview.status === 'completed') {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -486,28 +489,58 @@ export default function InterviewSession() {
                           {interview.videoUrl && (
                             <div>
                               <p className="text-xs text-gray-500 mb-1">Camera Recording</p>
-                              <video 
-                                controls 
-                                className="w-full max-w-sm rounded border"
-                                preload="metadata"
-                              >
-                                <source src={interview.videoUrl} type="video/webm" />
-                                Your browser does not support video playback.
-                              </video>
+                              <div className="space-y-2">
+                                <video 
+                                  controls 
+                                  className="w-full max-w-sm rounded border"
+                                  preload="metadata"
+                                  crossOrigin="anonymous"
+                                  onError={() => console.error('Video playback error')}
+                                >
+                                  <source src={interview.videoUrl} type="video/webm;codecs=vp9,opus" />
+                                  <source src={interview.videoUrl} type="video/webm;codecs=vp8,vorbis" />
+                                  <source src={interview.videoUrl} type="video/webm" />
+                                  <source src={interview.videoUrl} type="video/mp4" />
+                                  Your browser does not support video playback.
+                                </video>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => window.open(interview.videoUrl, '_blank')}
+                                  className="w-full"
+                                >
+                                  Download Video
+                                </Button>
+                              </div>
                             </div>
                           )}
                           
                           {interview.screenRecordingUrl && (
                             <div>
                               <p className="text-xs text-gray-500 mb-1">Screen Recording (Hands-on)</p>
-                              <video 
-                                controls 
-                                className="w-full max-w-sm rounded border"
-                                preload="metadata"
-                              >
-                                <source src={interview.screenRecordingUrl} type="video/webm" />
-                                Your browser does not support video playback.
-                              </video>
+                              <div className="space-y-2">
+                                <video 
+                                  controls 
+                                  className="w-full max-w-sm rounded border"
+                                  preload="metadata"
+                                  crossOrigin="anonymous"
+                                  onError={() => console.error('Screen recording playback error')}
+                                >
+                                  <source src={interview.screenRecordingUrl} type="video/webm;codecs=vp9,opus" />
+                                  <source src={interview.screenRecordingUrl} type="video/webm;codecs=vp8,vorbis" />
+                                  <source src={interview.screenRecordingUrl} type="video/webm" />
+                                  <source src={interview.screenRecordingUrl} type="video/mp4" />
+                                  Your browser does not support video playback.
+                                </video>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => window.open(interview.screenRecordingUrl, '_blank')}
+                                  className="w-full"
+                                >
+                                  Download Screen Recording
+                                </Button>
+                              </div>
                             </div>
                           )}
                         </div>
