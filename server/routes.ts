@@ -658,7 +658,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Calculate score using session-specific correct answers
       let correctAnswers = 0;
-      const totalQuestions = Object.keys(answersRecord).length;
+      // Fix: Use total questions from session mapping, not just answered questions
+      const totalQuestions = Object.keys(correctAnswersMapping).length;
       
       for (const [questionId, userAnswer] of Object.entries(answersRecord)) {
         const correctAnswer = correctAnswersMapping[parseInt(questionId)];
