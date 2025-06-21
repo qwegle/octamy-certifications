@@ -1729,7 +1729,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Store pending interview data temporarily
       (global as any).pendingInterviews = (global as any).pendingInterviews || {};
       (global as any).pendingInterviews[txnid] = {
-        userId: req.user!.userId,
+        userId: userId || null,
         technology,
         title: `${technology} Technical Interview`,
       };
