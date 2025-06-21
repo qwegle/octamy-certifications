@@ -27,7 +27,8 @@ import { useToast } from '@/hooks/use-toast';
 import type { Interview, InterviewQuestion } from '@shared/schema';
 
 export default function AIInterviews() {
-  const { user, token } = useAuth();
+  const { user } = useAuth();
+  const token = localStorage.getItem('token');
   const [, setLocation] = useLocation();
   const [selectedTechnology, setSelectedTechnology] = useState<string>('');
   const [processingTech, setProcessingTech] = useState<string>('');

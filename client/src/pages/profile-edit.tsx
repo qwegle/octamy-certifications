@@ -30,7 +30,8 @@ interface FileUploadResponse {
 }
 
 export default function ProfileEdit() {
-  const { user, token, updateUser } = useAuth();
+  const { user } = useAuth();
+  const token = localStorage.getItem('token');
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -123,9 +124,6 @@ export default function ProfileEdit() {
     },
     onSuccess: (data) => {
       if (data.success && data.user) {
-        if (updateUser) {
-          updateUser({ name: data.user.name, phone: data.user.phone });
-        }
         toast({
           title: 'Profile Updated',
           description: 'Your profile has been successfully updated.',
