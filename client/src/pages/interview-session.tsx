@@ -355,27 +355,58 @@ export default function InterviewSession() {
                 {interview.videoUrl && (
                   <div>
                     <h4 className="font-semibold mb-2">Video Recording</h4>
-                    <video 
-                      controls 
-                      className="w-full max-w-2xl rounded-lg shadow-lg"
-                      poster="/api/placeholder/800/450"
-                    >
-                      <source src={interview.videoUrl} type="video/mp4" />
-                      Your browser does not support the video tag.
-                    </video>
+                    {interview.videoUrl.startsWith('http') ? (
+                      <div className="relative">
+                        <video 
+                          controls 
+                          className="w-full max-w-2xl rounded-lg shadow-lg"
+                          poster="/api/placeholder/800/450"
+                          preload="metadata"
+                        >
+                          <source src={interview.videoUrl} type="video/mp4" />
+                          <source src={interview.videoUrl} type="video/webm" />
+                          <source src={interview.videoUrl} type="video/ogg" />
+                          <p className="text-gray-600 p-4">
+                            Your browser does not support video playback. 
+                            <a href={interview.videoUrl} download className="text-blue-600 hover:underline ml-1">
+                              Download the video file
+                            </a>
+                          </p>
+                        </video>
+                      </div>
+                    ) : (
+                      <div className="bg-gray-100 p-4 rounded-lg border-2 border-dashed border-gray-300">
+                        <p className="text-gray-600 text-center">
+                          Video recording available: <span className="font-mono text-sm">{interview.videoUrl}</span>
+                        </p>
+                        <p className="text-gray-500 text-sm text-center mt-2">
+                          Video file path stored in database - actual video playback would require proper file serving setup
+                        </p>
+                      </div>
+                    )}
                   </div>
                 )}
                 {interview.screenRecordingUrl && (
                   <div>
                     <h4 className="font-semibold mb-2">Screen Recording</h4>
-                    <video 
-                      controls 
-                      className="w-full max-w-2xl rounded-lg shadow-lg"
-                      poster="/api/placeholder/800/450"
-                    >
-                      <source src={interview.screenRecordingUrl} type="video/mp4" />
-                      Your browser does not support the video tag.
-                    </video>
+                    <div className="relative">
+                      <video 
+                        controls 
+                        className="w-full max-w-2xl rounded-lg shadow-lg"
+                        poster="/api/placeholder/800/450"
+                        preload="metadata"
+                      >
+                        <source src={interview.screenRecordingUrl} type="video/mp4" />
+                        <source src={interview.screenRecordingUrl} type="video/webm" />
+                        <source src={interview.screenRecordingUrl} type="video/ogg" />
+                        <p className="text-gray-600 p-4">
+                          Your browser does not support video playback. 
+                          <a href={interview.screenRecordingUrl} download className="text-blue-600 hover:underline ml-1">
+                            Download the video file
+                          </a>
+                        </p>
+                      </video>
+                    </div>
                   </div>
                 )}
               </CardContent>
