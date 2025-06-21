@@ -57,10 +57,10 @@ export default function AIInterviews() {
     },
   });
 
-  // Create new interview
+  // Create new interview mutation - redirect to payment
   const createInterviewMutation = useMutation({
     mutationFn: async (technology: string) => {
-      const response = await fetch('/api/interviews/create', {
+      const response = await fetch('/api/interviews/initiate-payment', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -68,12 +68,21 @@ export default function AIInterviews() {
         },
         body: JSON.stringify({ technology }),
       });
-      if (!response.ok) throw new Error('Failed to create interview');
+      if (!response.ok) throw new Error('Failed to initiate interview payment');
       return response.json();
     },
     onSuccess: (data) => {
-      refetchInterviews();
-      setLocation(`/interviews/${data.id}/payment`);
+      // Redirect to PayUMoney payment page
+      if (data.paymentForm) {
+        document.body.innerHTML += data.paymentForm;
+        const form = document.querySelector('form[name="payuForm"]') as HTMLFormElement;
+        if (form) {
+          form.submit();
+        }
+      }
+    },
+    onError: (error) => {
+      console.error('Interview payment initiation failed:', error);
     },
   });
 
@@ -228,13 +237,22 @@ export default function AIInterviews() {
                         <Clock className="mr-1 h-4 w-4" />
                         5-7 questions • 45-60 min
                       </div>
-                      <Button 
-                        onClick={() => createInterviewMutation.mutate(tech)}
-                        disabled={createInterviewMutation.isPending}
-                        className="w-full bg-black text-white hover:bg-gray-800"
-                      >
-                        {createInterviewMutation.isPending ? 'Creating...' : 'Start Interview - ₹99'}
-                      </Button>
+                      {userInterviews.some(interview => interview.technology === tech && interview.isPaid) ? (
+                        <Button 
+                          onClick={() => setLocation(`/interview/${userInterviews.find(i => i.technology === tech && i.isPaid)?.id}`)}
+                          className="w-full bg-green-600 text-white hover:bg-green-700"
+                        >
+                          Take Interview
+                        </Button>
+                      ) : (
+                        <Button 
+                          onClick={() => createInterviewMutation.mutate(tech)}
+                          disabled={createInterviewMutation.isPending}
+                          className="w-full bg-black text-white hover:bg-gray-800"
+                        >
+                          {createInterviewMutation.isPending ? 'Processing...' : 'Start Interview - ₹99'}
+                        </Button>
+                      )}
                     </CardContent>
                   </Card>
                 ))}

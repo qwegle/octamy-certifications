@@ -16,6 +16,7 @@ import {
   skillAssessments,
   sponsors,
   contactSubmissions,
+  interviews,
   type User, 
   type InsertUser,
   type UserAddress,

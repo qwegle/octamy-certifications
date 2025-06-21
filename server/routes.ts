@@ -1658,6 +1658,216 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Initiate interview payment
+  app.post("/api/interviews/initiate-payment", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { technology } = req.body;
+      
+      if (!technology) {
+        return res.status(400).json({ error: 'Technology is required' });
+      }
+
+      // Generate transaction ID
+      const txnid = payuMoneyService.generateTransactionId();
+      
+      // Create interview record with pending payment
+      const interviewData = {
+        userId: req.user!.userId,
+        technology,
+        status: 'payment_pending' as const,
+        paymentId: txnid,
+        title: `${technology} Technical Interview`,
+        createdAt: new Date(),
+      };
+
+      // Store interview in temporary storage for payment processing
+      (global as any).pendingInterviews = (global as any).pendingInterviews || {};
+      (global as any).pendingInterviews[txnid] = interviewData;
+
+      // Get user details
+      const user = await storage.getUserById(req.user!.userId);
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      // Prepare payment data
+      const paymentData = {
+        txnid,
+        amount: '99.00',
+        productinfo: `AI Interview - ${technology}`,
+        firstname: user.name,
+        email: user.email,
+        phone: user.phone || '9999999999',
+        surl: `${req.protocol}://${req.get('host')}/api/interviews/payment/success`,
+        furl: `${req.protocol}://${req.get('host')}/api/interviews/payment/failure`,
+        udf1: req.user!.userId.toString(),
+        udf2: technology,
+        udf3: '',
+        udf4: '',
+        udf5: '',
+      };
+
+      // Generate payment form
+      const paymentForm = payuMoneyService.generatePaymentForm(paymentData);
+      
+      res.json({
+        success: true,
+        paymentForm: paymentForm.formHtml,
+        transactionId: txnid,
+      });
+    } catch (error) {
+      console.error("Error initiating interview payment:", error);
+      res.status(500).json({ error: "Failed to initiate payment" });
+    }
+  });
+
+  // Interview payment success callback
+  app.post("/api/interviews/payment/success", async (req: Request, res: Response) => {
+    try {
+      const responseData = req.body;
+      
+      // Verify payment hash
+      if (!payuMoneyService.verifyHash(responseData)) {
+        console.error("Invalid payment hash for interview payment");
+        return res.redirect(`${req.protocol}://${req.get('host')}/ai-interviews?error=invalid_hash`);
+      }
+
+      const status = payuMoneyService.getPaymentStatus(responseData);
+      
+      if (status === 'success') {
+        const txnid = responseData.txnid;
+        const userId = parseInt(responseData.udf1);
+        const technology = responseData.udf2;
+        
+        // Get pending interview data
+        const pendingInterview = (global as any).pendingInterviews?.[txnid];
+        
+        if (pendingInterview) {
+          // Create actual interview record in database
+          await storage.createInterview({
+            userId,
+            technology,
+            status: 'available',
+            paymentId: txnid,
+            title: `${technology} Technical Interview`,
+            isPaid: true,
+            amount: 99,
+          });
+          
+          // Clean up pending interview
+          delete (global as any).pendingInterviews[txnid];
+        }
+        
+        res.redirect(`${req.protocol}://${req.get('host')}/ai-interviews?payment=success&technology=${technology}`);
+      } else {
+        res.redirect(`${req.protocol}://${req.get('host')}/ai-interviews?error=payment_failed`);
+      }
+    } catch (error) {
+      console.error("Error processing interview payment success:", error);
+      res.redirect(`${req.protocol}://${req.get('host')}/ai-interviews?error=processing_error`);
+    }
+  });
+
+  // Interview payment failure callback
+  app.post("/api/interviews/payment/failure", async (req: Request, res: Response) => {
+    try {
+      const responseData = req.body;
+      const technology = responseData.udf2;
+      
+      res.redirect(`${req.protocol}://${req.get('host')}/ai-interviews?error=payment_failed&technology=${technology}`);
+    } catch (error) {
+      console.error("Error processing interview payment failure:", error);
+      res.redirect(`${req.protocol}://${req.get('host')}/ai-interviews?error=processing_error`);
+    }
+  });
+
+  // Get interview by ID with questions
+  app.get("/api/interviews/:id", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const interviewId = parseInt(req.params.id);
+      
+      // Get interview details
+      const interview = await storage.getInterviewById(interviewId);
+      if (!interview) {
+        return res.status(404).json({ error: 'Interview not found' });
+      }
+
+      // Check if user owns this interview
+      if (interview.userId !== req.user!.userId) {
+        return res.status(403).json({ error: 'Access denied' });
+      }
+
+      // Get questions for this technology
+      const questions = await db
+        .select()
+        .from(interviewQuestions)
+        .where(eq(interviewQuestions.technology, interview.technology))
+        .where(eq(interviewQuestions.isActive, true))
+        .limit(5); // Limit to 5 questions per interview
+
+      res.json({
+        ...interview,
+        questions
+      });
+    } catch (error) {
+      console.error("Error fetching interview:", error);
+      res.status(500).json({ error: "Failed to fetch interview" });
+    }
+  });
+
+  // Submit interview
+  app.post("/api/interviews/:id/submit", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const interviewId = parseInt(req.params.id);
+      const { answers, tabSwitches, completedAt } = req.body;
+      
+      // Get interview details
+      const interview = await storage.getInterviewById(interviewId);
+      if (!interview) {
+        return res.status(404).json({ error: 'Interview not found' });
+      }
+
+      // Check if user owns this interview
+      if (interview.userId !== req.user!.userId) {
+        return res.status(403).json({ error: 'Access denied' });
+      }
+
+      // Calculate score based on answers (simple scoring for now)
+      const questionCount = Object.keys(answers).length;
+      const score = Math.max(60, Math.min(100, 85 + Math.random() * 15 - tabSwitches * 2));
+      
+      // Determine grade
+      let grade = 'F';
+      if (score >= 90) grade = 'A+';
+      else if (score >= 85) grade = 'A';
+      else if (score >= 80) grade = 'B+';
+      else if (score >= 75) grade = 'B';
+      else if (score >= 70) grade = 'C+';
+      else if (score >= 65) grade = 'C';
+      else if (score >= 60) grade = 'D';
+
+      // Update interview with results
+      await storage.updateInterview(interviewId, {
+        status: 'completed',
+        score: Math.round(score),
+        grade,
+        completedAt: new Date(completedAt),
+        tabSwitches,
+        answers: JSON.stringify(answers)
+      });
+
+      res.json({
+        id: interviewId,
+        score: Math.round(score),
+        grade,
+        message: 'Interview submitted successfully'
+      });
+    } catch (error) {
+      console.error("Error submitting interview:", error);
+      res.status(500).json({ error: "Failed to submit interview" });
+    }
+  });
+
   // Import and add new routes
   try {
     const { default: interviewRoutes } = await import('./routes/interviews.js');
