@@ -5,7 +5,7 @@ import { seedDatabase } from "./seed";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { z } from "zod";
-import { insertUserSchema, insertExamAttemptSchema, insertCertificateSchema, insertSellerSchema, insertSaleSchema, insertWithdrawalRequestSchema, insertSponsorSchema, interviewQuestions, interviews, users as usersTable } from "@shared/schema";
+import { insertUserSchema, insertExamAttemptSchema, insertCertificateSchema, insertSellerSchema, insertSaleSchema, insertWithdrawalRequestSchema, insertSponsorSchema, interviewQuestions, interviews, interviewResponses, users as usersTable } from "@shared/schema";
 import { desc, and, eq } from "drizzle-orm";
 import { db } from "./db";
 import { LearningPathController } from './controllers/learningPathController';

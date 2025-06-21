@@ -690,7 +690,7 @@ export default function InterviewSession() {
 
 // Component to display interview responses with audio transcription
 const InterviewResponsesDisplay = ({ interviewId }: { interviewId: number }) => {
-  const { data: responses, isLoading } = useQuery({
+  const { data: responsesData, isLoading } = useQuery({
     queryKey: ['/api/interview-responses', interviewId],
     queryFn: () => fetch(`/api/interview-responses/${interviewId}`, {
       headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
@@ -705,7 +705,10 @@ const InterviewResponsesDisplay = ({ interviewId }: { interviewId: number }) => 
     );
   }
 
-  if (!responses || responses.length === 0) {
+  // Ensure responses is always an array
+  const responses = Array.isArray(responsesData) ? responsesData : [];
+
+  if (responses.length === 0) {
     return (
       <div className="text-center py-8 text-gray-500">
         <p>No detailed responses available yet.</p>
