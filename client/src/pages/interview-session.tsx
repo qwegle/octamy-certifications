@@ -43,7 +43,6 @@ interface Interview {
 }
 
 export default function InterviewSession() {
-  const [, params] = useRoute('/interview/:id');
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -62,7 +61,14 @@ export default function InterviewSession() {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const screenRecorderRef = useRef<MediaRecorder | null>(null);
 
-  const interviewId = params?.id ? parseInt(params.id) : null;
+  // Extract interview ID from URL - check both patterns
+  const [matchInterview, paramsInterview] = useRoute('/interview/:id');
+  const [matchInterviews, paramsInterviews] = useRoute('/interviews/:id');
+  const [matchResults, paramsResults] = useRoute('/interview-results/:id');
+  
+  const interviewId = paramsInterview?.id ? parseInt(paramsInterview.id) : 
+                     paramsInterviews?.id ? parseInt(paramsInterviews.id) :
+                     paramsResults?.id ? parseInt(paramsResults.id) : null;
 
   // Fetch interview data
   const { data: interview, isLoading, error } = useQuery({
