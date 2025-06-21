@@ -1859,9 +1859,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const questions = await db
         .select()
         .from(interviewQuestions)
-        .where(eq(interviewQuestions.technology, interview.technology))
-        .where(eq(interviewQuestions.isActive, true))
+        .where(and(
+          eq(interviewQuestions.technology, interview.technology),
+          eq(interviewQuestions.isActive, true)
+        ))
         .limit(4); // 4 theory questions + 1 hands-on
+      
+      console.log(`Fetching questions for technology: ${interview.technology}`);
+      console.log(`Found ${questions.length} questions for ${interview.technology}`);
       
       // Add one hands-on question for the specific technology
       const handsOnQuestion = {
