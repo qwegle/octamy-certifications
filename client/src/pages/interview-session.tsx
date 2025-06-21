@@ -55,6 +55,8 @@ export default function InterviewSession() {
   const [tabSwitches, setTabSwitches] = useState(0);
   const [isScreenRecording, setIsScreenRecording] = useState(false);
   const screenRecorderRef = useRef<MediaRecorder | null>(null);
+  const [videoChunks, setVideoChunks] = useState<Blob[]>([]);
+  const [screenChunks, setScreenChunks] = useState<Blob[]>([]);
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -90,12 +92,18 @@ export default function InterviewSession() {
           videoRef.current.srcObject = stream;
         }
 
-        if (audioEnabled) {
-          const mediaRecorder = new MediaRecorder(stream);
-          mediaRecorderRef.current = mediaRecorder;
-          mediaRecorder.start();
-          setIsRecording(true);
-        }
+        const mediaRecorder = new MediaRecorder(stream);
+        mediaRecorderRef.current = mediaRecorder;
+        
+        // Collect video chunks
+        mediaRecorder.ondataavailable = (event) => {
+          if (event.data.size > 0) {
+            setVideoChunks(prev => [...prev, event.data]);
+          }
+        };
+        
+        mediaRecorder.start();
+        setIsRecording(true);
       } catch (error) {
         console.error('Error starting recording:', error);
         toast({
@@ -213,6 +221,13 @@ export default function InterviewSession() {
       const mediaRecorder = new MediaRecorder(screenStream);
       screenRecorderRef.current = mediaRecorder;
       
+      // Collect screen recording chunks
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          setScreenChunks(prev => [...prev, event.data]);
+        }
+      };
+      
       mediaRecorder.start();
       setIsScreenRecording(true);
       
@@ -232,7 +247,50 @@ export default function InterviewSession() {
 
   const submitInterviewMutation = useMutation({
     mutationFn: async () => {
-      cleanupMedia(); // Stop recording before submitting
+      // Stop recording and prepare videos
+      cleanupMedia();
+      
+      let videoUrl = null;
+      let screenRecordingUrl = null;
+      
+      // Create video blob and upload if available
+      if (videoChunks.length > 0) {
+        const videoBlob = new Blob(videoChunks, { type: 'video/webm' });
+        const formData = new FormData();
+        formData.append('video', videoBlob, `interview-${id}-video.webm`);
+        formData.append('type', 'video');
+        
+        const uploadResponse = await fetch(`/api/interviews/${id}/upload-recording`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` },
+          body: formData,
+        });
+        
+        if (uploadResponse.ok) {
+          const uploadResult = await uploadResponse.json();
+          videoUrl = uploadResult.url;
+        }
+      }
+      
+      // Create screen recording blob and upload if available
+      if (screenChunks.length > 0) {
+        const screenBlob = new Blob(screenChunks, { type: 'video/webm' });
+        const formData = new FormData();
+        formData.append('video', screenBlob, `interview-${id}-screen.webm`);
+        formData.append('type', 'screen');
+        
+        const uploadResponse = await fetch(`/api/interviews/${id}/upload-recording`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` },
+          body: formData,
+        });
+        
+        if (uploadResponse.ok) {
+          const uploadResult = await uploadResponse.json();
+          screenRecordingUrl = uploadResult.url;
+        }
+      }
+      
       const response = await fetch(`/api/interviews/${id}/submit`, {
         method: 'POST',
         headers: {
@@ -243,6 +301,8 @@ export default function InterviewSession() {
           answers,
           tabSwitches,
           completedAt: new Date(),
+          videoUrl,
+          screenRecordingUrl,
         }),
       });
       if (!response.ok) throw new Error('Failed to submit interview');
@@ -387,6 +447,42 @@ export default function InterviewSession() {
                       <div>
                         <p className="text-sm text-gray-600">SWOT Analysis</p>
                         <p className="text-sm">{interview.swotAnalysis}</p>
+                      </div>
+                    )}
+
+                    {/* Video Recordings Section */}
+                    {(interview.videoUrl || interview.screenRecordingUrl) && (
+                      <div>
+                        <p className="text-sm text-gray-600 mb-3">Recordings</p>
+                        <div className="space-y-3">
+                          {interview.videoUrl && (
+                            <div>
+                              <p className="text-xs text-gray-500 mb-1">Camera Recording</p>
+                              <video 
+                                controls 
+                                className="w-full max-w-sm rounded border"
+                                preload="metadata"
+                              >
+                                <source src={interview.videoUrl} type="video/webm" />
+                                Your browser does not support video playback.
+                              </video>
+                            </div>
+                          )}
+                          
+                          {interview.screenRecordingUrl && (
+                            <div>
+                              <p className="text-xs text-gray-500 mb-1">Screen Recording (Hands-on)</p>
+                              <video 
+                                controls 
+                                className="w-full max-w-sm rounded border"
+                                preload="metadata"
+                              >
+                                <source src={interview.screenRecordingUrl} type="video/webm" />
+                                Your browser does not support video playback.
+                              </video>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>

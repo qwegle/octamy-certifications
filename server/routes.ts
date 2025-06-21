@@ -1882,7 +1882,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/interviews/:id/submit", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const interviewId = parseInt(req.params.id);
-      const { answers, tabSwitches, completedAt } = req.body;
+      const { answers, tabSwitches, completedAt, videoUrl, screenRecordingUrl } = req.body;
       
       // Get interview details
       const interview = await storage.getInterviewById(interviewId);
@@ -1941,7 +1941,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         completedAt: new Date(completedAt),
         tabSwitches,
         answers: JSON.stringify(answers),
-        aiSummary
+        aiSummary,
+        videoUrl,
+        screenRecordingUrl
       });
 
       res.json({
@@ -1953,6 +1955,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error submitting interview:", error);
       res.status(500).json({ error: "Failed to submit interview" });
+    }
+  });
+
+  // Upload interview recordings
+  app.post("/api/interviews/:id/upload-recording", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const interviewId = parseInt(req.params.id);
+      
+      // Verify interview ownership
+      const interview = await storage.getInterviewById(interviewId);
+      if (!interview || interview.userId !== req.user!.userId) {
+        return res.status(403).json({ error: 'Access denied' });
+      }
+      
+      // For now, we'll simulate the upload and return a mock URL
+      // In production, this would upload to cloud storage like AWS S3 or Cloudinary
+      const recordingType = req.body.type || 'video';
+      const timestamp = Date.now();
+      const mockUrl = `/uploads/recordings/${interviewId}-${recordingType}-${timestamp}.webm`;
+      
+      // Log the upload attempt for debugging
+      console.log(`Recording uploaded: Interview ${interviewId}, Type: ${recordingType}, URL: ${mockUrl}`);
+      
+      res.json({ url: mockUrl, type: recordingType });
+    } catch (error) {
+      console.error("Error uploading recording:", error);
+      res.status(500).json({ error: "Failed to upload recording" });
     }
   });
 

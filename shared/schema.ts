@@ -811,7 +811,8 @@ export const interviews = pgTable("interviews", {
   completedQuestions: integer("completed_questions").default(0).notNull(),
   score: integer("score"), // out of 100
   grade: text("grade"), // A+, A, B+, B, C+, C, D, F
-  videoUrl: text("video_url"), // Cloudinary URL
+  videoUrl: text("video_url"), // Camera recording URL
+  screenRecordingUrl: text("screen_recording_url"), // Screen recording URL
   swotAnalysis: jsonb("swot_analysis").$type<{
     strengths: string[];
     weaknesses: string[];
