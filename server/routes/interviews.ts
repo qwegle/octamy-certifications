@@ -250,6 +250,49 @@ router.post('/interviews/:id/complete', requireAuth, async (req, res) => {
   }
 });
 
+// Process payment for interview
+router.post('/interviews/:id/payment', requireAuth, async (req, res) => {
+  try {
+    const interviewId = parseInt(req.params.id);
+    const { amount, paymentMethod } = req.body;
+    
+    // Verify interview belongs to user
+    const [interview] = await db
+      .select()
+      .from(interviews)
+      .where(and(
+        eq(interviews.id, interviewId),
+        eq(interviews.userId, req.user!.id)
+      ));
+
+    if (!interview) {
+      return res.status(404).json({ error: 'Interview not found' });
+    }
+
+    // For now, simulate successful payment
+    // In production, integrate with actual PayUMoney API
+    const mockTransactionId = `TXN_${Date.now()}`;
+    
+    const [updatedInterview] = await db
+      .update(interviews)
+      .set({
+        paymentStatus: 'paid',
+        transactionId: mockTransactionId,
+      })
+      .where(eq(interviews.id, interviewId))
+      .returning();
+
+    res.json({ 
+      success: true, 
+      interview: updatedInterview,
+      transactionId: mockTransactionId 
+    });
+  } catch (error) {
+    console.error('Error processing payment:', error);
+    res.status(500).json({ error: 'Failed to process payment' });
+  }
+});
+
 // Get interview results
 router.get('/interviews/:id/results', requireAuth, async (req, res) => {
   try {

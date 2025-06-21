@@ -30,6 +30,7 @@ import BusinessCertificates from "@/pages/business-certificates";
 import InternshipForm from "@/pages/internship-form";
 import AIInterviews from "@/pages/ai-interviews";
 import ProfileEdit from "@/pages/profile-edit";
+import InterviewPayment from "@/pages/interview-payment";
 import Verify from "@/pages/verify";
 import Preferences from "@/pages/preferences";
 import Progress from "@/pages/progress";
@@ -91,6 +92,7 @@ function Router() {
       <Route path="/contact" component={Contact} />
       <Route path="/ai-interviews" component={AIInterviews} />
       <Route path="/profile-edit" component={ProfileEdit} />
+      <Route path="/interviews/:id/payment" component={InterviewPayment} />
       <Route component={NotFound} />
     </Switch>
   );
