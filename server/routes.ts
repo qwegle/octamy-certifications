@@ -1966,12 +1966,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ? `Moderate performance with ${validAnswers}/${totalQuestions} complete answers. Room for improvement in technical depth of ${technology}.`
         : `Limited responses provided. Consider reviewing ${technology} fundamentals before retaking the interview.`;
 
+      // Validate and parse completedAt date
+      let completedDate;
+      try {
+        // Handle various date formats and ensure valid date
+        if (completedAt) {
+          const parsedDate = new Date(completedAt);
+          if (isNaN(parsedDate.getTime())) {
+            // If invalid date, use current time
+            completedDate = new Date();
+          } else {
+            completedDate = parsedDate;
+          }
+        } else {
+          // If no completedAt provided, use current time
+          completedDate = new Date();
+        }
+      } catch (error) {
+        console.error("Error parsing completedAt date:", error);
+        completedDate = new Date();
+      }
+
       // Update interview with results
       await storage.updateInterview(interviewId, {
         status: 'completed',
         score: Math.round(score),
         grade,
-        completedAt: new Date(completedAt),
+        completedAt: completedDate,
         tabSwitches,
         answers: JSON.stringify(answers),
         aiSummary,
