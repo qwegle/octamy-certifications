@@ -416,10 +416,10 @@ export default function AIInterviews() {
 
                         {/* Action Buttons */}
                         <div className="flex gap-2 pt-2">
-                          {interview.status === 'pending' && interview.paymentStatus === 'paid' && (
+                          {(interview.status === 'available' || (interview.status === 'pending' && interview.paymentStatus === 'paid')) && (
                             <Button 
                               className="flex-1"
-                              onClick={() => setLocation(`/interviews/${interview.id}`)}
+                              onClick={() => window.location.href = `/interviews/${interview.id}`}
                             >
                               <Play className="mr-2 h-4 w-4" />
                               Start Interview
@@ -435,12 +435,22 @@ export default function AIInterviews() {
                             </Button>
                           )}
                           
+                          {interview.status === 'in_progress' && (
+                            <Button 
+                              className="flex-1 bg-orange-600 hover:bg-orange-700"
+                              onClick={() => window.location.href = `/interviews/${interview.id}`}
+                            >
+                              <Clock className="mr-2 h-4 w-4" />
+                              Continue Interview
+                            </Button>
+                          )}
+                          
                           {interview.status === 'completed' && (
                             <>
                               <Button 
                                 variant="outline" 
                                 className="flex-1"
-                                onClick={() => setLocation(`/interviews/${interview.id}/results`)}
+                                onClick={() => window.location.href = `/interviews/${interview.id}`}
                               >
                                 <Eye className="mr-2 h-4 w-4" />
                                 View Results
