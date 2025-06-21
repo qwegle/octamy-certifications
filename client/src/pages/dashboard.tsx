@@ -321,47 +321,7 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Unpaid Certificates */}
-        {unpaidCertificates.length > 0 && (
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-octamy-black mb-4">Unpaid Certificates</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {unpaidCertificates.map((certificate) => (
-                <Card key={certificate.id} className="border-red-200">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center justify-between">
-                      <Badge variant="destructive">Unpaid</Badge>
-                      <AlertCircle className="w-5 h-5 text-red-600" />
-                    </div>
-                    <CardTitle className="text-lg">{certificate.courseTitle}</CardTitle>
-                  </CardHeader>
-                    <CardContent className="space-y-3">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Score:</span>
-                        <span className="font-semibold text-black">{certificate.score}%</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Date:</span>
-                        <span className="font-semibold text-black">
-                          {new Date(certificate.issuedAt).toLocaleDateString()}
-                        </span>
-                      </div>
-                      <div className="pt-2">
-                        <Link href={`/checkout?certificateId=${certificate.certificateId}&courseId=${certificate.courseId}`}>
-                          <Button
-                            size="sm"
-                            className="w-full bg-black text-white hover:bg-gray-800"
-                          >
-                            Pay ₹99 & Download
-                          </Button>
-                        </Link>
-                      </div>
-                    </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        )}
+
 
         {/* AI Interviews Section */}
         <div className="mb-8">
