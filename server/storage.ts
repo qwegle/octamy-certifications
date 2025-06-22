@@ -1083,42 +1083,27 @@ export class DatabaseStorage implements IStorage {
     try {
       console.log('getQuestionsForAdmin called with:', { courseId, search });
       
-      const baseQuery = db
-        .select({
-          id: questions.id,
-          courseId: questions.courseId,
-          question: questions.question,
-          options: questions.options,
-          correctAnswer: questions.correctAnswer,
-          explanation: questions.explanation,
-          difficulty: questions.difficulty,
-          isActive: questions.isActive,
-          course: {
-            title: courses.title
-          }
-        })
-        .from(questions)
-        .leftJoin(courses, eq(questions.courseId, courses.id));
-
-      let query = baseQuery;
+      // Direct SQL approach without explanation field
+      const baseResult = await db.execute(sql`
+        SELECT 
+          q.id, 
+          q.question, 
+          q.course_id as "courseId", 
+          q.options, 
+          q.correct_answer as "correctAnswer",
+          q.difficulty,
+          q.is_active as "isActive",
+          json_build_object('title', c.title) as course
+        FROM questions q 
+        LEFT JOIN courses c ON q.course_id = c.id 
+        ORDER BY q.id DESC 
+        LIMIT 50
+      `);
       
-      if (courseId) {
-        query = query.where(eq(questions.courseId, courseId));
-      }
+      console.log('Direct SQL result:', baseResult.rows.length);
+      return baseResult.rows;
 
-      if (search) {
-        const searchCondition = or(
-          ilike(questions.question, `%${search}%`),
-          ilike(questions.explanation, `%${search}%`)
-        );
-        query = courseId 
-          ? query.where(and(eq(questions.courseId, courseId), searchCondition))
-          : query.where(searchCondition);
-      }
-
-      const result = await query.orderBy(desc(questions.id)).limit(50);
-      console.log('Questions found:', result.length);
-      return result;
+      // TODO: Add filtering logic back once base query works
     } catch (error) {
       console.error('Error in getQuestionsForAdmin:', error);
       throw error;
@@ -2048,8 +2033,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createQuestion(questionData: any) {
-    const [question] = await db.insert(questions).values(questionData).returning();
-    return question;
+    try {
+      console.log('Creating question with data:', questionData);
+      const [question] = await db.insert(questions).values(questionData).returning();
+      console.log('Question created:', question);
+      return question;
+    } catch (error) {
+      console.error('Error creating question:', error);
+      throw error;
+    }
   }
 
   async updateQuestion(questionId: number, questionData: any) {

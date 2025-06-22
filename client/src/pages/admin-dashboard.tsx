@@ -112,10 +112,26 @@ function QuestionsManagement() {
                 ))}
               </SelectContent>
             </Select>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Question
-            </Button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Question
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>Add New Question</DialogTitle>
+                </DialogHeader>
+                <AddQuestionForm 
+                  courses={courses} 
+                  onSuccess={() => {
+                    refetchQuestions();
+                    toast({ title: "Success", description: "Question added successfully" });
+                  }} 
+                />
+              </DialogContent>
+            </Dialog>
           </div>
 
           {questionsLoading ? (
@@ -283,6 +299,132 @@ function QuestionsManagement() {
         </DialogContent>
       </Dialog>
     </Card>
+  );
+}
+
+// Add Question Form Component
+function AddQuestionForm({ courses, onSuccess }: { courses: any[], onSuccess: () => void }) {
+  const [formData, setFormData] = useState({
+    courseId: '',
+    question: '',
+    options: ['', '', '', ''],
+    correctAnswer: 0,
+    difficulty: 'intermediate',
+    isActive: true
+  });
+  const { toast } = useToast();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const response = await apiRequest("POST", "/api/admin/questions", {
+        ...formData,
+        courseId: parseInt(formData.courseId),
+        options: formData.options.filter(opt => opt.trim() !== '')
+      });
+      if (response.ok) {
+        onSuccess();
+        setFormData({
+          courseId: '',
+          question: '',
+          options: ['', '', '', ''],
+          correctAnswer: 0,
+
+          difficulty: 'intermediate',
+          isActive: true
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to add question",
+        variant: "destructive",
+      });
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <label className="text-sm font-medium">Course</label>
+        <select 
+          className="w-full mt-1 p-2 border rounded-md"
+          value={formData.courseId}
+          onChange={(e) => setFormData({...formData, courseId: e.target.value})}
+          required
+        >
+          <option value="">Select a course</option>
+          {courses.map((course) => (
+            <option key={course.id} value={course.id}>{course.title}</option>
+          ))}
+        </select>
+      </div>
+      <div>
+        <label className="text-sm font-medium">Question</label>
+        <textarea 
+          className="w-full mt-1 p-2 border rounded-md"
+          value={formData.question}
+          onChange={(e) => setFormData({...formData, question: e.target.value})}
+          rows={3}
+          required
+        />
+      </div>
+      <div>
+        <label className="text-sm font-medium">Options</label>
+        {formData.options.map((option, index) => (
+          <input 
+            key={index}
+            className="w-full mt-1 p-2 border rounded-md"
+            placeholder={`Option ${index + 1}`}
+            value={option}
+            onChange={(e) => {
+              const newOptions = [...formData.options];
+              newOptions[index] = e.target.value;
+              setFormData({...formData, options: newOptions});
+            }}
+            required={index < 2}
+          />
+        ))}
+      </div>
+      <div>
+        <label className="text-sm font-medium">Correct Answer</label>
+        <select 
+          className="w-full mt-1 p-2 border rounded-md"
+          value={formData.correctAnswer}
+          onChange={(e) => setFormData({...formData, correctAnswer: parseInt(e.target.value)})}
+        >
+          {formData.options.map((_, index) => (
+            <option key={index} value={index}>Option {index + 1}</option>
+          ))}
+        </select>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="text-sm font-medium">Difficulty</label>
+          <select 
+            className="w-full mt-1 p-2 border rounded-md"
+            value={formData.difficulty}
+            onChange={(e) => setFormData({...formData, difficulty: e.target.value})}
+          >
+            <option value="beginner">Beginner</option>
+            <option value="intermediate">Intermediate</option>
+            <option value="advanced">Advanced</option>
+          </select>
+        </div>
+        <div className="flex items-center space-x-2 mt-6">
+          <input 
+            type="checkbox"
+            checked={formData.isActive}
+            onChange={(e) => setFormData({...formData, isActive: e.target.checked})}
+          />
+          <label className="text-sm">Active</label>
+        </div>
+      </div>
+      <div className="flex justify-end gap-2">
+        <Button type="submit">Add Question</Button>
+      </div>
+    </form>
   );
 }
 
@@ -528,6 +670,131 @@ function AIQuestionsManagement() {
         </DialogContent>
       </Dialog>
     </Card>
+  );
+}
+
+// Add AI Question Form Component
+function AddAIQuestionForm({ onSuccess }: { onSuccess: () => void }) {
+  const [formData, setFormData] = useState({
+    title: '',
+    question: '',
+    technology: 'JavaScript',
+    difficulty: 'intermediate',
+    questionType: 'interview',
+    timeLimit: 600,
+    isActive: true
+  });
+  const { toast } = useToast();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const response = await apiRequest("POST", "/api/admin/interview-questions", formData);
+      if (response.ok) {
+        onSuccess();
+        setFormData({
+          title: '',
+          question: '',
+          technology: 'JavaScript',
+          difficulty: 'intermediate',
+          questionType: 'interview',
+          timeLimit: 600,
+          isActive: true
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to add AI interview question",
+        variant: "destructive",
+      });
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <label className="text-sm font-medium">Title</label>
+        <input 
+          className="w-full mt-1 p-2 border rounded-md"
+          value={formData.title}
+          onChange={(e) => setFormData({...formData, title: e.target.value})}
+          required
+        />
+      </div>
+      <div>
+        <label className="text-sm font-medium">Question</label>
+        <textarea 
+          className="w-full mt-1 p-2 border rounded-md"
+          value={formData.question}
+          onChange={(e) => setFormData({...formData, question: e.target.value})}
+          rows={4}
+          required
+        />
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="text-sm font-medium">Technology</label>
+          <select 
+            className="w-full mt-1 p-2 border rounded-md"
+            value={formData.technology}
+            onChange={(e) => setFormData({...formData, technology: e.target.value})}
+          >
+            {["JavaScript", "Python", "React", "Node.js", "Java", "C++", "SQL", "MongoDB"].map((tech) => (
+              <option key={tech} value={tech}>{tech}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="text-sm font-medium">Difficulty</label>
+          <select 
+            className="w-full mt-1 p-2 border rounded-md"
+            value={formData.difficulty}
+            onChange={(e) => setFormData({...formData, difficulty: e.target.value})}
+          >
+            <option value="beginner">Beginner</option>
+            <option value="intermediate">Intermediate</option>
+            <option value="advanced">Advanced</option>
+          </select>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="text-sm font-medium">Question Type</label>
+          <select 
+            className="w-full mt-1 p-2 border rounded-md"
+            value={formData.questionType}
+            onChange={(e) => setFormData({...formData, questionType: e.target.value})}
+          >
+            <option value="interview">Interview</option>
+            <option value="practical">Practical</option>
+            <option value="handson">Hands-on</option>
+          </select>
+        </div>
+        <div>
+          <label className="text-sm font-medium">Time Limit (seconds)</label>
+          <input 
+            type="number"
+            className="w-full mt-1 p-2 border rounded-md"
+            value={formData.timeLimit}
+            onChange={(e) => setFormData({...formData, timeLimit: parseInt(e.target.value)})}
+            min="60"
+            max="3600"
+          />
+        </div>
+      </div>
+      <div className="flex items-center space-x-2">
+        <input 
+          type="checkbox"
+          checked={formData.isActive}
+          onChange={(e) => setFormData({...formData, isActive: e.target.checked})}
+        />
+        <label className="text-sm">Active</label>
+      </div>
+      <div className="flex justify-end gap-2">
+        <Button type="submit">Add AI Question</Button>
+      </div>
+    </form>
   );
 }
 

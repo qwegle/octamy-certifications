@@ -2156,7 +2156,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const questionData = req.body;
       
       // Validate required fields
-      if (!questionData.courseId || !questionData.question || !questionData.options || !questionData.correctAnswer) {
+      if (!questionData.courseId || !questionData.question || !questionData.options || questionData.correctAnswer === undefined) {
         return res.status(400).json({ message: 'Missing required fields' });
       }
       
