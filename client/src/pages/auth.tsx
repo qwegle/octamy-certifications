@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/lib/auth';
+import { useAuth } from '@/lib/auth.tsx';
 import Header from '@/components/header';
 import Footer from '@/components/footer';
 import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';

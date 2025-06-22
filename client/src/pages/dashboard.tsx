@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { useAuth } from '@/lib/auth';
+import { useAuth } from '@/lib/auth.tsx';
 import { Link, useLocation } from 'wouter';
 import Header from '@/components/header';
 import Footer from '@/components/footer';
@@ -12,34 +12,32 @@ import DashboardAnalytics from '@/components/dashboard-analytics';
 
 
 export default function Dashboard() {
-  const { user, token } = useAuth();
+  const { user, token, isLoading } = useAuth();
   const [, setLocation] = useLocation();
+
+  // Redirect to login if not authenticated
+  if (!isLoading && !user) {
+    setLocation('/login');
+    return null;
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+      </div>
+    );
+  }
 
   const { data: certificates = [], isLoading: certificatesLoading, error: certificatesError } = useQuery<Certificate[]>({
     queryKey: ['/api/user/certificates'],
     enabled: !!user && !!token,
-    queryFn: async () => {
-      const response = await fetch('/api/user/certificates', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-      if (!response.ok) throw new Error('Failed to fetch certificates');
-      return response.json();
-    },
   });
 
   // Fetch user's interviews
   const { data: userInterviews = [] } = useQuery<Interview[]>({
     queryKey: ['/api/user/interviews'],
     enabled: !!user && !!token,
-    queryFn: async () => {
-      const response = await fetch('/api/user/interviews', {
-        headers: { 'Authorization': `Bearer ${token}` },
-      });
-      if (!response.ok) throw new Error('Failed to fetch interviews');
-      return response.json();
-    },
   });
 
   // Debug logging for certificate data

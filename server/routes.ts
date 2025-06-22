@@ -69,9 +69,12 @@ const authenticateToken = (req: AuthenticatedRequest, res: Response, next: NextF
     const decoded = jwt.verify(token, JWT_SECRET) as any;
     req.user = decoded;
     next();
-  } catch (err) {
+  } catch (err: any) {
     console.error("JWT verification error:", err);
-    return res.status(403).json({ message: "Invalid token" });
+    if (err.name === 'TokenExpiredError') {
+      return res.status(401).json({ message: "Token expired", code: "TOKEN_EXPIRED" });
+    }
+    return res.status(401).json({ message: "Invalid token", code: "INVALID_TOKEN" });
   }
 };
 
