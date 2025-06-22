@@ -40,6 +40,476 @@ import {
   Award
 } from "lucide-react";
 
+// Question Management Components
+function QuestionsManagement() {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCourse, setSelectedCourse] = useState<number | undefined>();
+  const { toast } = useToast();
+
+  const { data: questions = [], isLoading: questionsLoading } = useQuery({
+    queryKey: ["/api/admin/questions", selectedCourse, searchTerm],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (selectedCourse) params.append('courseId', selectedCourse.toString());
+      if (searchTerm) params.append('search', searchTerm);
+      const response = await apiRequest("GET", `/api/admin/questions?${params}`);
+      return response.json();
+    }
+  });
+
+  const { data: courses = [] } = useQuery({
+    queryKey: ["/api/admin/courses"]
+  });
+
+  const deleteQuestion = useMutation({
+    mutationFn: async (questionId: number) => {
+      const response = await apiRequest("DELETE", `/api/admin/questions/${questionId}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/questions"] });
+      toast({
+        title: "Question Deleted",
+        description: "Question has been deleted successfully.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete question",
+        variant: "destructive",
+      });
+    },
+  });
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Course Questions Management</CardTitle>
+        <CardDescription>Manage questions for certification courses</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          <div className="flex gap-4 items-center">
+            <Input
+              placeholder="Search questions..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="max-w-sm"
+            />
+            <Select value={selectedCourse?.toString()} onValueChange={(value) => setSelectedCourse(value ? parseInt(value) : undefined)}>
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Filter by course" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">All Courses</SelectItem>
+                {courses.map((course: any) => (
+                  <SelectItem key={course.id} value={course.id.toString()}>
+                    {course.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Question
+            </Button>
+          </div>
+
+          {questionsLoading ? (
+            <div className="flex justify-center py-8">
+              <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+            </div>
+          ) : (
+            <div className="border rounded-lg">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Question</TableHead>
+                    <TableHead>Course</TableHead>
+                    <TableHead>Difficulty</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {questions.map((question: any) => (
+                    <TableRow key={question.id}>
+                      <TableCell>
+                        <div className="max-w-md">
+                          <p className="font-medium truncate">{question.question}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {question.options?.length} options
+                          </p>
+                        </div>
+                      </TableCell>
+                      <TableCell>{question.course?.title || 'N/A'}</TableCell>
+                      <TableCell>
+                        <Badge variant={question.difficulty === 'hard' ? 'destructive' : question.difficulty === 'medium' ? 'default' : 'secondary'}>
+                          {question.difficulty || 'Easy'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={question.isActive ? 'default' : 'secondary'}>
+                          {question.isActive ? 'Active' : 'Inactive'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <Button variant="outline" size="sm">
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="outline" size="sm">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete Question</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to delete this question? This action cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => deleteQuestion.mutate(question.id)}>
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function AIQuestionsManagement() {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedTechnology, setSelectedTechnology] = useState<string>("");
+  const { toast } = useToast();
+
+  const { data: questions = [], isLoading: questionsLoading } = useQuery({
+    queryKey: ["/api/admin/interview-questions", selectedTechnology, searchTerm],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (selectedTechnology) params.append('technology', selectedTechnology);
+      if (searchTerm) params.append('search', searchTerm);
+      const response = await apiRequest("GET", `/api/admin/interview-questions?${params}`);
+      return response.json();
+    }
+  });
+
+  const deleteQuestion = useMutation({
+    mutationFn: async (questionId: number) => {
+      const response = await apiRequest("DELETE", `/api/admin/interview-questions/${questionId}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/interview-questions"] });
+      toast({
+        title: "AI Question Deleted",
+        description: "AI interview question has been deleted successfully.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete AI question",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const technologies = ["JavaScript", "Python", "React", "Node.js", "Java", "C++", "SQL", "MongoDB"];
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>AI Interview Questions Management</CardTitle>
+        <CardDescription>Manage questions for AI technical interviews</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          <div className="flex gap-4 items-center">
+            <Input
+              placeholder="Search AI questions..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="max-w-sm"
+            />
+            <Select value={selectedTechnology} onValueChange={setSelectedTechnology}>
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Filter by technology" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">All Technologies</SelectItem>
+                {technologies.map((tech) => (
+                  <SelectItem key={tech} value={tech}>
+                    {tech}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button>
+              <Plus className="h-4 w-4 mr-2" />
+              Add AI Question
+            </Button>
+          </div>
+
+          {questionsLoading ? (
+            <div className="flex justify-center py-8">
+              <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+            </div>
+          ) : (
+            <div className="border rounded-lg">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Title</TableHead>
+                    <TableHead>Technology</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {questions.map((question: any) => (
+                    <TableRow key={question.id}>
+                      <TableCell>
+                        <div className="max-w-md">
+                          <p className="font-medium">{question.title}</p>
+                          <p className="text-sm text-muted-foreground truncate">
+                            {question.question}
+                          </p>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline">{question.technology}</Badge>
+                      </TableCell>
+                      <TableCell>{question.type || 'General'}</TableCell>
+                      <TableCell>
+                        <Badge variant={question.isActive ? 'default' : 'secondary'}>
+                          {question.isActive ? 'Active' : 'Inactive'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <Button variant="outline" size="sm">
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="outline" size="sm">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete AI Question</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to delete this AI interview question? This action cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => deleteQuestion.mutate(question.id)}>
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function ContactSubmissionsManagement() {
+  const [searchTerm, setSearchTerm] = useState("");
+  const { toast } = useToast();
+
+  const { data: contacts = [], isLoading: contactsLoading } = useQuery({
+    queryKey: ["/api/admin/contacts", searchTerm],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (searchTerm) params.append('search', searchTerm);
+      const response = await apiRequest("GET", `/api/admin/contacts?${params}`);
+      return response.json();
+    }
+  });
+
+  const updateContact = useMutation({
+    mutationFn: async ({ contactId, status, adminNotes }: { contactId: number; status: string; adminNotes?: string }) => {
+      const response = await apiRequest("PUT", `/api/admin/contacts/${contactId}`, { status, adminNotes });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/contacts"] });
+      toast({
+        title: "Contact Updated",
+        description: "Contact submission has been updated successfully.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update contact",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'responded':
+        return <Badge variant="default">Responded</Badge>;
+      case 'pending':
+        return <Badge variant="secondary">Pending</Badge>;
+      default:
+        return <Badge variant="outline">New</Badge>;
+    }
+  };
+
+  const newCount = contacts.filter((contact: any) => !contact.status || contact.status === 'new').length;
+  const respondedCount = contacts.filter((contact: any) => contact.status === 'responded').length;
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Contact Submissions</CardTitle>
+        <CardDescription>Manage support requests and customer inquiries</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <Input
+              placeholder="Search contact submissions..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="max-w-sm"
+            />
+            <div className="flex gap-2">
+              <Badge variant="outline">New: {newCount}</Badge>
+              <Badge variant="outline">Responded: {respondedCount}</Badge>
+            </div>
+          </div>
+
+          {contactsLoading ? (
+            <div className="flex justify-center py-8">
+              <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+            </div>
+          ) : (
+            <div className="border rounded-lg">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Subject</TableHead>
+                    <TableHead>Phone</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {contacts.map((contact: any) => (
+                    <TableRow key={contact.id}>
+                      <TableCell className="font-medium">{contact.name}</TableCell>
+                      <TableCell>{contact.email}</TableCell>
+                      <TableCell>
+                        <div className="max-w-xs">
+                          <p className="truncate">{contact.subject}</p>
+                        </div>
+                      </TableCell>
+                      <TableCell>{contact.phone || 'N/A'}</TableCell>
+                      <TableCell>{getStatusBadge(contact.status)}</TableCell>
+                      <TableCell>
+                        {new Date(contact.submittedAt).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => updateContact.mutate({ contactId: contact.id, status: 'responded' })}
+                            disabled={contact.status === 'responded'}
+                          >
+                            <Check className="h-4 w-4" />
+                          </Button>
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button variant="outline" size="sm">
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-2xl">
+                              <DialogHeader>
+                                <DialogTitle>Contact Details</DialogTitle>
+                              </DialogHeader>
+                              <div className="space-y-4">
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div>
+                                    <p className="font-medium">Name</p>
+                                    <p className="text-sm text-muted-foreground">{contact.name}</p>
+                                  </div>
+                                  <div>
+                                    <p className="font-medium">Email</p>
+                                    <p className="text-sm text-muted-foreground">{contact.email}</p>
+                                  </div>
+                                  <div>
+                                    <p className="font-medium">Phone</p>
+                                    <p className="text-sm text-muted-foreground">{contact.phone || 'N/A'}</p>
+                                  </div>
+                                  <div>
+                                    <p className="font-medium">Status</p>
+                                    <div>{getStatusBadge(contact.status)}</div>
+                                  </div>
+                                </div>
+                                <div>
+                                  <p className="font-medium">Subject</p>
+                                  <p className="text-sm text-muted-foreground">{contact.subject}</p>
+                                </div>
+                                <div>
+                                  <p className="font-medium">Message</p>
+                                  <p className="text-sm text-muted-foreground whitespace-pre-wrap">{contact.message}</p>
+                                </div>
+                              </div>
+                            </DialogContent>
+                          </Dialog>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 interface Analytics {
   totalUsers?: number;
   totalCourses?: number;
