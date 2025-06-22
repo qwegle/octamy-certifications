@@ -97,12 +97,12 @@ function QuestionsManagement() {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="max-w-sm"
             />
-            <Select value={selectedCourse?.toString()} onValueChange={(value) => setSelectedCourse(value ? parseInt(value) : undefined)}>
+            <Select value={selectedCourse?.toString() || "all"} onValueChange={(value) => setSelectedCourse(value === "all" ? undefined : parseInt(value))}>
               <SelectTrigger className="w-[200px]">
                 <SelectValue placeholder="Filter by course" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Courses</SelectItem>
+                <SelectItem value="all">All Courses</SelectItem>
                 {courses.map((course: any) => (
                   <SelectItem key={course.id} value={course.id.toString()}>
                     {course.title}
@@ -248,12 +248,12 @@ function AIQuestionsManagement() {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="max-w-sm"
             />
-            <Select value={selectedTechnology} onValueChange={setSelectedTechnology}>
+            <Select value={selectedTechnology || "all"} onValueChange={(value) => setSelectedTechnology(value === "all" ? "" : value)}>
               <SelectTrigger className="w-[200px]">
                 <SelectValue placeholder="Filter by technology" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Technologies</SelectItem>
+                <SelectItem value="all">All Technologies</SelectItem>
                 {technologies.map((tech) => (
                   <SelectItem key={tech} value={tech}>
                     {tech}
