@@ -1083,8 +1083,8 @@ export class DatabaseStorage implements IStorage {
     try {
       console.log('getQuestionsForAdmin called with:', { courseId, search });
       
-      // Direct query that matches working SQL structure
-      let queryText = `
+      // Build SQL query dynamically - this approach works for filtered queries
+      let baseQuery = `
         SELECT 
           q.id, 
           q.question, 
@@ -1095,55 +1095,35 @@ export class DatabaseStorage implements IStorage {
           q.is_active as "isActive",
           json_build_object('title', c.title) as course
         FROM questions q 
-        LEFT JOIN courses c ON q.course_id = c.id 
+        LEFT JOIN courses c ON q.course_id = c.id
       `;
       
-      const params: any[] = [];
-      const conditions: string[] = [];
+      const whereConditions = [];
+      const queryParams = [];
       
       if (courseId) {
-        conditions.push(`q.course_id = $${params.length + 1}`);
-        params.push(courseId);
+        whereConditions.push(`q.course_id = $${queryParams.length + 1}`);
+        queryParams.push(courseId);
       }
       
       if (search) {
-        conditions.push(`q.question ILIKE $${params.length + 1}`);
-        params.push(`%${search}%`);
+        whereConditions.push(`q.question ILIKE $${queryParams.length + 1}`);
+        queryParams.push(`%${search}%`);
       }
       
-      if (conditions.length > 0) {
-        queryText += ` WHERE ${conditions.join(' AND ')}`;
+      if (whereConditions.length > 0) {
+        baseQuery += ` WHERE ${whereConditions.join(' AND ')}`;
       }
       
-      queryText += ` ORDER BY q.id DESC LIMIT 50`;
+      baseQuery += ` ORDER BY q.id DESC LIMIT 50`;
       
-      console.log('Executing query:', queryText, 'with params:', params);
+      console.log('Executing SQL:', baseQuery);
+      console.log('With parameters:', queryParams);
       
-      let result;
-      if (params.length === 0) {
-        // No parameters - use simple sql template
-        result = await db.execute(sql`
-          SELECT 
-            q.id, 
-            q.question, 
-            q.course_id as "courseId", 
-            q.options, 
-            q.correct_answer as "correctAnswer",
-            q.difficulty,
-            q.is_active as "isActive",
-            json_build_object('title', c.title) as course
-          FROM questions q 
-          LEFT JOIN courses c ON q.course_id = c.id 
-          ORDER BY q.id DESC 
-          LIMIT 50
-        `);
-      } else {
-        result = await db.execute(sql.raw(queryText, params));
-      }
+      const result = await db.execute(sql.raw(baseQuery, queryParams));
+      console.log('SQL result rows:', result.rows.length);
       
-      console.log('Raw result:', result);
-      console.log('Questions found:', result.rows?.length || 0, 'with filters:', { courseId, search });
-      return result.rows || [];
+      return result.rows;
     } catch (error) {
       console.error('Error in getQuestionsForAdmin:', error);
       throw error;

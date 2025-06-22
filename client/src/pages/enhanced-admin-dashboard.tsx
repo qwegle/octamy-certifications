@@ -13,6 +13,8 @@ import {
   ChevronDown, ChevronRight, User, Calendar, Clock, MapPin, Phone, Mail, CreditCard
 } from "lucide-react";
 import { EnhancedQuestionsManagement } from "@/components/enhanced-questions-management";
+import { EnhancedAIQuestionsManagement } from "@/components/enhanced-ai-questions-management";
+import { EnhancedContactSubmissionsManagement } from "@/components/enhanced-contact-submissions-management";
 import { useToast } from "@/hooks/use-toast";
 
 function EnhancedAdminDashboard() {
