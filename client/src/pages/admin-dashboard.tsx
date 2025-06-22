@@ -44,6 +44,8 @@ import {
 function QuestionsManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCourse, setSelectedCourse] = useState<number | undefined>();
+  const [editingQuestion, setEditingQuestion] = useState<any>(null);
+  const [showEditDialog, setShowEditDialog] = useState(false);
   const { toast } = useToast();
 
   const { data: questions = [], isLoading: questionsLoading, refetch: refetchQuestions } = useQuery({
@@ -160,11 +162,8 @@ function QuestionsManagement() {
                             variant="outline" 
                             size="sm"
                             onClick={() => {
-                              console.log("Editing question:", question);
-                              toast({
-                                title: "Edit Question",
-                                description: `Editing: ${question.question.substring(0, 50)}...`,
-                              });
+                              setEditingQuestion(question);
+                              setShowEditDialog(true);
                             }}
                           >
                             <Edit className="h-4 w-4" />
@@ -200,6 +199,89 @@ function QuestionsManagement() {
           )}
         </div>
       </CardContent>
+
+      {/* Edit Question Dialog */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Edit Question</DialogTitle>
+          </DialogHeader>
+          {editingQuestion && (
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Question</label>
+                <textarea 
+                  className="w-full mt-1 p-2 border rounded-md" 
+                  value={editingQuestion.question}
+                  onChange={(e) => setEditingQuestion({...editingQuestion, question: e.target.value})}
+                  rows={3}
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Course</label>
+                <p className="text-sm text-muted-foreground">{editingQuestion.course?.title || 'No course assigned'}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Options</label>
+                {editingQuestion.options?.map((option: string, index: number) => (
+                  <input 
+                    key={index}
+                    className="w-full mt-1 p-2 border rounded-md" 
+                    value={option}
+                    onChange={(e) => {
+                      const newOptions = [...editingQuestion.options];
+                      newOptions[index] = e.target.value;
+                      setEditingQuestion({...editingQuestion, options: newOptions});
+                    }}
+                  />
+                ))}
+              </div>
+              <div className="flex gap-2">
+                <label className="text-sm font-medium">Correct Answer:</label>
+                <select 
+                  value={editingQuestion.correctAnswer}
+                  onChange={(e) => setEditingQuestion({...editingQuestion, correctAnswer: parseInt(e.target.value)})}
+                  className="px-2 py-1 border rounded"
+                >
+                  {editingQuestion.options?.map((_: any, index: number) => (
+                    <option key={index} value={index}>Option {index + 1}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setShowEditDialog(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={async () => {
+                  try {
+                    const response = await apiRequest("PUT", `/api/admin/questions/${editingQuestion.id}`, {
+                      question: editingQuestion.question,
+                      options: editingQuestion.options,
+                      correctAnswer: editingQuestion.correctAnswer
+                    });
+                    if (response.ok) {
+                      toast({
+                        title: "Question Updated",
+                        description: "Question has been updated successfully.",
+                      });
+                      setShowEditDialog(false);
+                      refetchQuestions();
+                    }
+                  } catch (error) {
+                    toast({
+                      title: "Error",
+                      description: "Failed to update question",
+                      variant: "destructive",
+                    });
+                  }
+                }}>
+                  Save Changes
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
@@ -207,6 +289,8 @@ function QuestionsManagement() {
 function AIQuestionsManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTechnology, setSelectedTechnology] = useState<string>("");
+  const [editingQuestion, setEditingQuestion] = useState<any>(null);
+  const [showEditDialog, setShowEditDialog] = useState(false);
   const { toast } = useToast();
 
   const { data: questions = [], isLoading: questionsLoading, refetch: refetchInterviewQuestions } = useQuery({
@@ -319,11 +403,8 @@ function AIQuestionsManagement() {
                             variant="outline" 
                             size="sm"
                             onClick={() => {
-                              console.log("Editing AI interview question:", question);
-                              toast({
-                                title: "Edit AI Interview Question",
-                                description: `Editing: ${question.title}`,
-                              });
+                              setEditingQuestion(question);
+                              setShowEditDialog(true);
                             }}
                           >
                             <Edit className="h-4 w-4" />
@@ -359,6 +440,93 @@ function AIQuestionsManagement() {
           )}
         </div>
       </CardContent>
+
+      {/* Edit AI Interview Question Dialog */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Edit AI Interview Question</DialogTitle>
+          </DialogHeader>
+          {editingQuestion && (
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Title</label>
+                <input 
+                  className="w-full mt-1 p-2 border rounded-md" 
+                  value={editingQuestion.title}
+                  onChange={(e) => setEditingQuestion({...editingQuestion, title: e.target.value})}
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Question</label>
+                <textarea 
+                  className="w-full mt-1 p-2 border rounded-md" 
+                  value={editingQuestion.question}
+                  onChange={(e) => setEditingQuestion({...editingQuestion, question: e.target.value})}
+                  rows={4}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium">Technology</label>
+                  <select 
+                    className="w-full mt-1 p-2 border rounded-md"
+                    value={editingQuestion.technology}
+                    onChange={(e) => setEditingQuestion({...editingQuestion, technology: e.target.value})}
+                  >
+                    {["JavaScript", "Python", "React", "Node.js", "Java", "C++", "SQL", "MongoDB"].map((tech) => (
+                      <option key={tech} value={tech}>{tech}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Difficulty</label>
+                  <select 
+                    className="w-full mt-1 p-2 border rounded-md"
+                    value={editingQuestion.difficulty}
+                    onChange={(e) => setEditingQuestion({...editingQuestion, difficulty: e.target.value})}
+                  >
+                    <option value="beginner">Beginner</option>
+                    <option value="intermediate">Intermediate</option>
+                    <option value="advanced">Advanced</option>
+                  </select>
+                </div>
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setShowEditDialog(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={async () => {
+                  try {
+                    const response = await apiRequest("PUT", `/api/admin/interview-questions/${editingQuestion.id}`, {
+                      title: editingQuestion.title,
+                      question: editingQuestion.question,
+                      technology: editingQuestion.technology,
+                      difficulty: editingQuestion.difficulty
+                    });
+                    if (response.ok) {
+                      toast({
+                        title: "AI Interview Question Updated",
+                        description: "AI interview question has been updated successfully.",
+                      });
+                      setShowEditDialog(false);
+                      refetchInterviewQuestions();
+                    }
+                  } catch (error) {
+                    toast({
+                      title: "Error",
+                      description: "Failed to update AI interview question",
+                      variant: "destructive",
+                    });
+                  }
+                }}>
+                  Save Changes
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }

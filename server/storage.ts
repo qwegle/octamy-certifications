@@ -1081,7 +1081,9 @@ export class DatabaseStorage implements IStorage {
   // Question management for admin
   async getQuestionsForAdmin(courseId?: number, search?: string): Promise<any[]> {
     try {
-      let query = db
+      console.log('getQuestionsForAdmin called with:', { courseId, search });
+      
+      const baseQuery = db
         .select({
           id: questions.id,
           courseId: questions.courseId,
@@ -1091,7 +1093,6 @@ export class DatabaseStorage implements IStorage {
           explanation: questions.explanation,
           difficulty: questions.difficulty,
           isActive: questions.isActive,
-          createdAt: questions.createdAt,
           course: {
             title: courses.title
           }
@@ -1099,27 +1100,24 @@ export class DatabaseStorage implements IStorage {
         .from(questions)
         .leftJoin(courses, eq(questions.courseId, courses.id));
 
-      const conditions: any[] = [];
-
+      let query = baseQuery;
+      
       if (courseId) {
-        conditions.push(eq(questions.courseId, courseId));
+        query = query.where(eq(questions.courseId, courseId));
       }
 
       if (search) {
-        conditions.push(
-          or(
-            ilike(questions.question, `%${search}%`),
-            ilike(questions.explanation, `%${search}%`)
-          )
+        const searchCondition = or(
+          ilike(questions.question, `%${search}%`),
+          ilike(questions.explanation, `%${search}%`)
         );
+        query = courseId 
+          ? query.where(and(eq(questions.courseId, courseId), searchCondition))
+          : query.where(searchCondition);
       }
 
-      if (conditions.length > 0) {
-        query = query.where(and(...conditions));
-      }
-
-      const result = await query.orderBy(desc(questions.createdAt)).limit(50);
-      console.log('Questions query result:', result.length);
+      const result = await query.orderBy(desc(questions.id)).limit(50);
+      console.log('Questions found:', result.length);
       return result;
     } catch (error) {
       console.error('Error in getQuestionsForAdmin:', error);
@@ -1128,12 +1126,17 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateQuestion(id: number, updates: Partial<InsertQuestion>): Promise<Question | undefined> {
-    const [question] = await db
-      .update(questions)
-      .set(updates)
-      .where(eq(questions.id, id))
-      .returning();
-    return question || undefined;
+    try {
+      const [question] = await db
+        .update(questions)
+        .set(updates)
+        .where(eq(questions.id, id))
+        .returning();
+      return question || undefined;
+    } catch (error) {
+      console.error('Error updating question:', error);
+      throw error;
+    }
   }
 
   async deleteQuestion(id: number): Promise<boolean> {
@@ -1176,12 +1179,17 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateInterviewQuestion(id: number, updates: any): Promise<any | undefined> {
-    const [question] = await db
-      .update(interviewQuestions)
-      .set(updates)
-      .where(eq(interviewQuestions.id, id))
-      .returning();
-    return question || undefined;
+    try {
+      const [question] = await db
+        .update(interviewQuestions)
+        .set(updates)
+        .where(eq(interviewQuestions.id, id))
+        .returning();
+      return question || undefined;
+    } catch (error) {
+      console.error('Error updating interview question:', error);
+      throw error;
+    }
   }
 
   async deleteInterviewQuestion(id: number): Promise<boolean> {
