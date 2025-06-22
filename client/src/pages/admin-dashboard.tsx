@@ -822,11 +822,14 @@ export default function AdminDashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="space-y-6">
           <Tabs defaultValue="overview" className="space-y-4">
-            <TabsList className="grid w-full grid-cols-7">
+            <TabsList className="grid w-full grid-cols-10">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="customers">Customers</TabsTrigger>
               <TabsTrigger value="categories">Categories</TabsTrigger>
               <TabsTrigger value="courses">Courses</TabsTrigger>
+              <TabsTrigger value="questions">Questions</TabsTrigger>
+              <TabsTrigger value="ai-questions">AI Questions</TabsTrigger>
+              <TabsTrigger value="contacts">Contact</TabsTrigger>
               <TabsTrigger value="exams">Exams</TabsTrigger>
               <TabsTrigger value="partners">Partners</TabsTrigger>
               <TabsTrigger value="transactions">Transactions</TabsTrigger>
@@ -1553,6 +1556,21 @@ export default function AdminDashboard() {
                   </CardContent>
                 </Card>
               )}
+            </TabsContent>
+
+            {/* Questions Tab */}
+            <TabsContent value="questions" className="space-y-4">
+              <QuestionsManagement />
+            </TabsContent>
+
+            {/* AI Questions Tab */}
+            <TabsContent value="ai-questions" className="space-y-4">
+              <AIQuestionsManagement />
+            </TabsContent>
+
+            {/* Contact Submissions Tab */}
+            <TabsContent value="contacts" className="space-y-4">
+              <ContactSubmissionsManagement />
             </TabsContent>
           </Tabs>
         </div>

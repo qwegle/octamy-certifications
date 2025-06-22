@@ -1047,6 +1047,23 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(contactSubmissions.submittedAt));
   }
 
+  async getContactSubmissions(search?: string): Promise<ContactSubmission[]> {
+    let query = db.select().from(contactSubmissions);
+    
+    if (search) {
+      query = query.where(
+        or(
+          ilike(contactSubmissions.name, `%${search}%`),
+          ilike(contactSubmissions.email, `%${search}%`),
+          ilike(contactSubmissions.subject, `%${search}%`),
+          ilike(contactSubmissions.message, `%${search}%`)
+        )
+      );
+    }
+    
+    return await query.orderBy(desc(contactSubmissions.submittedAt));
+  }
+
   async updateContactSubmissionStatus(id: number, status: string, adminNotes?: string): Promise<ContactSubmission> {
     const [result] = await db
       .update(contactSubmissions)
@@ -1058,6 +1075,106 @@ export class DatabaseStorage implements IStorage {
       .where(eq(contactSubmissions.id, id))
       .returning();
     return result;
+  }
+
+  // Question management for admin
+  async getQuestionsForAdmin(courseId?: number, search?: string): Promise<(Question & { course: { title: string } })[]> {
+    let query = db
+      .select({
+        id: questions.id,
+        courseId: questions.courseId,
+        question: questions.question,
+        options: questions.options,
+        correctAnswer: questions.correctAnswer,
+        explanation: questions.explanation,
+        difficulty: questions.difficulty,
+        isActive: questions.isActive,
+        createdAt: questions.createdAt,
+        course: {
+          title: courses.title
+        }
+      })
+      .from(questions)
+      .leftJoin(courses, eq(questions.courseId, courses.id));
+
+    if (courseId) {
+      query = query.where(eq(questions.courseId, courseId));
+    }
+
+    if (search) {
+      query = query.where(
+        or(
+          ilike(questions.question, `%${search}%`),
+          ilike(questions.explanation, `%${search}%`)
+        )
+      );
+    }
+
+    return await query.orderBy(desc(questions.createdAt));
+  }
+
+  async updateQuestion(id: number, updates: Partial<InsertQuestion>): Promise<Question | undefined> {
+    const [question] = await db
+      .update(questions)
+      .set(updates)
+      .where(eq(questions.id, id))
+      .returning();
+    return question || undefined;
+  }
+
+  async deleteQuestion(id: number): Promise<boolean> {
+    const result = await db
+      .delete(questions)
+      .where(eq(questions.id, id));
+    return result.rowCount > 0;
+  }
+
+  // Interview question management for admin
+  async getInterviewQuestionsForAdmin(technology?: string, search?: string): Promise<any[]> {
+    let query = db.select().from(interviewQuestions);
+
+    if (technology) {
+      query = query.where(eq(interviewQuestions.technology, technology));
+    }
+
+    if (search) {
+      query = query.where(
+        or(
+          ilike(interviewQuestions.title, `%${search}%`),
+          ilike(interviewQuestions.question, `%${search}%`),
+          ilike(interviewQuestions.technology, `%${search}%`)
+        )
+      );
+    }
+
+    return await query.orderBy(desc(interviewQuestions.createdAt));
+  }
+
+  async createInterviewQuestion(questionData: any): Promise<any> {
+    const [question] = await db
+      .insert(interviewQuestions)
+      .values({
+        ...questionData,
+        createdAt: new Date()
+      })
+      .returning();
+    return question;
+  }
+
+  async updateInterviewQuestion(id: number, updates: any): Promise<any | undefined> {
+    const [question] = await db
+      .update(interviewQuestions)
+      .set(updates)
+      .where(eq(interviewQuestions.id, id))
+      .returning();
+    return question || undefined;
+  }
+
+  async deleteInterviewQuestion(id: number): Promise<boolean> {
+    const result = await db
+      .delete(interviewQuestions)
+      .where(eq(interviewQuestions.id, id));
+    return result.rowCount > 0;
   }
 
   async updateSellerApproval(sellerId: number, approved: boolean): Promise<void> {

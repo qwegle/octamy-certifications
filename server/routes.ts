@@ -2139,6 +2139,158 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin Course Questions Management - Secure endpoints
+  app.get('/api/admin/questions', authenticateAdminToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { courseId, search } = req.query;
+      const questions = await storage.getQuestionsForAdmin(courseId ? parseInt(courseId as string) : undefined, search as string);
+      res.json(questions);
+    } catch (error) {
+      console.error('Error fetching questions:', error);
+      res.status(500).json({ message: 'Failed to fetch questions' });
+    }
+  });
+
+  app.post('/api/admin/questions', authenticateAdminToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const questionData = req.body;
+      
+      // Validate required fields
+      if (!questionData.courseId || !questionData.question || !questionData.options || !questionData.correctAnswer) {
+        return res.status(400).json({ message: 'Missing required fields' });
+      }
+      
+      const question = await storage.createQuestion(questionData);
+      res.status(201).json(question);
+    } catch (error) {
+      console.error('Error creating question:', error);
+      res.status(500).json({ message: 'Failed to create question' });
+    }
+  });
+
+  app.put('/api/admin/questions/:id', authenticateAdminToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const questionId = parseInt(req.params.id);
+      if (isNaN(questionId)) {
+        return res.status(400).json({ message: 'Invalid question ID' });
+      }
+      
+      const updates = req.body;
+      const question = await storage.updateQuestion(questionId, updates);
+      if (!question) {
+        return res.status(404).json({ message: 'Question not found' });
+      }
+      res.json(question);
+    } catch (error) {
+      console.error('Error updating question:', error);
+      res.status(500).json({ message: 'Failed to update question' });
+    }
+  });
+
+  app.delete('/api/admin/questions/:id', authenticateAdminToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const questionId = parseInt(req.params.id);
+      if (isNaN(questionId)) {
+        return res.status(400).json({ message: 'Invalid question ID' });
+      }
+      
+      const deleted = await storage.deleteQuestion(questionId);
+      if (!deleted) {
+        return res.status(404).json({ message: 'Question not found' });
+      }
+      res.json({ message: 'Question deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting question:', error);
+      res.status(500).json({ message: 'Failed to delete question' });
+    }
+  });
+
+  // Admin Interview Questions Management - Secure endpoints
+  app.get('/api/admin/interview-questions', authenticateAdminToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { technology, search } = req.query;
+      const questions = await storage.getInterviewQuestionsForAdmin(technology as string, search as string);
+      res.json(questions);
+    } catch (error) {
+      console.error('Error fetching interview questions:', error);
+      res.status(500).json({ message: 'Failed to fetch interview questions' });
+    }
+  });
+
+  app.post('/api/admin/interview-questions', authenticateAdminToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const questionData = req.body;
+      
+      // Validate required fields
+      if (!questionData.technology || !questionData.title || !questionData.question) {
+        return res.status(400).json({ message: 'Missing required fields' });
+      }
+      
+      const question = await storage.createInterviewQuestion(questionData);
+      res.status(201).json(question);
+    } catch (error) {
+      console.error('Error creating interview question:', error);
+      res.status(500).json({ message: 'Failed to create interview question' });
+    }
+  });
+
+  app.put('/api/admin/interview-questions/:id', authenticateAdminToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const questionId = parseInt(req.params.id);
+      if (isNaN(questionId)) {
+        return res.status(400).json({ message: 'Invalid interview question ID' });
+      }
+      
+      const updates = req.body;
+      const question = await storage.updateInterviewQuestion(questionId, updates);
+      if (!question) {
+        return res.status(404).json({ message: 'Interview question not found' });
+      }
+      res.json(question);
+    } catch (error) {
+      console.error('Error updating interview question:', error);
+      res.status(500).json({ message: 'Failed to update interview question' });
+    }
+  });
+
+  app.delete('/api/admin/interview-questions/:id', authenticateAdminToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const questionId = parseInt(req.params.id);
+      if (isNaN(questionId)) {
+        return res.status(400).json({ message: 'Invalid interview question ID' });
+      }
+      
+      const deleted = await storage.deleteInterviewQuestion(questionId);
+      if (!deleted) {
+        return res.status(404).json({ message: 'Interview question not found' });
+      }
+      res.json({ message: 'Interview question deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting interview question:', error);
+      res.status(500).json({ message: 'Failed to delete interview question' });
+    }
+  });
+
+  // Admin Contact Submissions Management - Secure endpoints
+  app.put('/api/admin/contacts/:id', authenticateAdminToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const contactId = parseInt(req.params.id);
+      if (isNaN(contactId)) {
+        return res.status(400).json({ message: 'Invalid contact ID' });
+      }
+      
+      const updates = req.body;
+      const contact = await storage.updateContactSubmissionStatus(contactId, updates.status, updates.adminNotes);
+      if (!contact) {
+        return res.status(404).json({ message: 'Contact submission not found' });
+      }
+      res.json(contact);
+    } catch (error) {
+      console.error('Error updating contact submission:', error);
+      res.status(500).json({ message: 'Failed to update contact submission' });
+    }
+  });
+
   // Import and add new routes
   // Add user interviews endpoint with detailed logging
   app.get("/api/user/interviews", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
