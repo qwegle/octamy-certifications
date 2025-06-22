@@ -46,7 +46,7 @@ function QuestionsManagement() {
   const [selectedCourse, setSelectedCourse] = useState<number | undefined>();
   const { toast } = useToast();
 
-  const { data: questions = [], isLoading: questionsLoading } = useQuery({
+  const { data: questions = [], isLoading: questionsLoading, refetch: refetchQuestions } = useQuery({
     queryKey: ["/api/admin/questions", selectedCourse, searchTerm],
     queryFn: async () => {
       const params = new URLSearchParams();
@@ -156,7 +156,17 @@ function QuestionsManagement() {
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-2">
-                          <Button variant="outline" size="sm">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => {
+                              console.log("Editing question:", question);
+                              toast({
+                                title: "Edit Question",
+                                description: `Editing: ${question.question.substring(0, 50)}...`,
+                              });
+                            }}
+                          >
                             <Edit className="h-4 w-4" />
                           </Button>
                           <AlertDialog>
@@ -199,11 +209,11 @@ function AIQuestionsManagement() {
   const [selectedTechnology, setSelectedTechnology] = useState<string>("");
   const { toast } = useToast();
 
-  const { data: questions = [], isLoading: questionsLoading } = useQuery({
+  const { data: questions = [], isLoading: questionsLoading, refetch: refetchInterviewQuestions } = useQuery({
     queryKey: ["/api/admin/interview-questions", selectedTechnology, searchTerm],
     queryFn: async () => {
       const params = new URLSearchParams();
-      if (selectedTechnology) params.append('technology', selectedTechnology);
+      if (selectedTechnology && selectedTechnology !== "all") params.append('technology', selectedTechnology);
       if (searchTerm) params.append('search', searchTerm);
       const response = await apiRequest("GET", `/api/admin/interview-questions?${params}`);
       return response.json();
@@ -305,7 +315,17 @@ function AIQuestionsManagement() {
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-2">
-                          <Button variant="outline" size="sm">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => {
+                              console.log("Editing AI interview question:", question);
+                              toast({
+                                title: "Edit AI Interview Question",
+                                description: `Editing: ${question.title}`,
+                              });
+                            }}
+                          >
                             <Edit className="h-4 w-4" />
                           </Button>
                           <AlertDialog>
@@ -1298,7 +1318,7 @@ export default function AdminDashboard() {
               <TabsTrigger value="categories">Categories</TabsTrigger>
               <TabsTrigger value="courses">Courses</TabsTrigger>
               <TabsTrigger value="questions">Questions</TabsTrigger>
-              <TabsTrigger value="ai-questions">AI Questions</TabsTrigger>
+              <TabsTrigger value="ai-questions">AI Interview</TabsTrigger>
               <TabsTrigger value="contacts">Contact</TabsTrigger>
               <TabsTrigger value="exams">Exams</TabsTrigger>
               <TabsTrigger value="partners">Partners</TabsTrigger>

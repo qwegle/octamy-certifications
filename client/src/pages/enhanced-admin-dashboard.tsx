@@ -297,7 +297,7 @@ function EnhancedAdminDashboard() {
             <TabsTrigger value="overview" className="data-[state=active]:bg-white data-[state=active]:text-black">Overview</TabsTrigger>
             <TabsTrigger value="courses" className="data-[state=active]:bg-white data-[state=active]:text-black">Courses</TabsTrigger>
             <TabsTrigger value="questions" className="data-[state=active]:bg-white data-[state=active]:text-black">Questions</TabsTrigger>
-            <TabsTrigger value="ai-questions" className="data-[state=active]:bg-white data-[state=active]:text-black">AI Questions</TabsTrigger>
+            <TabsTrigger value="ai-questions" className="data-[state=active]:bg-white data-[state=active]:text-black">AI Interview</TabsTrigger>
             <TabsTrigger value="contacts" className="data-[state=active]:bg-white data-[state=active]:text-black">Contact</TabsTrigger>
             <TabsTrigger value="customers" className="data-[state=active]:bg-white data-[state=active]:text-black">Customers</TabsTrigger>
             <TabsTrigger value="transactions" className="data-[state=active]:bg-white data-[state=active]:text-black">Transactions</TabsTrigger>

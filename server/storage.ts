@@ -17,6 +17,7 @@ import {
   sponsors,
   contactSubmissions,
   interviews,
+  interviewQuestions,
   type User, 
   type InsertUser,
   type UserAddress,
@@ -1078,39 +1079,52 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Question management for admin
-  async getQuestionsForAdmin(courseId?: number, search?: string): Promise<(Question & { course: { title: string } })[]> {
-    let query = db
-      .select({
-        id: questions.id,
-        courseId: questions.courseId,
-        question: questions.question,
-        options: questions.options,
-        correctAnswer: questions.correctAnswer,
-        explanation: questions.explanation,
-        difficulty: questions.difficulty,
-        isActive: questions.isActive,
-        createdAt: questions.createdAt,
-        course: {
-          title: courses.title
-        }
-      })
-      .from(questions)
-      .leftJoin(courses, eq(questions.courseId, courses.id));
+  async getQuestionsForAdmin(courseId?: number, search?: string): Promise<any[]> {
+    try {
+      let query = db
+        .select({
+          id: questions.id,
+          courseId: questions.courseId,
+          question: questions.question,
+          options: questions.options,
+          correctAnswer: questions.correctAnswer,
+          explanation: questions.explanation,
+          difficulty: questions.difficulty,
+          isActive: questions.isActive,
+          createdAt: questions.createdAt,
+          course: {
+            title: courses.title
+          }
+        })
+        .from(questions)
+        .leftJoin(courses, eq(questions.courseId, courses.id));
 
-    if (courseId) {
-      query = query.where(eq(questions.courseId, courseId));
+      const conditions: any[] = [];
+
+      if (courseId) {
+        conditions.push(eq(questions.courseId, courseId));
+      }
+
+      if (search) {
+        conditions.push(
+          or(
+            ilike(questions.question, `%${search}%`),
+            ilike(questions.explanation, `%${search}%`)
+          )
+        );
+      }
+
+      if (conditions.length > 0) {
+        query = query.where(and(...conditions));
+      }
+
+      const result = await query.orderBy(desc(questions.createdAt)).limit(50);
+      console.log('Questions query result:', result.length);
+      return result;
+    } catch (error) {
+      console.error('Error in getQuestionsForAdmin:', error);
+      throw error;
     }
-
-    if (search) {
-      query = query.where(
-        or(
-          ilike(questions.question, `%${search}%`),
-          ilike(questions.explanation, `%${search}%`)
-        )
-      );
-    }
-
-    return await query.orderBy(desc(questions.createdAt));
   }
 
   async updateQuestion(id: number, updates: Partial<InsertQuestion>): Promise<Question | undefined> {
