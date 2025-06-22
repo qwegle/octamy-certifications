@@ -82,7 +82,7 @@ function CertificateSlider() {
           </div>
         ) : (
           // Loading placeholder
-          <div className="flex overflow-x-auto space-x-6 pb-4">
+          (<div className="flex overflow-x-auto space-x-6 pb-4">
             {Array.from({ length: 3 }).map((_, index) => (
               <div
                 key={index}
@@ -99,7 +99,7 @@ function CertificateSlider() {
                 <div className="h-6 bg-gray-700 rounded w-20"></div>
               </div>
             ))}
-          </div>
+          </div>)
         )}
       </div>
     </div>
@@ -201,10 +201,8 @@ export default function Landing() {
           </div>
         </div>
       </nav>
-
       {/* Certificate Slider */}
       <CertificateSlider />
-
       {/* Hero Section */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-6 text-center">
@@ -241,7 +239,6 @@ export default function Landing() {
           </div>
         </div>
       </section>
-
       {/* Stats Section */}
       <section className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-6">
@@ -270,9 +267,8 @@ export default function Landing() {
           </div>
         </div>
       </section>
-
       {/* Course Discovery Section */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-white pt-[25px] pb-[25px]">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold text-black mb-6">
@@ -339,7 +335,6 @@ export default function Landing() {
           )}
         </div>
       </section>
-
       {/* Business Certification Section */}
       <section className="py-16 bg-black text-white">
         <div className="max-w-7xl mx-auto px-6 text-center">
@@ -403,7 +398,6 @@ export default function Landing() {
           </Link>
         </div>
       </section>
-
       {/* Badge System Section */}
       <section className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-6 text-center">
@@ -446,7 +440,6 @@ export default function Landing() {
           </div>
         </div>
       </section>
-
       {/* Footer */}
       <footer className="bg-black text-white py-12">
         <div className="max-w-7xl mx-auto px-6">
