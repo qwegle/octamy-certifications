@@ -12,6 +12,7 @@ import {
   Users, BookOpen, DollarSign, FileText, TrendingUp, Activity, Search, Filter, RefreshCw, Eye, Edit, Trash2,
   ChevronDown, ChevronRight, User, Calendar, Clock, MapPin, Phone, Mail, CreditCard
 } from "lucide-react";
+import { EnhancedQuestionsManagement } from "@/components/enhanced-questions-management";
 import { useToast } from "@/hooks/use-toast";
 
 function EnhancedAdminDashboard() {

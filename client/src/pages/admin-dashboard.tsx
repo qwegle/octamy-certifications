@@ -161,7 +161,11 @@ function QuestionsManagement() {
                           </p>
                         </div>
                       </TableCell>
-                      <TableCell>{question.course?.title || 'N/A'}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline">
+                          {question.course?.title || courses.find(c => c.id === question.courseId)?.title || "No Course"}
+                        </Badge>
+                      </TableCell>
                       <TableCell>
                         <Badge variant={question.difficulty === 'hard' ? 'destructive' : question.difficulty === 'medium' ? 'default' : 'secondary'}>
                           {question.difficulty || 'Easy'}
