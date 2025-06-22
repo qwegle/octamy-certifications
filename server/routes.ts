@@ -1457,6 +1457,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Contact submission endpoint for help center
+  app.post("/api/contact-submission", async (req: Request, res: Response) => {
+    try {
+      const { name, email, subject, message } = req.body;
+
+      if (!name || !email || !subject || !message) {
+        return res.status(400).json({ 
+          message: "Missing required fields" 
+        });
+      }
+
+      // Insert contact submission into database
+      const [submission] = await db
+        .insert(contactSubmissions)
+        .values({
+          name: name.trim(),
+          email: email.trim().toLowerCase(),
+          subject: subject.trim(),
+          message: message.trim(),
+          status: "new"
+        })
+        .returning();
+
+      res.status(201).json({ 
+        message: "Message sent successfully! We'll get back to you within 24 hours.",
+        submissionId: submission.id
+      });
+    } catch (error) {
+      console.error("Contact submission error:", error);
+      res.status(500).json({ 
+        message: "Failed to send message. Please try again." 
+      });
+    }
+  });
+
   // Shareable certificate route - displays certificate in smaller format for sharing
   app.get("/api/certificate/:certificateNumber", async (req: Request, res: Response) => {
     try {
