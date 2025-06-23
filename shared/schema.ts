@@ -49,6 +49,90 @@ export const insertContactSubmissionSchema = createInsertSchema(contactSubmissio
 export type InsertContactSubmission = z.infer<typeof insertContactSubmissionSchema>;
 export type ContactSubmission = typeof contactSubmissions.$inferSelect;
 
+// Recruiter portal tables
+export const recruiters = pgTable('recruiters', {
+  id: serial('id').primaryKey(),
+  email: text('email').notNull().unique(),
+  password: text('password').notNull(),
+  
+  // Individual Information (Step 1)
+  firstName: text('first_name').notNull().default(''),
+  lastName: text('last_name').notNull().default(''),
+  phone: text('phone').notNull().default(''),
+  designation: text('designation').notNull().default(''),
+  linkedinProfile: text('linkedin_profile'),
+  
+  // Company Information (Step 2)
+  companyName: text('company_name').notNull().default(''),
+  companyWebsite: text('company_website'),
+  companySize: text('company_size').notNull().default('1-10'),
+  industry: text('industry').notNull().default(''),
+  companyAddress: text('company_address').notNull().default(''),
+  companyCity: text('company_city').notNull().default(''),
+  companyState: text('company_state').notNull().default(''),
+  companyCountry: text('company_country').notNull().default('India'),
+  
+  // KYC Information (Step 3)
+  gstNumber: text('gst_number'),
+  panNumber: text('pan_number'),
+  companyRegistrationNumber: text('company_registration_number'),
+  
+  // Document URLs
+  gstCertificate: text('gst_certificate_url'),
+  panCard: text('pan_card_url'),
+  companyRegistrationCertificate: text('company_registration_certificate_url'),
+  
+  // Status and Credits
+  isActive: boolean('is_active').default(true),
+  kycStatus: text('kyc_status').notNull().default('pending'),
+  creditsBalance: decimal('credits_balance', { precision: 10, scale: 2 }).default('0.00'),
+  
+  // Metadata
+  registrationStep: integer('registration_step').default(1),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+  lastLoginAt: timestamp('last_login_at'),
+});
+
+export const creditTransactions = pgTable('credit_transactions', {
+  id: serial('id').primaryKey(),
+  recruiterId: integer('recruiter_id').notNull().references(() => recruiters.id),
+  type: text('type').notNull(),
+  amount: decimal('amount', { precision: 10, scale: 2 }).notNull(),
+  description: text('description').notNull(),
+  relatedUserId: integer('related_user_id'),
+  relatedAction: text('related_action'),
+  balanceAfter: decimal('balance_after', { precision: 10, scale: 2 }).notNull(),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+export const profileAccessLogs = pgTable('profile_access_logs', {
+  id: serial('id').primaryKey(),
+  recruiterId: integer('recruiter_id').notNull().references(() => recruiters.id),
+  userId: integer('user_id').notNull(),
+  accessType: text('access_type').notNull(),
+  creditsUsed: decimal('credits_used', { precision: 10, scale: 2 }).notNull(),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+export const savedSearches = pgTable('saved_searches', {
+  id: serial('id').primaryKey(),
+  recruiterId: integer('recruiter_id').notNull().references(() => recruiters.id),
+  name: text('name').notNull(),
+  filters: jsonb('filters').notNull(),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+export const insertRecruiterSchema = createInsertSchema(recruiters).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  lastLoginAt: true,
+});
+
+export type Recruiter = typeof recruiters.$inferSelect;
+export type InsertRecruiter = z.infer<typeof insertRecruiterSchema>;
+
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   email: text("email").notNull().unique(),

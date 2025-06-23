@@ -34,6 +34,7 @@ import apiRoutes from "./routes/index";
 import certificateRoutes from "./routes/certificateRoutes";
 import { emailService } from "./utils/emailService";
 import { generateCertificateHTML } from "./utils/certificateGenerator";
+import { registerRecruiterRoutes } from "./routes/recruiterRoutes";
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -444,6 +445,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // API routes (from routes/index.ts) - MOVED BEFORE seller routes to prevent conflicts
   app.use(apiRoutes);
+
+  // Register recruiter routes
+  registerRecruiterRoutes(app);
 
   // Add missing seller routes AFTER API routes to ensure they are properly registered
   app.get(

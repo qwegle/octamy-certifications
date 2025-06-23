@@ -1,451 +1,83 @@
-# Octamy Professional Certification Platform
+# Octamy Platform - Replit Development Guide
 
-## Overview
+## Project Overview
+Comprehensive professional certification platform with AI-powered interviews, integrated payment systems, and now includes a separate recruiter portal for talent acquisition.
 
-Octamy is a comprehensive professional certification platform built as a full-stack web application. It enables users to take online assessments across various domains (AI, Development, Business, Internships) and obtain verified certificates upon successful completion. The platform features a modern React frontend with a Node.js/Express backend, using PostgreSQL for data persistence and Drizzle ORM for database operations.
-
-## System Architecture
-
-### Frontend Architecture
-- **Framework**: React 18 with TypeScript
-- **Routing**: Wouter for client-side routing
-- **State Management**: TanStack Query (React Query) for server state management
-- **UI Framework**: Tailwind CSS with shadcn/ui component library
-- **Build Tool**: Vite for development and production builds
-- **Authentication**: JWT-based authentication with context provider pattern
-
-### Backend Architecture
-- **Runtime**: Node.js with Express.js framework
-- **Language**: TypeScript with ES modules
+## Architecture
+- **Frontend**: React + TypeScript + Tailwind CSS + Wouter routing
+- **Backend**: Express.js + Node.js + TypeScript  
 - **Database**: PostgreSQL with Drizzle ORM
-- **Authentication**: JWT tokens with bcrypt for password hashing
-- **API Design**: RESTful API endpoints
-- **Session Management**: JWT-based stateless authentication
+- **Authentication**: JWT tokens with secure session management
+- **Payments**: PayUMoney integration for Indian market
+- **File Storage**: Cloudinary for document uploads
+- **AI**: OpenAI GPT-4o for interview analysis and scoring
 
-### Data Storage Solutions
-- **Primary Database**: PostgreSQL hosted on Neon serverless platform
-- **ORM**: Drizzle ORM with connection pooling
-- **Database Schema**: Comprehensive schema with users, categories, courses, questions, exam attempts, certificates, and payments
-- **Migrations**: Drizzle Kit for database migrations and schema management
+## Key Features
+### Main Platform
+- Multi-domain certifications (AI, Development, Business, Internships)
+- AI-powered video interview system with screen recording
+- Advanced question management with multiple choice and AI interactions
+- Certificate generation with QR codes and verification
+- Admin dashboard with comprehensive analytics
+- Seller/partner referral system
 
-## Key Components
+### Recruiter Portal (NEW)
+- **Location**: `/recruiter` folder - completely separate feature
+- **Routes**: `/recruiter/auth`, `/recruiter/dashboard`, `/recruiter/search`, `/recruiter/wallet`
+- **Multi-step Registration**: Individual info → Company details → KYC documents
+- **Credit System**: Pay-per-access (1 credit: profile/CV, 2 credits: interviews)
+- **Advanced Search**: Filter by technology, experience, location, work type
+- **Authentication**: Separate JWT system with KYC verification workflow
 
-### Database Schema
-- **Users**: User authentication and profile management with admin roles
-- **Categories**: Course categorization (AI, Development, Business, Internships)
-- **Courses**: Course metadata including duration, pricing, and passing scores
-- **Questions**: Multiple-choice questions with correct answer tracking
-- **Exam Attempts**: User exam submissions with scoring
-- **Certificates**: Generated certificates with verification capabilities
-- **Payments**: Payment processing integration with Razorpay
+## Recent Changes
+### 2025-01-22: Recruiter Portal Implementation
+- Created complete recruiter portal in `/recruiter` folder
+- Built multi-step onboarding wizard with form validation
+- Implemented credit-based access system for candidate data
+- Added advanced search with multiple filter options
+- Created separate authentication system for recruiters
+- Integrated with existing user/certificate/interview data
+- Added wallet system for credit management and transactions
 
-### Authentication and Authorization
-- JWT-based authentication with secure token storage
-- Role-based access control (admin vs regular users)
-- Protected routes and API endpoints
-- Optional authentication middleware for public routes
+### Authentication Issues Fixed
+- Resolved JWT token expiration handling across all components
+- Fixed import conflicts between auth.ts and auth.tsx files
+- Updated logout functionality to work consistently
+- Added proper token validation and cleanup
 
-### UI Components
-- Comprehensive shadcn/ui component library integration
-- Responsive design with mobile-first approach
-- Dark mode support through CSS custom properties
-- Accessible components following ARIA guidelines
+## Database Schema
+### Main Platform Tables
+- `users`, `courses`, `categories`, `questions`, `certificates`
+- `exam_attempts`, `interviews`, `interview_questions`
+- `sellers`, `referral_clicks`, `referral_conversions`
 
-### Exam System
-- Timed examinations with countdown timers
-- Real-time progress tracking
-- Automatic submission on timeout
-- Score calculation and pass/fail determination
+### Recruiter Portal Tables (NEW)
+- `recruiters`: Multi-step registration data with KYC status
+- `credit_transactions`: Credit purchases and spending history
+- `profile_access_logs`: Tracks candidate profile access
+- `saved_searches`: Recruiter's saved search filters
 
-## Data Flow
+## Environment Configuration
+Required secrets:
+- `DATABASE_URL`, `JWT_SECRET`
+- `CLOUDINARY_*` (for file uploads)
+- `OPENAI_API_KEY` (for AI features)
+- `PAYUMONEY_*` (for payments)
 
-1. **User Registration/Login**: Users authenticate through JWT tokens stored in localStorage
-2. **Course Selection**: Users browse categorized courses and select assessments
-3. **Exam Taking**: Timed multiple-choice exams with progress tracking
-4. **Result Processing**: Automatic scoring and certificate generation
-5. **Payment Processing**: Razorpay integration for certificate purchases
-6. **Certificate Generation**: PDF certificates with verification codes
-7. **Certificate Verification**: Public verification system for certificate authenticity
+## Development Guidelines
+- Use TypeScript strictly with proper type definitions
+- Follow component separation (auth, pages, components, utils)
+- Maintain separate routing for main platform vs recruiter portal
+- Credit system calculations must be precise for billing accuracy
+- KYC verification workflow requires admin approval process
 
-## External Dependencies
+## Deployment Notes
+- Multi-step database migrations required for recruiter tables
+- Separate auth contexts prevent interference between platforms
+- Credit transaction logging ensures financial audit trail
+- File upload integration works with existing Cloudinary setup
 
-### Core Dependencies
-- **Database**: Neon PostgreSQL serverless database
-- **Payment Processing**: Razorpay payment gateway
-- **UI Components**: Radix UI primitives with shadcn/ui styling
-- **Form Handling**: React Hook Form with Zod validation
-- **HTTP Client**: Native fetch API with TanStack Query
-
-### Development Tools
-- **TypeScript**: Type safety across frontend and backend
-- **ESBuild**: Fast backend compilation for production
-- **PostCSS**: CSS processing with Tailwind CSS
-- **Drizzle Kit**: Database migration and introspection tools
-
-## Deployment Strategy
-
-### Development Environment
-- **Runtime**: Node.js 20 with Replit integration
-- **Database**: PostgreSQL 16 module in Replit
-- **Hot Reload**: Vite HMR for frontend, tsx for backend development
-- **Port**: Application runs on port 5000
-
-### Production Build
-- **Frontend**: Vite production build with static asset optimization
-- **Backend**: ESBuild compilation to single bundle
-- **Deployment**: Replit Autoscale deployment target
-- **Environment**: Production environment variable configuration
-
-### Build Process
-1. Frontend assets compiled to `dist/public`
-2. Backend compiled to `dist/index.js`
-3. Static file serving in production mode
-4. Database migrations applied via Drizzle Kit
-
-## Recent Updates
-
-### Certificate Design Enhancement with SVG Asset Integration (June 17, 2025)
-- **Enhanced certificate styling** with professional Poppins font family and refined typography
-- **Created reliable SVG assets** replacing external image URLs for consistent loading
-- **Professional SVG logos** for ISO certification and Make in India branding
-- **Stylized SVG signature** for Nitikesh Pattanayak with handwritten flourishes
-- **Fixed certificate styling issues** including recipient name margins and footer spacing
-- **Updated certificate elements** with 70px footer margin and proper text formatting
-- **Removed italic styling** from "An ISO Certified Company" text for better readability
-- **Synchronized both generators** to use identical SVG assets and styling
-- **Improved performance** by using local SVG files instead of external URLs
-- **Badge styling** with precise positioning and professional verification elements
-
-### PayUMoney Payment System Fix (June 17, 2025)
-- **Fixed critical payment flow issue** where certificates were created as already paid (isPaid: true)
-- **Corrected certificate creation logic** in both routes.ts and certificateController.ts to always create unpaid certificates
-- **Removed certificate reuse logic** that was finding existing paid certificates instead of creating new unpaid ones
-- **Payment page now displays properly** showing PayUMoney payment form instead of success message
-- **PayUMoney integration fully functional** with payment initiation, form generation, and success callbacks
-- **Revenue protection restored** - users must complete PayUMoney payment to access certificates
-- **Complete payment flow working** from exam success through PayUMoney payment to certificate activation
-- **Database integrity maintained** - all new exam attempts create fresh unpaid certificates requiring payment
-
-### Simplified Exam Scoring Logic (June 17, 2025)
-- **Fixed critical exam bug** where 100% scores were failing due to complex retake system
-- **Simplified passing logic** to use each course's defined passing score (e.g., 60% for Demo Course)
-- **Removed confusing retake requirements** that prevented high scores from passing
-- **Updated response messages** to show correct passing thresholds from course settings
-- **Streamlined exam logic** making it easy to understand: score >= course.passingScore = pass
-- **Developer-friendly code structure** with clear comments explaining the simple passing criteria
-
-### Comprehensive Exam Results System with Detailed Failure Analysis (June 17, 2025)
-- **Detailed exam results page** showing comprehensive failure feedback with category breakdowns and weak areas
-- **Enhanced exam submission flow** redirecting to detailed results instead of simple notifications
-- **Performance analysis by category** showing specific areas where users struggled
-- **Difficulty-based breakdown** analyzing performance across easy, medium, and hard questions
-- **Personalized study recommendations** based on weak areas and performance patterns
-- **Retake payment integration** allowing users to pay and retake failed exams directly from results page
-- **Complete exam attempt tracking** with detailed analytics and previous attempt history
-- **Payment flow updates** supporting both certificate purchase and exam retake payments
-- **Backend API endpoints** for detailed exam results analysis and retake functionality
-- **Professional results interface** with progress bars, score visualization, and actionable feedback
-
-### Interactive Course Recommendation System with Personalized Learning Paths (June 17, 2025)
-- **Complete learning path system** with structured course sequences and progress tracking
-- **Advanced recommendation engine** analyzing user behavior, preferences, and completion patterns
-- **Skill assessment integration** for personalized learning path suggestions based on competency levels
-- **Learning path controller** with sophisticated algorithms for course recommendations and path matching
-- **Database schema extensions** for learning paths, user enrollments, skill assessments, and progress tracking
-- **Frontend learning paths page** with discovery, enrollment, progress visualization, and recommendation tabs
-- **Navigation integration** making learning paths accessible through the main header navigation
-- **Comprehensive API endpoints** for learning path management, enrollment, and recommendation generation
-- **User preference tracking** for category preferences, learning goals, and notification settings
-- **Smart recommendation algorithms** considering completion history, skill levels, and trending courses
-
-### Production Deployment Documentation and Build System (June 17, 2025)
-- **Comprehensive deployment guide** with DEPLOYMENT.md covering all deployment scenarios
-- **Automated build script** (build.sh) with complete production preparation workflow
-- **Multiple deployment options** including traditional server, Docker, PM2, and cloud platforms
-- **Security hardening** with SSL configuration, environment management, and monitoring setup
-- **Database migration** and backup strategies for production environments
-- **Performance optimization** guidelines with caching, compression, and load balancing
-- **Docker configuration** with multi-stage builds and health checks
-- **PM2 ecosystem** configuration for process management and clustering
-- **Nginx reverse proxy** setup with SSL termination and static file serving
-
-### Certificate Management System Fixes (June 17, 2025)
-- **Prevented duplicate certificates** - only one certificate per user per course allowed
-- **Best score tracking** - users can only purchase certificates for improved scores
-- **Fixed certificate count display** - home page now shows actual certified users instead of 0
-- **Enhanced certificate creation logic** - updates existing certificates with better performance
-- **Resolved checkout flow issues** - proper certificate retrieval and payment processing
-- **Database integrity** - comprehensive certificate validation and duplicate prevention
-
-### Comprehensive Sponsor Support System (June 17, 2025)
-- **Interactive sponsor page** with custom payment amounts and preset options (₹1 to ₹1,000,000)
-- **Team member showcase** featuring Qwegle team information and professional backgrounds
-- **Future roadmap display** highlighting AI-based learning paths, skill improvement, and career guidance
-- **Current features overview** showcasing existing platform capabilities and achievements
-- **Unique value propositions** section explaining Octamy's competitive advantages
-- **PayUMoney payment integration** for secure sponsor payment processing with transaction tracking
-- **Database schema** with sponsors table for donation tracking and payment status management
-- **Navigation integration** with "Sponsors" links in both desktop and mobile headers (removed Business Pricing)
-- **API endpoints** for sponsor creation, payment processing, and transaction status updates
-
-### Click Tracking Analytics and Certificate Display Fixes (June 17, 2025)
-- **Fixed click tracking analytics** - referral link clicks now properly recorded in database
-- **Resolved database schema issues** - added missing conversion_date column for proper tracking
-- **Partner dashboard analytics working** - shows real-time click data with course-wise breakdown
-- **Certificate course names displaying correctly** - API and frontend alignment verified
-- **Referral URL generation and tracking** - complete flow from generation to analytics working
-- **Database column mapping fixed** - storage methods now use correct schema field names
-
-### Enhanced Checkout System with Physical Certificate Shipping (June 17, 2025)
-- **Complete address management system** with CRUD operations for user shipping addresses
-- **Physical certificate shipping option** with ₹50 additional cost for premium paper delivery
-- **Enhanced checkout page** with dual certificate options (digital-only vs digital + physical)
-- **Default address management** with user-friendly address selection interface
-
-### Admin Sponsor and Contact Management System (June 18, 2025)
-- **Sponsor management dashboard** with comprehensive sponsor details including payment amounts, names, emails, and messages
-- **Contact form administration** allowing admins to view and manage all customer support requests and inquiries
-- **Enhanced admin dashboard** with dedicated tabs for sponsors and contact submissions with search functionality
-- **Payment status tracking** for sponsor contributions with transaction ID monitoring
-- **Contact status management** with new, read, and responded status tracking for customer support workflow
-
-### Landing Page Certificate Display Enhancement (June 18, 2025)
-- **Fixed certificate display duplicates** - removed duplicate "Certified in" text appearing twice in certificate cards
-- **Added infinite horizontal auto-scroll** - smooth 30-second loop animation for professional certificate showcase
-- **Limited to latest 10 certificates** - API now returns only the 10 most recent certifications for optimal performance
-- **Blurred out scores for privacy** - certificate scores now display as "••%" to protect user privacy while maintaining professional appearance
-- **Seamless infinite scroll implementation** - duplicated certificate array creates continuous scrolling without visible breaks
-
-### Comprehensive Admin Dashboard with Customer and Course Management (June 17, 2025)
-- **Complete admin authentication system** with secure adminToken-based access control
-- **Customer management interface** showing registration data, purchase history, certificate counts, and spending analytics
-- **Course management system** with enrollment tracking, revenue monitoring, and content administration capabilities
-- **Exam administration panel** displaying all exam attempts, scores, pass/fail status, and detailed student performance
-- **Transaction monitoring** with comprehensive payment tracking, status updates, and financial reporting
-- **Partner management system** with approval workflows, earnings tracking, and referral analytics
-- **Admin overview dashboard** with key metrics, recent activity feeds, and platform performance indicators
-- **Six-tab organized interface** providing complete platform control and monitoring capabilities
-- **Database schema extensions** for shipping addresses, payment amounts, and physical copy tracking
-- **API endpoints** for comprehensive address management and shipping cost calculation
-- **Updated course detail flow** directing users through enhanced checkout instead of direct exam access
-- **Seamless integration** with existing payment gateway supporting physical certificate orders
-
-### Complete MVC Architecture Refactoring (June 17, 2025)
-- **Full MVC structure implementation** with separated controllers, middleware, and routes
-- **Modular controller architecture** with AuthController, CourseController, ExamController, CertificateController, and PaymentController
-- **Authentication middleware** with proper JWT token validation and user context
-- **Database-first approach** removing all dummy JSON data in favor of admin-manageable database content
-- **Comprehensive storage interface** with all required methods for database operations
-- **Professional certificate generator** with HTML-based PDF generation and premium styling
-- **Clean separation of concerns** for better maintainability and scalability
-- **Fixed exam submission 401 Unauthorized error** by resolving routing conflicts between MVC and legacy routes
-- **Optional authentication support** for anonymous exam submissions working correctly
-
-### Seller/Partner System Implementation (June 16, 2025)
-- **Complete seller authentication system** with separate registration/login
-- **10% commission tracking** on all course sales with referral code system
-- **Real-time analytics dashboard** showing earnings, sales, and withdrawal history
-- **UPI and bank account withdrawal** system with admin approval workflow
-- **Admin seller management** for approval/rejection of partner accounts
-- **Commission calculation and tracking** with pending/paid status management
-
-### Complete React Native Mobile App - All Phases (June 18, 2025)
-- **Phase 1-4 Complete** - production-ready React Native app with Expo managed workflow
-- **Full exam system** - timed exams with question navigation, auto-submit, and detailed results
-- **Certificate management** - professional certificate viewer with sharing and verification
-- **Course browsing** - search, filter by categories, and detailed course information
-- **Complete navigation** - stack and tab navigation between all screens and features
-- **Push notifications** - exam reminders, certificate alerts, and notification channels
-- **Offline capabilities** - data caching, synchronization, and network status detection
-- **Professional UI** - black/white theme with polished mobile-optimized interface
-- **Production deployment ready** - comprehensive build and testing documentation provided
-
-### React Native Mobile App Critical Fixes (June 19, 2025)
-- **Fixed ExamScreen crash** - resolved "Cannot read property 'map' of undefined" error with proper null checking
-- **Enhanced error handling** - added comprehensive loading states, error messages, and retry functionality
-- **API endpoint alignment** - fixed authentication endpoints to match web server structure (/api/login vs /api/auth/login)
-- **Improved Redux store** - enhanced fetchExamQuestions thunk with proper error handling and response format support
-- **Added error UI components** - retry buttons, error messages, and loading indicators throughout the app
-- **Enhanced exam initialization** - proper timer setup (60 minutes) and question array handling
-- **Mobile app stability** - comprehensive null checking and defensive programming throughout ExamScreen component
-
-### Authentication System Fixes and Certificate Dashboard Restoration (June 18, 2025)
-- **Fixed user registration and login system** - resolved JWT authentication conflicts and endpoint routing issues
-- **Added dual endpoint support** - both `/api/login` and `/api/auth/login` routes working for Replit and local development
-- **Certificate dashboard restoration** - user certificates now properly displaying in dashboard after authentication fixes
-- **JWT token validation fixed** - improved error handling and token verification middleware
-- **Database certificate creation** - added complete test certificates for user verification and dashboard testing
-- **Endpoint compatibility** - registration endpoints `/api/register` and `/api/auth/register` both functional
-
-### Git Merge Conflict Resolution and System Stability (June 18, 2025)
-- **Resolved critical Git merge conflicts** - completely fixed all merge conflict markers in verify.tsx preventing repository operations
-- **Certificate verification system restored** - verification page now properly handles both nested and flat API response structures
-- **Application stability maintained** - workflow successfully restarted and running on port 5000 after conflict resolution
-- **Data structure compatibility** - certificate display works with certificate.certificate.* and direct certificate.* properties
-- **Repository pull operations enabled** - Git conflicts no longer blocking development workflow updates
-
-### Complete Payment System Restoration (June 18, 2025)
-- **Fixed critical payment processing failure** - resolved all payment initiation errors from database schema mismatches
-- **Corrected database schema conflicts** - removed non-existent gatewayResponse column references causing 500 errors
-- **Fixed exam data reconstruction** - payment system now works even when temporary exam data expires
-- **Commission calculation accuracy** - commission now based on actual payment amount, not course price (₹1.00 → ₹0.10)
-- **PayUMoney integration fully restored** - complete payment form generation with proper hash validation and security headers
-- **Payment flow end-to-end working** - from exam completion through PayUMoney gateway to certificate activation
-- **Database consistency maintained** - all payment records properly created without column errors
-
-### Certificate View Page with Iframe Integration (June 18, 2025)
-- **Rebuilt certificate view page with iframe approach** - displays `/api/certificates/<id>/download` directly in iframe for authentic viewing
-- **Professional authentication design** - hero section with Octamy Solutions branding and verification status badges
-- **Comprehensive certificate sidebar** - detailed information including recipient, course, scores, verification status, and authenticity checks
-- **Enhanced download functionality** - PDF downloads with proper filename format and error handling using Puppeteer backend
-- **Improved print system** - direct iframe printing with fallback to new window approach for landscape PDF printing
-- **Smart share functionality** - formatted share text with achievement details, scores, and verification URL with proper error handling
-- **Fixed share cancellation handling** - graceful error handling for user-canceled shares without showing error messages
-- **Security overlay system** - visual blocking for unpaid/expired certificates while maintaining verification information
-- **Blockchain verification branding** - authenticity indicators showing ISO certification, digital signatures, and global recognition
-- **Octamy logo integration** - using image_1750054456482.png from assets folder in professional header design
-- **Mobile-responsive layout** - grid system with sidebar information and centered certificate display
-- **Status-based interactions** - buttons disabled for invalid certificates with clear user feedback
-- **Professional certificate presentation** - authentic appearance verified by Octamy Solutions Private Limited
-
-### Seller Authentication and Sharing URLs Fixed (June 18, 2025)
-- **Fixed seller authentication system** - resolved automatic logout issues and Vite middleware conflicts
-- **Corrected API route mappings** - aligned frontend/backend endpoints for proper functionality
-- **Fixed sharing URL generation** - resolved route mismatch between `/generate-referral` and `/generate-referral-url`
-- **Updated parameter handling** - controller now accepts both `{type, itemId}` and `{courseId}` formats
-- **Seller dashboard fully functional** - registration, login, analytics, and URL generation working correctly
-- **Data structure alignment** - fixed frontend/backend field mapping for sales commission display
-- **Fixed null referral codes** - updated seller records with proper referral codes and authentication credentials
-- **Resolved route conflicts** - removed duplicate seller route registrations to prevent HTML/JSON response conflicts
-- **Commission tracking system restored** - fixed referral click tracking API endpoint and commission calculation logic
-- **Conversion tracking implemented** - referral clicks now properly convert to sales when payments are completed
-- **Analytics dashboard functional** - seller dashboard showing real-time click data and commission tracking
-- **Partner login credentials fixed** - updated partner@octamy.com password hash to work with "password"
-
-### Black and White Cred-Style Branding (June 16, 2025)
-- **Complete UI redesign** with black and white Cred-inspired aesthetic
-- **Bold typography** with high contrast design elements
-- **Minimalist interface** focusing on functionality and professionalism
-- **Updated landing page** with partner program integration
-- **Consistent branding** across all pages and components
-
-### PayUMoney Payment Gateway Integration (June 16, 2025)
-- **Complete PayUMoney integration** with secure hash generation and verification
-- **Payment initiation API** with proper form generation for PayUMoney gateway
-- **Success and failure callback handling** with automatic certificate generation
-- **Commission tracking integration** with seller referral codes during payment
-- **Payment status verification** and transaction tracking system
-- **Secure payment forms** with 256-bit SSL encryption and fraud protection
-
-### Database Schema Extensions
-- **Sellers table** with approval status, earnings tracking, and payment details
-- **Sales table** for commission tracking with referral codes
-- **Withdrawal requests table** with UPI/bank account support and admin processing
-- **Payment tracking** with PayUMoney transaction IDs and gateway responses
-- **Smart notifications tables** for user preferences, notifications, course recommendations, and activity tracking
-- **Complete relations** between users, sellers, sales, withdrawals, payments, and smart notification system
-
-## Local Development Support
-
-### README Documentation
-- **Comprehensive setup guide** for Windows and Mac development environments
-- **Environment configuration** with detailed .env file examples
-- **Common issues solutions** including dotenv and import.meta.url fixes
-- **Database setup instructions** with PostgreSQL configuration
-- **API documentation** with all endpoint specifications
-- **Deployment guidelines** for production environments
-
-### Development Configuration Fixes
-- **Local vite.config.ts** compatibility for import.meta.url issues
-- **Environment variable loading** with proper dotenv configuration
-- **Database connection** setup for local PostgreSQL instances
-- **Port management** solutions for development conflicts
-
-## Local Development Documentation (June 18, 2025)
-- **Complete local setup guide** with platform-specific instructions for Windows, macOS, and Linux environments
-- **Comprehensive troubleshooting section** covering common issues like port conflicts, database connections, and import.meta.url errors
-- **Environment configuration template** with all required variables and secure defaults for development
-- **Quick start guide** for 5-minute setup with essential commands and verification checklist
-- **Complete API reference documentation** with all endpoints, request/response examples, and authentication details
-- **Phase 5 advanced features documentation** covering analytics, security, performance optimization, and enterprise features
-- **Mobile app integration guide** with local API configuration and testing instructions
-- **Production deployment guidance** with environment variables, security configurations, and monitoring setup
-- **Developer workflow documentation** with Git workflow, database changes, and code quality standards
-- **API testing examples** with curl commands, JavaScript implementations, and React Hook patterns
-
-## Changelog
-
-```
-Changelog:
-- June 17, 2025: Implemented comprehensive exam results system with detailed failure feedback, category analysis, and retake payment integration
-- June 17, 2025: Enhanced certificate design with signature integration and professional styling using Poppins font family
-- June 17, 2025: Updated both frontend and server-side certificate generators with authentic Nitikesh Pattanayak signature
-- June 17, 2025: Applied specific styling requirements including #1f2138 color scheme, bordered course names, and 70px footer margins
-- June 17, 2025: Positioned badge text at 68% and sized certification logos to 55px height for optimal presentation
-- June 17, 2025: Created comprehensive sponsor support system with interactive payment page, team showcase, and PayUMoney integration
-- June 17, 2025: Added sponsor page to navigation with "Support Us" links in desktop and mobile headers
-- June 17, 2025: Built sponsors database table with payment tracking and transaction status management
-- June 17, 2025: Implemented comprehensive exam scoring logic with developer-friendly comments throughout codebase
-- June 17, 2025: Added improved exam passing rules: First-time users need ≥50%, retakers need higher than previous best
-- June 17, 2025: Created getExamAttemptsByUserAndCourse storage method for retake logic validation
-- June 17, 2025: Enhanced exam submission response with detailed retake information and helpful user messages  
-- June 17, 2025: Updated certificate creation logic to only generate certificates for actual passing attempts
-- June 17, 2025: Added comprehensive developer comments to dashboard, storage, and routes for code maintainability
-- June 17, 2025: Fixed critical seller authentication infinite redirect loop between /seller-auth and /partner-dashboard
-- June 17, 2025: Fixed payment loading issue - certificates now created automatically after passing exams
-- June 17, 2025: Added seller-auth route (/seller-auth) for proper partner authentication access
-- June 17, 2025: Created learning_paths and user_learning_paths database tables for learning path functionality
-- June 17, 2025: Removed playful mascot character system as requested - not well defined
-- June 17, 2025: Fixed critical dashboard validCertificates error by using correct variable name
-- June 17, 2025: Simplified exam success flow to prevent premature certificate creation
-- June 17, 2025: Proper exam → checkout redirect only when exam is passed
-- June 17, 2025: Complete MVC architecture refactoring with modular controllers, middleware, and database-first approach
-- June 17, 2025: Implemented AuthController, CourseController, ExamController, CertificateController, and PaymentController
-- June 17, 2025: Added comprehensive authentication middleware with JWT token validation
-- June 17, 2025: Created professional certificate generator with HTML-based PDF generation
-- June 17, 2025: Removed all dummy JSON data in favor of admin-manageable database content
-- June 17, 2025: Added comprehensive README documentation with setup instructions and API documentation
-- June 16, 2025: Added comprehensive README with Windows/Mac setup instructions and local development fixes
-- June 16, 2025: Documented solutions for common development issues including dotenv and import.meta.url problems
-- June 16, 2025: Interactive course progress visualization with animated achievement unlocks fully implemented
-- June 16, 2025: Authentication integration with proper error handling and progress page routing completed
-- June 16, 2025: Redesigned certificates with premium professional styling featuring Playfair Display and Inter fonts
-- June 16, 2025: Added ornate corners, sophisticated black borders, and luxury typography to certificates
-- June 16, 2025: Enhanced certificate branding with proper Octamy Solutions company information
-- June 16, 2025: Synchronized certificate preview and download versions with identical premium styling
-- June 16, 2025: Implemented professional certificate layout matching high-end certification standards
-- June 16, 2025: Fixed certificate download functionality with HTML-based solution and print-to-PDF capability
-- June 16, 2025: Resolved ES module compatibility issues in PDF generation endpoint
-- June 16, 2025: Updated both certificate page and dashboard download handlers to work with new HTML format
-- June 16, 2025: Enhanced payment security with SSL enforcement and comprehensive security headers
-- June 16, 2025: Fixed certificate delivery after successful payment with proper success callback
-- June 16, 2025: Added payment success/failure pages with proper certificate access
-- June 16, 2025: Implemented hack-proof checkout process with HTTPS redirection and anti-fraud measures
-- June 16, 2025: Enhanced PayUMoney form with security headers and encrypted form submission
-- June 16, 2025: Fixed SmartNotifications runtime error with proper null checks and data structure handling
-- June 16, 2025: Fixed authentication token handling for Generate Recommendations feature
-- June 16, 2025: Resolved localStorage key mismatch between authToken and token in API client
-- June 16, 2025: Smart notifications and recommendations system now fully functional
-- June 16, 2025: Updated PayUMoney to production environment with live credentials
-- June 16, 2025: Fixed critical exam submission and certificate creation bugs
-- June 16, 2025: Resolved pricing discrepancy from ₹199 to ₹99 in payment flow
-- June 16, 2025: Added courseId field to certificate schema and updated database
-- June 16, 2025: Fixed answers array format handling in exam submission API
-- June 16, 2025: Implemented smart notifications system with personalized course recommendations
-- June 16, 2025: Added user preferences management for learning goals and notification settings
-- June 16, 2025: Created intelligent recommendation engine based on user activity and interests
-- June 16, 2025: Integrated real-time notifications with activity tracking
-- June 16, 2025: Integrated PayUMoney payment gateway with secure hash verification and commission tracking
-- June 16, 2025: Implemented comprehensive seller/partner system with 10% commission tracking
-- June 16, 2025: Applied black and white Cred-style branding across entire platform
-- June 16, 2025: Added real-time analytics dashboard for partners
-- June 16, 2025: Integrated UPI and bank withdrawal system with admin approval
-- June 16, 2025: Initial setup and comprehensive course catalog implementation
-```
-
-## User Preferences
-
-```
-Preferred communication style: Simple, everyday language.
-Branding preference: Black and white Cred-style design with minimalist aesthetic.
-```
+## User Credentials (Testing)
+- **Main Platform**: `nitikeshpro@gmail.com` / `nitikesh123`
+- **Admin**: `admin@octamy.com` / `admin123`
+- **Recruiter Portal**: New registrations via `/recruiter/auth`

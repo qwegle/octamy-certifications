@@ -18,6 +18,10 @@ import {
   contactSubmissions,
   interviews,
   interviewQuestions,
+  recruiters,
+  creditTransactions,
+  profileAccessLogs,
+  savedSearches,
   type User, 
   type InsertUser,
   type UserAddress,
@@ -2506,6 +2510,278 @@ export class DatabaseStorage implements IStorage {
         revenue: Number(monthlyStats.monthlyRevenue) || 0,
         exams: Number(monthlyStats.monthlyExams) || 0
       }
+    };
+  }
+
+  // Recruiter Management Methods
+  async getRecruiterByEmail(email: string) {
+    const [recruiter] = await db.select().from(recruiters).where(eq(recruiters.email, email));
+    return recruiter || undefined;
+  }
+
+  async getRecruiterById(id: number) {
+    const [recruiter] = await db.select().from(recruiters).where(eq(recruiters.id, id));
+    return recruiter || undefined;
+  }
+
+  async createRecruiter(data: any) {
+    const [recruiter] = await db.insert(recruiters).values(data).returning();
+    return recruiter;
+  }
+
+  async updateRecruiterLastLogin(id: number) {
+    await db.update(recruiters)
+      .set({ lastLoginAt: new Date() })
+      .where(eq(recruiters.id, id));
+  }
+
+  async updateRecruiterStep1(data: any) {
+    await db.update(recruiters)
+      .set({
+        firstName: data.firstName,
+        lastName: data.lastName,
+        phone: data.phone,
+        designation: data.designation,
+        linkedinProfile: data.linkedinProfile,
+        registrationStep: data.registrationStep,
+        updatedAt: new Date()
+      })
+      .where(eq(recruiters.id, data.id));
+  }
+
+  async updateRecruiterStep2(data: any) {
+    await db.update(recruiters)
+      .set({
+        companyName: data.companyName,
+        companyWebsite: data.companyWebsite,
+        companySize: data.companySize,
+        industry: data.industry,
+        companyAddress: data.companyAddress,
+        companyCity: data.companyCity,
+        companyState: data.companyState,
+        companyCountry: data.companyCountry,
+        registrationStep: data.registrationStep,
+        updatedAt: new Date()
+      })
+      .where(eq(recruiters.id, data.id));
+  }
+
+  async updateRecruiterStep3(data: any) {
+    await db.update(recruiters)
+      .set({
+        gstNumber: data.gstNumber,
+        panNumber: data.panNumber,
+        companyRegistrationNumber: data.companyRegistrationNumber,
+        gstCertificate: data.gstCertificate,
+        panCard: data.panCard,
+        companyRegistrationCertificate: data.companyRegistrationCertificate,
+        registrationStep: data.registrationStep,
+        kycStatus: data.kycStatus,
+        updatedAt: new Date()
+      })
+      .where(eq(recruiters.id, data.id));
+  }
+
+  async getRecruiterDashboardData(recruiterId: number) {
+    const profileViews = await db.select({ count: sql`count(*)` })
+      .from(profileAccessLogs)
+      .where(and(
+        eq(profileAccessLogs.recruiterId, recruiterId),
+        eq(profileAccessLogs.accessType, 'profile_view')
+      ));
+
+    const cvDownloads = await db.select({ count: sql`count(*)` })
+      .from(profileAccessLogs)
+      .where(and(
+        eq(profileAccessLogs.recruiterId, recruiterId),
+        eq(profileAccessLogs.accessType, 'cv_download')
+      ));
+
+    const interviewAccess = await db.select({ count: sql`count(*)` })
+      .from(profileAccessLogs)
+      .where(and(
+        eq(profileAccessLogs.recruiterId, recruiterId),
+        eq(profileAccessLogs.accessType, 'interview_access')
+      ));
+
+    const recentActivity = await db.select({
+      id: profileAccessLogs.id,
+      type: profileAccessLogs.accessType,
+      userName: users.name,
+      creditsUsed: profileAccessLogs.creditsUsed,
+      createdAt: profileAccessLogs.createdAt
+    })
+    .from(profileAccessLogs)
+    .leftJoin(users, eq(profileAccessLogs.userId, users.id))
+    .where(eq(profileAccessLogs.recruiterId, recruiterId))
+    .orderBy(desc(profileAccessLogs.createdAt))
+    .limit(10);
+
+    return {
+      profileViews: profileViews[0]?.count || 0,
+      cvDownloads: cvDownloads[0]?.count || 0,
+      interviewAccess: interviewAccess[0]?.count || 0,
+      recentActivity
+    };
+  }
+
+  async searchCandidates(filters: any, page: number, limit: number) {
+    let query = db.select({
+      id: users.id,
+      name: users.name,
+      email: users.email,
+      location: users.location,
+      experience: users.experience,
+      currentRole: users.currentRole,
+      skills: users.skills,
+      lastActive: users.updatedAt
+    }).from(users);
+
+    const conditions = [];
+    
+    if (filters.location) {
+      conditions.push(ilike(users.location, `%${filters.location}%`));
+    }
+
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
+    }
+
+    const offset = (page - 1) * limit;
+    const candidates = await query.limit(limit).offset(offset);
+
+    const candidatesWithDetails = await Promise.all(
+      candidates.map(async (candidate) => {
+        const certs = await db.select({
+          id: certificates.id,
+          courseTitle: certificates.courseTitle,
+          score: certificates.score,
+          badge: certificates.badge
+        })
+        .from(certificates)
+        .where(eq(certificates.userId, candidate.id))
+        .limit(3);
+
+        const userInterviews = await db.select({
+          id: interviews.id,
+          technology: interviews.technology,
+          score: interviews.score,
+          grade: interviews.grade
+        })
+        .from(interviews)
+        .where(eq(interviews.userId, candidate.id))
+        .limit(3);
+
+        return {
+          ...candidate,
+          certificates: certs,
+          interviews: userInterviews,
+          profileViews: 0
+        };
+      })
+    );
+
+    const totalResult = await db.select({ count: sql`count(*)` }).from(users);
+    const total = Number(totalResult[0]?.count) || 0;
+
+    return {
+      candidates: candidatesWithDetails,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit)
+    };
+  }
+
+  async processProfileAccess(recruiterId: number, candidateId: number, accessType: string, creditsRequired: number) {
+    const recruiter = await this.getRecruiterById(recruiterId);
+    if (!recruiter) throw new Error('Recruiter not found');
+
+    const currentBalance = parseFloat(recruiter.creditsBalance);
+    const newBalance = currentBalance - creditsRequired;
+
+    await db.update(recruiters)
+      .set({ 
+        creditsBalance: newBalance.toFixed(2),
+        updatedAt: new Date()
+      })
+      .where(eq(recruiters.id, recruiterId));
+
+    await db.insert(creditTransactions).values({
+      recruiterId,
+      type: 'spend',
+      amount: creditsRequired.toString(),
+      description: `${accessType} access for candidate`,
+      relatedUserId: candidateId,
+      relatedAction: accessType,
+      balanceAfter: newBalance.toFixed(2)
+    });
+
+    await db.insert(profileAccessLogs).values({
+      recruiterId,
+      userId: candidateId,
+      accessType,
+      creditsUsed: creditsRequired.toString()
+    });
+
+    let responseData: any = {
+      creditsUsed: creditsRequired,
+      remainingCredits: newBalance.toFixed(2)
+    };
+
+    if (accessType === 'cv_download') {
+      responseData.cvUrl = `/api/recruiter/download-cv/${candidateId}`;
+    } else if (accessType === 'interview_access') {
+      const interviewData = await db.select()
+        .from(interviews)
+        .where(eq(interviews.userId, candidateId));
+      responseData.interviewData = interviewData;
+    }
+
+    return responseData;
+  }
+
+  async getRecruiterWallet(recruiterId: number) {
+    const recruiter = await this.getRecruiterById(recruiterId);
+    if (!recruiter) throw new Error('Recruiter not found');
+
+    const transactions = await db.select()
+      .from(creditTransactions)
+      .where(eq(creditTransactions.recruiterId, recruiterId))
+      .orderBy(desc(creditTransactions.createdAt))
+      .limit(20);
+
+    return {
+      balance: recruiter.creditsBalance,
+      transactions
+    };
+  }
+
+  async purchaseCredits(recruiterId: number, amount: number, paymentId: string) {
+    const recruiter = await this.getRecruiterById(recruiterId);
+    if (!recruiter) throw new Error('Recruiter not found');
+
+    const currentBalance = parseFloat(recruiter.creditsBalance);
+    const newBalance = currentBalance + amount;
+
+    await db.update(recruiters)
+      .set({ 
+        creditsBalance: newBalance.toFixed(2),
+        updatedAt: new Date()
+      })
+      .where(eq(recruiters.id, recruiterId));
+
+    await db.insert(creditTransactions).values({
+      recruiterId,
+      type: 'purchase',
+      amount: amount.toString(),
+      description: `Credit purchase - Payment ID: ${paymentId}`,
+      balanceAfter: newBalance.toFixed(2)
+    });
+
+    return {
+      success: true,
+      newBalance: newBalance.toFixed(2),
+      creditsAdded: amount
     };
   }
 }

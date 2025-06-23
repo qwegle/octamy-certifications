@@ -48,6 +48,16 @@ import TempExamResults from "@/pages/TempExamResults";
 import PaymentTemp from "@/pages/PaymentTemp";
 import Contact from "@/pages/contact";
 
+// Recruiter Portal Components
+import { 
+  RecruiterAuthProvider,
+  RecruiterAuth,
+  RecruiterOnboarding,
+  RecruiterDashboard,
+  CandidateSearch,
+  RecruiterWallet
+} from "../../recruiter";
+
 function Router() {
   return (
     <Switch>
@@ -100,6 +110,14 @@ function Router() {
       <Route path="/interviews/:id" component={InterviewSession} />
       <Route path="/interview-results/:id" component={InterviewSession} />
       <Route path="/interviews/:id/payment" component={InterviewPayment} />
+      
+      {/* Recruiter Portal Routes */}
+      <Route path="/recruiter/auth" component={RecruiterAuth} />
+      <Route path="/recruiter/onboarding" component={RecruiterOnboarding} />
+      <Route path="/recruiter/dashboard" component={RecruiterDashboard} />
+      <Route path="/recruiter/search" component={CandidateSearch} />
+      <Route path="/recruiter/wallet" component={RecruiterWallet} />
+      
       <Route component={NotFound} />
     </Switch>
   );
@@ -110,10 +128,12 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <SellerAuthProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Router />
-          </TooltipProvider>
+          <RecruiterAuthProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Router />
+            </TooltipProvider>
+          </RecruiterAuthProvider>
         </SellerAuthProvider>
       </AuthProvider>
     </QueryClientProvider>
