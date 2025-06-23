@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
-import { apiRequest } from '@/lib/queryClient';
 import { storage } from '../storage';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
