@@ -16,6 +16,7 @@ import { EnhancedQuestionsManagement } from "@/components/enhanced-questions-man
 import { EnhancedAIQuestionsManagement } from "@/components/enhanced-ai-questions-management";
 import { EnhancedContactSubmissionsManagement } from "@/components/enhanced-contact-submissions-management";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/lib/auth.tsx";
 
 function EnhancedAdminDashboard() {
   const [analytics, setAnalytics] = useState<any>(null);
@@ -49,8 +50,10 @@ function EnhancedAdminDashboard() {
   const [expandedTransactions, setExpandedTransactions] = useState<Set<number>>(new Set());
   const [transactionDetails, setTransactionDetails] = useState<Record<number, any>>({});
   const { toast } = useToast();
+  const { logout } = useAuth();
 
   const handleLogout = () => {
+    logout();
     localStorage.removeItem('adminToken');
     window.location.href = '/admin/login';
   };
