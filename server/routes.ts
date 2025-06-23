@@ -493,6 +493,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/login", loginHandler);
   app.post("/api/auth/login", loginHandler);
+  
+  // Logout route
+  app.post("/api/logout", (req: Request, res: Response) => {
+    res.json({ message: "Logout successful" });
+  });
 
   app.get("/api/user", authenticateToken, async (req: AuthenticatedRequest, res) => {
     try {
