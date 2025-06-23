@@ -94,16 +94,19 @@ export default function Auth() {
     try {
       if (isLogin) {
         await login(formData.email, formData.password);
+        toast({
+          title: "Login Successful",
+          description: "Welcome back! Redirecting to dashboard...",
+        });
+        setTimeout(() => setLocation('/dashboard'), 1000);
       } else {
         await register(formData.email, formData.password, formData.name);
+        toast({
+          title: "Registration Successful",
+          description: "Account created! Redirecting to dashboard...",
+        });
+        setTimeout(() => setLocation('/dashboard'), 1000);
       }
-      
-      toast({
-        title: "Success!",
-        description: isLogin ? "Welcome back!" : "Account created successfully!",
-      });
-      
-      setLocation('/dashboard');
     } catch (error) {
       toast({
         title: "Error",
