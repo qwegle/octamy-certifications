@@ -499,30 +499,32 @@ export default function CandidateSearch() {
                       <div className="flex flex-col space-y-2 ml-6">
                         <Button
                           size="sm"
-                          variant="outline"
+                          className="bg-black text-white hover:bg-gray-800 flex items-center space-x-1"
                           onClick={() => handleAccessProfile(candidate.id, 'view')}
-                          className="flex items-center space-x-1"
                         >
                           <Eye className="h-4 w-4" />
-                          <span>View (1 credit)</span>
+                          <span>View Profile</span>
+                          <Badge variant="secondary" className="ml-2 text-xs">1</Badge>
                         </Button>
                         <Button
                           size="sm"
                           variant="outline"
+                          className="border-black text-black hover:bg-black hover:text-white flex items-center space-x-1"
                           onClick={() => handleAccessProfile(candidate.id, 'cv')}
-                          className="flex items-center space-x-1"
                         >
                           <Download className="h-4 w-4" />
-                          <span>CV (1 credit)</span>
+                          <span>Download CV</span>
+                          <Badge variant="secondary" className="ml-2 text-xs">1</Badge>
                         </Button>
                         <Button
                           size="sm"
                           variant="outline"
+                          className="border-gray-600 text-gray-600 hover:bg-gray-600 hover:text-white flex items-center space-x-1"
                           onClick={() => handleAccessProfile(candidate.id, 'interview')}
-                          className="flex items-center space-x-1"
                         >
                           <FileText className="h-4 w-4" />
-                          <span>Interviews (2 credits)</span>
+                          <span>AI Interviews</span>
+                          <Badge variant="secondary" className="ml-2 text-xs">2</Badge>
                         </Button>
                       </div>
                     </div>

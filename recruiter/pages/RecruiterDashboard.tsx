@@ -63,15 +63,20 @@ export default function RecruiterDashboard() {
     switch (recruiter.kycStatus) {
       case 'pending':
         return (
-          <Card className="border-yellow-200 bg-yellow-50">
+          <Card className="border-l-4 border-yellow-500 bg-gradient-to-r from-yellow-50 to-orange-50">
             <CardContent className="p-6">
-              <div className="flex items-center space-x-3">
-                <Clock className="h-8 w-8 text-yellow-600" />
-                <div>
-                  <h3 className="font-semibold text-yellow-800">KYC Verification Pending</h3>
-                  <p className="text-yellow-700 text-sm">
-                    Complete your profile setup to start accessing candidate profiles.
+              <div className="flex items-center space-x-4">
+                <div className="bg-yellow-100 p-3 rounded-full">
+                  <Clock className="h-8 w-8 text-yellow-600" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-bold text-yellow-800 text-lg">Verification In Progress</h3>
+                  <p className="text-yellow-700 text-sm mt-1">
+                    Complete your profile setup to unlock premium recruitment features.
                   </p>
+                  <Button className="mt-3 bg-yellow-600 hover:bg-yellow-700 text-white" size="sm">
+                    Complete Setup
+                  </Button>
                 </div>
               </div>
             </CardContent>
@@ -79,14 +84,16 @@ export default function RecruiterDashboard() {
         );
       case 'under_review':
         return (
-          <Card className="border-blue-200 bg-blue-50">
+          <Card className="border-l-4 border-blue-500 bg-gradient-to-r from-blue-50 to-indigo-50">
             <CardContent className="p-6">
-              <div className="flex items-center space-x-3">
-                <AlertCircle className="h-8 w-8 text-blue-600" />
-                <div>
-                  <h3 className="font-semibold text-blue-800">KYC Under Review</h3>
-                  <p className="text-blue-700 text-sm">
-                    Your documents are being reviewed. This usually takes 1-2 business days.
+              <div className="flex items-center space-x-4">
+                <div className="bg-blue-100 p-3 rounded-full">
+                  <AlertCircle className="h-8 w-8 text-blue-600" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-bold text-blue-800 text-lg">Under Review</h3>
+                  <p className="text-blue-700 text-sm mt-1">
+                    Our team is reviewing your documents. You'll be notified within 24-48 hours.
                   </p>
                 </div>
               </div>
@@ -95,16 +102,18 @@ export default function RecruiterDashboard() {
         );
       case 'rejected':
         return (
-          <Card className="border-red-200 bg-red-50">
+          <Card className="border-l-4 border-red-500 bg-gradient-to-r from-red-50 to-pink-50">
             <CardContent className="p-6">
-              <div className="flex items-center space-x-3">
-                <AlertCircle className="h-8 w-8 text-red-600" />
-                <div>
-                  <h3 className="font-semibold text-red-800">KYC Verification Failed</h3>
-                  <p className="text-red-700 text-sm">
-                    Please resubmit your documents or contact support for assistance.
+              <div className="flex items-center space-x-4">
+                <div className="bg-red-100 p-3 rounded-full">
+                  <AlertCircle className="h-8 w-8 text-red-600" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-bold text-red-800 text-lg">Verification Failed</h3>
+                  <p className="text-red-700 text-sm mt-1">
+                    Please resubmit your documents or contact our support team.
                   </p>
-                  <Button className="mt-2" size="sm">
+                  <Button className="mt-3 bg-red-600 hover:bg-red-700 text-white" size="sm">
                     Resubmit Documents
                   </Button>
                 </div>
@@ -114,14 +123,16 @@ export default function RecruiterDashboard() {
         );
       case 'approved':
         return (
-          <Card className="border-green-200 bg-green-50">
+          <Card className="border-l-4 border-green-500 bg-gradient-to-r from-green-50 to-emerald-50">
             <CardContent className="p-6">
-              <div className="flex items-center space-x-3">
-                <CheckCircle className="h-8 w-8 text-green-600" />
-                <div>
-                  <h3 className="font-semibold text-green-800">KYC Verified</h3>
-                  <p className="text-green-700 text-sm">
-                    Your account is verified. You can now access all candidate profiles.
+              <div className="flex items-center space-x-4">
+                <div className="bg-green-100 p-3 rounded-full">
+                  <CheckCircle className="h-8 w-8 text-green-600" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-bold text-green-800 text-lg">✓ Fully Verified</h3>
+                  <p className="text-green-700 text-sm mt-1">
+                    Welcome to Octamy AI Recruiter! You now have full access to our talent network.
                   </p>
                 </div>
               </div>

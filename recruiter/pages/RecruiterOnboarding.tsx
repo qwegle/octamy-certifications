@@ -373,10 +373,16 @@ export default function RecruiterOnboarding() {
 
   const renderStep3 = () => (
     <div className="space-y-6">
-      <div className="bg-blue-50 p-4 rounded-lg">
-        <p className="text-sm text-blue-800">
-          Upload your company documents for KYC verification. These documents help us verify your company's legitimacy.
-        </p>
+      <div className="bg-gray-100 p-6 rounded-lg border-l-4 border-black">
+        <div className="flex items-start space-x-3">
+          <Shield className="h-6 w-6 text-black mt-1" />
+          <div>
+            <h4 className="font-semibold text-black mb-2">Secure Business Verification</h4>
+            <p className="text-sm text-gray-700">
+              Upload your company documents for KYC verification. This ensures platform security and builds trust with candidates.
+            </p>
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-6">
@@ -451,15 +457,18 @@ export default function RecruiterOnboarding() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8" style={{ fontFamily: 'Poppins, sans-serif' }}>
-      <div className="max-w-4xl mx-auto px-4">
+    <div className="min-h-screen bg-black text-white py-8" style={{ fontFamily: 'Poppins, sans-serif' }}>
+      <div className="max-w-5xl mx-auto px-4">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Complete Your Profile</h1>
-          <p className="text-gray-600">We need some information to set up your recruiter account</p>
+          <div className="flex items-center justify-center space-x-2 mb-4">
+            <Building2 className="h-8 w-8 text-white" />
+            <h1 className="text-3xl font-bold text-white">Welcome to Octamy AI Recruiter</h1>
+          </div>
+          <p className="text-gray-300 text-lg">Let's set up your premium recruitment experience</p>
         </div>
 
         {/* Progress Steps */}
-        <div className="flex items-center justify-center mb-8">
+        <div className="flex items-center justify-center mb-12">
           {steps.map((step, index) => {
             const Icon = step.icon;
             const isActive = currentStep === step.number;
@@ -467,16 +476,24 @@ export default function RecruiterOnboarding() {
             
             return (
               <div key={step.number} className="flex items-center">
-                <div className={`flex items-center space-x-2 px-4 py-2 rounded-lg ${
-                  isActive ? 'bg-blue-100 text-blue-700' : 
-                  isCompleted ? 'bg-green-100 text-green-700' : 
-                  'bg-gray-100 text-gray-500'
+                <div className={`flex items-center space-x-3 px-6 py-3 rounded-full border-2 transition-all ${
+                  isActive ? 'bg-white text-black border-white' : 
+                  isCompleted ? 'bg-gray-800 text-white border-gray-600' : 
+                  'bg-transparent text-gray-400 border-gray-600'
                 }`}>
-                  <Icon className="h-5 w-5" />
-                  <span className="font-medium">{step.title}</span>
+                  <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
+                    isActive ? 'bg-black text-white' : 
+                    isCompleted ? 'bg-white text-black' : 
+                    'bg-gray-700 text-gray-400'
+                  }`}>
+                    {isCompleted ? <CheckCircle className="h-5 w-5" /> : <Icon className="h-4 w-4" />}
+                  </div>
+                  <span className="font-medium text-sm">{step.title}</span>
                 </div>
                 {index < steps.length - 1 && (
-                  <ArrowRight className="h-4 w-4 text-gray-400 mx-2" />
+                  <div className={`h-0.5 w-16 mx-4 ${
+                    isCompleted ? 'bg-white' : 'bg-gray-600'
+                  }`} />
                 )}
               </div>
             );
@@ -484,21 +501,26 @@ export default function RecruiterOnboarding() {
         </div>
 
         {/* Form Card */}
-        <Card className="shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-xl">
-              Step {currentStep}: {steps[currentStep - 1]?.title}
+        <Card className="bg-white text-black shadow-2xl border-0">
+          <CardHeader className="bg-gray-50 border-b">
+            <CardTitle className="text-2xl font-bold text-center">
+              {steps[currentStep - 1]?.title}
             </CardTitle>
+            <p className="text-gray-600 text-center mt-2">
+              {currentStep === 1 && "Tell us about yourself"}
+              {currentStep === 2 && "Share your company details"}  
+              {currentStep === 3 && "Verify your business credentials"}
+            </p>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-8">
             {steps[currentStep - 1]?.component()}
 
-            <div className="flex justify-between mt-8">
+            <div className="flex justify-between mt-10">
               <Button
                 variant="outline"
                 onClick={handlePrevious}
                 disabled={currentStep === 1}
-                className="flex items-center space-x-2"
+                className="flex items-center space-x-2 border-gray-300 text-gray-700 hover:bg-gray-50"
               >
                 <ArrowLeft className="h-4 w-4" />
                 <span>Previous</span>
@@ -507,13 +529,13 @@ export default function RecruiterOnboarding() {
               <Button
                 onClick={handleNext}
                 disabled={isLoading}
-                className="bg-blue-600 hover:bg-blue-700 flex items-center space-x-2"
+                className="bg-black hover:bg-gray-800 text-white flex items-center space-x-2 px-8"
               >
                 {isLoading ? (
                   <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
                 ) : (
                   <>
-                    <span>{currentStep === 3 ? 'Complete Registration' : 'Next'}</span>
+                    <span>{currentStep === 3 ? 'Complete Setup' : 'Continue'}</span>
                     <ArrowRight className="h-4 w-4" />
                   </>
                 )}

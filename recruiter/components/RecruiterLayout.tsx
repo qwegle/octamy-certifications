@@ -34,13 +34,13 @@ export default function RecruiterLayout({ children }: RecruiterLayoutProps) {
   const getKycStatusBadge = () => {
     switch (recruiter.kycStatus) {
       case 'approved':
-        return <Badge className="bg-green-600">KYC Approved</Badge>;
+        return <Badge className="bg-green-600 text-white">✓ Verified</Badge>;
       case 'under_review':
-        return <Badge className="bg-yellow-600">Under Review</Badge>;
+        return <Badge className="bg-yellow-600 text-white">⏳ Review</Badge>;
       case 'rejected':
-        return <Badge variant="destructive">KYC Rejected</Badge>;
+        return <Badge className="bg-red-600 text-white">✗ Rejected</Badge>;
       default:
-        return <Badge variant="outline">KYC Pending</Badge>;
+        return <Badge className="bg-gray-600 text-white">⚠ Pending</Badge>;
     }
   };
 
@@ -53,38 +53,38 @@ export default function RecruiterLayout({ children }: RecruiterLayoutProps) {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50" style={{ fontFamily: 'Poppins, sans-serif' }}>
+    <div className="min-h-screen bg-white" style={{ fontFamily: 'Poppins, sans-serif' }}>
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
+      <header className="bg-black shadow-lg border-b border-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-4">
-              <Link href="/recruiter/dashboard" className="flex items-center space-x-2">
-                <Shield className="h-8 w-8 text-blue-600" />
-                <span className="text-2xl font-bold text-gray-900">Octamy Recruiter</span>
+              <Link href="/recruiter/dashboard" className="flex items-center space-x-3">
+                <Shield className="h-8 w-8 text-white" />
+                <span className="text-2xl font-bold text-white">Octamy AI Recruiter</span>
               </Link>
             </div>
             
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2 text-sm">
-                <CreditCard className="h-4 w-4 text-gray-500" />
-                <span className="font-medium">{recruiter.creditsBalance} Credits</span>
+            <div className="flex items-center space-x-6">
+              <div className="flex items-center space-x-2 bg-gray-800 px-3 py-2 rounded-full">
+                <CreditCard className="h-4 w-4 text-white" />
+                <span className="font-medium text-white">{recruiter.creditsBalance} Credits</span>
               </div>
               
               {getKycStatusBadge()}
               
-              <div className="text-right">
-                <p className="text-sm font-medium text-gray-900">
+              <div className="text-right text-white">
+                <p className="text-sm font-medium">
                   {recruiter.firstName} {recruiter.lastName}
                 </p>
-                <p className="text-xs text-gray-500">{recruiter.companyName}</p>
+                <p className="text-xs text-gray-300">{recruiter.companyName}</p>
               </div>
               
               <Button
                 onClick={handleLogout}
                 variant="outline"
                 size="sm"
-                className="flex items-center space-x-1"
+                className="flex items-center space-x-1 border-gray-600 text-white hover:bg-gray-800"
               >
                 <LogOut className="h-4 w-4" />
                 <span>Logout</span>
@@ -96,7 +96,7 @@ export default function RecruiterLayout({ children }: RecruiterLayoutProps) {
 
       <div className="flex">
         {/* Sidebar */}
-        <aside className="w-64 bg-white shadow-sm min-h-screen">
+        <aside className="w-64 bg-black min-h-screen border-r border-gray-800">
           <nav className="mt-8 px-4 space-y-2">
             {navigation.map((item) => {
               const isActive = location === item.href;
@@ -106,10 +106,10 @@ export default function RecruiterLayout({ children }: RecruiterLayoutProps) {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className={`flex items-center space-x-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  className={`flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${
                     isActive
-                      ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-700'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                      ? 'bg-white text-black shadow-lg'
+                      : 'text-gray-300 hover:text-white hover:bg-gray-800'
                   }`}
                 >
                   <Icon className="h-5 w-5" />
@@ -121,7 +121,7 @@ export default function RecruiterLayout({ children }: RecruiterLayoutProps) {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 p-8">
+        <main className="flex-1 p-8 bg-gray-50 min-h-screen">
           {children}
         </main>
       </div>
