@@ -1603,27 +1603,62 @@ export default function AdminDashboard() {
   });
 
   // Partner approval mutation
-  const approvePartnerMutation = useMutation({
-    mutationFn: async ({ partnerId, approved }: { partnerId: number; approved: boolean }) => {
-      const response = await apiRequest("POST", `/api/admin/partners/${partnerId}/approve`, { approved });
-      return response.json();
-    },
-    onSuccess: () => {
+  // const approvePartnerMutation = useMutation({
+  //   mutationFn: async ({ partnerId, approved }: { partnerId: number; approved: boolean }) => {
+  //     const response = await apiRequest("POST", `/api/admin/partners/${partnerId}/approve`, { approved });
+  //     return response.json();
+  //   },
+  //   onSuccess: () => {
+  //     queryClient.invalidateQueries({ queryKey: ["/api/admin/partners"] });
+  //     queryClient.invalidateQueries({ queryKey: ["/api/admin/analytics"] });
+  //     toast({
+  //       title: "Partner Updated",
+  //       description: "Partner status has been updated successfully.",
+  //     });
+  //   },
+  //   onError: (error: any) => {
+  //     toast({
+  //       title: "Error",
+  //       description: error.message || "Failed to update partner status",
+  //       variant: "destructive",
+  //     });
+  //   },
+  // });
+
+  const [approveLoading, setApproveLoading] = useState(false);
+  async function approvePartner(partnerId: number, approved: boolean) {
+    try {
+      setApproveLoading(true);
+      const response = await apiRequest(
+        "POST",
+        `/api/admin/partners/${partnerId}/approve`,
+        { approved }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to update partner status");
+      }
+
+      const data = await response.json();
+      
       queryClient.invalidateQueries({ queryKey: ["/api/admin/partners"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/analytics"] });
       toast({
         title: "Partner Updated",
         description: "Partner status has been updated successfully.",
       });
-    },
-    onError: (error: any) => {
+
+      return data;
+    } catch (error: any) {
       toast({
         title: "Error",
         description: error.message || "Failed to update partner status",
         variant: "destructive",
       });
-    },
-  });
+    } finally {
+      setApproveLoading(false);
+    }
+  }
 
   // Withdrawal processing mutation
   const processWithdrawalMutation = useMutation({
@@ -2310,8 +2345,8 @@ export default function AdminDashboard() {
                                 {!partner.isApproved && (
                                   <Button
                                     size="sm"
-                                    onClick={() => approvePartnerMutation.mutate({ partnerId: partner.id, approved: true })}
-                                    disabled={approvePartnerMutation.isPending}
+                                    onClick={() => approvePartner( partner.id,  true )}
+                                    disabled={approveLoading}
                                   >
                                     <Check className="h-4 w-4" />
                                   </Button>
