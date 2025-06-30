@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/lib/auth';
+import { useAuth } from '@/lib/auth.tsx';
 import Header from '@/components/header';
 import Footer from '@/components/footer';
 import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
@@ -94,16 +94,19 @@ export default function Auth() {
     try {
       if (isLogin) {
         await login(formData.email, formData.password);
+        toast({
+          title: "Login Successful",
+          description: "Welcome back! Redirecting to dashboard...",
+        });
+        setTimeout(() => setLocation('/dashboard'), 1000);
       } else {
         await register(formData.email, formData.password, formData.name);
+        toast({
+          title: "Registration Successful",
+          description: "Account created! Redirecting to dashboard...",
+        });
+        setTimeout(() => setLocation('/dashboard'), 1000);
       }
-      
-      toast({
-        title: "Success!",
-        description: isLogin ? "Welcome back!" : "Account created successfully!",
-      });
-      
-      setLocation('/dashboard');
     } catch (error) {
       toast({
         title: "Error",

@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
+import { useAuth } from "@/lib/auth.tsx";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -39,6 +40,935 @@ import {
   MousePointer,
   Award
 } from "lucide-react";
+
+// Question Management Components
+function QuestionsManagement() {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCourse, setSelectedCourse] = useState<number | undefined>();
+  const [editingQuestion, setEditingQuestion] = useState<any>(null);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const { toast } = useToast();
+
+  const { data: questions = [], isLoading: questionsLoading, refetch: refetchQuestions } = useQuery({
+    queryKey: ["/api/admin/questions", selectedCourse, searchTerm],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (selectedCourse) params.append('courseId', selectedCourse.toString());
+      if (searchTerm) params.append('search', searchTerm);
+      const response = await apiRequest("GET", `/api/admin/questions?${params}`);
+      return response.json();
+    }
+  });
+
+  const { data: courses = [] } = useQuery({
+    queryKey: ["/api/admin/courses"]
+  });
+
+  const deleteQuestion = useMutation({
+    mutationFn: async (questionId: number) => {
+      const response = await apiRequest("DELETE", `/api/admin/questions/${questionId}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/questions"] });
+      toast({
+        title: "Question Deleted",
+        description: "Question has been deleted successfully.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete question",
+        variant: "destructive",
+      });
+    },
+  });
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Course Questions Management</CardTitle>
+        <CardDescription>Manage questions for certification courses</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          <div className="flex gap-4 items-center">
+            <Input
+              placeholder="Search questions..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="max-w-sm"
+            />
+            <Select value={selectedCourse?.toString() || "all"} onValueChange={(value) => setSelectedCourse(value === "all" ? undefined : parseInt(value))}>
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Filter by course" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Courses</SelectItem>
+                {courses.map((course: any) => (
+                  <SelectItem key={course.id} value={course.id.toString()}>
+                    {course.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Question
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>Add New Question</DialogTitle>
+                </DialogHeader>
+                <AddQuestionForm 
+                  courses={courses} 
+                  onSuccess={() => {
+                    refetchQuestions();
+                    toast({ title: "Success", description: "Question added successfully" });
+                  }} 
+                />
+              </DialogContent>
+            </Dialog>
+          </div>
+
+          {questionsLoading ? (
+            <div className="flex justify-center py-8">
+              <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+            </div>
+          ) : (
+            <div className="border rounded-lg">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Question</TableHead>
+                    <TableHead>Course</TableHead>
+                    <TableHead>Difficulty</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {questions.map((question: any) => (
+                    <TableRow key={question.id}>
+                      <TableCell>
+                        <div className="max-w-md">
+                          <p className="font-medium truncate">{question.question}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {question.options?.length} options
+                          </p>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline">
+                          {question.course?.title || courses.find(c => c.id === question.courseId)?.title || "No Course"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={question.difficulty === 'hard' ? 'destructive' : question.difficulty === 'medium' ? 'default' : 'secondary'}>
+                          {question.difficulty || 'Easy'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={question.isActive ? 'default' : 'secondary'}>
+                          {question.isActive ? 'Active' : 'Inactive'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => {
+                              setEditingQuestion(question);
+                              setShowEditDialog(true);
+                            }}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="outline" size="sm">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete Question</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to delete this question? This action cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => deleteQuestion.mutate(question.id)}>
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </div>
+      </CardContent>
+
+      {/* Edit Question Dialog */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Edit Question</DialogTitle>
+          </DialogHeader>
+          {editingQuestion && (
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Question</label>
+                <textarea 
+                  className="w-full mt-1 p-2 border rounded-md" 
+                  value={editingQuestion.question}
+                  onChange={(e) => setEditingQuestion({...editingQuestion, question: e.target.value})}
+                  rows={3}
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Course</label>
+                <p className="text-sm text-muted-foreground">{editingQuestion.course?.title || 'No course assigned'}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Options</label>
+                {editingQuestion.options?.map((option: string, index: number) => (
+                  <input 
+                    key={index}
+                    className="w-full mt-1 p-2 border rounded-md" 
+                    value={option}
+                    onChange={(e) => {
+                      const newOptions = [...editingQuestion.options];
+                      newOptions[index] = e.target.value;
+                      setEditingQuestion({...editingQuestion, options: newOptions});
+                    }}
+                  />
+                ))}
+              </div>
+              <div className="flex gap-2">
+                <label className="text-sm font-medium">Correct Answer:</label>
+                <select 
+                  value={editingQuestion.correctAnswer}
+                  onChange={(e) => setEditingQuestion({...editingQuestion, correctAnswer: parseInt(e.target.value)})}
+                  className="px-2 py-1 border rounded"
+                >
+                  {editingQuestion.options?.map((_: any, index: number) => (
+                    <option key={index} value={index}>Option {index + 1}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setShowEditDialog(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={async () => {
+                  try {
+                    const response = await apiRequest("PUT", `/api/admin/questions/${editingQuestion.id}`, {
+                      question: editingQuestion.question,
+                      options: editingQuestion.options,
+                      correctAnswer: editingQuestion.correctAnswer
+                    });
+                    if (response.ok) {
+                      toast({
+                        title: "Question Updated",
+                        description: "Question has been updated successfully.",
+                      });
+                      setShowEditDialog(false);
+                      refetchQuestions();
+                    }
+                  } catch (error) {
+                    toast({
+                      title: "Error",
+                      description: "Failed to update question",
+                      variant: "destructive",
+                    });
+                  }
+                }}>
+                  Save Changes
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </Card>
+  );
+}
+
+// Add Question Form Component
+function AddQuestionForm({ courses, onSuccess }: { courses: any[], onSuccess: () => void }) {
+  const [formData, setFormData] = useState({
+    courseId: '',
+    question: '',
+    options: ['', '', '', ''],
+    correctAnswer: 0,
+    difficulty: 'intermediate',
+    isActive: true
+  });
+  const { toast } = useToast();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const response = await apiRequest("POST", "/api/admin/questions", {
+        ...formData,
+        courseId: parseInt(formData.courseId),
+        options: formData.options.filter(opt => opt.trim() !== '')
+      });
+      if (response.ok) {
+        onSuccess();
+        setFormData({
+          courseId: '',
+          question: '',
+          options: ['', '', '', ''],
+          correctAnswer: 0,
+
+          difficulty: 'intermediate',
+          isActive: true
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to add question",
+        variant: "destructive",
+      });
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <label className="text-sm font-medium">Course</label>
+        <select 
+          className="w-full mt-1 p-2 border rounded-md"
+          value={formData.courseId}
+          onChange={(e) => setFormData({...formData, courseId: e.target.value})}
+          required
+        >
+          <option value="">Select a course</option>
+          {courses.map((course) => (
+            <option key={course.id} value={course.id}>{course.title}</option>
+          ))}
+        </select>
+      </div>
+      <div>
+        <label className="text-sm font-medium">Question</label>
+        <textarea 
+          className="w-full mt-1 p-2 border rounded-md"
+          value={formData.question}
+          onChange={(e) => setFormData({...formData, question: e.target.value})}
+          rows={3}
+          required
+        />
+      </div>
+      <div>
+        <label className="text-sm font-medium">Options</label>
+        {formData.options.map((option, index) => (
+          <input 
+            key={index}
+            className="w-full mt-1 p-2 border rounded-md"
+            placeholder={`Option ${index + 1}`}
+            value={option}
+            onChange={(e) => {
+              const newOptions = [...formData.options];
+              newOptions[index] = e.target.value;
+              setFormData({...formData, options: newOptions});
+            }}
+            required={index < 2}
+          />
+        ))}
+      </div>
+      <div>
+        <label className="text-sm font-medium">Correct Answer</label>
+        <select 
+          className="w-full mt-1 p-2 border rounded-md"
+          value={formData.correctAnswer}
+          onChange={(e) => setFormData({...formData, correctAnswer: parseInt(e.target.value)})}
+        >
+          {formData.options.map((_, index) => (
+            <option key={index} value={index}>Option {index + 1}</option>
+          ))}
+        </select>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="text-sm font-medium">Difficulty</label>
+          <select 
+            className="w-full mt-1 p-2 border rounded-md"
+            value={formData.difficulty}
+            onChange={(e) => setFormData({...formData, difficulty: e.target.value})}
+          >
+            <option value="beginner">Beginner</option>
+            <option value="intermediate">Intermediate</option>
+            <option value="advanced">Advanced</option>
+          </select>
+        </div>
+        <div className="flex items-center space-x-2 mt-6">
+          <input 
+            type="checkbox"
+            checked={formData.isActive}
+            onChange={(e) => setFormData({...formData, isActive: e.target.checked})}
+          />
+          <label className="text-sm">Active</label>
+        </div>
+      </div>
+      <div className="flex justify-end gap-2">
+        <Button type="submit">Add Question</Button>
+      </div>
+    </form>
+  );
+}
+
+function AIQuestionsManagement() {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedTechnology, setSelectedTechnology] = useState<string>("");
+  const [editingQuestion, setEditingQuestion] = useState<any>(null);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const { toast } = useToast();
+
+  const { data: questions = [], isLoading: questionsLoading, refetch: refetchInterviewQuestions } = useQuery({
+    queryKey: ["/api/admin/interview-questions", selectedTechnology, searchTerm],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (selectedTechnology && selectedTechnology !== "all") params.append('technology', selectedTechnology);
+      if (searchTerm) params.append('search', searchTerm);
+      const response = await apiRequest("GET", `/api/admin/interview-questions?${params}`);
+      return response.json();
+    }
+  });
+
+  const deleteQuestion = useMutation({
+    mutationFn: async (questionId: number) => {
+      const response = await apiRequest("DELETE", `/api/admin/interview-questions/${questionId}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/interview-questions"] });
+      toast({
+        title: "AI Question Deleted",
+        description: "AI interview question has been deleted successfully.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete AI question",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const technologies = ["JavaScript", "Python", "React", "Node.js", "Java", "C++", "SQL", "MongoDB"];
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>AI Interview Questions Management</CardTitle>
+        <CardDescription>Manage questions for AI technical interviews</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          <div className="flex gap-4 items-center">
+            <Input
+              placeholder="Search AI questions..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="max-w-sm"
+            />
+            <Select value={selectedTechnology || "all"} onValueChange={(value) => setSelectedTechnology(value === "all" ? "" : value)}>
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Filter by technology" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Technologies</SelectItem>
+                {technologies.map((tech) => (
+                  <SelectItem key={tech} value={tech}>
+                    {tech}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button>
+              <Plus className="h-4 w-4 mr-2" />
+              Add AI Question
+            </Button>
+          </div>
+
+          {questionsLoading ? (
+            <div className="flex justify-center py-8">
+              <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+            </div>
+          ) : (
+            <div className="border rounded-lg">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Title</TableHead>
+                    <TableHead>Technology</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {questions.map((question: any) => (
+                    <TableRow key={question.id}>
+                      <TableCell>
+                        <div className="max-w-md">
+                          <p className="font-medium">{question.title}</p>
+                          <p className="text-sm text-muted-foreground truncate">
+                            {question.question}
+                          </p>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline">{question.technology}</Badge>
+                      </TableCell>
+                      <TableCell>{question.type || 'General'}</TableCell>
+                      <TableCell>
+                        <Badge variant={question.isActive ? 'default' : 'secondary'}>
+                          {question.isActive ? 'Active' : 'Inactive'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => {
+                              setEditingQuestion(question);
+                              setShowEditDialog(true);
+                            }}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="outline" size="sm">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete AI Question</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to delete this AI interview question? This action cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => deleteQuestion.mutate(question.id)}>
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </div>
+      </CardContent>
+
+      {/* Edit AI Interview Question Dialog */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Edit AI Interview Question</DialogTitle>
+          </DialogHeader>
+          {editingQuestion && (
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Title</label>
+                <input 
+                  className="w-full mt-1 p-2 border rounded-md" 
+                  value={editingQuestion.title}
+                  onChange={(e) => setEditingQuestion({...editingQuestion, title: e.target.value})}
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Question</label>
+                <textarea 
+                  className="w-full mt-1 p-2 border rounded-md" 
+                  value={editingQuestion.question}
+                  onChange={(e) => setEditingQuestion({...editingQuestion, question: e.target.value})}
+                  rows={4}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium">Technology</label>
+                  <select 
+                    className="w-full mt-1 p-2 border rounded-md"
+                    value={editingQuestion.technology}
+                    onChange={(e) => setEditingQuestion({...editingQuestion, technology: e.target.value})}
+                  >
+                    {["JavaScript", "Python", "React", "Node.js", "Java", "C++", "SQL", "MongoDB"].map((tech) => (
+                      <option key={tech} value={tech}>{tech}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Difficulty</label>
+                  <select 
+                    className="w-full mt-1 p-2 border rounded-md"
+                    value={editingQuestion.difficulty}
+                    onChange={(e) => setEditingQuestion({...editingQuestion, difficulty: e.target.value})}
+                  >
+                    <option value="beginner">Beginner</option>
+                    <option value="intermediate">Intermediate</option>
+                    <option value="advanced">Advanced</option>
+                  </select>
+                </div>
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setShowEditDialog(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={async () => {
+                  try {
+                    const response = await apiRequest("PUT", `/api/admin/interview-questions/${editingQuestion.id}`, {
+                      title: editingQuestion.title,
+                      question: editingQuestion.question,
+                      technology: editingQuestion.technology,
+                      difficulty: editingQuestion.difficulty
+                    });
+                    if (response.ok) {
+                      toast({
+                        title: "AI Interview Question Updated",
+                        description: "AI interview question has been updated successfully.",
+                      });
+                      setShowEditDialog(false);
+                      refetchInterviewQuestions();
+                    }
+                  } catch (error) {
+                    toast({
+                      title: "Error",
+                      description: "Failed to update AI interview question",
+                      variant: "destructive",
+                    });
+                  }
+                }}>
+                  Save Changes
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </Card>
+  );
+}
+
+// Add AI Question Form Component
+function AddAIQuestionForm({ onSuccess }: { onSuccess: () => void }) {
+  const [formData, setFormData] = useState({
+    title: '',
+    question: '',
+    technology: 'JavaScript',
+    difficulty: 'intermediate',
+    questionType: 'interview',
+    timeLimit: 600,
+    isActive: true
+  });
+  const { toast } = useToast();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const response = await apiRequest("POST", "/api/admin/interview-questions", formData);
+      if (response.ok) {
+        onSuccess();
+        setFormData({
+          title: '',
+          question: '',
+          technology: 'JavaScript',
+          difficulty: 'intermediate',
+          questionType: 'interview',
+          timeLimit: 600,
+          isActive: true
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to add AI interview question",
+        variant: "destructive",
+      });
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <label className="text-sm font-medium">Title</label>
+        <input 
+          className="w-full mt-1 p-2 border rounded-md"
+          value={formData.title}
+          onChange={(e) => setFormData({...formData, title: e.target.value})}
+          required
+        />
+      </div>
+      <div>
+        <label className="text-sm font-medium">Question</label>
+        <textarea 
+          className="w-full mt-1 p-2 border rounded-md"
+          value={formData.question}
+          onChange={(e) => setFormData({...formData, question: e.target.value})}
+          rows={4}
+          required
+        />
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="text-sm font-medium">Technology</label>
+          <select 
+            className="w-full mt-1 p-2 border rounded-md"
+            value={formData.technology}
+            onChange={(e) => setFormData({...formData, technology: e.target.value})}
+          >
+            {["JavaScript", "Python", "React", "Node.js", "Java", "C++", "SQL", "MongoDB"].map((tech) => (
+              <option key={tech} value={tech}>{tech}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="text-sm font-medium">Difficulty</label>
+          <select 
+            className="w-full mt-1 p-2 border rounded-md"
+            value={formData.difficulty}
+            onChange={(e) => setFormData({...formData, difficulty: e.target.value})}
+          >
+            <option value="beginner">Beginner</option>
+            <option value="intermediate">Intermediate</option>
+            <option value="advanced">Advanced</option>
+          </select>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="text-sm font-medium">Question Type</label>
+          <select 
+            className="w-full mt-1 p-2 border rounded-md"
+            value={formData.questionType}
+            onChange={(e) => setFormData({...formData, questionType: e.target.value})}
+          >
+            <option value="interview">Interview</option>
+            <option value="practical">Practical</option>
+            <option value="handson">Hands-on</option>
+          </select>
+        </div>
+        <div>
+          <label className="text-sm font-medium">Time Limit (seconds)</label>
+          <input 
+            type="number"
+            className="w-full mt-1 p-2 border rounded-md"
+            value={formData.timeLimit}
+            onChange={(e) => setFormData({...formData, timeLimit: parseInt(e.target.value)})}
+            min="60"
+            max="3600"
+          />
+        </div>
+      </div>
+      <div className="flex items-center space-x-2">
+        <input 
+          type="checkbox"
+          checked={formData.isActive}
+          onChange={(e) => setFormData({...formData, isActive: e.target.checked})}
+        />
+        <label className="text-sm">Active</label>
+      </div>
+      <div className="flex justify-end gap-2">
+        <Button type="submit">Add AI Question</Button>
+      </div>
+    </form>
+  );
+}
+
+function ContactSubmissionsManagement() {
+  const [searchTerm, setSearchTerm] = useState("");
+  const { toast } = useToast();
+
+  const { data: contacts = [], isLoading: contactsLoading } = useQuery({
+    queryKey: ["/api/admin/contacts", searchTerm],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (searchTerm) params.append('search', searchTerm);
+      const response = await apiRequest("GET", `/api/admin/contacts?${params}`);
+      return response.json();
+    }
+  });
+
+  const updateContact = useMutation({
+    mutationFn: async ({ contactId, status, adminNotes }: { contactId: number; status: string; adminNotes?: string }) => {
+      const response = await apiRequest("PUT", `/api/admin/contacts/${contactId}`, { status, adminNotes });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/contacts"] });
+      toast({
+        title: "Contact Updated",
+        description: "Contact submission has been updated successfully.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update contact",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'responded':
+        return <Badge variant="default">Responded</Badge>;
+      case 'pending':
+        return <Badge variant="secondary">Pending</Badge>;
+      default:
+        return <Badge variant="outline">New</Badge>;
+    }
+  };
+
+  const newCount = contacts.filter((contact: any) => !contact.status || contact.status === 'new').length;
+  const respondedCount = contacts.filter((contact: any) => contact.status === 'responded').length;
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Contact Submissions</CardTitle>
+        <CardDescription>Manage support requests and customer inquiries</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <Input
+              placeholder="Search contact submissions..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="max-w-sm"
+            />
+            <div className="flex gap-2">
+              <Badge variant="outline">New: {newCount}</Badge>
+              <Badge variant="outline">Responded: {respondedCount}</Badge>
+            </div>
+          </div>
+
+          {contactsLoading ? (
+            <div className="flex justify-center py-8">
+              <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+            </div>
+          ) : (
+            <div className="border rounded-lg">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Subject</TableHead>
+                    <TableHead>Phone</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {contacts.map((contact: any) => (
+                    <TableRow key={contact.id}>
+                      <TableCell className="font-medium">{contact.name}</TableCell>
+                      <TableCell>{contact.email}</TableCell>
+                      <TableCell>
+                        <div className="max-w-xs">
+                          <p className="truncate">{contact.subject}</p>
+                        </div>
+                      </TableCell>
+                      <TableCell>{contact.phone || 'N/A'}</TableCell>
+                      <TableCell>{getStatusBadge(contact.status)}</TableCell>
+                      <TableCell>
+                        {new Date(contact.submittedAt).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => updateContact.mutate({ contactId: contact.id, status: 'responded' })}
+                            disabled={contact.status === 'responded'}
+                          >
+                            <Check className="h-4 w-4" />
+                          </Button>
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button variant="outline" size="sm">
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-2xl">
+                              <DialogHeader>
+                                <DialogTitle>Contact Details</DialogTitle>
+                              </DialogHeader>
+                              <div className="space-y-4">
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div>
+                                    <p className="font-medium">Name</p>
+                                    <p className="text-sm text-muted-foreground">{contact.name}</p>
+                                  </div>
+                                  <div>
+                                    <p className="font-medium">Email</p>
+                                    <p className="text-sm text-muted-foreground">{contact.email}</p>
+                                  </div>
+                                  <div>
+                                    <p className="font-medium">Phone</p>
+                                    <p className="text-sm text-muted-foreground">{contact.phone || 'N/A'}</p>
+                                  </div>
+                                  <div>
+                                    <p className="font-medium">Status</p>
+                                    <div>{getStatusBadge(contact.status)}</div>
+                                  </div>
+                                </div>
+                                <div>
+                                  <p className="font-medium">Subject</p>
+                                  <p className="text-sm text-muted-foreground">{contact.subject}</p>
+                                </div>
+                                <div>
+                                  <p className="font-medium">Message</p>
+                                  <p className="text-sm text-muted-foreground whitespace-pre-wrap">{contact.message}</p>
+                                </div>
+                              </div>
+                            </DialogContent>
+                          </Dialog>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 interface Analytics {
   totalUsers?: number;
@@ -673,27 +1603,62 @@ export default function AdminDashboard() {
   });
 
   // Partner approval mutation
-  const approvePartnerMutation = useMutation({
-    mutationFn: async ({ partnerId, approved }: { partnerId: number; approved: boolean }) => {
-      const response = await apiRequest("POST", `/api/admin/partners/${partnerId}/approve`, { approved });
-      return response.json();
-    },
-    onSuccess: () => {
+  // const approvePartnerMutation = useMutation({
+  //   mutationFn: async ({ partnerId, approved }: { partnerId: number; approved: boolean }) => {
+  //     const response = await apiRequest("POST", `/api/admin/partners/${partnerId}/approve`, { approved });
+  //     return response.json();
+  //   },
+  //   onSuccess: () => {
+  //     queryClient.invalidateQueries({ queryKey: ["/api/admin/partners"] });
+  //     queryClient.invalidateQueries({ queryKey: ["/api/admin/analytics"] });
+  //     toast({
+  //       title: "Partner Updated",
+  //       description: "Partner status has been updated successfully.",
+  //     });
+  //   },
+  //   onError: (error: any) => {
+  //     toast({
+  //       title: "Error",
+  //       description: error.message || "Failed to update partner status",
+  //       variant: "destructive",
+  //     });
+  //   },
+  // });
+
+  const [approveLoading, setApproveLoading] = useState(false);
+  async function approvePartner(partnerId: number, approved: boolean) {
+    try {
+      setApproveLoading(true);
+      const response = await apiRequest(
+        "POST",
+        `/api/admin/partners/${partnerId}/approve`,
+        { approved }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to update partner status");
+      }
+
+      const data = await response.json();
+      
       queryClient.invalidateQueries({ queryKey: ["/api/admin/partners"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/analytics"] });
       toast({
         title: "Partner Updated",
         description: "Partner status has been updated successfully.",
       });
-    },
-    onError: (error: any) => {
+
+      return data;
+    } catch (error: any) {
       toast({
         title: "Error",
         description: error.message || "Failed to update partner status",
         variant: "destructive",
       });
-    },
-  });
+    } finally {
+      setApproveLoading(false);
+    }
+  }
 
   // Withdrawal processing mutation
   const processWithdrawalMutation = useMutation({
@@ -822,11 +1787,14 @@ export default function AdminDashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="space-y-6">
           <Tabs defaultValue="overview" className="space-y-4">
-            <TabsList className="grid w-full grid-cols-7">
+            <TabsList className="grid w-full grid-cols-10">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="customers">Customers</TabsTrigger>
               <TabsTrigger value="categories">Categories</TabsTrigger>
               <TabsTrigger value="courses">Courses</TabsTrigger>
+              <TabsTrigger value="questions">Questions</TabsTrigger>
+              <TabsTrigger value="ai-questions">AI Interview</TabsTrigger>
+              <TabsTrigger value="contacts">Contact</TabsTrigger>
               <TabsTrigger value="exams">Exams</TabsTrigger>
               <TabsTrigger value="partners">Partners</TabsTrigger>
               <TabsTrigger value="transactions">Transactions</TabsTrigger>
@@ -1377,8 +2345,8 @@ export default function AdminDashboard() {
                                 {!partner.isApproved && (
                                   <Button
                                     size="sm"
-                                    onClick={() => approvePartnerMutation.mutate({ partnerId: partner.id, approved: true })}
-                                    disabled={approvePartnerMutation.isPending}
+                                    onClick={() => approvePartner( partner.id,  true )}
+                                    disabled={approveLoading}
                                   >
                                     <Check className="h-4 w-4" />
                                   </Button>
@@ -1553,6 +2521,21 @@ export default function AdminDashboard() {
                   </CardContent>
                 </Card>
               )}
+            </TabsContent>
+
+            {/* Questions Tab */}
+            <TabsContent value="questions" className="space-y-4">
+              <QuestionsManagement />
+            </TabsContent>
+
+            {/* AI Questions Tab */}
+            <TabsContent value="ai-questions" className="space-y-4">
+              <AIQuestionsManagement />
+            </TabsContent>
+
+            {/* Contact Submissions Tab */}
+            <TabsContent value="contacts" className="space-y-4">
+              <ContactSubmissionsManagement />
             </TabsContent>
           </Tabs>
         </div>
