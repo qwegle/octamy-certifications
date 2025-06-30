@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/lib/auth';
+import { useAuth } from '@/lib/auth.tsx';
 import { apiRequest } from '@/lib/queryClient';
 import Header from '@/components/header';
 import Footer from '@/components/footer';

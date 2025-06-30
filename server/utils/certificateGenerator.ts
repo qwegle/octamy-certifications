@@ -1,4 +1,4 @@
-import puppeteer from 'puppeteer';
+import puppeteer from "puppeteer";
 
 interface CertificateData {
   certificateId: string;
@@ -12,7 +12,7 @@ interface CertificateData {
 }
 
 function generateCertificateHTML(data: CertificateData): string {
-  const courseLevel = data.courseLevel || 'Beginner';
+  const courseLevel = data.courseLevel || "Beginner";
   const issueDate = new Date(data.issueDate);
   const expiryDate = new Date(issueDate);
   expiryDate.setFullYear(expiryDate.getFullYear() + 3); // 3 years validity
@@ -465,20 +465,32 @@ function generateCertificateHTML(data: CertificateData): string {
                   <path d="M20 70 L15 85 L25 80 Z" fill="url(#ribbonGradient)" opacity="0.9"/>
                   <path d="M100 70 L105 85 L95 80 Z" fill="url(#ribbonGradient)" opacity="0.9"/>
                 </svg>
-                <div class="badge-text">${(data.courseLevel || 'CERTIFIED').toUpperCase()}</div>
+                <div class="badge-text">${(
+                  data.courseLevel || "CERTIFIED"
+                ).toUpperCase()}</div>
               </div>
               
               <div class="achievement-details">
-                <div class="achievement-score">Score Achieved: ${data.userScore}%</div>
-                <div class="achievement-label">Passing Score: ${data.passingScore}%</div>
+                <div class="achievement-score">Score Achieved: ${
+                  data.userScore
+                }%</div>
+                <div class="achievement-label">Passing Score: ${
+                  data.passingScore
+                }%</div>
               </div>
             </div>
             
             <div class="certificate-footer">
               <div class="certificate-details">
-                <div><strong>Certificate ID:</strong> ${data.certificateId}</div>
-                <div><strong>Issue Date:</strong> ${new Date(data.issueDate).toLocaleDateString()}</div>
-                <div><strong>Completion Date:</strong> ${new Date(data.completionDate).toLocaleDateString()}</div>
+                <div><strong>Certificate ID:</strong> ${
+                  data.certificateId
+                }</div>
+                <div><strong>Issue Date:</strong> ${new Date(
+                  data.issueDate
+                ).toLocaleDateString()}</div>
+                <div><strong>Completion Date:</strong> ${new Date(
+                  data.completionDate
+                ).toLocaleDateString()}</div>
                 <div><strong>Valid Until:</strong> ${expiryDate.toLocaleDateString()}</div>
                 <div><strong>Status:</strong> Valid Internationally</div>
               </div>
@@ -504,34 +516,37 @@ function generateCertificateHTML(data: CertificateData): string {
   `;
 }
 
-export async function generateCertificatePDF(data: CertificateData): Promise<Buffer> {
+export async function generateCertificatePDF(
+  data: CertificateData
+): Promise<Buffer> {
   const html = generateCertificateHTML(data);
 
   const browser = await puppeteer.launch({
     headless: true,
-    executablePath: '/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium',
+    executablePath:
+      "/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium",
     args: [
-      '--no-sandbox', 
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-      '--disable-accelerated-2d-canvas',
-      '--no-first-run',
-      '--no-zygote',
-      '--single-process',
-      '--disable-gpu',
-      '--disable-extensions'
-    ]
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-dev-shm-usage",
+      "--disable-accelerated-2d-canvas",
+      "--no-first-run",
+      "--no-zygote",
+      "--single-process",
+      "--disable-gpu",
+      "--disable-extensions",
+    ],
   });
 
   try {
     const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: 'networkidle0' });
-    
+    await page.setContent(html, { waitUntil: "networkidle0" });
+
     const pdf = await page.pdf({
-      format: 'A4',
+      format: "A4",
       landscape: true,
       printBackground: true,
-      margin: { top: '10px', right: '10px', bottom: '10px', left: '10px' }
+      margin: { top: "10px", right: "10px", bottom: "10px", left: "10px" },
     });
 
     return Buffer.from(pdf);
@@ -554,166 +569,434 @@ export async function generateInvoicePDF(data: {
   date: Date;
   paymentMethod: string;
 }): Promise<Buffer> {
-  const html = `
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Invoice - Octamy Solutions</title>
-      <style>
+  // const html = `
+  //   <!DOCTYPE html>
+  //   <html lang="en">
+  //   <head>
+  //     <meta charset="UTF-8">
+  //     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  //     <title>Invoice - Octamy Solutions</title>
+  //     <style>
+  //       body {
+  //         font-family: Arial, sans-serif;
+  //         margin: 0;
+  //         padding: 20px;
+  //         background: #f8f9fa;
+  //       }
+
+  //       .invoice-container {
+  //         max-width: 800px;
+  //         margin: 0 auto;
+  //         background: white;
+  //         padding: 40px;
+  //         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  //       }
+
+  //       .invoice-header {
+  //         display: flex;
+  //         justify-content: space-between;
+  //         align-items: start;
+  //         margin-bottom: 40px;
+  //         border-bottom: 2px solid #000;
+  //         padding-bottom: 20px;
+  //       }
+
+  //       .company-info h1 {
+  //         margin: 0;
+  //         font-size: 28px;
+  //         color: #000;
+  //       }
+
+  //       .company-info p {
+  //         margin: 5px 0;
+  //         color: #666;
+  //       }
+
+  //       .invoice-info {
+  //         text-align: right;
+  //       }
+
+  //       .invoice-info h2 {
+  //         margin: 0;
+  //         font-size: 24px;
+  //         color: #000;
+  //       }
+
+  //       .customer-info {
+  //         margin-bottom: 30px;
+  //       }
+
+  //       .invoice-details {
+  //         width: 100%;
+  //         border-collapse: collapse;
+  //         margin-bottom: 30px;
+  //       }
+
+  //       .invoice-details th,
+  //       .invoice-details td {
+  //         border: 1px solid #ddd;
+  //         padding: 12px;
+  //         text-align: left;
+  //       }
+
+  //       .invoice-details th {
+  //         background: #f8f9fa;
+  //         font-weight: bold;
+  //       }
+
+  //       .total-row {
+  //         font-weight: bold;
+  //         background: #f0f0f0;
+  //       }
+
+  //       .footer {
+  //         margin-top: 40px;
+  //         padding-top: 20px;
+  //         border-top: 1px solid #ddd;
+  //         color: #666;
+  //         font-size: 14px;
+  //       }
+  //     </style>
+  //   </head>
+  //   <body>
+  //     <div class="invoice-container">
+  //       <div class="invoice-header">
+  //         <div class="company-info">
+  //           <h1>OCTAMY SOLUTIONS</h1>
+  //           <p>Professional Certificate Provider</p>
+  //           <p>Email: info@octamy.com</p>
+  //         </div>
+  //         <div class="invoice-info">
+  //           <h2>INVOICE</h2>
+  //           <p><strong>Invoice #:</strong> ${data.transactionId}</p>
+  //           <p><strong>Date:</strong> ${data.date.toLocaleDateString()}</p>
+  //         </div>
+  //       </div>
+
+  //       <div class="customer-info">
+  //         <h3>Bill To:</h3>
+  //         <p><strong>${data.customerName}</strong></p>
+  //         <p>${data.customerEmail}</p>
+  //       </div>
+
+  //       <table class="invoice-details">
+  //         <thead>
+  //           <tr>
+  //             <th>Description</th>
+  //             <th>Amount</th>
+  //           </tr>
+  //         </thead>
+  //         <tbody>
+  //           <tr>
+  //             <td>Digital Certificate - ${data.courseTitle}</td>
+  //             <td>₹${data.certificateAmount}</td>
+  //           </tr>
+  //           ${data.includesPhysicalCopy ? `
+  //           <tr>
+  //             <td>Physical Certificate Shipping</td>
+  //             <td>₹${data.shippingAmount}</td>
+  //           </tr>
+  //           ` : ''}
+  //         </tbody>
+  //         <tfoot>
+  //           <tr class="total-row">
+  //             <td><strong>Total Amount</strong></td>
+  //             <td><strong>₹${data.amount}</strong></td>
+  //           </tr>
+  //         </tfoot>
+  //       </table>
+
+  //       <div class="footer">
+  //         <p><strong>Payment Method:</strong> ${data.paymentMethod}</p>
+  //         <p><strong>Payment Status:</strong> Completed</p>
+  //         <p>Thank you for choosing Octamy Solutions for your professional certification needs.</p>
+  //       </div>
+  //     </div>
+  //   </body>
+  //   </html>
+  // `;
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Invoice - Octamy Solutions</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.js"></script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap");
+      @import url("https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css");
+
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: system-ui, -apple-system, sans-serif;
+      }
+
+      .certificate-container {
+        width: 297mm;
+        height: 200mm;
+      }
+
+      @media print {
         body {
-          font-family: Arial, sans-serif;
           margin: 0;
-          padding: 20px;
-          background: #f8f9fa;
-        }
-        
-        .invoice-container {
-          max-width: 800px;
-          margin: 0 auto;
+          padding: 0;
           background: white;
-          padding: 40px;
-          box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
-        
-        .invoice-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: start;
-          margin-bottom: 40px;
-          border-bottom: 2px solid #000;
-          padding-bottom: 20px;
-        }
-        
-        .company-info h1 {
+
+        .certificate-container {
+          width: 297mm;
+          height: 200mm;
           margin: 0;
-          font-size: 28px;
-          color: #000;
+          box-shadow: none;
+          page-break-inside: avoid;
+          page-break-after: always;
+        }
+      }
+
+      .tracking-wide {
+        letter-spacing: 5px;
+      }
+
+      /* Badge Styles */
+      .badge-container {
+        position: absolute;
+        width: 200px;
+        height: 200px;
+        top: 30px;
+        right: 30px;
+        z-index: 10;
+      }
+
+      .badge-image {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+      }
+
+      .badge-text {
+        position: absolute;
+        top: 67%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        font-size: 10px;
+        font-weight: 700;
+        text-align: center;
+        font-family: 'Inter', sans-serif;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+      }
+
+      /* Responsive badge sizing */
+      @media (max-width: 768px) {
+        .badge-container {
+          width: 60px;
+          height: 60px;
+          top: 10px;
+          right: 10px;
         }
         
-        .company-info p {
-          margin: 5px 0;
-          color: #666;
+        .badge-text {
+          font-size: 6px;
         }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="min-h-screen bg-gray-100 p-4 flex items-center justify-center">
+      <!-- Certificate Container with A4 proportions and responsive scaling -->
+      <div class="certificate-container relative bg-white shadow-2xl transform origin-center">
         
-        .invoice-info {
-          text-align: right;
-        }
-        
-        .invoice-info h2 {
-          margin: 0;
-          font-size: 24px;
-          color: #000;
-        }
-        
-        .customer-info {
-          margin-bottom: 30px;
-        }
-        
-        .invoice-details {
-          width: 100%;
-          border-collapse: collapse;
-          margin-bottom: 30px;
-        }
-        
-        .invoice-details th,
-        .invoice-details td {
-          border: 1px solid #ddd;
-          padding: 12px;
-          text-align: left;
-        }
-        
-        .invoice-details th {
-          background: #f8f9fa;
-          font-weight: bold;
-        }
-        
-        .total-row {
-          font-weight: bold;
-          background: #f0f0f0;
-        }
-        
-        .footer {
-          margin-top: 40px;
-          padding-top: 20px;
-          border-top: 1px solid #ddd;
-          color: #666;
-          font-size: 14px;
-        }
-      </style>
-    </head>
-    <body>
-      <div class="invoice-container">
-        <div class="invoice-header">
-          <div class="company-info">
-            <h1>OCTAMY SOLUTIONS</h1>
-            <p>Professional Certificate Provider</p>
-            <p>Email: info@octamy.com</p>
-          </div>
-          <div class="invoice-info">
-            <h2>INVOICE</h2>
-            <p><strong>Invoice #:</strong> ${data.transactionId}</p>
-            <p><strong>Date:</strong> ${data.date.toLocaleDateString()}</p>
-          </div>
+        <!-- Golden curved decorative elements -->
+        <div class="absolute top-0 left-0 w-full h-full overflow-hidden">
+          <!-- Top left curve -->
+          <img
+            src="../certificateImages/Solutions Private Limited.svg"
+            alt="Decorative Element"
+          />
         </div>
-        
-        <div class="customer-info">
-          <h3>Bill To:</h3>
-          <p><strong>${data.customerName}</strong></p>
-          <p>${data.customerEmail}</p>
+
+        <!-- Top Right Badge -->
+        <div class="badge-container">
+          <svg width="200" height="200" viewBox="0 0 120 120" class="badge-image">
+            <defs>
+              <linearGradient id="shieldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#4a4a4a;stop-opacity:1" />
+                <stop offset="50%" style="stop-color:#2a2a2a;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#1a1a1a;stop-opacity:1" />
+              </linearGradient>
+              <linearGradient id="ribbonGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#888;stop-opacity:1" />
+                <stop offset="50%" style="stop-color:#666;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#555;stop-opacity:1" />
+              </linearGradient>
+            </defs>
+            
+            <!-- Shield Shape -->
+            <path d="M60 10 L100 30 L100 60 Q100 80 85 95 Q70 105 60 110 Q50 105 35 95 Q20 80 20 60 L20 30 Z" 
+                  fill="url(#shieldGradient)" stroke="#fff" stroke-width="2"/>
+            
+            <!-- Inner Circle -->
+            <circle cx="60" cy="45" r="15" fill="#fff" stroke="#333" stroke-width="1"/>
+            
+            <!-- Sunburst pattern around circle -->
+            <g transform="translate(60,45)">
+              <g stroke="#fff" stroke-width="1" fill="none">
+                <circle r="20" opacity="0.3"/>
+                <path d="M0,-25 L0,-20 M0,20 L0,25 M25,0 L20,0 M-20,0 L-25,0" stroke-width="2"/>
+                <path d="M17.6,-17.6 L14.1,-14.1 M-14.1,14.1 L-17.6,17.6 M17.6,17.6 L14.1,14.1 M-14.1,-14.1 L-17.6,-17.6" stroke-width="1.5"/>
+              </g>
+            </g>
+            
+            <!-- Ribbon banners -->
+            <path d="M20 70 Q35 65 50 70 Q60 72 70 70 Q85 65 100 70 L95 85 Q80 80 65 85 Q60 87 55 85 Q40 80 25 85 Z" 
+                  fill="url(#ribbonGradient)" stroke="#333" stroke-width="1" opacity="0.8"/>
+            
+            <path d="M25 85 Q40 80 55 85 Q60 87 65 85 Q80 80 95 85 L90 95 Q75 90 60 95 Q45 90 30 95 Z" 
+                  fill="url(#ribbonGradient)" stroke="#333" stroke-width="1" opacity="0.6"/>
+            
+            <!-- Ribbon ends -->
+            <path d="M20 70 L15 85 L25 80 Z" fill="url(#ribbonGradient)" opacity="0.9"/>
+            <path d="M100 70 L105 85 L95 80 Z" fill="url(#ribbonGradient)" opacity="0.9"/>
+          </svg>
+          <div class="badge-text">CERTIFIED</div>
         </div>
-        
-        <table class="invoice-details">
-          <thead>
-            <tr>
-              <th>Description</th>
-              <th>Amount</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Digital Certificate - ${data.courseTitle}</td>
-              <td>₹${data.certificateAmount}</td>
-            </tr>
-            ${data.includesPhysicalCopy ? `
-            <tr>
-              <td>Physical Certificate Shipping</td>
-              <td>₹${data.shippingAmount}</td>
-            </tr>
-            ` : ''}
-          </tbody>
-          <tfoot>
-            <tr class="total-row">
-              <td><strong>Total Amount</strong></td>
-              <td><strong>₹${data.amount}</strong></td>
-            </tr>
-          </tfoot>
-        </table>
-        
-        <div class="footer">
-          <p><strong>Payment Method:</strong> ${data.paymentMethod}</p>
-          <p><strong>Payment Status:</strong> Completed</p>
-          <p>Thank you for choosing Octamy Solutions for your professional certification needs.</p>
+
+        <div class="p-16">
+          <!-- Main content -->
+          <div class="flex justify-center items-center flex-col mb-8">
+            <div class="text-center mb-12">
+              <img
+                src="../certificateImages/octamy.svg"
+                alt="Octamy Logo"
+                class="w-64 mx-auto"
+              />
+              <p class="text-sm" style="color: #331f30">
+                Solutions Private Limited
+              </p>
+              <p class="text-xs" style="color: #696171">
+                An ISO Certified Company
+              </p>
+            </div>
+
+            <div class="text-center">
+              <h1
+                class="text-3xl mb-3 tracking-wide"
+                style="color: #08060c; letter-spacing: 5px"
+              >
+                CERTIFICATE OF COMPLETION
+              </h1>
+              <h3 class="mb-2" style="color: #787378">
+                This is to certify that
+              </h3>
+            </div>
+
+            <img
+              src="../certificateImages/Frame 1.svg"
+              alt="Decorative Frame"
+              class="w-32"
+            />
+
+            <h1 class="text-4xl font-bold mb-2" style="color: #282842">
+              ${data.customerName}
+            </h1>
+
+            <img
+              src="../certificateImages/Frame 1.svg"
+              alt="Decorative Frame"
+              class="mb-4 w-32"
+            />
+
+            <p
+              class="text-lg max-w-3xl text-center mb-8 px-12"
+              style="color: #807a83"
+            >
+              has successfully demonstrated mastery and completed the
+              comprehensive professional certification program
+            </p>
+
+            <p class="text-xl font-semibold" style="color: #292945">
+             ${data.courseTitle}
+            </p>
+          </div>
+
+          <!-- Footer -->
+          <div class="flex justify-between items-center">
+            <div>
+              <div class="text-xs mb-4" style="color: #807a83">
+                <p>Certificate ID: OCT-2025-DEM-1750405520618</p>
+                <p><span class="font-semibold">Issue Date:</span> ${data.date.toLocaleDateString()}</p>
+                <p><span class="font-semibold">Expiry Date:</span> 6/20/2027</p>
+                <p>
+                  <span class="font-semibold">Status:</span> Valid
+                  Internationally
+                </p>
+              </div>
+              <div class="text-xs ml-4" style="color: #807a83">
+                <p><span class="font-semibold">Valid Until:</span> 6/20/2027</p>
+                <p>
+                  <span class="font-semibold">Verification:</span>
+                  octamy.com/verify
+                </p>
+              </div>
+            </div>
+
+            <div class="flex flex-col items-end gap-4">
+              <div class="text-center mr-24">
+                <p class="text-lg font-semibold" style="color: #16111e">
+                  Nitikesh Pattanayak
+                </p>
+                <p class="text-xs" style="color: #433d5e">
+                  Director of Certification
+                </p>
+              </div>
+              <div class="flex gap-4">
+                <img
+                  src="../certificateImages/ISO.svg"
+                  alt="ISO Certification"
+                  class="h-20"
+                />
+                <img
+                  src="../certificateImages/ISO.svg"
+                  alt="ISO Certification"
+                  class="h-20"
+                />
+                <img
+                  src="../certificateImages/Make_In_India.svg"
+                  alt="Make in India"
+                  class="h-20"
+                />
+                <img
+                  src="../certificateImages/QR.svg"
+                  alt="QR Code"
+                  class="h-20"
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </body>
-    </html>
-  `;
+    </div>
+  </body>
+</html>`;
 
   const browser = await puppeteer.launch({
     headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
   });
 
   try {
     const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: 'networkidle0' });
-    
+    await page.setContent(html, { waitUntil: "networkidle0" });
+
     const pdf = await page.pdf({
-      format: 'A4',
+      format: "A4",
       printBackground: true,
-      margin: { top: '20px', right: '20px', bottom: '20px', left: '20px' }
+      margin: { top: "20px", right: "20px", bottom: "20px", left: "20px" },
     });
 
     return Buffer.from(pdf);

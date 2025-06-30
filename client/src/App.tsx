@@ -3,7 +3,7 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AuthProvider } from "./lib/auth";
+import { AuthProvider } from "./lib/auth.tsx";
 import { SellerAuthProvider } from "./lib/sellerAuth";
 import Landing from "@/pages/landing-new";
 import Exam from "@/pages/exam";
@@ -28,6 +28,10 @@ import DemoBusinessCertificate from "@/pages/demo-business-certificate";
 import DemoInternshipCertificate from "@/pages/demo-internship-certificate";
 import BusinessCertificates from "@/pages/business-certificates";
 import InternshipForm from "@/pages/internship-form";
+import AIInterviews from "@/pages/ai-interviews";
+import ProfileEdit from "@/pages/profile-edit";
+import InterviewPayment from "@/pages/interview-payment";
+import InterviewSession from "@/pages/interview-session";
 import Verify from "@/pages/verify";
 import Preferences from "@/pages/preferences";
 import Progress from "@/pages/progress";
@@ -49,6 +53,9 @@ function Router() {
     <Switch>
       <Route path="/" component={Landing} />
       <Route path="/auth" component={Auth} />
+      <Route path="/login" component={Auth} />
+      <Route path="/register" component={Auth} />
+      <Route path="/logout" component={Auth} />
       <Route path="/courses" component={Courses} />
       <Route path="/virtual-internships" component={VirtualInternships} />
       <Route path="/business-certifications" component={BusinessCertificationsPage} />
@@ -87,6 +94,12 @@ function Router() {
       <Route path="/business-certificates" component={BusinessCertificates} />
       <Route path="/internship/:slug" component={InternshipForm} />
       <Route path="/contact" component={Contact} />
+      <Route path="/ai-interviews" component={AIInterviews} />
+      <Route path="/profile-edit" component={ProfileEdit} />
+      <Route path="/interview/:id" component={InterviewSession} />
+      <Route path="/interviews/:id" component={InterviewSession} />
+      <Route path="/interview-results/:id" component={InterviewSession} />
+      <Route path="/interviews/:id/payment" component={InterviewPayment} />
       <Route component={NotFound} />
     </Switch>
   );

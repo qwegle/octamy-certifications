@@ -16,6 +16,8 @@ import {
   skillAssessments,
   sponsors,
   contactSubmissions,
+  interviews,
+  interviewQuestions,
   type User, 
   type InsertUser,
   type UserAddress,
@@ -1046,6 +1048,23 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(contactSubmissions.submittedAt));
   }
 
+  async getContactSubmissions(search?: string): Promise<ContactSubmission[]> {
+    let query = db.select().from(contactSubmissions);
+    
+    if (search) {
+      query = query.where(
+        or(
+          ilike(contactSubmissions.name, `%${search}%`),
+          ilike(contactSubmissions.email, `%${search}%`),
+          ilike(contactSubmissions.subject, `%${search}%`),
+          ilike(contactSubmissions.message, `%${search}%`)
+        )
+      );
+    }
+    
+    return await query.orderBy(desc(contactSubmissions.submittedAt));
+  }
+
   async updateContactSubmissionStatus(id: number, status: string, adminNotes?: string): Promise<ContactSubmission> {
     const [result] = await db
       .update(contactSubmissions)
@@ -1057,6 +1076,132 @@ export class DatabaseStorage implements IStorage {
       .where(eq(contactSubmissions.id, id))
       .returning();
     return result;
+  }
+
+  // Question management for admin
+  async getQuestionsForAdmin(courseId?: number, search?: string): Promise<any[]> {
+    try {
+      console.log('getQuestionsForAdmin called with:', { courseId, search });
+      
+      // Build SQL query dynamically - this approach works for filtered queries
+      let baseQuery = `
+        SELECT 
+          q.id, 
+          q.question, 
+          q.course_id as "courseId", 
+          q.options, 
+          q.correct_answer as "correctAnswer",
+          q.difficulty,
+          q.is_active as "isActive",
+          json_build_object('title', c.title) as course
+        FROM questions q 
+        LEFT JOIN courses c ON q.course_id = c.id
+      `;
+      
+      const whereConditions = [];
+      const queryParams = [];
+      
+      if (courseId) {
+        whereConditions.push(`q.course_id = $${queryParams.length + 1}`);
+        queryParams.push(courseId);
+      }
+      
+      if (search) {
+        whereConditions.push(`q.question ILIKE $${queryParams.length + 1}`);
+        queryParams.push(`%${search}%`);
+      }
+      
+      if (whereConditions.length > 0) {
+        baseQuery += ` WHERE ${whereConditions.join(' AND ')}`;
+      }
+      
+      baseQuery += ` ORDER BY q.id DESC LIMIT 50`;
+      
+      console.log('Executing SQL:', baseQuery);
+      console.log('With parameters:', queryParams);
+      
+      const result = await db.execute(sql.raw(baseQuery, queryParams));
+      console.log('SQL result rows:', result.rows.length);
+      
+      return result.rows;
+    } catch (error) {
+      console.error('Error in getQuestionsForAdmin:', error);
+      throw error;
+    }
+  }
+
+  async updateQuestion(id: number, updates: Partial<InsertQuestion>): Promise<Question | undefined> {
+    try {
+      const [question] = await db
+        .update(questions)
+        .set(updates)
+        .where(eq(questions.id, id))
+        .returning();
+      return question || undefined;
+    } catch (error) {
+      console.error('Error updating question:', error);
+      throw error;
+    }
+  }
+
+  async deleteQuestion(id: number): Promise<boolean> {
+    const result = await db
+      .delete(questions)
+      .where(eq(questions.id, id));
+    return result.rowCount > 0;
+  }
+
+  // Interview question management for admin
+  async getInterviewQuestionsForAdmin(technology?: string, search?: string): Promise<any[]> {
+    let query = db.select().from(interviewQuestions);
+
+    if (technology) {
+      query = query.where(eq(interviewQuestions.technology, technology));
+    }
+
+    if (search) {
+      query = query.where(
+        or(
+          ilike(interviewQuestions.title, `%${search}%`),
+          ilike(interviewQuestions.question, `%${search}%`),
+          ilike(interviewQuestions.technology, `%${search}%`)
+        )
+      );
+    }
+
+    return await query.orderBy(desc(interviewQuestions.createdAt));
+  }
+
+  async createInterviewQuestion(questionData: any): Promise<any> {
+    const [question] = await db
+      .insert(interviewQuestions)
+      .values({
+        ...questionData,
+        createdAt: new Date()
+      })
+      .returning();
+    return question;
+  }
+
+  async updateInterviewQuestion(id: number, updates: any): Promise<any | undefined> {
+    try {
+      const [question] = await db
+        .update(interviewQuestions)
+        .set(updates)
+        .where(eq(interviewQuestions.id, id))
+        .returning();
+      return question || undefined;
+    } catch (error) {
+      console.error('Error updating interview question:', error);
+      throw error;
+    }
+  }
+
+  async deleteInterviewQuestion(id: number): Promise<boolean> {
+    const result = await db
+      .delete(interviewQuestions)
+      .where(eq(interviewQuestions.id, id));
+    return result.rowCount > 0;
   }
 
   async updateSellerApproval(sellerId: number, approved: boolean): Promise<void> {
@@ -1073,10 +1218,88 @@ export class DatabaseStorage implements IStorage {
   async updatePaymentStatus(transactionId: string, status: string, paymentResponse: any): Promise<void> {
     await db
       .update(payments)
-      .set({ 
-        status
+      .set({
+        status,
+        paymentResponse: JSON.stringify(paymentResponse),
+        updatedAt: new Date()
       })
       .where(eq(payments.transactionId, transactionId));
+  }
+
+  // Interview methods
+  async createInterview(data: any): Promise<any> {
+    const [interview] = await db.insert(interviews).values({
+      userId: data.userId,
+      technology: data.technology,
+      status: data.status || 'available',
+      paymentId: data.paymentId,
+      title: data.title,
+      isPaid: data.isPaid || false,
+      amount: data.amount || 0,
+      createdAt: new Date(),
+    }).returning();
+    
+    return interview;
+  }
+
+  async getInterviewById(id: number): Promise<any> {
+    const [interview] = await db
+      .select()
+      .from(interviews)
+      .where(eq(interviews.id, id));
+    
+    return interview;
+  }
+
+  async updateInterview(id: number, data: any): Promise<any> {
+    const [interview] = await db
+      .update(interviews)
+      .set({
+        ...data,
+        updatedAt: new Date(),
+      })
+      .where(eq(interviews.id, id))
+      .returning();
+    
+    return interview;
+  }
+
+  // Interview methods
+  async createInterview(data: any): Promise<any> {
+    const [interview] = await db.insert(interviews).values({
+      userId: data.userId,
+      technology: data.technology,
+      status: data.status || 'available',
+      paymentId: data.paymentId,
+      title: data.title,
+      isPaid: data.isPaid || false,
+      amount: data.amount || 0,
+      createdAt: new Date(),
+    }).returning();
+    
+    return interview;
+  }
+
+  async getInterviewById(id: number): Promise<any> {
+    const [interview] = await db
+      .select()
+      .from(interviews)
+      .where(eq(interviews.id, id));
+    
+    return interview;
+  }
+
+  async updateInterview(id: number, data: any): Promise<any> {
+    const [interview] = await db
+      .update(interviews)
+      .set({
+        ...data,
+        updatedAt: new Date(),
+      })
+      .where(eq(interviews.id, id))
+      .returning();
+    
+    return interview;
   }
 
   async getPaymentByTransactionId(transactionId: string): Promise<Payment | undefined> {
@@ -1830,8 +2053,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createQuestion(questionData: any) {
-    const [question] = await db.insert(questions).values(questionData).returning();
-    return question;
+    try {
+      console.log('Creating question with data:', questionData);
+      const [question] = await db.insert(questions).values(questionData).returning();
+      console.log('Question created:', question);
+      return question;
+    } catch (error) {
+      console.error('Error creating question:', error);
+      throw error;
+    }
   }
 
   async updateQuestion(questionId: number, questionData: any) {

@@ -16,7 +16,7 @@ export async function apiRequest(
   const isAdminRoute = url.includes('/admin');
   const token = isAdminRoute 
     ? localStorage.getItem('adminToken') 
-    : localStorage.getItem('authToken');
+    : localStorage.getItem('token');
     
   const headers: Record<string, string> = {};
   
@@ -35,6 +35,29 @@ export async function apiRequest(
     credentials: "include",
   });
 
+  // Handle authentication errors
+  if (res.status === 401 && !isAdminRoute) {
+    try {
+      const responseData = await res.json();
+      if (responseData.code === "TOKEN_EXPIRED" || responseData.code === "INVALID_TOKEN") {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        if (!window.location.pathname.includes('/login')) {
+          window.location.href = '/login';
+        }
+        throw new Error("Session expired. Please login again.");
+      }
+    } catch (jsonError) {
+      // If we can't parse JSON, still handle the 401
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      if (!window.location.pathname.includes('/login')) {
+        window.location.href = '/login';
+      }
+      throw new Error("Authentication failed. Please login again.");
+    }
+  }
+
   await throwIfResNotOk(res);
   return res;
 }
@@ -49,7 +72,7 @@ export const getQueryFn: <T>(options: {
     const isAdminRoute = url.includes('/admin');
     const token = isAdminRoute 
       ? localStorage.getItem('adminToken') 
-      : localStorage.getItem('authToken');
+      : localStorage.getItem('token');
       
     const headers: Record<string, string> = {};
     
@@ -62,8 +85,30 @@ export const getQueryFn: <T>(options: {
       credentials: "include",
     });
 
-    if (unauthorizedBehavior === "returnNull" && res.status === 401) {
-      return null;
+    if (res.status === 401) {
+      if (!isAdminRoute) {
+        try {
+          const responseData = await res.json();
+          if (responseData.code === "TOKEN_EXPIRED" || responseData.code === "INVALID_TOKEN") {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            if (!window.location.pathname.includes('/login')) {
+              window.location.href = '/login';
+            }
+          }
+        } catch (jsonError) {
+          // If we can't parse JSON, still handle the 401
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          if (!window.location.pathname.includes('/login')) {
+            window.location.href = '/login';
+          }
+        }
+      }
+      
+      if (unauthorizedBehavior === "returnNull") {
+        return null;
+      }
     }
 
     await throwIfResNotOk(res);
