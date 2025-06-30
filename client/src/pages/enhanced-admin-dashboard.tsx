@@ -12,7 +12,11 @@ import {
   Users, BookOpen, DollarSign, FileText, TrendingUp, Activity, Search, Filter, RefreshCw, Eye, Edit, Trash2,
   ChevronDown, ChevronRight, User, Calendar, Clock, MapPin, Phone, Mail, CreditCard
 } from "lucide-react";
+import { EnhancedQuestionsManagement } from "@/components/enhanced-questions-management";
+import { EnhancedAIQuestionsManagement } from "@/components/enhanced-ai-questions-management";
+import { EnhancedContactSubmissionsManagement } from "@/components/enhanced-contact-submissions-management";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/lib/auth.tsx";
 
 function EnhancedAdminDashboard() {
   const [analytics, setAnalytics] = useState<any>(null);
@@ -46,8 +50,10 @@ function EnhancedAdminDashboard() {
   const [expandedTransactions, setExpandedTransactions] = useState<Set<number>>(new Set());
   const [transactionDetails, setTransactionDetails] = useState<Record<number, any>>({});
   const { toast } = useToast();
+  const { logout } = useAuth();
 
   const handleLogout = () => {
+    logout();
     localStorage.removeItem('adminToken');
     window.location.href = '/admin/login';
   };
@@ -293,9 +299,12 @@ function EnhancedAdminDashboard() {
         </div>
 
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6 bg-gray-900">
+          <TabsList className="grid w-full grid-cols-9 bg-gray-900">
             <TabsTrigger value="overview" className="data-[state=active]:bg-white data-[state=active]:text-black">Overview</TabsTrigger>
             <TabsTrigger value="courses" className="data-[state=active]:bg-white data-[state=active]:text-black">Courses</TabsTrigger>
+            <TabsTrigger value="questions" className="data-[state=active]:bg-white data-[state=active]:text-black">Questions</TabsTrigger>
+            <TabsTrigger value="ai-questions" className="data-[state=active]:bg-white data-[state=active]:text-black">AI Interview</TabsTrigger>
+            <TabsTrigger value="contacts" className="data-[state=active]:bg-white data-[state=active]:text-black">Contact</TabsTrigger>
             <TabsTrigger value="customers" className="data-[state=active]:bg-white data-[state=active]:text-black">Customers</TabsTrigger>
             <TabsTrigger value="transactions" className="data-[state=active]:bg-white data-[state=active]:text-black">Transactions</TabsTrigger>
             <TabsTrigger value="partners" className="data-[state=active]:bg-white data-[state=active]:text-black">Partners</TabsTrigger>
@@ -1090,6 +1099,21 @@ function EnhancedAdminDashboard() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Questions Tab */}
+          <TabsContent value="questions">
+            <EnhancedQuestionsManagement />
+          </TabsContent>
+
+          {/* AI Questions Tab */}
+          <TabsContent value="ai-questions">
+            <EnhancedAIQuestionsManagement />
+          </TabsContent>
+
+          {/* Contact Submissions Tab */}
+          <TabsContent value="contacts">
+            <EnhancedContactSubmissionsManagement />
           </TabsContent>
         </Tabs>
       </div>

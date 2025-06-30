@@ -3,7 +3,7 @@ import { useLocation } from 'wouter';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, Download, Home, User } from 'lucide-react';
-import { useAuth } from '@/lib/auth';
+import { useAuth } from '@/lib/auth.tsx';
 
 export default function PaymentSuccess() {
   const [, setLocation] = useLocation();

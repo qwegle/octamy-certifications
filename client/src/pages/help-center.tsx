@@ -12,13 +12,75 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { useLocation } from "wouter";
-import { HelpCircle, Mail, Phone, MessageCircle } from "lucide-react";
+import { HelpCircle, Mail, Phone, MessageCircle, Send } from "lucide-react";
 import octamyLogoDark from "@/assets/image_1750054456482.png";
 import octamyLogoLight from "@/assets/image_1750054465427.png";
 import { Link } from "wouter";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+const contactFormSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  email: z.string().email("Please enter a valid email address"),
+  phone: z.string().min(10, "Phone number must be at least 10 digits").optional(),
+  subject: z.string().min(5, "Subject must be at least 5 characters"),
+  message: z.string().min(10, "Message must be at least 10 characters"),
+});
+
+type ContactFormData = z.infer<typeof contactFormSchema>;
+
 export default function HelpCenter() {
   const [, setLocation] = useLocation();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const form = useForm<ContactFormData>({
+    resolver: zodResolver(contactFormSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      phone: "",
+      subject: "",
+      message: "",
+    },
+  });
+
+  const contactMutation = useMutation({
+    mutationFn: (data: ContactFormData) =>
+      apiRequest("POST", "/api/contact-submission", data),
+    onSuccess: () => {
+      toast({
+        title: "Message Sent!",
+        description: "We've received your message and will get back to you soon.",
+      });
+      form.reset();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send message. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const onSubmit = (data: ContactFormData) => {
+    contactMutation.mutate(data);
+  };
 
   const faqs = [
     {
@@ -106,7 +168,7 @@ export default function HelpCenter() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* FAQ Section */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 space-y-8">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
@@ -130,6 +192,108 @@ export default function HelpCenter() {
                     </AccordionItem>
                   ))}
                 </Accordion>
+              </CardContent>
+            </Card>
+
+            {/* Contact Form Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Send className="h-6 w-6 text-blue-600" />
+                  <span>Contact Support</span>
+                </CardTitle>
+                <CardDescription>
+                  Send us a message and we'll respond within 24 hours
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Your full name" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Email</FormLabel>
+                          <FormControl>
+                            <Input type="email" placeholder="your.email@example.com" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="phone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Phone Number (Optional)</FormLabel>
+                          <FormControl>
+                            <Input type="tel" placeholder="+91 9876543210" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="subject"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Subject</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Brief description of your inquiry" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="message"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Message</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="Please describe your issue or question in detail..."
+                              rows={5}
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button 
+                      type="submit" 
+                      className="w-full" 
+                      disabled={contactMutation.isPending}
+                    >
+                      {contactMutation.isPending ? (
+                        "Sending..."
+                      ) : (
+                        <>
+                          <Send className="h-4 w-4 mr-2" />
+                          Send Message
+                        </>
+                      )}
+                    </Button>
+                  </form>
+                </Form>
               </CardContent>
             </Card>
           </div>

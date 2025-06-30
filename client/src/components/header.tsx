@@ -1,19 +1,21 @@
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/lib/auth.tsx";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import octamyLogoDark from "@/assets/image_1750054456482.png";
 import octamyLogoLight from "@/assets/image_1750054465427.png";
 export default function Header() {
-  const { user, isAuthenticated, isLoading } = useAuth();
-  const [location] = useLocation();
+  const { user, token, logout: authLogout, isLoading } = useAuth();
+  const [location, setLocation] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const logout = () => {
-    localStorage.removeItem("authToken");
-    window.location.href = "/";
+  const handleLogout = () => {
+    authLogout();
+    setLocation("/");
   };
+  
+  const isAuthenticated = !!user && !!token;
 
   const isActive = (path: string) => location === path;
 
@@ -86,7 +88,7 @@ export default function Header() {
                   </Button>
                 </Link>
                 <Button
-                  onClick={logout}
+                  onClick={handleLogout}
                   className="bg-white text-black hover:bg-gray-200"
                 >
                   Logout

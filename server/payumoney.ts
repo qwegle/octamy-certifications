@@ -84,13 +84,14 @@ export class PayUMoneyService {
 
   constructor() {
     this.config = {
-      merchantId: process.env.PAYUMONEY_MERCHANT_ID!,
-      merchantKey: process.env.PAYUMONEY_MERCHANT_KEY!,
-      salt: process.env.PAYUMONEY_SALT!,
+      merchantId: process.env.PAYUMONEY_MERCHANT_ID || '',
+      merchantKey: process.env.PAYUMONEY_MERCHANT_KEY || '',
+      salt: process.env.PAYUMONEY_SALT || '',
       baseUrl: 'https://secure.payu.in/_payment'
     };
 
-    if (!this.config.merchantId || !this.config.merchantKey || !this.config.salt) {
+    // Only throw error in production
+    if (process.env.NODE_ENV === 'production' && (!this.config.merchantId || !this.config.merchantKey || !this.config.salt)) {
       throw new Error('PayUMoney configuration is incomplete. Please provide PAYUMONEY_MERCHANT_ID, PAYUMONEY_MERCHANT_KEY, and PAYUMONEY_SALT');
     }
   }
@@ -99,6 +100,10 @@ export class PayUMoneyService {
    * Generate hash for payment request
    */
   generateHash(paymentData: PaymentRequest): string {
+    if (!this.config.merchantKey || !this.config.salt) {
+      throw new Error('PayUMoney credentials not configured for payment processing');
+    }
+
     const {
       txnid,
       amount,
@@ -121,6 +126,10 @@ export class PayUMoneyService {
    * Verify hash for payment response
    */
   verifyHash(responseData: Partial<PaymentResponse>): boolean {
+    if (!this.config.merchantKey || !this.config.salt) {
+      throw new Error('PayUMoney credentials not configured for payment verification');
+    }
+
     const {
       status,
       firstname,
@@ -151,6 +160,8 @@ export class PayUMoneyService {
     method: string;
     fields: Record<string, string>;
     securityHeaders: Record<string, string>;
+    html: string;
+    url: string;
   } {
     const hash = this.generateHash(paymentData);
 
@@ -158,34 +169,51 @@ export class PayUMoneyService {
     const secureSuccessUrl = paymentData.surl.replace('http://', 'https://');
     const secureFailureUrl = paymentData.furl.replace('http://', 'https://');
 
+    const fields = {
+      key: this.config.merchantKey,
+      txnid: paymentData.txnid,
+      amount: paymentData.amount,
+      productinfo: paymentData.productinfo,
+      firstname: paymentData.firstname,
+      email: paymentData.email,
+      phone: paymentData.phone || '',
+      surl: secureSuccessUrl,
+      furl: secureFailureUrl,
+      hash: hash,
+      udf1: paymentData.udf1 || '',
+      udf2: paymentData.udf2 || '',
+      udf3: paymentData.udf3 || '',
+      udf4: paymentData.udf4 || '',
+      udf5: paymentData.udf5 || '',
+      service_provider: 'payu_paisa',
+      enforce_paymethod: 'creditcard,debitcard,netbanking,upi',
+      pg: 'CC,DC,NB,UPI',
+      bankcode: 'CC',
+      drop_category: '0',
+      offer_key: '',
+      show_payment_mode: '1'
+    };
+
+    // Generate HTML form
+    const formFields = Object.entries(fields)
+      .map(([key, value]) => `<input type="hidden" name="${key}" value="${value}" />`)
+      .join('\n');
+
+    const html = `
+      <form method="POST" action="${this.config.baseUrl}" id="payuform">
+        ${formFields}
+      </form>
+      <script>
+        document.getElementById('payuform').submit();
+      </script>
+    `;
+
     return {
       action: this.config.baseUrl,
       method: 'POST',
-      fields: {
-        key: this.config.merchantKey,
-        txnid: paymentData.txnid,
-        amount: paymentData.amount,
-        productinfo: paymentData.productinfo,
-        firstname: paymentData.firstname,
-        email: paymentData.email,
-        phone: paymentData.phone || '',
-        surl: secureSuccessUrl,
-        furl: secureFailureUrl,
-        hash: hash,
-        udf1: paymentData.udf1 || '',
-        udf2: paymentData.udf2 || '',
-        udf3: paymentData.udf3 || '',
-        udf4: paymentData.udf4 || '',
-        udf5: paymentData.udf5 || '',
-        // Enhanced security fields
-        service_provider: 'payu_paisa',
-        enforce_paymethod: 'creditcard,debitcard,netbanking,upi',
-        pg: 'CC,DC,NB,UPI', // Payment gateway options
-        bankcode: 'CC', // Default to credit card for security
-        drop_category: '0',
-        offer_key: '',
-        show_payment_mode: '1'
-      },
+      fields,
+      html,
+      url: this.config.baseUrl,
       securityHeaders: {
         'Content-Security-Policy': "default-src 'self' https://secure.payu.in https://test.payu.in; script-src 'self' 'unsafe-inline' https://secure.payu.in; style-src 'self' 'unsafe-inline'",
         'X-Frame-Options': 'SAMEORIGIN',
