@@ -13,7 +13,11 @@ export interface CertificateData {
 
 function generateCertificateHTML(data: CertificateData): string {
   const expiryDate = new Date(data.issueDate);
-  expiryDate.setFullYear(expiryDate.getFullYear() + 2);
+  if (data.courseTitle.toLowerCase().includes("internship")) {
+     expiryDate.setMonth(expiryDate.getMonth() + 2);
+  }else{
+    expiryDate.setFullYear(expiryDate.getFullYear() + 2);
+  }
   const formattedExpiryDate = expiryDate.toLocaleDateString("en-GB", {
     day: "2-digit",
     month: "short",
@@ -24,6 +28,7 @@ function generateCertificateHTML(data: CertificateData): string {
     month: "short",
     year: "numeric",
   });
+  console.log("data",data)
 
   // return `
   //   <!DOCTYPE html>
@@ -760,7 +765,7 @@ function generateCertificateHTML(data: CertificateData): string {
 
       .signature-info {
         text-align: center;
-        margin-right: 96px;
+        margin-right: 10px;
       }
 
       .signature-name {
@@ -901,10 +906,9 @@ function generateCertificateHTML(data: CertificateData): string {
               </p>
             </div>
             <div class="details-secondary">
-              <p><span class="font-semibold">Valid Until: </span> ${formattedExpiryDate}</p>
               <p>
                 <span class="font-semibold">Verification:</span>
-                octamy.com/verify
+                www.octamy.com/verify
               </p>
             </div>
           </div>
@@ -916,16 +920,6 @@ function generateCertificateHTML(data: CertificateData): string {
             </div>
             <div class="certification-logos">
               <img
-                src="/certificateImages/iso.svg"
-                alt="ISO Certification"
-                class="certification-logo"
-              />
-              <img
-                src="/certificateImages/iso.svg"
-                alt="ISO Certification"
-                class="certification-logo"
-              />
-              <img
                 src="/certificateImages/Make_In_India.svg"
                 alt="Make in India"
                 class="certification-logo"
@@ -933,11 +927,6 @@ function generateCertificateHTML(data: CertificateData): string {
               <img
                 src="/certificateImages/makeinodisha.svg"
                 alt="Make in India"
-                class="certification-logo"
-              />
-              <img
-                src="/certificateImages/qr.svg"
-                alt="QR Code"
                 class="certification-logo"
               />
             </div>
