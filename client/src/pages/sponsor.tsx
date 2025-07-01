@@ -242,10 +242,10 @@ export default function SponsorPage() {
             <nav className="hidden md:flex items-center space-x-6">
               <Button
                 variant="ghost"
-                onClick={() => setLocation("/courses")}
+                onClick={() => setLocation("/exams")}
                 className="text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-900"
               >
-                Courses
+                Exams
               </Button>
               <Button
                 variant="ghost"

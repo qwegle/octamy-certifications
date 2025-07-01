@@ -147,8 +147,8 @@ export default function Landing() {
               />
             </Link>
             <div className="hidden md:flex space-x-6">
-              <Link href="/courses" className="hover:text-gray-300">
-                Courses
+              <Link href="/exams" className="hover:text-gray-300">
+                Exams
               </Link>
               <Link href="/virtual-internships" className="hover:text-gray-300">
                 Internships
@@ -228,7 +228,7 @@ export default function Landing() {
                 size="lg"
                 className="bg-black text-white hover:bg-gray-800 px-8 py-4 text-lg"
               >
-                Start Learning <ArrowRight className="ml-2 w-5 h-5" />
+                Start Exam <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
             </Link>
             <Link href="/partners">
@@ -276,14 +276,14 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold text-black mb-6">
-              Choose Your Learning Path
+              Choose Your Assessment
             </h2>
             <div className="max-w-md mx-auto">
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                 <Input
                   type="text"
-                  placeholder="Search courses..."
+                  placeholder="Search exams..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10 pr-4 py-3 border-2 border-black focus:border-black"
@@ -344,7 +344,7 @@ export default function Landing() {
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-6 text-center">
           <h2 className="text-4xl font-bold text-black mb-6">
-            AI-Powered Technical Assessment Platform
+            AI-Powered Technical Interview
           </h2>
           <p className="text-xl text-gray-600 mb-12 max-w-3xl mx-auto">
             Professional technical interviews with AI evaluation - 44+ technologies, instant scoring, recruiter-ready certificates
@@ -445,17 +445,17 @@ export default function Landing() {
                   className="bg-black text-white hover:bg-gray-800 px-8 py-4 text-lg"
                   aria-label="Begin AI-powered technical interview assessment"
                 >
-                  Start Professional Assessment <ArrowRight className="ml-2 w-5 h-5" />
+                  Start Professional Interview <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
               </Link>
             ) : (
-              <Link href="/dashboard">
+              <Link href="/ai-interviews">
                 <Button 
                   size="lg" 
                   className="bg-black text-white hover:bg-gray-800 px-8 py-4 text-lg"
                   aria-label="Begin AI-powered technical interview assessment"
                 >
-                  Start Professional Assessment <ArrowRight className="ml-2 w-5 h-5" />
+                  Start Professional Interview <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
               </Link>
             )}
@@ -579,7 +579,7 @@ export default function Landing() {
               </p>
             </div>
             <div>
-              <h4 className="font-semibold mb-4">Courses</h4>
+              <h4 className="font-semibold mb-4">Exams</h4>
               <ul className="space-y-2 text-gray-400">
                 <li>
                   <Link href="/" className="hover:text-white">
@@ -634,11 +634,12 @@ export default function Landing() {
                 ISO Certified by Octamy Solutions Private Limited
               </p>
               <div className="flex space-x-4">
+                ⭐⭐⭐⭐⭐
+                {/* <Star className="w-5 h-5 text-yellow-400" />
                 <Star className="w-5 h-5 text-yellow-400" />
                 <Star className="w-5 h-5 text-yellow-400" />
                 <Star className="w-5 h-5 text-yellow-400" />
-                <Star className="w-5 h-5 text-yellow-400" />
-                <Star className="w-5 h-5 text-yellow-400" />
+                <Star className="w-5 h-5 text-yellow-400" /> */}
               </div>
             </div>
           </div>
