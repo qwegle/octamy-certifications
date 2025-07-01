@@ -14,7 +14,17 @@ export interface CertificateData {
 function generateCertificateHTML(data: CertificateData): string {
   const expiryDate = new Date(data.issueDate);
   expiryDate.setFullYear(expiryDate.getFullYear() + 2);
-  console.log("Data",data)
+  const formattedExpiryDate = expiryDate.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+  const issueDate =data.issueDate.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+
   // return `
   //   <!DOCTYPE html>
   //   <html lang="en">
@@ -558,16 +568,18 @@ function generateCertificateHTML(data: CertificateData): string {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Certificate of Completion</title>
     <style>
-      @import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap");
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:wght@300;400;500;600;700&display=swap");
 
       * {
-        box-sizing: border-box;
-      }
+       box-sizing: border-box;
+       font-family: 'Poppins', system-ui, -apple-system, sans-serif;
+     }
+
 
       body {
         margin: 0;
         padding: 0;
-        font-family: system-ui, -apple-system, sans-serif;
+        font-family: 'Poppins', system-ui, -apple-system, sans-serif;
         width: 1123px;
         height: 756px;
         background-color: #f3f4f6;
@@ -649,7 +661,7 @@ function generateCertificateHTML(data: CertificateData): string {
       .company-name {
         font-size: 14px;
         color: #331f30;
-        margin: 0px 0 4px 0;
+        margin: 8px 0 4px 0;
       }
 
       .company-subtitle {
@@ -766,12 +778,12 @@ function generateCertificateHTML(data: CertificateData): string {
 
       .certification-logos {
         display: flex;
-        gap: 16px;
+        gap: 8px;
         align-items: flex-end;
       }
 
       .certification-logo {
-        height: 80px;
+        height: 50px;
         width: auto;
       }
 
@@ -798,7 +810,7 @@ function generateCertificateHTML(data: CertificateData): string {
 
       .badge-text {
         position: absolute;
-        top: 67%;
+        top: 70%;
         left: 50%;
         transform: translate(-50%, -50%);
         color: white;
@@ -825,97 +837,11 @@ function generateCertificateHTML(data: CertificateData): string {
 
       <!-- Top Right Badge -->
       <div class="badge-container">
-        <svg width="200" height="200" viewBox="0 0 120 120" class="badge-image">
-          <defs>
-            <linearGradient
-              id="shieldGradient"
-              x1="0%"
-              y1="0%"
-              x2="100%"
-              y2="100%"
-            >
-              <stop offset="0%" style="stop-color: #4a4a4a; stop-opacity: 1" />
-              <stop offset="50%" style="stop-color: #2a2a2a; stop-opacity: 1" />
-              <stop
-                offset="100%"
-                style="stop-color: #1a1a1a; stop-opacity: 1"
-              />
-            </linearGradient>
-            <linearGradient
-              id="ribbonGradient"
-              x1="0%"
-              y1="0%"
-              x2="100%"
-              y2="100%"
-            >
-              <stop offset="0%" style="stop-color: #888; stop-opacity: 1" />
-              <stop offset="50%" style="stop-color: #666; stop-opacity: 1" />
-              <stop offset="100%" style="stop-color: #555; stop-opacity: 1" />
-            </linearGradient>
-          </defs>
-
-          <!-- Shield Shape -->
-          <path
-            d="M60 10 L100 30 L100 60 Q100 80 85 95 Q70 105 60 110 Q50 105 35 95 Q20 80 20 60 L20 30 Z"
-            fill="url(#shieldGradient)"
-            stroke="#fff"
-            stroke-width="2"
-          />
-
-          <!-- Inner Circle -->
-          <circle
-            cx="60"
-            cy="45"
-            r="15"
-            fill="#fff"
-            stroke="#333"
-            stroke-width="1"
-          />
-
-          <!-- Sunburst pattern around circle -->
-          <g transform="translate(60,45)">
-            <g stroke="#fff" stroke-width="1" fill="none">
-              <circle r="20" opacity="0.3" />
-              <path
-                d="M0,-25 L0,-20 M0,20 L0,25 M25,0 L20,0 M-20,0 L-25,0"
-                stroke-width="2"
-              />
-              <path
-                d="M17.6,-17.6 L14.1,-14.1 M-14.1,14.1 L-17.6,17.6 M17.6,17.6 L14.1,14.1 M-14.1,-14.1 L-17.6,-17.6"
-                stroke-width="1.5"
-              />
-            </g>
-          </g>
-
-          <!-- Ribbon banners -->
-          <path
-            d="M20 70 Q35 65 50 70 Q60 72 70 70 Q85 65 100 70 L95 85 Q80 80 65 85 Q60 87 55 85 Q40 80 25 85 Z"
-            fill="url(#ribbonGradient)"
-            stroke="#333"
-            stroke-width="1"
-            opacity="0.8"
-          />
-
-          <path
-            d="M25 85 Q40 80 55 85 Q60 87 65 85 Q80 80 95 85 L90 95 Q75 90 60 95 Q45 90 30 95 Z"
-            fill="url(#ribbonGradient)"
-            stroke="#333"
-            stroke-width="1"
-            opacity="0.6"
-          />
-
-          <!-- Ribbon ends -->
-          <path
-            d="M20 70 L15 85 L25 80 Z"
-            fill="url(#ribbonGradient)"
-            opacity="0.9"
-          />
-          <path
-            d="M100 70 L105 85 L95 80 Z"
-            fill="url(#ribbonGradient)"
-            opacity="0.9"
-          />
-        </svg>
+        <img
+          src="/certificateImages/Badge.svg"
+          class="badge-image"
+          alt=""
+        />
         <div class="badge-text">${data.courseLevel}</div>
       </div>
 
@@ -967,15 +893,15 @@ function generateCertificateHTML(data: CertificateData): string {
         <div class="footer-section">
           <div class="certificate-details">
             <div class="details-main">
-              <p>Certificate ID: ${data.certificateId}</p>
-              <p><span class="font-semibold">Issue Date:</span> ${data.issueDate}</p>
-              <p><span class="font-semibold">Expiry Date:</span>${expiryDate}</p>
+              <p><span class="font-semibold">Certificate ID:</span> ${data.certificateId}</p>
+              <p><span class="font-semibold">Issue Date:</span> ${issueDate}</p>
+              <p><span class="font-semibold">Expiry Date: </span>${formattedExpiryDate}</p>
               <p>
                 <span class="font-semibold">Status:</span> Valid Internationally
               </p>
             </div>
             <div class="details-secondary">
-              <p><span class="font-semibold">Valid Until:</span> ${expiryDate}</p>
+              <p><span class="font-semibold">Valid Until: </span> ${formattedExpiryDate}</p>
               <p>
                 <span class="font-semibold">Verification:</span>
                 octamy.com/verify
@@ -1001,6 +927,11 @@ function generateCertificateHTML(data: CertificateData): string {
               />
               <img
                 src="/certificateImages/Make_In_India.svg"
+                alt="Make in India"
+                class="certification-logo"
+              />
+              <img
+                src="/certificateImages/makeinodisha.svg"
                 alt="Make in India"
                 class="certification-logo"
               />
@@ -1536,7 +1467,6 @@ export async function generateCertificatePDF(
 }
 
 export {
-   generateCertificateHTML , 
+  generateCertificateHTML,
   // generateCertificateHTMLDemo
-
 };
