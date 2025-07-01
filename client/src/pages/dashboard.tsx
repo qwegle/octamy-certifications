@@ -291,7 +291,13 @@ export default function Dashboard() {
                       <div className="flex justify-between text-sm">
                         <span className="text-gray-600">Expires:</span>
                         <span className="font-semibold text-black">
-                          {new Date(certificate.expiresAt).toLocaleDateString()}
+                          {certificate?.courseTitle
+                            ?.toLowerCase()
+                            ?.includes("internship")
+                            ? "Never"
+                            : new Date(
+                                certificate.expiresAt
+                              ).toLocaleDateString()}
                         </span>
                       </div>
                       <div className="flex gap-2 pt-2">

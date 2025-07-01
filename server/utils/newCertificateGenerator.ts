@@ -13,22 +13,22 @@ export interface CertificateData {
 
 function generateCertificateHTML(data: CertificateData): string {
   const expiryDate = new Date(data.issueDate);
+  let formattedExpiryDate: any;
   if (data.courseTitle.toLowerCase().includes("internship")) {
-     expiryDate.setMonth(expiryDate.getMonth() + 2);
-  }else{
+    formattedExpiryDate = "Never";
+  } else {
     expiryDate.setFullYear(expiryDate.getFullYear() + 2);
+    formattedExpiryDate = expiryDate.toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
   }
-  const formattedExpiryDate = expiryDate.toLocaleDateString("en-GB", {
+  const issueDate = data.issueDate.toLocaleDateString("en-GB", {
     day: "2-digit",
     month: "short",
     year: "numeric",
   });
-  const issueDate =data.issueDate.toLocaleDateString("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-  console.log("data",data)
 
   // return `
   //   <!DOCTYPE html>
@@ -898,7 +898,9 @@ function generateCertificateHTML(data: CertificateData): string {
         <div class="footer-section">
           <div class="certificate-details">
             <div class="details-main">
-              <p><span class="font-semibold">Certificate ID:</span> ${data.certificateId}</p>
+              <p><span class="font-semibold">Certificate ID:</span> ${
+                data.certificateId
+              }</p>
               <p><span class="font-semibold">Issue Date:</span> ${issueDate}</p>
               <p><span class="font-semibold">Expiry Date: </span>${formattedExpiryDate}</p>
               <p>
@@ -906,8 +908,15 @@ function generateCertificateHTML(data: CertificateData): string {
               </p>
             </div>
             <div class="details-secondary">
+             <p>
+              ${
+                formattedExpiryDate === "Never"
+                  ? '<span class="font-semibold">Duration: </span> 90 Days'
+                  : ""
+                }
+              </p>
               <p>
-                <span class="font-semibold">Verification:</span>
+                <span class="font-semibold">Verification: </span>
                 www.octamy.com/verify
               </p>
             </div>
