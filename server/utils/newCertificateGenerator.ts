@@ -14,6 +14,17 @@ export interface CertificateData {
 function generateCertificateHTML(data: CertificateData): string {
   const expiryDate = new Date(data.issueDate);
   expiryDate.setFullYear(expiryDate.getFullYear() + 2);
+  const formattedExpiryDate = expiryDate.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+  const issueDate =data.issueDate.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+
   // return `
   //   <!DOCTYPE html>
   //   <html lang="en">
@@ -557,16 +568,18 @@ function generateCertificateHTML(data: CertificateData): string {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Certificate of Completion</title>
     <style>
-      @import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap");
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:wght@300;400;500;600;700&display=swap");
 
       * {
-        box-sizing: border-box;
-      }
+       box-sizing: border-box;
+       font-family: 'Poppins', system-ui, -apple-system, sans-serif;
+     }
+
 
       body {
         margin: 0;
         padding: 0;
-        font-family: system-ui, -apple-system, sans-serif;
+        font-family: 'Poppins', system-ui, -apple-system, sans-serif;
         width: 1123px;
         height: 756px;
         background-color: #f3f4f6;
@@ -648,7 +661,7 @@ function generateCertificateHTML(data: CertificateData): string {
       .company-name {
         font-size: 14px;
         color: #331f30;
-        margin: 0px 0 4px 0;
+        margin: 8px 0 4px 0;
       }
 
       .company-subtitle {
@@ -770,7 +783,7 @@ function generateCertificateHTML(data: CertificateData): string {
       }
 
       .certification-logo {
-        height: 40px;
+        height: 50px;
         width: auto;
       }
 
@@ -881,14 +894,14 @@ function generateCertificateHTML(data: CertificateData): string {
           <div class="certificate-details">
             <div class="details-main">
               <p><span class="font-semibold">Certificate ID:</span> ${data.certificateId}</p>
-              <p><span class="font-semibold">Issue Date:</span> ${data.issueDate}</p>
-              <p><span class="font-semibold">Expiry Date:</span>${expiryDate}</p>
+              <p><span class="font-semibold">Issue Date:</span> ${issueDate}</p>
+              <p><span class="font-semibold">Expiry Date: </span>${formattedExpiryDate}</p>
               <p>
                 <span class="font-semibold">Status:</span> Valid Internationally
               </p>
             </div>
             <div class="details-secondary">
-              <p><span class="font-semibold">Valid Until:</span> ${expiryDate}</p>
+              <p><span class="font-semibold">Valid Until: </span> ${formattedExpiryDate}</p>
               <p>
                 <span class="font-semibold">Verification:</span>
                 octamy.com/verify
@@ -1454,7 +1467,6 @@ export async function generateCertificatePDF(
 }
 
 export {
-   generateCertificateHTML , 
+  generateCertificateHTML,
   // generateCertificateHTMLDemo
-
 };
