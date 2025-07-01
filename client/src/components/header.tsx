@@ -38,8 +38,8 @@ export default function Header() {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex space-x-6">
-            <Link href="/courses" className="hover:text-gray-300">
-              Courses
+            <Link href="/exams" className="hover:text-gray-300">
+              Exams
             </Link>
             {/* <Link href="/learning-paths" className="hover:text-gray-300">Learning Paths</Link> */}
             <Link href="/virtual-internships" className="hover:text-gray-300">
