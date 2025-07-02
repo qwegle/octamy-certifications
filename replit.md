@@ -56,6 +56,14 @@ Comprehensive professional certification platform with AI-powered interviews, in
 - ✅ Users can now retake any completed interview for ₹99 by clicking "Retake" button
 - ✅ Payment flow works correctly for retakes, generating new transaction IDs and interview records
 
+### 2025-01-02: Tawk.to Live Chat Integration & Demo Test Course
+- ✅ Added Tawk.to live chat widget to help center page with real credentials
+- ✅ Made Live Chat section clickable with hover effects and proper UX
+- ✅ Implemented proper script loading and cleanup for chat widget
+- ✅ Created "Demo Test Course" in database for testing purposes
+- ✅ Demo course: ID 45, Price ₹1.00, 1 question, 80% passing score, slug: demo-test-course
+- ✅ Perfect for testing payment flow and certification system with minimal cost
+
 ### 2025-01-23: Premium UI Redesign for Recruiter Portal
 - Redesigned authentication page with split-screen layout (left: branding/quotes, right: forms)
 - Implemented black and white premium startup branding throughout
