@@ -1111,6 +1111,26 @@ function CourseForm({ course, onCancel, onSuccess }: { course?: any; onCancel: (
     }
   });
 
+  // Reset form when course data changes
+  useEffect(() => {
+    if (course) {
+      form.reset({
+        title: course.title || "",
+        description: course.description || "",
+        slug: course.slug || "",
+        categoryId: course.categoryId || 0,
+        duration: course.duration || 30,
+        passingScore: course.passingScore || 60,
+        price: course.price || "99",
+        originalPrice: course.originalPrice || "",
+        isOnSale: course.isOnSale || false,
+        level: course.level || "Beginner",
+        isActive: course.isActive !== false,
+        isInternship: course.isInternship || false
+      });
+    }
+  }, [course, form]);
+
   // Fetch categories
   const { data: categories = [] } = useQuery<Category[]>({
     queryKey: ["/api/categories"]
