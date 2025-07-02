@@ -1143,7 +1143,8 @@ function CourseForm({ course, onCancel, onSuccess }: { course?: any; onCancel: (
       const method = isEditing ? "PUT" : "POST";
       return await apiRequest(method, url, data);
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('Mutation success:', data);
       queryClient.invalidateQueries({ queryKey: ["/api/admin/courses"] });
       toast({
         title: "Success",
@@ -1152,6 +1153,7 @@ function CourseForm({ course, onCancel, onSuccess }: { course?: any; onCancel: (
       onSuccess();
     },
     onError: (error: any) => {
+      console.error('Mutation error:', error);
       toast({
         title: "Error",
         description: error.message || `Failed to ${isEditing ? 'update' : 'create'} course`,
@@ -1161,10 +1163,15 @@ function CourseForm({ course, onCancel, onSuccess }: { course?: any; onCancel: (
   });
 
   const onSubmit = (data: CourseFormData) => {
+    console.log('Form submitted with data:', data);
+    console.log('Is editing:', isEditing);
+    console.log('Course ID:', course?.id);
+    
     // Generate slug from title if not provided
     if (!data.slug && data.title) {
       data.slug = data.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
     }
+    console.log('Final data being sent:', data);
     courseMutation.mutate(data);
   };
 
