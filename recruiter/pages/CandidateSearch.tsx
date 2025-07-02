@@ -210,6 +210,12 @@ export default function CandidateSearch() {
 
   const handleAccessProfile = async (candidateId: number, accessType: 'view' | 'cv' | 'interview') => {
     try {
+      if (accessType === 'view') {
+        // Navigate to detailed profile page
+        window.location.href = `/recruiter/profile/${candidateId}`;
+        return;
+      }
+
       const response = await apiRequest('POST', '/api/recruiter/access-profile', {
         candidateId,
         accessType,

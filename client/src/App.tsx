@@ -56,6 +56,7 @@ import {
   RecruiterOnboarding,
   RecruiterDashboard,
   CandidateSearch,
+  CandidateProfile,
   RecruiterWallet
 } from "../../recruiter";
 
@@ -117,6 +118,7 @@ function Router() {
       <Route path="/recruiter/onboarding" component={RecruiterOnboarding} />
       <Route path="/recruiter/dashboard" component={RecruiterDashboard} />
       <Route path="/recruiter/search" component={CandidateSearch} />
+      <Route path="/recruiter/profile/:id" component={CandidateProfile} />
       <Route path="/recruiter/wallet" component={RecruiterWallet} />
       
       <Route component={NotFound} />
