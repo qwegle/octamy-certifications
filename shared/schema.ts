@@ -139,6 +139,8 @@ export const users = pgTable("users", {
   password: text("password"),
   name: text("name").notNull(),
   phone: text("phone"),
+  company: text("company"),
+  position: text("position"),
   isAdmin: boolean("is_admin").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   

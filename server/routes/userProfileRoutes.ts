@@ -39,6 +39,8 @@ const router = Router();
 const updateProfileSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters').optional(),
   phone: z.string().optional(),
+  company: z.string().optional(),
+  position: z.string().optional(),
   location: z.string().optional(),
   experience: z.number().min(0).max(50).optional(),
   currentRole: z.string().optional(),
@@ -72,6 +74,8 @@ router.get('/profile', authenticateToken, async (req, res) => {
       name: user.name,
       email: user.email,
       phone: user.phone,
+      company: user.company,
+      position: user.position,
       location: user.location,
       experience: user.experience,
       currentRole: user.currentRole,
@@ -139,7 +143,7 @@ router.put('/profile', authenticateToken, async (req, res) => {
 // Helper function to calculate profile completeness
 function calculateProfileCompleteness(data: any): number {
   const fields = [
-    'name', 'phone', 'location', 'experience', 'currentRole', 
+    'name', 'phone', 'company', 'position', 'location', 'experience', 'currentRole', 
     'skills', 'availability', 'noticePeriod', 'expectedSalary',
     'workType', 'category', 'bio', 'careerGoals'
   ];
