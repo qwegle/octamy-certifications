@@ -85,7 +85,7 @@ import {
   type RatingAggregate,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, count, sql, or, asc, ilike } from "drizzle-orm";
+import { eq, and, desc, count, sql, or, asc, ilike, gte, lte } from "drizzle-orm";
 
 export interface IStorage {
   // User operations
@@ -2619,10 +2619,39 @@ export class DatabaseStorage implements IStorage {
 
     const conditions = [];
     
+    // Location filter
     if (filters.location) {
       conditions.push(ilike(users.location, `%${filters.location}%`));
     }
 
+    // Experience range filter
+    if (filters.experience) {
+      if (filters.experience.min !== undefined) {
+        conditions.push(gte(users.experience, filters.experience.min));
+      }
+      if (filters.experience.max !== undefined) {
+        conditions.push(lte(users.experience, filters.experience.max));
+      }
+    }
+
+    // Skills filter (if skills are stored as array or string)
+    if (filters.skills && filters.skills.length > 0) {
+      // Assuming skills are stored as an array in JSON format
+      const skillConditions = filters.skills.map((skill: string) => 
+        sql`${users.skills}::text ILIKE ${'%' + skill + '%'}`
+      );
+      conditions.push(or(...skillConditions));
+    }
+
+    // Technology filter (check in skills)
+    if (filters.technology && filters.technology.length > 0) {
+      const techConditions = filters.technology.map((tech: string) => 
+        sql`${users.skills}::text ILIKE ${'%' + tech + '%'}`
+      );
+      conditions.push(or(...techConditions));
+    }
+
+    // Apply filters only if we have conditions
     if (conditions.length > 0) {
       query = query.where(and(...conditions));
     }
@@ -2669,6 +2698,81 @@ export class DatabaseStorage implements IStorage {
       total,
       page,
       totalPages: Math.ceil(total / limit)
+    };
+  }
+
+  async getCandidateProfile(candidateId: number) {
+    // Get basic user information
+    const candidate = await db.select({
+      id: users.id,
+      name: users.name,
+      email: users.email,
+      location: users.location,
+      experience: users.experience,
+      currentRole: users.currentRole,
+      skills: users.skills,
+      bio: users.bio,
+      phone: users.phone,
+      linkedinProfile: users.linkedinProfile,
+      githubProfile: users.githubProfile,
+      portfolioUrl: users.portfolioUrl,
+      createdAt: users.createdAt,
+      updatedAt: users.updatedAt
+    })
+    .from(users)
+    .where(eq(users.id, candidateId));
+
+    if (!candidate || candidate.length === 0) {
+      return null;
+    }
+
+    const candidateData = candidate[0];
+
+    // Get certificates
+    const certs = await db.select({
+      id: certificates.id,
+      courseTitle: certificates.courseTitle,
+      score: certificates.score,
+      badge: certificates.badge,
+      issuedAt: certificates.issuedAt,
+      certificateId: certificates.certificateId
+    })
+    .from(certificates)
+    .where(eq(certificates.userId, candidateId))
+    .orderBy(desc(certificates.issuedAt));
+
+    // Get interviews
+    const userInterviews = await db.select({
+      id: interviews.id,
+      technology: interviews.technology,
+      score: interviews.score,
+      grade: interviews.grade,
+      createdAt: interviews.createdAt,
+      status: interviews.status
+    })
+    .from(interviews)
+    .where(eq(interviews.userId, candidateId))
+    .orderBy(desc(interviews.createdAt));
+
+    // Get exam attempts for additional context
+    const examAttempts = await db.select({
+      id: examAttempts.id,
+      title: examAttempts.title,
+      score: examAttempts.score,
+      passed: examAttempts.passed,
+      completedAt: examAttempts.completedAt
+    })
+    .from(examAttempts)
+    .where(eq(examAttempts.userId, candidateId))
+    .orderBy(desc(examAttempts.completedAt));
+
+    return {
+      ...candidateData,
+      certificates: certs,
+      interviews: userInterviews,
+      examAttempts: examAttempts,
+      profileViews: 0, // This could be tracked separately
+      lastActive: candidateData.updatedAt
     };
   }
 

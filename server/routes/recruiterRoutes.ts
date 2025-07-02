@@ -368,4 +368,36 @@ export function registerRecruiterRoutes(app: any) {
       res.status(500).json({ message: "Failed to purchase credits", error: error.message });
     }
   });
+
+  // Get Candidate Profile by ID
+  app.get('/api/recruiter/candidate/:id', authenticateRecruiterToken, async (req: AuthenticatedRecruiterRequest, res: Response) => {
+    try {
+      const recruiterId = req.recruiter?.recruiterId;
+      if (!recruiterId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const candidateId = parseInt(req.params.id);
+      if (!candidateId || isNaN(candidateId)) {
+        return res.status(400).json({ message: "Invalid candidate ID" });
+      }
+
+      // Check if recruiter is KYC approved
+      const recruiter = await storage.getRecruiterById(recruiterId);
+      if (!recruiter || recruiter.kycStatus !== 'approved') {
+        return res.status(403).json({ message: "KYC verification required to view candidate profiles" });
+      }
+
+      // Get candidate profile data
+      const candidateProfile = await storage.getCandidateProfile(candidateId);
+      if (!candidateProfile) {
+        return res.status(404).json({ message: "The candidate profile you're looking for doesn't exist." });
+      }
+
+      res.json(candidateProfile);
+    } catch (error: any) {
+      console.error("Candidate profile error:", error);
+      res.status(500).json({ message: "Failed to load candidate profile", error: error.message });
+    }
+  });
 }
