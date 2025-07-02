@@ -4,6 +4,8 @@ import courseRoutes from './courseRoutes';
 import examRoutes from './examRoutes';
 import certificateRoutes from './certificateRoutes';
 import analyticsRoutes from './analytics';
+import userProfileRoutes from './userProfileRoutes';
+import { registerRecruiterRoutes } from './recruiterRoutes';
 // Remove sellerRoutes import to prevent conflicts - seller routes are handled directly in main routes.ts
 
 const router = Router();
@@ -14,7 +16,11 @@ router.use('/auth', authRoutes);
 // router.use('/courses', courseRoutes);
 router.use('/exam', examRoutes);
 router.use('/certificates', certificateRoutes);
+router.use('/user', userProfileRoutes); // Mount user profile routes
 router.use('/', analyticsRoutes); // Mount analytics routes at root level for /api/user/profile
 // Remove seller routes mounting - handled directly in main routes.ts
+
+// Register recruiter routes
+registerRecruiterRoutes(router);
 
 export default router;

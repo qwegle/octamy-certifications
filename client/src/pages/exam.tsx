@@ -11,6 +11,8 @@ import { apiRequest } from '@/lib/queryClient';
 import { useAuth } from '@/lib/auth.tsx';
 import Header from '@/components/header';
 import ExamTimer from '@/components/exam-timer';
+import { Helmet } from 'react-helmet-async';
+import { ExamStructuredData } from '@/components/seo-structured-data';
 
 import type { Course, Question } from '@shared/schema';
 import { AlertTriangle } from 'lucide-react';
@@ -22,7 +24,7 @@ interface ExamQuestion {
 }
 
 export default function Exam() {
-  const { courseId } = useParams();
+  const { slug } = useParams();
   const [, setLocation] = useLocation();
   const { user } = useAuth();
   const { toast } = useToast();
@@ -41,20 +43,22 @@ export default function Exam() {
   });
 
   const { data: course } = useQuery<Course>({
-    queryKey: [`/api/courses/${courseId}`],
-    enabled: !!courseId,
+    queryKey: [`/api/courses/slug/${slug}`],
+    enabled: !!slug,
   });
 
   const { data: questionsData } = useQuery<{questions: ExamQuestion[], sessionId: string}>({
-    queryKey: [`/api/courses/${courseId}/questions`, sessionId],
+    queryKey: [`/api/courses/${course?.id}/questions`, examStarted, examStartTime],
     queryFn: async () => {
-      const response = await fetch(`/api/courses/${courseId}/questions`, {
+      // Always generate a fresh session for each exam attempt
+      const newSessionId = `session_${Date.now()}_${Math.random()}`;
+      const response = await fetch(`/api/courses/${course?.id}/questions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          sessionId: sessionId || `session_${Date.now()}_${Math.random()}`
+          sessionId: newSessionId
         }),
       });
       if (!response.ok) {
@@ -62,17 +66,17 @@ export default function Exam() {
       }
       return response.json();
     },
-    enabled: !!courseId && examStarted,
+    enabled: !!course?.id && examStarted,
   });
 
   const questions = questionsData?.questions || [];
 
   // Set session ID when questions data is available
   useEffect(() => {
-    if (questionsData?.sessionId && !sessionId) {
+    if (questionsData?.sessionId) {
       setSessionId(questionsData.sessionId);
     }
-  }, [questionsData, sessionId]);
+  }, [questionsData]);
 
   // Anti-cheating: Monitor tab/window focus
   useEffect(() => {
@@ -160,12 +164,31 @@ export default function Exam() {
         });
       }
     },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to submit exam. Please try again.",
-        variant: "destructive",
-      });
+    onError: async (error: any) => {
+      try {
+        const errorData = await error.json();
+        if (errorData.code === 'SESSION_EXPIRED') {
+          toast({
+            title: "Session Expired",
+            description: "Your exam session has expired. Please start the exam again.",
+            variant: "destructive",
+          });
+          // Reload the page to restart the exam
+          window.location.reload();
+        } else {
+          toast({
+            title: "Error",
+            description: errorData.message || "Failed to submit exam. Please try again.",
+            variant: "destructive",
+          });
+        }
+      } catch {
+        toast({
+          title: "Error",
+          description: "Failed to submit exam. Please try again.",
+          variant: "destructive",
+        });
+      }
     },
   });
 
@@ -178,6 +201,16 @@ export default function Exam() {
       });
       return;
     }
+    
+    // Reset state for fresh exam attempt
+    setSessionId('');
+    setAnswers({});
+    setCurrentQuestion(0);
+    setTabSwitches(0);
+    setIsWindowFocused(true);
+    
+    // Invalidate queries to force fresh fetch
+    queryClient.invalidateQueries({ queryKey: [`/api/courses/${course?.id}/questions`] });
     
     setExamStarted(true);
     setExamStartTime(Date.now());
@@ -203,7 +236,7 @@ export default function Exam() {
     }
     
     submitExamMutation.mutate({
-      courseId: parseInt(courseId!),
+      courseId: course?.id!,
       answers,
       timeTaken,
       userName: userInfo.name,
@@ -224,9 +257,24 @@ export default function Exam() {
   const progress = questions.length > 0 ? ((currentQuestion + 1) / questions.length) * 100 : 0;
   const answeredCount = Object.keys(answers).length;
 
+  const courseSlug = course?.slug || course?.title.toLowerCase()
+    .replace(/[^a-zA-Z0-9\s]/g, '')
+    .replace(/\s+/g, '-');
+
   if (!examStarted) {
     return (
       <div className="min-h-screen bg-white">
+        <Helmet>
+          <title>{course?.title ? `${course.title} - Certification Exam | Octamy` : 'Certification Exam | Octamy'}</title>
+          <meta name="description" content={course?.title ? `Take the ${course.title} certification exam and earn your professional credential. Comprehensive assessment with instant results.` : 'Take your certification exam and earn your professional credential.'} />
+          <meta property="og:title" content={course?.title ? `${course.title} - Certification Exam | Octamy` : 'Certification Exam | Octamy'} />
+          <meta property="og:description" content={course?.title ? `Take the ${course.title} certification exam and earn your professional credential.` : 'Take your certification exam and earn your professional credential.'} />
+          <meta property="og:url" content={`${window.location.origin}/exam/${courseSlug}`} />
+          <link rel="canonical" href={`${window.location.origin}/exam/${courseSlug}`} />
+        </Helmet>
+        
+        {course && <ExamStructuredData course={course} rating={course.rating} />}
+        
         <Header />
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <Card>
