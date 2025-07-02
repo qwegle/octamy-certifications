@@ -2177,7 +2177,10 @@ export default function AdminDashboard() {
                                       <Button 
                                         size="sm" 
                                         variant="outline"
-                                        onClick={() => setSelectedCourse(course)}
+                                        onClick={() => {
+                                          setSelectedCourse(course);
+                                          setIsEditingCourse(true);
+                                        }}
                                       >
                                         <Edit className="h-4 w-4" />
                                       </Button>
