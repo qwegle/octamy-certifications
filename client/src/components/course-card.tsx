@@ -5,6 +5,12 @@ import { Clock, Users, Star, ChevronRight, Award } from "lucide-react";
 import { Link } from "wouter";
 import type { Course, Category } from "@shared/schema";
 
+// Import category images
+import aiImage from "@/assets/course-images/ai-assessment.jpg";
+import developmentImage from "@/assets/course-images/development-assessment.jpg";
+import businessImage from "@/assets/course-images/business-assessment.jpg";
+import internshipImage from "@/assets/course-images/internship-assessment.jpg";
+
 interface CourseCardProps {
   course: Course & { category: Category };
   certifiedCount?: number;
@@ -21,6 +27,22 @@ export default function CourseCard({
   const courseSlug = course.slug || course.title.toLowerCase()
     .replace(/[^a-zA-Z0-9\s]/g, '')
     .replace(/\s+/g, '-');
+
+  // Function to get the appropriate image based on category
+  const getCategoryImage = (categoryName: string) => {
+    switch (categoryName.toLowerCase()) {
+      case 'ai':
+        return aiImage;
+      case 'development':
+        return developmentImage;
+      case 'business':
+        return businessImage;
+      case 'internships':
+        return internshipImage;
+      default:
+        return businessImage; // Default fallback
+    }
+  };
   return (
     <Card
       className={`group hover:shadow-lg transition-all duration-300 border-2 hover:border-black relative ${
@@ -29,9 +51,12 @@ export default function CourseCard({
     >
       <div className={`${viewMode === "list" ? "w-64 flex-shrink-0" : ""}`}>
         <div className="aspect-video bg-gradient-to-br from-gray-900 to-black rounded-t-lg relative overflow-hidden">
-          <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center">
-            <Award className="h-12 w-12 text-white" />
-          </div>
+          <img 
+            src={getCategoryImage(course.category.name)} 
+            alt={`${course.category.name} assessment`}
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-black bg-opacity-40"></div>
           <div className="absolute top-4 left-4">
             <Badge
               variant="secondary"
