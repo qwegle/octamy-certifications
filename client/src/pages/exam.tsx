@@ -23,7 +23,7 @@ interface ExamQuestion {
 }
 
 export default function Exam() {
-  const { courseId } = useParams();
+  const { slug } = useParams();
   const [, setLocation] = useLocation();
   const { user } = useAuth();
   const { toast } = useToast();
@@ -42,14 +42,14 @@ export default function Exam() {
   });
 
   const { data: course } = useQuery<Course>({
-    queryKey: [`/api/courses/slug/${courseId}`],
-    enabled: !!courseId,
+    queryKey: [`/api/courses/slug/${slug}`],
+    enabled: !!slug,
   });
 
   const { data: questionsData } = useQuery<{questions: ExamQuestion[], sessionId: string}>({
-    queryKey: [`/api/courses/${courseId}/questions`, sessionId],
+    queryKey: [`/api/courses/${course?.id}/questions`, sessionId],
     queryFn: async () => {
-      const response = await fetch(`/api/courses/${courseId}/questions`, {
+      const response = await fetch(`/api/courses/${course?.id}/questions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -63,7 +63,7 @@ export default function Exam() {
       }
       return response.json();
     },
-    enabled: !!courseId && examStarted,
+    enabled: !!course?.id && examStarted,
   });
 
   const questions = questionsData?.questions || [];
