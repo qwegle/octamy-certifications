@@ -33,7 +33,7 @@ const authenticateRecruiterToken = (req: AuthenticatedRecruiterRequest, res: Res
 
 export function registerRecruiterRoutes(app: any) {
   // Recruiter Registration
-  app.post('/api/recruiter/register', async (req: Request, res: Response) => {
+  app.post('/recruiter/register', async (req: Request, res: Response) => {
     try {
       const { email, password } = req.body;
       
@@ -104,7 +104,7 @@ export function registerRecruiterRoutes(app: any) {
   });
 
   // Recruiter Login
-  app.post('/api/recruiter/login', async (req: Request, res: Response) => {
+  app.post('/recruiter/login', async (req: Request, res: Response) => {
     try {
       const { email, password } = req.body;
       
@@ -148,7 +148,7 @@ export function registerRecruiterRoutes(app: any) {
   });
 
   // Onboarding Step 1: Personal Information
-  app.post('/api/recruiter/onboarding/step1', authenticateRecruiterToken, async (req: AuthenticatedRecruiterRequest, res: Response) => {
+  app.post('/recruiter/onboarding/step1', authenticateRecruiterToken, async (req: AuthenticatedRecruiterRequest, res: Response) => {
     try {
       const recruiterId = req.recruiter?.recruiterId;
       if (!recruiterId) {
@@ -175,7 +175,7 @@ export function registerRecruiterRoutes(app: any) {
   });
 
   // Onboarding Step 2: Company Information
-  app.post('/api/recruiter/onboarding/step2', authenticateRecruiterToken, async (req: AuthenticatedRecruiterRequest, res: Response) => {
+  app.post('/recruiter/onboarding/step2', authenticateRecruiterToken, async (req: AuthenticatedRecruiterRequest, res: Response) => {
     try {
       const recruiterId = req.recruiter?.recruiterId;
       if (!recruiterId) {
@@ -214,7 +214,7 @@ export function registerRecruiterRoutes(app: any) {
   });
 
   // Onboarding Step 3: KYC Documents
-  app.post('/api/recruiter/onboarding/step3', authenticateRecruiterToken, async (req: AuthenticatedRecruiterRequest, res: Response) => {
+  app.post('/recruiter/onboarding/step3', authenticateRecruiterToken, async (req: AuthenticatedRecruiterRequest, res: Response) => {
     try {
       const recruiterId = req.recruiter?.recruiterId;
       if (!recruiterId) {
@@ -250,7 +250,7 @@ export function registerRecruiterRoutes(app: any) {
   });
 
   // Get Dashboard Data
-  app.get('/api/recruiter/dashboard', authenticateRecruiterToken, async (req: AuthenticatedRecruiterRequest, res: Response) => {
+  app.get('/recruiter/dashboard', authenticateRecruiterToken, async (req: AuthenticatedRecruiterRequest, res: Response) => {
     try {
       const recruiterId = req.recruiter?.recruiterId;
       if (!recruiterId) {
@@ -268,7 +268,7 @@ export function registerRecruiterRoutes(app: any) {
   });
 
   // Search Candidates
-  app.post('/api/recruiter/search', authenticateRecruiterToken, async (req: AuthenticatedRecruiterRequest, res: Response) => {
+  app.post('/recruiter/search', authenticateRecruiterToken, async (req: AuthenticatedRecruiterRequest, res: Response) => {
     try {
       const recruiterId = req.recruiter?.recruiterId;
       if (!recruiterId) {
@@ -295,7 +295,7 @@ export function registerRecruiterRoutes(app: any) {
   });
 
   // Access Profile (View/CV/Interview)
-  app.post('/api/recruiter/access-profile', authenticateRecruiterToken, async (req: AuthenticatedRecruiterRequest, res: Response) => {
+  app.post('/recruiter/access-profile', authenticateRecruiterToken, async (req: AuthenticatedRecruiterRequest, res: Response) => {
     try {
       const recruiterId = req.recruiter?.recruiterId;
       if (!recruiterId) {
@@ -336,7 +336,7 @@ export function registerRecruiterRoutes(app: any) {
   });
 
   // Get Wallet Information
-  app.get('/api/recruiter/wallet', authenticateRecruiterToken, async (req: AuthenticatedRecruiterRequest, res: Response) => {
+  app.get('/recruiter/wallet', authenticateRecruiterToken, async (req: AuthenticatedRecruiterRequest, res: Response) => {
     try {
       const recruiterId = req.recruiter?.recruiterId;
       if (!recruiterId) {
@@ -353,7 +353,7 @@ export function registerRecruiterRoutes(app: any) {
   });
 
   // Purchase Credits
-  app.post('/api/recruiter/purchase-credits', authenticateRecruiterToken, async (req: AuthenticatedRecruiterRequest, res: Response) => {
+  app.post('/recruiter/purchase-credits', authenticateRecruiterToken, async (req: AuthenticatedRecruiterRequest, res: Response) => {
     try {
       const recruiterId = req.recruiter?.recruiterId;
       if (!recruiterId) {
@@ -373,7 +373,7 @@ export function registerRecruiterRoutes(app: any) {
   });
 
   // Get Candidate Profile by ID
-  app.get('/api/recruiter/candidate/:id', authenticateRecruiterToken, async (req: AuthenticatedRecruiterRequest, res: Response) => {
+  app.get('/recruiter/candidate/:id', authenticateRecruiterToken, async (req: AuthenticatedRecruiterRequest, res: Response) => {
     try {
       const recruiterId = req.recruiter?.recruiterId;
       if (!recruiterId) {
@@ -392,6 +392,9 @@ export function registerRecruiterRoutes(app: any) {
       }
 
       // Get candidate profile data
+      console.log(`=== CANDIDATE PROFILE API CALLED ===`);
+      console.log(`Request URL: ${req.url}, Method: ${req.method}`);
+      console.log(`Recruiter ID: ${recruiterId}, Candidate ID: ${candidateId}`);
       console.log(`Fetching candidate profile for ID: ${candidateId}`);
       const candidateProfile = await storage.getCandidateProfile(candidateId);
       console.log('Profile data received:', candidateProfile ? 'Found' : 'Not found');
@@ -410,7 +413,7 @@ export function registerRecruiterRoutes(app: any) {
   });
 
   // Get Recruiter Profile
-  app.get('/api/recruiter/profile', authenticateRecruiterToken, async (req: AuthenticatedRecruiterRequest, res: Response) => {
+  app.get('/recruiter/profile', authenticateRecruiterToken, async (req: AuthenticatedRecruiterRequest, res: Response) => {
     try {
       const recruiterId = req.recruiter?.recruiterId;
       if (!recruiterId) {
@@ -430,7 +433,7 @@ export function registerRecruiterRoutes(app: any) {
   });
 
   // Update Recruiter Profile
-  app.put('/api/recruiter/profile', authenticateRecruiterToken, async (req: AuthenticatedRecruiterRequest, res: Response) => {
+  app.put('/recruiter/profile', authenticateRecruiterToken, async (req: AuthenticatedRecruiterRequest, res: Response) => {
     try {
       const recruiterId = req.recruiter?.recruiterId;
       if (!recruiterId) {
@@ -456,7 +459,7 @@ export function registerRecruiterRoutes(app: any) {
   });
 
   // Update Company Information
-  app.put('/api/recruiter/company', authenticateRecruiterToken, async (req: AuthenticatedRecruiterRequest, res: Response) => {
+  app.put('/recruiter/company', authenticateRecruiterToken, async (req: AuthenticatedRecruiterRequest, res: Response) => {
     try {
       const recruiterId = req.recruiter?.recruiterId;
       if (!recruiterId) {
@@ -494,7 +497,7 @@ export function registerRecruiterRoutes(app: any) {
   });
 
   // Change Password
-  app.put('/api/recruiter/change-password', authenticateRecruiterToken, async (req: AuthenticatedRecruiterRequest, res: Response) => {
+  app.put('/recruiter/change-password', authenticateRecruiterToken, async (req: AuthenticatedRecruiterRequest, res: Response) => {
     try {
       const recruiterId = req.recruiter?.recruiterId;
       if (!recruiterId) {
@@ -529,7 +532,7 @@ export function registerRecruiterRoutes(app: any) {
   });
 
   // Generate PayUMoney Payment Hash
-  app.post('/api/recruiter/generate-payment-hash', authenticateRecruiterToken, async (req: AuthenticatedRecruiterRequest, res: Response) => {
+  app.post('/recruiter/generate-payment-hash', authenticateRecruiterToken, async (req: AuthenticatedRecruiterRequest, res: Response) => {
     try {
       const { key, amount, productinfo, firstname, email, txnid, surl, furl, service_provider } = req.body;
       
@@ -548,7 +551,7 @@ export function registerRecruiterRoutes(app: any) {
   });
 
   // Payment Success Handler
-  app.post('/api/recruiter/payment-success', async (req: Request, res: Response) => {
+  app.post('/recruiter/payment-success', async (req: Request, res: Response) => {
     try {
       const { txnid, amount, status, hash } = req.body;
       
@@ -572,7 +575,7 @@ export function registerRecruiterRoutes(app: any) {
   });
 
   // Payment Failure Handler  
-  app.post('/api/recruiter/payment-failed', async (req: Request, res: Response) => {
+  app.post('/recruiter/payment-failed', async (req: Request, res: Response) => {
     try {
       const { txnid } = req.body;
       res.redirect(`/recruiter/payment-failed?txnid=${txnid}`);
@@ -583,7 +586,7 @@ export function registerRecruiterRoutes(app: any) {
   });
 
   // Access Interview Video with Credit Deduction
-  app.post('/api/recruiter/access-interview-video', authenticateRecruiterToken, async (req: AuthenticatedRecruiterRequest, res: Response) => {
+  app.post('/recruiter/access-interview-video', authenticateRecruiterToken, async (req: AuthenticatedRecruiterRequest, res: Response) => {
     try {
       const { interviewId, candidateId } = req.body;
       const recruiterId = req.recruiter?.recruiterId;

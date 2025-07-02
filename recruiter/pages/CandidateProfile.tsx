@@ -104,57 +104,12 @@ export default function CandidateProfile() {
       });
       
       if (!response.ok) {
-        // Fallback: build profile from available data
-        const [certificatesResponse] = await Promise.all([
-          fetch('/api/recent-certificates')
-        ]);
-        
-        if (certificatesResponse.ok) {
-          const certificates = await certificatesResponse.json();
-          const candidateCerts = certificates.filter((cert: any) => 
-            cert.userId?.toString() === id || cert.name?.toLowerCase().includes(id.toLowerCase())
-          );
-          
-          if (candidateCerts.length > 0) {
-            const firstCert = candidateCerts[0];
-            const mockProfile: CandidateProfile = {
-              id: parseInt(id),
-              name: firstCert.name || 'Professional',
-              email: firstCert.email || `${firstCert.name?.toLowerCase().replace(/\s+/g, '.')}@email.com`,
-              location: 'India',
-              experience: Math.floor(Math.random() * 8) + 2,
-              currentRole: 'Software Developer',
-              skills: extractSkillsFromCertificates(candidateCerts),
-              certificates: candidateCerts.map((cert: any) => ({
-                id: cert.id || Math.random(),
-                courseTitle: cert.course || cert.courseTitle || 'Certificate',
-                score: cert.score || 85,
-                badge: cert.badge || (cert.score >= 90 ? 'Expert' : cert.score >= 80 ? 'Professional' : 'Intermediate'),
-                issuedAt: cert.issuedAt || cert.createdAt || new Date().toISOString(),
-                difficulty: getDifficultyFromScore(cert.score),
-                category: getCategoryFromCourse(cert.course)
-              })),
-              interviews: [], // Will be populated from actual interview data
-              profileViews: Math.floor(Math.random() * 100) + 50,
-              lastActive: '2 days ago',
-              averageScore: calculateAverageScore(candidateCerts),
-              dedicationScore: calculateDedicationScore(candidateCerts),
-              technicalStrength: getTechnicalStrengths(candidateCerts),
-              careerGoals: 'Seeking challenging opportunities in software development',
-              availability: 'Immediate',
-              noticePeriod: '30 days',
-              expectedSalary: '₹8-12 LPA'
-            };
-            
-            setCandidate(mockProfile);
-          } else {
-            throw new Error('Candidate not found');
-          }
-        }
-      } else {
-        const profileData = await response.json();
-        setCandidate(profileData);
+        const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+        throw new Error(errorData.message || `Failed to fetch candidate profile: ${response.status}`);
       }
+      
+      const profileData = await response.json();
+      setCandidate(profileData);
     } catch (error) {
       console.error('Error fetching candidate profile:', error);
       toast({
