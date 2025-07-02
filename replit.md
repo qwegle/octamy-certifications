@@ -60,9 +60,10 @@ Comprehensive professional certification platform with AI-powered interviews, in
 - ✅ Added Tawk.to live chat widget to help center page with real credentials
 - ✅ Made Live Chat section clickable with hover effects and proper UX
 - ✅ Implemented proper script loading and cleanup for chat widget
-- ✅ Created "Demo Test Course" in database for testing purposes
+- ✅ Created "Certification System Test" course in database for testing purposes
 - ✅ Demo course: ID 45, Price ₹1.00, 1 question, 80% passing score, slug: demo-test-course
 - ✅ Perfect for testing payment flow and certification system with minimal cost
+- ✅ Updated course name from "Demo Test Course" to "Certification System Test" based on question content
 
 ### 2025-01-23: Premium UI Redesign for Recruiter Portal
 - Redesigned authentication page with split-screen layout (left: branding/quotes, right: forms)
