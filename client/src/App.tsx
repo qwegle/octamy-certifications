@@ -57,7 +57,8 @@ import {
   RecruiterDashboard,
   CandidateSearch,
   CandidateProfile,
-  RecruiterWallet
+  RecruiterWallet,
+  RecruiterProtectedRoute
 } from "../../recruiter";
 
 function Router() {
@@ -116,10 +117,34 @@ function Router() {
       {/* Recruiter Portal Routes */}
       <Route path="/recruiter/auth" component={RecruiterAuth} />
       <Route path="/recruiter/onboarding" component={RecruiterOnboarding} />
-      <Route path="/recruiter/dashboard" component={RecruiterDashboard} />
-      <Route path="/recruiter/search" component={CandidateSearch} />
-      <Route path="/recruiter/profile/:id" component={CandidateProfile} />
-      <Route path="/recruiter/wallet" component={RecruiterWallet} />
+      <Route path="/recruiter/dashboard">
+        {() => (
+          <RecruiterProtectedRoute>
+            <RecruiterDashboard />
+          </RecruiterProtectedRoute>
+        )}
+      </Route>
+      <Route path="/recruiter/search">
+        {() => (
+          <RecruiterProtectedRoute requireKyc>
+            <CandidateSearch />
+          </RecruiterProtectedRoute>
+        )}
+      </Route>
+      <Route path="/recruiter/profile/:id">
+        {() => (
+          <RecruiterProtectedRoute requireKyc>
+            <CandidateProfile />
+          </RecruiterProtectedRoute>
+        )}
+      </Route>
+      <Route path="/recruiter/wallet">
+        {() => (
+          <RecruiterProtectedRoute>
+            <RecruiterWallet />
+          </RecruiterProtectedRoute>
+        )}
+      </Route>
       
       <Route component={NotFound} />
     </Switch>
