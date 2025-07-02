@@ -42,7 +42,7 @@ export default function Exam() {
   });
 
   const { data: course } = useQuery<Course>({
-    queryKey: [`/api/courses/${courseId}`],
+    queryKey: [`/api/courses/slug/${courseId}`],
     enabled: !!courseId,
   });
 
