@@ -1139,13 +1139,25 @@ function CourseForm({ course, onCancel, onSuccess }: { course?: any; onCancel: (
   // Create/Update course mutation
   const courseMutation = useMutation({
     mutationFn: async (data: CourseFormData) => {
+      console.log('Form data being sent:', data);
+      console.log('Is editing:', isEditing);
+      console.log('Course ID:', course?.id);
       const url = isEditing ? `/api/admin/courses/${course.id}` : "/api/admin/courses";
       const method = isEditing ? "PUT" : "POST";
-      return await apiRequest(method, url, data);
+      console.log('API URL:', url);
+      console.log('HTTP Method:', method);
+      const result = await apiRequest(method, url, data);
+      console.log('API Response:', result);
+      return result;
     },
     onSuccess: (data) => {
       console.log('Mutation success:', data);
+      // Invalidate all course-related queries
       queryClient.invalidateQueries({ queryKey: ["/api/admin/courses"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/courses"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/analytics"] });
+      // Refetch the data immediately
+      queryClient.refetchQueries({ queryKey: ["/api/admin/courses"] });
       toast({
         title: "Success",
         description: `Course ${isEditing ? 'updated' : 'created'} successfully`
@@ -2142,7 +2154,7 @@ export default function AdminDashboard() {
                                   <div className="text-sm text-muted-foreground">{course.duration} min • {course.passingScore}% pass</div>
                                 </div>
                               </TableCell>
-                              <TableCell>{course.category?.name || 'Unknown'}</TableCell>
+                              <TableCell>{course.categoryName || 'Unknown'}</TableCell>
                               <TableCell>
                                 <div>
                                   <span className="font-medium">₹{course.price}</span>
