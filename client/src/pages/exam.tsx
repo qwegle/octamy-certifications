@@ -162,12 +162,31 @@ export default function Exam() {
         });
       }
     },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to submit exam. Please try again.",
-        variant: "destructive",
-      });
+    onError: async (error: any) => {
+      try {
+        const errorData = await error.json();
+        if (errorData.code === 'SESSION_EXPIRED') {
+          toast({
+            title: "Session Expired",
+            description: "Your exam session has expired. Please start the exam again.",
+            variant: "destructive",
+          });
+          // Reload the page to restart the exam
+          window.location.reload();
+        } else {
+          toast({
+            title: "Error",
+            description: errorData.message || "Failed to submit exam. Please try again.",
+            variant: "destructive",
+          });
+        }
+      } catch {
+        toast({
+          title: "Error",
+          description: "Failed to submit exam. Please try again.",
+          variant: "destructive",
+        });
+      }
     },
   });
 

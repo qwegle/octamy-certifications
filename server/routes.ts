@@ -984,6 +984,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Get correct answers from session mapping
         const correctAnswersMapping =
           (global as any).questionMappings?.[sessionId] || {};
+        
+        console.log(`Exam submission for session ${sessionId}:`);
+        console.log(`- Available sessions: ${Object.keys((global as any).questionMappings || {}).join(', ')}`);
+        console.log(`- Questions in this session: ${Object.keys(correctAnswersMapping).length}`);
+        
+        // Safety check: Ensure we have questions to evaluate
+        if (Object.keys(correctAnswersMapping).length === 0) {
+          console.warn(`No question mappings found for session ${sessionId}`);
+          return res.status(400).json({
+            message: "Exam session expired or invalid. Please restart the exam.",
+            code: "SESSION_EXPIRED"
+          });
+        }
 
         // Transform answers to Record<string, number> format
         const answersRecord: Record<string, number> = {};
@@ -1016,13 +1029,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         }
 
-        // Clean up session data
+        // Calculate the final score percentage
+        const score = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
+
+        // Clean up session data AFTER score calculation
         if ((global as any).questionMappings?.[sessionId]) {
           delete (global as any).questionMappings[sessionId];
         }
-
-        // Calculate the final score percentage
-        const score = Math.round((correctAnswers / totalQuestions) * 100);
 
         // Get course data to check passing score
         const course = await storage.getCourse(courseId);
