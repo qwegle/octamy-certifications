@@ -40,6 +40,14 @@ Comprehensive professional certification platform with AI-powered interviews, in
 - Configured Jest with TypeScript and ES modules support
 - Added comprehensive error handling and security testing scenarios
 
+### 2025-01-02: Partners Login and Slug-Based URL Generation Fix
+- ✅ Verified partners/sellers login functionality working correctly
+- ✅ Fixed referral URL generation to use course slugs instead of IDs
+- ✅ Updated both SellerController and direct routes to use slug-based URLs
+- ✅ Tested complete workflow: login → generate URL → track referral clicks
+- ✅ URLs now generate as `/course/business-strategy-fundamentals?ref=CODE` instead of `/course/36?ref=CODE`
+- ✅ Referral tracking and shareable items endpoints functioning properly
+
 ### 2025-01-23: Premium UI Redesign for Recruiter Portal
 - Redesigned authentication page with split-screen layout (left: branding/quotes, right: forms)
 - Implemented black and white premium startup branding throughout

@@ -688,9 +688,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(404).json({ message: "Seller not found" });
         }
 
-        // Generate referral URL
+        // Get course details to use slug instead of ID
+        const course = await storage.getCourse(targetCourseId);
+        if (!course) {
+          return res.status(404).json({ message: "Course not found" });
+        }
+
+        // Generate referral URL using slug
         const baseUrl = `${req.protocol}://${req.get("host")}`;
-        const referralUrl = `${baseUrl}/course/${targetCourseId}?ref=${seller.referralCode}`;
+        const referralUrl = `${baseUrl}/course/${course.slug}?ref=${seller.referralCode}`;
 
         res.json({
           referralUrl,
