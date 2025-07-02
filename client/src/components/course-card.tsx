@@ -5,6 +5,24 @@ import { Clock, Users, Star, ChevronRight, Award } from "lucide-react";
 import { Link } from "wouter";
 import type { Course, Category } from "@shared/schema";
 
+// Import category images (fallbacks)
+import aiImage from "@/assets/course-images/ai-assessment.jpg";
+import developmentImage from "@/assets/course-images/development-assessment.jpg";
+import businessImage from "@/assets/course-images/business-assessment.jpg";
+import internshipImage from "@/assets/course-images/internship-assessment.jpg";
+
+// Import specific course images
+import businessStrategyImage from "@/assets/course-images/business-strategy-fundamentals.jpg";
+import financialAnalysisImage from "@/assets/course-images/financial-analysis-professional.jpg";
+import leadershipImage from "@/assets/course-images/leadership-management.jpg";
+import digitalMarketingImage from "@/assets/course-images/digital-marketing-fundamentals.jpg";
+import reactImage from "@/assets/course-images/react-development-mastery.jpg";
+import nodejsImage from "@/assets/course-images/nodejs-backend-development.jpg";
+import mlImage from "@/assets/course-images/machine-learning-fundamentals.jpg";
+import dataScienceImage from "@/assets/course-images/data-science-internship.jpg";
+import pythonImage from "@/assets/course-images/python-programming-mastery.jpg";
+import cloudImage from "@/assets/course-images/cloud-computing-essentials.jpg";
+
 interface CourseCardProps {
   course: Course & { category: Category };
   certifiedCount?: number;
@@ -18,6 +36,50 @@ export default function CourseCard({
   rating = 4.8,
   viewMode = "grid",
 }: CourseCardProps) {
+  const courseSlug = course.slug || course.title.toLowerCase()
+    .replace(/[^a-zA-Z0-9\s]/g, '')
+    .replace(/\s+/g, '-');
+
+  // Function to get the appropriate image based on course slug/title
+  const getCourseImage = (courseSlug: string, categoryName: string) => {
+    // First try to match specific course images by slug
+    switch (courseSlug) {
+      case 'business-strategy-fundamentals':
+        return businessStrategyImage;
+      case 'financial-analysis-professional':
+        return financialAnalysisImage;
+      case 'leadership-management':
+        return leadershipImage;
+      case 'digital-marketing-fundamentals':
+        return digitalMarketingImage;
+      case 'react-development-mastery':
+        return reactImage;
+      case 'nodejs-backend-development':
+        return nodejsImage;
+      case 'machine-learning-fundamentals':
+        return mlImage;
+      case 'data-science-internship':
+        return dataScienceImage;
+      case 'python-programming-mastery':
+        return pythonImage;
+      case 'cloud-computing-essentials':
+        return cloudImage;
+      default:
+        // Fall back to category-based images
+        switch (categoryName.toLowerCase()) {
+          case 'ai':
+            return aiImage;
+          case 'development':
+            return developmentImage;
+          case 'business':
+            return businessImage;
+          case 'internships':
+            return internshipImage;
+          default:
+            return businessImage;
+        }
+    }
+  };
   return (
     <Card
       className={`group hover:shadow-lg transition-all duration-300 border-2 hover:border-black relative ${
@@ -26,9 +88,12 @@ export default function CourseCard({
     >
       <div className={`${viewMode === "list" ? "w-64 flex-shrink-0" : ""}`}>
         <div className="aspect-video bg-gradient-to-br from-gray-900 to-black rounded-t-lg relative overflow-hidden">
-          <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center">
-            <Award className="h-12 w-12 text-white" />
-          </div>
+          <img 
+            src={getCourseImage(courseSlug, course.category.name)} 
+            alt={`${course.title} assessment`}
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-black bg-opacity-40"></div>
           <div className="absolute top-4 left-4">
             <Badge
               variant="secondary"
@@ -123,7 +188,7 @@ export default function CourseCard({
                   </div>
                 )}
               </div>
-              <Link href={`/course/${course.id}`}>
+              <Link href={`/course/${courseSlug}`}>
                 <Button className="bg-black hover:bg-gray-800 text-white group">
                   Learn More
                   <ChevronRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />

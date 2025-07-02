@@ -1,4 +1,4 @@
-import { pgTable, text, varchar, serial, integer, boolean, timestamp, decimal, json, index, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, serial, integer, boolean, timestamp, decimal, json, index, jsonb, unique } from "drizzle-orm/pg-core";
 import { relations, eq, desc, and, asc } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -49,15 +49,146 @@ export const insertContactSubmissionSchema = createInsertSchema(contactSubmissio
 export type InsertContactSubmission = z.infer<typeof insertContactSubmissionSchema>;
 export type ContactSubmission = typeof contactSubmissions.$inferSelect;
 
+// Recruiter portal tables
+export const recruiters = pgTable('recruiters', {
+  id: serial('id').primaryKey(),
+  email: text('email').notNull().unique(),
+  password: text('password').notNull(),
+  
+  // Individual Information (Step 1)
+  firstName: text('first_name').notNull().default(''),
+  lastName: text('last_name').notNull().default(''),
+  phone: text('phone').notNull().default(''),
+  designation: text('designation').notNull().default(''),
+  linkedinProfile: text('linkedin_profile'),
+  
+  // Company Information (Step 2)
+  companyName: text('company_name').notNull().default(''),
+  companyWebsite: text('company_website'),
+  companySize: text('company_size').notNull().default('1-10'),
+  industry: text('industry').notNull().default(''),
+  companyAddress: text('company_address').notNull().default(''),
+  companyCity: text('company_city').notNull().default(''),
+  companyState: text('company_state').notNull().default(''),
+  companyCountry: text('company_country').notNull().default('India'),
+  
+  // KYC Information (Step 3)
+  gstNumber: text('gst_number'),
+  panNumber: text('pan_number'),
+  companyRegistrationNumber: text('company_registration_number'),
+  
+  // Document URLs
+  gstCertificate: text('gst_certificate_url'),
+  panCard: text('pan_card_url'),
+  companyRegistrationCertificate: text('company_registration_certificate_url'),
+  
+  // Status and Credits
+  isActive: boolean('is_active').default(true),
+  kycStatus: text('kyc_status').notNull().default('pending'),
+  creditsBalance: decimal('credits_balance', { precision: 10, scale: 2 }).default('0.00'),
+  
+  // Metadata
+  registrationStep: integer('registration_step').default(1),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+  lastLoginAt: timestamp('last_login_at'),
+});
+
+export const creditTransactions = pgTable('credit_transactions', {
+  id: serial('id').primaryKey(),
+  recruiterId: integer('recruiter_id').notNull().references(() => recruiters.id),
+  type: text('type').notNull(),
+  amount: decimal('amount', { precision: 10, scale: 2 }).notNull(),
+  description: text('description').notNull(),
+  relatedUserId: integer('related_user_id'),
+  relatedAction: text('related_action'),
+  balanceAfter: decimal('balance_after', { precision: 10, scale: 2 }).notNull(),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+export const profileAccessLogs = pgTable('profile_access_logs', {
+  id: serial('id').primaryKey(),
+  recruiterId: integer('recruiter_id').notNull().references(() => recruiters.id),
+  userId: integer('user_id').notNull(),
+  accessType: text('access_type').notNull(),
+  creditsUsed: decimal('credits_used', { precision: 10, scale: 2 }).notNull(),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+export const savedSearches = pgTable('saved_searches', {
+  id: serial('id').primaryKey(),
+  recruiterId: integer('recruiter_id').notNull().references(() => recruiters.id),
+  name: text('name').notNull(),
+  filters: jsonb('filters').notNull(),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+export const insertRecruiterSchema = createInsertSchema(recruiters).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  lastLoginAt: true,
+});
+
+export type Recruiter = typeof recruiters.$inferSelect;
+export type InsertRecruiter = z.infer<typeof insertRecruiterSchema>;
+
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   email: text("email").notNull().unique(),
   password: text("password"),
   name: text("name").notNull(),
   phone: text("phone"),
+  company: text("company"),
+  position: text("position"),
   isAdmin: boolean("is_admin").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+  
+  // Professional Profile Fields (for recruiters to search)
+  location: text("location"),
+  experience: integer("experience"), // years of experience
+  currentRole: text("current_role"),
+  skills: text("skills").array(), // technical skills
+  availability: text("availability"), // immediate, 1-month, etc.
+  noticePeriod: text("notice_period"), // 30 days, 60 days, etc.
+  expectedSalary: text("expected_salary"), // salary range
+  workType: text("work_type").array(), // remote, hybrid, onsite
+  category: text("category").array(), // preferred job categories
+  linkedinProfile: text("linkedin_profile"),
+  portfolioUrl: text("portfolio_url"),
+  resume: text("resume_url"),
+  bio: text("bio"),
+  careerGoals: text("career_goals"),
+  
+  // Profile visibility and metrics
+  profileVisibility: boolean("profile_visibility").default(true),
+  lastActive: timestamp("last_active").defaultNow(),
+  profileCompleteness: integer("profile_completeness").default(0), // percentage
+  
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
+
+// User profile insert and update schemas
+export const insertUserSchema = createInsertSchema(users).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  lastActive: true,
+});
+
+export const updateUserProfileSchema = createInsertSchema(users).omit({
+  id: true,
+  email: true,
+  password: true,
+  isAdmin: true,
+  createdAt: true,
+  updatedAt: true,
+  lastActive: true,
+}).partial();
+
+export type InsertUser = z.infer<typeof insertUserSchema>;
+export type UpdateUserProfile = z.infer<typeof updateUserProfileSchema>;
+export type User = typeof users.$inferSelect;
 
 export const userAddresses = pgTable("user_addresses", {
   id: serial("id").primaryKey(),
@@ -658,21 +789,47 @@ export const skillAssessmentsRelations = relations(skillAssessments, ({ one }) =
   }),
 }));
 
-// Insert schemas
-export const insertUserSchema = createInsertSchema(users).omit({
-  id: true,
-  createdAt: true,
-}).extend({
-  phone: z.string().optional()
-});
+// Insert schemas (userSchema already defined above with profile fields)
 
 export const insertCategorySchema = createInsertSchema(categories).omit({
   id: true,
 });
 
+// Rating tables
+export const ratings = pgTable('ratings', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  courseId: integer('course_id').notNull().references(() => courses.id, { onDelete: 'cascade' }),
+  rating: integer('rating').notNull(),
+  reviewText: text('review_text'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+}, (table) => ({
+  userCourseUnique: unique().on(table.userId, table.courseId),
+}));
+
+export const ratingAggregates = pgTable('rating_aggregates', {
+  id: serial('id').primaryKey(),
+  courseId: integer('course_id').notNull().references(() => courses.id, { onDelete: 'cascade' }).unique(),
+  averageRating: decimal('average_rating', { precision: 3, scale: 2 }).default('0.00'),
+  totalReviews: integer('total_reviews').default(0),
+  rating1Count: integer('rating_1_count').default(0),
+  rating2Count: integer('rating_2_count').default(0),
+  rating3Count: integer('rating_3_count').default(0),
+  rating4Count: integer('rating_4_count').default(0),
+  rating5Count: integer('rating_5_count').default(0),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
 export const insertCourseSchema = createInsertSchema(courses).omit({
   id: true,
   createdAt: true,
+});
+
+export const insertRatingSchema = createInsertSchema(ratings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
 });
 
 export const insertQuestionSchema = createInsertSchema(questions).omit({
@@ -712,9 +869,7 @@ export const insertUserAchievementSchema = createInsertSchema(userAchievements).
   unlockedAt: true,
 });
 
-// Types
-export type User = typeof users.$inferSelect;
-export type InsertUser = z.infer<typeof insertUserSchema>;
+// Types (User and InsertUser types defined above with profile fields)
 
 export const insertUserAddressSchema = createInsertSchema(userAddresses).omit({
   id: true,
@@ -728,6 +883,9 @@ export type Category = typeof categories.$inferSelect;
 export type InsertCategory = z.infer<typeof insertCategorySchema>;
 export type Course = typeof courses.$inferSelect;
 export type InsertCourse = z.infer<typeof insertCourseSchema>;
+export type Rating = typeof ratings.$inferSelect;
+export type InsertRating = z.infer<typeof insertRatingSchema>;
+export type RatingAggregate = typeof ratingAggregates.$inferSelect;
 export type Question = typeof questions.$inferSelect;
 export type InsertQuestion = z.infer<typeof insertQuestionSchema>;
 export type ExamAttempt = typeof examAttempts.$inferSelect;

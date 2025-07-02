@@ -18,6 +18,10 @@ import {
   contactSubmissions,
   interviews,
   interviewQuestions,
+  recruiters,
+  creditTransactions,
+  profileAccessLogs,
+  savedSearches,
   type User, 
   type InsertUser,
   type UserAddress,
@@ -73,16 +77,22 @@ import {
   type InsertAchievement,
   type UserAchievement,
   type InsertUserAchievement,
-  referralClicks
+  referralClicks,
+  ratings,
+  ratingAggregates,
+  type Rating,
+  type InsertRating,
+  type RatingAggregate,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, count, sql, or, asc, ilike } from "drizzle-orm";
+import { eq, and, desc, count, sql, or, asc, ilike, gte, lte } from "drizzle-orm";
 
 export interface IStorage {
   // User operations
   getUser(id: number): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  updateUserProfile(id: number, updates: Partial<InsertUser>): Promise<User | undefined>;
 
   // User address operations
   getUserAddresses(userId: number): Promise<UserAddress[]>;
@@ -231,15 +241,7 @@ export interface IStorage {
 export class DatabaseStorage implements IStorage {
   // User operations
   async getUser(id: number): Promise<User | undefined> {
-    const [user] = await db.select({
-      id: users.id,
-      name: users.name,
-      email: users.email,
-      password: users.password,
-      phone: users.phone,
-      isAdmin: users.isAdmin,
-      createdAt: users.createdAt
-    }).from(users).where(eq(users.id, id));
+    const [user] = await db.select().from(users).where(eq(users.id, id));
     return user || undefined;
   }
 
@@ -254,6 +256,15 @@ export class DatabaseStorage implements IStorage {
       .values(insertUser)
       .returning();
     return user;
+  }
+
+  async updateUserProfile(id: number, updates: Partial<InsertUser>): Promise<User | undefined> {
+    const [user] = await db
+      .update(users)
+      .set(updates)
+      .where(eq(users.id, id))
+      .returning();
+    return user || undefined;
   }
 
   // User address operations
@@ -1748,31 +1759,6 @@ export class DatabaseStorage implements IStorage {
     }
     return undefined;
   }
-  // Sponsor operations
-  async createSponsor(sponsorData: InsertSponsor): Promise<Sponsor> {
-    const [sponsor] = await db
-      .insert(sponsors)
-      .values(sponsorData)
-      .returning();
-    return sponsor;
-  }
-
-  async getAllSponsors(): Promise<Sponsor[]> {
-    return await db.select().from(sponsors).orderBy(desc(sponsors.createdAt));
-  }
-
-  async updateSponsorPaymentStatus(id: number, status: string, transactionId?: string): Promise<Sponsor> {
-    const [result] = await db
-      .update(sponsors)
-      .set({
-        paymentStatus: status,
-        ...(transactionId && { transactionId }),
-        updatedAt: new Date()
-      })
-      .where(eq(sponsors.id, id))
-      .returning();
-    return result;
-  }
 
   // Admin analytics with comprehensive data
   async getAdminAnalytics() {
@@ -2417,7 +2403,7 @@ export class DatabaseStorage implements IStorage {
   // Update course (admin)
   async updateCourseAdmin(id: number, updates: Partial<InsertCourse>) {
     const [course] = await db.update(courses)
-      .set({ ...updates, createdAt: new Date() })
+      .set(updates)
       .where(eq(courses.id, id))
       .returning();
     return course;
@@ -2507,6 +2493,479 @@ export class DatabaseStorage implements IStorage {
         exams: Number(monthlyStats.monthlyExams) || 0
       }
     };
+  }
+
+  // Recruiter Management Methods
+  async getRecruiterByEmail(email: string) {
+    const [recruiter] = await db.select().from(recruiters).where(eq(recruiters.email, email));
+    return recruiter || undefined;
+  }
+
+  async getRecruiterById(id: number) {
+    const [recruiter] = await db.select().from(recruiters).where(eq(recruiters.id, id));
+    return recruiter || undefined;
+  }
+
+  async createRecruiter(data: any) {
+    const [recruiter] = await db.insert(recruiters).values(data).returning();
+    return recruiter;
+  }
+
+  async updateRecruiterLastLogin(id: number) {
+    await db.update(recruiters)
+      .set({ lastLoginAt: new Date() })
+      .where(eq(recruiters.id, id));
+  }
+
+  async updateRecruiterStep1(data: any) {
+    await db.update(recruiters)
+      .set({
+        firstName: data.firstName,
+        lastName: data.lastName,
+        phone: data.phone,
+        designation: data.designation,
+        linkedinProfile: data.linkedinProfile,
+        registrationStep: data.registrationStep,
+        updatedAt: new Date()
+      })
+      .where(eq(recruiters.id, data.id));
+  }
+
+  async updateRecruiterStep2(data: any) {
+    await db.update(recruiters)
+      .set({
+        companyName: data.companyName,
+        companyWebsite: data.companyWebsite,
+        companySize: data.companySize,
+        industry: data.industry,
+        companyAddress: data.companyAddress,
+        companyCity: data.companyCity,
+        companyState: data.companyState,
+        companyCountry: data.companyCountry,
+        registrationStep: data.registrationStep,
+        updatedAt: new Date()
+      })
+      .where(eq(recruiters.id, data.id));
+  }
+
+  async updateRecruiterStep3(data: any) {
+    await db.update(recruiters)
+      .set({
+        gstNumber: data.gstNumber,
+        panNumber: data.panNumber,
+        companyRegistrationNumber: data.companyRegistrationNumber,
+        gstCertificate: data.gstCertificate,
+        panCard: data.panCard,
+        companyRegistrationCertificate: data.companyRegistrationCertificate,
+        registrationStep: data.registrationStep,
+        kycStatus: data.kycStatus,
+        updatedAt: new Date()
+      })
+      .where(eq(recruiters.id, data.id));
+  }
+
+  async updateRecruiterPassword(recruiterId: number, hashedPassword: string) {
+    await db.update(recruiters)
+      .set({
+        password: hashedPassword,
+        updatedAt: new Date()
+      })
+      .where(eq(recruiters.id, recruiterId));
+  }
+
+  async updateRecruiterCredits(recruiterId: number, newCredits: number) {
+    await db.update(recruiters)
+      .set({
+        credits: newCredits,
+        updatedAt: new Date()
+      })
+      .where(eq(recruiters.id, recruiterId));
+  }
+
+  async getRecruiterDashboardData(recruiterId: number) {
+    const profileViews = await db.select({ count: sql`count(*)` })
+      .from(profileAccessLogs)
+      .where(and(
+        eq(profileAccessLogs.recruiterId, recruiterId),
+        eq(profileAccessLogs.accessType, 'profile_view')
+      ));
+
+    const cvDownloads = await db.select({ count: sql`count(*)` })
+      .from(profileAccessLogs)
+      .where(and(
+        eq(profileAccessLogs.recruiterId, recruiterId),
+        eq(profileAccessLogs.accessType, 'cv_download')
+      ));
+
+    const interviewAccess = await db.select({ count: sql`count(*)` })
+      .from(profileAccessLogs)
+      .where(and(
+        eq(profileAccessLogs.recruiterId, recruiterId),
+        eq(profileAccessLogs.accessType, 'interview_access')
+      ));
+
+    const recentActivity = await db.select({
+      id: profileAccessLogs.id,
+      type: profileAccessLogs.accessType,
+      userName: users.name,
+      creditsUsed: profileAccessLogs.creditsUsed,
+      createdAt: profileAccessLogs.createdAt
+    })
+    .from(profileAccessLogs)
+    .leftJoin(users, eq(profileAccessLogs.userId, users.id))
+    .where(eq(profileAccessLogs.recruiterId, recruiterId))
+    .orderBy(desc(profileAccessLogs.createdAt))
+    .limit(10);
+
+    return {
+      profileViews: profileViews[0]?.count || 0,
+      cvDownloads: cvDownloads[0]?.count || 0,
+      interviewAccess: interviewAccess[0]?.count || 0,
+      recentActivity
+    };
+  }
+
+  async searchCandidates(filters: any = {}, page: number = 1, limit: number = 10) {
+    try {
+      console.log('Search filters received:', filters);
+      
+      // Simple approach: get all users first 
+      const offset = (page - 1) * limit;
+      
+      // Get all users with basic pagination, no complex filtering for now
+      const allCandidates = await db.select().from(users)
+        .limit(limit)
+        .offset(offset);
+
+      // Get additional details for each candidate
+      const candidatesWithDetails = await Promise.all(
+        allCandidates.map(async (candidate) => {
+          // Get certificates
+          const certs = await db.select({
+            id: certificates.id,
+            courseTitle: certificates.courseTitle,
+            score: certificates.score,
+            badge: certificates.badge
+          })
+          .from(certificates)
+          .where(eq(certificates.userId, candidate.id))
+          .limit(3);
+
+          // Get interviews
+          const userInterviews = await db.select({
+            id: interviews.id,
+            technology: interviews.technology,
+            score: interviews.score,
+            grade: interviews.grade
+          })
+          .from(interviews)
+          .where(eq(interviews.userId, candidate.id))
+          .limit(3);
+
+          return {
+            ...candidate,
+            certificates: certs,
+            interviews: userInterviews,
+            profileViews: 0
+          };
+        })
+      );
+
+      // Get total count
+      const totalResult = await db.select({ count: sql`count(*)` }).from(users);
+      const total = Number(totalResult[0]?.count) || 0;
+
+      console.log('Search completed, returning:', candidatesWithDetails.length, 'candidates');
+      console.log('Candidate IDs found:', candidatesWithDetails.map(c => c.id));
+
+      return {
+        candidates: candidatesWithDetails,
+        total,
+        page,
+        totalPages: Math.ceil(total / limit)
+      };
+    } catch (error) {
+      console.error('Search error:', error);
+      return {
+        candidates: [],
+        total: 0,
+        page,
+        totalPages: 0
+      };
+    }
+  }
+
+  async getCandidateProfile(candidateId: number) {
+    try {
+      console.log('Getting candidate profile for ID:', candidateId);
+      
+      // Get basic user information with simple select
+      const candidate = await db.select().from(users).where(eq(users.id, candidateId));
+
+      if (!candidate || candidate.length === 0) {
+        console.log('Candidate not found');
+        return null;
+      }
+
+      const candidateData = candidate[0];
+      console.log('Found candidate:', candidateData.name);
+
+      // Get certificates with simple select
+      const certs = await db.select().from(certificates)
+        .where(eq(certificates.userId, candidateId));
+
+      console.log('Found certificates:', certs.length);
+
+      // Get interviews with simple select
+      const userInterviews = await db.select().from(interviews)
+        .where(eq(interviews.userId, candidateId));
+
+      console.log('Found interviews:', userInterviews.length);
+
+      return {
+        ...candidateData,
+        certificates: certs,
+        interviews: userInterviews,
+        profileViews: 0
+      };
+    } catch (error) {
+      console.error('Candidate profile error:', error);
+      return null;
+    }
+  }
+
+  async processProfileAccess(recruiterId: number, candidateId: number, accessType: string, creditsRequired: number) {
+    const recruiter = await this.getRecruiterById(recruiterId);
+    if (!recruiter) throw new Error('Recruiter not found');
+
+    const currentBalance = parseFloat(recruiter.creditsBalance);
+    const newBalance = currentBalance - creditsRequired;
+
+    await db.update(recruiters)
+      .set({ 
+        creditsBalance: newBalance.toFixed(2),
+        updatedAt: new Date()
+      })
+      .where(eq(recruiters.id, recruiterId));
+
+    await db.insert(creditTransactions).values({
+      recruiterId,
+      type: 'spend',
+      amount: creditsRequired.toString(),
+      description: `${accessType} access for candidate`,
+      relatedUserId: candidateId,
+      relatedAction: accessType,
+      balanceAfter: newBalance.toFixed(2)
+    });
+
+    await db.insert(profileAccessLogs).values({
+      recruiterId,
+      userId: candidateId,
+      accessType,
+      creditsUsed: creditsRequired.toString()
+    });
+
+    let responseData: any = {
+      creditsUsed: creditsRequired,
+      remainingCredits: newBalance.toFixed(2)
+    };
+
+    if (accessType === 'cv_download') {
+      responseData.cvUrl = `/api/recruiter/download-cv/${candidateId}`;
+    } else if (accessType === 'interview_access') {
+      const interviewData = await db.select()
+        .from(interviews)
+        .where(eq(interviews.userId, candidateId));
+      responseData.interviewData = interviewData;
+    }
+
+    return responseData;
+  }
+
+  async getRecruiterWallet(recruiterId: number) {
+    const recruiter = await this.getRecruiterById(recruiterId);
+    if (!recruiter) throw new Error('Recruiter not found');
+
+    const transactions = await db.select()
+      .from(creditTransactions)
+      .where(eq(creditTransactions.recruiterId, recruiterId))
+      .orderBy(desc(creditTransactions.createdAt))
+      .limit(20);
+
+    return {
+      balance: recruiter.creditsBalance,
+      transactions
+    };
+  }
+
+  async purchaseCredits(recruiterId: number, amount: number, paymentId: string) {
+    const recruiter = await this.getRecruiterById(recruiterId);
+    if (!recruiter) throw new Error('Recruiter not found');
+
+    const currentBalance = parseFloat(recruiter.creditsBalance);
+    const newBalance = currentBalance + amount;
+
+    await db.update(recruiters)
+      .set({ 
+        creditsBalance: newBalance.toFixed(2),
+        updatedAt: new Date()
+      })
+      .where(eq(recruiters.id, recruiterId));
+
+    await db.insert(creditTransactions).values({
+      recruiterId,
+      type: 'purchase',
+      amount: amount.toString(),
+      description: `Credit purchase - Payment ID: ${paymentId}`,
+      balanceAfter: newBalance.toFixed(2)
+    });
+
+    return {
+      success: true,
+      newBalance: newBalance.toFixed(2),
+      creditsAdded: amount
+    };
+  }
+
+  // Rating operations
+  async createRating(insertRating: InsertRating): Promise<Rating> {
+    const [rating] = await db
+      .insert(ratings)
+      .values(insertRating)
+      .returning();
+    
+    // Update aggregate after creating rating
+    await this.updateRatingAggregate(rating.courseId);
+    return rating;
+  }
+
+  async updateRating(userId: number, courseId: number, newRating: number, reviewText?: string): Promise<Rating> {
+    const [rating] = await db
+      .update(ratings)
+      .set({ 
+        rating: newRating, 
+        reviewText,
+        updatedAt: new Date() 
+      })
+      .where(and(eq(ratings.userId, userId), eq(ratings.courseId, courseId)))
+      .returning();
+    
+    // Update aggregate after updating rating
+    await this.updateRatingAggregate(courseId);
+    return rating;
+  }
+
+  async getUserRating(userId: number, courseId: number): Promise<Rating | undefined> {
+    const [rating] = await db
+      .select()
+      .from(ratings)
+      .where(and(eq(ratings.userId, userId), eq(ratings.courseId, courseId)));
+    return rating || undefined;
+  }
+
+  async getCourseRatings(courseId: number, limit = 10, offset = 0): Promise<any[]> {
+    return await db
+      .select({
+        id: ratings.id,
+        userId: ratings.userId,
+        courseId: ratings.courseId,
+        rating: ratings.rating,
+        reviewText: ratings.reviewText,
+        createdAt: ratings.createdAt,
+        updatedAt: ratings.updatedAt,
+        userName: users.name,
+      })
+      .from(ratings)
+      .leftJoin(users, eq(ratings.userId, users.id))
+      .where(eq(ratings.courseId, courseId))
+      .orderBy(desc(ratings.createdAt))
+      .limit(limit)
+      .offset(offset);
+  }
+
+  async getRatingAggregate(courseId: number): Promise<RatingAggregate | undefined> {
+    const [aggregate] = await db
+      .select()
+      .from(ratingAggregates)
+      .where(eq(ratingAggregates.courseId, courseId));
+    return aggregate || undefined;
+  }
+
+  async updateRatingAggregate(courseId: number): Promise<void> {
+    // Get all ratings for the course
+    const courseRatings = await db
+      .select()
+      .from(ratings)
+      .where(eq(ratings.courseId, courseId));
+
+    if (courseRatings.length === 0) {
+      // No ratings yet, set defaults
+      await db
+        .insert(ratingAggregates)
+        .values({
+          courseId,
+          averageRating: '0.00',
+          totalReviews: 0,
+          rating1Count: 0,
+          rating2Count: 0,
+          rating3Count: 0,
+          rating4Count: 0,
+          rating5Count: 0,
+        })
+        .onConflictDoUpdate({
+          target: ratingAggregates.courseId,
+          set: {
+            averageRating: '0.00',
+            totalReviews: 0,
+            rating1Count: 0,
+            rating2Count: 0,
+            rating3Count: 0,
+            rating4Count: 0,
+            rating5Count: 0,
+            updatedAt: new Date(),
+          },
+        });
+      return;
+    }
+
+    // Calculate aggregates
+    const totalReviews = courseRatings.length;
+    const totalScore = courseRatings.reduce((sum, r) => sum + r.rating, 0);
+    const averageRating = (totalScore / totalReviews).toFixed(2);
+
+    const ratingCounts = [0, 0, 0, 0, 0];
+    courseRatings.forEach(r => {
+      if (r.rating >= 1 && r.rating <= 5) {
+        ratingCounts[r.rating - 1]++;
+      }
+    });
+
+    // Update aggregate
+    await db
+      .insert(ratingAggregates)
+      .values({
+        courseId,
+        averageRating,
+        totalReviews,
+        rating1Count: ratingCounts[0],
+        rating2Count: ratingCounts[1],
+        rating3Count: ratingCounts[2],
+        rating4Count: ratingCounts[3],
+        rating5Count: ratingCounts[4],
+      })
+      .onConflictDoUpdate({
+        target: ratingAggregates.courseId,
+        set: {
+          averageRating,
+          totalReviews,
+          rating1Count: ratingCounts[0],
+          rating2Count: ratingCounts[1],
+          rating3Count: ratingCounts[2],
+          rating4Count: ratingCounts[3],
+          rating5Count: ratingCounts[4],
+          updatedAt: new Date(),
+        },
+      });
   }
 }
 

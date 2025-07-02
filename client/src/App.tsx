@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "./lib/auth.tsx";
 import { SellerAuthProvider } from "./lib/sellerAuth";
+import { HelmetProvider } from 'react-helmet-async';
 import Landing from "@/pages/landing-new";
 import Exam from "@/pages/exam";
 import Payment from "@/pages/payment";
@@ -48,6 +49,19 @@ import TempExamResults from "@/pages/TempExamResults";
 import PaymentTemp from "@/pages/PaymentTemp";
 import Contact from "@/pages/contact";
 
+
+// Recruiter Portal Components
+import { 
+  RecruiterAuthProvider,
+  RecruiterAuth,
+  RecruiterOnboarding,
+  RecruiterDashboard,
+  CandidateSearch,
+  CandidateProfile,
+  RecruiterWallet,
+  RecruiterProtectedRoute
+} from "../../recruiter";
+
 function Router() {
   return (
     <Switch>
@@ -64,7 +78,7 @@ function Router() {
       <Route path="/admin/login" component={AdminLogin} />
       <Route path="/admin/dashboard" component={AdminDashboard} />
       <Route path="/enhanced-admin" component={EnhancedAdminDashboard} />
-      <Route path="/exam/:courseId" component={Exam} />
+      <Route path="/exam/:slug" component={Exam} />
       <Route path="/exam-results-temp/:tempExamId" component={TempExamResults} />
       <Route path="/payment" component={PaymentTemp} />
       <Route path="/checkout/:courseId" component={EnhancedCheckout} />
@@ -100,6 +114,55 @@ function Router() {
       <Route path="/interviews/:id" component={InterviewSession} />
       <Route path="/interview-results/:id" component={InterviewSession} />
       <Route path="/interviews/:id/payment" component={InterviewPayment} />
+      
+      {/* Recruiter Portal Routes */}
+      <Route path="/recruiter/auth" component={RecruiterAuth} />
+      <Route path="/recruiter/onboarding" component={RecruiterOnboarding} />
+      <Route path="/recruiter/dashboard">
+        {() => (
+          <RecruiterProtectedRoute>
+            <RecruiterDashboard />
+          </RecruiterProtectedRoute>
+        )}
+      </Route>
+      <Route path="/recruiter/search">
+        {() => (
+          <RecruiterProtectedRoute requireKyc>
+            <CandidateSearch />
+          </RecruiterProtectedRoute>
+        )}
+      </Route>
+      <Route path="/recruiter/profile/:id">
+        {() => (
+          <RecruiterProtectedRoute requireKyc>
+            <CandidateProfile />
+          </RecruiterProtectedRoute>
+        )}
+      </Route>
+      <Route path="/recruiter/wallet">
+        {() => (
+          <RecruiterProtectedRoute>
+            <RecruiterWallet />
+          </RecruiterProtectedRoute>
+        )}
+      </Route>
+      <Route path="/recruiter/profile">
+        {() => (
+          <RecruiterProtectedRoute>
+            <RecruiterProfile />
+          </RecruiterProtectedRoute>
+        )}
+      </Route>
+      <Route path="/recruiter/settings">
+        {() => (
+          <RecruiterProtectedRoute>
+            <RecruiterSettings />
+          </RecruiterProtectedRoute>
+        )}
+      </Route>
+      <Route path="/recruiter/payment-success" component={PaymentSuccess} />
+      <Route path="/recruiter/payment-failed" component={PaymentFailed} />
+      
       <Route component={NotFound} />
     </Switch>
   );
@@ -107,16 +170,20 @@ function Router() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <SellerAuthProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Router />
-          </TooltipProvider>
-        </SellerAuthProvider>
-      </AuthProvider>
-    </QueryClientProvider>
+    <HelmetProvider>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <SellerAuthProvider>
+            <RecruiterAuthProvider>
+              <TooltipProvider>
+                <Toaster />
+                <Router />
+              </TooltipProvider>
+            </RecruiterAuthProvider>
+          </SellerAuthProvider>
+        </AuthProvider>
+      </QueryClientProvider>
+    </HelmetProvider>
   );
 }
 

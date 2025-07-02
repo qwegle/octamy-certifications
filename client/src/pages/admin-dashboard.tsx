@@ -1111,6 +1111,26 @@ function CourseForm({ course, onCancel, onSuccess }: { course?: any; onCancel: (
     }
   });
 
+  // Reset form when course data changes
+  useEffect(() => {
+    if (course) {
+      form.reset({
+        title: course.title || "",
+        description: course.description || "",
+        slug: course.slug || "",
+        categoryId: course.categoryId || 0,
+        duration: course.duration || 30,
+        passingScore: course.passingScore || 60,
+        price: course.price || "99",
+        originalPrice: course.originalPrice || "",
+        isOnSale: course.isOnSale || false,
+        level: course.level || "Beginner",
+        isActive: course.isActive !== false,
+        isInternship: course.isInternship || false
+      });
+    }
+  }, [course, form]);
+
   // Fetch categories
   const { data: categories = [] } = useQuery<Category[]>({
     queryKey: ["/api/categories"]
@@ -1119,12 +1139,25 @@ function CourseForm({ course, onCancel, onSuccess }: { course?: any; onCancel: (
   // Create/Update course mutation
   const courseMutation = useMutation({
     mutationFn: async (data: CourseFormData) => {
+      console.log('Form data being sent:', data);
+      console.log('Is editing:', isEditing);
+      console.log('Course ID:', course?.id);
       const url = isEditing ? `/api/admin/courses/${course.id}` : "/api/admin/courses";
       const method = isEditing ? "PUT" : "POST";
-      return await apiRequest(method, url, data);
+      console.log('API URL:', url);
+      console.log('HTTP Method:', method);
+      const result = await apiRequest(method, url, data);
+      console.log('API Response:', result);
+      return result;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('Mutation success:', data);
+      // Invalidate all course-related queries
       queryClient.invalidateQueries({ queryKey: ["/api/admin/courses"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/courses"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/analytics"] });
+      // Refetch the data immediately
+      queryClient.refetchQueries({ queryKey: ["/api/admin/courses"] });
       toast({
         title: "Success",
         description: `Course ${isEditing ? 'updated' : 'created'} successfully`
@@ -1132,6 +1165,7 @@ function CourseForm({ course, onCancel, onSuccess }: { course?: any; onCancel: (
       onSuccess();
     },
     onError: (error: any) => {
+      console.error('Mutation error:', error);
       toast({
         title: "Error",
         description: error.message || `Failed to ${isEditing ? 'update' : 'create'} course`,
@@ -1141,10 +1175,15 @@ function CourseForm({ course, onCancel, onSuccess }: { course?: any; onCancel: (
   });
 
   const onSubmit = (data: CourseFormData) => {
+    console.log('Form submitted with data:', data);
+    console.log('Is editing:', isEditing);
+    console.log('Course ID:', course?.id);
+    
     // Generate slug from title if not provided
     if (!data.slug && data.title) {
       data.slug = data.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
     }
+    console.log('Final data being sent:', data);
     courseMutation.mutate(data);
   };
 
@@ -2115,7 +2154,7 @@ export default function AdminDashboard() {
                                   <div className="text-sm text-muted-foreground">{course.duration} min • {course.passingScore}% pass</div>
                                 </div>
                               </TableCell>
-                              <TableCell>{course.category?.name || 'Unknown'}</TableCell>
+                              <TableCell>{course.categoryName || 'Unknown'}</TableCell>
                               <TableCell>
                                 <div>
                                   <span className="font-medium">₹{course.price}</span>
@@ -2157,7 +2196,10 @@ export default function AdminDashboard() {
                                       <Button 
                                         size="sm" 
                                         variant="outline"
-                                        onClick={() => setSelectedCourse(course)}
+                                        onClick={() => {
+                                          setSelectedCourse(course);
+                                          setIsEditingCourse(true);
+                                        }}
                                       >
                                         <Edit className="h-4 w-4" />
                                       </Button>
