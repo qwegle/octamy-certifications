@@ -400,4 +400,123 @@ export function registerRecruiterRoutes(app: any) {
       res.status(500).json({ message: "Failed to load candidate profile", error: error.message });
     }
   });
+
+  // Get Recruiter Profile
+  app.get('/api/recruiter/profile', authenticateRecruiterToken, async (req: AuthenticatedRecruiterRequest, res: Response) => {
+    try {
+      const recruiterId = req.recruiter?.recruiterId;
+      if (!recruiterId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const recruiter = await storage.getRecruiterById(recruiterId);
+      if (!recruiter) {
+        return res.status(404).json({ message: "Recruiter not found" });
+      }
+
+      res.json(recruiter);
+    } catch (error: any) {
+      console.error("Get profile error:", error);
+      res.status(500).json({ message: "Failed to fetch profile", error: error.message });
+    }
+  });
+
+  // Update Recruiter Profile
+  app.put('/api/recruiter/profile', authenticateRecruiterToken, async (req: AuthenticatedRecruiterRequest, res: Response) => {
+    try {
+      const recruiterId = req.recruiter?.recruiterId;
+      if (!recruiterId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const { firstName, lastName, phone, designation, linkedinProfile } = req.body;
+      
+      await storage.updateRecruiterStep1({
+        id: recruiterId,
+        firstName,
+        lastName,
+        phone,
+        designation,
+        linkedinProfile
+      });
+
+      res.json({ message: "Profile updated successfully" });
+    } catch (error: any) {
+      console.error("Update profile error:", error);
+      res.status(500).json({ message: "Failed to update profile", error: error.message });
+    }
+  });
+
+  // Update Company Information
+  app.put('/api/recruiter/company', authenticateRecruiterToken, async (req: AuthenticatedRecruiterRequest, res: Response) => {
+    try {
+      const recruiterId = req.recruiter?.recruiterId;
+      if (!recruiterId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const { 
+        companyName, 
+        companyWebsite, 
+        companySize, 
+        industry, 
+        companyAddress, 
+        companyCity, 
+        companyState, 
+        companyCountry 
+      } = req.body;
+      
+      await storage.updateRecruiterStep2({
+        id: recruiterId,
+        companyName,
+        companyWebsite,
+        companySize,
+        industry,
+        companyAddress,
+        companyCity,
+        companyState,
+        companyCountry
+      });
+
+      res.json({ message: "Company information updated successfully" });
+    } catch (error: any) {
+      console.error("Update company error:", error);
+      res.status(500).json({ message: "Failed to update company information", error: error.message });
+    }
+  });
+
+  // Change Password
+  app.put('/api/recruiter/change-password', authenticateRecruiterToken, async (req: AuthenticatedRecruiterRequest, res: Response) => {
+    try {
+      const recruiterId = req.recruiter?.recruiterId;
+      if (!recruiterId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const { currentPassword, newPassword } = req.body;
+      
+      // Get current recruiter
+      const recruiter = await storage.getRecruiterById(recruiterId);
+      if (!recruiter) {
+        return res.status(404).json({ message: "Recruiter not found" });
+      }
+
+      // Verify current password
+      const validPassword = await bcrypt.compare(currentPassword, recruiter.password);
+      if (!validPassword) {
+        return res.status(400).json({ message: "Current password is incorrect" });
+      }
+
+      // Hash new password
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      
+      // Update password
+      await storage.updateRecruiterPassword(recruiterId, hashedPassword);
+
+      res.json({ message: "Password changed successfully" });
+    } catch (error: any) {
+      console.error("Change password error:", error);
+      res.status(500).json({ message: "Failed to change password", error: error.message });
+    }
+  });
 }
