@@ -350,7 +350,7 @@ export default function CandidateProfile() {
                 <div className="mt-6">
                   <h4 className="font-medium mb-3">Skill Distribution</h4>
                   <div className="space-y-3">
-                    {candidate.technicalStrength.map((strength, index) => (
+                    {(candidate.technicalStrength || []).map((strength, index) => (
                       <div key={strength}>
                         <div className="flex justify-between text-sm mb-1">
                           <span>{strength}</span>
@@ -563,7 +563,7 @@ export default function CandidateProfile() {
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-2">
-                  {candidate.skills.map((skill, index) => (
+                  {(candidate.skills || []).map((skill, index) => (
                     <Badge key={index} variant="secondary">
                       {skill}
                     </Badge>
