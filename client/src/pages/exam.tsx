@@ -48,7 +48,7 @@ export default function Exam() {
   });
 
   const { data: questionsData } = useQuery<{questions: ExamQuestion[], sessionId: string}>({
-    queryKey: [`/api/courses/${course?.id}/questions`, examStarted],
+    queryKey: [`/api/courses/${course?.id}/questions`, examStarted, examStartTime],
     queryFn: async () => {
       // Always generate a fresh session for each exam attempt
       const newSessionId = `session_${Date.now()}_${Math.random()}`;
@@ -73,10 +73,10 @@ export default function Exam() {
 
   // Set session ID when questions data is available
   useEffect(() => {
-    if (questionsData?.sessionId && !sessionId) {
+    if (questionsData?.sessionId) {
       setSessionId(questionsData.sessionId);
     }
-  }, [questionsData, sessionId]);
+  }, [questionsData]);
 
   // Anti-cheating: Monitor tab/window focus
   useEffect(() => {
@@ -208,6 +208,9 @@ export default function Exam() {
     setCurrentQuestion(0);
     setTabSwitches(0);
     setIsWindowFocused(true);
+    
+    // Invalidate queries to force fresh fetch
+    queryClient.invalidateQueries({ queryKey: [`/api/courses/${course?.id}/questions`] });
     
     setExamStarted(true);
     setExamStartTime(Date.now());
