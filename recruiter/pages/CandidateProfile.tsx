@@ -510,7 +510,7 @@ export default function CandidateProfile() {
                       <p className="text-sm text-blue-800">
                         This candidate shows strong technical aptitude with consistent learning patterns. 
                         High dedication score indicates reliability for long-term roles. 
-                        Strong performance in {candidate.technicalStrength.join(', ')} areas.
+                        Strong performance in {(candidate.technicalStrength || []).join(', ')} areas.
                       </p>
                     </div>
                   </CardContent>
