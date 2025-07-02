@@ -141,7 +141,52 @@ export const users = pgTable("users", {
   phone: text("phone"),
   isAdmin: boolean("is_admin").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+  
+  // Professional Profile Fields (for recruiters to search)
+  location: text("location"),
+  experience: integer("experience"), // years of experience
+  currentRole: text("current_role"),
+  skills: text("skills").array(), // technical skills
+  availability: text("availability"), // immediate, 1-month, etc.
+  noticePeriod: text("notice_period"), // 30 days, 60 days, etc.
+  expectedSalary: text("expected_salary"), // salary range
+  workType: text("work_type").array(), // remote, hybrid, onsite
+  category: text("category").array(), // preferred job categories
+  linkedinProfile: text("linkedin_profile"),
+  portfolioUrl: text("portfolio_url"),
+  resume: text("resume_url"),
+  bio: text("bio"),
+  careerGoals: text("career_goals"),
+  
+  // Profile visibility and metrics
+  profileVisibility: boolean("profile_visibility").default(true),
+  lastActive: timestamp("last_active").defaultNow(),
+  profileCompleteness: integer("profile_completeness").default(0), // percentage
+  
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
+
+// User profile insert and update schemas
+export const insertUserSchema = createInsertSchema(users).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  lastActive: true,
+});
+
+export const updateUserProfileSchema = createInsertSchema(users).omit({
+  id: true,
+  email: true,
+  password: true,
+  isAdmin: true,
+  createdAt: true,
+  updatedAt: true,
+  lastActive: true,
+}).partial();
+
+export type InsertUser = z.infer<typeof insertUserSchema>;
+export type UpdateUserProfile = z.infer<typeof updateUserProfileSchema>;
+export type User = typeof users.$inferSelect;
 
 export const userAddresses = pgTable("user_addresses", {
   id: serial("id").primaryKey(),
@@ -742,13 +787,7 @@ export const skillAssessmentsRelations = relations(skillAssessments, ({ one }) =
   }),
 }));
 
-// Insert schemas
-export const insertUserSchema = createInsertSchema(users).omit({
-  id: true,
-  createdAt: true,
-}).extend({
-  phone: z.string().optional()
-});
+// Insert schemas (userSchema already defined above with profile fields)
 
 export const insertCategorySchema = createInsertSchema(categories).omit({
   id: true,
@@ -828,9 +867,7 @@ export const insertUserAchievementSchema = createInsertSchema(userAchievements).
   unlockedAt: true,
 });
 
-// Types
-export type User = typeof users.$inferSelect;
-export type InsertUser = z.infer<typeof insertUserSchema>;
+// Types (User and InsertUser types defined above with profile fields)
 
 export const insertUserAddressSchema = createInsertSchema(userAddresses).omit({
   id: true,
