@@ -591,7 +591,7 @@ export function registerRecruiterRoutes(app: any) {
         return res.status(404).json({ message: "Recruiter not found" });
       }
 
-      if (recruiter.credits < 2) {
+      if (parseFloat(recruiter.creditsBalance) < 2) {
         return res.status(400).json({ message: "Insufficient credits. Interview videos require 2 credits." });
       }
 
@@ -606,7 +606,8 @@ export function registerRecruiterRoutes(app: any) {
       }
 
       // Deduct 2 credits
-      await storage.updateRecruiterCredits(recruiterId, recruiter.credits - 2);
+      const newBalance = parseFloat(recruiter.creditsBalance) - 2;
+      await storage.updateRecruiterCredits(recruiterId, newBalance);
 
       // Log the credit transaction
       await storage.createCreditTransaction({

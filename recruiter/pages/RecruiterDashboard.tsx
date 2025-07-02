@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useRecruiterAuth } from '../auth/RecruiterAuthProvider';
 import { apiRequest } from '@/lib/queryClient';
 import RecruiterLayout from '../components/RecruiterLayout';
+import { Link, useLocation } from 'wouter';
 import {
   Users,
   Search,
@@ -215,9 +216,11 @@ export default function RecruiterDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{recruiter?.creditsBalance || '0'}</div>
-              <Button size="sm" className="mt-2" variant="outline">
-                Buy Credits
-              </Button>
+              <Link href="/recruiter/wallet">
+                <Button size="sm" className="mt-2" variant="outline">
+                  Buy Credits
+                </Button>
+              </Link>
             </CardContent>
           </Card>
         </div>
@@ -235,9 +238,11 @@ export default function RecruiterDashboard() {
               <p className="text-gray-600 mb-4">
                 Find the perfect candidates using our advanced search filters.
               </p>
-              <Button className="w-full bg-blue-600 hover:bg-blue-700">
-                Start Searching
-              </Button>
+              <Link href="/recruiter/search">
+                <Button className="w-full bg-blue-600 hover:bg-blue-700">
+                  Start Searching
+                </Button>
+              </Link>
             </CardContent>
           </Card>
 
@@ -252,7 +257,10 @@ export default function RecruiterDashboard() {
               <p className="text-gray-600 mb-4">
                 Access profiles you've recently viewed or downloaded.
               </p>
-              <Button variant="outline" className="w-full">
+              <Button variant="outline" className="w-full" onClick={() => {
+                // For now, show a message until we implement history page
+                alert('Recent profile views and downloads coming soon!');
+              }}>
                 View History
               </Button>
             </CardContent>
@@ -269,7 +277,10 @@ export default function RecruiterDashboard() {
               <p className="text-gray-600 mb-4">
                 Track your recruitment metrics and performance.
               </p>
-              <Button variant="outline" className="w-full">
+              <Button variant="outline" className="w-full" onClick={() => {
+                // For now, show a message until we implement analytics page
+                alert('Analytics dashboard coming soon!');
+              }}>
                 View Analytics
               </Button>
             </CardContent>

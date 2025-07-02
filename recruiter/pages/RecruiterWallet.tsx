@@ -81,9 +81,12 @@ export default function RecruiterWallet() {
       };
 
       // Generate hash server-side
-      const hashResponse = await apiRequest('POST', '/api/recruiter/generate-payment-hash', {
+      const hashResponse = await fetch('/api/recruiter/generate-payment-hash', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('recruiterToken')}`
+        },
         body: JSON.stringify(paymentData)
       });
 
