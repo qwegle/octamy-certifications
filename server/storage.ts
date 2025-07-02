@@ -2573,6 +2573,15 @@ export class DatabaseStorage implements IStorage {
       .where(eq(recruiters.id, recruiterId));
   }
 
+  async updateRecruiterCredits(recruiterId: number, newCredits: number) {
+    await db.update(recruiters)
+      .set({
+        credits: newCredits,
+        updatedAt: new Date()
+      })
+      .where(eq(recruiters.id, recruiterId));
+  }
+
   async getRecruiterDashboardData(recruiterId: number) {
     const profileViews = await db.select({ count: sql`count(*)` })
       .from(profileAccessLogs)

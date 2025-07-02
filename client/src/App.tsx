@@ -146,6 +146,22 @@ function Router() {
           </RecruiterProtectedRoute>
         )}
       </Route>
+      <Route path="/recruiter/profile">
+        {() => (
+          <RecruiterProtectedRoute>
+            <RecruiterProfile />
+          </RecruiterProtectedRoute>
+        )}
+      </Route>
+      <Route path="/recruiter/settings">
+        {() => (
+          <RecruiterProtectedRoute>
+            <RecruiterSettings />
+          </RecruiterProtectedRoute>
+        )}
+      </Route>
+      <Route path="/recruiter/payment-success" component={PaymentSuccess} />
+      <Route path="/recruiter/payment-failed" component={PaymentFailed} />
       
       <Route component={NotFound} />
     </Switch>

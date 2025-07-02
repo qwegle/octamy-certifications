@@ -18,6 +18,7 @@ import {
   TrendingUp,
   Award,
   Clock,
+  X,
   Target,
   BarChart3,
   Video,
@@ -78,6 +79,7 @@ export default function CandidateProfile() {
   const [, params] = useRoute('/recruiter/profile/:id');
   const [candidate, setCandidate] = useState<CandidateProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [watchingVideo, setWatchingVideo] = useState<{interview: Interview, videoUrl: string} | null>(null);
   const [activeVideo, setActiveVideo] = useState<string | null>(null);
   const { toast } = useToast();
 
@@ -247,6 +249,50 @@ export default function CandidateProfile() {
       case 'expert': return 'bg-green-100 text-green-800';
       case 'professional': return 'bg-blue-100 text-blue-800';
       default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const handleWatchInterview = async (interview: Interview) => {
+    if (!interview.videoUrl) {
+      toast({
+        title: "Video Not Available",
+        description: "This interview recording is not available.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/recruiter/access-interview-video', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('recruiterToken')}`,
+        },
+        body: JSON.stringify({
+          interviewId: interview.id,
+          candidateId: params?.id,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        toast({
+          title: "Access Failed",
+          description: error.message || "Failed to access interview video",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const data = await response.json();
+      setWatchingVideo({ interview, videoUrl: data.videoUrl });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An error occurred while accessing the video",
+        variant: "destructive",
+      });
     }
   };
 
@@ -445,9 +491,13 @@ export default function CandidateProfile() {
                                   </span>
                                 </div>
                               </div>
-                              <Button variant="outline" size="sm">
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => handleWatchInterview(interview)}
+                              >
                                 <Play className="h-4 w-4 mr-2" />
-                                Watch
+                                Watch (2 credits)
                               </Button>
                             </div>
                           </div>
@@ -615,6 +665,63 @@ export default function CandidateProfile() {
           </div>
         </div>
       </div>
+
+      {/* Video Modal */}
+      {watchingVideo && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-semibold">
+                {watchingVideo.interview.technology} Interview - {candidate?.name}
+              </h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setWatchingVideo(null)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            
+            <div className="mb-4">
+              <video
+                src={watchingVideo.videoUrl}
+                controls
+                className="w-full h-96 bg-black rounded-lg"
+                onError={() => {
+                  toast({
+                    title: "Video Error",
+                    description: "Unable to load video",
+                    variant: "destructive",
+                  });
+                }}
+              >
+                Your browser does not support the video tag.
+              </video>
+            </div>
+            
+            <div className="flex items-center justify-between text-sm text-gray-600">
+              <div>
+                Score: <span className={`font-semibold ${getScoreColor(watchingVideo.interview.score)}`}>
+                  {watchingVideo.interview.score}% ({watchingVideo.interview.grade})
+                </span>
+              </div>
+              <div>
+                Date: {new Date(watchingVideo.interview.completedAt).toLocaleDateString()}
+              </div>
+            </div>
+            
+            {watchingVideo.interview.feedback && (
+              <div className="mt-4">
+                <h4 className="font-medium mb-2">AI Feedback</h4>
+                <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
+                  {watchingVideo.interview.feedback}
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

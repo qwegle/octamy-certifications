@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
+import crypto from 'crypto';
 import { storage } from '../storage';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
@@ -517,6 +518,122 @@ export function registerRecruiterRoutes(app: any) {
     } catch (error: any) {
       console.error("Change password error:", error);
       res.status(500).json({ message: "Failed to change password", error: error.message });
+    }
+  });
+
+  // Generate PayUMoney Payment Hash
+  app.post('/api/recruiter/generate-payment-hash', authenticateRecruiterToken, async (req: AuthenticatedRecruiterRequest, res: Response) => {
+    try {
+      const { key, amount, productinfo, firstname, email, txnid, surl, furl, service_provider } = req.body;
+      
+      const PAYUMONEY_SALT = process.env.PAYUMONEY_SALT || 'eCwWELxi';
+      
+      // Create hash string: key|txnid|amount|productinfo|firstname|email|||||||||||salt
+      const hashString = `${key}|${txnid}|${amount}|${productinfo}|${firstname}|${email}|||||||||||${PAYUMONEY_SALT}`;
+      
+      const hash = crypto.createHash('sha512').update(hashString).digest('hex');
+      
+      res.json({ hash });
+    } catch (error: any) {
+      console.error("Payment hash generation error:", error);
+      res.status(500).json({ message: "Failed to generate payment hash", error: error.message });
+    }
+  });
+
+  // Payment Success Handler
+  app.post('/api/recruiter/payment-success', async (req: Request, res: Response) => {
+    try {
+      const { txnid, amount, status, hash } = req.body;
+      
+      if (status === 'success') {
+        // Extract recruiter ID from transaction ID or use session
+        // For now, let's parse transaction ID format: TXN_timestamp_randomstring
+        // You would normally store this mapping when creating the transaction
+        
+        // Process the successful payment
+        const credits = Math.floor(parseFloat(amount) / 50); // ₹50 per credit
+        
+        // Redirect to success page with parameters
+        res.redirect(`/recruiter/payment-success?txnid=${txnid}&amount=${amount}&credits=${credits}`);
+      } else {
+        res.redirect(`/recruiter/payment-failed?txnid=${txnid}`);
+      }
+    } catch (error: any) {
+      console.error("Payment success handler error:", error);
+      res.redirect('/recruiter/payment-failed');
+    }
+  });
+
+  // Payment Failure Handler  
+  app.post('/api/recruiter/payment-failed', async (req: Request, res: Response) => {
+    try {
+      const { txnid } = req.body;
+      res.redirect(`/recruiter/payment-failed?txnid=${txnid}`);
+    } catch (error: any) {
+      console.error("Payment failure handler error:", error);
+      res.redirect('/recruiter/payment-failed');
+    }
+  });
+
+  // Access Interview Video with Credit Deduction
+  app.post('/api/recruiter/access-interview-video', authenticateRecruiterToken, async (req: AuthenticatedRecruiterRequest, res: Response) => {
+    try {
+      const { interviewId, candidateId } = req.body;
+      const recruiterId = req.recruiter?.recruiterId;
+
+      if (!recruiterId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      // Check recruiter's credit balance
+      const recruiter = await storage.getRecruiterById(recruiterId);
+      if (!recruiter) {
+        return res.status(404).json({ message: "Recruiter not found" });
+      }
+
+      if (recruiter.credits < 2) {
+        return res.status(400).json({ message: "Insufficient credits. Interview videos require 2 credits." });
+      }
+
+      // Get interview details
+      const interview = await storage.getInterviewById(interviewId);
+      if (!interview) {
+        return res.status(404).json({ message: "Interview not found" });
+      }
+
+      if (!interview.videoUrl) {
+        return res.status(404).json({ message: "Video not available for this interview" });
+      }
+
+      // Deduct 2 credits
+      await storage.updateRecruiterCredits(recruiterId, recruiter.credits - 2);
+
+      // Log the credit transaction
+      await storage.createCreditTransaction({
+        recruiterId,
+        amount: -2,
+        type: 'deduction',
+        description: `Interview video access - Candidate ${candidateId}`,
+        metadata: { interviewId, candidateId }
+      });
+
+      // Log profile access
+      await storage.logProfileAccess({
+        recruiterId,
+        candidateId: parseInt(candidateId),
+        accessType: 'interview_video',
+        creditsUsed: 2
+      });
+
+      res.json({ 
+        videoUrl: interview.videoUrl,
+        creditsRemaining: recruiter.credits - 2,
+        message: "Video access granted. 2 credits deducted."
+      });
+
+    } catch (error: any) {
+      console.error("Interview video access error:", error);
+      res.status(500).json({ message: "Failed to access interview video", error: error.message });
     }
   });
 }

@@ -57,12 +57,68 @@ export default function RecruiterWallet() {
     }
   };
 
-  const handlePurchaseCredits = (amount: number) => {
-    // This would integrate with payment gateway
-    toast({
-      title: 'Purchase Credits',
-      description: `Redirecting to payment gateway for ${amount} credits...`,
-    });
+  const handlePurchaseCredits = async (amount: number) => {
+    try {
+      setLoading(true);
+      
+      // Calculate price (₹50 per credit)
+      const totalPrice = amount * 50;
+      const transactionId = `TXN_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
+      
+      // Create PayUMoney payment form
+      const paymentData = {
+        key: process.env.VITE_PAYUMONEY_MERCHANT_KEY || 'gtKFFx',
+        amount: totalPrice,
+        productinfo: `Credits Purchase - ${amount} credits`,
+        firstname: recruiter?.firstName || 'Recruiter',
+        email: recruiter?.email || '',
+        phone: recruiter?.phone || '',
+        txnid: transactionId,
+        surl: `${window.location.origin}/recruiter/payment-success`,
+        furl: `${window.location.origin}/recruiter/payment-failed`,
+        hash: '', // This would be generated server-side
+        service_provider: 'payu_paisa'
+      };
+
+      // Generate hash server-side
+      const hashResponse = await apiRequest('POST', '/api/recruiter/generate-payment-hash', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(paymentData)
+      });
+
+      if (hashResponse.ok) {
+        const { hash } = await hashResponse.json();
+        paymentData.hash = hash;
+
+        // Create and submit payment form
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = 'https://test.payu.in/_payment'; // Use sandboxsecure.payu.in for production
+        
+        Object.entries(paymentData).forEach(([key, value]) => {
+          const input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = key;
+          input.value = value.toString();
+          form.appendChild(input);
+        });
+
+        document.body.appendChild(form);
+        form.submit();
+      } else {
+        throw new Error('Failed to generate payment hash');
+      }
+    } catch (error) {
+      console.error('Payment error:', error);
+      toast({
+        title: 'Payment Error',
+        description: 'Failed to initiate payment. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const getTransactionIcon = (type: string) => {
