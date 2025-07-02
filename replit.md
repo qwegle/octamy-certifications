@@ -64,6 +64,7 @@ Comprehensive professional certification platform with AI-powered interviews, in
 - ✅ Demo course: ID 45, Price ₹1.00, 1 question, 80% passing score, slug: demo-test-course
 - ✅ Perfect for testing payment flow and certification system with minimal cost
 - ✅ Updated course name from "Demo Test Course" to "Certification System Test" based on question content
+- ✅ Updated "Test Course Update" to "Digital Marketing Fundamentals" based on 15 marketing questions covering SEO, PPC, social media, email marketing, and analytics
 
 ### 2025-01-23: Premium UI Redesign for Recruiter Portal
 - Redesigned authentication page with split-screen layout (left: branding/quotes, right: forms)
