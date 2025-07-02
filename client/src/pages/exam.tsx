@@ -48,15 +48,17 @@ export default function Exam() {
   });
 
   const { data: questionsData } = useQuery<{questions: ExamQuestion[], sessionId: string}>({
-    queryKey: [`/api/courses/${course?.id}/questions`, sessionId],
+    queryKey: [`/api/courses/${course?.id}/questions`, examStarted],
     queryFn: async () => {
+      // Always generate a fresh session for each exam attempt
+      const newSessionId = `session_${Date.now()}_${Math.random()}`;
       const response = await fetch(`/api/courses/${course?.id}/questions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          sessionId: sessionId || `session_${Date.now()}_${Math.random()}`
+          sessionId: newSessionId
         }),
       });
       if (!response.ok) {
@@ -199,6 +201,14 @@ export default function Exam() {
       });
       return;
     }
+    
+    // Reset state for fresh exam attempt
+    setSessionId('');
+    setAnswers({});
+    setCurrentQuestion(0);
+    setTabSwitches(0);
+    setIsWindowFocused(true);
+    setExamResults(null);
     
     setExamStarted(true);
     setExamStartTime(Date.now());
