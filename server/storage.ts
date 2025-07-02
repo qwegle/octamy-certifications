@@ -2401,7 +2401,7 @@ export class DatabaseStorage implements IStorage {
   // Update course (admin)
   async updateCourseAdmin(id: number, updates: Partial<InsertCourse>) {
     const [course] = await db.update(courses)
-      .set({ ...updates, createdAt: new Date() })
+      .set(updates)
       .where(eq(courses.id, id))
       .returning();
     return course;

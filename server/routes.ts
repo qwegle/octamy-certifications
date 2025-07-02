@@ -1818,6 +1818,89 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
+  // Admin course creation
+  app.post(
+    "/api/admin/courses",
+    authenticateAdminToken,
+    async (req: AuthenticatedRequest, res: Response) => {
+      try {
+        const courseData = req.body;
+        
+        // Validate required fields
+        if (!courseData.title || !courseData.categoryId || !courseData.price) {
+          return res.status(400).json({ message: "Missing required fields: title, categoryId, price" });
+        }
+
+        // Generate slug if not provided
+        if (!courseData.slug) {
+          courseData.slug = courseData.title.toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '');
+        }
+
+        const course = await storage.createCourseAdmin(courseData);
+        res.status(201).json(course);
+      } catch (error) {
+        console.error("Error creating course:", error);
+        res.status(500).json({ message: "Failed to create course" });
+      }
+    }
+  );
+
+  // Admin course update
+  app.put(
+    "/api/admin/courses/:id",
+    authenticateAdminToken,
+    async (req: AuthenticatedRequest, res: Response) => {
+      try {
+        const courseId = parseInt(req.params.id);
+        if (isNaN(courseId)) {
+          return res.status(400).json({ message: "Invalid course ID" });
+        }
+
+        const courseData = req.body;
+        
+        // Generate slug if title is being updated but slug is not provided
+        if (courseData.title && !courseData.slug) {
+          courseData.slug = courseData.title.toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '');
+        }
+
+        const course = await storage.updateCourseAdmin(courseId, courseData);
+        
+        if (!course) {
+          return res.status(404).json({ message: "Course not found" });
+        }
+
+        res.json(course);
+      } catch (error) {
+        console.error("Error updating course:", error);
+        res.status(500).json({ message: "Failed to update course" });
+      }
+    }
+  );
+
+  // Admin course deletion
+  app.delete(
+    "/api/admin/courses/:id",
+    authenticateAdminToken,
+    async (req: AuthenticatedRequest, res: Response) => {
+      try {
+        const courseId = parseInt(req.params.id);
+        if (isNaN(courseId)) {
+          return res.status(400).json({ message: "Invalid course ID" });
+        }
+
+        await storage.deleteCourseAdmin(courseId);
+        res.json({ message: "Course deleted successfully" });
+      } catch (error) {
+        console.error("Error deleting course:", error);
+        res.status(500).json({ message: "Failed to delete course" });
+      }
+    }
+  );
+
   app.get(
     "/api/admin/exam-attempts",
     authenticateAdminToken,
