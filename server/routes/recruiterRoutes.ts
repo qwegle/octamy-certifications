@@ -615,30 +615,12 @@ export function registerRecruiterRoutes(app: any) {
         return res.status(404).json({ message: "Video not available for this interview" });
       }
 
-      // Deduct 2 credits
-      const newBalance = parseFloat(recruiter.creditsBalance) - 2;
-      await storage.updateRecruiterCredits(recruiterId, newBalance);
-
-      // Log the credit transaction
-      await storage.createCreditTransaction({
-        recruiterId,
-        amount: -2,
-        type: 'deduction',
-        description: `Interview video access - Candidate ${candidateId}`,
-        metadata: { interviewId, candidateId }
-      });
-
-      // Log profile access
-      await storage.logProfileAccess({
-        recruiterId,
-        candidateId: parseInt(candidateId),
-        accessType: 'interview_video',
-        creditsUsed: 2
-      });
+      // Process credit transaction and access logging
+      await storage.processProfileAccess(recruiterId, parseInt(candidateId), 'interview_video', 2);
 
       res.json({ 
         videoUrl: interview.videoUrl,
-        creditsRemaining: recruiter.credits - 2,
+        creditsRemaining: (parseFloat(recruiter.creditsBalance) - 2).toFixed(2),
         message: "Video access granted. 2 credits deducted."
       });
 
