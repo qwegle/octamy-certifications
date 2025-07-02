@@ -305,29 +305,42 @@ export default function AIInterviews() {
                         <Clock className="mr-1 h-4 w-4" />
                         5-7 questions • 45-60 min
                       </div>
-                      {userInterviews.some(interview => interview.technology === tech && interview.isPaid) ? (
-                        <Button 
-                          onClick={() => setLocation(`/interview/${userInterviews.find(i => i.technology === tech && i.isPaid)?.id}`)}
-                          className="w-full bg-green-600 text-white hover:bg-green-700"
-                        >
-                          Take Interview
-                        </Button>
-                      ) : (
-                        <Button 
-                          onClick={() => createInterviewMutation.mutate(tech)}
-                          disabled={processingTech === tech}
-                          className="w-full bg-black text-white hover:bg-gray-800 transition-all"
-                        >
-                          {processingTech === tech ? (
-                            <div className="flex items-center gap-2">
-                              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                              Processing...
-                            </div>
-                          ) : (
-                            'Start Interview - ₹99'
-                          )}
-                        </Button>
-                      )}
+                      {(() => {
+                        const availableInterview = userInterviews.find(i => 
+                          i.technology === tech && 
+                          i.isPaid && 
+                          (i.status === 'available' || (i.status === 'pending' && i.paymentStatus === 'paid'))
+                        );
+                        
+                        if (availableInterview) {
+                          return (
+                            <Button 
+                              onClick={() => setLocation(`/interview/${availableInterview.id}`)}
+                              className="w-full bg-green-600 text-white hover:bg-green-700"
+                            >
+                              <Play className="mr-2 h-4 w-4" />
+                              Take Interview
+                            </Button>
+                          );
+                        }
+                        
+                        return (
+                          <Button 
+                            onClick={() => createInterviewMutation.mutate(tech)}
+                            disabled={processingTech === tech}
+                            className="w-full bg-black text-white hover:bg-gray-800 transition-all"
+                          >
+                            {processingTech === tech ? (
+                              <div className="flex items-center gap-2">
+                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                Processing...
+                              </div>
+                            ) : (
+                              'Start Interview - ₹99'
+                            )}
+                          </Button>
+                        );
+                      })()}
                     </CardContent>
                   </Card>
                 ))}
@@ -454,6 +467,23 @@ export default function AIInterviews() {
                               >
                                 <Eye className="mr-2 h-4 w-4" />
                                 View Results
+                              </Button>
+                              <Button 
+                                className="flex-1 bg-green-600 hover:bg-green-700"
+                                onClick={() => createInterviewMutation.mutate(interview.technology)}
+                                disabled={processingTech === interview.technology}
+                              >
+                                {processingTech === interview.technology ? (
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                    Processing...
+                                  </div>
+                                ) : (
+                                  <>
+                                    <Play className="mr-2 h-4 w-4" />
+                                    Retake - ₹99
+                                  </>
+                                )}
                               </Button>
                               {interview.videoUrl && (
                                 <Button 
