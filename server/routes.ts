@@ -2776,6 +2776,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
+  // General file upload endpoint for CVs/resumes
+  app.post(
+    "/api/upload",
+    authenticateToken,
+    upload.single("file"),
+    async (req: AuthenticatedRequest, res: Response) => {
+      try {
+        if (!req.file) {
+          return res.status(400).json({ error: "No file uploaded" });
+        }
+
+        const allowedTypes = [
+          "application/pdf",
+          "application/msword",
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        ];
+
+        if (!allowedTypes.includes(req.file.mimetype)) {
+          return res.status(400).json({ 
+            error: "Invalid file type. Only PDF and Word documents are allowed." 
+          });
+        }
+
+        if (!process.env.CLOUDINARY_CLOUD_NAME) {
+          return res.status(500).json({ error: "Cloudinary not configured" });
+        }
+
+        const publicId = `resumes/${req.user!.userId}_${Date.now()}`;
+
+        // Upload to Cloudinary
+        const uploadResult = await new Promise((resolve, reject) => {
+          cloudinary.uploader
+            .upload_stream(
+              {
+                resource_type: "raw",
+                public_id: publicId,
+                format: req.file!.originalname.split('.').pop()
+              },
+              (error: any, result: any) => {
+                if (error) reject(error);
+                else resolve(result);
+              }
+            )
+            .end(req.file!.buffer);
+        });
+
+        console.log(`File uploaded to Cloudinary: User ${req.user!.userId}`);
+
+        res.json({
+          success: true,
+          fileUrl: (uploadResult as any).secure_url,
+          fileName: req.file.originalname,
+          fileSize: req.file.size,
+          publicId: (uploadResult as any).public_id
+        });
+      } catch (error) {
+        console.error("Error uploading file:", error);
+        res.status(500).json({ error: "Failed to upload file" });
+      }
+    }
+  );
+
   // Upload interview recordings to Cloudinary
   app.post(
     "/api/interviews/:id/upload-recording",
