@@ -12,6 +12,7 @@ import { useAuth } from '@/lib/auth.tsx';
 import Header from '@/components/header';
 import ExamTimer from '@/components/exam-timer';
 import { Helmet } from 'react-helmet-async';
+import { ExamStructuredData } from '@/components/seo-structured-data';
 
 import type { Course, Question } from '@shared/schema';
 import { AlertTriangle } from 'lucide-react';
