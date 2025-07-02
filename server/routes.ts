@@ -832,28 +832,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
-  // Simple profile update endpoint using the same auth pattern as /api/user
-  app.post(
-    "/api/update-profile",
-    authenticateToken,
-    async (req: AuthenticatedRequest, res) => {
-      try {
-        const userId = req.user!.userId;
-        const profileData = req.body;
-
-        // Update the user profile using the updateUserProfile method
-        const updatedProfile = await storage.updateUserProfile(userId, profileData);
-        
-        res.json({
-          message: "Profile updated successfully",
-          profile: updatedProfile
-        });
-      } catch (error) {
-        console.error("Profile update error:", error);
-        res.status(500).json({ message: "Failed to update profile" });
-      }
-    }
-  );
+  // Import and mount user profile routes
+  try {
+    const { default: userProfileRoutes } = await import("./routes/userProfileRoutes.js");
+    app.use("/api/user", userProfileRoutes);
+    console.log("User profile routes mounted successfully");
+  } catch (error) {
+    console.error("Failed to load user profile routes:", error);
+  }
 
   // Categories and courses
   app.get("/api/categories", async (req, res) => {

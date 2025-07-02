@@ -1,7 +1,37 @@
 import { Router } from 'express';
-import { authenticateToken } from '../middleware/auth';
 import { storage } from '../storage';
 import { z } from 'zod';
+import jwt from 'jsonwebtoken';
+
+// Use the same JWT_SECRET pattern as routes.ts for consistency
+const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
+
+interface AuthenticatedRequest extends Request {
+  user?: {
+    userId: number;
+    email: string;
+    isAdmin?: boolean;
+  };
+}
+
+// Custom authentication middleware for userProfileRoutes
+const authenticateToken = async (req: any, res: any, next: any) => {
+  try {
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if (!token) {
+      return res.status(401).json({ message: "Access token required" });
+    }
+
+    const decoded = jwt.verify(token, JWT_SECRET) as any;
+    req.user = { userId: decoded.userId, email: decoded.email, isAdmin: decoded.isAdmin };
+    next();
+  } catch (error) {
+    console.error("Profile auth error:", error);
+    res.status(401).json({ message: "Invalid token" });
+  }
+};
 
 const router = Router();
 
