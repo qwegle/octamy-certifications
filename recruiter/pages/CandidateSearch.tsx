@@ -122,7 +122,7 @@ export default function CandidateSearch() {
         console.log('Candidate IDs returned:', searchData.candidates?.map(c => c.id) || []);
         
         setCandidates(searchData.candidates || []);
-        setTotalCandidates(searchData.total || searchData.candidates?.length || 0);
+        setTotalResults(searchData.total || searchData.candidates?.length || 0);
         setCurrentPage(page);
         
         if ((searchData.candidates || []).length === 0) {
