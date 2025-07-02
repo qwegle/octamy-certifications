@@ -21,6 +21,9 @@ import {
 import { useAuth } from "@/lib/auth";
 import { useLocation } from "wouter";
 import { useEffect, useState } from "react";
+import RatingSystem from "@/components/rating-system";
+import { CourseStructuredData } from "@/components/seo-structured-data";
+import { Helmet } from "react-helmet-async";
 // Using available image from assets
 import octamyLogoDark from "@assets/image_1750054456482.png";
 import octamyLogoLight from "@assets/image_1750054465427.png";
@@ -31,7 +34,7 @@ export default function CourseDetail() {
   const { user } = useAuth();
   const [referralCode, setReferralCode] = useState<string | null>(null);
 
-  const { data: course, isLoading } = useQuery<Course & { category: Category }>(
+  const { data: course, isLoading } = useQuery<Course & { category: Category; rating: any }>(
     {
       queryKey: ["/api/courses/slug", slug],
       queryFn: async () => {
@@ -130,7 +133,10 @@ export default function CourseDetail() {
       setLocation("/auth");
       return;
     }
-    setLocation(`/exam/${course?.id}`);
+    const courseSlug = course?.slug || course?.title?.toLowerCase()
+      .replace(/[^a-zA-Z0-9\s]/g, '')
+      .replace(/\s+/g, '-');
+    setLocation(`/exam/${courseSlug}`);
   };
 
   const handleGetCertified = () => {

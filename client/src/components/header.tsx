@@ -26,13 +26,11 @@ export default function Header() {
           {/* Logo */}
           <Link href="/" className="flex items-center">
             <span className="text-2xl font-bold">
-              <Link href="/" className="text-2xl font-bold">
-                <img
-                  src={octamyLogoLight}
-                  alt="Octamy"
-                  className="h-8 dark:block"
-                />
-              </Link>
+              <img
+                src={octamyLogoLight}
+                alt="Octamy"
+                className="h-8 dark:block"
+              />
             </span>
           </Link>
 

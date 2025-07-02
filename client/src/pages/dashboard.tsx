@@ -56,6 +56,12 @@ export default function Dashboard() {
     enabled: !!user && !!token,
   });
 
+  // Fetch user's profile to get completeness
+  const { data: userProfile } = useQuery({
+    queryKey: ["/api/user/profile"],
+    enabled: !!user && !!token,
+  });
+
   // Debug logging for certificate data
   console.log("Dashboard certificates data:", {
     certificates,
@@ -189,7 +195,7 @@ export default function Dashboard() {
                   className="border-black text-black hover:bg-black hover:text-white"
                 >
                   <Edit className="w-4 h-4 mr-2" />
-                  Edit Profile
+                  {userProfile?.profileCompleteness === 100 ? "Edit Profile" : "Complete Profile"}
                 </Button>
               </Link>
             </div>
@@ -291,7 +297,13 @@ export default function Dashboard() {
                       <div className="flex justify-between text-sm">
                         <span className="text-gray-600">Expires:</span>
                         <span className="font-semibold text-black">
-                          {new Date(certificate.expiresAt).toLocaleDateString()}
+                          {certificate?.courseTitle
+                            ?.toLowerCase()
+                            ?.includes("internship")
+                            ? "Never"
+                            : new Date(
+                                certificate.expiresAt
+                              ).toLocaleDateString()}
                         </span>
                       </div>
                       <div className="flex gap-2 pt-2">

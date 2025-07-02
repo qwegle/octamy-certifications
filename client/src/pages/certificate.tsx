@@ -44,23 +44,29 @@ export default function CertificateView() {
 
     setIsDownloading(true);
     try {
-      const response = await fetch(
-        `/api/certificates/${certificateId}/download?format=pdf`
-      );
-      if (response.ok) {
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.style.display = "none";
-        a.href = url;
-        a.download = `Certificate-${certificate.userName}-${certificate.courseTitle}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-      } else {
-        alert("Failed to download certificate. Please try again.");
-      }
+      // const response = await fetch(
+      //   `/api/certificates/${certificateId}/download?format=pdf`
+      // );
+      // if (response.ok) {
+      //   const blob = await response.blob();
+      //   const url = window.URL.createObjectURL(blob);
+      //   const a = document.createElement("a");
+      //   a.style.display = "none";
+      //   a.href = url;
+      //   a.download = `Certificate-${certificate.userName}-${certificate.courseTitle}.pdf`;
+      //   document.body.appendChild(a);
+      //   a.click();
+      //   window.URL.revokeObjectURL(url);
+      //   document.body.removeChild(a);
+      // } else {
+      //   alert("Failed to download certificate. Please try again.");
+      // }
+      const link = document.createElement("a");
+      link.href = `/api/certificates/${certificateId}/download?format=pdf`;
+      link.download = `${certificateId}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
     } catch (error) {
       console.error("Error downloading certificate:", error);
       alert("Failed to download certificate. Please try again.");

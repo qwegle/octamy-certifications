@@ -19,7 +19,7 @@ import {
   users as usersTable,
   contactSubmissions,
 } from "@shared/schema";
-import { desc, and, eq } from "drizzle-orm";
+import { desc, and, eq, not } from "drizzle-orm";
 import { db, pool } from "./db";
 import { LearningPathController } from "./controllers/learningPathController";
 import { payuMoneyService } from "./payumoney";
@@ -34,6 +34,8 @@ import apiRoutes from "./routes/index";
 import certificateRoutes from "./routes/certificateRoutes";
 import { emailService } from "./utils/emailService";
 import { generateCertificateHTML } from "./utils/certificateGenerator";
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -442,8 +444,196 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
-  // API routes (from routes/index.ts) - MOVED BEFORE seller routes to prevent conflicts
-  app.use(apiRoutes);
+  // API routes moved to proper location with /api prefix to prevent conflicts
+
+  // Register recruiter routes
+  // Recruiter login endpoint
+  app.post('/api/recruiter/login', async (req: Request, res: Response) => {
+    try {
+      const { email, password } = req.body;
+
+      // Find recruiter by email
+      const recruiter = await storage.getRecruiterByEmail(email);
+      if (!recruiter) {
+        return res.status(401).json({ message: 'Invalid credentials' });
+      }
+
+      // Check password
+      const isPasswordValid = await bcrypt.compare(password, recruiter.password);
+      if (!isPasswordValid) {
+        return res.status(401).json({ message: 'Invalid credentials' });
+      }
+
+      // Update last login
+      await storage.updateRecruiterLastLogin(recruiter.id);
+
+      // Generate JWT token
+      const token = jwt.sign(
+        { recruiterId: recruiter.id, email: recruiter.email },
+        process.env.JWT_SECRET || 'your-secret-key',
+        { expiresIn: '7d' }
+      );
+
+      res.json({
+        message: 'Login successful',
+        token,
+        recruiter: {
+          id: recruiter.id,
+          email: recruiter.email,
+          firstName: recruiter.firstName,
+          lastName: recruiter.lastName,
+          companyName: recruiter.companyName,
+          kycStatus: recruiter.kycStatus,
+          creditsBalance: recruiter.creditsBalance,
+          registrationStep: recruiter.registrationStep
+        }
+      });
+    } catch (error: any) {
+      console.error('Login error:', error);
+      res.status(500).json({ message: 'Login failed' });
+    }
+  });
+
+  // Recruiter registration endpoint
+  app.post('/api/recruiter/register', async (req: Request, res: Response) => {
+    try {
+      const { email, password } = req.body;
+
+      // Check if recruiter already exists
+      const existingRecruiter = await storage.getRecruiterByEmail(email);
+      if (existingRecruiter) {
+        return res.status(400).json({ message: 'Email already registered' });
+      }
+
+      // Hash password
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      // Create recruiter
+      const recruiter = await storage.createRecruiter({
+        email,
+        password: hashedPassword,
+        registrationStep: 1,
+        firstName: '',
+        lastName: '',
+        phone: '',
+        designation: '',
+        companyName: '',
+        companySize: '1-10',
+        industry: '',
+        companyAddress: '',
+        companyCity: '',
+        companyState: '',
+        companyCountry: 'India',
+        kycStatus: 'pending',
+        creditsBalance: '0.00'
+      });
+
+      // Generate JWT token
+      const token = jwt.sign(
+        { recruiterId: recruiter.id, email: recruiter.email },
+        process.env.JWT_SECRET || 'your-secret-key',
+        { expiresIn: '7d' }
+      );
+
+      res.status(201).json({
+        message: 'Registration successful',
+        token,
+        recruiter: {
+          id: recruiter.id,
+          email: recruiter.email,
+          registrationStep: recruiter.registrationStep
+        }
+      });
+    } catch (error: any) {
+      console.error('Registration error:', error);
+      res.status(500).json({ message: 'Registration failed' });
+    }
+  });
+
+  // Rating endpoints
+  app.post('/api/ratings/:courseId', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const courseId = parseInt(req.params.courseId);
+      const { rating, reviewText } = req.body;
+      const userId = req.user!.userId;
+
+      if (!rating || rating < 1 || rating > 5) {
+        return res.status(400).json({ message: 'Rating must be between 1 and 5' });
+      }
+
+      // Check if user already rated this course
+      const existingRating = await storage.getUserRating(userId, courseId);
+      
+      let result;
+      if (existingRating) {
+        result = await storage.updateRating(userId, courseId, rating, reviewText);
+      } else {
+        result = await storage.createRating({
+          userId,
+          courseId,
+          rating,
+          reviewText,
+        });
+      }
+
+      res.json(result);
+    } catch (error: any) {
+      console.error('Rating submission error:', error);
+      res.status(500).json({ message: 'Failed to submit rating' });
+    }
+  });
+
+  app.get('/api/ratings/user/:courseId', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const courseId = parseInt(req.params.courseId);
+      const userId = req.user!.userId;
+
+      const rating = await storage.getUserRating(userId, courseId);
+      res.json(rating);
+    } catch (error: any) {
+      console.error('Get user rating error:', error);
+      res.status(500).json({ message: 'Failed to fetch user rating' });
+    }
+  });
+
+  app.get('/api/ratings/aggregate/:courseId', async (req: Request, res: Response) => {
+    try {
+      const courseId = parseInt(req.params.courseId);
+      const aggregate = await storage.getRatingAggregate(courseId);
+      
+      if (!aggregate) {
+        // Return default values if no ratings exist
+        return res.json({
+          averageRating: '4.8',
+          totalReviews: 0,
+          rating1Count: 0,
+          rating2Count: 0,
+          rating3Count: 0,
+          rating4Count: 0,
+          rating5Count: 0,
+        });
+      }
+
+      res.json(aggregate);
+    } catch (error: any) {
+      console.error('Get rating aggregate error:', error);
+      res.status(500).json({ message: 'Failed to fetch rating aggregate' });
+    }
+  });
+
+  app.get('/api/ratings/reviews/:courseId', async (req: Request, res: Response) => {
+    try {
+      const courseId = parseInt(req.params.courseId);
+      const limit = parseInt(req.query.limit as string) || 10;
+      const offset = parseInt(req.query.offset as string) || 0;
+
+      const reviews = await storage.getCourseRatings(courseId, limit, offset);
+      res.json(reviews);
+    } catch (error: any) {
+      console.error('Get course reviews error:', error);
+      res.status(500).json({ message: 'Failed to fetch reviews' });
+    }
+  });
 
   // Add missing seller routes AFTER API routes to ensure they are properly registered
   app.get(
@@ -497,9 +687,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(404).json({ message: "Seller not found" });
         }
 
-        // Generate referral URL
+        // Get course details to use slug instead of ID
+        const course = await storage.getCourse(targetCourseId);
+        if (!course) {
+          return res.status(404).json({ message: "Course not found" });
+        }
+
+        // Generate referral URL using slug
         const baseUrl = `${req.protocol}://${req.get("host")}`;
-        const referralUrl = `${baseUrl}/course/${targetCourseId}?ref=${seller.referralCode}`;
+        const referralUrl = `${baseUrl}/course/${course.slug}?ref=${seller.referralCode}`;
 
         res.json({
           referralUrl,
@@ -635,6 +831,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     }
   );
+
+  // Import and mount user profile routes
+  try {
+    const { default: userProfileRoutes } = await import("./routes/userProfileRoutes.js");
+    app.use("/api/user", userProfileRoutes);
+    console.log("User profile routes mounted successfully");
+  } catch (error) {
+    console.error("Failed to load user profile routes:", error);
+  }
 
   // Categories and courses
   app.get("/api/categories", async (req, res) => {
@@ -793,6 +998,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Get correct answers from session mapping
         const correctAnswersMapping =
           (global as any).questionMappings?.[sessionId] || {};
+        
+        console.log(`Exam submission for session ${sessionId}:`);
+        console.log(`- Available sessions: ${Object.keys((global as any).questionMappings || {}).join(', ')}`);
+        console.log(`- Questions in this session: ${Object.keys(correctAnswersMapping).length}`);
+        
+        // Safety check: Ensure we have questions to evaluate
+        if (Object.keys(correctAnswersMapping).length === 0) {
+          console.warn(`No question mappings found for session ${sessionId}`);
+          return res.status(400).json({
+            message: "Exam session expired or invalid. Please restart the exam.",
+            code: "SESSION_EXPIRED"
+          });
+        }
 
         // Transform answers to Record<string, number> format
         const answersRecord: Record<string, number> = {};
@@ -825,13 +1043,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         }
 
-        // Clean up session data
+        // Calculate the final score percentage
+        const score = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
+
+        // Clean up session data AFTER score calculation
         if ((global as any).questionMappings?.[sessionId]) {
           delete (global as any).questionMappings[sessionId];
         }
-
-        // Calculate the final score percentage
-        const score = Math.round((correctAnswers / totalQuestions) * 100);
 
         // Get course data to check passing score
         const course = await storage.getCourse(courseId);
@@ -1627,6 +1845,89 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
+  // Admin course creation
+  app.post(
+    "/api/admin/courses",
+    authenticateAdminToken,
+    async (req: AuthenticatedRequest, res: Response) => {
+      try {
+        const courseData = req.body;
+        
+        // Validate required fields
+        if (!courseData.title || !courseData.categoryId || !courseData.price) {
+          return res.status(400).json({ message: "Missing required fields: title, categoryId, price" });
+        }
+
+        // Generate slug if not provided
+        if (!courseData.slug) {
+          courseData.slug = courseData.title.toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '');
+        }
+
+        const course = await storage.createCourseAdmin(courseData);
+        res.status(201).json(course);
+      } catch (error) {
+        console.error("Error creating course:", error);
+        res.status(500).json({ message: "Failed to create course" });
+      }
+    }
+  );
+
+  // Admin course update
+  app.put(
+    "/api/admin/courses/:id",
+    authenticateAdminToken,
+    async (req: AuthenticatedRequest, res: Response) => {
+      try {
+        const courseId = parseInt(req.params.id);
+        if (isNaN(courseId)) {
+          return res.status(400).json({ message: "Invalid course ID" });
+        }
+
+        const courseData = req.body;
+        
+        // Generate slug if title is being updated but slug is not provided
+        if (courseData.title && !courseData.slug) {
+          courseData.slug = courseData.title.toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '');
+        }
+
+        const course = await storage.updateCourseAdmin(courseId, courseData);
+        
+        if (!course) {
+          return res.status(404).json({ message: "Course not found" });
+        }
+
+        res.json(course);
+      } catch (error) {
+        console.error("Error updating course:", error);
+        res.status(500).json({ message: "Failed to update course" });
+      }
+    }
+  );
+
+  // Admin course deletion
+  app.delete(
+    "/api/admin/courses/:id",
+    authenticateAdminToken,
+    async (req: AuthenticatedRequest, res: Response) => {
+      try {
+        const courseId = parseInt(req.params.id);
+        if (isNaN(courseId)) {
+          return res.status(400).json({ message: "Invalid course ID" });
+        }
+
+        await storage.deleteCourseAdmin(courseId);
+        res.json({ message: "Course deleted successfully" });
+      } catch (error) {
+        console.error("Error deleting course:", error);
+        res.status(500).json({ message: "Failed to delete course" });
+      }
+    }
+  );
+
   app.get(
     "/api/admin/exam-attempts",
     authenticateAdminToken,
@@ -2093,7 +2394,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         }
 
-        // Check if user already has this interview (only for authenticated users)
+        // Check if user already has an uncompleted paid interview for this technology
+        // Allow retakes for completed interviews
         let existingInterview: any[] = [];
         if (userId) {
           existingInterview = await db
@@ -2103,7 +2405,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
               and(
                 eq(interviews.userId, userId),
                 eq(interviews.technology, technology),
-                eq(interviews.paymentStatus, "paid")
+                eq(interviews.paymentStatus, "paid"),
+                not(eq(interviews.status, "completed")) // Only block if interview is not completed
               )
             )
             .limit(1);
@@ -2489,6 +2792,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
+  // General file upload endpoint for CVs/resumes
+  app.post(
+    "/api/upload",
+    authenticateToken,
+    upload.single("file"),
+    async (req: AuthenticatedRequest, res: Response) => {
+      try {
+        if (!req.file) {
+          return res.status(400).json({ error: "No file uploaded" });
+        }
+
+        const allowedTypes = [
+          "application/pdf",
+          "application/msword",
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        ];
+
+        if (!allowedTypes.includes(req.file.mimetype)) {
+          return res.status(400).json({ 
+            error: "Invalid file type. Only PDF and Word documents are allowed." 
+          });
+        }
+
+        if (!process.env.CLOUDINARY_CLOUD_NAME) {
+          return res.status(500).json({ error: "Cloudinary not configured" });
+        }
+
+        const publicId = `resumes/${req.user!.userId}_${Date.now()}`;
+
+        // Upload to Cloudinary
+        const uploadResult = await new Promise((resolve, reject) => {
+          cloudinary.uploader
+            .upload_stream(
+              {
+                resource_type: "raw",
+                public_id: publicId,
+                format: req.file!.originalname.split('.').pop()
+              },
+              (error: any, result: any) => {
+                if (error) reject(error);
+                else resolve(result);
+              }
+            )
+            .end(req.file!.buffer);
+        });
+
+        console.log(`File uploaded to Cloudinary: User ${req.user!.userId}`);
+
+        res.json({
+          success: true,
+          fileUrl: (uploadResult as any).secure_url,
+          fileName: req.file.originalname,
+          fileSize: req.file.size,
+          publicId: (uploadResult as any).public_id
+        });
+      } catch (error) {
+        console.error("Error uploading file:", error);
+        res.status(500).json({ error: "Failed to upload file" });
+      }
+    }
+  );
+
   // Upload interview recordings to Cloudinary
   app.post(
     "/api/interviews/:id/upload-recording",
@@ -2861,6 +3226,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
   } catch (error) {
     console.log("Additional routes loading...");
   }
+
+  // Rating system routes
+  app.post("/api/ratings", async (req, res) => {
+    if (!req.isAuthenticated() || !req.user) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+
+    try {
+      const { courseId, rating, reviewText } = req.body;
+      
+      if (!courseId || !rating || rating < 1 || rating > 5) {
+        return res.status(400).json({ message: "Valid courseId and rating (1-5) required" });
+      }
+
+      // Check if user already rated this course
+      const existingRating = await storage.getUserRating(req.user.id, courseId);
+      
+      let result;
+      if (existingRating) {
+        // Update existing rating
+        result = await storage.updateRating(req.user.id, courseId, rating, reviewText);
+      } else {
+        // Create new rating
+        result = await storage.createRating({
+          userId: req.user.id,
+          courseId,
+          rating,
+          reviewText,
+        });
+      }
+
+      res.json(result);
+    } catch (error: any) {
+      console.error("Error creating/updating rating:", error);
+      res.status(500).json({ message: "Failed to save rating" });
+    }
+  });
+
+  app.get("/api/ratings/:courseId", async (req, res) => {
+    try {
+      const courseId = parseInt(req.params.courseId);
+      const limit = parseInt(req.query.limit as string) || 10;
+      const offset = parseInt(req.query.offset as string) || 0;
+
+      const ratings = await storage.getCourseRatings(courseId, limit, offset);
+      const aggregate = await storage.getRatingAggregate(courseId);
+
+      res.json({
+        ratings,
+        aggregate: aggregate || {
+          averageRating: '0.00',
+          totalReviews: 0,
+          rating1Count: 0,
+          rating2Count: 0,
+          rating3Count: 0,
+          rating4Count: 0,
+          rating5Count: 0,
+        }
+      });
+    } catch (error: any) {
+      console.error("Error fetching ratings:", error);
+      res.status(500).json({ message: "Failed to fetch ratings" });
+    }
+  });
+
+  app.get("/api/user-rating/:courseId", async (req, res) => {
+    if (!req.isAuthenticated() || !req.user) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+
+    try {
+      const courseId = parseInt(req.params.courseId);
+      const userRating = await storage.getUserRating(req.user.id, courseId);
+      
+      res.json(userRating || null);
+    } catch (error: any) {
+      console.error("Error fetching user rating:", error);
+      res.status(500).json({ message: "Failed to fetch user rating" });
+    }
+  });
 
   const httpServer = createServer(app);
   return httpServer;

@@ -13,22 +13,22 @@ export interface CertificateData {
 
 function generateCertificateHTML(data: CertificateData): string {
   const expiryDate = new Date(data.issueDate);
+  let formattedExpiryDate: any;
   if (data.courseTitle.toLowerCase().includes("internship")) {
-     expiryDate.setMonth(expiryDate.getMonth() + 2);
-  }else{
+    formattedExpiryDate = "Never";
+  } else {
     expiryDate.setFullYear(expiryDate.getFullYear() + 2);
+    formattedExpiryDate = expiryDate.toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
   }
-  const formattedExpiryDate = expiryDate.toLocaleDateString("en-GB", {
+  const issueDate = data.issueDate.toLocaleDateString("en-GB", {
     day: "2-digit",
     month: "short",
     year: "numeric",
   });
-  const issueDate =data.issueDate.toLocaleDateString("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-  console.log("data",data)
 
   // return `
   //   <!DOCTYPE html>
@@ -728,7 +728,7 @@ function generateCertificateHTML(data: CertificateData): string {
         align-items: flex-end;
         z-index: 2;
         position: relative;
-        margin-top: 40px;
+        margin-top: 30px;
       }
 
       .certificate-details {
@@ -762,7 +762,9 @@ function generateCertificateHTML(data: CertificateData): string {
         align-items: flex-end;
         gap: 16px;
       }
-
+      .signature{
+        height:45px
+      }  
       .signature-info {
         text-align: center;
         margin-right: 10px;
@@ -898,7 +900,9 @@ function generateCertificateHTML(data: CertificateData): string {
         <div class="footer-section">
           <div class="certificate-details">
             <div class="details-main">
-              <p><span class="font-semibold">Certificate ID:</span> ${data.certificateId}</p>
+              <p><span class="font-semibold">Certificate ID:</span> ${
+                data.certificateId
+              }</p>
               <p><span class="font-semibold">Issue Date:</span> ${issueDate}</p>
               <p><span class="font-semibold">Expiry Date: </span>${formattedExpiryDate}</p>
               <p>
@@ -906,8 +910,15 @@ function generateCertificateHTML(data: CertificateData): string {
               </p>
             </div>
             <div class="details-secondary">
+             <p>
+              ${
+                formattedExpiryDate === "Never"
+                  ? '<span class="font-semibold">Duration: </span> 90 Days'
+                  : ""
+                }
+              </p>
               <p>
-                <span class="font-semibold">Verification:</span>
+                <span class="font-semibold">Verification: </span>
                 www.octamy.com/verify
               </p>
             </div>
@@ -915,6 +926,7 @@ function generateCertificateHTML(data: CertificateData): string {
 
           <div class="signature-section">
             <div class="signature-info">
+              <img class="signature" src="/certificateImages/sign.svg"/>
               <p class="signature-name">Nitikesh Pattanayak</p>
               <p class="signature-title">Director of Certification</p>
             </div>
@@ -938,478 +950,6 @@ function generateCertificateHTML(data: CertificateData): string {
 </html>
 `;
 }
-
-// function generateCertificateHTMLDemo(data: any): string {
-//   const expiryDate = new Date(data.issueDate);
-//   expiryDate.setFullYear(expiryDate.getFullYear() + 2);
-
-//   return `
-//   <!DOCTYPE html>
-//   <html lang="en">
-//    <head>
-//     <meta charset="UTF-8" />
-//     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-//     <title>Certificate of Completion</title>
-//     <style>
-//       @import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap");
-
-//       * {
-//         box-sizing: border-box;
-//       }
-
-//       body {
-//         margin: 0;
-//         padding: 0;
-//         font-family: system-ui, -apple-system, sans-serif;
-//         min-height: 100vh;
-//         background-color: #f3f4f6;
-//         padding: 16px;
-//         display: flex;
-//         align-items: center;
-//         justify-content: center;
-//       }
-
-//       .certificate-container {
-//         width: 297mm;
-//         height: 200mm;
-//         position: relative;
-//         background-color: white;
-//         box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-//         transform-origin: center;
-//       }
-
-//       @media print {
-//         body {
-//           margin: 0;
-//           padding: 0;
-//           background: white;
-//         }
-
-//         .certificate-container {
-//           width: 297mm;
-//           height: 200mm;
-//           margin: 0;
-//           box-shadow: none;
-//           page-break-inside: avoid;
-//           page-break-after: always;
-//         }
-//       }
-
-//       .certificate-content {
-//         padding: 64px;
-//         height: 100%;
-//         display: flex;
-//         flex-direction: column;
-//       }
-
-//       .decorative-background {
-//         position: absolute;
-//         top: 0;
-//         left: 0;
-//         width: 100%;
-//         height: 100%;
-//         overflow: hidden;
-//         z-index: 1;
-//       }
-
-//       .main-content {
-//         display: flex;
-//         justify-content: center;
-//         align-items: center;
-//         flex-direction: column;
-//         margin: 0;
-//         z-index: 2;
-//         position: relative;
-//       }
-
-//       .header-section {
-//         text-align: center;
-//         margin-bottom: 48px;
-//       }
-
-//       .logo-container {
-//         margin-bottom: 0px;
-//       }
-
-//       .logo-image {
-//         width: 256px;
-//         height: auto;
-//         margin: 0 auto;
-//         display: block;
-//       }
-
-//       .company-name {
-//         font-size: 14px;
-//         color: #331f30;
-//         margin: 0px 0 4px 0;
-//       }
-
-//       .company-subtitle {
-//         font-size: 12px;
-//         color: #696171;
-//         margin: 0;
-//       }
-
-//       .title-section {
-//         text-align: center;
-//       }
-
-//       .certificate-title {
-//         font-size: 32px;
-//         letter-spacing: 5px;
-//         color: #08060c;
-//         font-weight: normal;
-//         margin: 0;
-//       }
-
-//       .subtitle {
-//         color: #787378;
-//         font-size: 18px;
-//         margin: 0;
-//       }
-
-//       .decorative-frame {
-//         width: 128px;
-//         height: auto;
-//       }
-
-//       .recipient-name {
-//         font-size: 40px;
-//         font-weight: bold;
-//         color: #282842;
-//         margin: 2px;
-//       }
-
-//       .completion-text {
-//         font-size: 18px;
-//         max-width: 768px;
-//         text-align: center;
-//         padding: 0 48px;
-//         color: #807a83;
-//         line-height: 1.5;
-//         margin: 10px 0 0 0;
-//       }
-
-//       .course-title {
-//         font-size: 20px;
-//         font-weight: 600;
-//         color: #292945;
-//         margin-bottom: 0;
-//       }
-
-//       .footer-section {
-//         display: flex;
-//         justify-content: space-between;
-//         align-items: flex-end;
-//         z-index: 2;
-//         position: relative;
-//         margin-top: 40px;
-//       }
-
-//       .certificate-details {
-//         display: flex;
-//         flex-direction: column;
-//       }
-
-//       .details-main {
-//         font-size: 12px;
-//         color: #807a83;
-//         margin-bottom: 20px;
-//       }
-
-//       .details-main p {
-//         margin: 2px 0;
-//       }
-
-//       .details-secondary {
-//         font-size: 12px;
-//         margin-left: 16px;
-//         color: #807a83;
-//       }
-
-//       .details-secondary p {
-//         margin: 2px 0;
-//       }
-
-//       .signature-section {
-//         display: flex;
-//         flex-direction: column;
-//         align-items: flex-end;
-//         gap: 16px;
-//       }
-
-//       .signature-info {
-//         text-align: center;
-//         margin-right: 96px;
-//       }
-
-//       .signature-name {
-//         font-size: 18px;
-//         font-weight: 600;
-//         color: #16111e;
-//         margin: 0 0 4px 0;
-//       }
-
-//       .signature-title {
-//         font-size: 12px;
-//         color: #433d5e;
-//         margin: 0;
-//       }
-
-//       .certification-logos {
-//         display: flex;
-//         gap: 16px;
-//         align-items: flex-end;
-//       }
-
-//       .certification-logo {
-//         height: 80px;
-//         width: auto;
-//       }
-
-//       .font-semibold {
-//         font-weight: 600;
-//       }
-
-//       /* Badge Styles */
-//       .badge-container {
-//         position: absolute;
-//         width: 200px;
-//         height: 200px;
-//         top: 30px;
-//         right: 30px;
-//         z-index: 10;
-//       }
-
-//       .badge-image {
-//         width: 100%;
-//         height: 100%;
-//         object-fit: contain;
-//         filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
-//       }
-
-//       .badge-text {
-//         position: absolute;
-//         top: 67%;
-//         left: 50%;
-//         transform: translate(-50%, -50%);
-//         color: white;
-//         font-size: 18px;
-//         font-weight: 700;
-//         text-align: center;
-//         font-family: "Inter", sans-serif;
-//         text-transform: uppercase;
-//         letter-spacing: 1px;
-//         text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
-//       }
-//     </style>
-//   </head>
-//   <body>
-//     <div class="certificate-container">
-//       <!-- Golden curved decorative elements -->
-//       <div class="decorative-background">
-//         <img
-//           src="/certificateImages/SolutionsPrivateLimited.svg"
-//           style="width: 1150px;"
-//           alt=""
-//         />
-//       </div>
-
-//       <!-- Top Right Badge -->
-//       <div class="badge-container">
-//         <svg width="200" height="200" viewBox="0 0 120 120" class="badge-image">
-//           <defs>
-//             <linearGradient
-//               id="shieldGradient"
-//               x1="0%"
-//               y1="0%"
-//               x2="100%"
-//               y2="100%"
-//             >
-//               <stop offset="0%" style="stop-color: #4a4a4a; stop-opacity: 1" />
-//               <stop offset="50%" style="stop-color: #2a2a2a; stop-opacity: 1" />
-//               <stop
-//                 offset="100%"
-//                 style="stop-color: #1a1a1a; stop-opacity: 1"
-//               />
-//             </linearGradient>
-//             <linearGradient
-//               id="ribbonGradient"
-//               x1="0%"
-//               y1="0%"
-//               x2="100%"
-//               y2="100%"
-//             >
-//               <stop offset="0%" style="stop-color: #888; stop-opacity: 1" />
-//               <stop offset="50%" style="stop-color: #666; stop-opacity: 1" />
-//               <stop offset="100%" style="stop-color: #555; stop-opacity: 1" />
-//             </linearGradient>
-//           </defs>
-
-//           <!-- Shield Shape -->
-//           <path
-//             d="M60 10 L100 30 L100 60 Q100 80 85 95 Q70 105 60 110 Q50 105 35 95 Q20 80 20 60 L20 30 Z"
-//             fill="url(#shieldGradient)"
-//             stroke="#fff"
-//             stroke-width="2"
-//           />
-
-//           <!-- Inner Circle -->
-//           <circle
-//             cx="60"
-//             cy="45"
-//             r="15"
-//             fill="#fff"
-//             stroke="#333"
-//             stroke-width="1"
-//           />
-
-//           <!-- Sunburst pattern around circle -->
-//           <g transform="translate(60,45)">
-//             <g stroke="#fff" stroke-width="1" fill="none">
-//               <circle r="20" opacity="0.3" />
-//               <path
-//                 d="M0,-25 L0,-20 M0,20 L0,25 M25,0 L20,0 M-20,0 L-25,0"
-//                 stroke-width="2"
-//               />
-//               <path
-//                 d="M17.6,-17.6 L14.1,-14.1 M-14.1,14.1 L-17.6,17.6 M17.6,17.6 L14.1,14.1 M-14.1,-14.1 L-17.6,-17.6"
-//                 stroke-width="1.5"
-//               />
-//             </g>
-//           </g>
-
-//           <!-- Ribbon banners -->
-//           <path
-//             d="M20 70 Q35 65 50 70 Q60 72 70 70 Q85 65 100 70 L95 85 Q80 80 65 85 Q60 87 55 85 Q40 80 25 85 Z"
-//             fill="url(#ribbonGradient)"
-//             stroke="#333"
-//             stroke-width="1"
-//             opacity="0.8"
-//           />
-
-//           <path
-//             d="M25 85 Q40 80 55 85 Q60 87 65 85 Q80 80 95 85 L90 95 Q75 90 60 95 Q45 90 30 95 Z"
-//             fill="url(#ribbonGradient)"
-//             stroke="#333"
-//             stroke-width="1"
-//             opacity="0.6"
-//           />
-
-//           <!-- Ribbon ends -->
-//           <path
-//             d="M20 70 L15 85 L25 80 Z"
-//             fill="url(#ribbonGradient)"
-//             opacity="0.9"
-//           />
-//           <path
-//             d="M100 70 L105 85 L95 80 Z"
-//             fill="url(#ribbonGradient)"
-//             opacity="0.9"
-//           />
-//         </svg>
-//         <div class="badge-text">CERTIFIED</div>
-//       </div>
-
-//       <div class="certificate-content">
-//         <!-- Main content -->
-//         <div class="main-content">
-//           <div class="header-section">
-//             <div class="logo-container">
-//               <img
-//                 src="/certificateImages/octamy.svg"
-//                 alt="Octamy Logo"
-//                 class="logo-image"
-//               />
-//             </div>
-//             <p class="company-name">Solutions Private Limited</p>
-//             <p class="company-subtitle">An ISO Certified Company</p>
-//           </div>
-
-//           <div class="title-section">
-//             <h1 class="certificate-title">CERTIFICATE OF COMPLETION</h1>
-//             <h3 class="subtitle">This is to certify that</h3>
-//           </div>
-
-//           <!-- Decorative Frame -->
-//           <img
-//             src="/certificateImages/Frame 1.svg"
-//             alt="Decorative Frame"
-//             class="decorative-frame"
-//           />
-
-//           <h1 class="recipient-name">${data.userName}</h1>
-
-//           <!-- Decorative Frame -->
-//           <img
-//             src="/certificateImages/Frame 1.svg"
-//             alt="Decorative Frame"
-//             class="decorative-frame"
-//           />
-
-//           <p class="completion-text">
-//             has successfully demonstrated mastery and completed the
-//             comprehensive professional certification program
-//           </p>
-
-//           <p class="course-title">${data.courseTitle}</p>
-//         </div>
-
-//         <!-- Footer -->
-//         <div class="footer-section">
-//           <div class="certificate-details">
-//             <div class="details-main">
-//               <p>Certificate ID: OCT-2025-DEM-1750405520618</p>
-//               <p><span class="font-semibold">Issue Date:</span> ${data.issueDate}</p>
-//               <p><span class="font-semibold">Expiry Date:</span> 6/20/2027</p>
-//               <p>
-//                 <span class="font-semibold">Status:</span> Valid Internationally
-//               </p>
-//             </div>
-//             <div class="details-secondary">
-//               <p><span class="font-semibold">Valid Until:</span> 6/20/2027</p>
-//               <p>
-//                 <span class="font-semibold">Verification:</span>
-//                 octamy.com/verify
-//               </p>
-//             </div>
-//           </div>
-
-//           <div class="signature-section">
-//             <div class="signature-info">
-//               <p class="signature-name">Nitikesh Pattanayak</p>
-//               <p class="signature-title">Director of Certification</p>
-//             </div>
-//             <div class="certification-logos">
-//               <img
-//                 src="/certificateImages/iso.svg"
-//                 alt="ISO Certification"
-//                 class="certification-logo"
-//               />
-//               <img
-//                 src="/certificateImages/iso.svg"
-//                 alt="ISO Certification"
-//                 class="certification-logo"
-//               />
-//               <img
-//                 src="/certificateImages/Make_In_India.svg"
-//                 alt="Make in India"
-//                 class="certification-logo"
-//               />
-//               <img
-//                 src="/certificateImages/qr.svg"
-//                 alt="QR Code"
-//                 class="certification-logo"
-//               />
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   </body>
-// </html>
-// `;
-// }
 
 export async function generateCertificatePDF(
   data: CertificateData

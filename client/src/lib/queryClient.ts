@@ -12,11 +12,18 @@ export async function apiRequest(
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
-  // Use admin token for admin routes, regular token for others
+  // Use appropriate token based on route type
   const isAdminRoute = url.includes('/admin');
-  const token = isAdminRoute 
-    ? localStorage.getItem('adminToken') 
-    : localStorage.getItem('token');
+  const isRecruiterRoute = url.includes('/recruiter');
+  
+  let token: string | null = null;
+  if (isAdminRoute) {
+    token = localStorage.getItem('adminToken');
+  } else if (isRecruiterRoute) {
+    token = localStorage.getItem('recruiterToken');
+  } else {
+    token = localStorage.getItem('token');
+  }
     
   const headers: Record<string, string> = {};
   
@@ -36,14 +43,28 @@ export async function apiRequest(
   });
 
   // Handle authentication errors
-  if (res.status === 401 && !isAdminRoute) {
+  if (res.status === 401) {
     try {
       const responseData = await res.json();
       if (responseData.code === "TOKEN_EXPIRED" || responseData.code === "INVALID_TOKEN") {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        if (!window.location.pathname.includes('/login')) {
-          window.location.href = '/login';
+        if (isRecruiterRoute) {
+          localStorage.removeItem('recruiterToken');
+          localStorage.removeItem('recruiterData');
+          if (!window.location.pathname.includes('/recruiter/auth')) {
+            window.location.href = '/recruiter/auth';
+          }
+        } else if (isAdminRoute) {
+          localStorage.removeItem('adminToken');
+          localStorage.removeItem('adminUser');
+          if (!window.location.pathname.includes('/admin-login')) {
+            window.location.href = '/admin-login';
+          }
+        } else {
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          if (!window.location.pathname.includes('/login')) {
+            window.location.href = '/login';
+          }
         }
         throw new Error("Session expired. Please login again.");
       }
