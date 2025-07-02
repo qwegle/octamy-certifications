@@ -562,14 +562,14 @@ export default function CandidateSearch() {
                         <div className="mb-4">
                           <Label className="text-sm font-medium">Skills</Label>
                           <div className="flex flex-wrap gap-1 mt-1">
-                            {candidate.skills.slice(0, 6).map((skill) => (
+                            {(candidate.skills || []).slice(0, 6).map((skill) => (
                               <Badge key={skill} variant="secondary" className="text-xs">
                                 {skill}
                               </Badge>
                             ))}
-                            {candidate.skills.length > 6 && (
+                            {(candidate.skills || []).length > 6 && (
                               <Badge variant="outline" className="text-xs">
-                                +{candidate.skills.length - 6} more
+                                +{(candidate.skills || []).length - 6} more
                               </Badge>
                             )}
                           </div>

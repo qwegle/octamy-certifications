@@ -2605,175 +2605,112 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
-  async searchCandidates(filters: any, page: number, limit: number) {
-    let query = db.select({
-      id: users.id,
-      name: users.name,
-      email: users.email,
-      location: users.location,
-      experience: users.experience,
-      currentRole: users.currentRole,
-      skills: users.skills,
-      lastActive: users.updatedAt
-    }).from(users);
+  async searchCandidates(filters: any = {}, page: number = 1, limit: number = 10) {
+    try {
+      console.log('Search filters received:', filters);
+      
+      // Simple approach: get all users first 
+      const offset = (page - 1) * limit;
+      
+      // Get all users with basic pagination, no complex filtering for now
+      const allCandidates = await db.select().from(users)
+        .limit(limit)
+        .offset(offset);
 
-    const conditions = [];
-    
-    // Location filter
-    if (filters.location) {
-      conditions.push(ilike(users.location, `%${filters.location}%`));
-    }
+      // Get additional details for each candidate
+      const candidatesWithDetails = await Promise.all(
+        allCandidates.map(async (candidate) => {
+          // Get certificates
+          const certs = await db.select({
+            id: certificates.id,
+            courseTitle: certificates.courseTitle,
+            score: certificates.score,
+            badge: certificates.badge
+          })
+          .from(certificates)
+          .where(eq(certificates.userId, candidate.id))
+          .limit(3);
 
-    // Experience range filter
-    if (filters.experience) {
-      if (filters.experience.min !== undefined) {
-        conditions.push(gte(users.experience, filters.experience.min));
-      }
-      if (filters.experience.max !== undefined) {
-        conditions.push(lte(users.experience, filters.experience.max));
-      }
-    }
+          // Get interviews
+          const userInterviews = await db.select({
+            id: interviews.id,
+            technology: interviews.technology,
+            score: interviews.score,
+            grade: interviews.grade
+          })
+          .from(interviews)
+          .where(eq(interviews.userId, candidate.id))
+          .limit(3);
 
-    // Skills filter (if skills are stored as array or string)
-    if (filters.skills && filters.skills.length > 0) {
-      // Assuming skills are stored as an array in JSON format
-      const skillConditions = filters.skills.map((skill: string) => 
-        sql`${users.skills}::text ILIKE ${'%' + skill + '%'}`
-      );
-      conditions.push(or(...skillConditions));
-    }
-
-    // Technology filter (check in skills)
-    if (filters.technology && filters.technology.length > 0) {
-      const techConditions = filters.technology.map((tech: string) => 
-        sql`${users.skills}::text ILIKE ${'%' + tech + '%'}`
-      );
-      conditions.push(or(...techConditions));
-    }
-
-    // Apply filters only if we have conditions
-    if (conditions.length > 0) {
-      query = query.where(and(...conditions));
-    }
-
-    const offset = (page - 1) * limit;
-    const candidates = await query.limit(limit).offset(offset);
-
-    const candidatesWithDetails = await Promise.all(
-      candidates.map(async (candidate) => {
-        const certs = await db.select({
-          id: certificates.id,
-          courseTitle: certificates.courseTitle,
-          score: certificates.score,
-          badge: certificates.badge
+          return {
+            ...candidate,
+            certificates: certs,
+            interviews: userInterviews,
+            profileViews: 0
+          };
         })
-        .from(certificates)
-        .where(eq(certificates.userId, candidate.id))
-        .limit(3);
+      );
 
-        const userInterviews = await db.select({
-          id: interviews.id,
-          technology: interviews.technology,
-          score: interviews.score,
-          grade: interviews.grade
-        })
-        .from(interviews)
-        .where(eq(interviews.userId, candidate.id))
-        .limit(3);
+      // Get total count
+      const totalResult = await db.select({ count: sql`count(*)` }).from(users);
+      const total = Number(totalResult[0]?.count) || 0;
 
-        return {
-          ...candidate,
-          certificates: certs,
-          interviews: userInterviews,
-          profileViews: 0
-        };
-      })
-    );
+      console.log('Search completed, returning:', candidatesWithDetails.length, 'candidates');
 
-    const totalResult = await db.select({ count: sql`count(*)` }).from(users);
-    const total = Number(totalResult[0]?.count) || 0;
-
-    return {
-      candidates: candidatesWithDetails,
-      total,
-      page,
-      totalPages: Math.ceil(total / limit)
-    };
+      return {
+        candidates: candidatesWithDetails,
+        total,
+        page,
+        totalPages: Math.ceil(total / limit)
+      };
+    } catch (error) {
+      console.error('Search error:', error);
+      return {
+        candidates: [],
+        total: 0,
+        page,
+        totalPages: 0
+      };
+    }
   }
 
   async getCandidateProfile(candidateId: number) {
-    // Get basic user information
-    const candidate = await db.select({
-      id: users.id,
-      name: users.name,
-      email: users.email,
-      location: users.location,
-      experience: users.experience,
-      currentRole: users.currentRole,
-      skills: users.skills,
-      bio: users.bio,
-      phone: users.phone,
-      linkedinProfile: users.linkedinProfile,
-      githubProfile: users.githubProfile,
-      portfolioUrl: users.portfolioUrl,
-      createdAt: users.createdAt,
-      updatedAt: users.updatedAt
-    })
-    .from(users)
-    .where(eq(users.id, candidateId));
+    try {
+      console.log('Getting candidate profile for ID:', candidateId);
+      
+      // Get basic user information with simple select
+      const candidate = await db.select().from(users).where(eq(users.id, candidateId));
 
-    if (!candidate || candidate.length === 0) {
+      if (!candidate || candidate.length === 0) {
+        console.log('Candidate not found');
+        return null;
+      }
+
+      const candidateData = candidate[0];
+      console.log('Found candidate:', candidateData.name);
+
+      // Get certificates with simple select
+      const certs = await db.select().from(certificates)
+        .where(eq(certificates.userId, candidateId));
+
+      console.log('Found certificates:', certs.length);
+
+      // Get interviews with simple select
+      const userInterviews = await db.select().from(interviews)
+        .where(eq(interviews.userId, candidateId));
+
+      console.log('Found interviews:', userInterviews.length);
+
+      return {
+        ...candidateData,
+        certificates: certs,
+        interviews: userInterviews,
+        profileViews: 0
+      };
+    } catch (error) {
+      console.error('Candidate profile error:', error);
       return null;
     }
-
-    const candidateData = candidate[0];
-
-    // Get certificates
-    const certs = await db.select({
-      id: certificates.id,
-      courseTitle: certificates.courseTitle,
-      score: certificates.score,
-      badge: certificates.badge,
-      issuedAt: certificates.issuedAt,
-      certificateId: certificates.certificateId
-    })
-    .from(certificates)
-    .where(eq(certificates.userId, candidateId))
-    .orderBy(desc(certificates.issuedAt));
-
-    // Get interviews
-    const userInterviews = await db.select({
-      id: interviews.id,
-      technology: interviews.technology,
-      score: interviews.score,
-      grade: interviews.grade,
-      createdAt: interviews.createdAt,
-      status: interviews.status
-    })
-    .from(interviews)
-    .where(eq(interviews.userId, candidateId))
-    .orderBy(desc(interviews.createdAt));
-
-    // Get exam attempts for additional context
-    const examAttempts = await db.select({
-      id: examAttempts.id,
-      title: examAttempts.title,
-      score: examAttempts.score,
-      passed: examAttempts.passed,
-      completedAt: examAttempts.completedAt
-    })
-    .from(examAttempts)
-    .where(eq(examAttempts.userId, candidateId))
-    .orderBy(desc(examAttempts.completedAt));
-
-    return {
-      ...candidateData,
-      certificates: certs,
-      interviews: userInterviews,
-      examAttempts: examAttempts,
-      profileViews: 0, // This could be tracked separately
-      lastActive: candidateData.updatedAt
-    };
   }
 
   async processProfileAccess(recruiterId: number, candidateId: number, accessType: string, creditsRequired: number) {
