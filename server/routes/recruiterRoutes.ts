@@ -283,7 +283,9 @@ export function registerRecruiterRoutes(app: any) {
         return res.status(403).json({ message: "KYC verification required to search candidates" });
       }
 
+      console.log('About to call storage.searchCandidates with:', { filters, page, limit });
       const searchResults = await storage.searchCandidates(filters, page, limit);
+      console.log('Search results from storage:', searchResults);
       
       res.json(searchResults);
     } catch (error: any) {

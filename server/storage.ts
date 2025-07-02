@@ -2676,6 +2676,7 @@ export class DatabaseStorage implements IStorage {
       const total = Number(totalResult[0]?.count) || 0;
 
       console.log('Search completed, returning:', candidatesWithDetails.length, 'candidates');
+      console.log('Candidate IDs found:', candidatesWithDetails.map(c => c.id));
 
       return {
         candidates: candidatesWithDetails,

@@ -120,84 +120,32 @@ export default function CandidateSearch() {
         const searchData = await response.json();
         console.log('Found candidates from backend:', searchData.candidates?.length || 0);
         
-        if (searchData.candidates && searchData.candidates.length > 0) {
-          setCandidates(searchData.candidates);
-          setTotalCandidates(searchData.total || searchData.candidates.length);
-          return;
-        }
-      }
-      
-      // If recruiter search fails, fall back to fetching all users directly
-      if (!response.ok || !response.headers.get('content-type')?.includes('application/json')) {
-        console.warn('Recruiter search API unavailable, fetching users directly');
-        
-        // Fetch publicly available data as fallback
-        const [certificatesResponse] = await Promise.all([
-          fetch('/api/recent-certificates')
-        ]);
-        
-        if (certificatesResponse.ok) {
-          const certificates = await certificatesResponse.json();
-          
-          // Group certificates by user/name to create candidate profiles
-          const candidateMap = new Map<string, Candidate>();
-          
-          certificates.forEach((cert: any) => {
-            const key = cert.name || cert.userId?.toString() || cert.email;
-            if (!key) return;
-            
-            if (!candidateMap.has(key)) {
-              candidateMap.set(key, {
-                id: cert.userId || cert.id || 1,
-                name: cert.name || 'Unknown',
-                email: cert.email || `${cert.name?.toLowerCase().replace(/\s+/g, '.')}@email.com`,
-                location: 'India',
-                experience: Math.floor(Math.random() * 8) + 2,
-                currentRole: 'Software Developer',
-                skills: ['JavaScript', 'React', 'Node.js'],
-                certificates: [],
-                interviews: [],
-                profileViews: Math.floor(Math.random() * 100),
-                lastActive: new Date(cert.createdAt || Date.now()).toLocaleDateString()
-              });
-            }
-            
-            const candidate = candidateMap.get(key)!;
-            candidate.certificates.push({
-              id: cert.id || Math.random(),
-              courseTitle: cert.courseTitle || cert.title || 'Certificate',
-              score: cert.score || 85,
-              badge: cert.score >= 90 ? 'Expert' : cert.score >= 80 ? 'Professional' : 'Intermediate'
-            });
-          });
-          
-          const candidates = Array.from(candidateMap.values());
-          
-          setCandidates(candidates);
-          setTotalResults(candidates.length);
-          setCurrentPage(page);
-          
-          toast({
-            title: 'Candidates Found',
-            description: `Found ${candidates.length} candidates based on certificate data.`,
-            variant: 'default',
-          });
-          return;
-        }
-      } else {
-        const data = await response.json();
-        console.log('Search response data:', data);
-        setCandidates(data.candidates || []);
-        setTotalResults(data.total || 0);
+        setCandidates(searchData.candidates || []);
+        setTotalCandidates(searchData.total || searchData.candidates?.length || 0);
         setCurrentPage(page);
         
-        if ((data.candidates || []).length === 0) {
+        if ((searchData.candidates || []).length === 0) {
           toast({
             title: 'No Results',
             description: 'No candidates match your search criteria. Try adjusting the filters.',
             variant: 'default',
           });
         }
+        return;
+      } else {
+        // Handle API errors
+        const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+        console.error('Search API error:', errorData);
+        
+        toast({
+          title: 'Search Failed',
+          description: errorData.message || 'Failed to search candidates. Please try again.',
+          variant: 'destructive',
+        });
+        
+        setCandidates([]);
+        setTotalResults(0);
+        setCurrentPage(1);
         return;
       }
       
