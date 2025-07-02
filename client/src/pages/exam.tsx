@@ -208,7 +208,6 @@ export default function Exam() {
     setCurrentQuestion(0);
     setTabSwitches(0);
     setIsWindowFocused(true);
-    setExamResults(null);
     
     setExamStarted(true);
     setExamStartTime(Date.now());
