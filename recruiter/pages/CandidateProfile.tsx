@@ -95,12 +95,18 @@ export default function CandidateProfile() {
     setLoading(true);
     try {
       // Try to fetch from dedicated recruiter endpoint first
-      let response = await apiRequest('GET', `/api/recruiter/candidate/${id}`);
+      let response = await fetch(`/api/recruiter/candidate/${id}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('recruiterToken')}`,
+          'Content-Type': 'application/json'
+        }
+      });
       
       if (!response.ok) {
         // Fallback: build profile from available data
         const [certificatesResponse] = await Promise.all([
-          apiRequest('GET', '/api/recent-certificates')
+          fetch('/api/recent-certificates')
         ]);
         
         if (certificatesResponse.ok) {
