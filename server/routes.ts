@@ -19,7 +19,7 @@ import {
   users as usersTable,
   contactSubmissions,
 } from "@shared/schema";
-import { desc, and, eq } from "drizzle-orm";
+import { desc, and, eq, not } from "drizzle-orm";
 import { db, pool } from "./db";
 import { LearningPathController } from "./controllers/learningPathController";
 import { payuMoneyService } from "./payumoney";
@@ -2386,7 +2386,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         }
 
-        // Check if user already has this interview (only for authenticated users)
+        // Check if user already has an uncompleted paid interview for this technology
+        // Allow retakes for completed interviews
         let existingInterview: any[] = [];
         if (userId) {
           existingInterview = await db
@@ -2396,7 +2397,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
               and(
                 eq(interviews.userId, userId),
                 eq(interviews.technology, technology),
-                eq(interviews.paymentStatus, "paid")
+                eq(interviews.paymentStatus, "paid"),
+                not(eq(interviews.status, "completed")) // Only block if interview is not completed
               )
             )
             .limit(1);
