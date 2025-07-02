@@ -29,7 +29,7 @@ const updateProfileSchema = z.object({
 router.get('/profile', authenticateToken, async (req, res) => {
   try {
     const userId = req.user!.userId;
-    const user = await storage.getUserById(userId);
+    const user = await storage.getUser(userId);
     
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
