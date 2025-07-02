@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -75,41 +75,84 @@ export default function ProfileEdit() {
     profileVisibility: true,
   });
 
-  // Fetch current profile data
+  // Initialize form with user data when user context loads
+  useEffect(() => {
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        name: user.name || '',
+        email: user.email || '',
+        phone: user.phone || '',
+      }));
+    }
+  }, [user]);
+
+  // Fetch current profile data - Use existing user data as fallback
   const { data: profile, isLoading } = useQuery({
     queryKey: ['/api/user/profile'],
     enabled: !!user && !!token,
     queryFn: async () => {
-      const response = await fetch('/api/user/profile', {
-        headers: { 'Authorization': `Bearer ${token}` },
-      });
-      if (!response.ok) throw new Error('Failed to fetch profile');
-      const data = await response.json();
-      setFormData({
-        name: data.name || '',
-        email: data.email || '',
-        phone: data.phone || '',
-        bio: data.bio || '',
-        company: data.company || '',
-        position: data.position || '',
-        linkedin: data.linkedin || '',
-        github: data.github || '',
-        // Professional fields for recruiter search
-        location: data.location || '',
-        experience: data.experience || 0,
-        currentRole: data.currentRole || '',
-        skills: data.skills || [],
-        availability: data.availability || '',
-        noticePeriod: data.noticePeriod || '',
-        expectedSalary: data.expectedSalary || '',
-        workType: data.workType || [],
-        category: data.category || [],
-        linkedinProfile: data.linkedinProfile || '',
-        portfolioUrl: data.portfolioUrl || '',
-        careerGoals: data.careerGoals || '',
-        profileVisibility: data.profileVisibility ?? true,
-      });
-      return data;
+      try {
+        const response = await fetch('/api/user/profile', {
+          headers: { 'Authorization': `Bearer ${token}` },
+        });
+        if (!response.ok) {
+          // If profile endpoint fails, use user data from auth context
+          console.log('Profile endpoint failed, using user data from auth context');
+          return {
+            name: user?.name || '',
+            email: user?.email || '',
+            phone: user?.phone || '',
+            bio: '',
+            company: '',
+            position: '',
+            linkedin: '',
+            github: '',
+            location: '',
+            experience: 0,
+            currentRole: '',
+            skills: [],
+            availability: '',
+            noticePeriod: '',
+            expectedSalary: '',
+            workType: [],
+            category: [],
+            linkedinProfile: '',
+            portfolioUrl: '',
+            careerGoals: '',
+            profileVisibility: true,
+          };
+        }
+        const data = await response.json();
+        setFormData({
+          name: data.name || '',
+          email: data.email || '',
+          phone: data.phone || '',
+          bio: data.bio || '',
+          company: data.company || '',
+          position: data.position || '',
+          linkedin: data.linkedin || '',
+          github: data.github || '',
+          // Professional fields for recruiter search
+          location: data.location || '',
+          experience: data.experience || 0,
+          currentRole: data.currentRole || '',
+          skills: data.skills || [],
+          availability: data.availability || '',
+          noticePeriod: data.noticePeriod || '',
+          expectedSalary: data.expectedSalary || '',
+          workType: data.workType || [],
+          category: data.category || [],
+          linkedinProfile: data.linkedinProfile || '',
+          portfolioUrl: data.portfolioUrl || '',
+          careerGoals: data.careerGoals || '',
+          profileVisibility: data.profileVisibility ?? true,
+        });
+        return data;
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+        throw error;
+      }
     },
   });
 
