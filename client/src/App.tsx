@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "./lib/auth.tsx";
 import { SellerAuthProvider } from "./lib/sellerAuth";
+import { HelmetProvider } from 'react-helmet-async';
 import Landing from "@/pages/landing-new";
 import Exam from "@/pages/exam";
 import Payment from "@/pages/payment";
@@ -125,18 +126,20 @@ function Router() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <SellerAuthProvider>
-          <RecruiterAuthProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Router />
-            </TooltipProvider>
-          </RecruiterAuthProvider>
-        </SellerAuthProvider>
-      </AuthProvider>
-    </QueryClientProvider>
+    <HelmetProvider>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <SellerAuthProvider>
+            <RecruiterAuthProvider>
+              <TooltipProvider>
+                <Toaster />
+                <Router />
+              </TooltipProvider>
+            </RecruiterAuthProvider>
+          </SellerAuthProvider>
+        </AuthProvider>
+      </QueryClientProvider>
+    </HelmetProvider>
   );
 }
 

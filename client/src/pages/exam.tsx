@@ -11,6 +11,7 @@ import { apiRequest } from '@/lib/queryClient';
 import { useAuth } from '@/lib/auth.tsx';
 import Header from '@/components/header';
 import ExamTimer from '@/components/exam-timer';
+import { Helmet } from 'react-helmet-async';
 
 import type { Course, Question } from '@shared/schema';
 import { AlertTriangle } from 'lucide-react';
@@ -232,10 +233,10 @@ export default function Exam() {
     return (
       <div className="min-h-screen bg-white">
         <Helmet>
-          <title>{course?.title} - Certification Exam | Octamy</title>
-          <meta name="description" content={`Take the ${course?.title} certification exam and earn your professional credential. Comprehensive assessment with instant results.`} />
-          <meta property="og:title" content={`${course?.title} - Certification Exam | Octamy`} />
-          <meta property="og:description" content={`Take the ${course?.title} certification exam and earn your professional credential.`} />
+          <title>{course?.title ? `${course.title} - Certification Exam | Octamy` : 'Certification Exam | Octamy'}</title>
+          <meta name="description" content={course?.title ? `Take the ${course.title} certification exam and earn your professional credential. Comprehensive assessment with instant results.` : 'Take your certification exam and earn your professional credential.'} />
+          <meta property="og:title" content={course?.title ? `${course.title} - Certification Exam | Octamy` : 'Certification Exam | Octamy'} />
+          <meta property="og:description" content={course?.title ? `Take the ${course.title} certification exam and earn your professional credential.` : 'Take your certification exam and earn your professional credential.'} />
           <meta property="og:url" content={`${window.location.origin}/exam/${courseSlug}`} />
           <link rel="canonical" href={`${window.location.origin}/exam/${courseSlug}`} />
         </Helmet>
