@@ -77,7 +77,12 @@ import {
   type InsertAchievement,
   type UserAchievement,
   type InsertUserAchievement,
-  referralClicks
+  referralClicks,
+  ratings,
+  ratingAggregates,
+  type Rating,
+  type InsertRating,
+  type RatingAggregate,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, count, sql, or, asc, ilike } from "drizzle-orm";
@@ -2783,6 +2788,147 @@ export class DatabaseStorage implements IStorage {
       newBalance: newBalance.toFixed(2),
       creditsAdded: amount
     };
+  }
+
+  // Rating operations
+  async createRating(insertRating: InsertRating): Promise<Rating> {
+    const [rating] = await db
+      .insert(ratings)
+      .values(insertRating)
+      .returning();
+    
+    // Update aggregate after creating rating
+    await this.updateRatingAggregate(rating.courseId);
+    return rating;
+  }
+
+  async updateRating(userId: number, courseId: number, newRating: number, reviewText?: string): Promise<Rating> {
+    const [rating] = await db
+      .update(ratings)
+      .set({ 
+        rating: newRating, 
+        reviewText,
+        updatedAt: new Date() 
+      })
+      .where(and(eq(ratings.userId, userId), eq(ratings.courseId, courseId)))
+      .returning();
+    
+    // Update aggregate after updating rating
+    await this.updateRatingAggregate(courseId);
+    return rating;
+  }
+
+  async getUserRating(userId: number, courseId: number): Promise<Rating | undefined> {
+    const [rating] = await db
+      .select()
+      .from(ratings)
+      .where(and(eq(ratings.userId, userId), eq(ratings.courseId, courseId)));
+    return rating || undefined;
+  }
+
+  async getCourseRatings(courseId: number, limit = 10, offset = 0): Promise<any[]> {
+    return await db
+      .select({
+        id: ratings.id,
+        userId: ratings.userId,
+        courseId: ratings.courseId,
+        rating: ratings.rating,
+        reviewText: ratings.reviewText,
+        createdAt: ratings.createdAt,
+        updatedAt: ratings.updatedAt,
+        userName: users.name,
+      })
+      .from(ratings)
+      .leftJoin(users, eq(ratings.userId, users.id))
+      .where(eq(ratings.courseId, courseId))
+      .orderBy(desc(ratings.createdAt))
+      .limit(limit)
+      .offset(offset);
+  }
+
+  async getRatingAggregate(courseId: number): Promise<RatingAggregate | undefined> {
+    const [aggregate] = await db
+      .select()
+      .from(ratingAggregates)
+      .where(eq(ratingAggregates.courseId, courseId));
+    return aggregate || undefined;
+  }
+
+  async updateRatingAggregate(courseId: number): Promise<void> {
+    // Get all ratings for the course
+    const courseRatings = await db
+      .select()
+      .from(ratings)
+      .where(eq(ratings.courseId, courseId));
+
+    if (courseRatings.length === 0) {
+      // No ratings yet, set defaults
+      await db
+        .insert(ratingAggregates)
+        .values({
+          courseId,
+          averageRating: '0.00',
+          totalReviews: 0,
+          rating1Count: 0,
+          rating2Count: 0,
+          rating3Count: 0,
+          rating4Count: 0,
+          rating5Count: 0,
+        })
+        .onConflictDoUpdate({
+          target: ratingAggregates.courseId,
+          set: {
+            averageRating: '0.00',
+            totalReviews: 0,
+            rating1Count: 0,
+            rating2Count: 0,
+            rating3Count: 0,
+            rating4Count: 0,
+            rating5Count: 0,
+            updatedAt: new Date(),
+          },
+        });
+      return;
+    }
+
+    // Calculate aggregates
+    const totalReviews = courseRatings.length;
+    const totalScore = courseRatings.reduce((sum, r) => sum + r.rating, 0);
+    const averageRating = (totalScore / totalReviews).toFixed(2);
+
+    const ratingCounts = [0, 0, 0, 0, 0];
+    courseRatings.forEach(r => {
+      if (r.rating >= 1 && r.rating <= 5) {
+        ratingCounts[r.rating - 1]++;
+      }
+    });
+
+    // Update aggregate
+    await db
+      .insert(ratingAggregates)
+      .values({
+        courseId,
+        averageRating,
+        totalReviews,
+        rating1Count: ratingCounts[0],
+        rating2Count: ratingCounts[1],
+        rating3Count: ratingCounts[2],
+        rating4Count: ratingCounts[3],
+        rating5Count: ratingCounts[4],
+      })
+      .onConflictDoUpdate({
+        target: ratingAggregates.courseId,
+        set: {
+          averageRating,
+          totalReviews,
+          rating1Count: ratingCounts[0],
+          rating2Count: ratingCounts[1],
+          rating3Count: ratingCounts[2],
+          rating4Count: ratingCounts[3],
+          rating5Count: ratingCounts[4],
+          updatedAt: new Date(),
+        },
+      });
   }
 }
 

@@ -551,6 +551,91 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Rating endpoints
+  app.post('/api/ratings/:courseId', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const courseId = parseInt(req.params.courseId);
+      const { rating, reviewText } = req.body;
+      const userId = req.user!.userId;
+
+      if (!rating || rating < 1 || rating > 5) {
+        return res.status(400).json({ message: 'Rating must be between 1 and 5' });
+      }
+
+      // Check if user already rated this course
+      const existingRating = await storage.getUserRating(userId, courseId);
+      
+      let result;
+      if (existingRating) {
+        result = await storage.updateRating(userId, courseId, rating, reviewText);
+      } else {
+        result = await storage.createRating({
+          userId,
+          courseId,
+          rating,
+          reviewText,
+        });
+      }
+
+      res.json(result);
+    } catch (error: any) {
+      console.error('Rating submission error:', error);
+      res.status(500).json({ message: 'Failed to submit rating' });
+    }
+  });
+
+  app.get('/api/ratings/user/:courseId', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const courseId = parseInt(req.params.courseId);
+      const userId = req.user!.userId;
+
+      const rating = await storage.getUserRating(userId, courseId);
+      res.json(rating);
+    } catch (error: any) {
+      console.error('Get user rating error:', error);
+      res.status(500).json({ message: 'Failed to fetch user rating' });
+    }
+  });
+
+  app.get('/api/ratings/aggregate/:courseId', async (req: Request, res: Response) => {
+    try {
+      const courseId = parseInt(req.params.courseId);
+      const aggregate = await storage.getRatingAggregate(courseId);
+      
+      if (!aggregate) {
+        // Return default values if no ratings exist
+        return res.json({
+          averageRating: '4.8',
+          totalReviews: 0,
+          rating1Count: 0,
+          rating2Count: 0,
+          rating3Count: 0,
+          rating4Count: 0,
+          rating5Count: 0,
+        });
+      }
+
+      res.json(aggregate);
+    } catch (error: any) {
+      console.error('Get rating aggregate error:', error);
+      res.status(500).json({ message: 'Failed to fetch rating aggregate' });
+    }
+  });
+
+  app.get('/api/ratings/reviews/:courseId', async (req: Request, res: Response) => {
+    try {
+      const courseId = parseInt(req.params.courseId);
+      const limit = parseInt(req.query.limit as string) || 10;
+      const offset = parseInt(req.query.offset as string) || 0;
+
+      const reviews = await storage.getCourseRatings(courseId, limit, offset);
+      res.json(reviews);
+    } catch (error: any) {
+      console.error('Get course reviews error:', error);
+      res.status(500).json({ message: 'Failed to fetch reviews' });
+    }
+  });
+
   // Add missing seller routes AFTER API routes to ensure they are properly registered
   app.get(
     "/api/sellers/shareable-items",
@@ -2967,6 +3052,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
   } catch (error) {
     console.log("Additional routes loading...");
   }
+
+  // Rating system routes
+  app.post("/api/ratings", async (req, res) => {
+    if (!req.isAuthenticated() || !req.user) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+
+    try {
+      const { courseId, rating, reviewText } = req.body;
+      
+      if (!courseId || !rating || rating < 1 || rating > 5) {
+        return res.status(400).json({ message: "Valid courseId and rating (1-5) required" });
+      }
+
+      // Check if user already rated this course
+      const existingRating = await storage.getUserRating(req.user.id, courseId);
+      
+      let result;
+      if (existingRating) {
+        // Update existing rating
+        result = await storage.updateRating(req.user.id, courseId, rating, reviewText);
+      } else {
+        // Create new rating
+        result = await storage.createRating({
+          userId: req.user.id,
+          courseId,
+          rating,
+          reviewText,
+        });
+      }
+
+      res.json(result);
+    } catch (error: any) {
+      console.error("Error creating/updating rating:", error);
+      res.status(500).json({ message: "Failed to save rating" });
+    }
+  });
+
+  app.get("/api/ratings/:courseId", async (req, res) => {
+    try {
+      const courseId = parseInt(req.params.courseId);
+      const limit = parseInt(req.query.limit as string) || 10;
+      const offset = parseInt(req.query.offset as string) || 0;
+
+      const ratings = await storage.getCourseRatings(courseId, limit, offset);
+      const aggregate = await storage.getRatingAggregate(courseId);
+
+      res.json({
+        ratings,
+        aggregate: aggregate || {
+          averageRating: '0.00',
+          totalReviews: 0,
+          rating1Count: 0,
+          rating2Count: 0,
+          rating3Count: 0,
+          rating4Count: 0,
+          rating5Count: 0,
+        }
+      });
+    } catch (error: any) {
+      console.error("Error fetching ratings:", error);
+      res.status(500).json({ message: "Failed to fetch ratings" });
+    }
+  });
+
+  app.get("/api/user-rating/:courseId", async (req, res) => {
+    if (!req.isAuthenticated() || !req.user) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+
+    try {
+      const courseId = parseInt(req.params.courseId);
+      const userRating = await storage.getUserRating(req.user.id, courseId);
+      
+      res.json(userRating || null);
+    } catch (error: any) {
+      console.error("Error fetching user rating:", error);
+      res.status(500).json({ message: "Failed to fetch user rating" });
+    }
+  });
 
   const httpServer = createServer(app);
   return httpServer;

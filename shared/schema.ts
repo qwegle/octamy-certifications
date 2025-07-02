@@ -1,4 +1,4 @@
-import { pgTable, text, varchar, serial, integer, boolean, timestamp, decimal, json, index, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, serial, integer, boolean, timestamp, decimal, json, index, jsonb, unique } from "drizzle-orm/pg-core";
 import { relations, eq, desc, and, asc } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -754,9 +754,41 @@ export const insertCategorySchema = createInsertSchema(categories).omit({
   id: true,
 });
 
+// Rating tables
+export const ratings = pgTable('ratings', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  courseId: integer('course_id').notNull().references(() => courses.id, { onDelete: 'cascade' }),
+  rating: integer('rating').notNull(),
+  reviewText: text('review_text'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+}, (table) => ({
+  userCourseUnique: unique().on(table.userId, table.courseId),
+}));
+
+export const ratingAggregates = pgTable('rating_aggregates', {
+  id: serial('id').primaryKey(),
+  courseId: integer('course_id').notNull().references(() => courses.id, { onDelete: 'cascade' }).unique(),
+  averageRating: decimal('average_rating', { precision: 3, scale: 2 }).default('0.00'),
+  totalReviews: integer('total_reviews').default(0),
+  rating1Count: integer('rating_1_count').default(0),
+  rating2Count: integer('rating_2_count').default(0),
+  rating3Count: integer('rating_3_count').default(0),
+  rating4Count: integer('rating_4_count').default(0),
+  rating5Count: integer('rating_5_count').default(0),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
 export const insertCourseSchema = createInsertSchema(courses).omit({
   id: true,
   createdAt: true,
+});
+
+export const insertRatingSchema = createInsertSchema(ratings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
 });
 
 export const insertQuestionSchema = createInsertSchema(questions).omit({
@@ -812,6 +844,9 @@ export type Category = typeof categories.$inferSelect;
 export type InsertCategory = z.infer<typeof insertCategorySchema>;
 export type Course = typeof courses.$inferSelect;
 export type InsertCourse = z.infer<typeof insertCourseSchema>;
+export type Rating = typeof ratings.$inferSelect;
+export type InsertRating = z.infer<typeof insertRatingSchema>;
+export type RatingAggregate = typeof ratingAggregates.$inferSelect;
 export type Question = typeof questions.$inferSelect;
 export type InsertQuestion = z.infer<typeof insertQuestionSchema>;
 export type ExamAttempt = typeof examAttempts.$inferSelect;

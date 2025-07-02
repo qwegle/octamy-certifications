@@ -18,6 +18,9 @@ export default function CourseCard({
   rating = 4.8,
   viewMode = "grid",
 }: CourseCardProps) {
+  const courseSlug = course.slug || course.title.toLowerCase()
+    .replace(/[^a-zA-Z0-9\s]/g, '')
+    .replace(/\s+/g, '-');
   return (
     <Card
       className={`group hover:shadow-lg transition-all duration-300 border-2 hover:border-black relative ${

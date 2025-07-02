@@ -203,7 +203,7 @@ export default function Exam() {
     }
     
     submitExamMutation.mutate({
-      courseId: parseInt(courseId!),
+      courseId: course?.id!,
       answers,
       timeTaken,
       userName: userInfo.name,
@@ -224,9 +224,24 @@ export default function Exam() {
   const progress = questions.length > 0 ? ((currentQuestion + 1) / questions.length) * 100 : 0;
   const answeredCount = Object.keys(answers).length;
 
+  const courseSlug = course?.slug || course?.title.toLowerCase()
+    .replace(/[^a-zA-Z0-9\s]/g, '')
+    .replace(/\s+/g, '-');
+
   if (!examStarted) {
     return (
       <div className="min-h-screen bg-white">
+        <Helmet>
+          <title>{course?.title} - Certification Exam | Octamy</title>
+          <meta name="description" content={`Take the ${course?.title} certification exam and earn your professional credential. Comprehensive assessment with instant results.`} />
+          <meta property="og:title" content={`${course?.title} - Certification Exam | Octamy`} />
+          <meta property="og:description" content={`Take the ${course?.title} certification exam and earn your professional credential.`} />
+          <meta property="og:url" content={`${window.location.origin}/exam/${courseSlug}`} />
+          <link rel="canonical" href={`${window.location.origin}/exam/${courseSlug}`} />
+        </Helmet>
+        
+        {course && <ExamStructuredData course={course} rating={course.rating} />}
+        
         <Header />
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <Card>
