@@ -119,6 +119,7 @@ export default function CandidateSearch() {
       if (response.ok) {
         const searchData = await response.json();
         console.log('Found candidates from backend:', searchData.candidates?.length || 0);
+        console.log('Candidate IDs returned:', searchData.candidates?.map(c => c.id) || []);
         
         setCandidates(searchData.candidates || []);
         setTotalCandidates(searchData.total || searchData.candidates?.length || 0);
