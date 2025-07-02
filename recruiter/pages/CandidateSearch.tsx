@@ -100,13 +100,32 @@ export default function CandidateSearch() {
       console.log('Starting search with filters:', filters);
       
       // Try the proper recruiter search API first
-      let response = await apiRequest('POST', '/api/recruiter/search', {
-        filters,
-        page,
-        limit: 10,
+      let response = await fetch('/api/recruiter/search', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('recruiterToken')}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          filters,
+          page,
+          limit: 10,
+        })
       });
 
       console.log('Search response status:', response.status);
+      
+      // If recruiter search succeeds, use the real data
+      if (response.ok) {
+        const searchData = await response.json();
+        console.log('Found candidates from backend:', searchData.candidates?.length || 0);
+        
+        if (searchData.candidates && searchData.candidates.length > 0) {
+          setCandidates(searchData.candidates);
+          setTotalCandidates(searchData.total || searchData.candidates.length);
+          return;
+        }
+      }
       
       // If recruiter search fails, fall back to fetching all users directly
       if (!response.ok || !response.headers.get('content-type')?.includes('application/json')) {
@@ -114,7 +133,7 @@ export default function CandidateSearch() {
         
         // Fetch publicly available data as fallback
         const [certificatesResponse] = await Promise.all([
-          apiRequest('GET', '/api/recent-certificates')
+          fetch('/api/recent-certificates')
         ]);
         
         if (certificatesResponse.ok) {
@@ -129,7 +148,7 @@ export default function CandidateSearch() {
             
             if (!candidateMap.has(key)) {
               candidateMap.set(key, {
-                id: cert.userId || Math.floor(Math.random() * 10000),
+                id: cert.userId || cert.id || 1,
                 name: cert.name || 'Unknown',
                 email: cert.email || `${cert.name?.toLowerCase().replace(/\s+/g, '.')}@email.com`,
                 location: 'India',

@@ -390,11 +390,16 @@ export function registerRecruiterRoutes(app: any) {
       }
 
       // Get candidate profile data
+      console.log(`Fetching candidate profile for ID: ${candidateId}`);
       const candidateProfile = await storage.getCandidateProfile(candidateId);
+      console.log('Profile data received:', candidateProfile ? 'Found' : 'Not found');
+      
       if (!candidateProfile) {
+        console.log('Returning 404 - candidate not found');
         return res.status(404).json({ message: "The candidate profile you're looking for doesn't exist." });
       }
 
+      console.log('Returning profile data for candidate:', candidateProfile.name);
       res.json(candidateProfile);
     } catch (error: any) {
       console.error("Candidate profile error:", error);
