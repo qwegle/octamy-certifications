@@ -24,6 +24,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useLocation } from "wouter";
 import { HelpCircle, Mail, Phone, MessageCircle, Send } from "lucide-react";
+import { useEffect } from "react";
 import octamyLogoDark from "@/assets/image_1750054456482.png";
 import octamyLogoLight from "@/assets/image_1750054465427.png";
 import { Link } from "wouter";
@@ -47,6 +48,58 @@ export default function HelpCenter() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Tawk.to Live Chat Integration
+  useEffect(() => {
+    // Load Tawk.to script
+    const script = document.createElement('script');
+    script.async = true;
+    script.src = 'https://embed.tawk.to/677bb8032ac3b11ea8c4a0f2/1igcq60ce';
+    script.charset = 'UTF-8';
+    script.setAttribute('crossorigin', '*');
+    
+    // Add script to document head
+    document.head.appendChild(script);
+
+    // Initialize Tawk.to API when loaded
+    script.onload = () => {
+      (window as any).Tawk_API = (window as any).Tawk_API || {};
+      (window as any).Tawk_LoadStart = new Date();
+    };
+
+    // Clean up function
+    return () => {
+      if (document.head.contains(script)) {
+        document.head.removeChild(script);
+      }
+      // Remove Tawk.to widget if it exists
+      if ((window as any).Tawk_API) {
+        try {
+          (window as any).Tawk_API.hideWidget();
+        } catch (e) {
+          console.log('Tawk.to cleanup error:', e);
+        }
+      }
+    };
+  }, []);
+
+  // Function to open live chat
+  const openLiveChat = () => {
+    if ((window as any).Tawk_API && (window as any).Tawk_API.maximize) {
+      (window as any).Tawk_API.maximize();
+    } else {
+      // Fallback if Tawk.to is not loaded yet
+      toast({
+        title: "Live Chat Loading",
+        description: "Please wait a moment for the chat widget to load.",
+      });
+      setTimeout(() => {
+        if ((window as any).Tawk_API && (window as any).Tawk_API.maximize) {
+          (window as any).Tawk_API.maximize();
+        }
+      }, 1000);
+    }
+  };
 
   const form = useForm<ContactFormData>({
     resolver: zodResolver(contactFormSchema),
@@ -328,12 +381,15 @@ export default function HelpCenter() {
                   </div>
                 </div>
 
-                <div className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div 
+                  className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors"
+                  onClick={openLiveChat}
+                >
                   <MessageCircle className="h-5 w-5 text-purple-600" />
                   <div>
                     <p className="font-medium">Live Chat</p>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Available 9 AM - 6 PM IST
+                      Click here to start chatting - Available 9 AM - 6 PM IST
                     </p>
                   </div>
                 </div>
