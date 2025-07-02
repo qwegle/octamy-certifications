@@ -133,7 +133,10 @@ export default function CourseDetail() {
       setLocation("/auth");
       return;
     }
-    setLocation(`/exam/${course?.id}`);
+    const courseSlug = course?.slug || course?.title?.toLowerCase()
+      .replace(/[^a-zA-Z0-9\s]/g, '')
+      .replace(/\s+/g, '-');
+    setLocation(`/exam/${courseSlug}`);
   };
 
   const handleGetCertified = () => {
