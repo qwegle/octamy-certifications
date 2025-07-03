@@ -16,6 +16,15 @@ import businessStrategyImage from "@/assets/course-images/business-strategy-fund
 import financialAnalysisImage from "@/assets/course-images/financial-analysis-professional.jpg";
 import leadershipImage from "@/assets/course-images/leadership-management.jpg";
 import digitalMarketingImage from "@/assets/course-images/digital-marketing-fundamentals.jpg";
+import businesAnalyticsInternship from "@/assets/course-images/business-analytics-internship.jpg";
+import digitalMarketingInternship from "@/assets/course-images/digital-marketing-internship.jpg";
+import softwareDevelopmentInternship from "@/assets/course-images/software-development-internship.png";
+import cybersecurityInternship from "@/assets/course-images/cybersecurity-internship.jpg";
+import dataScienceInternship from "@/assets/course-images/data-science.jpg";
+import devOpsAutomationEngineer from "@/assets/course-images/DevOps-Automation-Engineer.jpg";
+import CloudSecurityArchitect from "@/assets/course-images/CloudSecurityArchitect.jpg";
+import SiteReliabilityEngineerPro from "@/assets/course-images/site-reliability-engineer-pro.jpg";
+import AWSCloudArchitectProfessional from "@/assets/course-images/AWS.png";
 import reactImage from "@/assets/course-images/react-development-mastery.jpg";
 import nodejsImage from "@/assets/course-images/nodejs-backend-development.jpg";
 import mlImage from "@/assets/course-images/machine-learning-fundamentals.jpg";
@@ -52,6 +61,24 @@ export default function CourseCard({
         return leadershipImage;
       case 'digital-marketing-fundamentals':
         return digitalMarketingImage;
+      case 'business-analytics-internship':
+        return businesAnalyticsInternship;
+      case 'digital-marketing-internship':
+        return digitalMarketingInternship;
+      case 'software-development-internship':
+        return softwareDevelopmentInternship;
+      case 'cybersecurity-internship':
+        return cybersecurityInternship;
+      case 'data-science-internship':
+        return dataScienceInternship;
+      case 'devops-automation-engineer':
+        return devOpsAutomationEngineer;
+      case 'cloud-security-architect':
+        return CloudSecurityArchitect;
+      case 'site-reliability-engineer-pro':
+        return SiteReliabilityEngineerPro;
+      case 'aws-cloud-architect-professional':
+        return AWSCloudArchitectProfessional;
       case 'react-development-mastery':
         return reactImage;
       case 'nodejs-backend-development':
