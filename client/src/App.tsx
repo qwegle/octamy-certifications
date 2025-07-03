@@ -61,6 +61,7 @@ import {
   RecruiterWallet,
   RecruiterProtectedRoute
 } from "../../recruiter";
+import InternShipPayment from "./pages/offlinInternshipPayment.tsx";
 
 function Router() {
   return (
@@ -75,6 +76,7 @@ function Router() {
       <Route path="/business-certifications" component={BusinessCertificationsPage} />
       <Route path="/learning-paths" component={LearningPaths} />
       <Route path="/sponsor" component={SponsorPage} />
+      <Route path="/intern-payment" component={InternShipPayment} />
       <Route path="/admin/login" component={AdminLogin} />
       <Route path="/admin/dashboard" component={AdminDashboard} />
       <Route path="/enhanced-admin" component={EnhancedAdminDashboard} />
