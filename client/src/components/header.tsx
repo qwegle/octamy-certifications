@@ -113,19 +113,19 @@ export default function Header() {
           <div className="md:hidden bg-black border-t border-gray-700">
             <div className="px-4 py-4 space-y-2">
               <Link
-                href="/courses"
+                href="/exams"
                 className="block text-white hover:text-gray-300 font-medium py-2"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Courses
+                Exams
               </Link>
-              <Link
+              {/* <Link
                 href="/learning-paths"
                 className="block text-white hover:text-gray-300 font-medium py-2"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Learning Paths
-              </Link>
+              </Link> */}
               <Link
                 href="/virtual-internships"
                 className="block text-white hover:text-gray-300 font-medium py-2"
@@ -188,7 +188,7 @@ export default function Header() {
                     </Link>
                     <Button
                       onClick={() => {
-                        logout();
+                        handleLogout();
                         setMobileMenuOpen(false);
                       }}
                       className="w-full bg-white text-black hover:bg-gray-200"
