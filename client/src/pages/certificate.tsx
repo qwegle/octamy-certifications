@@ -35,7 +35,6 @@ export default function CertificateView() {
     queryKey: [`/api/certificates/${certificateId}`],
     enabled: !!certificateId,
   });
-
   const handleDownload = async () => {
     if (!certificate?.isPaid) {
       alert("Certificate payment is required before download");
@@ -45,36 +44,49 @@ export default function CertificateView() {
     setIsDownloading(true);
     try {
       // const response = await fetch(
-      //   `/api/certificates/${certificateId}/download?format=pdf`
+      //   `http://localhost:5000/api/certificates/${certificateId}/download`,
+      //   {
+      //     method: "GET",
+      //   }
       // );
-      // if (response.ok) {
-      //   const blob = await response.blob();
-      //   const url = window.URL.createObjectURL(blob);
-      //   const a = document.createElement("a");
-      //   a.style.display = "none";
-      //   a.href = url;
+
+      // if (!response.ok) {
+      //   throw new Error(`Download failed: ${response.statusText}`);
+      // }
+
+      // // Check if the response is PDF
+      // const contentType = response.headers.get('content-type');
+      // if (!contentType || !contentType.includes('application/pdf')) {
+      //   throw new Error('Response is not a PDF');
+      // }
+
+      // const blob = await response.blob();
+      // const blobUrl = window.URL.createObjectURL(blob);
+
+      // // Try opening in new tab first
+      // const newWindow = window.open(blobUrl, '_blank');
+
+      // // If blocked by popup blocker, fall back to download
+      // if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+      //   const a = document.createElement('a');
+      //   a.href = blobUrl;
       //   a.download = `Certificate-${certificate.userName}-${certificate.courseTitle}.pdf`;
       //   document.body.appendChild(a);
       //   a.click();
-      //   window.URL.revokeObjectURL(url);
-      //   document.body.removeChild(a);
-      // } else {
-      //   alert("Failed to download certificate. Please try again.");
+      //   setTimeout(() => {
+      //     document.body.removeChild(a);
+      //     window.URL.revokeObjectURL(blobUrl);
+      //   }, 100);
       // }
-      const link = document.createElement("a");
-      link.href = `/api/certificates/${certificateId}/download?format=pdf`;
-      link.download = `${certificateId}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-    } catch (error) {
+      handlePrint();
+    } catch (error: any) {
       console.error("Error downloading certificate:", error);
-      alert("Failed to download certificate. Please try again.");
+      alert(`Failed to download certificate: ${error}`);
     } finally {
       setIsDownloading(false);
     }
   };
-
+  
   const handlePrint = async () => {
     if (!certificate?.isPaid) {
       alert("Certificate payment is required before printing");
