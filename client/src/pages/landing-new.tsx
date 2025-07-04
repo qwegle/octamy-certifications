@@ -210,7 +210,7 @@ export default function Landing() {
       {/* Hero Section */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-6 text-center">
-          <h1 className="text-6xl font-bold text-black mb-6">
+          <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold text-black mb-6">
             PROFESSIONAL
             <br />
             <span className="bg-black text-white px-4 py-2 inline-block mt-2">
@@ -222,8 +222,8 @@ export default function Landing() {
             credibility with performance-based badges and join our global
             leaderboard.
           </p>
-          <div className="flex justify-center space-x-4">
-            <Link href="/courses">
+          <div className="flex md:flex-row flex-col space-y-4 justify-center md:space-x-4 md:space-y-0">
+            <Link href="/exams">
               <Button
                 size="lg"
                 className="bg-black text-white hover:bg-gray-800 px-8 py-4 text-lg"
