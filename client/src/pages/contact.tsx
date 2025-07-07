@@ -260,7 +260,7 @@ export default function Contact() {
                   <Link href="/verify" className="block text-sm text-blue-600 hover:underline">
                     → Verify Certificate
                   </Link>
-                  <Link href="/courses" className="block text-sm text-blue-600 hover:underline">
+                  <Link href="/exams" className="block text-sm text-blue-600 hover:underline">
                     → Browse Certification Courses
                   </Link>
                   <Link href="/partners" className="block text-sm text-blue-600 hover:underline">

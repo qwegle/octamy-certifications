@@ -58,7 +58,7 @@ export default function Header() {
           </nav>
 
           {/* Auth Buttons */}
-          <div className="flex items-center space-x-4">
+          <div className="hidden md:flex items-center space-x-4">
             {!isLoading && !isAuthenticated ? (
               <>
                 <Link href="/auth">
