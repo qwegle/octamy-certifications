@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { GoogleAuthButton } from "@/components/google-auth-button";
+import { useSellerGoogleAuthHandler } from "@/utils/google-auth-handler";
 import { Eye, EyeOff } from "lucide-react";
 
 export default function SellerAuth() {
@@ -20,6 +22,9 @@ export default function SellerAuth() {
   
   const { login, register } = useSellerAuth();
   const { toast } = useToast();
+  
+  // Handle Google OAuth callback
+  useSellerGoogleAuthHandler();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -161,6 +166,21 @@ export default function SellerAuth() {
                 {isLoading ? "Processing..." : (isLogin ? "LOGIN" : "CREATE ACCOUNT")}
               </Button>
             </form>
+
+            <div className="mt-6">
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t border-gray-300" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-white px-2 text-gray-500">Or continue with</span>
+                </div>
+              </div>
+              
+              <div className="mt-6">
+                <GoogleAuthButton type="seller" isLoading={isLoading} />
+              </div>
+            </div>
 
             <div className="mt-6 text-center">
               <button
