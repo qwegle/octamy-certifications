@@ -142,6 +142,11 @@ export const users = pgTable("users", {
   company: text("company"),
   position: text("position"),
   isAdmin: boolean("is_admin").default(false).notNull(),
+  
+  // Google OAuth fields
+  googleId: text("google_id"),
+  isGoogleUser: boolean("is_google_user").default(false).notNull(),
+  
   createdAt: timestamp("created_at").defaultNow().notNull(),
   
   // Professional Profile Fields (for recruiters to search)
@@ -336,12 +341,16 @@ export const internshipApplications = pgTable("internship_applications", {
 export const sellers = pgTable("sellers", {
   id: serial("id").primaryKey(),
   email: text("email").notNull().unique(),
-  password: text("password").notNull(),
+  password: text("password"),
   name: text("name").notNull(),
   phone: text("phone"),
   referralCode: text("referral_code").unique(),
   isApproved: boolean("is_approved").default(false).notNull(),
   isActive: boolean("is_active").default(true).notNull(),
+  
+  // Google OAuth fields
+  googleId: text("google_id"),
+  isGoogleUser: boolean("is_google_user").default(false).notNull(),
   commissionRate: decimal("commission_rate", { precision: 5, scale: 2 }).default("10.00").notNull(),
   totalEarnings: decimal("total_earnings", { precision: 10, scale: 2 }).default("0.00").notNull(),
   pendingEarnings: decimal("pending_earnings", { precision: 10, scale: 2 }).default("0.00").notNull(),
