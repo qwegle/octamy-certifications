@@ -17,8 +17,24 @@ export function useGoogleAuthHandler() {
     if (token && success === 'true') {
       console.log('Google Auth Handler - Processing successful authentication');
       
-      // Store the token
-      localStorage.setItem('auth-token', token);
+      // Store the token using the same key as regular auth
+      localStorage.setItem('token', token);
+      
+      // Decode token to get user info
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const userData = {
+          id: payload.userId,
+          email: payload.email,
+          name: payload.name || payload.email
+        };
+        localStorage.setItem('user', JSON.stringify(userData));
+      } catch (error) {
+        console.error('Error decoding token:', error);
+      }
+      
+      // Trigger a custom event to notify auth context
+      window.dispatchEvent(new CustomEvent('authTokenUpdated'));
       
       // Clean up URL
       window.history.replaceState({}, '', window.location.pathname);
@@ -69,8 +85,8 @@ export function useSellerGoogleAuthHandler() {
     if (token && success === 'true') {
       console.log('Seller Google Auth Handler - Processing successful authentication');
       
-      // Store the seller token
-      localStorage.setItem('seller-auth-token', token);
+      // Store the seller token using the same key as regular seller auth
+      localStorage.setItem('sellerToken', token);
       
       // Clean up URL
       window.history.replaceState({}, '', window.location.pathname);

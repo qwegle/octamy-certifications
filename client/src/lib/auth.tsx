@@ -24,7 +24,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
+  // Function to check and set token/user
+  const checkAndSetAuth = () => {
     const storedToken = localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
     
@@ -38,6 +39,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // Token expired, clear storage
           localStorage.removeItem('token');
           localStorage.removeItem('user');
+          setToken(null);
+          setUser(null);
         } else {
           setToken(storedToken);
           setUser(JSON.parse(storedUser));
@@ -46,9 +49,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Invalid token format, clear storage
         localStorage.removeItem('token');
         localStorage.removeItem('user');
+        setToken(null);
+        setUser(null);
       }
+    } else {
+      setToken(null);
+      setUser(null);
     }
     setIsLoading(false);
+  };
+
+  useEffect(() => {
+    checkAndSetAuth();
+  }, []);
+
+  // Listen for storage changes and custom auth events (for Google OAuth)
+  useEffect(() => {
+    const handleStorageChange = () => {
+      checkAndSetAuth();
+    };
+    
+    const handleAuthUpdate = () => {
+      checkAndSetAuth();
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('authTokenUpdated', handleAuthUpdate);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('authTokenUpdated', handleAuthUpdate);
+    };
   }, []);
 
   const login = async (email: string, password: string) => {
