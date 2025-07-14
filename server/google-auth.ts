@@ -71,6 +71,11 @@ export function setupGoogleAuth() {
       let seller = await storage.getSellerByEmail(email);
       
       if (!seller) {
+        // Generate referral code for new seller
+        const referralCode = `REF${Date.now()}${Math.random()
+          .toString(36)
+          .substr(2, 9)}`.toUpperCase();
+          
         // Create new seller with pending status
         const sellerData = {
           name,
@@ -79,7 +84,8 @@ export function setupGoogleAuth() {
           phone: '', // Will need to be filled later
           googleId: profile.id,
           isGoogleUser: true,
-          isApproved: false // Pending admin approval
+          isApproved: false, // Pending admin approval
+          referralCode: referralCode
         };
         
         seller = await storage.createSeller(sellerData);
