@@ -8,12 +8,17 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/lib/auth.tsx';
 import Header from '@/components/header';
 import Footer from '@/components/footer';
+import { GoogleAuthButton } from '@/components/google-auth-button';
+import { useGoogleAuthHandler } from '@/utils/google-auth-handler';
 import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
 
 export default function Auth() {
   const [, setLocation] = useLocation();
   const { login, register } = useAuth();
   const { toast } = useToast();
+  
+  // Handle Google OAuth callback
+  useGoogleAuthHandler();
   
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
@@ -248,6 +253,21 @@ export default function Auth() {
                   {isLoading ? 'Please wait...' : (isLogin ? 'Sign In' : 'Create Account')}
                 </Button>
               </form>
+
+              <div className="mt-6">
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t border-octamy-gray-300" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-white px-2 text-octamy-gray-500">Or continue with</span>
+                  </div>
+                </div>
+                
+                <div className="mt-6">
+                  <GoogleAuthButton type="user" isLoading={isLoading} />
+                </div>
+              </div>
 
               <div className="mt-6 text-center">
                 <p className="text-octamy-gray-600">
