@@ -139,6 +139,9 @@ Comprehensive professional certification platform with AI-powered interviews, in
 - ✅ Added proper token handling and callback redirects
 - ✅ Updated storage layer to support Google OAuth user creation and linking
 - ✅ Fixed referral code generation for Google OAuth sellers to match regular seller registration
+- ✅ Implemented unique referral code generation with database uniqueness checks and retry logic
+- ✅ Added admin approval requirement (isApproved: false) for all sellers including Google OAuth registrations
+- ✅ Created shared referral code generation utility to ensure consistency between Google OAuth and regular seller registration
 - ✅ Added authentication handlers for seamless Google OAuth workflow
 - ✅ Enhanced token generation to include user name in JWT payload
 - ✅ Implemented custom event triggering to notify auth context of Google OAuth completion

@@ -2,6 +2,7 @@ import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { storage } from './storage';
 import jwt from 'jsonwebtoken';
+import { generateUniqueReferralCode } from './utils/referralCodeGenerator';
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 
@@ -71,12 +72,10 @@ export function setupGoogleAuth() {
       let seller = await storage.getSellerByEmail(email);
       
       if (!seller) {
-        // Generate referral code for new seller
-        const referralCode = `REF${Date.now()}${Math.random()
-          .toString(36)
-          .substr(2, 9)}`.toUpperCase();
+        // Generate unique referral code for new seller
+        const referralCode = await generateUniqueReferralCode();
           
-        // Create new seller with pending status
+        // Create new seller with pending status (requires admin approval)
         const sellerData = {
           name,
           email,
@@ -84,7 +83,8 @@ export function setupGoogleAuth() {
           phone: '', // Will need to be filled later
           googleId: profile.id,
           isGoogleUser: true,
-          isApproved: false, // Pending admin approval
+          isApproved: false, // Requires admin approval
+          isActive: true,
           referralCode: referralCode
         };
         
@@ -110,6 +110,8 @@ export function setupGoogleAuth() {
     done(null, user);
   });
 }
+
+
 
 export function generateToken(user: any, type: 'user' | 'seller') {
   const payload = type === 'user' 
