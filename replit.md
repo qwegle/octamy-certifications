@@ -130,6 +130,22 @@ Comprehensive professional certification platform with AI-powered interviews, in
 - Post-exam rating prompt for authenticated users who pass
 - Search engine optimization for better Google rankings with rich snippets
 
+### 2025-01-14: Google OAuth Authentication Implementation
+- ✅ Added Google OAuth2 authentication for both users and sellers
+- ✅ Created reusable GoogleAuthButton component with Chrome icon
+- ✅ Implemented passport-google-oauth20 strategy for both user types
+- ✅ Added database schema support for Google OAuth fields (googleId, isGoogleUser)
+- ✅ Created separate authentication flows for users (/api/auth/google/user) and sellers (/api/auth/google/seller)
+- ✅ Added proper token handling and callback redirects
+- ✅ Updated storage layer to support Google OAuth user creation and linking
+- ✅ Fixed referral code generation for Google OAuth sellers to match regular seller registration
+- ✅ Implemented unique referral code generation with database uniqueness checks and retry logic
+- ✅ Added admin approval requirement (isApproved: false) for all sellers including Google OAuth registrations
+- ✅ Created shared referral code generation utility to ensure consistency between Google OAuth and regular seller registration
+- ✅ Added authentication handlers for seamless Google OAuth workflow
+- ✅ Enhanced token generation to include user name in JWT payload
+- ✅ Implemented custom event triggering to notify auth context of Google OAuth completion
+
 ### 2025-01-22: Recruiter Portal Implementation
 - Created complete recruiter portal in `/recruiter` folder
 - Built multi-step onboarding wizard with form validation
