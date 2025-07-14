@@ -12,9 +12,29 @@ export function useGoogleAuthHandler() {
     const success = urlParams.get('success');
     const error = urlParams.get('error');
 
+    console.log('Google Auth Handler - URL params:', { token: !!token, success, error });
+
     if (token && success === 'true') {
-      // Store the token
-      localStorage.setItem('auth-token', token);
+      console.log('Google Auth Handler - Processing successful authentication');
+      
+      // Store the token using the same key as regular auth
+      localStorage.setItem('token', token);
+      
+      // Decode token to get user info
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const userData = {
+          id: payload.userId,
+          email: payload.email,
+          name: payload.name || payload.email
+        };
+        localStorage.setItem('user', JSON.stringify(userData));
+      } catch (error) {
+        console.error('Error decoding token:', error);
+      }
+      
+      // Trigger a custom event to notify auth context
+      window.dispatchEvent(new CustomEvent('authTokenUpdated'));
       
       // Clean up URL
       window.history.replaceState({}, '', window.location.pathname);
@@ -28,6 +48,8 @@ export function useGoogleAuthHandler() {
       // Redirect to dashboard
       setTimeout(() => setLocation('/dashboard'), 1000);
     } else if (error) {
+      console.log('Google Auth Handler - Processing authentication error:', error);
+      
       // Handle authentication error
       let errorMessage = "Google authentication failed. Please try again.";
       
@@ -58,9 +80,13 @@ export function useSellerGoogleAuthHandler() {
     const success = urlParams.get('success');
     const error = urlParams.get('error');
 
+    console.log('Seller Google Auth Handler - URL params:', { token: !!token, success, error });
+
     if (token && success === 'true') {
-      // Store the seller token
-      localStorage.setItem('seller-auth-token', token);
+      console.log('Seller Google Auth Handler - Processing successful authentication');
+      
+      // Store the seller token using the same key as regular seller auth
+      localStorage.setItem('sellerToken', token);
       
       // Clean up URL
       window.history.replaceState({}, '', window.location.pathname);
@@ -74,6 +100,8 @@ export function useSellerGoogleAuthHandler() {
       // Redirect to seller dashboard
       setTimeout(() => setLocation('/seller-dashboard'), 1000);
     } else if (error) {
+      console.log('Seller Google Auth Handler - Processing authentication error:', error);
+      
       // Handle authentication error
       let errorMessage = "Google authentication failed. Please try again.";
       
