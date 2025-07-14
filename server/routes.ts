@@ -5,6 +5,9 @@ import { seedDatabase } from "./seed";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { z } from "zod";
+import passport from "passport";
+import { setupGoogleAuth } from "./google-auth";
+import googleAuthRoutes from "./routes/google-auth-routes";
 import {
   insertUserSchema,
   insertExamAttemptSchema,
@@ -170,6 +173,13 @@ const upload = multer({
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Initialize passport and Google OAuth
+  app.use(passport.initialize());
+  setupGoogleAuth();
+  
+  // Register Google OAuth routes
+  app.use('/api', googleAuthRoutes);
+  
   // Initialize database if in development
   if (process.env.NODE_ENV === "development") {
     await seedDatabase();
