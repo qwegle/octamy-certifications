@@ -107,8 +107,8 @@ export function setupGoogleAuth() {
 
 export function generateToken(user: any, type: 'user' | 'seller') {
   const payload = type === 'user' 
-    ? { userId: user.id, email: user.email }
-    : { sellerId: user.id, email: user.email };
+    ? { userId: user.id, email: user.email, name: user.name }
+    : { sellerId: user.id, email: user.email, name: user.name };
     
   return jwt.sign(payload, JWT_SECRET, { expiresIn: "7d" });
 }
