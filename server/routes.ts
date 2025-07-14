@@ -8,6 +8,7 @@ import { z } from "zod";
 import passport from "passport";
 import { setupGoogleAuth } from "./google-auth";
 import googleAuthRoutes from "./routes/google-auth-routes";
+import { generateUniqueReferralCode } from "./utils/referralCodeGenerator";
 import {
   insertUserSchema,
   insertExamAttemptSchema,
@@ -355,11 +356,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         password: hashedPassword,
         name,
         phone,
-        isApproved: false,
+        isApproved: false, // Requires admin approval
         isActive: true,
-        referralCode: `REF${Date.now()}${Math.random()
-          .toString(36)
-          .substr(2, 9)}`.toUpperCase(),
+        referralCode: await generateUniqueReferralCode(),
       });
 
       const token = jwt.sign(
