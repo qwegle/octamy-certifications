@@ -77,8 +77,8 @@ function Router() {
       <Route path="/learning-paths" component={LearningPaths} />
       <Route path="/sponsor" component={SponsorPage} />
       <Route path="/intern-payment" component={InternShipPayment} />
-      <Route path="/admin/login" component={AdminLogin} />
-      <Route path="/admin/dashboard" component={AdminDashboard} />
+      <Route path="/qwegle/login" component={AdminLogin} />
+      <Route path="/qwegle/dashboard" component={AdminDashboard} />
       <Route path="/enhanced-admin" component={EnhancedAdminDashboard} />
       <Route path="/exam/:slug" component={Exam} />
       <Route path="/exam-results-temp/:tempExamId" component={TempExamResults} />
@@ -90,7 +90,7 @@ function Router() {
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/progress" component={Progress} />
       <Route path="/preferences" component={Preferences} />
-      <Route path="/admin" component={AdminDashboard} />
+      <Route path="/qwegle" component={AdminDashboard} />
       <Route path="/verify" component={Verify} />
       <Route path="/verify/:certificateId" component={Verify} />
       <Route path="/certificates/:certificateId" component={Certificate} />

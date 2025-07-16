@@ -65,7 +65,7 @@ export default function Contact() {
           <div className="flex items-center space-x-8">
             <Link href="/" className="text-2xl font-bold">OCTAMY</Link>
             <div className="hidden md:flex space-x-6">
-              <Link href="/courses" className="hover:text-gray-300">Courses</Link>
+              <Link href="/exams" className="hover:text-gray-300">Exams</Link>
               <Link href="/virtual-internships" className="hover:text-gray-300">Internships</Link>
               <Link href="/business-certifications" className="hover:text-gray-300">Business Pricing</Link>
               <Link href="/partners" className="hover:text-gray-300">Partners</Link>
@@ -74,7 +74,7 @@ export default function Contact() {
           </div>
           <div className="flex items-center space-x-4">
             <Link href="/auth">
-              <Button variant="outline" className="text-white border-white hover:bg-white hover:text-black">
+              <Button variant="outline" className=" border-white transition duration-500 hover:bg-white hover:scale-105 text-black">
                 Login
               </Button>
             </Link>
@@ -260,7 +260,7 @@ export default function Contact() {
                   <Link href="/verify" className="block text-sm text-blue-600 hover:underline">
                     → Verify Certificate
                   </Link>
-                  <Link href="/courses" className="block text-sm text-blue-600 hover:underline">
+                  <Link href="/exams" className="block text-sm text-blue-600 hover:underline">
                     → Browse Certification Courses
                   </Link>
                   <Link href="/partners" className="block text-sm text-blue-600 hover:underline">

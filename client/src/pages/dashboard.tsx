@@ -179,7 +179,7 @@ export default function Dashboard() {
       <Header />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-8">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center md:flex-row flex-col justify-between gap-4">
             <div>
               <h1 className="text-4xl font-bold text-black mb-2">
                 Welcome back, {user.name}!
@@ -426,7 +426,7 @@ export default function Dashboard() {
 
           {/* AI Interviews Section */}
           <div className="mb-8">
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center md:flex-row flex-col gap-4 justify-between mb-6">
               <h2 className="text-2xl font-bold text-black">AI Interviews</h2>
               <div className="flex gap-3">
                 {recentInterviews.length > 0 && (

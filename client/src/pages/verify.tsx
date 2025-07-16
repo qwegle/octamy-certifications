@@ -52,8 +52,8 @@ export default function Verify() {
               />
             </Link>
             <div className="hidden md:flex space-x-6">
-              <Link href="/courses" className="hover:text-gray-300">
-                Courses
+              <Link href="/exams" className="hover:text-gray-300">
+                Exams
               </Link>
               <Link href="/partners" className="hover:text-gray-300">
                 Partners

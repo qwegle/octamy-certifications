@@ -261,13 +261,13 @@ export default function SponsorPage() {
               >
                 Business
               </Button>
-              <Button
+              {/* <Button
                 variant="ghost"
                 onClick={() => setLocation("/learning-paths")}
                 className="text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-900"
               >
                 Learning Paths
-              </Button>
+              </Button> */}
             </nav>
 
             <div className="flex items-center space-x-4">
@@ -318,12 +318,12 @@ export default function SponsorPage() {
                 <Button
                   variant="ghost"
                   onClick={() => {
-                    setLocation("/courses");
+                    setLocation("/exams");
                     setMobileMenuOpen(false);
                   }}
                   className="justify-start text-black dark:text-white"
                 >
-                  Courses
+                  Exams
                 </Button>
                 <Button
                   variant="ghost"
