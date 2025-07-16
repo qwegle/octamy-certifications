@@ -1593,7 +1593,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     const adminToken = localStorage.getItem("adminToken");
     if (!adminToken) {
-      setLocation("/admin/login");
+      setLocation("/qwegle/login");
       return;
     }
   }, [setLocation]);
@@ -1775,7 +1775,7 @@ export default function AdminDashboard() {
 
   const handleLogout = () => {
     localStorage.removeItem("adminToken");
-    setLocation("/admin/login");
+    setLocation("/qwegle/login");
   };
 
   if (analyticsLoading) {
