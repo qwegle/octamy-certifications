@@ -5,6 +5,10 @@ import { seedDatabase } from "./seed";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { z } from "zod";
+import passport from "passport";
+import { setupGoogleAuth } from "./google-auth";
+import googleAuthRoutes from "./routes/google-auth-routes";
+import { generateUniqueReferralCode } from "./utils/referralCodeGenerator";
 import {
   insertUserSchema,
   insertExamAttemptSchema,
@@ -178,6 +182,13 @@ cloudinary.config({
 // });
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Initialize passport and Google OAuth
+  app.use(passport.initialize());
+  setupGoogleAuth();
+  
+  // Register Google OAuth routes
+  app.use('/api', googleAuthRoutes);
+  
   // Initialize database if in development
   if (process.env.NODE_ENV === "development") {
     await seedDatabase();
@@ -353,11 +364,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         password: hashedPassword,
         name,
         phone,
-        isApproved: false,
+        isApproved: false, // Requires admin approval
         isActive: true,
-        referralCode: `REF${Date.now()}${Math.random()
-          .toString(36)
-          .substr(2, 9)}`.toUpperCase(),
+        referralCode: await generateUniqueReferralCode(),
       });
 
       const token = jwt.sign(
@@ -1708,10 +1717,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         phone: "",
         surl: `${req.protocol}://${req.get(
           "host"
-        )}/api/sponsors/payment/success`,
+        )}/api/sponsor/payment/success`,
         furl: `${req.protocol}://${req.get(
           "host"
-        )}/api/sponsors/payment/failure`,
+        )}/api/sponsor/payment/failure`,
         udf1: sponsor.id.toString(),
         udf2: "",
         udf3: "",
@@ -1738,7 +1747,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Sponsor payment success callback
   app.post(
-    "/api/sponsors/payment/success",
+    "/api/sponsor/payment/success",
     async (req: Request, res: Response) => {
       try {
         const responseData = req.body;
@@ -1747,7 +1756,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (!payuMoneyService.verifyHash(responseData)) {
           console.error("Invalid payment hash for sponsor payment");
           return res.redirect(
-            `${req.protocol}://${req.get("host")}/sponsors?error=invalid_hash`
+            `${req.protocol}://${req.get("host")}/sponsor?error=invalid_hash`
           );
         }
 
@@ -1764,7 +1773,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           );
 
           res.redirect(
-            `${req.protocol}://${req.get("host")}/sponsors?success=true&txnid=${
+            `${req.protocol}://${req.get("host")}/sponsor?success=true&txnid=${
               responseData.txnid
             }`
           );
@@ -1779,13 +1788,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           res.redirect(
             `${req.protocol}://${req.get(
               "host"
-            )}/sponsors?error=payment_failed&txnid=${responseData.txnid}`
+            )}/sponsor?error=payment_failed&txnid=${responseData.txnid}`
           );
         }
       } catch (error) {
         console.error("Error processing sponsor payment success:", error);
         res.redirect(
-          `${req.protocol}://${req.get("host")}/sponsors?error=processing_error`
+          `${req.protocol}://${req.get("host")}/sponsor?error=processing_error`
         );
       }
     }
@@ -1793,7 +1802,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Sponsor payment failure callback
   app.post(
-    "/api/sponsors/payment/failure",
+    "/api/sponsor/payment/failure",
     async (req: Request, res: Response) => {
       try {
         const responseData = req.body;
@@ -1808,12 +1817,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.redirect(
           `${req.protocol}://${req.get(
             "host"
-          )}/sponsors?error=payment_failed&txnid=${responseData.txnid}`
+          )}/sponsor?error=payment_failed&txnid=${responseData.txnid}`
         );
       } catch (error) {
         console.error("Error processing sponsor payment failure:", error);
         res.redirect(
-          `${req.protocol}://${req.get("host")}/sponsors?error=processing_error`
+          `${req.protocol}://${req.get("host")}/sponsor?error=processing_error`
         );
       }
     }
@@ -2323,7 +2332,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         <script>
           function downloadPDF() {
             // Try API download first, fallback to print-to-PDF
-            fetch('/api/certificates/${certificateNumber}/download?format=pdf')
+            fetch('/certificate/${certificateNumber}?format=pdf')
               .then(response => {
                 if (response.ok) {
                   return response.blob();
