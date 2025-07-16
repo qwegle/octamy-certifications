@@ -34,7 +34,7 @@ export default function AdminLogin() {
           title: "Login Successful",
           description: "Welcome to the admin dashboard!",
         });
-        setLocation("/admin/dashboard");
+        setLocation("/qwegle/dashboard");
       } else {
         throw new Error('Invalid response format');
       }

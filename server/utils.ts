@@ -28,20 +28,30 @@ export function calculateExpiryDate(): Date {
 
 export function getBadgeColor(badge: string): string {
   switch (badge) {
-    case "platinum": return "#E5E7EB";
-    case "gold": return "#FCD34D";
-    case "silver": return "#D1D5DB";
-    case "bronze": return "#F59E0B";
-    default: return "#F59E0B";
+    case "platinum":
+      return "#E5E7EB";
+    case "gold":
+      return "#FCD34D";
+    case "silver":
+      return "#D1D5DB";
+    case "bronze":
+      return "#F59E0B";
+    default:
+      return "#F59E0B";
   }
 }
 
 export function getBadgeIcon(badge: string): string {
   switch (badge) {
-    case "platinum": return "💎";
-    case "gold": return "🥇";
-    case "silver": return "🥈";
-    case "bronze": return "🥉";
-    default: return "🥉";
+    case "platinum":
+      return "💎";
+    case "gold":
+      return "🥇";
+    case "silver":
+      return "🥈";
+    case "bronze":
+      return "🥉";
+    default:
+      return "🥉";
   }
 }

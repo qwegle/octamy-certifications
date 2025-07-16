@@ -287,12 +287,12 @@ export default function InternShipPayment() {
                 <Button
                   variant="ghost"
                   onClick={() => {
-                    setLocation("/courses");
+                    setLocation("/exams");
                     setMobileMenuOpen(false);
                   }}
                   className="justify-start text-black dark:text-white"
                 >
-                  Courses
+                  Exams
                 </Button>
                 <Button
                   variant="ghost"

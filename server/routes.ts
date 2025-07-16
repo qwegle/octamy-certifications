@@ -38,8 +38,10 @@ import apiRoutes from "./routes/index";
 import certificateRoutes from "./routes/certificateRoutes";
 import { emailService } from "./utils/emailService";
 import { generateCertificateHTML } from "./utils/certificateGenerator";
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import { Readable } from "stream";
+import { evaluateAnswersWithAI } from "./utils/openai.js";
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -155,23 +157,29 @@ const authenticateSellerToken = (
 };
 
 // Configure Cloudinary only if credentials are provided
-if (
-  process.env.CLOUDINARY_CLOUD_NAME &&
-  process.env.CLOUDINARY_API_KEY &&
-  process.env.CLOUDINARY_API_SECRET
-) {
-  cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-  });
-}
+// if (
+//   process.env.CLOUDINARY_CLOUD_NAME &&
+//   process.env.CLOUDINARY_API_KEY &&
+//   process.env.CLOUDINARY_API_SECRET
+// ) {
+//   cloudinary.config({
+// cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+// api_key: process.env.CLOUDINARY_API_KEY,
+// api_secret: process.env.CLOUDINARY_API_SECRET,
+//   });
+// }
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 // Configure multer for file uploads
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: { fileSize: 100 * 1024 * 1024 }, // 100MB limit
-});
+// const upload = multer({
+//   storage: multer.memoryStorage(),
+//   limits: { fileSize: 100 * 1024 * 1024 }, // 100MB limit
+// });
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize passport and Google OAuth
@@ -457,20 +465,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Register recruiter routes
   // Recruiter login endpoint
-  app.post('/api/recruiter/login', async (req: Request, res: Response) => {
+  app.post("/api/recruiter/login", async (req: Request, res: Response) => {
     try {
       const { email, password } = req.body;
 
       // Find recruiter by email
       const recruiter = await storage.getRecruiterByEmail(email);
       if (!recruiter) {
-        return res.status(401).json({ message: 'Invalid credentials' });
+        return res.status(401).json({ message: "Invalid credentials" });
       }
 
       // Check password
-      const isPasswordValid = await bcrypt.compare(password, recruiter.password);
+      const isPasswordValid = await bcrypt.compare(
+        password,
+        recruiter.password
+      );
       if (!isPasswordValid) {
-        return res.status(401).json({ message: 'Invalid credentials' });
+        return res.status(401).json({ message: "Invalid credentials" });
       }
 
       // Update last login
@@ -479,12 +490,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Generate JWT token
       const token = jwt.sign(
         { recruiterId: recruiter.id, email: recruiter.email },
-        process.env.JWT_SECRET || 'your-secret-key',
-        { expiresIn: '7d' }
+        process.env.JWT_SECRET || "your-secret-key",
+        { expiresIn: "7d" }
       );
 
       res.json({
-        message: 'Login successful',
+        message: "Login successful",
         token,
         recruiter: {
           id: recruiter.id,
@@ -494,24 +505,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
           companyName: recruiter.companyName,
           kycStatus: recruiter.kycStatus,
           creditsBalance: recruiter.creditsBalance,
-          registrationStep: recruiter.registrationStep
-        }
+          registrationStep: recruiter.registrationStep,
+        },
       });
     } catch (error: any) {
-      console.error('Login error:', error);
-      res.status(500).json({ message: 'Login failed' });
+      console.error("Login error:", error);
+      res.status(500).json({ message: "Login failed" });
     }
   });
 
   // Recruiter registration endpoint
-  app.post('/api/recruiter/register', async (req: Request, res: Response) => {
+  app.post("/api/recruiter/register", async (req: Request, res: Response) => {
     try {
       const { email, password } = req.body;
 
       // Check if recruiter already exists
       const existingRecruiter = await storage.getRecruiterByEmail(email);
       if (existingRecruiter) {
-        return res.status(400).json({ message: 'Email already registered' });
+        return res.status(400).json({ message: "Email already registered" });
       }
 
       // Hash password
@@ -522,127 +533,148 @@ export async function registerRoutes(app: Express): Promise<Server> {
         email,
         password: hashedPassword,
         registrationStep: 1,
-        firstName: '',
-        lastName: '',
-        phone: '',
-        designation: '',
-        companyName: '',
-        companySize: '1-10',
-        industry: '',
-        companyAddress: '',
-        companyCity: '',
-        companyState: '',
-        companyCountry: 'India',
-        kycStatus: 'pending',
-        creditsBalance: '0.00'
+        firstName: "",
+        lastName: "",
+        phone: "",
+        designation: "",
+        companyName: "",
+        companySize: "1-10",
+        industry: "",
+        companyAddress: "",
+        companyCity: "",
+        companyState: "",
+        companyCountry: "India",
+        kycStatus: "pending",
+        creditsBalance: "0.00",
       });
 
       // Generate JWT token
       const token = jwt.sign(
         { recruiterId: recruiter.id, email: recruiter.email },
-        process.env.JWT_SECRET || 'your-secret-key',
-        { expiresIn: '7d' }
+        process.env.JWT_SECRET || "your-secret-key",
+        { expiresIn: "7d" }
       );
 
       res.status(201).json({
-        message: 'Registration successful',
+        message: "Registration successful",
         token,
         recruiter: {
           id: recruiter.id,
           email: recruiter.email,
-          registrationStep: recruiter.registrationStep
-        }
+          registrationStep: recruiter.registrationStep,
+        },
       });
     } catch (error: any) {
-      console.error('Registration error:', error);
-      res.status(500).json({ message: 'Registration failed' });
+      console.error("Registration error:", error);
+      res.status(500).json({ message: "Registration failed" });
     }
   });
 
   // Rating endpoints
-  app.post('/api/ratings/:courseId', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
-    try {
-      const courseId = parseInt(req.params.courseId);
-      const { rating, reviewText } = req.body;
-      const userId = req.user!.userId;
+  app.post(
+    "/api/ratings/:courseId",
+    authenticateToken,
+    async (req: AuthenticatedRequest, res: Response) => {
+      try {
+        const courseId = parseInt(req.params.courseId);
+        const { rating, reviewText } = req.body;
+        const userId = req.user!.userId;
 
-      if (!rating || rating < 1 || rating > 5) {
-        return res.status(400).json({ message: 'Rating must be between 1 and 5' });
+        if (!rating || rating < 1 || rating > 5) {
+          return res
+            .status(400)
+            .json({ message: "Rating must be between 1 and 5" });
+        }
+
+        // Check if user already rated this course
+        const existingRating = await storage.getUserRating(userId, courseId);
+
+        let result;
+        if (existingRating) {
+          result = await storage.updateRating(
+            userId,
+            courseId,
+            rating,
+            reviewText
+          );
+        } else {
+          result = await storage.createRating({
+            userId,
+            courseId,
+            rating,
+            reviewText,
+          });
+        }
+
+        res.json(result);
+      } catch (error: any) {
+        console.error("Rating submission error:", error);
+        res.status(500).json({ message: "Failed to submit rating" });
       }
+    }
+  );
 
-      // Check if user already rated this course
-      const existingRating = await storage.getUserRating(userId, courseId);
-      
-      let result;
-      if (existingRating) {
-        result = await storage.updateRating(userId, courseId, rating, reviewText);
-      } else {
-        result = await storage.createRating({
-          userId,
-          courseId,
-          rating,
-          reviewText,
-        });
+  app.get(
+    "/api/ratings/user/:courseId",
+    authenticateToken,
+    async (req: AuthenticatedRequest, res: Response) => {
+      try {
+        const courseId = parseInt(req.params.courseId);
+        const userId = req.user!.userId;
+
+        const rating = await storage.getUserRating(userId, courseId);
+        res.json(rating);
+      } catch (error: any) {
+        console.error("Get user rating error:", error);
+        res.status(500).json({ message: "Failed to fetch user rating" });
       }
-
-      res.json(result);
-    } catch (error: any) {
-      console.error('Rating submission error:', error);
-      res.status(500).json({ message: 'Failed to submit rating' });
     }
-  });
+  );
 
-  app.get('/api/ratings/user/:courseId', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
-    try {
-      const courseId = parseInt(req.params.courseId);
-      const userId = req.user!.userId;
+  app.get(
+    "/api/ratings/aggregate/:courseId",
+    async (req: Request, res: Response) => {
+      try {
+        const courseId = parseInt(req.params.courseId);
+        const aggregate = await storage.getRatingAggregate(courseId);
 
-      const rating = await storage.getUserRating(userId, courseId);
-      res.json(rating);
-    } catch (error: any) {
-      console.error('Get user rating error:', error);
-      res.status(500).json({ message: 'Failed to fetch user rating' });
-    }
-  });
+        if (!aggregate) {
+          // Return default values if no ratings exist
+          return res.json({
+            averageRating: "4.8",
+            totalReviews: 0,
+            rating1Count: 0,
+            rating2Count: 0,
+            rating3Count: 0,
+            rating4Count: 0,
+            rating5Count: 0,
+          });
+        }
 
-  app.get('/api/ratings/aggregate/:courseId', async (req: Request, res: Response) => {
-    try {
-      const courseId = parseInt(req.params.courseId);
-      const aggregate = await storage.getRatingAggregate(courseId);
-      
-      if (!aggregate) {
-        // Return default values if no ratings exist
-        return res.json({
-          averageRating: '4.8',
-          totalReviews: 0,
-          rating1Count: 0,
-          rating2Count: 0,
-          rating3Count: 0,
-          rating4Count: 0,
-          rating5Count: 0,
-        });
+        res.json(aggregate);
+      } catch (error: any) {
+        console.error("Get rating aggregate error:", error);
+        res.status(500).json({ message: "Failed to fetch rating aggregate" });
       }
-
-      res.json(aggregate);
-    } catch (error: any) {
-      console.error('Get rating aggregate error:', error);
-      res.status(500).json({ message: 'Failed to fetch rating aggregate' });
     }
-  });
+  );
 
-  app.get('/api/ratings/reviews/:courseId', async (req: Request, res: Response) => {
-    try {
-      const courseId = parseInt(req.params.courseId);
-      const limit = parseInt(req.query.limit as string) || 10;
-      const offset = parseInt(req.query.offset as string) || 0;
+  app.get(
+    "/api/ratings/reviews/:courseId",
+    async (req: Request, res: Response) => {
+      try {
+        const courseId = parseInt(req.params.courseId);
+        const limit = parseInt(req.query.limit as string) || 10;
+        const offset = parseInt(req.query.offset as string) || 0;
 
-      const reviews = await storage.getCourseRatings(courseId, limit, offset);
-      res.json(reviews);
-    } catch (error: any) {
-      console.error('Get course reviews error:', error);
-      res.status(500).json({ message: 'Failed to fetch reviews' });
+        const reviews = await storage.getCourseRatings(courseId, limit, offset);
+        res.json(reviews);
+      } catch (error: any) {
+        console.error("Get course reviews error:", error);
+        res.status(500).json({ message: "Failed to fetch reviews" });
+      }
     }
-  });
+  );
 
   // Add missing seller routes AFTER API routes to ensure they are properly registered
   app.get(
@@ -843,7 +875,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Import and mount user profile routes
   try {
-    const { default: userProfileRoutes } = await import("./routes/userProfileRoutes.js");
+    const { default: userProfileRoutes } = await import(
+      "./routes/userProfileRoutes.js"
+    );
     app.use("/api/user", userProfileRoutes);
     console.log("User profile routes mounted successfully");
   } catch (error) {
@@ -1007,17 +1041,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Get correct answers from session mapping
         const correctAnswersMapping =
           (global as any).questionMappings?.[sessionId] || {};
-        
+
         console.log(`Exam submission for session ${sessionId}:`);
-        console.log(`- Available sessions: ${Object.keys((global as any).questionMappings || {}).join(', ')}`);
-        console.log(`- Questions in this session: ${Object.keys(correctAnswersMapping).length}`);
-        
+        console.log(
+          `- Available sessions: ${Object.keys(
+            (global as any).questionMappings || {}
+          ).join(", ")}`
+        );
+        console.log(
+          `- Questions in this session: ${
+            Object.keys(correctAnswersMapping).length
+          }`
+        );
+
         // Safety check: Ensure we have questions to evaluate
         if (Object.keys(correctAnswersMapping).length === 0) {
           console.warn(`No question mappings found for session ${sessionId}`);
           return res.status(400).json({
-            message: "Exam session expired or invalid. Please restart the exam.",
-            code: "SESSION_EXPIRED"
+            message:
+              "Exam session expired or invalid. Please restart the exam.",
+            code: "SESSION_EXPIRED",
           });
         }
 
@@ -1053,7 +1096,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
 
         // Calculate the final score percentage
-        const score = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
+        const score =
+          totalQuestions > 0
+            ? Math.round((correctAnswers / totalQuestions) * 100)
+            : 0;
 
         // Clean up session data AFTER score calculation
         if ((global as any).questionMappings?.[sessionId]) {
@@ -1671,10 +1717,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         phone: "",
         surl: `${req.protocol}://${req.get(
           "host"
-        )}/api/sponsors/payment/success`,
+        )}/api/sponsor/payment/success`,
         furl: `${req.protocol}://${req.get(
           "host"
-        )}/api/sponsors/payment/failure`,
+        )}/api/sponsor/payment/failure`,
         udf1: sponsor.id.toString(),
         udf2: "",
         udf3: "",
@@ -1701,7 +1747,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Sponsor payment success callback
   app.post(
-    "/api/sponsors/payment/success",
+    "/api/sponsor/payment/success",
     async (req: Request, res: Response) => {
       try {
         const responseData = req.body;
@@ -1710,7 +1756,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (!payuMoneyService.verifyHash(responseData)) {
           console.error("Invalid payment hash for sponsor payment");
           return res.redirect(
-            `${req.protocol}://${req.get("host")}/sponsors?error=invalid_hash`
+            `${req.protocol}://${req.get("host")}/sponsor?error=invalid_hash`
           );
         }
 
@@ -1727,7 +1773,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           );
 
           res.redirect(
-            `${req.protocol}://${req.get("host")}/sponsors?success=true&txnid=${
+            `${req.protocol}://${req.get("host")}/sponsor?success=true&txnid=${
               responseData.txnid
             }`
           );
@@ -1742,13 +1788,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           res.redirect(
             `${req.protocol}://${req.get(
               "host"
-            )}/sponsors?error=payment_failed&txnid=${responseData.txnid}`
+            )}/sponsor?error=payment_failed&txnid=${responseData.txnid}`
           );
         }
       } catch (error) {
         console.error("Error processing sponsor payment success:", error);
         res.redirect(
-          `${req.protocol}://${req.get("host")}/sponsors?error=processing_error`
+          `${req.protocol}://${req.get("host")}/sponsor?error=processing_error`
         );
       }
     }
@@ -1756,7 +1802,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Sponsor payment failure callback
   app.post(
-    "/api/sponsors/payment/failure",
+    "/api/sponsor/payment/failure",
     async (req: Request, res: Response) => {
       try {
         const responseData = req.body;
@@ -1771,12 +1817,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.redirect(
           `${req.protocol}://${req.get(
             "host"
-          )}/sponsors?error=payment_failed&txnid=${responseData.txnid}`
+          )}/sponsor?error=payment_failed&txnid=${responseData.txnid}`
         );
       } catch (error) {
         console.error("Error processing sponsor payment failure:", error);
         res.redirect(
-          `${req.protocol}://${req.get("host")}/sponsors?error=processing_error`
+          `${req.protocol}://${req.get("host")}/sponsor?error=processing_error`
         );
       }
     }
@@ -1861,17 +1907,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     async (req: AuthenticatedRequest, res: Response) => {
       try {
         const courseData = req.body;
-        
+
         // Validate required fields
         if (!courseData.title || !courseData.categoryId || !courseData.price) {
-          return res.status(400).json({ message: "Missing required fields: title, categoryId, price" });
+          return res.status(400).json({
+            message: "Missing required fields: title, categoryId, price",
+          });
         }
 
         // Generate slug if not provided
         if (!courseData.slug) {
-          courseData.slug = courseData.title.toLowerCase()
-            .replace(/[^a-z0-9]+/g, '-')
-            .replace(/^-+|-+$/g, '');
+          courseData.slug = courseData.title
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/^-+|-+$/g, "");
         }
 
         const course = await storage.createCourseAdmin(courseData);
@@ -1895,16 +1944,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
 
         const courseData = req.body;
-        
+
         // Generate slug if title is being updated but slug is not provided
         if (courseData.title && !courseData.slug) {
-          courseData.slug = courseData.title.toLowerCase()
-            .replace(/[^a-z0-9]+/g, '-')
-            .replace(/^-+|-+$/g, '');
+          courseData.slug = courseData.title
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/^-+|-+$/g, "");
         }
 
         const course = await storage.updateCourseAdmin(courseId, courseData);
-        
+
         if (!course) {
           return res.status(404).json({ message: "Course not found" });
         }
@@ -2282,7 +2332,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         <script>
           function downloadPDF() {
             // Try API download first, fallback to print-to-PDF
-            fetch('/api/certificates/${certificateNumber}/download?format=pdf')
+            fetch('/certificate/${certificateNumber}?format=pdf')
               .then(response => {
                 if (response.ok) {
                   return response.blob();
@@ -2470,7 +2520,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           redirectToPayment: true,
           paymentUrl: paymentForm.url,
         });
-      } catch (error) {
+      } catch (error:any) {
         console.error("Error initiating interview payment:", error);
         res
           .status(500)
@@ -2566,6 +2616,220 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     }
   );
+
+  //Initiate interview payment
+  // const isDevelopment = true;
+  // app.post(
+  //   "/api/interviews/initiate-payment",
+  //   optionalAuth,
+  //   async (req: AuthenticatedRequest, res: Response) => {
+  //     try {
+  //       const { technology } = req.body;
+
+  //       if (!technology) {
+  //         return res.status(400).json({ error: "Technology is required" });
+  //       }
+
+  //       // Generate transaction ID
+  //       const txnid = `INT${Date.now()}${Math.random()
+  //         .toString(36)
+  //         .substr(2, 9)}`;
+
+  //       // Get user details
+  //       let user = null;
+  //       let userId = null;
+  //       let userEmail = "guest@octamy.com";
+  //       let userName = "Guest User";
+
+  //       if (req.user?.userId) {
+  //         const userResult = await db
+  //           .select()
+  //           .from(usersTable)
+  //           .where(eq(usersTable.id, req.user.userId));
+  //         user = userResult[0];
+  //         if (user) {
+  //           userId = user.id;
+  //           userEmail = user.email;
+  //           userName = user.name;
+  //         }
+  //       }
+
+  //       // Check for existing uncompleted interview
+  //       let existingInterview: any[] = [];
+  //       if (userId) {
+  //         existingInterview = await db
+  //           .select()
+  //           .from(interviews)
+  //           .where(
+  //             and(
+  //               eq(interviews.userId, userId),
+  //               eq(interviews.technology, technology),
+  //               eq(interviews.paymentStatus, "paid"),
+  //               not(eq(interviews.status, "completed"))
+  //             )
+  //           )
+  //           .limit(1);
+  //       }
+
+  //       if (existingInterview.length > 0) {
+  //         return res.json({
+  //           success: true,
+  //           message: "Interview already purchased",
+  //           interviewId: existingInterview[0].id,
+  //           alreadyPurchased: true,
+  //         });
+  //       }
+
+  //       // DEVELOPMENT MODE: Skip payment
+  //       if (isDevelopment) {
+  //         // Create interview record directly
+  //         const [interview] = await db
+  //           .insert(interviews)
+  //           .values({
+  //             userId: userId,
+  //             technology,
+  //             status: "pending",
+  //             paymentId: txnid,
+  //             title: `${technology} Technical Interview`,
+  //             paymentStatus: "paid",
+  //             totalQuestions: 6,
+  //             paymentAmount: "0.00", // Mark as free in dev
+  //             createdAt: new Date(),
+  //           })
+  //           .returning();
+
+  //         return res.json({
+  //           success: true,
+  //           interviewId: interview.id,
+  //           developmentMode: true,
+  //           message: "Payment skipped in development mode",
+  //         });
+  //       }
+
+  //       // PRODUCTION: Normal payment flow
+  //       const paymentData = {
+  //         txnid,
+  //         amount: "99.00",
+  //         productinfo: `AI Interview - ${technology}`,
+  //         firstname: userName,
+  //         email: userEmail,
+  //         phone: user?.phone || "9999999999",
+  //         surl: `${req.protocol}://${req.get(
+  //           "host"
+  //         )}/api/interviews/payment/success`,
+  //         furl: `${req.protocol}://${req.get(
+  //           "host"
+  //         )}/api/interviews/payment/failure`,
+  //         udf1: userId?.toString() || "guest",
+  //         udf2: technology,
+  //       };
+
+  //       // Store pending interview
+  //       (global as any).pendingInterviews =
+  //         (global as any).pendingInterviews || {};
+  //       (global as any).pendingInterviews[txnid] = {
+  //         userId: userId || null,
+  //         technology,
+  //         title: `${technology} Technical Interview`,
+  //       };
+
+  //       const paymentForm = payuMoneyService.generatePaymentForm(paymentData);
+
+  //       res.json({
+  //         success: true,
+  //         paymentForm: paymentForm.html,
+  //         transactionId: txnid,
+  //         redirectToPayment: true,
+  //         paymentUrl: paymentForm.url,
+  //       });
+  //     } catch (error) {
+  //       console.error("Error initiating interview payment:", error);
+  //       res.status(500).json({
+  //         error: "Failed to initiate payment",
+  //         details: error.message,
+  //       });
+  //     }
+  //   }
+  // );
+
+  // app.post(
+  //   "/api/interviews/payment/success",
+  //   async (req: Request, res: Response) => {
+  //     try {
+  //       // Skip verification in development
+  //       if (!isDevelopment) {
+  //         const responseData = req.body;
+  //         if (!payuMoneyService.verifyHash(responseData)) {
+  //           console.error("Invalid payment hash for interview payment");
+  //           return res.redirect(
+  //             `${req.protocol}://${req.get(
+  //               "host"
+  //             )}/ai-interviews?error=invalid_hash`
+  //           );
+  //         }
+  //       }
+
+  //       const status = isDevelopment
+  //         ? "success"
+  //         : payuMoneyService.getPaymentStatus(req.body);
+  //       const responseData = req.body;
+
+  //       if (status === "success") {
+  //         const txnid = responseData.txnid || `DEV-${Date.now()}`;
+  //         const userId = parseInt(responseData.udf1 || "0");
+  //         const technology = responseData.udf2 || "development";
+
+  //         const existingInterview = await db
+  //           .select()
+  //           .from(interviews)
+  //           .where(eq(interviews.paymentId, txnid))
+  //           .limit(1);
+
+  //         if (existingInterview.length === 0) {
+  //           const [interview] = await db
+  //             .insert(interviews)
+  //             .values({
+  //               userId: userId,
+  //               technology,
+  //               status: "pending",
+  //               paymentId: txnid,
+  //               title: `${technology} Technical Interview`,
+  //               paymentStatus: "paid",
+  //               totalQuestions: 6,
+  //               paymentAmount: isDevelopment ? "0.00" : "99.00",
+  //               createdAt: new Date(),
+  //             })
+  //             .returning();
+
+  //           console.log(`Interview created: ID ${interview.id}`);
+  //         }
+
+  //         if ((global as any).pendingInterviews?.[txnid]) {
+  //           delete (global as any).pendingInterviews[txnid];
+  //         }
+
+  //         res.redirect(
+  //           `${req.protocol}://${req.get(
+  //             "host"
+  //           )}/ai-interviews?payment=success&technology=${technology}`
+  //         );
+  //       } else {
+  //         res.redirect(
+  //           `${req.protocol}://${req.get(
+  //             "host"
+  //           )}/ai-interviews?error=payment_failed`
+  //         );
+  //       }
+  //     } catch (error) {
+  //       console.error("Error processing payment success:", error);
+  //       res.redirect(
+  //         `${req.protocol}://${req.get(
+  //           "host"
+  //         )}/ai-interviews?error=processing_error`
+  //       );
+  //     }
+  //   }
+  // );
 
   // Interview payment failure callback
   app.post(
@@ -2682,6 +2946,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
+  // upload to cloud
+  const upload = multer({ storage: multer.memoryStorage() });
+
+  const uploadToCloud = async (buffer:Buffer, folder:any, resource_type:any) => {
+    const stream = Readable.from(buffer);
+
+    return new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          folder,
+          resource_type,
+        },
+        (error, result:any) => {
+          if (error) return reject(error);
+          resolve(result.secure_url);
+        }
+      );
+      stream.pipe(uploadStream);
+    });
+  };
+
+  // API: Upload recorded video
+  app.post(
+    "/api/upload-video",
+    upload.fields([
+      { name: "screen", maxCount: 1 },
+      { name: "video", maxCount: 1 },
+    ]),
+    async (req: AuthenticatedRequest, res: Response) => {
+      try {
+        const screenBuffer = req.files.screen[0].buffer;
+        const videoBuffer = req.files.video[0].buffer;
+        const screenUrl = await uploadToCloud(
+          screenBuffer,
+          "interviews/screen",
+          "video"
+        );
+        const videoUrl = await uploadToCloud(
+          videoBuffer,
+          "interviews/video",
+          "video"
+        );
+
+        if (!screenUrl || !videoUrl) {
+          res.json({ message: "screen or video url not found" });
+        }
+        res.json({
+          videoUrl,
+          screenUrl,
+        });
+      } catch (error) {
+        console.error("Upload failed:", error);
+        res.status(500).json({ error: "Failed to upload video" });
+      }
+    }
+  );
+
   // Submit interview
   app.post(
     "/api/interviews/:id/submit",
@@ -2709,31 +3030,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
 
         // Calculate score based on actual content quality
-        const totalQuestions = Object.keys(answers).length;
-        let validAnswers = 0;
+        // const totalQuestions = Object.keys(answers).length;
+        // let validAnswers = 0;
 
-        Object.values(answers).forEach((answer: any) => {
-          const answerText = answer
-            ? answer.toString().trim().toLowerCase()
-            : "";
-          // Only count meaningful answers
-          if (
-            answerText &&
-            answerText.length > 10 &&
-            !answerText.includes("don't know") &&
-            !answerText.includes("skip") &&
-            !answerText.includes("no idea") &&
-            answerText !== "na" &&
-            answerText !== "n/a"
-          ) {
-            validAnswers++;
-          }
-        });
+        // Object.values(answers).forEach((answer: any) => {
+        //   const answerText = answer
+        //     ? answer.toString().trim().toLowerCase()
+        //     : "";
+        //   // Only count meaningful answers
+        //   if (
+        //     answerText &&
+        //     answerText.length > 10 &&
+        //     !answerText.includes("don't know") &&
+        //     !answerText.includes("skip") &&
+        //     !answerText.includes("no idea") &&
+        //     answerText !== "na" &&
+        //     answerText !== "n/a"
+        //   ) {
+        //     validAnswers++;
+        //   }
+        // });
 
-        const score =
-          totalQuestions > 0
-            ? Math.round((validAnswers / totalQuestions) * 100)
-            : 0;
+        // const score =
+        //   totalQuestions > 0
+        //     ? Math.round((validAnswers / totalQuestions) * 100)
+        //     : 0;
+
+        const { score, feedback, perAnswerScores } =
+          await evaluateAnswersWithAI(answers);
 
         // Determine grade
         let grade = "F";
@@ -2746,35 +3070,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
         else if (score >= 60) grade = "D";
 
         // Generate AI summary based on performance
-        const technology = interview.technology || "the technology";
-        const aiSummary =
-          score > 70
-            ? `Strong performance with ${validAnswers}/${totalQuestions} well-answered questions. Demonstrated good understanding of ${technology}.`
-            : score > 40
-            ? `Moderate performance with ${validAnswers}/${totalQuestions} complete answers. Room for improvement in technical depth of ${technology}.`
-            : `Limited responses provided. Consider reviewing ${technology} fundamentals before retaking the interview.`;
+        // const technology = interview.technology || "the technology";
+        // const aiSummary =
+        //   score > 70
+        //     ? `Strong performance with ${validAnswers}/${totalQuestions} well-answered questions. Demonstrated good understanding of ${technology}.`
+        //     : score > 40
+        //     ? `Moderate performance with ${validAnswers}/${totalQuestions} complete answers. Room for improvement in technical depth of ${technology}.`
+        //     : `Limited responses provided. Consider reviewing ${technology} fundamentals before retaking the interview.`;
 
         // Validate and parse completedAt date
+        // let completedDate;
+        // try {
+        //   // Handle various date formats and ensure valid date
+        //   if (completedAt) {
+        //     const parsedDate = new Date(completedAt);
+        //     if (isNaN(parsedDate.getTime())) {
+        //       // If invalid date, use current time
+        //       completedDate = new Date();
+        //     } else {
+        //       completedDate = parsedDate;
+        //     }
+        //   } else {
+        //     // If no completedAt provided, use current time
+        //     completedDate = new Date();
+        //   }
+        // } catch (error) {
+        //   console.error("Error parsing completedAt date:", error);
+        //   completedDate = new Date();
+        // }
         let completedDate;
         try {
-          // Handle various date formats and ensure valid date
-          if (completedAt) {
-            const parsedDate = new Date(completedAt);
-            if (isNaN(parsedDate.getTime())) {
-              // If invalid date, use current time
-              completedDate = new Date();
-            } else {
-              completedDate = parsedDate;
-            }
-          } else {
-            // If no completedAt provided, use current time
-            completedDate = new Date();
-          }
-        } catch (error) {
-          console.error("Error parsing completedAt date:", error);
+          const parsedDate = new Date(completedAt);
+          completedDate = isNaN(parsedDate.getTime()) ? new Date() : parsedDate;
+        } catch {
           completedDate = new Date();
         }
-
         // Update interview with results
         await storage.updateInterview(interviewId, {
           status: "completed",
@@ -2783,7 +3113,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           completedAt: completedDate,
           tabSwitches,
           answers: JSON.stringify(answers),
-          aiSummary,
+          aiSummary:feedback,
           videoUrl,
           screenRecordingUrl,
         });
@@ -2792,6 +3122,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           id: interviewId,
           score: Math.round(score),
           grade,
+          aiSummary:feedback,
           message: "Interview submitted successfully",
         });
       } catch (error) {
@@ -2815,12 +3146,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const allowedTypes = [
           "application/pdf",
           "application/msword",
-          "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         ];
 
         if (!allowedTypes.includes(req.file.mimetype)) {
-          return res.status(400).json({ 
-            error: "Invalid file type. Only PDF and Word documents are allowed." 
+          return res.status(400).json({
+            error:
+              "Invalid file type. Only PDF and Word documents are allowed.",
           });
         }
 
@@ -2837,7 +3169,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               {
                 resource_type: "raw",
                 public_id: publicId,
-                format: req.file!.originalname.split('.').pop()
+                format: req.file!.originalname.split(".").pop(),
               },
               (error: any, result: any) => {
                 if (error) reject(error);
@@ -2854,7 +3186,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           fileUrl: (uploadResult as any).secure_url,
           fileName: req.file.originalname,
           fileSize: req.file.size,
-          publicId: (uploadResult as any).public_id
+          publicId: (uploadResult as any).public_id,
         });
       } catch (error) {
         console.error("Error uploading file:", error);
@@ -2864,65 +3196,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
   );
 
   // Upload interview recordings to Cloudinary
-  app.post(
-    "/api/interviews/:id/upload-recording",
-    authenticateToken,
-    upload.single("video"),
-    async (req: AuthenticatedRequest, res: Response) => {
-      try {
-        const interviewId = parseInt(req.params.id);
+  // app.post(
+  //   "/api/interviews/:id/upload-recording",
+  //   authenticateToken,
+  //   upload.single("video"),
+  //   async (req: AuthenticatedRequest, res: Response) => {
+  //     try {
+  //       const interviewId = parseInt(req.params.id);
 
-        // Verify interview ownership
-        const interview = await storage.getInterviewById(interviewId);
-        if (!interview || interview.userId !== req.user!.userId) {
-          return res.status(403).json({ error: "Access denied" });
-        }
+  //       // Verify interview ownership
+  //       const interview = await storage.getInterviewById(interviewId);
+  //       if (!interview || interview.userId !== req.user!.userId) {
+  //         return res.status(403).json({ error: "Access denied" });
+  //       }
 
-        if (!req.file) {
-          return res.status(400).json({ error: "No video file provided" });
-        }
+  //       if (!req.file) {
+  //         return res.status(400).json({ error: "No video file provided" });
+  //       }
 
-        const recordingType = req.body.type || "video";
-        const publicId = `interviews/${interviewId}-${recordingType}-${Date.now()}`;
+  //       const recordingType = req.body.type || "video";
+  //       const publicId = `interviews/${interviewId}-${recordingType}-${Date.now()}`;
 
-        // Check if Cloudinary is configured
-        if (!process.env.CLOUDINARY_CLOUD_NAME) {
-          return res.status(500).json({ error: "Cloudinary not configured" });
-        }
+  //       // Check if Cloudinary is configured
+  //       if (!process.env.CLOUDINARY_CLOUD_NAME) {
+  //         return res.status(500).json({ error: "Cloudinary not configured" });
+  //       }
 
-        // Upload to Cloudinary
-        const uploadResult = await new Promise((resolve, reject) => {
-          cloudinary.uploader
-            .upload_stream(
-              {
-                resource_type: "video",
-                public_id: publicId,
-                format: "mp4",
-                transformation: [{ quality: "auto", fetch_format: "auto" }],
-              },
-              (error, result) => {
-                if (error) reject(error);
-                else resolve(result);
-              }
-            )
-            .end(req.file!.buffer);
-        });
+  //       // Upload to Cloudinary
+  //       const uploadResult = await new Promise((resolve, reject) => {
+  //         cloudinary.uploader
+  //           .upload_stream(
+  //             {
+  //               resource_type: "video",
+  //               public_id: publicId,
+  //               format: "mp4",
+  //               transformation: [{ quality: "auto", fetch_format: "auto" }],
+  //             },
+  //             (error, result) => {
+  //               if (error) reject(error);
+  //               else resolve(result);
+  //             }
+  //           )
+  //           .end(req.file!.buffer);
+  //       });
 
-        console.log(
-          `Recording uploaded to Cloudinary: Interview ${interviewId}, Type: ${recordingType}`
-        );
+  //       console.log(
+  //         `Recording uploaded to Cloudinary: Interview ${interviewId}, Type: ${recordingType}`
+  //       );
 
-        res.json({
-          url: (uploadResult as any).secure_url,
-          type: recordingType,
-          publicId: (uploadResult as any).public_id,
-        });
-      } catch (error) {
-        console.error("Error uploading recording to Cloudinary:", error);
-        res.status(500).json({ error: "Failed to upload recording" });
-      }
-    }
-  );
+  //       res.json({
+  //         url: (uploadResult as any).secure_url,
+  //         type: recordingType,
+  //         publicId: (uploadResult as any).public_id,
+  //       });
+  //     } catch (error) {
+  //       console.error("Error uploading recording to Cloudinary:", error);
+  //       res.status(500).json({ error: "Failed to upload recording" });
+  //     }
+  //   }
+  // );
 
   // Get interview responses with audio transcription
   app.get(
@@ -3244,18 +3576,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     try {
       const { courseId, rating, reviewText } = req.body;
-      
+
       if (!courseId || !rating || rating < 1 || rating > 5) {
-        return res.status(400).json({ message: "Valid courseId and rating (1-5) required" });
+        return res
+          .status(400)
+          .json({ message: "Valid courseId and rating (1-5) required" });
       }
 
       // Check if user already rated this course
       const existingRating = await storage.getUserRating(req.user.id, courseId);
-      
+
       let result;
       if (existingRating) {
         // Update existing rating
-        result = await storage.updateRating(req.user.id, courseId, rating, reviewText);
+        result = await storage.updateRating(
+          req.user.id,
+          courseId,
+          rating,
+          reviewText
+        );
       } else {
         // Create new rating
         result = await storage.createRating({
@@ -3285,14 +3624,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({
         ratings,
         aggregate: aggregate || {
-          averageRating: '0.00',
+          averageRating: "0.00",
           totalReviews: 0,
           rating1Count: 0,
           rating2Count: 0,
           rating3Count: 0,
           rating4Count: 0,
           rating5Count: 0,
-        }
+        },
       });
     } catch (error: any) {
       console.error("Error fetching ratings:", error);
@@ -3308,7 +3647,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const courseId = parseInt(req.params.courseId);
       const userRating = await storage.getUserRating(req.user.id, courseId);
-      
+
       res.json(userRating || null);
     } catch (error: any) {
       console.error("Error fetching user rating:", error);

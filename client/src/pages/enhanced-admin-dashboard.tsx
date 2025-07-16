@@ -55,7 +55,7 @@ function EnhancedAdminDashboard() {
   const handleLogout = () => {
     logout();
     localStorage.removeItem('adminToken');
-    window.location.href = '/admin/login';
+    window.location.href = '/qwegle/login';
   };
 
   const fetchData = async (searchFilters = {}) => {
@@ -171,7 +171,7 @@ function EnhancedAdminDashboard() {
         });
         localStorage.removeItem('adminToken');
         setTimeout(() => {
-          window.location.href = '/admin/login';
+          window.location.href = '/qwegle/login';
         }, 2000);
         return;
       }
@@ -186,7 +186,7 @@ function EnhancedAdminDashboard() {
       if (errorMessage.includes('401') || errorMessage.includes('Unauthorized')) {
         localStorage.removeItem('adminToken');
         setTimeout(() => {
-          window.location.href = '/admin/login';
+          window.location.href = '/qwegle/login';
         }, 2000);
       }
     } finally {
@@ -244,7 +244,7 @@ function EnhancedAdminDashboard() {
         variant: "destructive",
       });
       setTimeout(() => {
-        window.location.href = '/admin/login';
+        window.location.href = '/qwegle/login';
       }, 2000);
       return;
     }

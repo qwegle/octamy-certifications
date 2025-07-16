@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -24,11 +24,16 @@ import {
   Video,
   Brain,
   Handshake,
+  Play,
+  ChevronLeft,
 } from "lucide-react";
 import CourseCard from "@/components/course-card";
 import { useAuth } from "@/hooks/useAuth";
 import type { Category, Course } from "@shared/schema";
-import octamyLogoDark from "@/assets/image_1750054456482.png";
+import bg2 from "@/assets/octamy-bg-2.png";
+import bg1 from "@/assets/octamy-bg-3.png";
+import bg3 from "@/assets/octamy-bg-4.png";
+import bg4 from "@/assets/octamy-bg-5.png";
 import octamyLogoLight from "@/assets/image_1750054465427.png";
 // Certificate Slider Component with infinite auto-scroll
 function CertificateSlider() {
@@ -86,7 +91,7 @@ function CertificateSlider() {
           </div>
         ) : (
           // Loading placeholder
-          (<div className="flex overflow-x-auto space-x-6 pb-4">
+          <div className="flex overflow-x-auto space-x-6 pb-4">
             {Array.from({ length: 3 }).map((_, index) => (
               <div
                 key={index}
@@ -103,12 +108,208 @@ function CertificateSlider() {
                 <div className="h-6 bg-gray-700 rounded w-20"></div>
               </div>
             ))}
-          </div>)
+          </div>
         )}
       </div>
     </div>
   );
 }
+
+const BannerSlider = () => {
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+
+  // Sample banner data (you can replace with your own images)
+  const banners = [
+    {
+      id: 1,
+      image:  bg1 ,
+      title: "Meet your new AI conversation coach",
+      subtitle:
+        "Role Play is the interactive way to practice your business and communication skills.",
+      description: "Build full-stack applications with modern technologies",
+      buttonText: "Get Certificate Now !",
+      gradient: "from-blue-600 to-purple-600",
+    },
+    {
+      id: 2,
+      image: bg2,
+      title: "Data Science Bootcamp",
+      subtitle: "Python, Machine Learning & AI",
+      description: "Transform your career with data science skills",
+      buttonText: "Get Certificate Now !",
+      gradient: "from-green-600 to-teal-600",
+    },
+    {
+      id: 3,
+      image:bg3,
+      title: "Digital Marketing Mastery",
+      subtitle: "SEO, Social Media & Analytics",
+      description: "Grow your business with proven marketing strategies",
+      buttonText: "Get Certificate Now !",
+      gradient: "from-orange-600 to-red-600",
+    },
+    {
+      id: 4,
+      image: bg4,
+      title: "UI/UX Design Complete",
+      subtitle: "Figma, Adobe XD & Prototyping",
+      description: "Create stunning user experiences and interfaces",
+      buttonText: "Get Certificate Now !",
+      gradient: "from-pink-600 to-purple-600",
+    },
+  ];
+
+  // Auto-play functionality
+  // useEffect(() => {
+  //   if (!isAutoPlaying) return;
+
+  //   const interval = setInterval(() => {
+  //     setCurrentSlide((prev) => (prev + 1) % banners.length);
+  //   }, 5000);
+
+  //   return () => clearInterval(interval);
+  // }, [isAutoPlaying, banners.length]);
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % banners.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + banners.length) % banners.length);
+  };
+
+  const goToSlide = (index: any) => {
+    setCurrentSlide(index);
+  };
+
+  const handleMouseEnter = () => {
+    setIsAutoPlaying(false);
+  };
+
+  const handleMouseLeave = () => {
+    setIsAutoPlaying(true);
+  };
+
+  return (
+    <div className="relative w-full p-4 mx-auto">
+      {/* Main Slider Container */}
+      <div
+        className="relative overflow-hidden rounded-lg shadow-2xl bg-gray-900"
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        {/* Slides */}
+        <div
+          className="flex transition-transform duration-500 ease-in-out"
+          style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+        >
+          {banners.map((banner) => (
+            <div key={banner.id} className="min-w-full relative">
+              {/* Background Image */}
+              <div className="relative h-96 ">
+                <img
+                  src={banner.image}
+                  alt={banner.title}
+                  className="w-full h-full object-cover"
+                />
+                {/* Gradient Overlay */}
+                <div
+                  className={`absolute inset-0 bg-gradient-to-r opacity-80`}
+                ></div>
+
+                {/* Content */}
+                <div className="absolute inset-0 flex items-center">
+                  <div className=" ml-20 bg-white rounded-md max-w-md px-6">
+                    <div className="max-w-md text-black py-4">
+                      {/* Badge */}
+                      {/* <div className="inline-flex items-center px-3 py-1 rounded-full bg-white/20 backdrop-blur-sm text-sm font-medium mb-4">
+                          <Play className="w-4 h-4 mr-2" />
+                          Featured Course
+                        </div> */}
+
+                      {/* Title */}
+                      <h1 className="text-3xl font-bold mb-2 leading-tight">
+                        {banner.title}
+                      </h1>
+
+                      {/* Subtitle */}
+                      <h2 className="text-lg  mb-2 ">{banner.subtitle}</h2>
+
+                      {/* Description */}
+                      {/* <p className="text-lg mb-6 text-gray-300 leading-relaxed">
+                          {banner.description}
+                        </p> */}
+
+                      {/* Course Stats */}
+                      {/* <div className="flex items-center gap-6 mb-8">
+                          <div className="flex items-center">
+                            <Star className="w-5 h-5 text-yellow-400 fill-current" />
+                            <span className="ml-1 font-semibold">
+                              {banner.rating}
+                            </span>
+                          </div>
+                          <div className="text-gray-300">
+                            {banner.students} students
+                          </div>
+                          <div className="text-gray-300">
+                            By {banner.instructor}
+                          </div>
+                        </div> */}
+
+                      {/* CTA Button */}
+                      <button className="bg-black text-white px-8 py-2 rounded-lg font-semibold text-md hover:bg-gray-900 transform transition duration-300 hover:scale-105 shadow-lg">
+                        {banner.buttonText}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Navigation Arrows */}
+        <button
+          onClick={prevSlide}
+          className="absolute left-4 top-1/2 -translate-y-1/2 bg-white backdrop-blur-sm rounded-full p-3 transition-all"
+        >
+          <ChevronLeft className="w-6 h-6 text-black" />
+        </button>
+
+        <button
+          onClick={nextSlide}
+          className="absolute right-4 top-1/2 -translate-y-1/2 bg-white backdrop-blur-sm rounded-full p-3 transition-all"
+        >
+          <ChevronRight className="w-6 h-6 text-black" />
+        </button>
+      </div>
+
+      {/* Dots Indicator */}
+      {/* <div className="flex justify-center mt-6 space-x-2">
+          {banners.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => goToSlide(index)}
+              className={`w-3 h-3 rounded-full transition-all ${
+                index === currentSlide
+                  ? "bg-blue-600 w-8"
+                  : "bg-gray-300 hover:bg-gray-400"
+              }`}
+            />
+          ))}
+        </div> */}
+
+      {/* Progress Bar */}
+      {/* <div className=" bg-gray-200 rounded-full h-1 overflow-hidden">
+          <div
+            className="h-full bg-blue-600 transition-all duration-500 ease-out"
+            style={{ width: `${((currentSlide + 1) / banners.length) * 100}%` }}
+          />
+        </div> */}
+    </div>
+  );
+};
 
 export default function Landing() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -205,6 +406,9 @@ export default function Landing() {
           </div>
         </div>
       </nav>
+
+      <BannerSlider />
+
       {/* Certificate Slider */}
       <CertificateSlider />
       {/* Hero Section */}
@@ -223,12 +427,12 @@ export default function Landing() {
             leaderboard.
           </p>
           <div className="flex md:flex-row flex-col space-y-4 justify-center md:space-x-4 md:space-y-0">
-            <Link href="/exams">
+            <Link href={isAuthenticated ? "/exams" : "/auth"}>
               <Button
                 size="lg"
                 className="bg-black text-white hover:bg-gray-800 px-8 py-4 text-lg"
               >
-                Start Exam <ArrowRight className="ml-2 w-5 h-5" />
+                Get Started <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
             </Link>
             <Link href="/partners">
@@ -339,7 +543,7 @@ export default function Landing() {
           )}
         </div>
       </section>
-      
+
       {/* AI-Powered Technical Assessment Section */}
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-6 text-center">
@@ -347,7 +551,8 @@ export default function Landing() {
             AI-Powered Technical Interview
           </h2>
           <p className="text-xl text-gray-600 mb-12 max-w-3xl mx-auto">
-            Professional technical interviews with AI evaluation - 44+ technologies, instant scoring, recruiter-ready certificates
+            Professional technical interviews with AI evaluation - 44+
+            technologies, instant scoring, recruiter-ready certificates
           </p>
 
           {/* How It Works - 4 Steps */}
@@ -356,36 +561,48 @@ export default function Landing() {
               <div className="w-20 h-20 bg-black rounded-full flex items-center justify-center mx-auto mb-4">
                 <Monitor className="w-10 h-10 text-white" />
               </div>
-              <h3 className="text-xl font-bold text-black mb-3">Choose Your Technology</h3>
+              <h3 className="text-xl font-bold text-black mb-3">
+                Choose Your Technology
+              </h3>
               <p className="text-gray-600 text-sm">
-                Select from 44+ professional technologies: React, Python, Data Science, Machine Learning, Java, JavaScript, and more
+                Select from 44+ professional technologies: React, Python, Data
+                Science, Machine Learning, Java, JavaScript, and more
               </p>
             </div>
             <div className="text-center">
               <div className="w-20 h-20 bg-black rounded-full flex items-center justify-center mx-auto mb-4">
                 <Video className="w-10 h-10 text-white" />
               </div>
-              <h3 className="text-xl font-bold text-black mb-3">Professional Interview Session</h3>
+              <h3 className="text-xl font-bold text-black mb-3">
+                Professional Interview Session
+              </h3>
               <p className="text-gray-600 text-sm">
-                Complete comprehensive video-recorded technical interviews with live coding, system design, and behavioral assessment
+                Complete comprehensive video-recorded technical interviews with
+                live coding, system design, and behavioral assessment
               </p>
             </div>
             <div className="text-center">
               <div className="w-20 h-20 bg-black rounded-full flex items-center justify-center mx-auto mb-4">
                 <Brain className="w-10 h-10 text-white" />
               </div>
-              <h3 className="text-xl font-bold text-black mb-3">AI-Powered Performance Analysis</h3>
+              <h3 className="text-xl font-bold text-black mb-3">
+                AI-Powered Performance Analysis
+              </h3>
               <p className="text-gray-600 text-sm">
-                Receive instant AI scoring, detailed technical feedback, competency analysis, and professional performance report
+                Receive instant AI scoring, detailed technical feedback,
+                competency analysis, and professional performance report
               </p>
             </div>
             <div className="text-center">
               <div className="w-20 h-20 bg-black rounded-full flex items-center justify-center mx-auto mb-4">
                 <Handshake className="w-10 h-10 text-white" />
               </div>
-              <h3 className="text-xl font-bold text-black mb-3">Get Hired by Top Recruiters</h3>
+              <h3 className="text-xl font-bold text-black mb-3">
+                Get Hired by Top Recruiters
+              </h3>
               <p className="text-gray-600 text-sm">
-                Share verified assessment certificates with employers and demonstrate your technical competency to hiring managers
+                Share verified assessment certificates with employers and
+                demonstrate your technical competency to hiring managers
               </p>
             </div>
           </div>
@@ -394,9 +611,12 @@ export default function Landing() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
             <Card className="border-2 border-gray-200 hover:border-black transition-colors">
               <CardHeader>
-                <CardTitle className="text-black">Industry-Standard Assessment Experience</CardTitle>
+                <CardTitle className="text-black">
+                  Industry-Standard Assessment Experience
+                </CardTitle>
                 <CardDescription className="text-gray-600">
-                  Professional video evaluation with integrity monitoring for authentic technical assessment
+                  Professional video evaluation with integrity monitoring for
+                  authentic technical assessment
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -408,9 +628,12 @@ export default function Landing() {
             </Card>
             <Card className="border-2 border-gray-200 hover:border-black transition-colors">
               <CardHeader>
-                <CardTitle className="text-black">Advanced AI Evaluation Engine</CardTitle>
+                <CardTitle className="text-black">
+                  Advanced AI Evaluation Engine
+                </CardTitle>
                 <CardDescription className="text-gray-600">
-                  Machine learning algorithms analyze coding proficiency, problem-solving methodology, and communication skills
+                  Machine learning algorithms analyze coding proficiency,
+                  problem-solving methodology, and communication skills
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -422,9 +645,12 @@ export default function Landing() {
             </Card>
             <Card className="border-2 border-gray-200 hover:border-black transition-colors">
               <CardHeader>
-                <CardTitle className="text-black">Recruiter-Ready Certification</CardTitle>
+                <CardTitle className="text-black">
+                  Recruiter-Ready Certification
+                </CardTitle>
                 <CardDescription className="text-gray-600">
-                  Industry-recognized professional certificates at ₹99 per session - trusted by hiring managers and tech recruiters
+                  Industry-recognized professional certificates at ₹99 per
+                  session - trusted by hiring managers and tech recruiters
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -440,22 +666,24 @@ export default function Landing() {
           <div className="text-center">
             {!isLoading && !isAuthenticated ? (
               <Link href="/auth">
-                <Button 
-                  size="lg" 
+                <Button
+                  size="lg"
                   className="bg-black text-white hover:bg-gray-800 px-8 py-4 text-lg"
                   aria-label="Begin AI-powered technical interview assessment"
                 >
-                  Start Professional Interview <ArrowRight className="ml-2 w-5 h-5" />
+                  Start Professional Interview{" "}
+                  <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
               </Link>
             ) : (
               <Link href="/ai-interviews">
-                <Button 
-                  size="lg" 
+                <Button
+                  size="lg"
                   className="bg-black text-white hover:bg-gray-800 px-8 py-4 text-lg"
                   aria-label="Begin AI-powered technical interview assessment"
                 >
-                  Start Professional Interview <ArrowRight className="ml-2 w-5 h-5" />
+                  Start Professional Interview{" "}
+                  <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
               </Link>
             )}

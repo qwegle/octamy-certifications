@@ -175,7 +175,7 @@ export default function AIInterviews() {
       </div>
     );
   }
-
+  console.log(userInterviews)
   return (
     <div className="min-h-screen bg-white">
       <Header />
@@ -366,7 +366,9 @@ export default function AIInterviews() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {userInterviews.map((interview) => (
+                {userInterviews.map((interview) => {
+                  console.log(interview)
+                  return(
                   <Card key={interview.id} className="border-2 hover:border-gray-300 transition-colors">
                     <CardContent className="p-6">
                       {/* Video Placeholder */}
@@ -405,7 +407,7 @@ export default function AIInterviews() {
                         </div>
 
                         {/* Score Display */}
-                        {interview.score ? (
+                        
                           <div className="bg-gray-50 rounded-lg p-4">
                             <div className="flex items-center justify-between">
                               <div>
@@ -419,13 +421,13 @@ export default function AIInterviews() {
                               </div>
                             </div>
                           </div>
-                        ) : (
-                          <div className="bg-yellow-50 rounded-lg p-4">
+                        
+                          {interview.paymentStatus === 'pending'&&<div className="bg-yellow-50 rounded-lg p-4">
                             <p className="text-yellow-800 text-sm">
-                              {interview.paymentStatus === 'pending' ? 'Payment required to start' : 'Ready to begin'}
+                              Payment required to start
                             </p>
-                          </div>
-                        )}
+                          </div>}
+                        
 
                         {/* Action Buttons */}
                         <div className="flex gap-2 pt-2">
@@ -507,7 +509,7 @@ export default function AIInterviews() {
                       </div>
                     </CardContent>
                   </Card>
-                ))}
+                )})}
               </div>
             )}
           </CardContent>
