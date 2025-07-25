@@ -345,7 +345,7 @@ export const sellers = pgTable("sellers", {
   name: text("name").notNull(),
   phone: text("phone"),
   referralCode: text("referral_code").unique(),
-  isApproved: boolean("is_approved").default(false).notNull(),
+  isApproved: boolean("is_approved").default(true).notNull(),
   isActive: boolean("is_active").default(true).notNull(),
   
   // Google OAuth fields

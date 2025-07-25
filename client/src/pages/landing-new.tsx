@@ -26,6 +26,8 @@ import {
   Handshake,
   Play,
   ChevronLeft,
+  ChevronUp,
+  ChevronDown,
 } from "lucide-react";
 import CourseCard from "@/components/course-card";
 import { useAuth } from "@/hooks/useAuth";
@@ -119,11 +121,10 @@ const BannerSlider = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
-  // Sample banner data (you can replace with your own images)
   const banners = [
     {
       id: 1,
-      image:  bg1 ,
+      image: bg1,
       title: "Meet your new AI conversation coach",
       subtitle:
         "Role Play is the interactive way to practice your business and communication skills.",
@@ -142,7 +143,7 @@ const BannerSlider = () => {
     },
     {
       id: 3,
-      image:bg3,
+      image: bg3,
       title: "Digital Marketing Mastery",
       subtitle: "SEO, Social Media & Analytics",
       description: "Grow your business with proven marketing strategies",
@@ -220,45 +221,19 @@ const BannerSlider = () => {
 
                 {/* Content */}
                 <div className="absolute inset-0 flex items-center">
-                  <div className=" ml-20 bg-white rounded-md max-w-md px-6">
+                  <div className=" ml-20 bg-white rounded-md max-w-xs lg:max-w-md px-6">
                     <div className="max-w-md text-black py-4">
-                      {/* Badge */}
-                      {/* <div className="inline-flex items-center px-3 py-1 rounded-full bg-white/20 backdrop-blur-sm text-sm font-medium mb-4">
-                          <Play className="w-4 h-4 mr-2" />
-                          Featured Course
-                        </div> */}
-
+                      
                       {/* Title */}
-                      <h1 className="text-3xl font-bold mb-2 leading-tight">
+                      <h1 className="text-xl lg:text-3xl font-bold mb-2 leading-tight">
                         {banner.title}
                       </h1>
 
                       {/* Subtitle */}
-                      <h2 className="text-lg  mb-2 ">{banner.subtitle}</h2>
-
-                      {/* Description */}
-                      {/* <p className="text-lg mb-6 text-gray-300 leading-relaxed">
-                          {banner.description}
-                        </p> */}
-
-                      {/* Course Stats */}
-                      {/* <div className="flex items-center gap-6 mb-8">
-                          <div className="flex items-center">
-                            <Star className="w-5 h-5 text-yellow-400 fill-current" />
-                            <span className="ml-1 font-semibold">
-                              {banner.rating}
-                            </span>
-                          </div>
-                          <div className="text-gray-300">
-                            {banner.students} students
-                          </div>
-                          <div className="text-gray-300">
-                            By {banner.instructor}
-                          </div>
-                        </div> */}
+                      <h2 className="text-sm lg:text-lg  mb-2 ">{banner.subtitle}</h2>
 
                       {/* CTA Button */}
-                      <button className="bg-black text-white px-8 py-2 rounded-lg font-semibold text-md hover:bg-gray-900 transform transition duration-300 hover:scale-105 shadow-lg">
+                      <button className="bg-black text-white px-4 md:px-8 md:py-2 py-1 rounded-lg text-sm  font-semibold md:text-md hover:bg-gray-900 transform transition duration-300 hover:scale-105 shadow-lg">
                         {banner.buttonText}
                       </button>
                     </div>
@@ -351,9 +326,26 @@ export default function Landing() {
               <Link href="/exams" className="hover:text-gray-300">
                 Exams
               </Link>
-              <Link href="/virtual-internships" className="hover:text-gray-300">
-                Internships
-              </Link>
+              <div className="relative group flex flex-col">
+                <div className="hover:text-gray-300 cursor-pointer flex gap-2">
+                  <p> Internships</p>
+                  <ChevronUp className="group-hover:hidden" />
+
+                  {/* Show Down on hover, hidden by default */}
+                  <ChevronDown className="hidden group-hover:block" />
+                </div>
+                <div className=" text-white bg-black absolute z-10 top-6 group-hover:flex flex-col gap-4 hidden w-44 p-4 rounded-md  ">
+                  <Link href="/virtual-internships" className="hover:text-gray-300">
+                    Virtual Internships
+                  </Link>
+                  <Link href="/remote-internships" className="hover:text-gray-300">
+                     Remote Internships
+                  </Link>
+                  <Link href="/intern-payment" className="hover:text-gray-300">
+                    Offline Internships
+                  </Link>
+                </div>
+              </div>
               {/* <Link href="/business-certifications" className="hover:text-gray-300">Business Pricing</Link> */}
               <Link href="/sponsor" className="hover:text-gray-300">
                 Sponsors

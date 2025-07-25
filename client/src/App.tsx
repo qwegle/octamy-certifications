@@ -62,6 +62,7 @@ import {
   RecruiterProtectedRoute
 } from "../../recruiter";
 import InternShipPayment from "./pages/offlinInternshipPayment.tsx";
+import RemoteInternShip from "./pages/RemoteInternShip.tsx";
 
 function Router() {
   return (
@@ -73,6 +74,7 @@ function Router() {
       <Route path="/logout" component={Auth} />
       <Route path="/exams" component={Courses} />
       <Route path="/virtual-internships" component={VirtualInternships} />
+      <Route path="/remote-internships" component={RemoteInternShip} />
       <Route path="/business-certifications" component={BusinessCertificationsPage} />
       <Route path="/learning-paths" component={LearningPaths} />
       <Route path="/sponsor" component={SponsorPage} />

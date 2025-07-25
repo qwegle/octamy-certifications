@@ -16,15 +16,13 @@ import { Badge } from "@/components/ui/badge";
 import {
   Heart,
   Users,
-  Target,
-  Zap,
-  Brain,
-  TrendingUp,
   Award,
   CheckCircle,
   ArrowLeft,
   Menu,
   X,
+  GraduationCap,
+  Laptop,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -32,69 +30,10 @@ import { useLocation } from "wouter";
 import { useAuth } from "@/lib/auth";
 // Using available image from assets
 import octamyLogoDark from "@/assets/image_1750054456482.png";
-import octamyLogoLight from "@/assets/image_1750054465427.png";
 
-const PRESET_AMOUNTS = [1000];
+const PRESET_AMOUNTS = [3000];
 
-const TEAM_MEMBERS = [
-  {
-    name: "Nitikesh Pattanayak",
-    role: "Founder & CEO",
-    image: "/team/nitikesh.jpg",
-    description:
-      "Visionary leader driving innovation in professional certification",
-  },
-  {
-    name: "Nikhilesh Pattanayak",
-    role: "Co-founder",
-    image: "/team/nikhil.jpg",
-    description: "Technical architect building scalable learning platforms",
-  },
-  {
-    name: "S.N Digbijaya",
-    role: "Head of Product",
-    image: "/team/digbi.jpg",
-    description: "Product strategist focused on learner experience",
-  },
-  {
-    name: "Subhendu Jena",
-    role: "Lead Developer",
-    image: "/team/subhendu.jpg",
-    description: "Full-stack developer creating robust educational tools",
-  },
-];
-
-const FUTURE_ROADMAP = [
-  {
-    title: "AI-Based Learning Paths",
-    description:
-      "Personalized learning journeys adapted to individual skill levels and career goals",
-    icon: <Brain className="w-6 h-6" />,
-    timeline: "Q2 2025",
-  },
-  {
-    title: "AI-Powered Skill Assessment",
-    description:
-      "Intelligent evaluation system that identifies strengths and improvement areas",
-    icon: <Target className="w-6 h-6" />,
-    timeline: "Q3 2025",
-  },
-  {
-    title: "AI Career Guidance",
-    description:
-      "Smart recommendations for career advancement based on industry trends",
-    icon: <TrendingUp className="w-6 h-6" />,
-    timeline: "Q4 2025",
-  },
-  {
-    title: "Advanced Analytics Dashboard",
-    description: "Comprehensive learning analytics with predictive insights",
-    icon: <Zap className="w-6 h-6" />,
-    timeline: "Q1 2026",
-  },
-];
-
-export default function InternShipPayment() {
+export default function RemoteInternShip() {
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
   const [customAmount, setCustomAmount] = useState("");
   const [name, setName] = useState("");
@@ -334,26 +273,25 @@ export default function InternShipPayment() {
       <div className="bg-black dark:bg-white text-white dark:text-black py-20">
         <div className="max-w-6xl mx-auto px-4 text-center">
           <div className="flex items-center justify-center mb-6">
-            <Heart className="w-12 h-12 text-red-500 mr-4" />
+            <Laptop className="w-12 h-12 text-blue-400 mr-4" />
             <h1 className="text-5xl font-bold">
-              Offline Internship Onboarding Payment
+              Remote Internship Onboarding Payment
             </h1>
           </div>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto mb-8">
-            Welcome to Octamy! To secure your spot in our{" "}
-            <strong>offline internship program</strong>, please complete the
-            onboarding payment. This amount helps us manage training materials,
-            on-site resources, and ensure a smooth experience for all offline
-            participants.
+          <p className="text-xl text-gray-300 dark:text-gray-700 max-w-3xl mx-auto mb-8">
+            Welcome to Octamy! To confirm your seat in our{" "}
+            <strong>Remote internship program</strong>, please complete the
+            onboarding payment. This fee supports live sessions, digital
+            learning materials, and a seamless remote training experience.
           </p>
-          <div className="flex items-center justify-center space-x-8 text-sm text-gray-400">
+          <div className="flex items-center justify-center space-x-8 text-sm text-gray-400 dark:text-gray-600">
             <div className="flex items-center">
               <Users className="w-4 h-4 mr-2" />
-              <span>100+ Interns Trained On-Site</span>
+              <span>500+ Virtual Interns Trained</span>
             </div>
             <div className="flex items-center">
-              <Award className="w-4 h-4 mr-2" />
-              <span>Hands-on Practical Learning</span>
+              <GraduationCap className="w-4 h-4 mr-2" />
+              <span>Live Expert Sessions</span>
             </div>
             <div className="flex items-center">
               <CheckCircle className="w-4 h-4 mr-2" />
@@ -530,7 +468,10 @@ export default function InternShipPayment() {
             </div>
             <div className="flex items-center">
               <i className="tabler-map-pin mr-2 text-lg" />
-              <span>3833, Nirupamalaya, Plot no. 516/1753, KIIT Rd, Patia, Bhubaneswar, Odisha 751024</span>
+              <span>
+                3833, Nirupamalaya, Plot no. 516/1753, KIIT Rd, Patia,
+                Bhubaneswar, Odisha 751024
+              </span>
             </div>
           </div>
         </div>
