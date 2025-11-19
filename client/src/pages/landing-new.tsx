@@ -32,7 +32,7 @@ import Header from "@/components/header";
 import Footer from "@/components/footer";
 import { useAuth } from "@/hooks/useAuth";
 import type { Category, Course } from "@shared/schema";
-import bg1 from "@assets/generated_images/Professional_laptop_mockup_exam_platform_f86c7a07.png";
+import bg1 from "@assets/stock_images/laptop_computer_prof_c7ea54fd.jpg";
 import bg2 from "@/assets/octamy-bg-2.png";
 import bg3 from "@/assets/octamy-bg-4.png";
 import bg4 from "@/assets/octamy-bg-5.png";
