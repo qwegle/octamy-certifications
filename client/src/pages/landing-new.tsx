@@ -35,6 +35,7 @@ import bg1 from "@/assets/octamy-bg-3.png";
 import bg3 from "@/assets/octamy-bg-4.png";
 import bg4 from "@/assets/octamy-bg-5.png";
 import premCQLogoLight from "@/assets/image_1750054465427.png";
+import premCQLogoDark from "@/assets/image_1750054456482.png";
 // Certificate Slider Component with infinite auto-scroll
 function CertificateSlider() {
   const { data: certificates = [] } = useQuery<any[]>({
@@ -348,7 +349,7 @@ export default function Landing() {
           <div className="flex items-center space-x-8">
             <Link href="/" className="text-2xl font-bold">
               <img
-                src={premCQLogoLight}
+                src={premCQLogoDark}
                 alt="PremCQ"
                 className="h-8"
               />
