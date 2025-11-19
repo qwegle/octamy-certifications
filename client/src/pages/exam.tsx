@@ -13,6 +13,16 @@ import Header from '@/components/header';
 import ExamTimer from '@/components/exam-timer';
 import { Helmet } from 'react-helmet-async';
 import { ExamStructuredData } from '@/components/seo-structured-data';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 import type { Course, Question } from '@shared/schema';
 import { AlertTriangle, Flag, Wifi, WifiOff, Maximize, Check, Circle, Clock } from 'lucide-react';
@@ -122,6 +132,9 @@ export default function Exam() {
   // Multi-subject exam state
   const [currentSubject, setCurrentSubject] = useState<string | null>(null);
   const [subjects, setSubjects] = useState<SubjectInfo[] | null>(null);
+  
+  // Confirmation dialog state
+  const [showSubmitConfirmation, setShowSubmitConfirmation] = useState(false);
 
   const { data: course } = useQuery<Course>({
     queryKey: [`/api/courses/slug/${slug}`],
@@ -448,8 +461,9 @@ export default function Exam() {
     });
   };
 
+  // Show confirmation dialog before submitting
   const handleSubmit = () => {
-    // Check internet connection before submitting
+    // Check internet connection before showing confirmation
     if (!isOnline || !navigator.onLine) {
       toast({
         title: "No Internet Connection",
@@ -458,7 +472,13 @@ export default function Exam() {
       });
       return;
     }
-
+    
+    // Show confirmation dialog
+    setShowSubmitConfirmation(true);
+  };
+  
+  // Actually submit the exam after confirmation
+  const confirmSubmit = () => {
     const timeTaken = Math.floor((Date.now() - examStartTime) / 1000);
     
     // Anti-cheating: Check for excessive tab switching
@@ -477,6 +497,8 @@ export default function Exam() {
     if (document.fullscreenElement) {
       document.exitFullscreen().catch(err => console.log('Exit fullscreen failed:', err));
     }
+    
+    setShowSubmitConfirmation(false);
     
     submitExamMutation.mutate({
       courseId: course?.id!,
@@ -499,7 +521,9 @@ export default function Exam() {
       title: "Time's Up!",
       description: "Your exam has been auto-submitted.",
     });
-    handleSubmit();
+    
+    // Auto-submit without confirmation when time runs out
+    confirmSubmit();
   };
 
   const progress = questions.length > 0 ? ((currentQuestion + 1) / questions.length) * 100 : 0;
@@ -521,7 +545,7 @@ export default function Exam() {
           <link rel="canonical" href={`${window.location.origin}/exam/${courseSlug}`} />
         </Helmet>
         
-        {course && <ExamStructuredData course={course} rating={4.5} />}
+        {course && <ExamStructuredData course={course} rating={{ averageRating: "4.5", totalReviews: 0, rating1Count: 0, rating2Count: 0, rating3Count: 0, rating4Count: 0, rating5Count: 0 }} />}
         
         <Header />
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -868,6 +892,111 @@ export default function Exam() {
         </Card>
         </div>
       </div>
+      
+      {/* Submit Confirmation Dialog */}
+      <AlertDialog open={showSubmitConfirmation} onOpenChange={setShowSubmitConfirmation}>
+        <AlertDialogContent className="max-w-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-2xl">Confirm Exam Submission</AlertDialogTitle>
+            <AlertDialogDescription className="text-base">
+              Please review your exam summary before final submission. Once submitted, you cannot make any changes.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          
+          <div className="py-4 space-y-4">
+            {/* Overall Statistics */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg">Overall Summary</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex flex-col">
+                    <span className="text-sm text-muted-foreground">Total Questions</span>
+                    <span className="text-2xl font-bold">{questions.length}</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-sm text-muted-foreground">Answered</span>
+                    <span className="text-2xl font-bold text-green-600">{answeredCount}</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-sm text-muted-foreground">Unanswered</span>
+                    <span className="text-2xl font-bold text-red-600">{questions.length - answeredCount}</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-sm text-muted-foreground">Flagged for Review</span>
+                    <span className="text-2xl font-bold text-yellow-600">{flaggedQuestions.size}</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            {/* Subject-wise Statistics (for multi-subject exams) */}
+            {isMultiSubject && subjects && subjects.length > 0 && (
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg">Subject-wise Summary</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {subjects.map((subject) => {
+                      const subjectQuestions = questions.filter(q => q.subject === subject.name);
+                      const subjectAnswered = subjectQuestions.filter(q => answers[q.id.toString()] !== undefined).length;
+                      const subjectFlagged = subjectQuestions.filter(q => flaggedQuestions.has(q.id)).length;
+                      
+                      return (
+                        <div key={subject.name} className="border-b last:border-0 pb-3 last:pb-0">
+                          <div className="font-semibold text-base mb-2">{subject.name}</div>
+                          <div className="grid grid-cols-3 gap-2 text-sm">
+                            <div>
+                              <span className="text-muted-foreground">Total: </span>
+                              <span className="font-medium">{subject.questionCount}</span>
+                            </div>
+                            <div>
+                              <span className="text-muted-foreground">Answered: </span>
+                              <span className="font-medium text-green-600">{subjectAnswered}</span>
+                            </div>
+                            <div>
+                              <span className="text-muted-foreground">Flagged: </span>
+                              <span className="font-medium text-yellow-600">{subjectFlagged}</span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+            
+            {/* Warning if unanswered questions */}
+            {answeredCount < questions.length && (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex items-start gap-3">
+                <AlertTriangle className="h-5 w-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-semibold text-yellow-900">Unanswered Questions</p>
+                  <p className="text-sm text-yellow-800">
+                    You have {questions.length - answeredCount} unanswered question(s). 
+                    Unanswered questions will be marked as incorrect.
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+          
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowSubmitConfirmation(false)}>
+              Go Back to Exam
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmSubmit}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              Final Submit
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
