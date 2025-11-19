@@ -1493,7 +1493,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           );
         }
 
-        await storage.updateExamAttemptPayment(attemptId, responseData.mihpayid);
+        await storage.updateExamAttemptPayment(attemptId, {
+          resultPaymentStatus: "paid",
+          resultPaymentId: responseData.mihpayid,
+        });
 
         // Mark results payment as completed
         examData.hasResultsPayment = true;
