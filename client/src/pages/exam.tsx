@@ -15,12 +15,79 @@ import { Helmet } from 'react-helmet-async';
 import { ExamStructuredData } from '@/components/seo-structured-data';
 
 import type { Course, Question } from '@shared/schema';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Flag, Wifi, WifiOff, Maximize, Check, Circle } from 'lucide-react';
 
 interface ExamQuestion {
   id: number;
   question: string;
   options: string[];
+}
+
+interface ExamProgress {
+  answers: Record<string, number>;
+  flaggedQuestions: number[];
+  currentQuestion: number;
+  examStartTime: number;
+  sessionId: string;
+  courseId: number;
+  userInfo: { name: string; email: string };
+  tabSwitches: number;
+  questions: ExamQuestion[]; // Cache questions for offline use
+}
+
+// Simple encryption using base64 and XOR (for basic obfuscation)
+const STORAGE_KEY = 'exam_progress_encrypted';
+const SECRET_KEY = 'premcq_exam_2024_secure';
+
+function encryptData(data: ExamProgress): string {
+  const jsonStr = JSON.stringify(data);
+  let encrypted = '';
+  for (let i = 0; i < jsonStr.length; i++) {
+    encrypted += String.fromCharCode(
+      jsonStr.charCodeAt(i) ^ SECRET_KEY.charCodeAt(i % SECRET_KEY.length)
+    );
+  }
+  return btoa(encrypted);
+}
+
+function decryptData(encrypted: string): ExamProgress | null {
+  try {
+    const decoded = atob(encrypted);
+    let decrypted = '';
+    for (let i = 0; i < decoded.length; i++) {
+      decrypted += String.fromCharCode(
+        decoded.charCodeAt(i) ^ SECRET_KEY.charCodeAt(i % SECRET_KEY.length)
+      );
+    }
+    return JSON.parse(decrypted);
+  } catch (error) {
+    console.error('Failed to decrypt exam data:', error);
+    return null;
+  }
+}
+
+function saveToLocalStorage(progress: ExamProgress): void {
+  try {
+    const encrypted = encryptData(progress);
+    localStorage.setItem(STORAGE_KEY, encrypted);
+  } catch (error) {
+    console.error('Failed to save exam progress:', error);
+  }
+}
+
+function loadFromLocalStorage(): ExamProgress | null {
+  try {
+    const encrypted = localStorage.getItem(STORAGE_KEY);
+    if (!encrypted) return null;
+    return decryptData(encrypted);
+  } catch (error) {
+    console.error('Failed to load exam progress:', error);
+    return null;
+  }
+}
+
+function clearLocalStorage(): void {
+  localStorage.removeItem(STORAGE_KEY);
 }
 
 export default function Exam() {
@@ -32,11 +99,15 @@ export default function Exam() {
 
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
+  const [flaggedQuestions, setFlaggedQuestions] = useState<Set<number>>(new Set());
   const [examStarted, setExamStarted] = useState(false);
   const [examStartTime, setExamStartTime] = useState<number>(0);
   const [sessionId, setSessionId] = useState<string>('');
   const [tabSwitches, setTabSwitches] = useState(0);
   const [isWindowFocused, setIsWindowFocused] = useState(true);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [cachedQuestions, setCachedQuestions] = useState<ExamQuestion[]>([]);
+  const [isResumingSession, setIsResumingSession] = useState(false);
   const [userInfo, setUserInfo] = useState({
     name: user?.name || '',
     email: user?.email || ''
@@ -66,10 +137,11 @@ export default function Exam() {
       }
       return response.json();
     },
-    enabled: !!course?.id && examStarted,
+    enabled: !!course?.id && examStarted && !isResumingSession, // Don't fetch if resuming
   });
 
-  const questions = questionsData?.questions || [];
+  // Use cached questions if available, otherwise use fetched questions
+  const questions = cachedQuestions.length > 0 ? cachedQuestions : (questionsData?.questions || []);
 
   // Set session ID when questions data is available
   useEffect(() => {
@@ -77,6 +149,113 @@ export default function Exam() {
       setSessionId(questionsData.sessionId);
     }
   }, [questionsData]);
+
+  // Monitor online/offline status
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOnline(true);
+      toast({
+        title: "Back Online",
+        description: "Internet connection restored. You can submit your exam now.",
+      });
+    };
+
+    const handleOffline = () => {
+      setIsOnline(false);
+      toast({
+        title: "Offline Mode",
+        description: "No internet connection. Your progress is being saved locally.",
+        variant: "destructive",
+      });
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, [toast]);
+
+  // Auto-save exam progress to encrypted local storage
+  useEffect(() => {
+    if (examStarted && course?.id && sessionId && questions.length > 0) {
+      const progress: ExamProgress = {
+        answers,
+        flaggedQuestions: Array.from(flaggedQuestions),
+        currentQuestion,
+        examStartTime,
+        sessionId,
+        courseId: course.id,
+        userInfo,
+        tabSwitches,
+        questions, // Save questions for offline use
+      };
+      saveToLocalStorage(progress);
+    }
+  }, [answers, flaggedQuestions, currentQuestion, examStarted, examStartTime, sessionId, course?.id, userInfo, tabSwitches, questions]);
+
+  // Load saved progress on mount
+  useEffect(() => {
+    const savedProgress = loadFromLocalStorage();
+    if (savedProgress && course?.id && savedProgress.courseId === course.id) {
+      // Prompt user to resume
+      const shouldResume = window.confirm(
+        'You have an incomplete exam session. Would you like to resume where you left off?'
+      );
+      
+      if (shouldResume && savedProgress.questions && savedProgress.questions.length > 0) {
+        // Restore all state including cached questions
+        setIsResumingSession(true);
+        setCachedQuestions(savedProgress.questions);
+        setAnswers(savedProgress.answers);
+        setFlaggedQuestions(new Set(savedProgress.flaggedQuestions));
+        setCurrentQuestion(savedProgress.currentQuestion);
+        setExamStartTime(savedProgress.examStartTime);
+        setSessionId(savedProgress.sessionId);
+        setUserInfo(savedProgress.userInfo);
+        setTabSwitches(savedProgress.tabSwitches);
+        setExamStarted(true);
+        
+        toast({
+          title: "Session Resumed",
+          description: "Your exam progress has been restored. You can continue offline if needed.",
+        });
+      } else {
+        clearLocalStorage();
+      }
+    }
+  }, [course?.id, toast]);
+
+  // Enter fullscreen when exam starts
+  useEffect(() => {
+    if (examStarted && !isResumingSession) {
+      const enterFullscreen = async () => {
+        try {
+          const elem = document.documentElement;
+          if (elem.requestFullscreen) {
+            await elem.requestFullscreen();
+          } else {
+            toast({
+              title: "Fullscreen Not Available",
+              description: "For the best exam experience, please maximize your browser window.",
+              variant: "default",
+            });
+          }
+        } catch (error) {
+          console.log('Fullscreen request failed:', error);
+          toast({
+            title: "Fullscreen Request Failed",
+            description: "Please manually enter fullscreen mode (F11) or maximize your browser for the best exam experience.",
+            variant: "default",
+          });
+        }
+      };
+      
+      enterFullscreen();
+    }
+  }, [examStarted, isResumingSession, toast]);
 
   // Anti-cheating: Monitor tab/window focus
   useEffect(() => {
@@ -208,6 +387,12 @@ export default function Exam() {
     setCurrentQuestion(0);
     setTabSwitches(0);
     setIsWindowFocused(true);
+    setCachedQuestions([]);
+    setIsResumingSession(false);
+    setFlaggedQuestions(new Set());
+    
+    // Clear any saved progress
+    clearLocalStorage();
     
     // Invalidate queries to force fresh fetch
     queryClient.invalidateQueries({ queryKey: [`/api/courses/${course?.id}/questions`] });
@@ -223,7 +408,29 @@ export default function Exam() {
     }));
   };
 
+  const toggleFlag = (questionId: number) => {
+    setFlaggedQuestions(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(questionId)) {
+        newSet.delete(questionId);
+      } else {
+        newSet.add(questionId);
+      }
+      return newSet;
+    });
+  };
+
   const handleSubmit = () => {
+    // Check internet connection before submitting
+    if (!isOnline || !navigator.onLine) {
+      toast({
+        title: "No Internet Connection",
+        description: "Please connect to the internet to submit your exam. Your progress is saved locally.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const timeTaken = Math.floor((Date.now() - examStartTime) / 1000);
     
     // Anti-cheating: Check for excessive tab switching
@@ -233,6 +440,14 @@ export default function Exam() {
         description: "Excessive tab switching detected. Your exam has been flagged for review.",
         variant: "destructive",
       });
+    }
+    
+    // Clear local storage after successful submission
+    clearLocalStorage();
+    
+    // Exit fullscreen
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(err => console.log('Exit fullscreen failed:', err));
     }
     
     submitExamMutation.mutate({
@@ -247,6 +462,11 @@ export default function Exam() {
   };
 
   const handleTimeUp = () => {
+    // Exit fullscreen when time is up
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(err => console.log('Exit fullscreen failed:', err));
+    }
+    
     toast({
       title: "Time's Up!",
       description: "Your exam has been auto-submitted.",
@@ -273,7 +493,7 @@ export default function Exam() {
           <link rel="canonical" href={`${window.location.origin}/exam/${courseSlug}`} />
         </Helmet>
         
-        {course && <ExamStructuredData course={course} rating={course.rating} />}
+        {course && <ExamStructuredData course={course} rating={4.5} />}
         
         <Header />
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -365,26 +585,45 @@ export default function Exam() {
 
   return (
     <div className="min-h-screen bg-white">
-      <Header />
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <Card>
-          <CardHeader>
-            <div className="flex flex-col md:flex-row justify-between items-center mb-4">
-              <div>
-                <CardTitle className="text-2xl">{course?.title}</CardTitle>
-                <p className="text-premcq-gray-600">
-                  Question {currentQuestion + 1} of {questions.length}
-                </p>
+      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="flex gap-4">
+          {/* Main Exam Content - Left Side */}
+          <Card className="flex-1">
+            <CardHeader>
+              <div className="flex flex-col gap-4">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <CardTitle className="text-2xl">{course?.title}</CardTitle>
+                    <p className="text-premcq-gray-600">
+                      Question {currentQuestion + 1} of {questions.length}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    {/* Online/Offline Indicator */}
+                    <div className={`flex items-center gap-2 px-3 py-1 rounded-md ${isOnline ? 'bg-green-50' : 'bg-red-50'}`} data-testid="connection-status">
+                      {isOnline ? (
+                        <>
+                          <Wifi className="h-4 w-4 text-green-600" />
+                          <span className="text-sm text-green-600">Online</span>
+                        </>
+                      ) : (
+                        <>
+                          <WifiOff className="h-4 w-4 text-red-600" />
+                          <span className="text-sm text-red-600">Offline</span>
+                        </>
+                      )}
+                    </div>
+                    <ExamTimer
+                      duration={course?.duration || 15}
+                      onTimeUp={handleTimeUp}
+                    />
+                  </div>
+                </div>
+                <Progress value={progress} className="w-full" />
               </div>
-              <ExamTimer
-                duration={course?.duration || 15}
-                onTimeUp={handleTimeUp}
-              />
-            </div>
-            <Progress value={progress} className="w-full" />
-          </CardHeader>
-          
-          <CardContent className="space-y-6">
+            </CardHeader>
+            
+            <CardContent className="space-y-6">
             {/* Anti-cheating warning */}
             {tabSwitches > 0 && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-4">
@@ -399,7 +638,19 @@ export default function Exam() {
             )}
             
             <div>
-              <h3 className="text-xl font-semibold mb-6">{currentQ.question}</h3>
+              <div className="flex justify-between items-start mb-6">
+                <h3 className="text-xl font-semibold flex-1">{currentQ.question}</h3>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => toggleFlag(currentQ.id)}
+                  className={`ml-4 ${flaggedQuestions.has(currentQ.id) ? 'bg-yellow-50 border-yellow-400 text-yellow-700' : ''}`}
+                  data-testid={`button-flag-${currentQ.id}`}
+                >
+                  <Flag className={`h-4 w-4 ${flaggedQuestions.has(currentQ.id) ? 'fill-yellow-500' : ''}`} />
+                  {flaggedQuestions.has(currentQ.id) ? 'Flagged' : 'Flag'}
+                </Button>
+              </div>
               
               <RadioGroup
                 value={answers[currentQ.id.toString()]?.toString() || ''}
@@ -407,7 +658,7 @@ export default function Exam() {
               >
                 {currentQ.options.map((option: string, index: number) => (
                   <div key={index} className="flex items-center space-x-2 p-4 border border-premcq-gray-300 rounded-lg hover:bg-premcq-gray-50 transition-colors">
-                    <RadioGroupItem value={index.toString()} id={`option-${index}`} />
+                    <RadioGroupItem value={index.toString()} id={`option-${index}`} data-testid={`radio-option-${index}`} />
                     <Label htmlFor={`option-${index}`} className="flex-1 cursor-pointer">
                       {option}
                     </Label>
@@ -448,9 +699,68 @@ export default function Exam() {
             </div>
           </CardContent>
         </Card>
-      </div>
-      
 
+        {/* Question Overview Panel - Right Side */}
+        <Card className="w-80 h-fit sticky top-4">
+          <CardHeader>
+            <CardTitle className="text-lg">Question Overview</CardTitle>
+            <p className="text-sm text-premcq-gray-600">
+              {answeredCount} of {questions.length} answered
+            </p>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-5 gap-2">
+              {questions.map((q, index) => {
+                const isAnswered = answers[q.id.toString()] !== undefined;
+                const isFlagged = flaggedQuestions.has(q.id);
+                const isCurrent = index === currentQuestion;
+
+                return (
+                  <button
+                    key={q.id}
+                    onClick={() => setCurrentQuestion(index)}
+                    data-testid={`question-nav-${index + 1}`}
+                    className={`
+                      relative w-12 h-12 rounded-md border-2 flex items-center justify-center text-sm font-semibold transition-all
+                      ${isCurrent ? 'border-black bg-black text-white' : ''}
+                      ${!isCurrent && isAnswered ? 'border-green-500 bg-green-50 text-green-700' : ''}
+                      ${!isCurrent && !isAnswered ? 'border-gray-300 bg-white text-gray-700 hover:border-gray-400' : ''}
+                    `}
+                  >
+                    {index + 1}
+                    {isFlagged && (
+                      <Flag className="absolute -top-1 -right-1 h-3 w-3 fill-yellow-500 text-yellow-500" />
+                    )}
+                    {isAnswered && !isCurrent && (
+                      <Check className="absolute -bottom-1 -right-1 h-3 w-3 text-green-600 bg-white rounded-full" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+            
+            <div className="mt-6 space-y-3 text-sm">
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 rounded border-2 border-green-500 bg-green-50"></div>
+                <span>Answered</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 rounded border-2 border-gray-300 bg-white"></div>
+                <span>Not Answered</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 rounded border-2 border-black bg-black"></div>
+                <span>Current</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Flag className="h-4 w-4 fill-yellow-500 text-yellow-500" />
+                <span>Flagged for Review</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        </div>
+      </div>
     </div>
   );
 }
