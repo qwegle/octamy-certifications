@@ -1233,14 +1233,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Mastery is achieved at 90% regardless of attempt number
         const mastered = score >= 90;
 
-        // Anti-cheating validation (relaxed for demo purposes)
-        const minTimePerQuestion = 1; // seconds (very relaxed for testing)
-        const expectedMinTime = totalQuestions * minTimePerQuestion;
-        if (finalTimeTaken < expectedMinTime) {
-          return res.status(400).json({
-            message: `Exam completed too quickly. Please spend at least ${minTimePerQuestion} seconds per question.`,
-          });
-        }
+        // Anti-cheating validation (removed - causes false positives)
+        // Users should be able to submit exams at their own pace
 
         // CREATE EXAM ATTEMPT IMMEDIATELY WITH UNPAID STATUS
         // This allows the attempt to appear on dashboard with a lock icon

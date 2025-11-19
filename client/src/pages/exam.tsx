@@ -387,26 +387,35 @@ export default function Exam() {
     onError: async (error: any) => {
       try {
         const errorData = await error.json();
-        if (errorData.code === 'SESSION_EXPIRED') {
+        
+        // Friendly error messages based on error code/type
+        if (errorData.code === 'SESSION_EXPIRED' || errorData.code === 'SESSION_RECONSTRUCTION_FAILED') {
           toast({
-            title: "Session Expired",
-            description: "Your exam session has expired. Please start the exam again.",
-            variant: "destructive",
+            title: "Unable to Submit",
+            description: "Your exam session was interrupted. Don't worry - your answers are saved! Please refresh and try again.",
           });
-          // Reload the page to restart the exam
-          window.location.reload();
-        } else {
+        } else if (errorData.message?.toLowerCase().includes('internet') || errorData.message?.toLowerCase().includes('network')) {
           toast({
-            title: "Error",
-            description: errorData.message || "Failed to submit exam. Please try again.",
-            variant: "destructive",
+            title: "Connection Issue",
+            description: "Please check your internet connection and try again. Your answers are saved locally.",
+          });
+        } else if (errorData.message?.includes('Course not found')) {
+          toast({
+            title: "Exam Not Found",
+            description: "This exam is no longer available. Please contact support if this is unexpected.",
+          });
+        } else {
+          // Generic friendly error
+          toast({
+            title: "Submission Issue",
+            description: errorData.message || "We couldn't submit your exam right now. Please try again in a moment. Your answers are saved!",
           });
         }
       } catch {
+        // Fallback for network errors
         toast({
-          title: "Error",
-          description: "Failed to submit exam. Please try again.",
-          variant: "destructive",
+          title: "Connection Problem",
+          description: "Please check your internet connection. Your answers are saved and you can try submitting again.",
         });
       }
     },
