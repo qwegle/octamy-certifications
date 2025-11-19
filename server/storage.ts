@@ -134,6 +134,7 @@ export interface IStorage {
   getExamAttempt(id: number): Promise<ExamAttempt | undefined>;
   getUserExamAttempts(userId: number, courseId?: number): Promise<ExamAttempt[]>;
   getExamAttemptByCertificateId(certificateId: number): Promise<ExamAttempt | undefined>;
+  updateExamAttemptPayment(id: number, updates: { resultPaymentStatus: string; resultPaymentId: string }): Promise<void>;
   
   // Get all exam attempts for a specific user and course - used for retake logic
   // This method is essential for determining if user is retaking and what their previous best score was
@@ -626,6 +627,16 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(examAttempts.createdAt));
     
     return attempts;
+  }
+
+  async updateExamAttemptPayment(
+    id: number, 
+    updates: { resultPaymentStatus: string; resultPaymentId: string }
+  ): Promise<void> {
+    await db
+      .update(examAttempts)
+      .set(updates)
+      .where(eq(examAttempts.id, id));
   }
 
   // Certificate operations

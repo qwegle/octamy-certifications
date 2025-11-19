@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -6,6 +7,9 @@ import { useAuth } from "@/lib/auth.tsx";
 import { Link, useLocation } from "wouter";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
+import PaymentModal from "@/components/PaymentModal";
+import { useToast } from "@/hooks/use-toast";
+import { queryClient } from "@/lib/queryClient";
 import {
   Download,
   Eye,
@@ -41,13 +45,37 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 
 export default function Dashboard() {
   const { user, token, isLoading } = useAuth();
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
+  const { toast } = useToast();
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+  const [selectedAttempt, setSelectedAttempt] = useState<{ id: number; courseTitle: string } | null>(null);
 
   useEffect(() => {
     if (!isLoading && !user) {
       setLocation("/login");
     }
   }, [isLoading, user, setLocation]);
+
+  // Handle payment success from URL query params
+  useEffect(() => {
+    const params = new URLSearchParams(location.split('?')[1] || '');
+    const paymentStatus = params.get('payment');
+    const attemptId = params.get('attemptId');
+
+    if (paymentStatus === 'success' && attemptId) {
+      toast({
+        title: "Payment Successful!",
+        description: "Your exam results have been unlocked. Scroll down to view your results.",
+        duration: 5000,
+      });
+
+      // Invalidate queries to refetch updated data
+      queryClient.invalidateQueries({ queryKey: ["/api/user/exam-attempts"] });
+
+      // Clean up URL
+      setLocation('/dashboard');
+    }
+  }, [location, toast, setLocation]);
 
   // Redirect to login if not authenticated
   // if (!isLoading && !user) {
@@ -591,15 +619,17 @@ export default function Dashboard() {
                                             </div>
                                           </div>
                                         </div>
-                                        <Link href={`/exam-submitted/${attempt.id}`}>
-                                          <Button
-                                            size="sm"
-                                            className="bg-black text-white hover:bg-gray-800"
-                                            data-testid={`button-pay-${attempt.id}`}
-                                          >
-                                            Pay ₹29
-                                          </Button>
-                                        </Link>
+                                        <Button
+                                          size="sm"
+                                          className="bg-black text-white hover:bg-gray-800"
+                                          data-testid={`button-pay-${attempt.id}`}
+                                          onClick={() => {
+                                            setSelectedAttempt({ id: attempt.id, courseTitle: attempt.courseTitle });
+                                            setPaymentModalOpen(true);
+                                          }}
+                                        >
+                                          Pay ₹29
+                                        </Button>
                                       </>
                                     )}
                                   </div>
@@ -724,6 +754,19 @@ export default function Dashboard() {
         </div>
       </div>
       <Footer />
+
+      {/* Payment Modal */}
+      {selectedAttempt && (
+        <PaymentModal
+          open={paymentModalOpen}
+          onClose={() => {
+            setPaymentModalOpen(false);
+            setSelectedAttempt(null);
+          }}
+          attemptId={selectedAttempt.id}
+          courseTitle={selectedAttempt.courseTitle}
+        />
+      )}
     </div>
   );
 }

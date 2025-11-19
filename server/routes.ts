@@ -3945,6 +3945,146 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Initialize PayUMoney payment from ATTEMPT ID (for dashboard inline payment)
+  app.post(
+    "/api/exam-attempts/:attemptId/initiate-payment",
+    authenticateToken,
+    async (req: AuthenticatedRequest, res: Response) => {
+      try {
+        const attemptId = parseInt(req.params.attemptId);
+        
+        if (!attemptId || isNaN(attemptId)) {
+          return res.status(400).json({ message: "Invalid attempt ID" });
+        }
+
+        // Get exam attempt from database
+        const attempt = await storage.getExamAttempt(attemptId);
+        
+        if (!attempt) {
+          return res.status(404).json({ message: "Exam attempt not found" });
+        }
+
+        // Verify ownership
+        if (attempt.userId !== req.user!.userId) {
+          return res.status(403).json({ message: "Unauthorized access" });
+        }
+
+        // Check if payment already made
+        if (attempt.resultPaymentStatus === "paid") {
+          return res.status(400).json({ message: "Results already unlocked" });
+        }
+
+        const txnid = payuMoneyService.generateTransactionId();
+        const formattedAmount = payuMoneyService.formatAmount("29"); // Fixed INR 29
+
+        console.log("Initiating dashboard results payment:", {
+          attemptId,
+          amount: formattedAmount,
+          userEmail: attempt.userEmail,
+        });
+
+        const baseUrl = `${req.protocol}://${req.get("host")}`;
+
+        const paymentData = {
+          txnid,
+          amount: formattedAmount,
+          productinfo: `Exam Results - Attempt #${attemptId}`,
+          firstname: attempt.userName,
+          email: attempt.userEmail,
+          phone: "9999999999",
+          surl: `${baseUrl}/api/exam-attempts/payment-success`,
+          furl: `${baseUrl}/api/exam-attempts/payment-failure`,
+          udf1: attempt.courseId.toString(),
+          udf2: attemptId.toString(), // Store attemptId for payment success
+          udf3: "",
+          udf4: req.user!.userId.toString(),
+          udf5: "",
+        };
+
+        const paymentForm = payuMoneyService.generatePaymentForm(paymentData);
+
+        res.json({
+          success: true,
+          paymentForm,
+          transactionId: txnid,
+          amount: formattedAmount,
+        });
+      } catch (error) {
+        console.error("Error initiating dashboard payment:", error);
+        res.status(500).json({ message: "Failed to initiate payment" });
+      }
+    }
+  );
+
+  // Payment success callback for DASHBOARD PAYMENT
+  app.post("/api/exam-attempts/payment-success", async (req: Request, res: Response) => {
+    try {
+      const responseData = req.body;
+
+      // Verify hash
+      if (!payuMoneyService.verifyHash(responseData)) {
+        console.error("Hash verification failed:", responseData.txnid);
+        return res.redirect(
+          `${req.protocol}://${req.get("host")}/payment-failed?error=hash_verification_failed`
+        );
+      }
+
+      const status = payuMoneyService.getPaymentStatus(responseData);
+
+      if (status === "success") {
+        const attemptId = parseInt(responseData.udf2);
+
+        if (!attemptId || isNaN(attemptId)) {
+          console.error("Invalid attempt ID in payment response");
+          return res.redirect(
+            `${req.protocol}://${req.get("host")}/payment-failed?error=invalid_attempt`
+          );
+        }
+
+        // Update exam attempt payment status
+        await storage.updateExamAttemptPayment(attemptId, {
+          resultPaymentStatus: "paid",
+          resultPaymentId: responseData.mihpayid,
+        });
+
+        console.log("Dashboard payment successful for attempt:", attemptId);
+
+        // Redirect to dashboard with success message
+        return res.redirect(
+          `${req.protocol}://${req.get("host")}/dashboard?payment=success&attemptId=${attemptId}`
+        );
+      } else {
+        return res.redirect(
+          `${req.protocol}://${req.get("host")}/payment-failed?error=payment_failed&status=${status}`
+        );
+      }
+    } catch (error) {
+      console.error("Error processing dashboard payment success:", error);
+      return res.redirect(
+        `${req.protocol}://${req.get("host")}/payment-failed?error=server_error`
+      );
+    }
+  });
+
+  // Payment failure callback for DASHBOARD PAYMENT
+  app.post("/api/exam-attempts/payment-failure", async (req: Request, res: Response) => {
+    try {
+      const responseData = req.body;
+      const attemptId = responseData.udf2;
+
+      console.log("Dashboard payment failed for attempt:", attemptId);
+
+      return res.redirect(
+        `${req.protocol}://${req.get("host")}/payment-failed?attemptId=${attemptId}`
+      );
+    } catch (error) {
+      console.error("Error processing dashboard payment failure:", error);
+      return res.redirect(
+        `${req.protocol}://${req.get("host")}/payment-failed?error=server_error`
+      );
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
