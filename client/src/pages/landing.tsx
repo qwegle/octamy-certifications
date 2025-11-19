@@ -13,6 +13,7 @@ import CourseCard from "@/components/course-card";
 import type { Course, Category } from "@shared/schema";
 import { motion } from "framer-motion";
 import { useLocation } from "wouter";
+import heroImage from "@assets/stock_images/modern_education_onl_dd44fd07.jpg";
 
 const categoryIcons = {
   'AI': Brain,
@@ -85,15 +86,23 @@ export default function Landing() {
         </div>
       </header>
       
-      {/* Black and White Cred-style Hero Section */}
-      <section className="relative bg-black text-white py-20 overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0 bg-repeat" style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='m36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
-          }}></div>
+      {/* Black and White Cred-style Hero Section with Background Image */}
+      <section className="relative text-white py-24 lg:py-32 overflow-hidden">
+        {/* Background Image with Dark Overlay */}
+        <div 
+          className="absolute inset-0 z-0"
+          style={{
+            backgroundImage: `url(${heroImage})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat'
+          }}
+        >
+          {/* Extra dark gradient overlay for strong black aesthetic */}
+          <div className="absolute inset-0 bg-gradient-to-br from-black/90 via-black/85 to-black/90" />
         </div>
         
-        <div className="relative max-w-7xl mx-auto px-6 text-center">
+        <div className="relative z-10 max-w-7xl mx-auto px-6 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -104,15 +113,16 @@ export default function Landing() {
               <br />
               <span className="text-white">CERTIFIED</span>
             </h1>
-            <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-xl md:text-2xl text-white/90 mb-10 max-w-3xl mx-auto leading-relaxed">
               Professional certifications that matter. Build your career with industry-recognized credentials.
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
               <a href="#courses">
                 <Button 
                   size="lg" 
                   className="bg-white text-black hover:bg-gray-100 px-8 py-4 text-lg font-bold border-2 border-white"
+                  data-testid="button-start-learning"
                 >
                   START LEARNING
                   <ArrowRight className="ml-2 h-5 w-5" />
@@ -122,26 +132,27 @@ export default function Landing() {
                 <Button 
                   variant="outline" 
                   size="lg"
-                  className="text-white border-white hover:bg-white hover:text-black px-8 py-4 text-lg font-bold"
+                  className="text-white border-white hover:bg-white hover:text-black px-8 py-4 text-lg font-bold backdrop-blur-sm bg-white/5"
+                  data-testid="button-view-certificates"
                 >
                   VIEW CERTIFICATES
                 </Button>
               </Link>
             </div>
 
-            {/* Stats Section */}
-            <div className="grid grid-cols-3 gap-8 max-w-2xl mx-auto">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-white">{courses.length}+</div>
-                <div className="text-gray-400 text-sm">COURSES</div>
+            {/* Stats Section with Glassmorphism */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-3xl mx-auto">
+              <div className="text-center backdrop-blur-sm bg-white/10 rounded-lg p-6 border border-white/20" data-testid="stat-courses">
+                <div className="text-4xl font-bold text-white mb-1">{courses.length}+</div>
+                <div className="text-white/80 text-sm font-medium">COURSES</div>
               </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-white">{categories.length}</div>
-                <div className="text-gray-400 text-sm">CATEGORIES</div>
+              <div className="text-center backdrop-blur-sm bg-white/10 rounded-lg p-6 border border-white/20" data-testid="stat-categories">
+                <div className="text-4xl font-bold text-white mb-1">{categories.length}</div>
+                <div className="text-white/80 text-sm font-medium">CATEGORIES</div>
               </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-white">{certificateCount.count}</div>
-                <div className="text-gray-400 text-sm">CERTIFIED</div>
+              <div className="text-center backdrop-blur-sm bg-white/10 rounded-lg p-6 border border-white/20" data-testid="stat-certified">
+                <div className="text-4xl font-bold text-white mb-1">{certificateCount.count}</div>
+                <div className="text-white/80 text-sm font-medium">CERTIFIED</div>
               </div>
             </div>
           </motion.div>

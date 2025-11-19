@@ -11,6 +11,7 @@ import Footer from "@/components/footer";
 import { useAuth } from "@/hooks/useAuth";
 import type { Category, Course } from "@shared/schema";
 import { Helmet } from "react-helmet-async";
+import heroImage from "@assets/stock_images/professional_develop_f088fd26.jpg";
 
 export default function TechExams() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -67,45 +68,63 @@ export default function TechExams() {
       <div className="min-h-screen bg-background">
         <Header />
 
-        <section className="bg-gradient-to-br from-gray-50 via-white to-gray-50 py-16 border-b">
-          <div className="max-w-7xl mx-auto px-6">
+        <section className="relative py-20 lg:py-32 overflow-hidden border-b">
+          {/* Background Image with Dark Overlay */}
+          <div 
+            className="absolute inset-0 z-0"
+            style={{
+              backgroundImage: `url(${heroImage})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat'
+            }}
+          >
+            {/* Dark gradient overlay for text readability */}
+            <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/70 to-black/80" />
+          </div>
+
+          {/* Content */}
+          <div className="relative z-10 max-w-7xl mx-auto px-6">
             <div className="text-center max-w-4xl mx-auto">
-              <Badge className="mb-4 bg-black text-white">Technology Certifications</Badge>
-              <h1 className="text-4xl lg:text-5xl font-bold text-foreground mb-6">
+              <Badge className="mb-6 bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20">
+                Technology Certifications
+              </Badge>
+              <h1 className="text-4xl lg:text-6xl font-bold text-white mb-6 leading-tight">
                 Master Technology with Expert-Level MCQ Assessments
               </h1>
-              <p className="text-lg text-muted-foreground mb-8">
+              <p className="text-lg lg:text-xl text-white/90 mb-10 leading-relaxed">
                 Prove your technical expertise in Web Development, AI/ML, Data Science, and more. Get instant verification and industry-recognized certificates.
               </p>
 
-              <div className="grid md:grid-cols-4 gap-6 mt-12">
-                <div className="text-center" data-testid="stat-courses">
-                  <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <Monitor className="w-8 h-8 text-primary" />
+              {/* Stats Grid */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-12">
+                <div className="text-center backdrop-blur-sm bg-white/10 rounded-lg p-6 border border-white/20" data-testid="stat-courses">
+                  <div className="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <Monitor className="w-7 h-7 text-white" />
                   </div>
-                  <div className="text-3xl font-bold text-foreground">{filteredCourses.length}+</div>
-                  <div className="text-sm text-muted-foreground">Tech Courses</div>
+                  <div className="text-3xl lg:text-4xl font-bold text-white mb-1">{filteredCourses.length}+</div>
+                  <div className="text-sm text-white/80">Tech Courses</div>
                 </div>
-                <div className="text-center" data-testid="stat-skills">
-                  <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <Code className="w-8 h-8 text-primary" />
+                <div className="text-center backdrop-blur-sm bg-white/10 rounded-lg p-6 border border-white/20" data-testid="stat-skills">
+                  <div className="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <Code className="w-7 h-7 text-white" />
                   </div>
-                  <div className="text-3xl font-bold text-foreground">20+</div>
-                  <div className="text-sm text-muted-foreground">Technologies</div>
+                  <div className="text-3xl lg:text-4xl font-bold text-white mb-1">20+</div>
+                  <div className="text-sm text-white/80">Technologies</div>
                 </div>
-                <div className="text-center" data-testid="stat-certificates">
-                  <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <Award className="w-8 h-8 text-primary" />
+                <div className="text-center backdrop-blur-sm bg-white/10 rounded-lg p-6 border border-white/20" data-testid="stat-certificates">
+                  <div className="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <Award className="w-7 h-7 text-white" />
                   </div>
-                  <div className="text-3xl font-bold text-foreground">5K+</div>
-                  <div className="text-sm text-muted-foreground">Certificates Issued</div>
+                  <div className="text-3xl lg:text-4xl font-bold text-white mb-1">5K+</div>
+                  <div className="text-sm text-white/80">Certificates Issued</div>
                 </div>
-                <div className="text-center" data-testid="stat-success">
-                  <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <TrendingUp className="w-8 h-8 text-primary" />
+                <div className="text-center backdrop-blur-sm bg-white/10 rounded-lg p-6 border border-white/20" data-testid="stat-success">
+                  <div className="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <TrendingUp className="w-7 h-7 text-white" />
                   </div>
-                  <div className="text-3xl font-bold text-foreground">98%</div>
-                  <div className="text-sm text-muted-foreground">Success Rate</div>
+                  <div className="text-3xl lg:text-4xl font-bold text-white mb-1">98%</div>
+                  <div className="text-sm text-white/80">Success Rate</div>
                 </div>
               </div>
             </div>
