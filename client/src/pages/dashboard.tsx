@@ -583,13 +583,15 @@ export default function Dashboard() {
                                             </div>
                                           </div>
                                         </div>
-                                        <Badge 
-                                          variant="secondary"
-                                          className="bg-gray-200 text-gray-700"
-                                          data-testid={`badge-locked-${attempt.id}`}
-                                        >
-                                          Pay ₹29
-                                        </Badge>
+                                        <Link href={`/exam-submitted/${attempt.id}`}>
+                                          <Button
+                                            size="sm"
+                                            className="bg-black text-white hover:bg-gray-800"
+                                            data-testid={`button-pay-${attempt.id}`}
+                                          >
+                                            Pay ₹29
+                                          </Button>
+                                        </Link>
                                       </>
                                     )}
                                   </div>
