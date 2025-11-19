@@ -15,7 +15,7 @@ import { Helmet } from 'react-helmet-async';
 import { ExamStructuredData } from '@/components/seo-structured-data';
 
 import type { Course, Question } from '@shared/schema';
-import { AlertTriangle, Flag, Wifi, WifiOff, Maximize, Check, Circle } from 'lucide-react';
+import { AlertTriangle, Flag, Wifi, WifiOff, Maximize, Check, Circle, Clock } from 'lucide-react';
 
 interface ExamQuestion {
   id: number;
@@ -584,46 +584,64 @@ export default function Exam() {
   const currentQ = questions[currentQuestion];
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <div className="flex gap-4">
-          {/* Main Exam Content - Left Side */}
-          <Card className="flex-1">
-            <CardHeader>
-              <div className="flex flex-col gap-4">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <CardTitle className="text-2xl">{course?.title}</CardTitle>
-                    <p className="text-premcq-gray-600">
-                      Question {currentQuestion + 1} of {questions.length}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    {/* Online/Offline Indicator */}
-                    <div className={`flex items-center gap-2 px-3 py-1 rounded-md ${isOnline ? 'bg-green-50' : 'bg-red-50'}`} data-testid="connection-status">
-                      {isOnline ? (
-                        <>
-                          <Wifi className="h-4 w-4 text-green-600" />
-                          <span className="text-sm text-green-600">Online</span>
-                        </>
-                      ) : (
-                        <>
-                          <WifiOff className="h-4 w-4 text-red-600" />
-                          <span className="text-sm text-red-600">Offline</span>
-                        </>
-                      )}
-                    </div>
-                    <ExamTimer
-                      duration={course?.duration || 15}
-                      onTimeUp={handleTimeUp}
-                    />
-                  </div>
+    <div className="min-h-screen bg-gradient-to-b from-white to-premcq-gray-50">
+      {/* Elegant Top Bar */}
+      <div className="bg-white border-b border-premcq-gray-200 sticky top-0 z-50 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-4">
+            {/* Left: Course Info */}
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <div className="h-10 w-10 bg-premcq-black rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-lg">{currentQuestion + 1}</span>
                 </div>
-                <Progress value={progress} className="w-full" />
+                <div>
+                  <h2 className="text-sm font-semibold text-premcq-gray-900">{course?.title}</h2>
+                  <p className="text-xs text-premcq-gray-500">Question {currentQuestion + 1} of {questions.length}</p>
+                </div>
               </div>
-            </CardHeader>
-            
-            <CardContent className="space-y-6">
+            </div>
+
+            {/* Right: Timer and Status */}
+            <div className="flex items-center gap-4">
+              {/* Connection Status */}
+              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border ${isOnline ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`} data-testid="connection-status">
+                {isOnline ? (
+                  <>
+                    <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
+                    <span className="text-xs font-medium text-green-700">Online</span>
+                  </>
+                ) : (
+                  <>
+                    <WifiOff className="h-3 w-3 text-red-600" />
+                    <span className="text-xs font-medium text-red-700">Offline</span>
+                  </>
+                )}
+              </div>
+              
+              {/* Timer */}
+              <div className="flex items-center gap-2 px-4 py-1.5 bg-premcq-black text-white rounded-full">
+                <Clock className="h-4 w-4" />
+                <ExamTimer
+                  duration={course?.duration || 15}
+                  onTimeUp={handleTimeUp}
+                />
+              </div>
+            </div>
+          </div>
+          
+          {/* Progress Bar */}
+          <div className="pb-2">
+            <Progress value={progress} className="h-1.5" />
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="flex gap-6">
+          {/* Main Exam Content - Left Side */}
+          <Card className="flex-1 shadow-md">
+            <CardContent className="space-y-6 pt-6">
             {/* Anti-cheating warning */}
             {tabSwitches > 0 && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-4">
