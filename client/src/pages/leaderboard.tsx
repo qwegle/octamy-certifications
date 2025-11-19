@@ -17,7 +17,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Medal, Award, ArrowLeft } from "lucide-react";
+import { Trophy, Medal, Award } from "lucide-react";
+import Header from "@/components/header";
+import Footer from "@/components/footer";
 import type { Course, Leaderboard, Category } from "@shared/schema";
 
 type LeaderboardWithCourse = Leaderboard & { courseTitle: string | null; courseSlug: string | null };
@@ -65,25 +67,7 @@ export default function LeaderboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Navigation */}
-      <nav className="bg-white border-b-2 border-gray-200 px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <Link href="/">
-            <Button variant="ghost" className="gap-2" data-testid="button-back-home">
-              <ArrowLeft className="w-4 h-4" />
-              Back to Home
-            </Button>
-          </Link>
-          <div className="flex gap-4">
-            <Link href="/exams">
-              <Button variant="outline" data-testid="button-practice-exams">Practice Exams</Button>
-            </Link>
-            <Link href="/dashboard">
-              <Button data-testid="button-dashboard">Dashboard</Button>
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <Header />
 
       <div className="max-w-7xl mx-auto px-6 py-12">
         {/* Header */}
