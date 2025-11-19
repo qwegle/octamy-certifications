@@ -960,44 +960,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Exam routes
+  // Exam routes - Supports both single-subject and multi-subject exams
   app.post("/api/courses/:id/questions", async (req, res) => {
     try {
       const { sessionId } = req.body;
-      const questions = await storage.getQuestionsByCourse(
-        parseInt(req.params.id)
-      );
-
-      // Use Fisher-Yates shuffle for proper randomization
-      const shuffled = [...questions];
-      for (let i = shuffled.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      const courseId = parseInt(req.params.id);
+      
+      // Fetch course to check for subjects
+      const course = await storage.getCourse(courseId);
+      if (!course) {
+        return res.status(404).json({ message: "Course not found" });
       }
 
-      // Select random number of questions (10-15) for variety
-      const questionCount = Math.floor(Math.random() * 6) + 10; // 10 to 15 questions
-      const limitedQuestions = shuffled.slice(
-        0,
-        Math.min(questionCount, questions.length)
-      );
+      const questions = await storage.getQuestionsByCourse(courseId);
+      
+      // Helper function to shuffle using Fisher-Yates algorithm
+      const fisherYatesShuffle = <T>(array: T[]): T[] => {
+        const shuffled = [...array];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled;
+      };
 
-      // Shuffle options within each question and track correct answer
-      const questionsWithShuffledOptions = limitedQuestions.map((q) => {
+      // Helper function to shuffle question options and track correct answer
+      const shuffleQuestionOptions = (q: any) => {
         const originalOptions = [...q.options];
         const correctAnswerText = originalOptions[q.correctAnswer];
-
-        // Shuffle options
-        const shuffledOptions = [...q.options];
-        for (let i = shuffledOptions.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [shuffledOptions[i], shuffledOptions[j]] = [
-            shuffledOptions[j],
-            shuffledOptions[i],
-          ];
-        }
-
-        // Find new position of correct answer
+        const shuffledOptions = fisherYatesShuffle(q.options);
         const newCorrectAnswer = shuffledOptions.findIndex(
           (option) => option === correctAnswerText
         );
@@ -1007,29 +998,82 @@ export async function registerRoutes(app: Express): Promise<Server> {
           question: q.question,
           options: shuffledOptions,
           correctAnswer: newCorrectAnswer,
+          subject: q.subject || null, // Include subject for multi-subject exams
         };
-      });
+      };
+
+      let processedQuestions: any[];
+      let subjectsData: any = null;
+
+      // Check if course has multi-subject configuration
+      if (course.subjects && Array.isArray(course.subjects) && course.subjects.length > 0) {
+        // MULTI-SUBJECT EXAM MODE
+        console.log(`Multi-subject exam detected for course ${courseId}:`, course.subjects);
+        
+        // Group questions by subject
+        const questionsBySubject: Record<string, any[]> = {};
+        course.subjects.forEach(subject => {
+          questionsBySubject[subject] = [];
+        });
+
+        questions.forEach(q => {
+          if (q.subject && questionsBySubject[q.subject]) {
+            questionsBySubject[q.subject].push(q);
+          }
+        });
+
+        // Randomize questions within each subject and shuffle options
+        processedQuestions = [];
+        subjectsData = course.subjects.map(subject => {
+          const subjectQuestions = questionsBySubject[subject] || [];
+          const shuffled = fisherYatesShuffle(subjectQuestions);
+          const questionsWithShuffledOptions = shuffled.map(shuffleQuestionOptions);
+          
+          processedQuestions.push(...questionsWithShuffledOptions);
+          
+          return {
+            name: subject,
+            questionCount: questionsWithShuffledOptions.length,
+          };
+        });
+
+        console.log(`Processed ${processedQuestions.length} questions across ${course.subjects.length} subjects`);
+      } else {
+        // SINGLE-SUBJECT EXAM MODE (Backward compatible)
+        const shuffled = fisherYatesShuffle(questions);
+        
+        // Select random number of questions (10-15) for variety
+        const questionCount = Math.floor(Math.random() * 6) + 10; // 10 to 15 questions
+        const limitedQuestions = shuffled.slice(
+          0,
+          Math.min(questionCount, questions.length)
+        );
+
+        processedQuestions = limitedQuestions.map(shuffleQuestionOptions);
+        console.log(`Single-subject exam: ${processedQuestions.length} questions`);
+      }
 
       // Store the question mapping using provided session ID
-      const finalSessionId =
-        sessionId || `session_${Date.now()}_${Math.random()}`;
+      const finalSessionId = sessionId || `session_${Date.now()}_${Math.random()}`;
       (global as any).questionMappings = (global as any).questionMappings || {};
       (global as any).questionMappings[finalSessionId] =
-        questionsWithShuffledOptions.reduce((acc: any, q) => {
+        processedQuestions.reduce((acc: any, q) => {
           acc[q.id] = q.correctAnswer;
           return acc;
         }, {});
 
       // Remove correct answers from response
-      const questionsWithoutAnswers = questionsWithShuffledOptions.map((q) => ({
+      const questionsWithoutAnswers = processedQuestions.map((q) => ({
         id: q.id,
         question: q.question,
         options: q.options,
+        subject: q.subject, // Include subject info for frontend
       }));
 
       res.json({
         questions: questionsWithoutAnswers,
         sessionId: finalSessionId,
+        subjects: subjectsData, // Include subjects data for multi-subject exams
       });
     } catch (error) {
       console.error("Error fetching questions:", error);

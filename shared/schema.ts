@@ -237,6 +237,7 @@ export const courses = pgTable("courses", {
   isInternship: boolean("is_internship").default(false).notNull(),
   metaTitle: text("meta_title"),
   metaDescription: text("meta_description"),
+  subjects: json("subjects").$type<string[]>(), // For multi-subject exams: ["English", "Math", "GK"]
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -253,6 +254,7 @@ export const questions = pgTable("questions", {
   expectedKeywords: text("expected_keywords").array(), // Keywords to look for in responses
   maxPoints: integer("max_points").default(100).notNull(), // Points for this question
   difficulty: text("difficulty").default("medium").notNull(), // easy, medium, hard
+  subject: varchar("subject", { length: 100 }), // Subject for multi-subject exams (e.g., "English", "Math")
 });
 
 export const examAttempts = pgTable("exam_attempts", {

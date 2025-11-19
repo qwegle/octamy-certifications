@@ -42,14 +42,18 @@ export default function Admin() {
     categoryId: '',
     duration: 15,
     passingScore: 50,
-    price: '199.00'
+    price: '199.00',
+    subjects: [] as string[], // For multi-subject exams
   });
+  
+  const [subjectInput, setSubjectInput] = useState(''); // Temp input for adding subjects
   
   const [newQuestion, setNewQuestion] = useState({
     courseId: selectedCourse || 0,
     question: '',
     options: ['', '', '', ''],
-    correctAnswer: 0
+    correctAnswer: 0,
+    subject: '', // Subject assignment for multi-subject exams
   });
 
   // Check if user is admin
