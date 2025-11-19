@@ -1102,7 +1102,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const finalTimeTaken = timeTaken || timeSpent || 60; // Use timeTaken or timeSpent as fallback
 
         // Get correct answers from session mapping
-        const correctAnswersMapping =
+        let correctAnswersMapping =
           (global as any).questionMappings?.[sessionId] || {};
 
         console.log(`Exam submission for session ${sessionId}:`);
@@ -1117,14 +1117,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }`
         );
 
-        // Safety check: Ensure we have questions to evaluate
+        // If session is missing (server restart), regenerate from database
         if (Object.keys(correctAnswersMapping).length === 0) {
-          console.warn(`No question mappings found for session ${sessionId}`);
-          return res.status(400).json({
-            message:
-              "Exam session expired or invalid. Please restart the exam.",
-            code: "SESSION_EXPIRED",
-          });
+          console.log(`Session ${sessionId} not found in memory. Reconstructing from database...`);
+          
+          try {
+            // Get all questions for this course
+            const allQuestions = await storage.getQuestionsByCourse(courseId);
+            
+            // Get the question IDs from the answers
+            const answeredQuestionIds = Object.keys(answers).map(id => parseInt(id));
+            
+            // Filter to only the questions that were answered
+            const examQuestions = allQuestions.filter(q => answeredQuestionIds.includes(q.id));
+            
+            if (examQuestions.length === 0) {
+              console.warn(`No questions found for course ${courseId}`);
+              return res.status(400).json({
+                message: "Unable to validate exam. Please restart the exam.",
+                code: "SESSION_RECONSTRUCTION_FAILED",
+              });
+            }
+            
+            // Reconstruct the correct answers mapping
+            correctAnswersMapping = examQuestions.reduce((acc: any, q) => {
+              acc[q.id] = q.correctAnswer;
+              return acc;
+            }, {});
+            
+            // Store it back in memory for potential future use
+            (global as any).questionMappings = (global as any).questionMappings || {};
+            (global as any).questionMappings[sessionId] = correctAnswersMapping;
+            
+            console.log(`Successfully reconstructed session with ${Object.keys(correctAnswersMapping).length} questions`);
+          } catch (reconstructError) {
+            console.error('Failed to reconstruct session:', reconstructError);
+            return res.status(400).json({
+              message: "Exam session expired or invalid. Please restart the exam.",
+              code: "SESSION_EXPIRED",
+            });
+          }
         }
 
         // Transform answers to Record<string, number> format
