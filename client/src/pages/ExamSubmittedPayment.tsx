@@ -213,18 +213,18 @@ export default function ExamSubmittedPayment() {
 
           {/* Payment to View Results Card */}
           <Card className="border-2 border-premcq-black shadow-lg">
-            <CardHeader className="bg-gradient-to-r from-premcq-black to-premcq-gray-800 text-white">
+            <CardHeader className="bg-premcq-gray-50 border-b-2 border-premcq-black">
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-white mb-2 flex items-center gap-2">
+                  <CardTitle className="text-premcq-black mb-2 flex items-center gap-2">
                     <Lock className="h-5 w-5" />
                     View Your Results
                   </CardTitle>
-                  <CardDescription className="text-white/80">
+                  <CardDescription className="text-premcq-gray-700">
                     Pay a small fee to unlock your exam score and detailed results
                   </CardDescription>
                 </div>
-                <Badge variant="secondary" className="bg-white text-premcq-black text-lg px-4 py-2">
+                <Badge variant="secondary" className="bg-premcq-black text-white text-lg px-4 py-2">
                   <IndianRupee className="h-4 w-4 inline mr-1" />
                   29
                 </Badge>
