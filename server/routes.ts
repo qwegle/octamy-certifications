@@ -23,7 +23,9 @@ import {
   users as usersTable,
   contactSubmissions,
   sellers,
+  insertQuestionSchema,
 } from "@shared/schema";
+import * as XLSX from 'xlsx';
 import { desc, and, eq, not } from "drizzle-orm";
 import { db } from "./db";
 import { LearningPathController } from "./controllers/learningPathController";
@@ -3761,6 +3763,171 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } catch (error) {
         console.error("Error deleting question:", error);
         res.status(500).json({ message: "Failed to delete question" });
+      }
+    }
+  );
+
+  // Bulk Import Questions from CSV/Excel
+  app.post(
+    "/api/admin/questions/bulk-import",
+    authenticateAdminToken,
+    upload.single('file'),
+    async (req: AuthenticatedRequest, res: Response) => {
+      try {
+        if (!req.file) {
+          return res.status(400).json({ message: "No file uploaded" });
+        }
+
+        const courseId = req.body.courseId;
+        if (!courseId) {
+          return res.status(400).json({ message: "Course ID is required" });
+        }
+
+        // Parse the file using xlsx
+        const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const data = XLSX.utils.sheet_to_json(worksheet);
+
+        const results = {
+          success: 0,
+          failed: 0,
+          errors: [] as Array<{ row: number; error: string; data: any }>,
+        };
+
+        // Process each row
+        for (let i = 0; i < data.length; i++) {
+          const row: any = data[i];
+          
+          try {
+            // Parse options (could be JSON string or separate columns)
+            let options: string[] = [];
+            if (row.options) {
+              try {
+                options = JSON.parse(row.options);
+              } catch {
+                // If not JSON, try to parse comma-separated
+                options = row.options.split(',').map((opt: string) => opt.trim());
+              }
+            } else {
+              // Try to get from option1, option2, option3, option4 columns
+              options = [
+                row.option1,
+                row.option2,
+                row.option3,
+                row.option4,
+                row.option5,
+                row.option6,
+              ].filter(Boolean);
+            }
+
+            // Parse tags
+            let tags: string[] = [];
+            if (row.tags) {
+              try {
+                tags = JSON.parse(row.tags);
+              } catch {
+                tags = row.tags.split(',').map((tag: string) => tag.trim());
+              }
+            }
+
+            // Build question object
+            const questionData = {
+              courseId: parseInt(courseId),
+              question: row.question || row.Question,
+              options,
+              correctAnswer: parseInt(row.correctAnswer || row.correct_answer || row['Correct Answer']) || 0,
+              difficulty: row.difficulty || row.Difficulty || 'medium',
+              subject: row.subject || row.Subject || null,
+              explanation: row.explanation || row.Explanation || null,
+              tags: tags.length > 0 ? tags : null,
+              questionType: row.questionType || row.question_type || 'multiple_choice',
+              isActive: row.isActive !== undefined ? Boolean(row.isActive) : true,
+              maxPoints: parseInt(row.maxPoints || row.max_points || '100'),
+              adminNotes: row.adminNotes || row.admin_notes || null,
+              importSource: req.file.originalname,
+            };
+
+            // Validate with Zod
+            const validated = insertQuestionSchema.parse(questionData);
+            
+            // Create the question
+            await storage.createQuestion(validated);
+            results.success++;
+          } catch (error: any) {
+            results.failed++;
+            results.errors.push({
+              row: i + 2, // +2 because Excel is 1-indexed and has header row
+              error: error.message || 'Unknown error',
+              data: row,
+            });
+          }
+        }
+
+        res.json({
+          message: `Import completed: ${results.success} succeeded, ${results.failed} failed`,
+          results,
+        });
+      } catch (error) {
+        console.error("Error importing questions:", error);
+        res.status(500).json({ message: "Failed to import questions", error: String(error) });
+      }
+    }
+  );
+
+  // Download Sample Template
+  app.get(
+    "/api/admin/questions/sample-template",
+    authenticateAdminToken,
+    async (req: AuthenticatedRequest, res: Response) => {
+      try {
+        // Create sample data
+        const sampleData = [
+          {
+            question: 'What is the capital of India?',
+            option1: 'Mumbai',
+            option2: 'New Delhi',
+            option3: 'Kolkata',
+            option4: 'Chennai',
+            correctAnswer: 1,
+            difficulty: 'easy',
+            subject: 'Geography',
+            explanation: 'New Delhi is the capital city of India since 1911.',
+            tags: 'geography,india,capital',
+            questionType: 'multiple_choice',
+            maxPoints: 100,
+          },
+          {
+            question: 'Which programming language is known for web development?',
+            option1: 'Python',
+            option2: 'JavaScript',
+            option3: 'Java',
+            option4: 'C++',
+            correctAnswer: 1,
+            difficulty: 'medium',
+            subject: 'Programming',
+            explanation: 'JavaScript is the primary language for web development, running in browsers.',
+            tags: 'programming,web,javascript',
+            questionType: 'multiple_choice',
+            maxPoints: 100,
+          },
+        ];
+
+        // Create workbook
+        const worksheet = XLSX.utils.json_to_sheet(sampleData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Questions');
+
+        // Generate buffer
+        const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+
+        // Set headers and send file
+        res.setHeader('Content-Disposition', 'attachment; filename=question-import-template.xlsx');
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.send(buffer);
+      } catch (error) {
+        console.error("Error generating template:", error);
+        res.status(500).json({ message: "Failed to generate template" });
       }
     }
   );
