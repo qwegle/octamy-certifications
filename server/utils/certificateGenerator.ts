@@ -498,7 +498,7 @@ function generateCertificateHTML(data: CertificateData): string {
               <div class="signature-section">
                 <div class="signature-line"></div>
                 <div class="signature-title">Director</div>
-                <div class="signature-name">PremCQ Solutions</div>
+                <div class="signature-name">PremCq Solutions</div>
               </div>
             </div>
           </div>
@@ -507,7 +507,7 @@ function generateCertificateHTML(data: CertificateData): string {
             <img src="https://images.seeklogo.com/logo-png/55/2/iso-certified-company-stamp-logo-png_seeklogo-556487.png" alt="ISO Certified" />
             <img src="https://static.vecteezy.com/system/resources/previews/019/909/405/non_2x/make-in-india-transparent-make-in-india-free-free-png.png" alt="Make in India" />
             <img src="https://sudikshya.com/wp-content/uploads/2024/08/startup-and-odisha-combo.png" alt="Startup Odisha" />
-            <img src="https://premcq.com/storage/optionbuilder/uploads/554402-14-2025_0143pmpremcq_logo_black.png" alt="PremCQ Logo" />
+            <img src="https://premcq.com/storage/optionbuilder/uploads/554402-14-2025_0143pmpremcq_logo_black.png" alt="PremCq Logo" />
           </div>
         </div>
       </div>
@@ -575,7 +575,7 @@ export async function generateInvoicePDF(data: {
   //   <head>
   //     <meta charset="UTF-8">
   //     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  //     <title>Invoice - PremCQ Solutions</title>
+  //     <title>Invoice - PremCq Solutions</title>
   //     <style>
   //       body {
   //         font-family: Arial, sans-serif;
@@ -709,7 +709,7 @@ export async function generateInvoicePDF(data: {
   //       <div class="footer">
   //         <p><strong>Payment Method:</strong> ${data.paymentMethod}</p>
   //         <p><strong>Payment Status:</strong> Completed</p>
-  //         <p>Thank you for choosing PremCQ Solutions for your professional certification needs.</p>
+  //         <p>Thank you for choosing PremCq Solutions for your professional certification needs.</p>
   //       </div>
   //     </div>
   //   </body>
@@ -721,7 +721,7 @@ export async function generateInvoicePDF(data: {
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Invoice - PremCQ Solutions</title>
+    <title>Invoice - PremCq Solutions</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.js"></script>
     <style>
       @import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap");
@@ -872,7 +872,7 @@ export async function generateInvoicePDF(data: {
             <div class="text-center mb-12">
               <img
                 src="../certificateImages/premcq.svg"
-                alt="PremCQ Logo"
+                alt="PremCq Logo"
                 class="w-64 mx-auto"
               />
               <p class="text-sm" style="color: #331f30">

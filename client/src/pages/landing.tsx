@@ -372,7 +372,7 @@ export default function Landing() {
               </div>
               <h3 className="text-2xl font-bold text-premcq-black mb-4">Trusted by 10k+</h3>
               <p className="text-premcq-gray-600">
-                Join thousands of professionals who have advanced their careers with PremCQ.
+                Join thousands of professionals who have advanced their careers with PremCq.
               </p>
             </div>
           </div>

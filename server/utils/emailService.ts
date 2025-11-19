@@ -35,7 +35,7 @@ class EmailService {
   async sendEmail(options: EmailOptions): Promise<boolean> {
     try {
       const mailOptions = {
-        from: `"PremCQ Solutions" <nikhileshpr@gmail.com>`,
+        from: `"PremCq Solutions" <nikhileshpr@gmail.com>`,
         to: options.to,
         subject: options.subject,
         html: options.html,
@@ -69,7 +69,7 @@ class EmailService {
       <html>
       <head>
         <meta charset="utf-8">
-        <title>Certificate Delivered - PremCQ Solutions</title>
+        <title>Certificate Delivered - PremCq Solutions</title>
         <style>
           body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
           .container { max-width: 600px; margin: 0 auto; padding: 20px; }
@@ -84,7 +84,7 @@ class EmailService {
         <div class="container">
           <div class="header">
             <h1>🎓 Certificate Delivered</h1>
-            <p>PremCQ Solutions</p>
+            <p>PremCq Solutions</p>
           </div>
           
           <div class="content">
@@ -107,11 +107,11 @@ class EmailService {
             
             ${includesPhysical ? '<p><strong>Physical Certificate:</strong> Your certificate will be printed on premium paper and shipped to your registered address within 7-10 business days.</p>' : ''}
             
-            <p>Thank you for choosing PremCQ Solutions for your professional development!</p>
+            <p>Thank you for choosing PremCq Solutions for your professional development!</p>
           </div>
           
           <div class="footer">
-            <p>© 2025 PremCQ Solutions. All rights reserved.</p>
+            <p>© 2025 PremCq Solutions. All rights reserved.</p>
             <p>This certificate is digitally signed and verified.</p>
           </div>
         </div>
@@ -121,7 +121,7 @@ class EmailService {
 
     return this.sendEmail({
       to: userEmail,
-      subject: `🎓 Your ${courseName} Certificate is Ready - PremCQ Solutions`,
+      subject: `🎓 Your ${courseName} Certificate is Ready - PremCq Solutions`,
       html: htmlContent,
       attachments: [
         {
@@ -151,7 +151,7 @@ class EmailService {
       <html>
       <head>
         <meta charset="utf-8">
-        <title>Payment Invoice - PremCQ Solutions</title>
+        <title>Payment Invoice - PremCq Solutions</title>
         <style>
           body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
           .container { max-width: 600px; margin: 0 auto; padding: 20px; }
@@ -167,7 +167,7 @@ class EmailService {
         <div class="container">
           <div class="header">
             <h1>💳 Payment Confirmation</h1>
-            <p>PremCQ Solutions</p>
+            <p>PremCq Solutions</p>
           </div>
           
           <div class="content">
@@ -209,7 +209,7 @@ class EmailService {
           </div>
           
           <div class="footer">
-            <p>© 2025 PremCQ Solutions. All rights reserved.</p>
+            <p>© 2025 PremCq Solutions. All rights reserved.</p>
             <p>For support, contact us at support@premcq.com</p>
           </div>
         </div>

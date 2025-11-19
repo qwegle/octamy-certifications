@@ -201,7 +201,7 @@ export default function DemoBusinessCertificate() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Certified By:</span>
-                    <span className="font-medium">PremCQ Solutions</span>
+                    <span className="font-medium">PremCq Solutions</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Date Issued:</span>
@@ -293,11 +293,11 @@ export default function DemoBusinessCertificate() {
             </div>
             <div>
               <h4 className="font-semibold mb-4">Connect</h4>
-              <p className="text-gray-400 mb-4">ISO Certified by PremCQ Solutions Private Limited</p>
+              <p className="text-gray-400 mb-4">ISO Certified by PremCq Solutions Private Limited</p>
             </div>
           </div>
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2025 PremCQ Solutions Private Limited. All rights reserved.</p>
+            <p>&copy; 2025 PremCq Solutions Private Limited. All rights reserved.</p>
           </div>
         </div>
       </footer>

@@ -34,7 +34,7 @@ export function CourseStructuredData({ course, rating }: StructuredDataProps) {
     courseCode: courseSlug,
     provider: {
       "@type": "Organization",
-      name: "PremCQ",
+      name: "PremCq",
       url: window.location.origin,
       logo: `${window.location.origin}/logo.png`
     },
@@ -43,7 +43,7 @@ export function CourseStructuredData({ course, rating }: StructuredDataProps) {
       name: course.instructorName
     } : {
       "@type": "Organization", 
-      name: "PremCQ Expert Team"
+      name: "PremCq Expert Team"
     },
     educationalLevel: "Professional",
     coursePrerequisites: "Basic computer skills",
@@ -67,7 +67,7 @@ export function CourseStructuredData({ course, rating }: StructuredDataProps) {
       "@type": "CourseInstance",
       courseMode: "online",
       courseWorkload: `PT${course.duration}M`,
-      instructor: course.instructorName || "PremCQ Expert Team"
+      instructor: course.instructorName || "PremCq Expert Team"
     }
   };
 
@@ -95,7 +95,7 @@ export function ExamStructuredData({ course, rating }: StructuredDataProps) {
     url: `${window.location.origin}/exam/${courseSlug}`,
     provider: {
       "@type": "Organization",
-      name: "PremCQ",
+      name: "PremCq",
       url: window.location.origin,
       logo: `${window.location.origin}/logo.png`
     },

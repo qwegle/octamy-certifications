@@ -218,7 +218,7 @@ export default function SponsorPage() {
         <div className="max-w-6xl mx-auto px-4 text-center">
           <div className="flex items-center justify-center mb-6">
             <Heart className="w-12 h-12 text-red-500 mr-4" />
-            <h1 className="text-5xl font-bold">Support PremCQ's Vision</h1>
+            <h1 className="text-5xl font-bold">Support PremCq's Vision</h1>
           </div>
           <p className="text-xl text-gray-300 max-w-3xl mx-auto mb-8">
             Help us revolutionize professional education by making quality
@@ -396,7 +396,7 @@ export default function SponsorPage() {
           <CardHeader className="bg-black text-white">
             <CardTitle className="text-2xl">What We've Built So Far</CardTitle>
             <CardDescription className="text-gray-300">
-              Current features available on the PremCQ platform
+              Current features available on the PremCq platform
             </CardDescription>
           </CardHeader>
           <CardContent className="p-8">
@@ -452,7 +452,7 @@ export default function SponsorPage() {
         {/* Our USPs */}
         <Card className="mb-16 border-2 border-black">
           <CardHeader className="bg-black text-white">
-            <CardTitle className="text-2xl">Why Choose PremCQ</CardTitle>
+            <CardTitle className="text-2xl">Why Choose PremCq</CardTitle>
             <CardDescription className="text-gray-300">
               Our unique value propositions that set us apart
             </CardDescription>

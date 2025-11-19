@@ -484,9 +484,9 @@ export default function Exam() {
     return (
       <div className="min-h-screen bg-white">
         <Helmet>
-          <title>{course?.title ? `${course.title} - Certification Exam | PremCQ` : 'Certification Exam | PremCQ'}</title>
+          <title>{course?.title ? `${course.title} - Certification Exam | PremCq` : 'Certification Exam | PremCq'}</title>
           <meta name="description" content={course?.title ? `Take the ${course.title} certification exam and earn your professional credential. Comprehensive assessment with instant results.` : 'Take your certification exam and earn your professional credential.'} />
-          <meta property="og:title" content={course?.title ? `${course.title} - Certification Exam | PremCQ` : 'Certification Exam | PremCQ'} />
+          <meta property="og:title" content={course?.title ? `${course.title} - Certification Exam | PremCq` : 'Certification Exam | PremCq'} />
           <meta property="og:description" content={course?.title ? `Take the ${course.title} certification exam and earn your professional credential.` : 'Take your certification exam and earn your professional credential.'} />
           <meta property="og:url" content={`${window.location.origin}/exam/${courseSlug}`} />
           <link rel="canonical" href={`${window.location.origin}/exam/${courseSlug}`} />

@@ -209,7 +209,7 @@ export default function Verification() {
             <div className="space-y-4 text-premcq-gray-600">
               <p>
                 Our certificate verification system allows you to instantly verify the authenticity 
-                and validity of any PremCQ certificate using its unique certificate ID.
+                and validity of any PremCq certificate using its unique certificate ID.
               </p>
               <ul className="list-disc list-inside space-y-2">
                 <li>All certificates are issued with a unique identifier</li>

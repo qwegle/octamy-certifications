@@ -58,7 +58,7 @@ export default function TechExams() {
   return (
     <>
       <Helmet>
-        <title>Technology Certifications - PremCQ</title>
+        <title>Technology Certifications - PremCq</title>
         <meta
           name="description"
           content="Get certified in Web Development, AI/ML, Data Science, Python, React, and more. Industry-recognized technology certifications with instant verification and performance badges."

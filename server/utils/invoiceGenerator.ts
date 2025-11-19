@@ -254,10 +254,10 @@ export async function generateInvoicePDF(invoiceData: InvoiceData): Promise<Buff
           ` : ''}
 
           <div class="footer">
-            <p><strong>Thank you for choosing PremCQ Solutions!</strong></p>
+            <p><strong>Thank you for choosing PremCq Solutions!</strong></p>
             <p>This is a computer-generated invoice. No signature required.</p>
             <p>For support inquiries, please contact us at support@premcq.com with your transaction ID.</p>
-            <p style="margin-top: 10px;">© ${new Date().getFullYear()} PremCQ Solutions. All rights reserved.</p>
+            <p style="margin-top: 10px;">© ${new Date().getFullYear()} PremCq Solutions. All rights reserved.</p>
           </div>
         </div>
       </body>

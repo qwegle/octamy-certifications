@@ -1796,7 +1796,7 @@ export default function AdminDashboard() {
               <Shield className="w-8 h-8 text-blue-600" />
               <div>
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Admin Dashboard</h1>
-                <p className="text-sm text-gray-500 dark:text-gray-400">PremCQ Platform Administration</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">PremCq Platform Administration</p>
               </div>
             </div>
             <div className="flex items-center space-x-4">

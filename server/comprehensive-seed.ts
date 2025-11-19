@@ -111,7 +111,7 @@ export async function createComprehensiveSeed() {
         price: template.level === 'novice' ? "199.00" : template.level === 'intermediate' ? "299.00" : template.level === 'advanced' ? "399.00" : "499.00",
         level: template.level,
         isInternship: category.name === "Internships",
-        metaTitle: `${template.title} Certification - ${category.name} | PremCQ`,
+        metaTitle: `${template.title} Certification - ${category.name} | PremCq`,
         metaDescription: `Get certified in ${template.title}. ${template.description}. Industry-recognized certification.`,
       };
       allCourses.push(course);

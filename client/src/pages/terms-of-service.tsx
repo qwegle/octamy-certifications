@@ -12,7 +12,7 @@ export default function TermsOfService() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <Button variant="ghost" onClick={() => setLocation("/")}>
-              <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">PremCQ</span>
+              <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">PremCq</span>
             </Button>
             <Button onClick={() => setLocation("/")}>
               Back to Home
@@ -35,7 +35,7 @@ export default function TermsOfService() {
             <section className="mb-8">
               <h2 className="text-2xl font-semibold mb-4">1. Acceptance of Terms</h2>
               <p className="mb-4">
-                By accessing and using PremCQ's certification platform, you accept and agree to be bound by the terms 
+                By accessing and using PremCq's certification platform, you accept and agree to be bound by the terms 
                 and provision of this agreement. If you do not agree to abide by the above, please do not use this service.
               </p>
             </section>
@@ -43,7 +43,7 @@ export default function TermsOfService() {
             <section className="mb-8">
               <h2 className="text-2xl font-semibold mb-4">2. Description of Service</h2>
               <p className="mb-4">
-                PremCQ provides online professional certification services, including but not limited to:
+                PremCq provides online professional certification services, including but not limited to:
               </p>
               <ul className="list-disc pl-6 mb-4 space-y-2">
                 <li>Online assessments and examinations</li>
@@ -121,7 +121,7 @@ export default function TermsOfService() {
             <section className="mb-8">
               <h2 className="text-2xl font-semibold mb-4">7. Intellectual Property</h2>
               <p className="mb-4">
-                All content, features, and functionality are owned by PremCQ and protected by copyright, trademark, 
+                All content, features, and functionality are owned by PremCq and protected by copyright, trademark, 
                 and other intellectual property laws. You may not:
               </p>
               <ul className="list-disc pl-6 mb-4 space-y-2">
@@ -156,7 +156,7 @@ export default function TermsOfService() {
             <section className="mb-8">
               <h2 className="text-2xl font-semibold mb-4">10. Limitation of Liability</h2>
               <p className="mb-4">
-                In no event shall PremCQ be liable for any indirect, incidental, special, consequential, or punitive 
+                In no event shall PremCq be liable for any indirect, incidental, special, consequential, or punitive 
                 damages arising out of your use of our services.
               </p>
             </section>
@@ -193,7 +193,7 @@ export default function TermsOfService() {
               <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
                 <p><strong>Email:</strong> legal@premcq.com</p>
                 <p><strong>Phone:</strong> +91 9876543210</p>
-                <p><strong>Address:</strong> PremCQ Technologies Pvt. Ltd., Bangalore, India</p>
+                <p><strong>Address:</strong> PremCq Technologies Pvt. Ltd., Bangalore, India</p>
               </div>
             </section>
           </CardContent>

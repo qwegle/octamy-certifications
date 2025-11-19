@@ -113,7 +113,7 @@ export default function CertificateView() {
   const handleShare = async () => {
     const shareText = `I've earned a professional certificate in ${certificate?.courseTitle}! 
 Score: ${certificate?.score}% 
-Verified by PremCQ Solutions Private Limited
+Verified by PremCq Solutions Private Limited
 View certificate: ${window.location.href}`;
 
     if (navigator.share) {
@@ -189,19 +189,19 @@ View certificate: ${window.location.href}`;
     <div className="min-h-screen bg-black text-white">
       <Header />
 
-      {/* Hero Section with PremCQ Branding */}
+      {/* Hero Section with PremCq Branding */}
       <div className=" py-16 pb-8">
         <div className="container mx-auto px-4 text-center">
           <div className="flex items-center justify-center mb-6">
             <img
               src={premcqLogo}
-              alt="PremCQ Solutions"
+              alt="PremCq Solutions"
               className=" h-16 mr-4"
             />
             <div className="text-left">
               <h1 className="text-3xl font-bold">Professional Certificate</h1>
               <p className="text-gray-400">
-                Verified by PremCQ Solutions Private Limited
+                Verified by PremCq Solutions Private Limited
               </p>
             </div>
           </div>
@@ -431,12 +431,12 @@ View certificate: ${window.location.href}`;
                 <div className="flex items-center mb-3">
                   <img
                     src={premcqLogo}
-                    alt="PremCQ Solutions"
+                    alt="PremCq Solutions"
                     className=" h-12 mr-3"
                   />
                   <div>
                     <p className="font-semibold text-white">
-                      PremCQ Solutions Private Limited
+                      PremCq Solutions Private Limited
                     </p>
                     <p className="text-sm text-gray-400">
                       An ISO Certified Company

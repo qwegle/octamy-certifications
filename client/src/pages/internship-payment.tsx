@@ -86,7 +86,7 @@ export default function InternshipPayment() {
         key: 'rzp_test_9Qg8QVTFCJp9dF', // This should come from environment
         amount: orderData.amount,
         currency: orderData.currency,
-        name: 'PremCQ',
+        name: 'PremCq',
         description: `Virtual Internship Certificate - ${certificate?.courseTitle}`,
         order_id: orderData.id,
         handler: (response: any) => {

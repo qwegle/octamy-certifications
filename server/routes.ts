@@ -2560,7 +2560,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         <meta property="og:title" content="Professional Certificate - ${certificateData.userName}">
         <meta property="og:description" content="Certificate of completion for ${certificateData.courseTitle}">
         <meta property="og:type" content="website">
-        <meta name="description" content="Professional certificate issued by PremCQ Solutions">
+        <meta name="description" content="Professional certificate issued by PremCq Solutions">
         <style>
           .share-controls {
             position: fixed;

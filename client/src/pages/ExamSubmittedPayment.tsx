@@ -158,7 +158,7 @@ export default function ExamSubmittedPayment() {
   return (
     <div className="min-h-screen bg-white">
       <Helmet>
-        <title>Exam Submitted - PremCQ</title>
+        <title>Exam Submitted - PremCq</title>
         <meta name="robots" content="noindex,nofollow" />
       </Helmet>
       

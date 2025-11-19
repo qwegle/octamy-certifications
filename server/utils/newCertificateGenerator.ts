@@ -406,7 +406,7 @@ function generateCertificateHTML(data: CertificateData): string {
   //         <div class="certificate-content">
   //           <div class="header-section">
   //             <div class="company-logo">
-  //               <img src="https://premcq.com/storage/optionbuilder/uploads/554402-14-2025_0143pmpremcq_logo_black.png" alt="PremCQ Logo" style="height: 50px;">
+  //               <img src="https://premcq.com/storage/optionbuilder/uploads/554402-14-2025_0143pmpremcq_logo_black.png" alt="PremCq Logo" style="height: 50px;">
   //             </div>
   //             <div class="company-tagline">Solutions Private Limited</div>
   //             <div style="font-size: 10px; color: #333; font-family: 'Poppins', sans-serif; letter-spacing: 1px;">An ISO Certified Company</div>
@@ -859,7 +859,7 @@ function generateCertificateHTML(data: CertificateData): string {
             <div class="logo-container">
               <img
                 src="/certificateImages/premcq.svg"
-                alt="PremCQ Logo"
+                alt="PremCq Logo"
                 class="logo-image"
               />
             </div>

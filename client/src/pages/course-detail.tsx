@@ -86,7 +86,7 @@ export default function CourseDetail() {
     if (course) {
       document.title =
         course.metaTitle ||
-        `${course.title} - Professional Certification | PremCQ`;
+        `${course.title} - Professional Certification | PremCq`;
 
       // Update meta description
       const metaDescription = document.querySelector(
@@ -194,7 +194,7 @@ export default function CourseDetail() {
                 className="hover:bg-gray-100 dark:hover:bg-gray-900"
               >
                 <span className="text-2xl font-bold text-black dark:text-white">
-                  PremCQ
+                  PremCq
                 </span>
               </Button>
               <ChevronRight className="h-4 w-4 text-gray-400" />

@@ -138,7 +138,7 @@ export default function Contact() {
                     <div>
                       <h3 className="font-semibold text-lg">Office Address</h3>
                       <p className="text-gray-600">
-                        PremCQ Solutions Private Limited<br />
+                        PremCq Solutions Private Limited<br />
                         123 Tech Park, Sector 5<br />
                         Bangalore, Karnataka 560001<br />
                         India

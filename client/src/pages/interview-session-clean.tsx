@@ -299,7 +299,7 @@ export default function InterviewSession() {
       <div className="min-h-screen bg-white">
         <header className="bg-white shadow-sm border-b border-gray-200">
           <div className="container mx-auto px-4 py-4">
-            <h1 className="text-2xl font-bold text-black">PremCQ | AI Interview</h1>
+            <h1 className="text-2xl font-bold text-black">PremCq | AI Interview</h1>
           </div>
         </header>
         <div className="max-w-4xl mx-auto px-4 py-8">
@@ -327,7 +327,7 @@ export default function InterviewSession() {
     <div className="min-h-screen bg-white">
       <header className="bg-white shadow-sm border-b border-gray-200">
         <div className="container mx-auto px-4 py-4">
-          <h1 className="text-2xl font-bold text-black">PremCQ | AI Interview</h1>
+          <h1 className="text-2xl font-bold text-black">PremCq | AI Interview</h1>
         </div>
       </header>
       <div className="max-w-6xl mx-auto px-4 py-6">

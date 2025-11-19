@@ -12,7 +12,7 @@ export default function Footer() {
               <Link href="/" className="text-2xl font-bold">
                 <img
                   src={premcqLogoLight}
-                  alt="PremCQ"
+                  alt="PremCq"
                   className="h-8 dark:block"
                 />
               </Link>
@@ -142,7 +142,7 @@ export default function Footer() {
 
         <div className="border-t border-gray-800 mt-12 pt-8 text-center">
           <p className="text-gray-300">
-            &copy; 2024 PremCQ. All rights reserved.
+            &copy; 2024 PremCq. All rights reserved.
           </p>
         </div>
       </div>

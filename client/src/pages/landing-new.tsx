@@ -876,7 +876,7 @@ export default function Landing() {
             <div>
               <h4 className="font-semibold mb-4">Connect</h4>
               <p className="text-gray-400 mb-4">
-                ISO Certified by PremCQ Solutions Private Limited
+                ISO Certified by PremCq Solutions Private Limited
               </p>
               <div className="flex space-x-4">
                 ⭐⭐⭐⭐⭐
@@ -890,7 +890,7 @@ export default function Landing() {
           </div>
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
             <p>
-              &copy; 2025 PremCQ Solutions Private Limited. All rights reserved.
+              &copy; 2025 PremCq Solutions Private Limited. All rights reserved.
             </p>
           </div>
         </div>

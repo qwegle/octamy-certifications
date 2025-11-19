@@ -28,7 +28,7 @@ export default function Header() {
             <span className="text-2xl font-bold">
               <img
                 src={premcqLogoDark}
-                alt="PremCQ"
+                alt="PremCq"
                 className="h-8"
               />
             </span>

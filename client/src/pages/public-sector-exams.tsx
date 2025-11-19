@@ -76,7 +76,7 @@ export default function PublicSectorExams() {
   return (
     <>
       <Helmet>
-        <title>Public Sector Exam Preparation - UPSC, SSC, Railway, Banking - PremCQ</title>
+        <title>Public Sector Exam Preparation - UPSC, SSC, Railway, Banking - PremCq</title>
         <meta
           name="description"
           content="Prepare for UPSC, IAS, IPS, SSC, Railway, and Banking exams with comprehensive MCQ practice tests. Get instant results and track your preparation progress."

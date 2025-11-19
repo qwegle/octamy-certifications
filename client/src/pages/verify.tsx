@@ -47,7 +47,7 @@ export default function Verify() {
               {" "}
               <img
                 src={premcqLogoLight}
-                alt="PremCQ"
+                alt="PremCq"
                 className="h-8 dark:block"
               />
             </Link>
@@ -252,7 +252,7 @@ export default function Verify() {
 
                   <div className="mt-8 p-4 bg-green-50 rounded-lg">
                     <p className="text-sm text-green-700">
-                      This certificate is authentic and verified by PremCQ
+                      This certificate is authentic and verified by PremCq
                       Solutions Private Limited.
                     </p>
                   </div>

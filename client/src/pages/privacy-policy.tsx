@@ -12,7 +12,7 @@ export default function PrivacyPolicy() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <Button variant="ghost" onClick={() => setLocation("/")}>
-              <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">PremCQ</span>
+              <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">PremCq</span>
             </Button>
             <Button onClick={() => setLocation("/")}>
               Back to Home
@@ -130,7 +130,7 @@ export default function PrivacyPolicy() {
               <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
                 <p><strong>Email:</strong> privacy@premcq.com</p>
                 <p><strong>Phone:</strong> +91 9876543210</p>
-                <p><strong>Address:</strong> PremCQ Technologies Pvt. Ltd., Bangalore, India</p>
+                <p><strong>Address:</strong> PremCq Technologies Pvt. Ltd., Bangalore, India</p>
               </div>
             </section>
           </CardContent>
