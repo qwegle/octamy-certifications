@@ -251,7 +251,7 @@ export default function DemoBusinessCertificate() {
                   Help us continue developing innovative certification solutions. Your support enables us to build better features and reach more learners.
                 </p>
                 <div className="space-y-2">
-                  <Link href="/sponsors">
+                  <Link href="/sponsor">
                     <Button className="w-full bg-black text-white hover:bg-gray-800">
                       Become a Sponsor
                     </Button>

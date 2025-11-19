@@ -22,17 +22,13 @@ import {
   TrendingUp,
   Award,
   CheckCircle,
-  ArrowLeft,
-  Menu,
-  X,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 import { useAuth } from "@/lib/auth";
-// Using available image from assets
-import premcqLogoDark from "@/assets/image_1750054456482.png";
-import premcqLogoLight from "@/assets/image_1750054465427.png";
+import Header from "@/components/header";
+import Footer from "@/components/footer";
 
 const PRESET_AMOUNTS = [1, 10, 100, 1000, 10000, 100000, 1000000];
 
@@ -132,7 +128,6 @@ export default function SponsorPage() {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [isAnonymous, setIsAnonymous] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const { user } = useAuth();
@@ -216,150 +211,7 @@ export default function SponsorPage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-black text-black dark:text-white">
-      {/* Header */}
-      <header className="bg-white dark:bg-black shadow-sm border-b border-black dark:border-white sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Button
-                variant="ghost"
-                onClick={() => setLocation("/")}
-                className="hover:bg-gray-100 dark:hover:bg-gray-900"
-              >
-                <span className="text-2xl font-bold text-black dark:text-white">
-                  <Link href="/" className="text-2xl font-bold">
-                    <img
-                      src={premcqLogoDark}
-                      alt="PremCQ"
-                      className="h-8 dark:none"
-                    />
-                  </Link>
-                </span>
-              </Button>
-            </div>
-
-            {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center space-x-6">
-              <Button
-                variant="ghost"
-                onClick={() => setLocation("/exams")}
-                className="text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-900"
-              >
-                Exams
-              </Button>
-              <Button
-                variant="ghost"
-                onClick={() => setLocation("/virtual-internships")}
-                className="text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-900"
-              >
-                Internships
-              </Button>
-              <Button
-                variant="ghost"
-                onClick={() => setLocation("/business-certifications")}
-                className="text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-900"
-              >
-                Business
-              </Button>
-              {/* <Button
-                variant="ghost"
-                onClick={() => setLocation("/learning-paths")}
-                className="text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-900"
-              >
-                Learning Paths
-              </Button> */}
-            </nav>
-
-            <div className="flex items-center space-x-4">
-              <Button
-                variant="ghost"
-                onClick={() => setLocation("/")}
-                className="hover:bg-gray-100 dark:hover:bg-gray-900"
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back
-              </Button>
-              {user ? (
-                <Button
-                  onClick={() => setLocation("/dashboard")}
-                  className="bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200"
-                >
-                  Dashboard
-                </Button>
-              ) : (
-                <Button
-                  onClick={() => setLocation("/auth")}
-                  className="bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200"
-                >
-                  Sign In
-                </Button>
-              )}
-
-              {/* Mobile menu button */}
-              <Button
-                variant="ghost"
-                size="sm"
-                className="md:hidden"
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              >
-                {mobileMenuOpen ? (
-                  <X className="h-5 w-5" />
-                ) : (
-                  <Menu className="h-5 w-5" />
-                )}
-              </Button>
-            </div>
-          </div>
-
-          {/* Mobile Navigation */}
-          {mobileMenuOpen && (
-            <nav className="md:hidden mt-4 pb-4 border-t border-black dark:border-white pt-4">
-              <div className="flex flex-col space-y-2">
-                <Button
-                  variant="ghost"
-                  onClick={() => {
-                    setLocation("/exams");
-                    setMobileMenuOpen(false);
-                  }}
-                  className="justify-start text-black dark:text-white"
-                >
-                  Exams
-                </Button>
-                <Button
-                  variant="ghost"
-                  onClick={() => {
-                    setLocation("/virtual-internships");
-                    setMobileMenuOpen(false);
-                  }}
-                  className="justify-start text-black dark:text-white"
-                >
-                  Internships
-                </Button>
-                <Button
-                  variant="ghost"
-                  onClick={() => {
-                    setLocation("/business-certifications");
-                    setMobileMenuOpen(false);
-                  }}
-                  className="justify-start text-black dark:text-white"
-                >
-                  Business
-                </Button>
-                <Button
-                  variant="ghost"
-                  onClick={() => {
-                    setLocation("/learning-paths");
-                    setMobileMenuOpen(false);
-                  }}
-                  className="justify-start text-black dark:text-white"
-                >
-                  Learning Paths
-                </Button>
-              </div>
-            </nav>
-          )}
-        </div>
-      </header>
+      <Header />
 
       {/* Hero Section */}
       <div className="bg-black dark:bg-white text-white dark:text-black py-20">
@@ -670,6 +522,7 @@ export default function SponsorPage() {
           </p>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }
