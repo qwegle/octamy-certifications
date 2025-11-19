@@ -39,8 +39,6 @@ import apiRoutes from "./routes/index";
 import certificateRoutes from "./routes/certificateRoutes";
 import { emailService } from "./utils/emailService";
 import { generateCertificateHTML } from "./utils/certificateGenerator";
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
 import { Readable } from "stream";
 import { evaluateAnswersWithAI } from "./utils/openai.js";
 
