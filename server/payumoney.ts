@@ -83,16 +83,33 @@ export class PayUMoneyService {
   private config: PayUMoneyConfig;
 
   constructor() {
+    // Support both PAYUMONEY_SALT and PAYUMONEY_MERCHANT_SALT for backwards compatibility
+    const salt = process.env.PAYUMONEY_MERCHANT_SALT || process.env.PAYUMONEY_SALT || '';
+    
+    // Determine base URL based on mode
+    const mode = process.env.PAYUMONEY_MODE || 'live';
+    const baseUrl = mode === 'test' 
+      ? 'https://test.payu.in/_payment'
+      : 'https://secure.payu.in/_payment';
+    
     this.config = {
       merchantId: process.env.PAYUMONEY_MERCHANT_ID || '',
       merchantKey: process.env.PAYUMONEY_MERCHANT_KEY || '',
-      salt: process.env.PAYUMONEY_SALT || '',
-      baseUrl: 'https://secure.payu.in/_payment'
+      salt,
+      baseUrl
     };
+
+    console.log('PayUMoney Config:', {
+      merchantId: this.config.merchantId ? '***set***' : 'MISSING',
+      merchantKey: this.config.merchantKey ? '***set***' : 'MISSING',
+      salt: this.config.salt ? '***set***' : 'MISSING',
+      mode,
+      baseUrl
+    });
 
     // Only throw error in production
     if (process.env.NODE_ENV === 'production' && (!this.config.merchantId || !this.config.merchantKey || !this.config.salt)) {
-      throw new Error('PayUMoney configuration is incomplete. Please provide PAYUMONEY_MERCHANT_ID, PAYUMONEY_MERCHANT_KEY, and PAYUMONEY_SALT');
+      throw new Error('PayUMoney configuration is incomplete. Please provide PAYUMONEY_MERCHANT_ID, PAYUMONEY_MERCHANT_KEY, and PAYUMONEY_MERCHANT_SALT (or PAYUMONEY_SALT)');
     }
   }
 
