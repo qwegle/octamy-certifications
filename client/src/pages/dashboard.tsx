@@ -493,7 +493,57 @@ export default function Dashboard() {
         )}
 
         {/* Exam History & Improvement Tracking */}
-        {examAttempts.length > 0 && (
+        {examAttemptsLoading ? (
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-black flex items-center gap-2">
+                <BarChart3 className="w-6 h-6" />
+                Your Exam History & Progress
+              </h2>
+            </div>
+            {/* Loading Skeleton */}
+            <Card className="mb-6 border-2 border-gray-200">
+              <CardHeader className="bg-gradient-to-r from-gray-50 to-white">
+                <div className="animate-pulse">
+                  <div className="h-6 bg-gray-200 rounded w-1/3 mb-3"></div>
+                  <div className="flex gap-4">
+                    <div className="h-4 bg-gray-200 rounded w-24"></div>
+                    <div className="h-4 bg-gray-200 rounded w-24"></div>
+                    <div className="h-4 bg-gray-200 rounded w-24"></div>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div>
+                    <div className="h-5 bg-gray-200 rounded w-32 mb-4 animate-pulse"></div>
+                    <div className="space-y-3">
+                      {[1, 2, 3].map((i) => (
+                        <div key={i} className="flex items-center justify-between p-3 bg-gray-50 rounded-md border border-gray-200 animate-pulse">
+                          <div className="flex items-center gap-3">
+                            <div className="w-5 h-5 bg-gray-300 rounded-full"></div>
+                            <div>
+                              <div className="h-4 bg-gray-300 rounded w-16 mb-2"></div>
+                              <div className="h-3 bg-gray-300 rounded w-20"></div>
+                            </div>
+                          </div>
+                          <div className="h-6 bg-gray-300 rounded w-16"></div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-center bg-gray-50 rounded-md border-2 border-dashed border-gray-300 p-8">
+                    <div className="animate-pulse text-center">
+                      <div className="w-12 h-12 bg-gray-300 rounded-full mx-auto mb-3"></div>
+                      <div className="h-5 bg-gray-300 rounded w-32 mx-auto mb-2"></div>
+                      <div className="h-4 bg-gray-300 rounded w-48 mx-auto"></div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        ) : examAttempts.length > 0 ? (
             <div className="mb-8">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-black flex items-center gap-2">
@@ -724,7 +774,7 @@ export default function Dashboard() {
                 });
               })()}
             </div>
-          )}
+          ) : null}
 
           {/* AI Interviews Section - Coming Soon */}
           <div className="mb-8">
