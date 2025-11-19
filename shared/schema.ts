@@ -271,6 +271,8 @@ export const examAttempts = pgTable("exam_attempts", {
   ipAddress: text("ip_address"),
   userAgent: text("user_agent"),
   tabSwitches: integer("tab_switches").default(0).notNull(),
+  resultPaymentStatus: text("result_payment_status").default("pending").notNull(), // pending, paid
+  resultPaymentId: text("result_payment_id"), // PayUMoney transaction ID
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

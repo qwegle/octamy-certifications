@@ -26,6 +26,7 @@ import {
   BarChart3,
   BookOpen,
   Share2,
+  Lock,
 } from "lucide-react";
 import type { Certificate, Interview, ExamAttempt } from "@shared/schema";
 
@@ -482,7 +483,9 @@ export default function Dashboard() {
                     : 0;
 
                   // Prepare data for graph
-                  const graphData = sortedAttempts.map((attempt, index) => ({
+                  // Only include paid attempts in the graph
+                  const paidAttempts = sortedAttempts.filter(attempt => (attempt as any).resultPaymentStatus === "paid");
+                  const graphData = paidAttempts.map((attempt, index) => ({
                     attempt: `Attempt ${index + 1}`,
                     score: attempt.score,
                     date: new Date(attempt.createdAt).toLocaleDateString(),
@@ -534,36 +537,64 @@ export default function Dashboard() {
                           <div>
                             <h4 className="font-semibold text-black mb-4">Recent Attempts</h4>
                             <div className="space-y-3">
-                              {sortedAttempts.slice(-5).reverse().map((attempt, index) => (
-                                <div 
-                                  key={attempt.id} 
-                                  className="flex items-center justify-between p-3 bg-gray-50 rounded-md border border-gray-200"
-                                  data-testid={`card-exam-attempt-${attempt.id}`}
-                                >
-                                  <div className="flex items-center gap-3">
-                                    {attempt.passed ? (
-                                      <CheckCircle className="w-5 h-5 text-green-600" data-testid={`icon-passed-${attempt.id}`} />
-                                    ) : (
-                                      <XCircle className="w-5 h-5 text-red-600" data-testid={`icon-failed-${attempt.id}`} />
-                                    )}
-                                    <div>
-                                      <div className="font-semibold text-black" data-testid={`text-score-${attempt.id}`}>
-                                        {attempt.score}%
-                                      </div>
-                                      <div className="text-xs text-gray-600" data-testid={`text-date-${attempt.id}`}>
-                                        {new Date(attempt.createdAt).toLocaleDateString()}
-                                      </div>
-                                    </div>
-                                  </div>
-                                  <Badge 
-                                    variant={attempt.passed ? "default" : "secondary"}
-                                    className={attempt.passed ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}
-                                    data-testid={`badge-status-${attempt.id}`}
+                              {sortedAttempts.slice(-5).reverse().map((attempt, index) => {
+                                const isPaid = (attempt as any).resultPaymentStatus === "paid";
+                                return (
+                                  <div 
+                                    key={attempt.id} 
+                                    className="flex items-center justify-between p-3 bg-gray-50 rounded-md border border-gray-200"
+                                    data-testid={`card-exam-attempt-${attempt.id}`}
                                   >
-                                    {attempt.passed ? "Passed" : "Failed"}
-                                  </Badge>
-                                </div>
-                              ))}
+                                    {isPaid ? (
+                                      <>
+                                        <div className="flex items-center gap-3">
+                                          {attempt.passed ? (
+                                            <CheckCircle className="w-5 h-5 text-green-600" data-testid={`icon-passed-${attempt.id}`} />
+                                          ) : (
+                                            <XCircle className="w-5 h-5 text-red-600" data-testid={`icon-failed-${attempt.id}`} />
+                                          )}
+                                          <div>
+                                            <div className="font-semibold text-black" data-testid={`text-score-${attempt.id}`}>
+                                              {attempt.score}%
+                                            </div>
+                                            <div className="text-xs text-gray-600" data-testid={`text-date-${attempt.id}`}>
+                                              {new Date(attempt.createdAt).toLocaleDateString()}
+                                            </div>
+                                          </div>
+                                        </div>
+                                        <Badge 
+                                          variant={attempt.passed ? "default" : "secondary"}
+                                          className={attempt.passed ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}
+                                          data-testid={`badge-status-${attempt.id}`}
+                                        >
+                                          {attempt.passed ? "Passed" : "Failed"}
+                                        </Badge>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <div className="flex items-center gap-3">
+                                          <Lock className="w-5 h-5 text-gray-400" data-testid={`icon-locked-${attempt.id}`} />
+                                          <div>
+                                            <div className="font-semibold text-gray-600" data-testid={`text-locked-${attempt.id}`}>
+                                              Results Locked
+                                            </div>
+                                            <div className="text-xs text-gray-500" data-testid={`text-date-${attempt.id}`}>
+                                              {new Date(attempt.createdAt).toLocaleDateString()}
+                                            </div>
+                                          </div>
+                                        </div>
+                                        <Badge 
+                                          variant="secondary"
+                                          className="bg-gray-200 text-gray-700"
+                                          data-testid={`badge-locked-${attempt.id}`}
+                                        >
+                                          Pay ₹29
+                                        </Badge>
+                                      </>
+                                    )}
+                                  </div>
+                                );
+                              })}
                             </div>
                           </div>
 

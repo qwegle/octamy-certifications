@@ -1387,9 +1387,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
           );
         }
 
+        // CRITICAL: Save exam attempt to database with payment information
+        const examAttempt = await storage.createExamAttempt({
+          userId: examData.userId,
+          courseId: examData.courseId,
+          userEmail: examData.userEmail,
+          userName: examData.userName,
+          score: examData.score,
+          totalQuestions: examData.totalQuestions,
+          answers: examData.answers,
+          timeTaken: examData.timeTaken,
+          passed: examData.passed,
+          mastered: examData.mastered,
+          sessionId: examData.sessionId,
+          ipAddress: examData.ipAddress,
+          userAgent: examData.userAgent,
+          tabSwitches: examData.tabSwitches,
+          resultPaymentStatus: "paid", // Mark as paid
+          resultPaymentId: responseData.mihpayid, // Store PayUMoney transaction ID
+        });
+
         // Mark results payment as completed
         examData.hasResultsPayment = true;
-        console.log(`Results viewing payment successful for tempExamId: ${tempExamId}`);
+        examData.examAttemptId = examAttempt.id; // Store the exam attempt ID
+        console.log(`Results viewing payment successful for tempExamId: ${tempExamId}, Exam Attempt ID: ${examAttempt.id}`);
 
         // Redirect to results page
         return res.redirect(
