@@ -132,7 +132,8 @@ export default function Admin() {
         categoryId: '',
         duration: 15,
         passingScore: 50,
-        price: '199.00'
+        price: '199.00',
+        subjects: [], // Include subjects in reset
       });
       toast({
         title: "Success",
@@ -168,7 +169,8 @@ export default function Admin() {
         courseId: selectedCourse || 0,
         question: '',
         options: ['', '', '', ''],
-        correctAnswer: 0
+        correctAnswer: 0,
+        subject: '', // Include subject in reset
       });
       toast({
         title: "Success",
@@ -201,6 +203,7 @@ export default function Admin() {
       duration: newCourse.duration,
       passingScore: newCourse.passingScore,
       price: newCourse.price,
+      subjects: newCourse.subjects.length > 0 ? newCourse.subjects : null, // Include subjects if provided
       isActive: true
     });
   };
@@ -215,11 +218,25 @@ export default function Admin() {
       return;
     }
 
+    // Check if course has subjects and subject is required
+    const selectedCourseData = courses.find(c => c.id === selectedCourse);
+    const hasSubjects = selectedCourseData?.subjects && Array.isArray(selectedCourseData.subjects) && selectedCourseData.subjects.length > 0;
+    
+    if (hasSubjects && !newQuestion.subject) {
+      toast({
+        title: "Validation Error",
+        description: "Please select a subject for this question.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     createQuestionMutation.mutate({
       courseId: selectedCourse,
       question: newQuestion.question,
       options: newQuestion.options,
       correctAnswer: newQuestion.correctAnswer,
+      subject: newQuestion.subject || null, // Include subject if provided
       isActive: true
     });
   };
@@ -387,6 +404,72 @@ export default function Admin() {
                     </div>
                   </div>
 
+                  {/* Multi-Subject Exam Configuration */}
+                  <div className="space-y-3">
+                    <Label>Exam Subjects (Optional - For Government Style Multi-Subject Exams)</Label>
+                    <p className="text-sm text-gray-600">Add subjects like English, Math, GK, Current Affairs for sectional exams</p>
+                    
+                    <div className="flex gap-2">
+                      <Input
+                        value={subjectInput}
+                        onChange={(e) => setSubjectInput(e.target.value)}
+                        placeholder="e.g., English, Math, General Knowledge"
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter' && subjectInput.trim()) {
+                            e.preventDefault();
+                            setNewCourse(prev => ({
+                              ...prev,
+                              subjects: [...prev.subjects, subjectInput.trim()]
+                            }));
+                            setSubjectInput('');
+                          }
+                        }}
+                      />
+                      <Button
+                        type="button"
+                        onClick={() => {
+                          if (subjectInput.trim()) {
+                            setNewCourse(prev => ({
+                              ...prev,
+                              subjects: [...prev.subjects, subjectInput.trim()]
+                            }));
+                            setSubjectInput('');
+                          }
+                        }}
+                        variant="outline"
+                        className="whitespace-nowrap"
+                      >
+                        <Plus className="w-4 h-4 mr-1" />
+                        Add Subject
+                      </Button>
+                    </div>
+
+                    {newCourse.subjects.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {newCourse.subjects.map((subject, index) => (
+                          <div
+                            key={index}
+                            className="bg-gray-100 px-3 py-1 rounded-md flex items-center gap-2"
+                          >
+                            <span className="text-sm font-medium">{subject}</span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setNewCourse(prev => ({
+                                  ...prev,
+                                  subjects: prev.subjects.filter((_, i) => i !== index)
+                                }));
+                              }}
+                              className="text-red-600 hover:text-red-800"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
                   <div className="flex gap-4">
                     <Button
                       onClick={handleCreateCourse}
@@ -487,6 +570,39 @@ export default function Admin() {
                   <CardTitle>Add New Question</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  {/* Subject Selection - Only shown for multi-subject courses */}
+                  {(() => {
+                    const selectedCourseData = courses.find(c => c.id === selectedCourse);
+                    const hasSubjects = selectedCourseData?.subjects && Array.isArray(selectedCourseData.subjects) && selectedCourseData.subjects.length > 0;
+                    
+                    if (hasSubjects) {
+                      return (
+                        <div>
+                          <Label htmlFor="subject">Subject * (Required for multi-subject exam)</Label>
+                          <Select
+                            value={newQuestion.subject}
+                            onValueChange={(value) => setNewQuestion(prev => ({ ...prev, subject: value }))}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select subject" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {selectedCourseData.subjects?.map((subject: string) => (
+                                <SelectItem key={subject} value={subject}>
+                                  {subject}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <p className="text-xs text-gray-600 mt-1">
+                            This question will appear in the "{newQuestion.subject || 'selected'}" section during the exam
+                          </p>
+                        </div>
+                      );
+                    }
+                    return null;
+                  })()}
+
                   <div>
                     <Label htmlFor="question">Question *</Label>
                     <Textarea
