@@ -61,6 +61,8 @@ import {
   CandidateSearch,
   CandidateProfile,
   RecruiterWallet,
+  RecruiterProfile,
+  RecruiterSettings,
   RecruiterProtectedRoute
 } from "../../recruiter";
 import InternShipPayment from "./pages/offlinInternshipPayment.tsx";
