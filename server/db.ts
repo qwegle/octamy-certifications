@@ -1,10 +1,10 @@
-import { Pool } from 'pg';
-import { drizzle } from 'drizzle-orm/node-postgres';
+import { neon } from '@neondatabase/serverless';
+import { drizzle } from 'drizzle-orm/neon-http';
 import * as schema from '@shared/schema';
 
-// Prefer "disable" if SSL is not set up locally
-const databaseUrl = 'postgresql://octamy:Octamy%231234@127.0.0.1:5432/octamydb?sslmode=disable';
+if (!process.env.DATABASE_URL) {
+  throw new Error('DATABASE_URL must be set. Ensure the database is provisioned.');
+}
 
-
-export const pool = new Pool({ connectionString: databaseUrl });
-export const db = drizzle(pool, { schema });
+export const client = neon(process.env.DATABASE_URL);
+export const db = drizzle(client, { schema });

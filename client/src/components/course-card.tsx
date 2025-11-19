@@ -85,8 +85,6 @@ export default function CourseCard({
         return nodejsImage;
       case 'machine-learning-fundamentals':
         return mlImage;
-      case 'data-science-internship':
-        return dataScienceImage;
       case 'python-programming-mastery':
         return pythonImage;
       case 'cloud-computing-essentials':

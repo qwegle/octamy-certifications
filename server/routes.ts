@@ -22,9 +22,10 @@ import {
   interviewResponses,
   users as usersTable,
   contactSubmissions,
+  sellers,
 } from "@shared/schema";
 import { desc, and, eq, not } from "drizzle-orm";
-import { db, pool } from "./db";
+import { db } from "./db";
 import { LearningPathController } from "./controllers/learningPathController";
 import { payuMoneyService } from "./payumoney";
 import {
@@ -207,25 +208,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(400).json({ message: "Partner ID is required" });
         }
 
-        // Always use parameterized queries to prevent SQL injection
-        const result = await pool.query(`SELECT * FROM sellers WHERE id = $1`, [
-          partner_id,
-        ]);
+        // Use Drizzle ORM to query the sellers table
+        const partnerResult = await db
+          .select()
+          .from(sellers)
+          .where(eq(sellers.id, parseInt(partner_id)))
+          .limit(1);
 
-        const partner = result.rows[0];
+        const partner = partnerResult[0];
 
         if (!partner) {
           return res.status(404).json({ message: "Partner not found" });
         }
 
-        if (partner.is_approved) {
+        if (partner.isApproved) {
           return res.status(400).json({ message: "User is already a partner" });
         }
 
-        await pool.query(
-          `UPDATE sellers SET is_approved = true WHERE id = $1`,
-          [partner_id]
-        );
+        await db
+          .update(sellers)
+          .set({ isApproved: true })
+          .where(eq(sellers.id, parseInt(partner_id)));
 
         res
           .status(200)
