@@ -1166,7 +1166,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
         }
 
-        // CRITICAL: DO NOT SAVE TO DATABASE YET - Store in memory for payment processing
+        // CREATE EXAM ATTEMPT IMMEDIATELY WITH UNPAID STATUS
+        // This allows the attempt to appear on dashboard with a lock icon
+        const examAttempt = await storage.createExamAttempt({
+          userId: req.user?.userId || null,
+          courseId,
+          userEmail,
+          userName,
+          score,
+          totalQuestions,
+          answers: answersRecord,
+          timeTaken: finalTimeTaken,
+          passed,
+          mastered,
+          sessionId,
+          ipAddress: req.ip || req.connection?.remoteAddress,
+          userAgent: req.get("User-Agent"),
+          tabSwitches: req.body.tabSwitches || 0,
+          resultPaymentStatus: "unpaid", // Mark as unpaid initially
+          resultPaymentId: null, // Will be filled after payment
+        });
+
+        console.log(`Created unpaid exam attempt ID: ${examAttempt.id} for user: ${req.user?.userId || 'guest'}`);
+
+        // Also store in temp memory for backward compatibility with temp exam flow
         const tempExamId = `temp_${Date.now()}_${Math.random()
           .toString(36)
           .substr(2, 9)}`;
@@ -1193,11 +1216,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           course: course,
           createdAt: new Date(),
           hasResultsPayment: false, // Track if results viewing payment has been made
+          examAttemptId: examAttempt.id, // Link to database record
         };
 
-        // Return comprehensive exam result with temporary ID for payment processing
+        // Return comprehensive exam result with both temp ID and attempt ID
         res.json({
-          tempExamId, // Use temporary ID instead of database ID
+          tempExamId, // Backward compatibility
+          attemptId: examAttempt.id, // Database attempt ID for new payment flow
           score,
           passed,
           correctAnswers,
@@ -1387,30 +1412,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
           );
         }
 
-        // CRITICAL: Save exam attempt to database with payment information
-        const examAttempt = await storage.createExamAttempt({
-          userId: examData.userId,
-          courseId: examData.courseId,
-          userEmail: examData.userEmail,
-          userName: examData.userName,
-          score: examData.score,
-          totalQuestions: examData.totalQuestions,
-          answers: examData.answers,
-          timeTaken: examData.timeTaken,
-          passed: examData.passed,
-          mastered: examData.mastered,
-          sessionId: examData.sessionId,
-          ipAddress: examData.ipAddress,
-          userAgent: examData.userAgent,
-          tabSwitches: examData.tabSwitches,
-          resultPaymentStatus: "paid", // Mark as paid
-          resultPaymentId: responseData.mihpayid, // Store PayUMoney transaction ID
-        });
+        // UPDATE existing exam attempt to mark as paid (instead of creating duplicate)
+        const attemptId = examData.examAttemptId;
+        if (!attemptId) {
+          console.error("No exam attempt ID found in temp data for:", tempExamId);
+          return res.redirect(
+            `${req.protocol}://${req.get("host")}/payment-failed?error=attempt_not_found`
+          );
+        }
+
+        await storage.updateExamAttemptPayment(attemptId, responseData.mihpayid);
 
         // Mark results payment as completed
         examData.hasResultsPayment = true;
-        examData.examAttemptId = examAttempt.id; // Store the exam attempt ID
-        console.log(`Results viewing payment successful for tempExamId: ${tempExamId}, Exam Attempt ID: ${examAttempt.id}`);
+        console.log(`Results viewing payment successful for tempExamId: ${tempExamId}, Exam Attempt ID: ${attemptId}`);
 
         // Redirect to results page
         return res.redirect(
