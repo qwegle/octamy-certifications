@@ -47,6 +47,7 @@ import AdminDashboard from "@/pages/admin-dashboard";
 import EnhancedAdminDashboard from "@/pages/enhanced-admin-dashboard";
 import TempExamResults from "@/pages/TempExamResults";
 import PaymentTemp from "@/pages/PaymentTemp";
+import ExamSubmittedPayment from "@/pages/ExamSubmittedPayment";
 import Contact from "@/pages/contact";
 import TechExams from "@/pages/tech-exams";
 import PublicSectorExams from "@/pages/public-sector-exams";
@@ -89,6 +90,7 @@ function Router() {
       <Route path="/qwegle/dashboard" component={AdminDashboard} />
       <Route path="/enhanced-admin" component={EnhancedAdminDashboard} />
       <Route path="/exam/:slug" component={Exam} />
+      <Route path="/exam-submitted/:tempExamId" component={ExamSubmittedPayment} />
       <Route path="/exam-results-temp/:tempExamId" component={TempExamResults} />
       <Route path="/payment" component={PaymentTemp} />
       <Route path="/checkout/:courseId" component={EnhancedCheckout} />

@@ -1192,6 +1192,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           previousBestScore,
           course: course,
           createdAt: new Date(),
+          hasResultsPayment: false, // Track if results viewing payment has been made
         };
 
         // Return comprehensive exam result with temporary ID for payment processing
@@ -1233,7 +1234,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
             .json({ message: "Exam results not found or expired" });
         }
 
-        // Return exam results for display without database persistence
+        // Check if results viewing payment has been made
+        const hasPayment = examData.hasResultsPayment === true;
+
+        // If payment not made, return minimal info for exam submitted page
+        if (!hasPayment) {
+          return res.json({
+            tempExamId,
+            course: examData.course,
+            totalQuestions: examData.totalQuestions,
+            timeTaken: examData.timeTaken,
+            userEmail: examData.userEmail,
+            userName: examData.userName,
+            hasPayment: false,
+          });
+        }
+
+        // Payment made - return full results
         res.json({
           tempExamId,
           score: examData.score,
@@ -1252,7 +1269,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           message: examData.passed
             ? `Congratulations! You passed with ${examData.score}%`
             : `You scored ${examData.score}%. You need at least ${examData.course.passingScore}% to pass.`,
-          needsPayment: true, // Always true for temp results
+          needsPayment: true, // Always true for certificate if passed
+          hasPayment: true,
         });
       } catch (error) {
         console.error("Error fetching temporary exam results:", error);
@@ -1260,6 +1278,155 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     }
   );
+
+  // Initialize PayUMoney payment for RESULTS VIEWING (INR 29)
+  app.post(
+    "/api/payment/initiate-results",
+    async (req: Request, res: Response) => {
+      try {
+        const {
+          tempExamId,
+          courseId,
+          userEmail,
+          userName,
+          amount, // Should be 29
+          paymentType, // Should be "results_viewing"
+        } = req.body;
+
+        if (!tempExamId) {
+          return res
+            .status(400)
+            .json({ message: "Temporary exam ID is required" });
+        }
+
+        // Get temporary exam data from memory
+        const examData = (global as any).tempExamData?.[tempExamId];
+
+        if (!examData) {
+          return res
+            .status(404)
+            .json({ message: "Exam data not found or expired" });
+        }
+
+        // Check if results payment already made
+        if (examData.hasResultsPayment) {
+          return res
+            .status(400)
+            .json({ message: "Results payment already completed" });
+        }
+
+        const txnid = payuMoneyService.generateTransactionId();
+        const formattedAmount = payuMoneyService.formatAmount("29"); // Fixed INR 29
+
+        console.log("Initiating results viewing payment:", {
+          tempExamId,
+          amount: formattedAmount,
+          userEmail: examData.userEmail,
+        });
+
+        const baseUrl = `${req.protocol}://${req.get("host")}`;
+
+        const paymentData = {
+          txnid,
+          amount: formattedAmount,
+          productinfo: `${examData.course.title} - Exam Results Viewing`,
+          firstname: examData.userName,
+          email: examData.userEmail,
+          phone: "9999999999", // Default phone for results viewing
+          surl: `${baseUrl}/api/payment/success-results`,
+          furl: `${baseUrl}/api/payment/failure-results`,
+          udf1: examData.courseId.toString(),
+          udf2: "0", // No payment DB record for results viewing
+          udf3: "", // No seller code for results viewing
+          udf4: "0", // No user ID required
+          udf5: tempExamId, // Store tempExamId for payment success processing
+        };
+
+        const paymentForm = payuMoneyService.generatePaymentForm(paymentData);
+
+        res.json({
+          success: true,
+          paymentForm,
+          transactionId: txnid,
+          amount: formattedAmount,
+        });
+      } catch (error) {
+        console.error("Error initiating results payment:", error);
+        res.status(500).json({ message: "Failed to initiate payment" });
+      }
+    }
+  );
+
+  // Payment success callback for RESULTS VIEWING
+  app.post("/api/payment/success-results", async (req: Request, res: Response) => {
+    try {
+      const responseData = req.body;
+
+      // Verify hash
+      if (!payuMoneyService.verifyHash(responseData)) {
+        console.error(
+          "Hash verification failed for results viewing transaction:",
+          responseData.txnid
+        );
+        return res.redirect(
+          `${req.protocol}://${req.get("host")}/payment-failed?error=hash_verification_failed`
+        );
+      }
+
+      const status = payuMoneyService.getPaymentStatus(responseData);
+
+      if (status === "success") {
+        const tempExamId = responseData.udf5;
+
+        // Get temporary exam data from memory
+        const examData = (global as any).tempExamData?.[tempExamId];
+        if (!examData) {
+          console.error("Temporary exam data not found for ID:", tempExamId);
+          return res.redirect(
+            `${req.protocol}://${req.get("host")}/payment-failed?error=exam_data_expired`
+          );
+        }
+
+        // Mark results payment as completed
+        examData.hasResultsPayment = true;
+        console.log(`Results viewing payment successful for tempExamId: ${tempExamId}`);
+
+        // Redirect to results page
+        return res.redirect(
+          `${req.protocol}://${req.get("host")}/exam-results-temp/${tempExamId}`
+        );
+      } else {
+        const tempExamId = responseData.udf5;
+        return res.redirect(
+          `${req.protocol}://${req.get("host")}/exam-submitted/${tempExamId}?payment=failed`
+        );
+      }
+    } catch (error) {
+      console.error("Error processing results payment success:", error);
+      return res.redirect(
+        `${req.protocol}://${req.get("host")}/payment-failed?error=processing_failed`
+      );
+    }
+  });
+
+  // Payment failure callback for RESULTS VIEWING
+  app.post("/api/payment/failure-results", async (req: Request, res: Response) => {
+    try {
+      const responseData = req.body;
+      const tempExamId = responseData.udf5;
+      
+      console.log("Results viewing payment failed for tempExamId:", tempExamId);
+      
+      return res.redirect(
+        `${req.protocol}://${req.get("host")}/exam-submitted/${tempExamId}?payment=failed`
+      );
+    } catch (error) {
+      console.error("Error processing results payment failure:", error);
+      return res.redirect(
+        `${req.protocol}://${req.get("host")}/payment-failed?error=processing_failed`
+      );
+    }
+  });
 
   // Initialize PayUMoney payment - PAYMENT-FIRST APPROACH
   app.post(

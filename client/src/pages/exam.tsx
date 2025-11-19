@@ -330,16 +330,15 @@ export default function Exam() {
     onSuccess: async (response) => {
       const result = await response.json();
       
-      // Always redirect to temporary exam results page (payment-first approach)
-      // User will see results and then be prompted to pay regardless of pass/fail
+      // Redirect to exam submitted page - payment required to view results
       if (result.tempExamId) {
-        setLocation(`/exam-results-temp/${result.tempExamId}`);
+        setLocation(`/exam-submitted/${result.tempExamId}`);
       } else {
         // Fallback for any edge cases
         toast({
-          title: result.passed ? "Exam Completed" : "Exam Failed",
-          description: result.message || `You scored ${result.score}%.`,
-          variant: result.passed ? "default" : "destructive",
+          title: "Exam Submitted",
+          description: "Your exam has been submitted successfully.",
+          variant: "default",
         });
       }
     },
