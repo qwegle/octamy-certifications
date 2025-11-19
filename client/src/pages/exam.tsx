@@ -648,7 +648,7 @@ export default function Exam() {
     <div className="min-h-screen bg-gradient-to-b from-white to-premcq-gray-50">
       {/* Elegant Top Bar */}
       <div className="bg-white border-b border-premcq-gray-200 sticky top-0 z-50 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             {/* Left: Course Info */}
             <div className="flex items-center gap-4">
@@ -710,7 +710,7 @@ export default function Exam() {
       {/* Multi-Subject Tabs */}
       {isMultiSubject && subjects && (
         <div className="bg-white border-b border-premcq-gray-200 shadow-sm">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="px-4 sm:px-6 lg:px-8">
             <div className="flex gap-2 overflow-x-auto py-3">
               {subjects.map((subject) => {
                 const subjectQuestions = questions.filter(q => q.subject === subject.name);
@@ -749,7 +749,7 @@ export default function Exam() {
         </div>
       )}
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="px-4 sm:px-6 lg:px-8 py-6">
         <div className="flex gap-6">
           {/* Main Exam Content - Left Side */}
           <Card className="flex-1 shadow-md">
@@ -800,7 +800,14 @@ export default function Exam() {
             <div className="flex justify-between items-center pt-6 border-t">
               <Button
                 variant="outline"
-                onClick={() => setCurrentQuestion(prev => Math.max(0, prev - 1))}
+                onClick={() => {
+                  const newIndex = Math.max(0, currentQuestion - 1);
+                  setCurrentQuestion(newIndex);
+                  // Auto-select subject for the new question
+                  if (isMultiSubject && questions[newIndex]?.subject) {
+                    setCurrentSubject(questions[newIndex].subject);
+                  }
+                }}
                 disabled={currentQuestion === 0}
               >
                 Previous
@@ -820,7 +827,14 @@ export default function Exam() {
                 </Button>
               ) : (
                 <Button
-                  onClick={() => setCurrentQuestion(prev => Math.min(questions.length - 1, prev + 1))}
+                  onClick={() => {
+                    const newIndex = Math.min(questions.length - 1, currentQuestion + 1);
+                    setCurrentQuestion(newIndex);
+                    // Auto-select subject for the new question
+                    if (isMultiSubject && questions[newIndex]?.subject) {
+                      setCurrentSubject(questions[newIndex].subject);
+                    }
+                  }}
                   className="bg-premcq-black text-white hover:bg-premcq-gray-800"
                 >
                   Next Question
@@ -858,7 +872,13 @@ export default function Exam() {
                 return (
                   <button
                     key={q.id}
-                    onClick={() => setCurrentQuestion(actualIndex)}
+                    onClick={() => {
+                      setCurrentQuestion(actualIndex);
+                      // Auto-select the subject tab when clicking a question
+                      if (isMultiSubject && q.subject && q.subject !== currentSubject) {
+                        setCurrentSubject(q.subject);
+                      }
+                    }}
                     data-testid={`question-nav-${displayIndex + 1}`}
                     className={`
                       relative w-12 h-12 rounded-md border-2 flex items-center justify-center text-sm font-semibold transition-all
