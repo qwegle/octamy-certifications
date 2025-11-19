@@ -255,6 +255,12 @@ export const questions = pgTable("questions", {
   maxPoints: integer("max_points").default(100).notNull(), // Points for this question
   difficulty: text("difficulty").default("medium").notNull(), // easy, medium, hard
   subject: varchar("subject", { length: 100 }), // Subject for multi-subject exams (e.g., "English", "Math")
+  explanation: text("explanation"), // Explanation of why the correct answer is correct
+  tags: text("tags").array(), // Tags for categorization and filtering
+  adminNotes: text("admin_notes"), // Internal notes for admins
+  importSource: text("import_source"), // Source of the question (manual, csv_import, excel_import)
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 export const examAttempts = pgTable("exam_attempts", {
@@ -847,8 +853,13 @@ export const insertRatingSchema = createInsertSchema(ratings).omit({
 
 export const insertQuestionSchema = createInsertSchema(questions).omit({
   id: true,
+  createdAt: true,
+  updatedAt: true,
 }).extend({
-  options: z.array(z.string()),
+  options: z.array(z.string()).min(2, "At least 2 options are required").max(6, "Maximum 6 options allowed"),
+  tags: z.array(z.string()).optional(),
+  expectedKeywords: z.array(z.string()).optional(),
+  aiEvaluationCriteria: z.array(z.string()).optional(),
 });
 
 export const insertExamAttemptSchema = createInsertSchema(examAttempts).omit({
