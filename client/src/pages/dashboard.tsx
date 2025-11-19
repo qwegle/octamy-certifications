@@ -218,12 +218,12 @@ export default function Dashboard() {
 
           <Card className="border-2 border-black">
             <CardContent className="p-6 text-center bg-gradient-to-br from-gray-50 to-white">
-              <Brain className="w-10 h-10 text-black mx-auto mb-3" />
+              <Trophy className="w-10 h-10 text-black mx-auto mb-3" />
               <div className="text-3xl font-bold text-black">
-                {userInterviews.length}
+                {activeCertificates.length}
               </div>
               <div className="text-sm text-gray-600 font-medium">
-                AI Interviews Taken
+                Active Certifications
               </div>
             </CardContent>
           </Card>
@@ -424,123 +424,23 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* AI Interviews Section */}
+          {/* AI Interviews Section - Coming Soon */}
           <div className="mb-8">
-            <div className="flex items-center md:flex-row flex-col gap-4 justify-between mb-6">
-              <h2 className="text-2xl font-bold text-black">AI Interviews</h2>
-              <div className="flex gap-3">
-                {recentInterviews.length > 0 && (
-                  <Link href="/ai-interviews">
-                    <Button
-                      variant="outline"
-                      className="border-black text-black hover:bg-gray-100"
-                    >
-                      <History className="w-4 h-4 mr-2" />
-                      View History
-                    </Button>
-                  </Link>
-                )}
-                <Link href="/ai-interviews">
-                  <Button className="bg-black text-white hover:bg-gray-800">
-                    <Play className="w-4 h-4 mr-2" />
-                    Start Interview Now
-                  </Button>
-                </Link>
-              </div>
-            </div>
-
-            {/* Recent Interviews Horizontal Scroll */}
-            {recentInterviews.length > 0 ? (
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold text-black mb-4">
-                  Recent Interview Results
+            <h2 className="text-2xl font-bold text-black mb-6">AI Interviews</h2>
+            <Card className="border-2 border-dashed border-gray-300 bg-gray-50">
+              <CardContent className="p-12 text-center">
+                <Brain className="w-20 h-20 text-gray-400 mx-auto mb-4 opacity-50" />
+                <h3 className="text-2xl font-bold text-black mb-3">
+                  Coming Soon
                 </h3>
-                <div className="flex gap-4 overflow-x-auto pb-4">
-                  {recentInterviews.map((interview) => (
-                    <Card
-                      key={interview.id}
-                      className="flex-shrink-0 w-80 border-2 border-gray-200 hover:border-black transition-colors"
-                    >
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-between mb-3">
-                          <h4 className="font-semibold text-black">
-                            {interview.technology}
-                          </h4>
-                          <span
-                            className={`px-2 py-1 rounded text-sm font-medium ${
-                              interview.grade?.startsWith("A")
-                                ? "bg-green-100 text-green-800"
-                                : interview.grade?.startsWith("B")
-                                ? "bg-blue-100 text-blue-800"
-                                : interview.grade?.startsWith("C")
-                                ? "bg-yellow-100 text-yellow-800"
-                                : "bg-red-100 text-red-800"
-                            }`}
-                          >
-                            Grade {interview.grade}
-                          </span>
-                        </div>
-                        <div className="text-2xl font-bold text-black mb-2">
-                          {interview.score}/100
-                        </div>
-                        <div className="text-sm text-gray-600 mb-3">
-                          Completed on{" "}
-                          {new Date(
-                            interview.completedAt!
-                          ).toLocaleDateString()}
-                        </div>
-                        <Link href="/ai-interviews">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="w-full border-black text-black hover:bg-black hover:text-white"
-                          >
-                            View Details <ArrowRight className="w-3 h-3 ml-1" />
-                          </Button>
-                        </Link>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <Card className="border-2 border-black mb-6">
-                <CardContent className="p-8 text-center">
-                  <Brain className="w-16 h-16 text-black mx-auto mb-4" />
-                  <h3 className="text-xl font-bold text-black mb-2">
-                    Start Your First AI Interview
-                  </h3>
-                  <p className="text-gray-600 mb-6">
-                    Get personalized feedback, score analysis, and shareable
-                    results for recruiters
-                  </p>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-black">5-7</div>
-                      <div className="text-sm text-gray-600">
-                        Technical Questions
-                      </div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-black">45-60</div>
-                      <div className="text-sm text-gray-600">
-                        Minutes Duration
-                      </div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-black">₹99</div>
-                      <div className="text-sm text-gray-600">Per Session</div>
-                    </div>
-                  </div>
-                  <Link href="/ai-interviews">
-                    <Button className="bg-black text-white hover:bg-gray-800 px-8">
-                      <Play className="w-4 h-4 mr-2" />
-                      Start Your First Interview
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
-            )}
+                <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+                  AI-powered interview platform is under development. Soon you'll be able to practice technical interviews with instant AI feedback and scoring.
+                </p>
+                <Badge variant="secondary" className="mt-6 text-base px-6 py-2 bg-black text-white">
+                  Feature in Development
+                </Badge>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Empty State */}
