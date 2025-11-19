@@ -34,7 +34,7 @@ import bg2 from "@/assets/octamy-bg-2.png";
 import bg1 from "@/assets/octamy-bg-3.png";
 import bg3 from "@/assets/octamy-bg-4.png";
 import bg4 from "@/assets/octamy-bg-5.png";
-import octamyLogoLight from "@/assets/image_1750054465427.png";
+import premCQLogoLight from "@/assets/image_1750054465427.png";
 // Certificate Slider Component with infinite auto-scroll
 function CertificateSlider() {
   const { data: certificates = [] } = useQuery<any[]>({
@@ -342,8 +342,8 @@ export default function Landing() {
           <div className="flex items-center space-x-8">
             <Link href="/" className="text-2xl font-bold">
               <img
-                src={octamyLogoLight}
-                alt="Octamy"
+                src={premCQLogoLight}
+                alt="PremCQ"
                 className="h-8 dark:block"
               />
             </Link>
@@ -412,38 +412,104 @@ export default function Landing() {
       {/* Certificate Slider */}
       <CertificateSlider />
       {/* Hero Section */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-6 text-center">
-          <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold text-black mb-6">
-            PROFESSIONAL
-            <br />
-            <span className="bg-black text-white px-4 py-2 inline-block mt-2">
-              CERTIFICATION
-            </span>
-          </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            Earn verified certificates from industry experts. Build your
-            credibility with performance-based badges and join our global
-            leaderboard.
-          </p>
-          <div className="flex md:flex-row flex-col space-y-4 justify-center md:space-x-4 md:space-y-0">
-            <Link href={isAuthenticated ? "/exams" : "/auth"}>
-              <Button
-                size="lg"
-                className="bg-black text-white hover:bg-gray-800 px-8 py-4 text-lg"
-              >
-                Get Started <ArrowRight className="ml-2 w-5 h-5" />
-              </Button>
-            </Link>
-            <Link href="/partners">
-              <Button
-                variant="outline"
-                size="lg"
-                className="border-black text-black hover:bg-black hover:text-white px-8 py-4 text-lg"
-              >
-                Become a Partner
-              </Button>
-            </Link>
+      <section className="py-20 bg-gradient-to-br from-gray-50 via-white to-gray-50">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div className="text-left">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-black mb-6 leading-tight">
+                India's Premier
+                <br />
+                <span className="bg-black text-white px-4 py-2 inline-block mt-2">
+                  MCQ CERTIFICATION
+                </span>
+                <br />
+                Platform
+              </h1>
+              <p className="text-lg text-gray-600 mb-8 max-w-xl">
+                Master your skills through rigorous MCQ assessments. Get certified in Technology, Public Sector Exams, and Professional domains with instant verification and lifetime access.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 mb-8">
+                <Link href="/tech-exams">
+                  <Button
+                    size="lg"
+                    className="bg-black text-white hover:bg-gray-800 px-8 py-4 text-lg w-full sm:w-auto"
+                  >
+                    Tech Certifications <ArrowRight className="ml-2 w-5 h-5" />
+                  </Button>
+                </Link>
+                <Link href="/public-sector-exams">
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className="border-black text-black hover:bg-black hover:text-white px-8 py-4 text-lg w-full sm:w-auto"
+                  >
+                    Public Sector Exams
+                  </Button>
+                </Link>
+              </div>
+              <div className="flex items-center gap-6 text-sm text-gray-600">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5 text-green-600" />
+                  <span>Instant Certificates</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5 text-green-600" />
+                  <span>Performance Badges</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5 text-green-600" />
+                  <span>Verified Results</span>
+                </div>
+              </div>
+            </div>
+            <div className="hidden lg:block">
+              <div className="grid grid-cols-2 gap-4">
+                <Card className="border-2 border-black hover:shadow-lg transition-shadow">
+                  <CardHeader className="pb-3">
+                    <div className="w-12 h-12 bg-black rounded-lg flex items-center justify-center mb-2">
+                      <Monitor className="w-6 h-6 text-white" />
+                    </div>
+                    <CardTitle className="text-lg">Technology</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-gray-600">Web Dev, AI/ML, Data Science & More</p>
+                  </CardContent>
+                </Card>
+                <Card className="border-2 border-black hover:shadow-lg transition-shadow mt-8">
+                  <CardHeader className="pb-3">
+                    <div className="w-12 h-12 bg-black rounded-lg flex items-center justify-center mb-2">
+                      <Award className="w-6 h-6 text-white" />
+                    </div>
+                    <CardTitle className="text-lg">Public Sector</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-gray-600">UPSC, SSC, Railway, Banking</p>
+                  </CardContent>
+                </Card>
+                <Card className="border-2 border-black hover:shadow-lg transition-shadow">
+                  <CardHeader className="pb-3">
+                    <div className="w-12 h-12 bg-black rounded-lg flex items-center justify-center mb-2">
+                      <Brain className="w-6 h-6 text-white" />
+                    </div>
+                    <CardTitle className="text-lg">AI Powered</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-gray-600">Intelligent Question Selection</p>
+                  </CardContent>
+                </Card>
+                <Card className="border-2 border-black hover:shadow-lg transition-shadow mt-8">
+                  <CardHeader className="pb-3">
+                    <div className="w-12 h-12 bg-black rounded-lg flex items-center justify-center mb-2">
+                      <Users className="w-6 h-6 text-white" />
+                    </div>
+                    <CardTitle className="text-lg">50K+ Users</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-gray-600">Join Our Learning Community</p>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -480,7 +546,7 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold text-black mb-6">
-              Choose Your Assessment
+              Choose Your Certification
             </h2>
             <div className="max-w-md mx-auto">
               <div className="relative">
@@ -801,7 +867,7 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
-              <h3 className="text-2xl font-bold mb-4">OCTAMY</h3>
+              <h3 className="text-2xl font-bold mb-4">PREMCQ</h3>
               <p className="text-gray-400">
                 Professional certification platform for the modern workforce.
               </p>
@@ -859,7 +925,7 @@ export default function Landing() {
             <div>
               <h4 className="font-semibold mb-4">Connect</h4>
               <p className="text-gray-400 mb-4">
-                ISO Certified by Octamy Solutions Private Limited
+                ISO Certified by PremCQ Solutions Private Limited
               </p>
               <div className="flex space-x-4">
                 ⭐⭐⭐⭐⭐
@@ -873,7 +939,7 @@ export default function Landing() {
           </div>
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
             <p>
-              &copy; 2025 Octamy Solutions Private Limited. All rights reserved.
+              &copy; 2025 PremCQ Solutions Private Limited. All rights reserved.
             </p>
           </div>
         </div>

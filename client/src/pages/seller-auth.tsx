@@ -67,12 +67,12 @@ export default function SellerAuth() {
   return (
     <>
       <Helmet>
-        <title>{isLogin ? 'Partner Login - Octamy' : 'Become a Partner - Octamy Reseller Program'}</title>
+        <title>{isLogin ? 'Partner Login - PremCQ' : 'Become a Partner - PremCQ Reseller Program'}</title>
         <meta 
           name="description" 
           content={isLogin 
-            ? 'Sign in to your Octamy partner account to access your dashboard, track earnings, and manage your reseller business.'
-            : 'Join the Octamy Partner Program and earn 10% commission on every sale. Get real-time analytics, dedicated support, and flexible payment options.'
+            ? 'Sign in to your PremCQ partner account to access your dashboard, track earnings, and manage your reseller business.'
+            : 'Join the PremCQ Partner Program and earn 10% commission on every sale. Get real-time analytics, dedicated support, and flexible payment options.'
           } 
         />
       </Helmet>
@@ -85,14 +85,14 @@ export default function SellerAuth() {
             <div className="max-w-4xl mx-auto text-center space-y-6">
               <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium">
                 <Award className="h-4 w-4" />
-                Octamy Partner Program
+                PremCQ Partner Program
               </div>
               <h1 className="text-4xl lg:text-6xl font-bold text-foreground">
                 {isLogin ? 'Welcome Back, Partner' : 'Earn While You Empower'}
               </h1>
               <p className="text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto">
                 {isLogin 
-                  ? 'Access your partner dashboard to track earnings, manage referrals, and grow your business with Octamy.'
+                  ? 'Access your partner dashboard to track earnings, manage referrals, and grow your business with PremCQ.'
                   : 'Join thousands of partners earning passive income by helping professionals get certified. Start earning 10% commission on every sale today.'
                 }
               </p>
@@ -122,7 +122,7 @@ export default function SellerAuth() {
               {!isLogin && (
                 <>
                   <div className="space-y-6">
-                    <h2 className="text-3xl font-bold text-foreground">Why Partner With Octamy?</h2>
+                    <h2 className="text-3xl font-bold text-foreground">Why Partner With PremCQ?</h2>
                     
                     <div className="grid gap-4">
                       <div className="flex gap-4" data-testid="benefit-commission">

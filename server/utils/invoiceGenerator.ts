@@ -159,10 +159,10 @@ export async function generateInvoicePDF(invoiceData: InvoiceData): Promise<Buff
         <div class="invoice-container">
           <div class="header">
             <div class="company-info">
-              <h1>OCTAMY SOLUTIONS</h1>
+              <h1>PREMCQ SOLUTIONS</h1>
               <p>Professional Certification Platform</p>
-              <p>Email: support@octamy.com</p>
-              <p>Website: www.octamy.com</p>
+              <p>Email: support@premcq.com</p>
+              <p>Website: www.premcq.com</p>
             </div>
             <div class="invoice-title">
               <h2>INVOICE</h2>
@@ -254,10 +254,10 @@ export async function generateInvoicePDF(invoiceData: InvoiceData): Promise<Buff
           ` : ''}
 
           <div class="footer">
-            <p><strong>Thank you for choosing Octamy Solutions!</strong></p>
+            <p><strong>Thank you for choosing PremCQ Solutions!</strong></p>
             <p>This is a computer-generated invoice. No signature required.</p>
-            <p>For support inquiries, please contact us at support@octamy.com with your transaction ID.</p>
-            <p style="margin-top: 10px;">© ${new Date().getFullYear()} Octamy Solutions. All rights reserved.</p>
+            <p>For support inquiries, please contact us at support@premcq.com with your transaction ID.</p>
+            <p style="margin-top: 10px;">© ${new Date().getFullYear()} PremCQ Solutions. All rights reserved.</p>
           </div>
         </div>
       </body>

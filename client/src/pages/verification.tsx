@@ -65,19 +65,19 @@ export default function Verification() {
       <Header />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-octamy-black mb-4">Verify Certificate</h1>
-          <p className="text-xl text-octamy-gray-600">
+          <h1 className="text-4xl font-bold text-premcq-black mb-4">Verify Certificate</h1>
+          <p className="text-xl text-premcq-gray-600">
             Enter certificate ID to verify authenticity and validity
           </p>
         </div>
 
         <Card className="mb-8">
           <CardHeader>
-            <CardTitle className="text-octamy-black">Certificate Verification</CardTitle>
+            <CardTitle className="text-premcq-black">Certificate Verification</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="max-w-md mx-auto">
-              <Label htmlFor="certificate-id" className="text-octamy-black">
+              <Label htmlFor="certificate-id" className="text-premcq-black">
                 Certificate ID
               </Label>
               <div className="flex gap-4 mt-2">
@@ -87,19 +87,19 @@ export default function Verification() {
                   placeholder="Enter certificate ID"
                   value={certificateId}
                   onChange={(e) => setCertificateId(e.target.value)}
-                  className="flex-1 focus:ring-2 focus:ring-octamy-black focus:border-transparent"
+                  className="flex-1 focus:ring-2 focus:ring-premcq-black focus:border-transparent"
                   onKeyDown={(e) => e.key === 'Enter' && handleVerify()}
                 />
                 <Button
                   onClick={handleVerify}
                   disabled={verifyMutation.isPending}
-                  className="bg-octamy-black text-white hover:bg-octamy-gray-800"
+                  className="bg-premcq-black text-white hover:bg-premcq-gray-800"
                 >
                   <Search className="w-4 h-4 mr-2" />
                   {verifyMutation.isPending ? 'Verifying...' : 'Verify'}
                 </Button>
               </div>
-              <p className="text-sm text-octamy-gray-500 mt-2">
+              <p className="text-sm text-premcq-gray-500 mt-2">
                 Example: OCT-2024-ML-123456
               </p>
             </div>
@@ -127,30 +127,30 @@ export default function Verification() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                       <div className="flex items-center">
-                        <span className="font-medium text-octamy-gray-700 mr-2">Name:</span>
+                        <span className="font-medium text-premcq-gray-700 mr-2">Name:</span>
                         <span>{verificationResult.userName}</span>
                       </div>
                       <div className="flex items-center">
-                        <span className="font-medium text-octamy-gray-700 mr-2">Course:</span>
+                        <span className="font-medium text-premcq-gray-700 mr-2">Course:</span>
                         <span>{verificationResult.courseTitle}</span>
                       </div>
                       <div className="flex items-center">
-                        <Trophy className="w-4 h-4 text-octamy-gray-600 mr-1" />
-                        <span className="font-medium text-octamy-gray-700 mr-2">Score:</span>
+                        <Trophy className="w-4 h-4 text-premcq-gray-600 mr-1" />
+                        <span className="font-medium text-premcq-gray-700 mr-2">Score:</span>
                         <span>{verificationResult.score}%</span>
                       </div>
                       <div className="flex items-center">
-                        <Calendar className="w-4 h-4 text-octamy-gray-600 mr-1" />
-                        <span className="font-medium text-octamy-gray-700 mr-2">Issued:</span>
+                        <Calendar className="w-4 h-4 text-premcq-gray-600 mr-1" />
+                        <span className="font-medium text-premcq-gray-700 mr-2">Issued:</span>
                         <span>{new Date(verificationResult.issuedAt).toLocaleDateString()}</span>
                       </div>
                       <div className="flex items-center">
-                        <Award className="w-4 h-4 text-octamy-gray-600 mr-1" />
-                        <span className="font-medium text-octamy-gray-700 mr-2">Valid Until:</span>
+                        <Award className="w-4 h-4 text-premcq-gray-600 mr-1" />
+                        <span className="font-medium text-premcq-gray-700 mr-2">Valid Until:</span>
                         <span>{new Date(verificationResult.expiresAt).toLocaleDateString()}</span>
                       </div>
                       <div className="flex items-center">
-                        <span className="font-medium text-octamy-gray-700 mr-2">Status:</span>
+                        <span className="font-medium text-premcq-gray-700 mr-2">Status:</span>
                         <Badge variant={isValid ? "default" : "destructive"}>
                           {isValid ? 'Valid' : 
                            !verificationResult.isPaid ? 'Unpaid' : 
@@ -162,14 +162,14 @@ export default function Verification() {
                     <div className="flex flex-col sm:flex-row gap-4">
                       <Button
                         onClick={() => window.open(`/certificates/${verificationResult.certificateId}`, '_blank')}
-                        className="bg-octamy-black text-white hover:bg-octamy-gray-800"
+                        className="bg-premcq-black text-white hover:bg-premcq-gray-800"
                       >
                         View Full Certificate
                       </Button>
                       <Button
                         variant="outline"
                         onClick={handleReset}
-                        className="border-octamy-gray-300 text-octamy-black hover:bg-octamy-gray-50"
+                        className="border-premcq-gray-300 text-premcq-black hover:bg-premcq-gray-50"
                       >
                         Verify Another Certificate
                       </Button>
@@ -203,13 +203,13 @@ export default function Verification() {
         {/* Information Section */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-octamy-black">About Certificate Verification</CardTitle>
+            <CardTitle className="text-premcq-black">About Certificate Verification</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4 text-octamy-gray-600">
+            <div className="space-y-4 text-premcq-gray-600">
               <p>
                 Our certificate verification system allows you to instantly verify the authenticity 
-                and validity of any Octamy certificate using its unique certificate ID.
+                and validity of any PremCQ certificate using its unique certificate ID.
               </p>
               <ul className="list-disc list-inside space-y-2">
                 <li>All certificates are issued with a unique identifier</li>

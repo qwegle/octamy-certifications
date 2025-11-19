@@ -23,18 +23,18 @@
   --destructive-foreground: hsl(0, 0%, 98%);
   --ring: hsl(0, 0%, 0%);
   --radius: 0.5rem;
-  --octamy-black: hsl(0, 0%, 0%);
-  --octamy-white: hsl(0, 0%, 100%);
-  --octamy-gray-50: hsl(0, 0%, 97%);
-  --octamy-gray-100: hsl(0, 0%, 91%);
-  --octamy-gray-200: hsl(0, 0%, 87%);
-  --octamy-gray-300: hsl(0, 0%, 80%);
-  --octamy-gray-400: hsl(0, 0%, 68%);
-  --octamy-gray-500: hsl(0, 0%, 42%);
-  --octamy-gray-600: hsl(0, 0%, 29%);
-  --octamy-gray-700: hsl(0, 0%, 20%);
-  --octamy-gray-800: hsl(0, 0%, 13%);
-  --octamy-gray-900: hsl(0, 0%, 0%);
+  --premcq-black: hsl(0, 0%, 0%);
+  --premcq-white: hsl(0, 0%, 100%);
+  --premcq-gray-50: hsl(0, 0%, 97%);
+  --premcq-gray-100: hsl(0, 0%, 91%);
+  --premcq-gray-200: hsl(0, 0%, 87%);
+  --premcq-gray-300: hsl(0, 0%, 80%);
+  --premcq-gray-400: hsl(0, 0%, 68%);
+  --premcq-gray-500: hsl(0, 0%, 42%);
+  --premcq-gray-600: hsl(0, 0%, 29%);
+  --premcq-gray-700: hsl(0, 0%, 20%);
+  --premcq-gray-800: hsl(0, 0%, 13%);
+  --premcq-gray-900: hsl(0, 0%, 0%);
 }
 
 /* Certificate Auto-Scroll Animation */
@@ -85,71 +85,71 @@
 }
 
 @layer utilities {
-  .octamy-black {
-    color: var(--octamy-black);
+  .premcq-black {
+    color: var(--premcq-black);
   }
   
-  .octamy-white {
-    color: var(--octamy-white);
+  .premcq-white {
+    color: var(--premcq-white);
   }
   
-  .bg-octamy-black {
-    background-color: var(--octamy-black);
+  .bg-premcq-black {
+    background-color: var(--premcq-black);
   }
   
-  .bg-octamy-white {
-    background-color: var(--octamy-white);
+  .bg-premcq-white {
+    background-color: var(--premcq-white);
   }
   
-  .bg-octamy-gray-50 {
-    background-color: var(--octamy-gray-50);
+  .bg-premcq-gray-50 {
+    background-color: var(--premcq-gray-50);
   }
   
-  .bg-octamy-gray-100 {
-    background-color: var(--octamy-gray-100);
+  .bg-premcq-gray-100 {
+    background-color: var(--premcq-gray-100);
   }
   
-  .bg-octamy-gray-200 {
-    background-color: var(--octamy-gray-200);
+  .bg-premcq-gray-200 {
+    background-color: var(--premcq-gray-200);
   }
   
-  .bg-octamy-gray-800 {
-    background-color: var(--octamy-gray-800);
+  .bg-premcq-gray-800 {
+    background-color: var(--premcq-gray-800);
   }
   
-  .text-octamy-black {
-    color: var(--octamy-black);
+  .text-premcq-black {
+    color: var(--premcq-black);
   }
   
-  .text-octamy-white {
-    color: var(--octamy-white);
+  .text-premcq-white {
+    color: var(--premcq-white);
   }
   
-  .text-octamy-gray-500 {
-    color: var(--octamy-gray-500);
+  .text-premcq-gray-500 {
+    color: var(--premcq-gray-500);
   }
   
-  .text-octamy-gray-600 {
-    color: var(--octamy-gray-600);
+  .text-premcq-gray-600 {
+    color: var(--premcq-gray-600);
   }
   
-  .border-octamy-gray-200 {
-    border-color: var(--octamy-gray-200);
+  .border-premcq-gray-200 {
+    border-color: var(--premcq-gray-200);
   }
   
-  .border-octamy-gray-300 {
-    border-color: var(--octamy-gray-300);
+  .border-premcq-gray-300 {
+    border-color: var(--premcq-gray-300);
   }
   
-  .hover\:bg-octamy-gray-50:hover {
-    background-color: var(--octamy-gray-50);
+  .hover\:bg-premcq-gray-50:hover {
+    background-color: var(--premcq-gray-50);
   }
   
-  .hover\:bg-octamy-gray-800:hover {
-    background-color: var(--octamy-gray-800);
+  .hover\:bg-premcq-gray-800:hover {
+    background-color: var(--premcq-gray-800);
   }
   
-  .hover\:text-octamy-black:hover {
-    color: var(--octamy-black);
+  .hover\:text-premcq-black:hover {
+    color: var(--premcq-black);
   }
 }

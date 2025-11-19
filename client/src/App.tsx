@@ -48,6 +48,8 @@ import EnhancedAdminDashboard from "@/pages/enhanced-admin-dashboard";
 import TempExamResults from "@/pages/TempExamResults";
 import PaymentTemp from "@/pages/PaymentTemp";
 import Contact from "@/pages/contact";
+import TechExams from "@/pages/tech-exams";
+import PublicSectorExams from "@/pages/public-sector-exams";
 
 
 // Recruiter Portal Components
@@ -72,6 +74,8 @@ function Router() {
       <Route path="/register" component={Auth} />
       <Route path="/logout" component={Auth} />
       <Route path="/exams" component={Courses} />
+      <Route path="/tech-exams" component={TechExams} />
+      <Route path="/public-sector-exams" component={PublicSectorExams} />
       <Route path="/virtual-internships" component={VirtualInternships} />
       <Route path="/business-certifications" component={BusinessCertificationsPage} />
       <Route path="/learning-paths" component={LearningPaths} />

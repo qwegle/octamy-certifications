@@ -61,7 +61,7 @@ export default function Landing() {
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-8">
               <Link href="/">
-                <h1 className="text-3xl font-bold tracking-tight">OCTAMY</h1>
+                <h1 className="text-3xl font-bold tracking-tight">PREMCQ</h1>
               </Link>
               <nav className="hidden md:flex space-x-8">
                 <Link href="/" className="hover:text-gray-300 transition-colors">Courses</Link>
@@ -228,8 +228,8 @@ export default function Landing() {
       <section id="courses" className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-octamy-black mb-4">Choose Your Path</h2>
-            <p className="text-xl text-octamy-gray-600 max-w-2xl mx-auto">
+            <h2 className="text-4xl font-bold text-premcq-black mb-4">Choose Your Path</h2>
+            <p className="text-xl text-premcq-gray-600 max-w-2xl mx-auto">
               Select from our carefully curated certification categories and take the first step towards professional growth.
             </p>
           </div>
@@ -242,9 +242,9 @@ export default function Landing() {
                 placeholder="Search certifications..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-4 text-lg focus:ring-2 focus:ring-octamy-black focus:border-transparent"
+                className="w-full pl-12 pr-4 py-4 text-lg focus:ring-2 focus:ring-premcq-black focus:border-transparent"
               />
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-octamy-gray-400 w-5 h-5" />
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-premcq-gray-400 w-5 h-5" />
             </div>
           </div>
 
@@ -305,11 +305,11 @@ export default function Landing() {
       </section>
 
       {/* Popular Certifications */}
-      <section id="popular-certifications" className="bg-octamy-gray-50 py-20">
+      <section id="popular-certifications" className="bg-premcq-gray-50 py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-octamy-black mb-4">Popular Certifications</h2>
-            <p className="text-xl text-octamy-gray-600 max-w-2xl mx-auto">
+            <h2 className="text-4xl font-bold text-premcq-black mb-4">Popular Certifications</h2>
+            <p className="text-xl text-premcq-gray-600 max-w-2xl mx-auto">
               Start with our most popular certifications across different skill levels and advance your career today.
             </p>
           </div>
@@ -322,7 +322,7 @@ export default function Landing() {
 
           {filteredCourses.length > 6 && (
             <div className="text-center mt-12">
-              <Button variant="outline" className="border-octamy-black text-octamy-black px-8 py-3 text-lg font-semibold hover:bg-octamy-black hover:text-white">
+              <Button variant="outline" className="border-premcq-black text-premcq-black px-8 py-3 text-lg font-semibold hover:bg-premcq-black hover:text-white">
                 View All {filteredCourses.length} Certifications
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
@@ -336,32 +336,32 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
             <div className="text-center">
-              <div className="w-16 h-16 bg-octamy-black rounded-full flex items-center justify-center mx-auto mb-6">
+              <div className="w-16 h-16 bg-premcq-black rounded-full flex items-center justify-center mx-auto mb-6">
                 <CheckCircle className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-2xl font-bold text-octamy-black mb-4">Industry Recognized</h3>
-              <p className="text-octamy-gray-600">
+              <h3 className="text-2xl font-bold text-premcq-black mb-4">Industry Recognized</h3>
+              <p className="text-premcq-gray-600">
                 Our certificates are recognized by leading companies and help advance your career.
               </p>
             </div>
             
             <div className="text-center">
-              <div className="w-16 h-16 bg-octamy-black rounded-full flex items-center justify-center mx-auto mb-6">
+              <div className="w-16 h-16 bg-premcq-black rounded-full flex items-center justify-center mx-auto mb-6">
                 <Clock className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-2xl font-bold text-octamy-black mb-4">Quick Assessment</h3>
-              <p className="text-octamy-gray-600">
+              <h3 className="text-2xl font-bold text-premcq-black mb-4">Quick Assessment</h3>
+              <p className="text-premcq-gray-600">
                 Complete your certification in 15-45 minutes with our efficient assessment system.
               </p>
             </div>
             
             <div className="text-center">
-              <div className="w-16 h-16 bg-octamy-black rounded-full flex items-center justify-center mx-auto mb-6">
+              <div className="w-16 h-16 bg-premcq-black rounded-full flex items-center justify-center mx-auto mb-6">
                 <Users className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-2xl font-bold text-octamy-black mb-4">Trusted by 10k+</h3>
-              <p className="text-octamy-gray-600">
-                Join thousands of professionals who have advanced their careers with Octamy.
+              <h3 className="text-2xl font-bold text-premcq-black mb-4">Trusted by 10k+</h3>
+              <p className="text-premcq-gray-600">
+                Join thousands of professionals who have advanced their careers with PremCQ.
               </p>
             </div>
           </div>

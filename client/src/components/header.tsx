@@ -3,8 +3,8 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth.tsx";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
-import octamyLogoDark from "@/assets/image_1750054456482.png";
-import octamyLogoLight from "@/assets/image_1750054465427.png";
+import premcqLogoDark from "@/assets/image_1750054456482.png";
+import premcqLogoLight from "@/assets/image_1750054465427.png";
 export default function Header() {
   const { user, token, logout: authLogout, isLoading } = useAuth();
   const [location, setLocation] = useLocation();
@@ -27,8 +27,8 @@ export default function Header() {
           <Link href="/" className="flex items-center">
             <span className="text-2xl font-bold">
               <img
-                src={octamyLogoLight}
-                alt="Octamy"
+                src={premcqLogoLight}
+                alt="PremCQ"
                 className="h-8 dark:block"
               />
             </span>

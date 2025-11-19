@@ -1,9 +1,9 @@
 import { Link } from "wouter";
-import octamyLogoDark from "@/assets/image_1750054456482.png";
-import octamyLogoLight from "@/assets/image_1750054465427.png";
+import premcqLogoDark from "@/assets/image_1750054456482.png";
+import premcqLogoLight from "@/assets/image_1750054465427.png";
 export default function Footer() {
   return (
-    <footer className="bg-octamy-black text-white py-16">
+    <footer className="bg-premcq-black text-white py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}
@@ -11,8 +11,8 @@ export default function Footer() {
             <span className="text-2xl font-bold text-white mb-4 block">
               <Link href="/" className="text-2xl font-bold">
                 <img
-                  src={octamyLogoLight}
-                  alt="Octamy"
+                  src={premcqLogoLight}
+                  alt="PremCQ"
                   className="h-8 dark:block"
                 />
               </Link>
@@ -130,7 +130,7 @@ export default function Footer() {
               </li>
               <li>
                 <a
-                  href="mailto:support@octamy.com"
+                  href="mailto:support@premcq.com"
                   className="text-gray-300 hover:text-white transition-colors"
                 >
                   Contact Support
@@ -142,7 +142,7 @@ export default function Footer() {
 
         <div className="border-t border-gray-800 mt-12 pt-8 text-center">
           <p className="text-gray-300">
-            &copy; 2024 Octamy. All rights reserved.
+            &copy; 2024 PremCQ. All rights reserved.
           </p>
         </div>
       </div>

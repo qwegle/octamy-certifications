@@ -63,7 +63,7 @@ export default function Contact() {
       <nav className="bg-black text-white px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-8">
-            <Link href="/" className="text-2xl font-bold">OCTAMY</Link>
+            <Link href="/" className="text-2xl font-bold">PREMCQ</Link>
             <div className="hidden md:flex space-x-6">
               <Link href="/exams" className="hover:text-gray-300">Exams</Link>
               <Link href="/virtual-internships" className="hover:text-gray-300">Internships</Link>
@@ -107,7 +107,7 @@ export default function Contact() {
                     </div>
                     <div>
                       <h3 className="font-semibold text-lg">Email Support</h3>
-                      <p className="text-gray-600">support@octamy.com</p>
+                      <p className="text-gray-600">support@premcq.com</p>
                       <p className="text-sm text-gray-500">Response within 24 hours</p>
                     </div>
                   </div>
@@ -138,7 +138,7 @@ export default function Contact() {
                     <div>
                       <h3 className="font-semibold text-lg">Office Address</h3>
                       <p className="text-gray-600">
-                        Octamy Solutions Private Limited<br />
+                        PremCQ Solutions Private Limited<br />
                         123 Tech Park, Sector 5<br />
                         Bangalore, Karnataka 560001<br />
                         India

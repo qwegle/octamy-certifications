@@ -19,7 +19,7 @@ import {
   Globe,
 } from "lucide-react";
 import type { Certificate } from "@shared/schema";
-import octamyLogo from "@/assets/image_1750054465427.png";
+import premcqLogo from "@/assets/image_1750054465427.png";
 import { useState } from "react";
 
 export default function CertificateView() {
@@ -113,7 +113,7 @@ export default function CertificateView() {
   const handleShare = async () => {
     const shareText = `I've earned a professional certificate in ${certificate?.courseTitle}! 
 Score: ${certificate?.score}% 
-Verified by Octamy Solutions Private Limited
+Verified by PremCQ Solutions Private Limited
 View certificate: ${window.location.href}`;
 
     if (navigator.share) {
@@ -189,19 +189,19 @@ View certificate: ${window.location.href}`;
     <div className="min-h-screen bg-black text-white">
       <Header />
 
-      {/* Hero Section with Octamy Branding */}
+      {/* Hero Section with PremCQ Branding */}
       <div className=" py-16 pb-8">
         <div className="container mx-auto px-4 text-center">
           <div className="flex items-center justify-center mb-6">
             <img
-              src={octamyLogo}
-              alt="Octamy Solutions"
+              src={premcqLogo}
+              alt="PremCQ Solutions"
               className=" h-16 mr-4"
             />
             <div className="text-left">
               <h1 className="text-3xl font-bold">Professional Certificate</h1>
               <p className="text-gray-400">
-                Verified by Octamy Solutions Private Limited
+                Verified by PremCQ Solutions Private Limited
               </p>
             </div>
           </div>
@@ -430,13 +430,13 @@ View certificate: ${window.location.href}`;
                 </h3>
                 <div className="flex items-center mb-3">
                   <img
-                    src={octamyLogo}
-                    alt="Octamy Solutions"
+                    src={premcqLogo}
+                    alt="PremCQ Solutions"
                     className=" h-12 mr-3"
                   />
                   <div>
                     <p className="font-semibold text-white">
-                      Octamy Solutions Private Limited
+                      PremCQ Solutions Private Limited
                     </p>
                     <p className="text-sm text-gray-400">
                       An ISO Certified Company

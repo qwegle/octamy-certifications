@@ -25,8 +25,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useLocation } from "wouter";
 import { HelpCircle, Mail, Phone, MessageCircle, Send } from "lucide-react";
 import { useEffect } from "react";
-import octamyLogoDark from "@/assets/image_1750054456482.png";
-import octamyLogoLight from "@/assets/image_1750054465427.png";
+import premcqLogoDark from "@/assets/image_1750054456482.png";
+import premcqLogoLight from "@/assets/image_1750054465427.png";
 import { Link } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -197,8 +197,8 @@ export default function HelpCenter() {
             <Button variant="ghost" onClick={() => setLocation("/")}>
               <span className="text-2xl font-bold text-black dark:text-white">
                 <img
-                  src={octamyLogoDark}
-                  alt="Octamy"
+                  src={premcqLogoDark}
+                  alt="PremCQ"
                   className="h-8 dark:none"
                 />
               </span>
@@ -366,7 +366,7 @@ export default function HelpCenter() {
                   <div>
                     <p className="font-medium">Email Support</p>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      support@octamy.com
+                      support@premcq.com
                     </p>
                   </div>
                 </div>

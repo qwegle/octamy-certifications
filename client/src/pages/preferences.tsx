@@ -81,8 +81,8 @@ export default function Preferences() {
         <Header />
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-octamy-black mb-4">Login Required</h2>
-            <p className="text-octamy-gray-600">Please log in to access your preferences.</p>
+            <h2 className="text-2xl font-bold text-premcq-black mb-4">Login Required</h2>
+            <p className="text-premcq-gray-600">Please log in to access your preferences.</p>
           </div>
         </div>
         <Footer />
@@ -128,11 +128,11 @@ export default function Preferences() {
       <Header />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-octamy-black mb-2 flex items-center gap-3">
+          <h1 className="text-4xl font-bold text-premcq-black mb-2 flex items-center gap-3">
             <Settings className="w-8 h-8" />
             Learning Preferences
           </h1>
-          <p className="text-xl text-octamy-gray-600">
+          <p className="text-xl text-premcq-gray-600">
             Customize your learning experience and notification settings
           </p>
         </div>
@@ -170,7 +170,7 @@ export default function Preferences() {
               {/* Preferred Categories */}
               <div>
                 <Label className="text-base font-medium">Preferred Learning Categories</Label>
-                <p className="text-sm text-octamy-gray-600 mb-3">
+                <p className="text-sm text-premcq-gray-600 mb-3">
                   Select categories you're most interested in learning about
                 </p>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -198,7 +198,7 @@ export default function Preferences() {
               {/* Learning Goals */}
               <div>
                 <Label className="text-base font-medium">Learning Goals</Label>
-                <p className="text-sm text-octamy-gray-600 mb-3">
+                <p className="text-sm text-premcq-gray-600 mb-3">
                   What do you want to achieve with your learning?
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -250,7 +250,7 @@ export default function Preferences() {
                   <div className="flex items-center justify-between">
                     <div>
                       <Label className="font-medium">Course Recommendations</Label>
-                      <p className="text-sm text-octamy-gray-600">Get personalized course suggestions</p>
+                      <p className="text-sm text-premcq-gray-600">Get personalized course suggestions</p>
                     </div>
                     <Switch
                       checked={formData.notificationSettings?.courseRecommendations ?? currentPrefs.notificationSettings.courseRecommendations}
@@ -270,7 +270,7 @@ export default function Preferences() {
                   <div className="flex items-center justify-between">
                     <div>
                       <Label className="font-medium">New Courses</Label>
-                      <p className="text-sm text-octamy-gray-600">Be notified when new courses are added</p>
+                      <p className="text-sm text-premcq-gray-600">Be notified when new courses are added</p>
                     </div>
                     <Switch
                       checked={formData.notificationSettings?.newCourses ?? currentPrefs.notificationSettings.newCourses}
@@ -290,7 +290,7 @@ export default function Preferences() {
                   <div className="flex items-center justify-between">
                     <div>
                       <Label className="font-medium">Achievements & Certificates</Label>
-                      <p className="text-sm text-octamy-gray-600">Updates about your certifications and achievements</p>
+                      <p className="text-sm text-premcq-gray-600">Updates about your certifications and achievements</p>
                     </div>
                     <Switch
                       checked={formData.notificationSettings?.achievements ?? currentPrefs.notificationSettings.achievements}
@@ -316,7 +316,7 @@ export default function Preferences() {
                   <div className="flex items-center justify-between">
                     <div>
                       <Label className="font-medium">Email Notifications</Label>
-                      <p className="text-sm text-octamy-gray-600">Receive notifications via email</p>
+                      <p className="text-sm text-premcq-gray-600">Receive notifications via email</p>
                     </div>
                     <Switch
                       checked={formData.notificationSettings?.email ?? currentPrefs.notificationSettings.email}
@@ -336,7 +336,7 @@ export default function Preferences() {
                   <div className="flex items-center justify-between">
                     <div>
                       <Label className="font-medium">Push Notifications</Label>
-                      <p className="text-sm text-octamy-gray-600">Receive in-app notifications</p>
+                      <p className="text-sm text-premcq-gray-600">Receive in-app notifications</p>
                     </div>
                     <Switch
                       checked={formData.notificationSettings?.push ?? currentPrefs.notificationSettings.push}
@@ -390,7 +390,7 @@ export default function Preferences() {
             <Button
               onClick={handleSave}
               disabled={updatePreferences.isPending}
-              className="bg-octamy-black text-white hover:bg-octamy-gray-800 flex items-center gap-2"
+              className="bg-premcq-black text-white hover:bg-premcq-gray-800 flex items-center gap-2"
             >
               <Save className="w-4 h-4" />
               {updatePreferences.isPending ? "Saving..." : "Save Preferences"}

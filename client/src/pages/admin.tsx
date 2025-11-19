@@ -61,8 +61,8 @@ export default function Admin() {
           <Card>
             <CardContent className="text-center py-12">
               <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-              <h2 className="text-2xl font-bold text-octamy-black mb-2">Access Denied</h2>
-              <p className="text-octamy-gray-600">
+              <h2 className="text-2xl font-bold text-premcq-black mb-2">Access Denied</h2>
+              <p className="text-premcq-gray-600">
                 You don't have permission to access the admin panel.
               </p>
             </CardContent>
@@ -232,21 +232,21 @@ export default function Admin() {
       <Header />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-octamy-black mb-2">Admin Dashboard</h1>
-          <p className="text-xl text-octamy-gray-600">
+          <h1 className="text-4xl font-bold text-premcq-black mb-2">Admin Dashboard</h1>
+          <p className="text-xl text-premcq-gray-600">
             Manage courses, questions, certificates, and users
           </p>
         </div>
 
         {/* Navigation Tabs */}
         <div className="mb-8">
-          <nav className="flex space-x-8 border-b border-octamy-gray-200">
+          <nav className="flex space-x-8 border-b border-premcq-gray-200">
             <button
               onClick={() => setActiveTab('courses')}
               className={`py-4 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'courses'
-                  ? 'border-octamy-black text-octamy-black'
-                  : 'border-transparent text-octamy-gray-500 hover:text-octamy-gray-700 hover:border-octamy-gray-300'
+                  ? 'border-premcq-black text-premcq-black'
+                  : 'border-transparent text-premcq-gray-500 hover:text-premcq-gray-700 hover:border-premcq-gray-300'
               }`}
             >
               <BookOpen className="w-4 h-4 inline mr-2" />
@@ -256,8 +256,8 @@ export default function Admin() {
               onClick={() => setActiveTab('questions')}
               className={`py-4 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'questions'
-                  ? 'border-octamy-black text-octamy-black'
-                  : 'border-transparent text-octamy-gray-500 hover:text-octamy-gray-700 hover:border-octamy-gray-300'
+                  ? 'border-premcq-black text-premcq-black'
+                  : 'border-transparent text-premcq-gray-500 hover:text-premcq-gray-700 hover:border-premcq-gray-300'
               }`}
             >
               <HelpCircle className="w-4 h-4 inline mr-2" />
@@ -267,8 +267,8 @@ export default function Admin() {
               onClick={() => setActiveTab('certificates')}
               className={`py-4 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'certificates'
-                  ? 'border-octamy-black text-octamy-black'
-                  : 'border-transparent text-octamy-gray-500 hover:text-octamy-gray-700 hover:border-octamy-gray-300'
+                  ? 'border-premcq-black text-premcq-black'
+                  : 'border-transparent text-premcq-gray-500 hover:text-premcq-gray-700 hover:border-premcq-gray-300'
               }`}
             >
               <Award className="w-4 h-4 inline mr-2" />
@@ -278,8 +278,8 @@ export default function Admin() {
               onClick={() => setActiveTab('users')}
               className={`py-4 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'users'
-                  ? 'border-octamy-black text-octamy-black'
-                  : 'border-transparent text-octamy-gray-500 hover:text-octamy-gray-700 hover:border-octamy-gray-300'
+                  ? 'border-premcq-black text-premcq-black'
+                  : 'border-transparent text-premcq-gray-500 hover:text-premcq-gray-700 hover:border-premcq-gray-300'
               }`}
             >
               <Users className="w-4 h-4 inline mr-2" />
@@ -292,10 +292,10 @@ export default function Admin() {
         {activeTab === 'courses' && (
           <div className="space-y-6">
             <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-octamy-black">Manage Courses</h2>
+              <h2 className="text-2xl font-bold text-premcq-black">Manage Courses</h2>
               <Button
                 onClick={() => setShowAddCourse(true)}
-                className="bg-octamy-black text-white hover:bg-octamy-gray-800"
+                className="bg-premcq-black text-white hover:bg-premcq-gray-800"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Add Course
@@ -387,7 +387,7 @@ export default function Admin() {
                     <Button
                       onClick={handleCreateCourse}
                       disabled={createCourseMutation.isPending}
-                      className="bg-octamy-black text-white hover:bg-octamy-gray-800"
+                      className="bg-premcq-black text-white hover:bg-premcq-gray-800"
                     >
                       {createCourseMutation.isPending ? 'Creating...' : 'Create Course'}
                     </Button>
@@ -412,7 +412,7 @@ export default function Admin() {
                     </Badge>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    <p className="text-sm text-octamy-gray-600">{course.description}</p>
+                    <p className="text-sm text-premcq-gray-600">{course.description}</p>
                     <div className="flex justify-between text-sm">
                       <span>Duration: {course.duration}m</span>
                       <span>Price: ₹{course.price}</span>
@@ -448,7 +448,7 @@ export default function Admin() {
         {activeTab === 'questions' && (
           <div className="space-y-6">
             <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-octamy-black">Manage Questions</h2>
+              <h2 className="text-2xl font-bold text-premcq-black">Manage Questions</h2>
               <div className="flex gap-4">
                 <Select
                   value={selectedCourse?.toString() || ''}
@@ -468,7 +468,7 @@ export default function Admin() {
                 {selectedCourse && (
                   <Button
                     onClick={() => setShowAddQuestion(true)}
-                    className="bg-octamy-black text-white hover:bg-octamy-gray-800"
+                    className="bg-premcq-black text-white hover:bg-premcq-gray-800"
                   >
                     <Plus className="w-4 h-4 mr-2" />
                     Add Question
@@ -519,7 +519,7 @@ export default function Admin() {
                         />
                       </div>
                     ))}
-                    <p className="text-sm text-octamy-gray-500">
+                    <p className="text-sm text-premcq-gray-500">
                       Select the correct answer by clicking the radio button
                     </p>
                   </div>
@@ -528,7 +528,7 @@ export default function Admin() {
                     <Button
                       onClick={handleCreateQuestion}
                       disabled={createQuestionMutation.isPending}
-                      className="bg-octamy-black text-white hover:bg-octamy-gray-800"
+                      className="bg-premcq-black text-white hover:bg-premcq-gray-800"
                     >
                       {createQuestionMutation.isPending ? 'Creating...' : 'Create Question'}
                     </Button>
@@ -545,15 +545,15 @@ export default function Admin() {
 
             {selectedCourse && (
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-octamy-black">
+                <h3 className="text-lg font-semibold text-premcq-black">
                   Questions for: {courses.find(c => c.id === selectedCourse)?.title}
                 </h3>
                 {questions.length === 0 ? (
                   <Card>
                     <CardContent className="text-center py-12">
-                      <HelpCircle className="w-16 h-16 text-octamy-gray-400 mx-auto mb-4" />
-                      <h3 className="text-xl font-bold text-octamy-black mb-2">No Questions Yet</h3>
-                      <p className="text-octamy-gray-600">
+                      <HelpCircle className="w-16 h-16 text-premcq-gray-400 mx-auto mb-4" />
+                      <h3 className="text-xl font-bold text-premcq-black mb-2">No Questions Yet</h3>
+                      <p className="text-premcq-gray-600">
                         This course doesn't have any questions. Add some to get started.
                       </p>
                     </CardContent>
@@ -574,7 +574,7 @@ export default function Admin() {
                                 className={`p-2 rounded border ${
                                   optIndex === question.correctAnswer
                                     ? 'bg-green-50 border-green-200 text-green-800'
-                                    : 'bg-octamy-gray-50 border-octamy-gray-200'
+                                    : 'bg-premcq-gray-50 border-premcq-gray-200'
                                 }`}
                               >
                                 <span className="font-medium mr-2">
@@ -610,12 +610,12 @@ export default function Admin() {
         {/* Certificates Tab */}
         {activeTab === 'certificates' && (
           <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-octamy-black">Certificate Management</h2>
+            <h2 className="text-2xl font-bold text-premcq-black">Certificate Management</h2>
             <Card>
               <CardContent className="text-center py-12">
-                <Award className="w-16 h-16 text-octamy-gray-400 mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-octamy-black mb-2">Certificate Management</h3>
-                <p className="text-octamy-gray-600">
+                <Award className="w-16 h-16 text-premcq-gray-400 mx-auto mb-4" />
+                <h3 className="text-xl font-bold text-premcq-black mb-2">Certificate Management</h3>
+                <p className="text-premcq-gray-600">
                   Certificate management features will be available here. This includes viewing all issued certificates, revoking certificates, and managing renewals.
                 </p>
               </CardContent>
@@ -626,12 +626,12 @@ export default function Admin() {
         {/* Users Tab */}
         {activeTab === 'users' && (
           <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-octamy-black">User Management</h2>
+            <h2 className="text-2xl font-bold text-premcq-black">User Management</h2>
             <Card>
               <CardContent className="text-center py-12">
-                <Users className="w-16 h-16 text-octamy-gray-400 mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-octamy-black mb-2">User Management</h3>
-                <p className="text-octamy-gray-600">
+                <Users className="w-16 h-16 text-premcq-gray-400 mx-auto mb-4" />
+                <h3 className="text-xl font-bold text-premcq-black mb-2">User Management</h3>
+                <p className="text-premcq-gray-600">
                   User management features will be available here. This includes viewing user statistics, managing user accounts, and reviewing user activity.
                 </p>
               </CardContent>

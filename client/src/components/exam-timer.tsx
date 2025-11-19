@@ -35,7 +35,7 @@ export default function ExamTimer({ duration, onTimeUp }: ExamTimerProps) {
     <div className={`flex items-center px-4 py-2 rounded-lg ${
       isCritical ? 'bg-red-100 text-red-800' : 
       isWarning ? 'bg-yellow-100 text-yellow-800' : 
-      'bg-octamy-gray-100 text-octamy-black'
+      'bg-premcq-gray-100 text-premcq-black'
     }`}>
       <Clock className="w-4 h-4 mr-2" />
       <span className="font-semibold">{formatTime(timeLeft)}</span>

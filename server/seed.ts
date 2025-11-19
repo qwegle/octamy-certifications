@@ -68,7 +68,7 @@ export async function seedDatabase() {
 
     const hashedPassword = await bcrypt.hash("admin123", 10);
     const adminUser = await db.insert(users).values({
-      email: "admin@octamy.com",
+      email: "admin@premcq.com",
       password: hashedPassword,
       name: "Admin User",
       isAdmin: true,
@@ -1143,7 +1143,7 @@ export async function seedDatabase() {
     console.log("\n===========================================");
     console.log("Database seeding completed successfully!");
     console.log("===========================================\n");
-    console.log("Admin login: admin@octamy.com / admin123");
+    console.log("Admin login: admin@premcq.com / admin123");
     console.log("Test users (password: test123):");
     console.log("  - john.doe@example.com (has ML certificate)");
     console.log("  - jane.smith@example.com (has React certificate)");

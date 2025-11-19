@@ -18,7 +18,7 @@ interface MascotMessage {
   autoHide?: number; // seconds
 }
 
-interface OctamyMascotProps {
+interface PremCQMascotProps {
   currentPage?: string;
   userProgress?: {
     coursesCompleted: number;
@@ -84,7 +84,7 @@ const mascotPersonalities = [
 const contextualMessages = {
   landing: [
     "Ready to start your learning adventure? I'm here to help!",
-    "Welcome to Octamy! Your journey to expertise begins now.",
+    "Welcome to PremCQ! Your journey to expertise begins now.",
     "Every master was once a disaster. Let's start building your skills!"
   ],
   courses: [
@@ -109,7 +109,7 @@ const contextualMessages = {
   ]
 };
 
-export default function OctamyMascot({ currentPage = 'landing', userProgress, onAction }: OctamyMascotProps) {
+export default function PremCQMascot({ currentPage = 'landing', userProgress, onAction }: PremCQMascotProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [currentMessage, setCurrentMessage] = useState<MascotMessage | null>(null);
   const [mascotPersonality, setMascotPersonality] = useState(mascotPersonalities[0]);
@@ -119,7 +119,7 @@ export default function OctamyMascot({ currentPage = 'landing', userProgress, on
 
   // Initialize mascot based on user preferences
   useEffect(() => {
-    const savedPersonality = localStorage.getItem('octamy-mascot-personality');
+    const savedPersonality = localStorage.getItem('premcq-mascot-personality');
     if (savedPersonality) {
       const personality = mascotPersonalities.find(p => p.name === savedPersonality);
       if (personality) setMascotPersonality(personality);
@@ -127,7 +127,7 @@ export default function OctamyMascot({ currentPage = 'landing', userProgress, on
       // Random personality on first visit
       const randomPersonality = mascotPersonalities[Math.floor(Math.random() * mascotPersonalities.length)];
       setMascotPersonality(randomPersonality);
-      localStorage.setItem('octamy-mascot-personality', randomPersonality.name);
+      localStorage.setItem('premcq-mascot-personality', randomPersonality.name);
     }
 
     // Show mascot after page load
@@ -148,7 +148,7 @@ export default function OctamyMascot({ currentPage = 'landing', userProgress, on
           return {
             id: 'welcome',
             type: 'welcome',
-            title: 'Welcome to Octamy!',
+            title: 'Welcome to PremCQ!',
             message: randomMessage || mascotPersonality.messages.welcome,
             action: {
               label: 'Explore Courses',
@@ -304,7 +304,7 @@ export default function OctamyMascot({ currentPage = 'landing', userProgress, on
     const newPersonality = mascotPersonalities[nextIndex];
     
     setMascotPersonality(newPersonality);
-    localStorage.setItem('octamy-mascot-personality', newPersonality.name);
+    localStorage.setItem('premcq-mascot-personality', newPersonality.name);
     
     setExpression(mascotExpressions.excited);
     

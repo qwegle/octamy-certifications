@@ -1284,7 +1284,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 courseId: courseId,
                 course: course,
                 userId: req.user?.userId || null,
-                userEmail: req.user?.email || "guest@octamy.com",
+                userEmail: req.user?.email || "guest@premcq.com",
                 userName: "Guest User",
                 score: 85, // Default passing score for payment
                 passed: true,
@@ -2271,7 +2271,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         <meta property="og:title" content="Professional Certificate - ${certificateData.userName}">
         <meta property="og:description" content="Certificate of completion for ${certificateData.courseTitle}">
         <meta property="og:type" content="website">
-        <meta name="description" content="Professional certificate issued by Octamy Solutions">
+        <meta name="description" content="Professional certificate issued by PremCQ Solutions">
         <style>
           .share-controls {
             position: fixed;
@@ -2438,7 +2438,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Get user details - handle both authenticated and guest users
         let user = null;
         let userId = null;
-        let userEmail = "guest@octamy.com";
+        let userEmail = "guest@premcq.com";
         let userName = "Guest User";
 
         if (req.user?.userId) {
@@ -2639,7 +2639,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   //       // Get user details
   //       let user = null;
   //       let userId = null;
-  //       let userEmail = "guest@octamy.com";
+  //       let userEmail = "guest@premcq.com";
   //       let userName = "Guest User";
 
   //       if (req.user?.userId) {

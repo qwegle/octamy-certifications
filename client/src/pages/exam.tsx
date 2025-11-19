@@ -265,9 +265,9 @@ export default function Exam() {
     return (
       <div className="min-h-screen bg-white">
         <Helmet>
-          <title>{course?.title ? `${course.title} - Certification Exam | Octamy` : 'Certification Exam | Octamy'}</title>
+          <title>{course?.title ? `${course.title} - Certification Exam | PremCQ` : 'Certification Exam | PremCQ'}</title>
           <meta name="description" content={course?.title ? `Take the ${course.title} certification exam and earn your professional credential. Comprehensive assessment with instant results.` : 'Take your certification exam and earn your professional credential.'} />
-          <meta property="og:title" content={course?.title ? `${course.title} - Certification Exam | Octamy` : 'Certification Exam | Octamy'} />
+          <meta property="og:title" content={course?.title ? `${course.title} - Certification Exam | PremCQ` : 'Certification Exam | PremCQ'} />
           <meta property="og:description" content={course?.title ? `Take the ${course.title} certification exam and earn your professional credential.` : 'Take your certification exam and earn your professional credential.'} />
           <meta property="og:url" content={`${window.location.origin}/exam/${courseSlug}`} />
           <link rel="canonical" href={`${window.location.origin}/exam/${courseSlug}`} />
@@ -285,12 +285,12 @@ export default function Exam() {
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="text-center space-y-4">
-                <p className="text-lg text-octamy-gray-600">
+                <p className="text-lg text-premcq-gray-600">
                   You are about to take the certification exam for {course?.title}.
                 </p>
-                <div className="bg-octamy-gray-50 p-6 rounded-lg">
+                <div className="bg-premcq-gray-50 p-6 rounded-lg">
                   <h3 className="font-semibold mb-4">Exam Instructions:</h3>
-                  <ul className="text-left space-y-2 text-sm text-octamy-gray-600">
+                  <ul className="text-left space-y-2 text-sm text-premcq-gray-600">
                     <li>• Duration: {course?.duration} minutes</li>
                     <li>• Questions: 10-15 multiple choice questions</li>
                     <li>• Passing Score: 50% or higher</li>
@@ -311,7 +311,7 @@ export default function Exam() {
                         type="text"
                         value={userInfo.name}
                         onChange={(e) => setUserInfo(prev => ({ ...prev, name: e.target.value }))}
-                        className="w-full mt-1 px-3 py-2 border border-octamy-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-octamy-black"
+                        className="w-full mt-1 px-3 py-2 border border-premcq-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-premcq-black"
                         placeholder="Enter your full name"
                       />
                     </div>
@@ -322,7 +322,7 @@ export default function Exam() {
                         type="email"
                         value={userInfo.email}
                         onChange={(e) => setUserInfo(prev => ({ ...prev, email: e.target.value }))}
-                        className="w-full mt-1 px-3 py-2 border border-octamy-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-octamy-black"
+                        className="w-full mt-1 px-3 py-2 border border-premcq-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-premcq-black"
                         placeholder="Enter your email address"
                       />
                     </div>
@@ -333,7 +333,7 @@ export default function Exam() {
               <div className="text-center">
                 <Button
                   onClick={startExam}
-                  className="bg-octamy-black text-white px-8 py-3 text-lg hover:bg-octamy-gray-800"
+                  className="bg-premcq-black text-white px-8 py-3 text-lg hover:bg-premcq-gray-800"
                   disabled={!userInfo.name || !userInfo.email}
                 >
                   Start Exam
@@ -372,7 +372,7 @@ export default function Exam() {
             <div className="flex flex-col md:flex-row justify-between items-center mb-4">
               <div>
                 <CardTitle className="text-2xl">{course?.title}</CardTitle>
-                <p className="text-octamy-gray-600">
+                <p className="text-premcq-gray-600">
                   Question {currentQuestion + 1} of {questions.length}
                 </p>
               </div>
@@ -406,7 +406,7 @@ export default function Exam() {
                 onValueChange={(value) => handleAnswerChange(currentQ.id.toString(), value)}
               >
                 {currentQ.options.map((option: string, index: number) => (
-                  <div key={index} className="flex items-center space-x-2 p-4 border border-octamy-gray-300 rounded-lg hover:bg-octamy-gray-50 transition-colors">
+                  <div key={index} className="flex items-center space-x-2 p-4 border border-premcq-gray-300 rounded-lg hover:bg-premcq-gray-50 transition-colors">
                     <RadioGroupItem value={index.toString()} id={`option-${index}`} />
                     <Label htmlFor={`option-${index}`} className="flex-1 cursor-pointer">
                       {option}
@@ -425,7 +425,7 @@ export default function Exam() {
                 Previous
               </Button>
               
-              <div className="text-sm text-octamy-gray-500">
+              <div className="text-sm text-premcq-gray-500">
                 {answeredCount}/{questions.length} answered
               </div>
               
@@ -433,14 +433,14 @@ export default function Exam() {
                 <Button
                   onClick={handleSubmit}
                   disabled={submitExamMutation.isPending}
-                  className="bg-octamy-black text-white hover:bg-octamy-gray-800"
+                  className="bg-premcq-black text-white hover:bg-premcq-gray-800"
                 >
                   {submitExamMutation.isPending ? 'Submitting...' : 'Submit Exam'}
                 </Button>
               ) : (
                 <Button
                   onClick={() => setCurrentQuestion(prev => Math.min(questions.length - 1, prev + 1))}
-                  className="bg-octamy-black text-white hover:bg-octamy-gray-800"
+                  className="bg-premcq-black text-white hover:bg-premcq-gray-800"
                 >
                   Next Question
                 </Button>

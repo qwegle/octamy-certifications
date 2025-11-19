@@ -296,7 +296,7 @@ export const certificates = pgTable("certificates", {
   businessName: text("business_name"),
   badge: text("badge").notNull(), // bronze, silver, gold, platinum
   certificateNumber: text("certificate_number").notNull().unique(),
-  issuedBy: text("issued_by").default("Octamy Solutions Private Limited").notNull(),
+  issuedBy: text("issued_by").default("PremCQ Solutions Private Limited").notNull(),
   retakeCount: integer("retake_count").default(0).notNull(),
   // Physical certificate shipping
   needsPhysicalCopy: boolean("needs_physical_copy").default(false).notNull(),

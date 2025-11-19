@@ -7,7 +7,7 @@ export async function seedAdminCredentials() {
     // Create admin user
     const adminPasswordHash = await bcrypt.hash("password", 10);
     await db.insert(users).values({
-      email: "admin@octamy.com",
+      email: "admin@premcq.com",
       password: adminPasswordHash,
       name: "Admin User",
       isAdmin: true,
@@ -17,7 +17,7 @@ export async function seedAdminCredentials() {
     // Create partner/seller account
     const partnerPasswordHash = await bcrypt.hash("password", 10);
     await db.insert(sellers).values({
-      email: "partner@octamy.com",
+      email: "partner@premcq.com",
       password: partnerPasswordHash,
       name: "Test Partner",
       isApproved: true,
@@ -28,8 +28,8 @@ export async function seedAdminCredentials() {
     }).onConflictDoNothing();
 
     console.log("✅ Admin and Partner credentials seeded successfully!");
-    console.log("Admin Login: admin@octamy.com / password");
-    console.log("Partner Login: partner@octamy.com / password");
+    console.log("Admin Login: admin@premcq.com / password");
+    console.log("Partner Login: partner@premcq.com / password");
   } catch (error) {
     console.error("Error seeding admin credentials:", error);
   }

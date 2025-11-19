@@ -401,12 +401,12 @@ function generateCertificateHTML(data: CertificateData): string {
   //         <div class="decorative-corners bottom-left"></div>
   //         <div class="decorative-corners bottom-right"></div>
 
-  //         <div class="watermark">OCTAMY</div>
+  //         <div class="watermark">PREMCQ</div>
 
   //         <div class="certificate-content">
   //           <div class="header-section">
   //             <div class="company-logo">
-  //               <img src="https://octamy.com/storage/optionbuilder/uploads/554402-14-2025_0143pmoctamy_logo_black.png" alt="Octamy Logo" style="height: 50px;">
+  //               <img src="https://premcq.com/storage/optionbuilder/uploads/554402-14-2025_0143pmpremcq_logo_black.png" alt="PremCQ Logo" style="height: 50px;">
   //             </div>
   //             <div class="company-tagline">Solutions Private Limited</div>
   //             <div style="font-size: 10px; color: #333; font-family: 'Poppins', sans-serif; letter-spacing: 1px;">An ISO Certified Company</div>
@@ -517,7 +517,7 @@ function generateCertificateHTML(data: CertificateData): string {
   //         <div class="bottom-section">
   //           <div class="expiry-info">
   //             <strong>Valid Until:</strong> ${expiryDate.toLocaleDateString()}<br>
-  //             <strong>Verification:</strong> octamy.com/verify
+  //             <strong>Verification:</strong> premcq.com/verify
   //           </div>
 
   //           <div class="certification-logos">
@@ -858,8 +858,8 @@ function generateCertificateHTML(data: CertificateData): string {
           <div class="header-section">
             <div class="logo-container">
               <img
-                src="/certificateImages/octamy.svg"
-                alt="Octamy Logo"
+                src="/certificateImages/premcq.svg"
+                alt="PremCQ Logo"
                 class="logo-image"
               />
             </div>
@@ -919,7 +919,7 @@ function generateCertificateHTML(data: CertificateData): string {
               </p>
               <p>
                 <span class="font-semibold">Verification: </span>
-                www.octamy.com/verify
+                www.premcq.com/verify
               </p>
             </div>
           </div>

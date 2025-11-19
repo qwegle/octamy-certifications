@@ -164,8 +164,8 @@ export default function AIInterviews() {
         <Header />
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-octamy-black mb-4">Login Required</h2>
-            <p className="text-octamy-gray-600">Please log in to access AI Interviews.</p>
+            <h2 className="text-2xl font-bold text-premcq-black mb-4">Login Required</h2>
+            <p className="text-premcq-gray-600">Please log in to access AI Interviews.</p>
             <Link href="/auth">
               <Button className="mt-4">Login</Button>
             </Link>
@@ -194,10 +194,10 @@ export default function AIInterviews() {
 
         {/* Header Section */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-octamy-black mb-2">
+          <h1 className="text-4xl font-bold text-premcq-black mb-2">
             AI Interviews
           </h1>
-          <p className="text-xl text-octamy-gray-600">
+          <p className="text-xl text-premcq-gray-600">
             Practice technical interviews with AI-powered assessment and boost your career prospects
           </p>
         </div>

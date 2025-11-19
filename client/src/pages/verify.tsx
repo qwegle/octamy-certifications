@@ -15,8 +15,8 @@ import {
   BookOpen,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import octamyLogoDark from "@/assets/image_1750054456482.png";
-import octamyLogoLight from "@/assets/image_1750054465427.png";
+import premcqLogoDark from "@/assets/image_1750054456482.png";
+import premcqLogoLight from "@/assets/image_1750054465427.png";
 export default function Verify() {
   const [certificateId, setCertificateId] = useState("");
   const [searchAttempted, setSearchAttempted] = useState(false);
@@ -46,8 +46,8 @@ export default function Verify() {
             <Link href="/" className="text-2xl font-bold">
               {" "}
               <img
-                src={octamyLogoLight}
-                alt="Octamy"
+                src={premcqLogoLight}
+                alt="PremCQ"
                 className="h-8 dark:block"
               />
             </Link>
@@ -252,7 +252,7 @@ export default function Verify() {
 
                   <div className="mt-8 p-4 bg-green-50 rounded-lg">
                     <p className="text-sm text-green-700">
-                      This certificate is authentic and verified by Octamy
+                      This certificate is authentic and verified by PremCQ
                       Solutions Private Limited.
                     </p>
                   </div>

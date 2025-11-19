@@ -65,7 +65,7 @@ export function CertificateActions({
       <Button
         onClick={handleDownload}
         disabled={isDownloading}
-        className="bg-octamy-black text-white hover:bg-octamy-gray-800"
+        className="bg-premcq-black text-white hover:bg-premcq-gray-800"
       >
         {isDownloading ? (
           <>
@@ -83,7 +83,7 @@ export function CertificateActions({
       <Button
         variant="outline"
         onClick={handlePrint}
-        className="border-octamy-black text-octamy-black hover:bg-octamy-gray-50"
+        className="border-premcq-black text-premcq-black hover:bg-premcq-gray-50"
       >
         <Printer className="w-4 h-4 mr-2" />
         Print Certificate
@@ -92,7 +92,7 @@ export function CertificateActions({
       <Button
         variant="outline"
         onClick={handleShare}
-        className="border-octamy-gray-300 text-octamy-gray-700 hover:bg-octamy-gray-200"
+        className="border-premcq-gray-300 text-premcq-gray-700 hover:bg-premcq-gray-200"
       >
         <Share2 className="w-4 h-4 mr-2" />
         Share Certificate

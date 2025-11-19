@@ -25,8 +25,8 @@ import RatingSystem from "@/components/rating-system";
 import { CourseStructuredData } from "@/components/seo-structured-data";
 import { Helmet } from "react-helmet-async";
 // Using available image from assets
-import octamyLogoDark from "@assets/image_1750054456482.png";
-import octamyLogoLight from "@assets/image_1750054465427.png";
+import premcqLogoDark from "@assets/image_1750054456482.png";
+import premcqLogoLight from "@assets/image_1750054465427.png";
 
 export default function CourseDetail() {
   const { slug } = useParams();
@@ -86,7 +86,7 @@ export default function CourseDetail() {
     if (course) {
       document.title =
         course.metaTitle ||
-        `${course.title} - Professional Certification | Octamy`;
+        `${course.title} - Professional Certification | PremCQ`;
 
       // Update meta description
       const metaDescription = document.querySelector(
@@ -194,7 +194,7 @@ export default function CourseDetail() {
                 className="hover:bg-gray-100 dark:hover:bg-gray-900"
               >
                 <span className="text-2xl font-bold text-black dark:text-white">
-                  Octamy
+                  PremCQ
                 </span>
               </Button>
               <ChevronRight className="h-4 w-4 text-gray-400" />

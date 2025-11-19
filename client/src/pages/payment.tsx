@@ -300,7 +300,7 @@ export default function Payment() {
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button 
-                  className="bg-octamy-black text-white hover:bg-octamy-gray-800"
+                  className="bg-premcq-black text-white hover:bg-premcq-gray-800"
                   onClick={() => window.open(`/api/certificates/${certificate.certificateId}/download`, '_blank')}
                 >
                   <Download className="mr-2 h-4 w-4" />
@@ -321,23 +321,23 @@ export default function Payment() {
                       // Add toast notification for copy
                     }
                   }}
-                  className="border-octamy-gray-300 text-octamy-black hover:bg-octamy-gray-50"
+                  className="border-premcq-gray-300 text-premcq-black hover:bg-premcq-gray-50"
                 >
                   <Share2 className="mr-2 h-4 w-4" />
                   Share Certificate
                 </Button>
               </div>
 
-              <div className="bg-octamy-gray-50 p-4 rounded-lg">
+              <div className="bg-premcq-gray-50 p-4 rounded-lg">
                 <div className="flex items-center justify-center gap-2 mb-2">
                   <QrCode className="h-4 w-4" />
                   <span className="text-sm font-medium">Verification</span>
                 </div>
-                <p className="text-xs text-octamy-gray-600">
+                <p className="text-xs text-premcq-gray-600">
                   Certificate ID: {certificate.certificateId}
                 </p>
-                <p className="text-xs text-octamy-gray-600">
-                  Verify at: octamy.com/verify
+                <p className="text-xs text-premcq-gray-600">
+                  Verify at: premcq.com/verify
                 </p>
               </div>
             </CardContent>

@@ -43,7 +43,7 @@ export async function createDemoContent() {
         isActive: true,
         isInternship: false,
         metaTitle: "Demo Course - Test Your Knowledge",
-        metaDescription: "Take this quick demo course to test the Octamy certification platform."
+        metaDescription: "Take this quick demo course to test the PremCQ certification platform."
       })
       .returning();
 

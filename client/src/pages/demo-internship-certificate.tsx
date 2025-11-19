@@ -11,7 +11,7 @@ export default function DemoInternshipCertificate() {
       <nav className="bg-black text-white px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-8">
-            <Link href="/" className="text-2xl font-bold">OCTAMY</Link>
+            <Link href="/" className="text-2xl font-bold">PREMCQ</Link>
             <div className="hidden md:flex space-x-6">
               <Link href="/" className="hover:text-gray-300">Courses</Link>
               <Link href="/partners" className="hover:text-gray-300">Partners</Link>
@@ -86,7 +86,7 @@ export default function DemoInternshipCertificate() {
                   </div>
                 </div>
                 <div className="border-t border-blue-600 pt-4">
-                  <h2 className="text-3xl font-bold mb-2">OCTAMY SOLUTIONS PRIVATE LIMITED</h2>
+                  <h2 className="text-3xl font-bold mb-2">PREMCQ SOLUTIONS PRIVATE LIMITED</h2>
                   <p className="text-sm opacity-90 mb-2">ISO 9001:2015 Certified Virtual Internship Provider</p>
                   <div className="flex items-center space-x-4">
                     <Shield className="w-5 h-5" />
@@ -172,7 +172,7 @@ export default function DemoInternshipCertificate() {
                     </div>
                     <div className="text-right">
                       <p><span className="font-bold">Program Duration:</span> 12 weeks</p>
-                      <p><span className="font-bold">Verify at:</span> octamy.com/verify/VIN-20250616-DS9X4K</p>
+                      <p><span className="font-bold">Verify at:</span> premcq.com/verify/VIN-20250616-DS9X4K</p>
                       <p><span className="font-bold">Mentor:</span> Dr. Sarah Johnson, PhD</p>
                       <p><span className="font-bold">Industry Partner:</span> TechCorp Analytics</p>
                     </div>
@@ -285,7 +285,7 @@ export default function DemoInternshipCertificate() {
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
-              <h3 className="text-2xl font-bold mb-4">OCTAMY</h3>
+              <h3 className="text-2xl font-bold mb-4">PREMCQ</h3>
               <p className="text-gray-400">Professional certification platform for the modern workforce.</p>
             </div>
             <div>
@@ -305,11 +305,11 @@ export default function DemoInternshipCertificate() {
             </div>
             <div>
               <h4 className="font-semibold mb-4">Connect</h4>
-              <p className="text-gray-400 mb-4">ISO Certified by Octamy Solutions Private Limited</p>
+              <p className="text-gray-400 mb-4">ISO Certified by PremCQ Solutions Private Limited</p>
             </div>
           </div>
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2025 Octamy Solutions Private Limited. All rights reserved.</p>
+            <p>&copy; 2025 PremCQ Solutions Private Limited. All rights reserved.</p>
           </div>
         </div>
       </footer>

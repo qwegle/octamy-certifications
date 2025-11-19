@@ -397,12 +397,12 @@ function generateCertificateHTML(data: CertificateData): string {
           <div class="decorative-corners bottom-left"></div>
           <div class="decorative-corners bottom-right"></div>
           
-          <div class="watermark">OCTAMY</div>
+          <div class="watermark">PREMCQ</div>
           
           <div class="certificate-content">
             <div class="company-header">
               <div class="company-logo">
-                <div class="company-name">OCTAMY</div>
+                <div class="company-name">PREMCQ</div>
               </div>
               <div class="company-tagline">Solutions Private Limited</div>
               <div style="font-size: 12px; color: #999; font-style: italic; margin-top: 5px;">Authorized Certification Body</div>
@@ -498,7 +498,7 @@ function generateCertificateHTML(data: CertificateData): string {
               <div class="signature-section">
                 <div class="signature-line"></div>
                 <div class="signature-title">Director</div>
-                <div class="signature-name">Octamy Solutions</div>
+                <div class="signature-name">PremCQ Solutions</div>
               </div>
             </div>
           </div>
@@ -507,7 +507,7 @@ function generateCertificateHTML(data: CertificateData): string {
             <img src="https://images.seeklogo.com/logo-png/55/2/iso-certified-company-stamp-logo-png_seeklogo-556487.png" alt="ISO Certified" />
             <img src="https://static.vecteezy.com/system/resources/previews/019/909/405/non_2x/make-in-india-transparent-make-in-india-free-free-png.png" alt="Make in India" />
             <img src="https://sudikshya.com/wp-content/uploads/2024/08/startup-and-odisha-combo.png" alt="Startup Odisha" />
-            <img src="https://octamy.com/storage/optionbuilder/uploads/554402-14-2025_0143pmoctamy_logo_black.png" alt="Octamy Logo" />
+            <img src="https://premcq.com/storage/optionbuilder/uploads/554402-14-2025_0143pmpremcq_logo_black.png" alt="PremCQ Logo" />
           </div>
         </div>
       </div>
@@ -575,7 +575,7 @@ export async function generateInvoicePDF(data: {
   //   <head>
   //     <meta charset="UTF-8">
   //     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  //     <title>Invoice - Octamy Solutions</title>
+  //     <title>Invoice - PremCQ Solutions</title>
   //     <style>
   //       body {
   //         font-family: Arial, sans-serif;
@@ -662,9 +662,9 @@ export async function generateInvoicePDF(data: {
   //     <div class="invoice-container">
   //       <div class="invoice-header">
   //         <div class="company-info">
-  //           <h1>OCTAMY SOLUTIONS</h1>
+  //           <h1>PREMCQ SOLUTIONS</h1>
   //           <p>Professional Certificate Provider</p>
-  //           <p>Email: info@octamy.com</p>
+  //           <p>Email: info@premcq.com</p>
   //         </div>
   //         <div class="invoice-info">
   //           <h2>INVOICE</h2>
@@ -709,7 +709,7 @@ export async function generateInvoicePDF(data: {
   //       <div class="footer">
   //         <p><strong>Payment Method:</strong> ${data.paymentMethod}</p>
   //         <p><strong>Payment Status:</strong> Completed</p>
-  //         <p>Thank you for choosing Octamy Solutions for your professional certification needs.</p>
+  //         <p>Thank you for choosing PremCQ Solutions for your professional certification needs.</p>
   //       </div>
   //     </div>
   //   </body>
@@ -721,7 +721,7 @@ export async function generateInvoicePDF(data: {
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Invoice - Octamy Solutions</title>
+    <title>Invoice - PremCQ Solutions</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.js"></script>
     <style>
       @import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap");
@@ -871,8 +871,8 @@ export async function generateInvoicePDF(data: {
           <div class="flex justify-center items-center flex-col mb-8">
             <div class="text-center mb-12">
               <img
-                src="../certificateImages/octamy.svg"
-                alt="Octamy Logo"
+                src="../certificateImages/premcq.svg"
+                alt="PremCQ Logo"
                 class="w-64 mx-auto"
               />
               <p class="text-sm" style="color: #331f30">
@@ -940,7 +940,7 @@ export async function generateInvoicePDF(data: {
                 <p><span class="font-semibold">Valid Until:</span> 6/20/2027</p>
                 <p>
                   <span class="font-semibold">Verification:</span>
-                  octamy.com/verify
+                  premcq.com/verify
                 </p>
               </div>
             </div>

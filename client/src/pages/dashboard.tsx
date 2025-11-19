@@ -104,15 +104,15 @@ export default function Dashboard() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <Card>
             <CardContent className="text-center py-12">
-              <AlertCircle className="w-16 h-16 text-octamy-gray-400 mx-auto mb-4" />
-              <h2 className="text-2xl font-bold text-octamy-black mb-2">
+              <AlertCircle className="w-16 h-16 text-premcq-gray-400 mx-auto mb-4" />
+              <h2 className="text-2xl font-bold text-premcq-black mb-2">
                 Login Required
               </h2>
-              <p className="text-octamy-gray-600 mb-6">
+              <p className="text-premcq-gray-600 mb-6">
                 Please log in to view your certificate dashboard.
               </p>
               <Link href="/auth">
-                <Button className="bg-octamy-black text-white hover:bg-octamy-gray-800">
+                <Button className="bg-premcq-black text-white hover:bg-premcq-gray-800">
                   Login
                 </Button>
               </Link>
@@ -384,13 +384,13 @@ export default function Dashboard() {
                     </CardHeader>
                     <CardContent className="space-y-3">
                       <div className="flex justify-between text-sm">
-                        <span className="text-octamy-gray-600">Score:</span>
+                        <span className="text-premcq-gray-600">Score:</span>
                         <span className="font-semibold">
                           {certificate.score}%
                         </span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span className="text-octamy-gray-600">Expired:</span>
+                        <span className="text-premcq-gray-600">Expired:</span>
                         <span className="font-semibold text-red-600">
                           {new Date(certificate.expiresAt).toLocaleDateString()}
                         </span>
@@ -412,7 +412,7 @@ export default function Dashboard() {
                         </Button>
                         <Button
                           size="sm"
-                          className="flex-1 bg-octamy-black text-white hover:bg-octamy-gray-800"
+                          className="flex-1 bg-premcq-black text-white hover:bg-premcq-gray-800"
                         >
                           Renew - ₹199
                         </Button>

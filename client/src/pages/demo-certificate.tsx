@@ -11,7 +11,7 @@ export default function DemoCertificate() {
       <nav className="bg-black text-white px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-8">
-            <Link href="/" className="text-2xl font-bold">OCTAMY</Link>
+            <Link href="/" className="text-2xl font-bold">PREMCQ</Link>
             <div className="hidden md:flex space-x-6">
               <Link href="/" className="hover:text-gray-300">Courses</Link>
               <Link href="/partners" className="hover:text-gray-300">Partners</Link>
@@ -121,7 +121,7 @@ export default function DemoCertificate() {
                         textShadow: '0 2px 4px rgba(0,0,0,0.1)'
                       }}
                     >
-                      OCTAMY
+                      PREMCQ
                     </div>
                   </div>
                   
@@ -287,7 +287,7 @@ export default function DemoCertificate() {
                   <img src="https://images.seeklogo.com/logo-png/55/2/iso-certified-company-stamp-logo-png_seeklogo-556487.png" alt="ISO Certified" className="h-12 w-auto object-contain" />
                   <img src="https://static.vecteezy.com/system/resources/previews/019/909/405/non_2x/make-in-india-transparent-make-in-india-free-free-png.png" alt="Make in India" className="h-12 w-auto object-contain" />
                   <img src="https://sudikshya.com/wp-content/uploads/2024/08/startup-and-odisha-combo.png" alt="Startup Odisha" className="h-12 w-auto object-contain" />
-                  <img src="https://octamy.com/storage/optionbuilder/uploads/554402-14-2025_0143pmoctamy_logo_black.png" alt="Octamy Logo" className="h-12 w-auto object-contain" />
+                  <img src="https://premcq.com/storage/optionbuilder/uploads/554402-14-2025_0143pmpremcq_logo_black.png" alt="PremCQ Logo" className="h-12 w-auto object-contain" />
                 </div>
               </div>
             </div>

@@ -134,12 +134,12 @@ export default function Auth() {
   return (
     <>
       <Helmet>
-        <title>{isLogin ? 'Sign In - Octamy Certifications' : 'Sign Up - Octamy Certifications'}</title>
+        <title>{isLogin ? 'Sign In - PremCQ Certifications' : 'Sign Up - PremCQ Certifications'}</title>
         <meta 
           name="description" 
           content={isLogin 
-            ? 'Sign in to Octamy to access your professional certifications, track your learning progress, and manage your credentials.'
-            : 'Join Octamy and earn industry-recognized certifications in technology, data science, web development, and public sector exams like UPSC, SSC, and Railway.'
+            ? 'Sign in to PremCQ to access your professional certifications, track your learning progress, and manage your credentials.'
+            : 'Join PremCQ and earn industry-recognized certifications in technology, data science, web development, and public sector exams like UPSC, SSC, and Railway.'
           } 
         />
       </Helmet>
@@ -152,7 +152,7 @@ export default function Auth() {
             <div className="space-y-8">
               <div className="space-y-4">
                 <h1 className="text-4xl lg:text-5xl font-bold text-foreground">
-                  {isLogin ? 'Welcome Back to Octamy' : 'Start Your Certification Journey'}
+                  {isLogin ? 'Welcome Back to PremCQ' : 'Start Your Certification Journey'}
                 </h1>
                 <p className="text-lg text-muted-foreground">
                   {isLogin 

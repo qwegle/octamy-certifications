@@ -31,8 +31,8 @@ import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 import { useAuth } from "@/lib/auth";
 // Using available image from assets
-import octamyLogoDark from "@/assets/image_1750054456482.png";
-import octamyLogoLight from "@/assets/image_1750054465427.png";
+import premcqLogoDark from "@/assets/image_1750054456482.png";
+import premcqLogoLight from "@/assets/image_1750054465427.png";
 
 const PRESET_AMOUNTS = [1000];
 
@@ -198,8 +198,8 @@ export default function InternShipPayment() {
                 <span className="text-2xl font-bold text-black dark:text-white">
                   <Link href="/" className="text-2xl font-bold">
                     <img
-                      src={octamyLogoDark}
-                      alt="Octamy"
+                      src={premcqLogoDark}
+                      alt="PremCQ"
                       className="h-8 dark:none"
                     />
                   </Link>
@@ -340,7 +340,7 @@ export default function InternShipPayment() {
             </h1>
           </div>
           <p className="text-xl text-gray-300 max-w-3xl mx-auto mb-8">
-            Welcome to Octamy! To secure your spot in our{" "}
+            Welcome to PremCQ! To secure your spot in our{" "}
             <strong>offline internship program</strong>, please complete the
             onboarding payment. This amount helps us manage training materials,
             on-site resources, and ensure a smooth experience for all offline
@@ -412,7 +412,7 @@ export default function InternShipPayment() {
             <CardTitle className="text-2xl">Complete Your Onboarding</CardTitle>
             <CardDescription className="text-gray-300">
               Select the payment amount to confirm your internship and get
-              started with your journey at Octamy.
+              started with your journey at PremCQ.
             </CardDescription>
           </CardHeader>
           <CardContent className="p-8">
