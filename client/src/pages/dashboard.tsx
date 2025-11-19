@@ -311,14 +311,15 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        {/* Certificates Section */}
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold text-black mb-6">
-            Your Certificates
-          </h2>
+        {/* Certificates Section - Only show if user has certificates */}
+        {certificates.length > 0 && (
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-black mb-6">
+              Your Certificates
+            </h2>
 
-          {/* Active Certificates */}
-          {activeCertificates.length > 0 && (
+            {/* Active Certificates */}
+            {activeCertificates.length > 0 && (
             <div className="mb-6">
               <h3 className="text-lg font-semibold text-black mb-4">
                 Active Certificates
@@ -488,9 +489,11 @@ export default function Dashboard() {
               </div>
             </div>
           )}
+          </div>
+        )}
 
-          {/* Exam History & Improvement Tracking */}
-          {examAttempts.length > 0 && (
+        {/* Exam History & Improvement Tracking */}
+        {examAttempts.length > 0 && (
             <div className="mb-8">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-black flex items-center gap-2">
@@ -763,7 +766,6 @@ export default function Dashboard() {
             </Card>
           )}
         </div>
-      </div>
       <Footer />
 
       {/* Payment Modal */}
