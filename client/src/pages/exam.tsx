@@ -372,6 +372,9 @@ export default function Exam() {
     onSuccess: async (response) => {
       const result = await response.json();
       
+      // Immediately invalidate exam attempts cache so dashboard updates instantly
+      queryClient.invalidateQueries({ queryKey: ['/api/user/exam-attempts'] });
+      
       // Redirect to exam submitted page - payment required to view results
       if (result.tempExamId) {
         setLocation(`/exam-submitted/${result.tempExamId}`);

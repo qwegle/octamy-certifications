@@ -105,9 +105,20 @@ export default function Dashboard() {
   });
 
   // Fetch user's exam attempts for improvement tracking
-  const { data: examAttempts = [] } = useQuery<EnrichedExamAttempt[]>({
+  const { data: examAttempts = [], isLoading: examAttemptsLoading, error: examAttemptsError } = useQuery<EnrichedExamAttempt[]>({
     queryKey: ["/api/user/exam-attempts"],
     enabled: !!user && !!token,
+    staleTime: 0, // Always fetch fresh data
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+  });
+
+  // Debug logging for exam attempts
+  console.log("Dashboard exam attempts data:", {
+    examAttempts,
+    count: examAttempts.length,
+    examAttemptsLoading,
+    examAttemptsError,
   });
 
   // Debug logging for certificate data
