@@ -2315,15 +2315,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         console.log("Fetching exam attempts for user ID:", userId);
         const attempts = await storage.getUserExamAttempts(userId);
+        console.log("Raw exam attempts fetched:", attempts.length);
         
         // Enrich with course information
         const enrichedAttempts = await Promise.all(
           attempts.map(async (attempt) => {
             const course = await storage.getCourse(attempt.courseId);
+            if (!course) {
+              console.log(`Course not found for ID: ${attempt.courseId}`);
+              return {
+                ...attempt,
+                courseTitle: "Unknown Course",
+                courseCategory: "general",
+              };
+            }
+            
+            // Get category information
+            const category = await storage.getCategories();
+            const courseCategory = category.find(c => c.id === course.categoryId);
+            
             return {
               ...attempt,
-              courseTitle: course?.title || "Unknown Course",
-              courseCategory: course?.category || "general",
+              courseTitle: course.title,
+              courseCategory: courseCategory?.name || "general",
             };
           })
         );
