@@ -2314,7 +2314,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
 
         console.log("Fetching exam attempts for user ID:", userId);
-        const attempts = await storage.getExamAttemptsByUser(userId);
+        const attempts = await storage.getUserExamAttempts(userId);
         
         // Enrich with course information
         const enrichedAttempts = await Promise.all(
