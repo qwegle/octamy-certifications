@@ -21,6 +21,12 @@ interface ExamQuestion {
   id: number;
   question: string;
   options: string[];
+  subject?: string | null; // For multi-subject exams
+}
+
+interface SubjectInfo {
+  name: string;
+  questionCount: number;
 }
 
 interface ExamProgress {
@@ -112,13 +118,21 @@ export default function Exam() {
     name: user?.name || '',
     email: user?.email || ''
   });
+  
+  // Multi-subject exam state
+  const [currentSubject, setCurrentSubject] = useState<string | null>(null);
+  const [subjects, setSubjects] = useState<SubjectInfo[] | null>(null);
 
   const { data: course } = useQuery<Course>({
     queryKey: [`/api/courses/slug/${slug}`],
     enabled: !!slug,
   });
 
-  const { data: questionsData } = useQuery<{questions: ExamQuestion[], sessionId: string}>({
+  const { data: questionsData } = useQuery<{
+    questions: ExamQuestion[];
+    sessionId: string;
+    subjects?: SubjectInfo[] | null;
+  }>({
     queryKey: [`/api/courses/${course?.id}/questions`, examStarted, examStartTime],
     queryFn: async () => {
       // Always generate a fresh session for each exam attempt
@@ -143,12 +157,27 @@ export default function Exam() {
   // Use cached questions if available, otherwise use fetched questions
   const questions = cachedQuestions.length > 0 ? cachedQuestions : (questionsData?.questions || []);
 
-  // Set session ID when questions data is available
+  // Set session ID and subjects when questions data is available
   useEffect(() => {
     if (questionsData?.sessionId) {
       setSessionId(questionsData.sessionId);
     }
-  }, [questionsData]);
+    if (questionsData?.subjects) {
+      setSubjects(questionsData.subjects);
+      // Set first subject as default for multi-subject exams
+      if (questionsData.subjects.length > 0 && !currentSubject) {
+        setCurrentSubject(questionsData.subjects[0].name);
+      }
+    }
+  }, [questionsData, currentSubject]);
+  
+  // Check if this is a multi-subject exam
+  const isMultiSubject = subjects && subjects.length > 0;
+  
+  // Filter questions by current subject (for multi-subject exams)
+  const displayQuestions = isMultiSubject && currentSubject
+    ? questions.filter(q => q.subject === currentSubject)
+    : questions;
 
   // Monitor online/offline status
   useEffect(() => {
@@ -626,6 +655,15 @@ export default function Exam() {
                   onTimeUp={handleTimeUp}
                 />
               </div>
+              
+              {/* Submit Button */}
+              <Button
+                onClick={handleSubmit}
+                className="bg-red-600 text-white hover:bg-red-700"
+                data-testid="button-submit-exam"
+              >
+                Submit Exam
+              </Button>
             </div>
           </div>
           
@@ -635,6 +673,48 @@ export default function Exam() {
           </div>
         </div>
       </div>
+      
+      {/* Multi-Subject Tabs */}
+      {isMultiSubject && subjects && (
+        <div className="bg-white border-b border-premcq-gray-200 shadow-sm">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex gap-2 overflow-x-auto py-3">
+              {subjects.map((subject) => {
+                const subjectQuestions = questions.filter(q => q.subject === subject.name);
+                const answeredInSubject = subjectQuestions.filter(q => answers[q.id.toString()] !== undefined).length;
+                const isActive = currentSubject === subject.name;
+                
+                return (
+                  <button
+                    key={subject.name}
+                    onClick={() => {
+                      setCurrentSubject(subject.name);
+                      // Jump to first question of this subject
+                      const firstQuestionIndex = questions.findIndex(q => q.subject === subject.name);
+                      if (firstQuestionIndex !== -1) {
+                        setCurrentQuestion(firstQuestionIndex);
+                      }
+                    }}
+                    className={`flex-shrink-0 px-6 py-3 rounded-md font-medium transition-all ${
+                      isActive
+                        ? 'bg-green-600 text-white shadow-md'
+                        : 'bg-premcq-gray-100 text-premcq-gray-800 hover:bg-premcq-gray-200'
+                    }`}
+                    data-testid={`tab-subject-${subject.name.toLowerCase().replace(/\s+/g, '-')}`}
+                  >
+                    <div className="text-left">
+                      <div className="font-semibold">{subject.name}</div>
+                      <div className="text-xs mt-1">
+                        {subject.questionCount} Questions • {answeredInSubject} Answered
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="flex gap-6">
@@ -720,23 +800,33 @@ export default function Exam() {
         {/* Question Overview Panel - Right Side */}
         <Card className="w-80 h-fit sticky top-4">
           <CardHeader>
-            <CardTitle className="text-lg">Question Overview</CardTitle>
+            <CardTitle className="text-lg">
+              {isMultiSubject && currentSubject ? `${currentSubject} - Questions` : 'Question Overview'}
+            </CardTitle>
             <p className="text-sm text-premcq-gray-600">
-              {answeredCount} of {questions.length} answered
+              {isMultiSubject && currentSubject ? (
+                <>
+                  {displayQuestions.filter(q => answers[q.id.toString()] !== undefined).length} of {displayQuestions.length} answered
+                </>
+              ) : (
+                <>{answeredCount} of {questions.length} answered</>
+              )}
             </p>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-5 gap-2">
-              {questions.map((q, index) => {
+              {(isMultiSubject && currentSubject ? displayQuestions : questions).map((q, displayIndex) => {
+                // For multi-subject, find actual index in full questions array
+                const actualIndex = questions.findIndex(question => question.id === q.id);
                 const isAnswered = answers[q.id.toString()] !== undefined;
                 const isFlagged = flaggedQuestions.has(q.id);
-                const isCurrent = index === currentQuestion;
+                const isCurrent = actualIndex === currentQuestion;
 
                 return (
                   <button
                     key={q.id}
-                    onClick={() => setCurrentQuestion(index)}
-                    data-testid={`question-nav-${index + 1}`}
+                    onClick={() => setCurrentQuestion(actualIndex)}
+                    data-testid={`question-nav-${displayIndex + 1}`}
                     className={`
                       relative w-12 h-12 rounded-md border-2 flex items-center justify-center text-sm font-semibold transition-all
                       ${isCurrent ? 'border-black bg-black text-white' : ''}
@@ -744,7 +834,7 @@ export default function Exam() {
                       ${!isCurrent && !isAnswered ? 'border-gray-300 bg-white text-gray-700 hover:border-gray-400' : ''}
                     `}
                   >
-                    {index + 1}
+                    {displayIndex + 1}
                     {isFlagged && (
                       <Flag className="absolute -top-1 -right-1 h-3 w-3 fill-yellow-500 text-yellow-500" />
                     )}
