@@ -2301,6 +2301,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
+  // User exam attempts endpoint - For dashboard exam history and improvement tracking
+  app.get(
+    "/api/user/exam-attempts",
+    authenticateToken,
+    async (req: AuthenticatedRequest, res: Response) => {
+      try {
+        const userId = req.user?.userId;
+
+        if (!userId) {
+          return res.status(401).json({ message: "Unauthorized" });
+        }
+
+        console.log("Fetching exam attempts for user ID:", userId);
+        const attempts = await storage.getExamAttemptsByUser(userId);
+        
+        // Enrich with course information
+        const enrichedAttempts = await Promise.all(
+          attempts.map(async (attempt) => {
+            const course = await storage.getCourse(attempt.courseId);
+            return {
+              ...attempt,
+              courseTitle: course?.title || "Unknown Course",
+              courseCategory: course?.category || "general",
+            };
+          })
+        );
+        
+        console.log("Found exam attempts:", enrichedAttempts.length);
+        res.json(enrichedAttempts);
+      } catch (error) {
+        console.error("Get user exam attempts error:", error);
+        res.status(500).json({ message: "Internal server error" });
+      }
+    }
+  );
+
   // Public API endpoint for recent certificates (for landing page)
   app.get("/api/recent-certificates", async (req: Request, res: Response) => {
     try {
