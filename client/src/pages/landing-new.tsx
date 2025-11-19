@@ -28,14 +28,14 @@ import {
   ChevronLeft,
 } from "lucide-react";
 import CourseCard from "@/components/course-card";
+import Header from "@/components/header";
+import Footer from "@/components/footer";
 import { useAuth } from "@/hooks/useAuth";
 import type { Category, Course } from "@shared/schema";
 import bg2 from "@/assets/octamy-bg-2.png";
 import bg1 from "@/assets/octamy-bg-3.png";
 import bg3 from "@/assets/octamy-bg-4.png";
 import bg4 from "@/assets/octamy-bg-5.png";
-import premCQLogoLight from "@/assets/image_1750054465427.png";
-import premCQLogoDark from "@/assets/image_1750054456482.png";
 // Certificate Slider Component with infinite auto-scroll
 function CertificateSlider() {
   const { data: certificates = [] } = useQuery<any[]>({
@@ -343,79 +343,8 @@ export default function Landing() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Navigation */}
-      <nav className="bg-white border-b-2 border-gray-200 px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center space-x-8">
-            <Link href="/" className="text-2xl font-bold">
-              <img
-                src={premCQLogoDark}
-                alt="PremCQ"
-                className="h-8"
-              />
-            </Link>
-            <div className="hidden md:flex space-x-6">
-              <Link href="/exams" className="text-black hover:text-gray-600">
-                Practice Exams
-              </Link>
-              <Link href="/leaderboard" className="text-black hover:text-gray-600">
-                Leaderboard
-              </Link>
-              <Link href="/virtual-internships" className="text-black hover:text-gray-600">
-                Internships
-              </Link>
-              <Link href="/sponsor" className="text-black hover:text-gray-600">
-                Sponsors
-              </Link>
-              <Link
-                href="/business-certifications"
-                className="text-black hover:text-gray-600"
-              >
-                Business
-              </Link>
-              <Link href="/help-center" className="text-black hover:text-gray-600">
-                Help
-              </Link>
-            </div>
-          </div>
-          <div className="flex items-center space-x-4">
-            {!isLoading && !isAuthenticated ? (
-              <>
-                <Link href="/auth">
-                  <Button
-                    variant="outline"
-                    className="border-black text-black hover:bg-black hover:text-white"
-                  >
-                    Login
-                  </Button>
-                </Link>
-                <Link href="/seller-auth">
-                  <Button className="bg-black text-white hover:bg-gray-800">
-                    Become a Reseller
-                  </Button>
-                </Link>
-              </>
-            ) : (
-              <>
-                <Link href="/dashboard">
-                  <Button
-                    variant="outline"
-                    className="border-black text-black hover:bg-black hover:text-white"
-                  >
-                    Dashboard
-                  </Button>
-                </Link>
-                <Link href="/logout">
-                  <Button className="bg-black text-white hover:bg-gray-800">
-                    Logout
-                  </Button>
-                </Link>
-              </>
-            )}
-          </div>
-        </div>
-      </nav>
-
+      <Header />
+      
       <BannerSlider />
 
       {/* Certificate Slider */}

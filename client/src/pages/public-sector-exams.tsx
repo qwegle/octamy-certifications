@@ -15,6 +15,7 @@ import { Helmet } from "react-helmet-async";
 export default function PublicSectorExams() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+  const [selectedYear, setSelectedYear] = useState<string | null>(null);
   const { user, isLoading } = useAuth();
   const isAuthenticated = !isLoading && user !== null;
 
@@ -41,6 +42,19 @@ export default function PublicSectorExams() {
 
   const publicSectorCategories = categories.filter(cat => publicSectorCategoryIds.includes(cat.id));
 
+  // Extract unique years from course titles
+  const availableYears = Array.from(
+    new Set(
+      allCourses
+        .filter(course => publicSectorCategoryIds.includes(course.categoryId))
+        .map(course => {
+          const yearMatch = course.title.match(/\b(20\d{2})\b/);
+          return yearMatch ? yearMatch[1] : null;
+        })
+        .filter(Boolean)
+    )
+  ).sort().reverse();
+
   const filteredCourses = allCourses.filter((course) => {
     const matchesSearch = course.title
       .toLowerCase()
@@ -50,9 +64,12 @@ export default function PublicSectorExams() {
     const matchesCategory =
       selectedCategory === null || course.categoryId === selectedCategory;
     
+    const matchesYear =
+      selectedYear === null || course.title.includes(selectedYear);
+    
     const isPublicSectorCourse = publicSectorCategoryIds.includes(course.categoryId);
 
-    return matchesSearch && matchesCategory && isPublicSectorCourse;
+    return matchesSearch && matchesCategory && matchesYear && isPublicSectorCourse;
   });
 
   return (
@@ -131,25 +148,59 @@ export default function PublicSectorExams() {
               </div>
             </div>
 
-            <div className="flex flex-wrap justify-center gap-3 mb-12">
-              <Button
-                variant={selectedCategory === null ? "default" : "outline"}
-                onClick={() => setSelectedCategory(null)}
-                data-testid="button-all-exams"
-              >
-                All Exams
-              </Button>
-              {publicSectorCategories.map((category) => (
+            {/* Category Filter */}
+            <div className="mb-6">
+              <h3 className="text-sm font-semibold text-foreground mb-3 text-center">Filter by Category</h3>
+              <div className="flex flex-wrap justify-center gap-3">
                 <Button
-                  key={category.id}
-                  variant={selectedCategory === category.id ? "default" : "outline"}
-                  onClick={() => setSelectedCategory(category.id)}
-                  data-testid={`button-category-${category.id}`}
+                  variant={selectedCategory === null ? "default" : "outline"}
+                  onClick={() => setSelectedCategory(null)}
+                  className={selectedCategory === null ? "bg-black text-white" : "border-black text-black hover:bg-black hover:text-white"}
+                  data-testid="button-all-categories"
                 >
-                  {category.name}
+                  All Categories
                 </Button>
-              ))}
+                {publicSectorCategories.map((category) => (
+                  <Button
+                    key={category.id}
+                    variant={selectedCategory === category.id ? "default" : "outline"}
+                    onClick={() => setSelectedCategory(category.id)}
+                    className={selectedCategory === category.id ? "bg-black text-white" : "border-black text-black hover:bg-black hover:text-white"}
+                    data-testid={`button-category-${category.id}`}
+                  >
+                    {category.name.replace('Public Sector - ', '')}
+                  </Button>
+                ))}
+              </div>
             </div>
+
+            {/* Year Filter */}
+            {availableYears.length > 0 && (
+              <div className="mb-12">
+                <h3 className="text-sm font-semibold text-foreground mb-3 text-center">Filter by Year</h3>
+                <div className="flex flex-wrap justify-center gap-3">
+                  <Button
+                    variant={selectedYear === null ? "default" : "outline"}
+                    onClick={() => setSelectedYear(null)}
+                    className={selectedYear === null ? "bg-black text-white" : "border-black text-black hover:bg-black hover:text-white"}
+                    data-testid="button-all-years"
+                  >
+                    All Years
+                  </Button>
+                  {availableYears.map((year) => (
+                    <Button
+                      key={year}
+                      variant={selectedYear === year ? "default" : "outline"}
+                      onClick={() => setSelectedYear(year)}
+                      className={selectedYear === year ? "bg-black text-white" : "border-black text-black hover:bg-black hover:text-white"}
+                      data-testid={`button-year-${year}`}
+                    >
+                      {year}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredCourses.map((course) => (
@@ -169,7 +220,8 @@ export default function PublicSectorExams() {
                 <Button variant="outline" onClick={() => {
                   setSearchQuery("");
                   setSelectedCategory(null);
-                }}>
+                  setSelectedYear(null);
+                }} className="border-black text-black hover:bg-black hover:text-white">
                   Clear Filters
                 </Button>
               </div>

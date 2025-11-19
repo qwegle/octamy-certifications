@@ -20,39 +20,44 @@ export default function Header() {
   const isActive = (path: string) => location === path;
 
   return (
-    <header className="bg-black text-white sticky top-0 z-50">
+    <header className="bg-white border-b-2 border-gray-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-6 py-4">
         <div className="flex justify-between items-center">
           {/* Logo */}
           <Link href="/" className="flex items-center">
             <span className="text-2xl font-bold">
               <img
-                src={premcqLogoLight}
+                src={premcqLogoDark}
                 alt="PremCQ"
-                className="h-8 dark:block"
+                className="h-8"
               />
             </span>
           </Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex space-x-6">
-            <Link href="/exams" className="hover:text-gray-300">
-              Exams
+            <Link href="/exams" className="text-black hover:text-gray-600">
+              Practice Exams
             </Link>
-            {/* <Link href="/learning-paths" className="hover:text-gray-300">Learning Paths</Link> */}
-            <Link href="/virtual-internships" className="hover:text-gray-300">
+            <Link href="/public-sector-exams" className="text-black hover:text-gray-600">
+              Public Sector
+            </Link>
+            <Link href="/leaderboard" className="text-black hover:text-gray-600">
+              Leaderboard
+            </Link>
+            <Link href="/virtual-internships" className="text-black hover:text-gray-600">
               Internships
             </Link>
-            <Link href="/sponsor" className="hover:text-gray-300">
+            <Link href="/sponsor" className="text-black hover:text-gray-600">
               Sponsors
             </Link>
             <Link
               href="/business-certifications"
-              className="hover:text-gray-300"
+              className="text-black hover:text-gray-600"
             >
               Business
             </Link>
-            <Link href="/help-center" className="hover:text-gray-300">
+            <Link href="/help-center" className="text-black hover:text-gray-600">
               Help
             </Link>
           </nav>
@@ -64,13 +69,13 @@ export default function Header() {
                 <Link href="/auth">
                   <Button
                     variant="outline"
-                    className="border-black text-black hover:bg-white hover:text-black"
+                    className="border-black text-black hover:bg-black hover:text-white"
                   >
                     Login
                   </Button>
                 </Link>
                 <Link href="/seller-auth">
-                  <Button className="bg-white text-black hover:bg-gray-200">
+                  <Button className="bg-black text-white hover:bg-gray-800">
                     Become a Reseller
                   </Button>
                 </Link>
@@ -80,14 +85,14 @@ export default function Header() {
                 <Link href="/dashboard">
                   <Button
                     variant="outline"
-                    className="border-white text-white hover:bg-white hover:text-black bg-black"
+                    className="border-black text-black hover:bg-black hover:text-white"
                   >
                     Dashboard
                   </Button>
                 </Link>
                 <Button
                   onClick={handleLogout}
-                  className="bg-white text-black hover:bg-gray-200"
+                  className="bg-black text-white hover:bg-gray-800"
                 >
                   Logout
                 </Button>
@@ -97,7 +102,7 @@ export default function Header() {
 
           {/* Mobile menu button */}
           <button
-            className="md:hidden"
+            className="md:hidden text-black"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             {mobileMenuOpen ? (
@@ -110,56 +115,64 @@ export default function Header() {
 
         {/* Mobile Navigation */}
         {mobileMenuOpen && (
-          <div className="md:hidden bg-black border-t border-gray-700">
+          <div className="md:hidden bg-white border-t border-gray-200">
             <div className="px-4 py-4 space-y-2">
               <Link
                 href="/exams"
-                className="block text-white hover:text-gray-300 font-medium py-2"
+                className="block text-black hover:text-gray-600 font-medium py-2"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Exams
+                Practice Exams
               </Link>
-              {/* <Link
-                href="/learning-paths"
-                className="block text-white hover:text-gray-300 font-medium py-2"
+              <Link
+                href="/public-sector-exams"
+                className="block text-black hover:text-gray-600 font-medium py-2"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Learning Paths
-              </Link> */}
+                Public Sector
+              </Link>
+              <Link
+                href="/leaderboard"
+                className="block text-black hover:text-gray-600 font-medium py-2"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Leaderboard
+              </Link>
               <Link
                 href="/virtual-internships"
-                className="block text-white hover:text-gray-300 font-medium py-2"
+                className="block text-black hover:text-gray-600 font-medium py-2"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Internships
               </Link>
               <Link
                 href="/sponsor"
-                className="block text-white hover:text-gray-300 font-medium py-2"
+                className="block text-black hover:text-gray-600 font-medium py-2"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Sponsors
               </Link>
               <Link
                 href="/business-certifications"
-                className="hover:text-gray-300"
+                className="block text-black hover:text-gray-600 font-medium py-2"
+                onClick={() => setMobileMenuOpen(false)}
               >
                 Business
               </Link>
               <Link
                 href="/help-center"
-                className="block text-white hover:text-gray-300 font-medium py-2"
+                className="block text-black hover:text-gray-600 font-medium py-2"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Help
               </Link>
-              <div className="pt-4 border-t border-gray-700">
+              <div className="pt-4 border-t border-gray-200">
                 {!isLoading && !isAuthenticated ? (
                   <div className="space-y-2">
                     <Link href="/auth" onClick={() => setMobileMenuOpen(false)}>
                       <Button
                         variant="outline"
-                        className="w-full border-black text-black hover:bg-white hover:text-black"
+                        className="w-full border-black text-black hover:bg-black hover:text-white"
                       >
                         Login
                       </Button>
@@ -168,7 +181,7 @@ export default function Header() {
                       href="/seller-auth"
                       onClick={() => setMobileMenuOpen(false)}
                     >
-                      <Button className="w-full bg-white text-black hover:bg-gray-200">
+                      <Button className="w-full bg-black text-white hover:bg-gray-800">
                         Become Reseller
                       </Button>
                     </Link>
@@ -181,7 +194,7 @@ export default function Header() {
                     >
                       <Button
                         variant="outline"
-                        className="w-full border-white text-black hover:bg-white hover:text-black bg-black"
+                        className="w-full border-black text-black hover:bg-black hover:text-white"
                       >
                         Dashboard
                       </Button>
@@ -191,7 +204,7 @@ export default function Header() {
                         handleLogout();
                         setMobileMenuOpen(false);
                       }}
-                      className="w-full bg-white text-black hover:bg-gray-200"
+                      className="w-full bg-black text-white hover:bg-gray-800"
                     >
                       Logout
                     </Button>
