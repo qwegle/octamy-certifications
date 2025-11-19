@@ -110,6 +110,7 @@ export async function seedDatabase() {
     const courseData = [
       {
         title: "Machine Learning Fundamentals",
+        slug: "machine-learning-fundamentals",
         description: "Master the basics of ML algorithms, supervised and unsupervised learning, model evaluation, and real-world applications.",
         categoryId: aiCategory.id,
         duration: 15,
@@ -119,6 +120,7 @@ export async function seedDatabase() {
       },
       {
         title: "Deep Learning with Neural Networks",
+        slug: "deep-learning-neural-networks",
         description: "Comprehensive course on neural networks, backpropagation, CNNs, RNNs, and modern deep learning frameworks.",
         categoryId: aiCategory.id,
         duration: 20,
@@ -128,6 +130,7 @@ export async function seedDatabase() {
       },
       {
         title: "Natural Language Processing",
+        slug: "natural-language-processing",
         description: "Learn text processing, sentiment analysis, language models, transformers, and NLP applications.",
         categoryId: aiCategory.id,
         duration: 18,
@@ -137,6 +140,7 @@ export async function seedDatabase() {
       },
       {
         title: "Computer Vision Professional",
+        slug: "computer-vision-professional",
         description: "Image processing, object detection, facial recognition, and computer vision applications with OpenCV and TensorFlow.",
         categoryId: aiCategory.id,
         duration: 22,
@@ -146,6 +150,7 @@ export async function seedDatabase() {
       },
       {
         title: "React.js Professional",
+        slug: "reactjs-professional",
         description: "Advanced React concepts, hooks, state management, testing, and best practices for modern web development.",
         categoryId: devCategory.id,
         duration: 12,
@@ -155,6 +160,7 @@ export async function seedDatabase() {
       },
       {
         title: "Node.js Backend Development",
+        slug: "nodejs-backend-development",
         description: "Build scalable backend applications with Node.js, Express, databases, authentication, and API design.",
         categoryId: devCategory.id,
         duration: 16,
@@ -164,6 +170,7 @@ export async function seedDatabase() {
       },
       {
         title: "Full Stack JavaScript Developer",
+        slug: "fullstack-javascript-developer",
         description: "Complete full-stack development with JavaScript, React, Node.js, MongoDB, and deployment strategies.",
         categoryId: devCategory.id,
         duration: 25,
@@ -173,6 +180,7 @@ export async function seedDatabase() {
       },
       {
         title: "Python for Backend Development",
+        slug: "python-backend-development",
         description: "Django, Flask, FastAPI, database integration, REST APIs, and Python web development best practices.",
         categoryId: devCategory.id,
         duration: 18,
@@ -182,6 +190,7 @@ export async function seedDatabase() {
       },
       {
         title: "DevOps Engineering Essentials",
+        slug: "devops-engineering-essentials",
         description: "CI/CD, Docker, Kubernetes, AWS, monitoring, automation, and infrastructure as code.",
         categoryId: devCategory.id,
         duration: 20,
@@ -191,6 +200,7 @@ export async function seedDatabase() {
       },
       {
         title: "Digital Marketing Strategy",
+        slug: "digital-marketing-strategy",
         description: "SEO, SEM, social media marketing, content strategy, analytics, and customer acquisition.",
         categoryId: businessCategory.id,
         duration: 10,
@@ -200,6 +210,7 @@ export async function seedDatabase() {
       },
       {
         title: "Business Analytics with Data",
+        slug: "business-analytics-data",
         description: "Data-driven decision making, KPI analysis, business intelligence, and strategic insights from data.",
         categoryId: businessCategory.id,
         duration: 14,
@@ -209,6 +220,7 @@ export async function seedDatabase() {
       },
       {
         title: "Project Management Professional",
+        slug: "project-management-professional",
         description: "Agile, Scrum, project planning, team leadership, risk management, and delivery optimization.",
         categoryId: businessCategory.id,
         duration: 12,
@@ -218,6 +230,7 @@ export async function seedDatabase() {
       },
       {
         title: "Data Science with Python",
+        slug: "data-science-python",
         description: "NumPy, Pandas, Scikit-learn, data cleaning, exploratory analysis, and machine learning pipelines.",
         categoryId: dataCategory.id,
         duration: 20,
@@ -227,6 +240,7 @@ export async function seedDatabase() {
       },
       {
         title: "SQL for Data Analysis",
+        slug: "sql-data-analysis",
         description: "Advanced SQL queries, joins, subqueries, window functions, and database optimization for analytics.",
         categoryId: dataCategory.id,
         duration: 12,
@@ -236,6 +250,7 @@ export async function seedDatabase() {
       },
       {
         title: "Data Visualization with Tableau",
+        slug: "data-visualization-tableau",
         description: "Create interactive dashboards, storytelling with data, advanced charts, and business reporting.",
         categoryId: dataCategory.id,
         duration: 10,
@@ -245,6 +260,7 @@ export async function seedDatabase() {
       },
       {
         title: "UPSC Prelims - General Studies 2024",
+        slug: "upsc-prelims-general-studies-2024",
         description: "Comprehensive preparation for UPSC Civil Services Prelims with previous year papers and practice tests.",
         categoryId: upscCategory.id,
         duration: 30,
@@ -254,6 +270,7 @@ export async function seedDatabase() {
       },
       {
         title: "UPSC Mains - Essay Writing",
+        slug: "upsc-mains-essay-writing",
         description: "Master essay writing for UPSC Mains with structured approach, examples, and expert guidance.",
         categoryId: upscCategory.id,
         duration: 15,
@@ -263,6 +280,7 @@ export async function seedDatabase() {
       },
       {
         title: "IAS Interview Preparation",
+        slug: "ias-interview-preparation",
         description: "Personality test preparation with mock interviews, current affairs, and communication skills.",
         categoryId: upscCategory.id,
         duration: 20,
@@ -272,6 +290,7 @@ export async function seedDatabase() {
       },
       {
         title: "SSC CGL 2024 - Complete Preparation",
+        slug: "ssc-cgl-2024-complete",
         description: "Staff Selection Commission Combined Graduate Level exam preparation with all sections covered.",
         categoryId: sscCategory.id,
         duration: 25,
@@ -281,6 +300,7 @@ export async function seedDatabase() {
       },
       {
         title: "SSC CHSL - Tier 1 & Tier 2",
+        slug: "ssc-chsl-tier-1-2",
         description: "Combined Higher Secondary Level exam preparation with quantitative aptitude, reasoning, and English.",
         categoryId: sscCategory.id,
         duration: 20,
@@ -290,6 +310,7 @@ export async function seedDatabase() {
       },
       {
         title: "RRB NTPC 2024 - Complete Guide",
+        slug: "rrb-ntpc-2024-complete",
         description: "Railway Non-Technical Popular Categories exam with mathematics, reasoning, and general awareness.",
         categoryId: railwayCategory.id,
         duration: 22,
@@ -299,6 +320,7 @@ export async function seedDatabase() {
       },
       {
         title: "RRB Group D - Technical Preparation",
+        slug: "rrb-group-d-technical",
         description: "Railway Group D examination covering mathematics, reasoning, science, and general awareness.",
         categoryId: railwayCategory.id,
         duration: 18,
@@ -308,6 +330,7 @@ export async function seedDatabase() {
       },
       {
         title: "Virtual Software Development Internship",
+        slug: "virtual-software-dev-internship",
         description: "Complete software development internship with real projects, code reviews, and industry mentorship.",
         categoryId: internshipCategory.id,
         duration: 20,
@@ -317,6 +340,7 @@ export async function seedDatabase() {
       },
       {
         title: "Data Science Internship Program",
+        slug: "data-science-internship",
         description: "Hands-on data science experience with real datasets, analysis projects, and professional guidance.",
         categoryId: internshipCategory.id,
         duration: 18,

@@ -188,8 +188,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Register Google OAuth routes
   app.use('/api', googleAuthRoutes);
   
-  // Initialize database if in development
-  if (process.env.NODE_ENV === "development") {
+  // Initialize database if not in production
+  if (process.env.NODE_ENV !== "production") {
     await seedDatabase();
   }
 
