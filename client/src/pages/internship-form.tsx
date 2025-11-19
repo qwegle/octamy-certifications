@@ -124,7 +124,7 @@ export default function InternshipFormPage() {
       <nav className="bg-black text-white px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-8">
-            <Link href="/" className="text-2xl font-bold">PREMCQ</Link>
+            <Link href="/" className="text-2xl font-bold">PremCq</Link>
             <div className="hidden md:flex space-x-6">
               <Link href="/" className="hover:text-gray-300">Courses</Link>
               <Link href="/partners" className="hover:text-gray-300">Partners</Link>
@@ -436,7 +436,7 @@ export default function InternshipFormPage() {
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
-              <h3 className="text-2xl font-bold mb-4">PREMCQ</h3>
+              <h3 className="text-2xl font-bold mb-4">PremCq</h3>
               <p className="text-gray-400">Professional certification platform for the modern workforce.</p>
             </div>
             <div>

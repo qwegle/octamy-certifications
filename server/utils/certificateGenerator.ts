@@ -397,12 +397,12 @@ function generateCertificateHTML(data: CertificateData): string {
           <div class="decorative-corners bottom-left"></div>
           <div class="decorative-corners bottom-right"></div>
           
-          <div class="watermark">PREMCQ</div>
+          <div class="watermark">PremCq</div>
           
           <div class="certificate-content">
             <div class="company-header">
               <div class="company-logo">
-                <div class="company-name">PREMCQ</div>
+                <div class="company-name">PremCq</div>
               </div>
               <div class="company-tagline">Solutions Private Limited</div>
               <div style="font-size: 12px; color: #999; font-style: italic; margin-top: 5px;">Authorized Certification Body</div>
@@ -662,7 +662,7 @@ export async function generateInvoicePDF(data: {
   //     <div class="invoice-container">
   //       <div class="invoice-header">
   //         <div class="company-info">
-  //           <h1>PREMCQ SOLUTIONS</h1>
+  //           <h1>PremCq SOLUTIONS</h1>
   //           <p>Professional Certificate Provider</p>
   //           <p>Email: info@premcq.com</p>
   //         </div>

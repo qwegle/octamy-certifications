@@ -11,7 +11,7 @@ export default function DemoCertificate() {
       <nav className="bg-black text-white px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-8">
-            <Link href="/" className="text-2xl font-bold">PREMCQ</Link>
+            <Link href="/" className="text-2xl font-bold">PremCq</Link>
             <div className="hidden md:flex space-x-6">
               <Link href="/" className="hover:text-gray-300">Courses</Link>
               <Link href="/partners" className="hover:text-gray-300">Partners</Link>
@@ -121,7 +121,7 @@ export default function DemoCertificate() {
                         textShadow: '0 2px 4px rgba(0,0,0,0.1)'
                       }}
                     >
-                      PREMCQ
+                      PremCq
                     </div>
                   </div>
                   

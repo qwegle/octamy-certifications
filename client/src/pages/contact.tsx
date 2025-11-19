@@ -63,7 +63,7 @@ export default function Contact() {
       <nav className="bg-black text-white px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-8">
-            <Link href="/" className="text-2xl font-bold">PREMCQ</Link>
+            <Link href="/" className="text-2xl font-bold">PremCq</Link>
             <div className="hidden md:flex space-x-6">
               <Link href="/exams" className="hover:text-gray-300">Exams</Link>
               <Link href="/virtual-internships" className="hover:text-gray-300">Internships</Link>

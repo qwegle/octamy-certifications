@@ -159,7 +159,7 @@ export async function generateInvoicePDF(invoiceData: InvoiceData): Promise<Buff
         <div class="invoice-container">
           <div class="header">
             <div class="company-info">
-              <h1>PREMCQ SOLUTIONS</h1>
+              <h1>PremCq SOLUTIONS</h1>
               <p>Professional Certification Platform</p>
               <p>Email: support@premcq.com</p>
               <p>Website: www.premcq.com</p>

@@ -401,7 +401,7 @@ function generateCertificateHTML(data: CertificateData): string {
   //         <div class="decorative-corners bottom-left"></div>
   //         <div class="decorative-corners bottom-right"></div>
 
-  //         <div class="watermark">PREMCQ</div>
+  //         <div class="watermark">PremCq</div>
 
   //         <div class="certificate-content">
   //           <div class="header-section">

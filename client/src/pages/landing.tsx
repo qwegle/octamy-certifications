@@ -62,7 +62,7 @@ export default function Landing() {
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-8">
               <Link href="/">
-                <h1 className="text-3xl font-bold tracking-tight">PREMCQ</h1>
+                <h1 className="text-3xl font-bold tracking-tight">PremCq</h1>
               </Link>
               <nav className="hidden md:flex space-x-8">
                 <Link href="/" className="hover:text-gray-300 transition-colors">Courses</Link>
