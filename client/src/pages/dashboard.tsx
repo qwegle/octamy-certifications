@@ -476,15 +476,16 @@ export default function Dashboard() {
                   );
                   
                   const latestAttempt = sortedAttempts[sortedAttempts.length - 1];
-                  const hasMultipleAttempts = sortedAttempts.length > 1;
-                  const bestScore = Math.max(...sortedAttempts.map(a => a.score));
-                  const scoreImprovement = hasMultipleAttempts 
-                    ? latestAttempt.score - sortedAttempts[0].score 
+                  
+                  // Only include paid attempts in calculations and graph
+                  const paidAttempts = sortedAttempts.filter(attempt => (attempt as any).resultPaymentStatus === "paid");
+                  const hasMultiplePaidAttempts = paidAttempts.length > 1;
+                  const bestScore = paidAttempts.length > 0 ? Math.max(...paidAttempts.map(a => a.score)) : null;
+                  const scoreImprovement = hasMultiplePaidAttempts 
+                    ? paidAttempts[paidAttempts.length - 1].score - paidAttempts[0].score 
                     : 0;
 
                   // Prepare data for graph
-                  // Only include paid attempts in the graph
-                  const paidAttempts = sortedAttempts.filter(attempt => (attempt as any).resultPaymentStatus === "paid");
                   const graphData = paidAttempts.map((attempt, index) => ({
                     attempt: `Attempt ${index + 1}`,
                     score: attempt.score,
@@ -504,10 +505,12 @@ export default function Dashboard() {
                               <div className="text-sm text-gray-600">
                                 Total Attempts: <span className="font-semibold text-black" data-testid={`text-total-attempts-${courseId}`}>{sortedAttempts.length}</span>
                               </div>
-                              <div className="text-sm text-gray-600">
-                                Best Score: <span className="font-semibold text-black" data-testid={`text-best-score-${courseId}`}>{bestScore}%</span>
-                              </div>
-                              {hasMultipleAttempts && (
+                              {bestScore !== null && (
+                                <div className="text-sm text-gray-600">
+                                  Best Score: <span className="font-semibold text-black" data-testid={`text-best-score-${courseId}`}>{bestScore}%</span>
+                                </div>
+                              )}
+                              {hasMultiplePaidAttempts && (
                                 <div className="text-sm text-gray-600">
                                   Improvement: 
                                   <span 
@@ -516,6 +519,11 @@ export default function Dashboard() {
                                   >
                                     {scoreImprovement > 0 ? '+' : ''}{scoreImprovement}%
                                   </span>
+                                </div>
+                              )}
+                              {paidAttempts.length === 0 && (
+                                <div className="text-sm text-gray-600">
+                                  <span className="font-semibold text-orange-600">Pay ₹29 to unlock results</span>
                                 </div>
                               )}
                             </div>
@@ -601,7 +609,7 @@ export default function Dashboard() {
                           </div>
 
                           {/* Progress Graph */}
-                          {hasMultipleAttempts && (
+                          {hasMultiplePaidAttempts && (
                             <div>
                               <h4 className="font-semibold text-black mb-4">Score Progression</h4>
                               <ResponsiveContainer width="100%" height={200}>
@@ -641,14 +649,16 @@ export default function Dashboard() {
                             </div>
                           )}
 
-                          {/* First Attempt Message */}
-                          {!hasMultipleAttempts && (
+                          {/* Message when no paid attempts or only one */}
+                          {paidAttempts.length < 2 && (
                             <div className="flex items-center justify-center bg-gray-50 rounded-md border-2 border-dashed border-gray-300 p-8">
                               <div className="text-center">
                                 <TrendingUp className="w-12 h-12 text-gray-400 mx-auto mb-3" />
                                 <h4 className="font-semibold text-black mb-2">Track Your Progress</h4>
                                 <p className="text-sm text-gray-600 mb-4">
-                                  Retake this exam to see your improvement over time
+                                  {paidAttempts.length === 0 
+                                    ? "Pay ₹29 to unlock your results and start tracking progress"
+                                    : "Retake this exam to see your improvement over time"}
                                 </p>
                                 <Link href={`/courses/${courseId}`}>
                                   <Button 
