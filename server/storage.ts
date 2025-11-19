@@ -111,6 +111,7 @@ export interface IStorage {
 
   // Course operations
   getCourses(categoryId?: number): Promise<(Course & { category: Category })[]>;
+  getCoursesPage(options?: { categoryId?: number; limit?: number; offset?: number; search?: string }): Promise<{ data: (Course & { category: Category })[]; total: number }>;
   getAllCourses(): Promise<(Course & { category: Category })[]>;
   getCourse(id: number): Promise<Course | undefined>;
   getCourseBySlug(slug: string): Promise<(Course & { category: Category }) | undefined>;
@@ -413,6 +414,73 @@ export class DatabaseStorage implements IStorage {
       .where(categoryId ? eq(courses.categoryId, categoryId) : undefined);
 
     return await query;
+  }
+
+  async getCoursesPage(options?: { categoryId?: number; limit?: number; offset?: number; search?: string }): Promise<{ data: (Course & { category: Category })[]; total: number }> {
+    const { categoryId, limit = 10, offset = 0, search } = options || {};
+
+    // Build where conditions
+    const conditions = [];
+    if (categoryId) {
+      conditions.push(eq(courses.categoryId, categoryId));
+    }
+    if (search) {
+      conditions.push(
+        or(
+          ilike(courses.title, `%${search}%`),
+          ilike(courses.description, `%${search}%`)
+        )
+      );
+    }
+
+    const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
+    // Get total count
+    const [countResult] = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(courses)
+      .innerJoin(categories, eq(courses.categoryId, categories.id))
+      .where(whereClause);
+
+    // Get paginated data
+    const data = await db
+      .select({
+        id: courses.id,
+        title: courses.title,
+        description: courses.description,
+        slug: courses.slug,
+        categoryId: courses.categoryId,
+        duration: courses.duration,
+        passingScore: courses.passingScore,
+        price: courses.price,
+        originalPrice: courses.originalPrice,
+        isOnSale: courses.isOnSale,
+        saleEndDate: courses.saleEndDate,
+        level: courses.level,
+        isActive: courses.isActive,
+        isInternship: courses.isInternship,
+        metaTitle: courses.metaTitle,
+        metaDescription: courses.metaDescription,
+        createdAt: courses.createdAt,
+        category: {
+          id: categories.id,
+          name: categories.name,
+          description: categories.description,
+          icon: categories.icon,
+          slug: categories.slug,
+        }
+      })
+      .from(courses)
+      .innerJoin(categories, eq(courses.categoryId, categories.id))
+      .where(whereClause)
+      .limit(limit)
+      .offset(offset)
+      .orderBy(desc(courses.createdAt));
+
+    return {
+      data,
+      total: countResult.count
+    };
   }
 
   async getAllCourses(): Promise<(Course & { category: Category })[]> {

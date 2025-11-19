@@ -320,19 +320,25 @@ export default function Landing() {
     queryKey: ["/api/categories"],
   });
 
-  const { data: courses = [] } = useQuery<(Course & { category: Category })[]>({
-    queryKey: ["/api/courses"],
+  // Fetch limited courses for landing page (10 courses)
+  const { data: coursesResponse } = useQuery<{ data: (Course & { category: Category })[]; total: number }>({
+    queryKey: ["/api/courses", selectedCategory, searchQuery],
+    queryFn: async () => {
+      const queryParams = new URLSearchParams();
+      queryParams.append('limit', '10');
+      queryParams.append('offset', '0');
+      if (selectedCategory) queryParams.append('categoryId', selectedCategory.toString());
+      if (searchQuery) queryParams.append('search', searchQuery);
+      
+      const response = await fetch(`/api/courses?${queryParams}`);
+      if (!response.ok) throw new Error('Failed to fetch courses');
+      return response.json();
+    }
   });
 
-  const filteredCourses = courses.filter((course) => {
-    const matchesSearch =
-      !searchQuery ||
-      course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      course.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory =
-      !selectedCategory || course.categoryId === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+  // Use paginated response
+  const courses = coursesResponse?.data || [];
+  const totalCourses = coursesResponse?.total || 0;
 
   return (
     <div className="min-h-screen bg-white">
@@ -417,13 +423,11 @@ export default function Landing() {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="text-left">
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-black mb-6 leading-tight">
-                India's Premier
-                <br />
-                <span className="bg-black text-white px-4 py-2 inline-block mt-2">
+                <span className="block">India's Premier</span>
+                <span className="bg-black text-white px-4 py-2 block mt-2 mb-2 w-fit">
                   MCQ CERTIFICATION
                 </span>
-                <br />
-                Platform
+                <span className="block">Platform</span>
               </h1>
               <p className="text-lg text-gray-600 mb-8 max-w-xl">
                 Master your skills through rigorous MCQ assessments. Get certified in Technology, Public Sector Exams, and Professional domains with instant verification and lifetime access.
@@ -594,17 +598,32 @@ export default function Landing() {
           </div>
 
           {/* Courses Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredCourses.map((course) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
+            {courses.map((course) => (
               <CourseCard key={course.id} course={course} />
             ))}
           </div>
 
-          {filteredCourses.length === 0 && (
+          {courses.length === 0 && (
             <div className="text-center py-12">
               <p className="text-gray-600 text-lg">
                 No courses found matching your criteria.
               </p>
+            </div>
+          )}
+
+          {courses.length > 0 && (
+            <div className="text-center mt-8">
+              <Link href="/exams">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-2 border-black text-black hover:bg-black hover:text-white px-8 py-4 text-lg"
+                  data-testid="button-show-all-courses"
+                >
+                  Show All {totalCourses} Courses <ArrowRight className="ml-2 w-5 h-5" />
+                </Button>
+              </Link>
             </div>
           )}
         </div>

@@ -897,7 +897,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/courses", async (req, res) => {
     try {
-      const courses = await storage.getCourses();
+      // Check if pagination params are provided
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
+      const offset = req.query.offset ? parseInt(req.query.offset as string) : undefined;
+      const categoryId = req.query.categoryId ? parseInt(req.query.categoryId as string) : undefined;
+      const search = req.query.search as string | undefined;
+
+      // If pagination requested, use getCoursesPage
+      if (limit !== undefined || offset !== undefined || search !== undefined) {
+        const result = await storage.getCoursesPage({
+          limit: limit || 10,
+          offset: offset || 0,
+          categoryId,
+          search
+        });
+        return res.json(result);
+      }
+
+      // Otherwise, use legacy getCourses
+      const courses = await storage.getCourses(categoryId);
       res.json(courses);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch courses" });

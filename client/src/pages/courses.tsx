@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -6,6 +6,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import { Link } from "wouter";
 import { Search, Filter, Clock, Users, Star, TrendingUp, Award, Grid, List, SortAsc, SortDesc } from "lucide-react";
 import Header from "@/components/header";
@@ -41,11 +50,14 @@ export default function CoursesPage() {
   const [sortBy, setSortBy] = useState("popularity");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [showFilters, setShowFilters] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const coursesPerPage = 12;
 
   const { data: categories = [] } = useQuery<Category[]>({
     queryKey: ['/api/categories'],
   });
 
+  // Fetch all courses for filtering (we'll do client-side filtering for now due to complex filters)
   const { data: courses = [], isLoading } = useQuery<(Course & { category: Category })[]>({
     queryKey: ['/api/courses'],
   });
@@ -102,12 +114,25 @@ export default function CoursesPage() {
     return filtered;
   }, [courses, searchQuery, selectedCategory, selectedDifficulty, selectedPriceRange, sortBy]);
 
+  // Pagination
+  const totalPages = Math.ceil(filteredAndSortedCourses.length / coursesPerPage);
+  const paginatedCourses = useMemo(() => {
+    const startIndex = (currentPage - 1) * coursesPerPage;
+    return filteredAndSortedCourses.slice(startIndex, startIndex + coursesPerPage);
+  }, [filteredAndSortedCourses, currentPage, coursesPerPage]);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, selectedCategory, selectedDifficulty, selectedPriceRange, sortBy]);
+
   const clearFilters = () => {
     setSearchQuery("");
     setSelectedCategory("all");
     setSelectedDifficulty("all");
     setSelectedPriceRange("all");
     setSortBy("popularity");
+    setCurrentPage(1);
   };
 
   const hasActiveFilters = searchQuery || selectedCategory !== "all" || selectedDifficulty !== "all" || selectedPriceRange !== "all";
@@ -317,13 +342,113 @@ export default function CoursesPage() {
                 ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" 
                 : "grid-cols-1"
             }`}>
-              {filteredAndSortedCourses.map((course) => (
+              {paginatedCourses.map((course) => (
                 <CourseCard
                   key={course.id}
                   course={course}
                   viewMode={viewMode}
                 />
               ))}
+            </div>
+          )}
+
+          {/* Pagination */}
+          {!isLoading && filteredAndSortedCourses.length > 0 && totalPages > 1 && (
+            <div className="mt-12 flex justify-center">
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious 
+                      onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
+                      className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                      data-testid="pagination-previous"
+                    />
+                  </PaginationItem>
+                  
+                  {(() => {
+                    const pages = [];
+                    const siblingCount = 2; // Show current±2 pages
+                    
+                    // Always show first page
+                    pages.push(
+                      <PaginationItem key={1}>
+                        <PaginationLink
+                          onClick={() => setCurrentPage(1)}
+                          isActive={currentPage === 1}
+                          className="cursor-pointer"
+                          data-testid="pagination-page-1"
+                        >
+                          1
+                        </PaginationLink>
+                      </PaginationItem>
+                    );
+                    
+                    // Calculate start and end of visible page window
+                    const start = Math.max(2, currentPage - siblingCount);
+                    const end = Math.min(totalPages - 1, currentPage + siblingCount);
+                    
+                    // Show ellipsis before window if there's a gap
+                    if (start > 2) {
+                      pages.push(
+                        <PaginationItem key="ellipsis-start">
+                          <PaginationEllipsis />
+                        </PaginationItem>
+                      );
+                    }
+                    
+                    // Show pages in the window around current page
+                    for (let page = start; page <= end; page++) {
+                      pages.push(
+                        <PaginationItem key={page}>
+                          <PaginationLink
+                            onClick={() => setCurrentPage(page)}
+                            isActive={page === currentPage}
+                            className="cursor-pointer"
+                            data-testid={`pagination-page-${page}`}
+                          >
+                            {page}
+                          </PaginationLink>
+                        </PaginationItem>
+                      );
+                    }
+                    
+                    // Show ellipsis after window if there's a gap
+                    if (end < totalPages - 1) {
+                      pages.push(
+                        <PaginationItem key="ellipsis-end">
+                          <PaginationEllipsis />
+                        </PaginationItem>
+                      );
+                    }
+                    
+                    // Always show last page (if more than 1 page)
+                    if (totalPages > 1) {
+                      pages.push(
+                        <PaginationItem key={totalPages}>
+                          <PaginationLink
+                            onClick={() => setCurrentPage(totalPages)}
+                            isActive={currentPage === totalPages}
+                            className="cursor-pointer"
+                            data-testid={`pagination-page-${totalPages}`}
+                          >
+                            {totalPages}
+                          </PaginationLink>
+                        </PaginationItem>
+                      );
+                    }
+                    
+                    return pages;
+                  })()}
+                  
+                  <PaginationItem>
+                    <PaginationNext
+                      onClick={() => currentPage < totalPages && setCurrentPage(currentPage + 1)}
+                      className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                      data-testid="pagination-next"
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
             </div>
           )}
         </div>
