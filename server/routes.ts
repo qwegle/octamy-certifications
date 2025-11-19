@@ -2145,6 +2145,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Leaderboard API endpoint
+  app.get("/api/leaderboard", async (req: Request, res: Response) => {
+    try {
+      // Validate and sanitize inputs
+      let courseId: number | undefined = undefined;
+      if (req.query.courseId) {
+        const trimmed = (req.query.courseId as string).trim();
+        const parsed = parseInt(trimmed, 10);
+        if (isNaN(parsed) || parsed <= 0 || !Number.isInteger(parsed)) {
+          return res.status(400).json({ message: "Invalid courseId parameter" });
+        }
+        courseId = parsed;
+      }
+      
+      let limit = 50; // Default limit
+      if (req.query.limit) {
+        const trimmed = (req.query.limit as string).trim();
+        const parsed = parseInt(trimmed, 10);
+        if (isNaN(parsed) || parsed <= 0 || !Number.isInteger(parsed)) {
+          return res.status(400).json({ message: "Invalid limit parameter" });
+        }
+        // Cap limit to prevent unbounded queries
+        limit = Math.min(parsed, 500);
+      }
+      
+      const leaderboard = await storage.getLeaderboard(courseId, limit);
+      res.json(leaderboard);
+    } catch (error) {
+      console.error("Error fetching leaderboard:", error);
+      res.status(500).json({ message: "Failed to fetch leaderboard" });
+    }
+  });
+
   // Contact form submission endpoint
   app.post("/api/contact", async (req: Request, res: Response) => {
     try {

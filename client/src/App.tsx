@@ -50,6 +50,7 @@ import PaymentTemp from "@/pages/PaymentTemp";
 import Contact from "@/pages/contact";
 import TechExams from "@/pages/tech-exams";
 import PublicSectorExams from "@/pages/public-sector-exams";
+import LeaderboardPage from "@/pages/leaderboard";
 
 
 // Recruiter Portal Components
@@ -76,6 +77,7 @@ function Router() {
       <Route path="/register" component={Auth} />
       <Route path="/logout" component={Auth} />
       <Route path="/exams" component={Courses} />
+      <Route path="/leaderboard" component={LeaderboardPage} />
       <Route path="/tech-exams" component={TechExams} />
       <Route path="/public-sector-exams" component={PublicSectorExams} />
       <Route path="/virtual-internships" component={VirtualInternships} />

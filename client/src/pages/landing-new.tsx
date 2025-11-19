@@ -46,12 +46,12 @@ function CertificateSlider() {
     certificates.length > 0 ? [...certificates, ...certificates] : [];
   console.log(duplicatedCertificates);
   return (
-    <div className="bg-black text-white py-8">
+    <div className="bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-8">
-          <h3 className="text-2xl font-bold">Recent Certifications</h3>
-          <p className="text-gray-400 mt-2">
-            Join thousands of professionals who have earned their certificates
+          <h3 className="text-2xl font-bold text-black">Recent Top Scorers</h3>
+          <p className="text-gray-600 mt-2">
+            Join thousands who have excelled in their practice exams
           </p>
         </div>
 
@@ -61,29 +61,29 @@ function CertificateSlider() {
               {duplicatedCertificates.map((cert, index) => (
                 <div
                   key={`${cert.name}-${cert.course}-${index}`}
-                  className="flex-shrink-0 bg-gray-900 rounded-lg p-6 min-w-[300px]"
+                  className="flex-shrink-0 bg-white border-2 border-gray-200 rounded-lg p-6 min-w-[300px] hover:border-black transition-colors"
                 >
                   <div className="flex items-center space-x-3 mb-3">
-                    <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center">
-                      <Award className="w-6 h-6 text-black" />
+                    <div className="w-12 h-12 bg-black rounded-full flex items-center justify-center">
+                      <Award className="w-6 h-6 text-white" />
                     </div>
                     <div>
-                      <h4 className="font-semibold">{cert.name}</h4>
-                      <p className="text-sm text-gray-400">{cert.company}</p>
+                      <h4 className="font-semibold text-black">{cert.name}</h4>
+                      <p className="text-sm text-gray-600">{cert.company}</p>
                     </div>
                   </div>
-                  <p className="text-sm mb-2">
-                    Certified in{" "}
-                    <span className="font-semibold">{cert.course}</span>
+                  <p className="text-sm text-gray-700 mb-2">
+                    Practiced{" "}
+                    <span className="font-semibold text-black">{cert.course}</span>
                   </p>
                   <div className="flex items-center justify-between">
                     <Badge
                       variant="outline"
-                      className="border-white text-white"
+                      className="border-black text-black"
                     >
                       {cert.badge} Badge
                     </Badge>
-                    <span className="text-xs text-gray-400">Score: ••%</span>
+                    <span className="text-xs text-gray-600">Score: ••%</span>
                   </div>
                 </div>
               ))}
@@ -95,17 +95,17 @@ function CertificateSlider() {
             {Array.from({ length: 3 }).map((_, index) => (
               <div
                 key={index}
-                className="flex-shrink-0 bg-gray-900 rounded-lg p-6 min-w-[300px] animate-pulse"
+                className="flex-shrink-0 bg-white border-2 border-gray-200 rounded-lg p-6 min-w-[300px] animate-pulse"
               >
                 <div className="flex items-center space-x-3 mb-3">
-                  <div className="w-12 h-12 bg-gray-700 rounded-full"></div>
+                  <div className="w-12 h-12 bg-gray-300 rounded-full"></div>
                   <div>
-                    <div className="h-4 bg-gray-700 rounded w-24 mb-2"></div>
-                    <div className="h-3 bg-gray-700 rounded w-16"></div>
+                    <div className="h-4 bg-gray-300 rounded w-24 mb-2"></div>
+                    <div className="h-3 bg-gray-300 rounded w-16"></div>
                   </div>
                 </div>
-                <div className="h-3 bg-gray-700 rounded w-32 mb-2"></div>
-                <div className="h-6 bg-gray-700 rounded w-20"></div>
+                <div className="h-3 bg-gray-300 rounded w-32 mb-2"></div>
+                <div className="h-6 bg-gray-300 rounded w-20"></div>
               </div>
             ))}
           </div>
@@ -124,38 +124,38 @@ const BannerSlider = () => {
     {
       id: 1,
       image:  bg1 ,
-      title: "Meet your new AI conversation coach",
+      title: "Practice for Your Entrance Exams",
       subtitle:
-        "Role Play is the interactive way to practice your business and communication skills.",
+        "Real MCQ tests to prepare for technology certifications and competitive exams",
       description: "Build full-stack applications with modern technologies",
-      buttonText: "Get Certificate Now !",
+      buttonText: "Start Practicing Now",
       gradient: "from-blue-600 to-purple-600",
     },
     {
       id: 2,
       image: bg2,
-      title: "Data Science Bootcamp",
-      subtitle: "Python, Machine Learning & AI",
+      title: "Master Data Science & AI",
+      subtitle: "Practice MCQs in Python, Machine Learning & AI",
       description: "Transform your career with data science skills",
-      buttonText: "Get Certificate Now !",
+      buttonText: "Begin Practice Tests",
       gradient: "from-green-600 to-teal-600",
     },
     {
       id: 3,
       image:bg3,
-      title: "Digital Marketing Mastery",
-      subtitle: "SEO, Social Media & Analytics",
+      title: "Digital Marketing Prep",
+      subtitle: "Practice SEO, Social Media & Analytics MCQs",
       description: "Grow your business with proven marketing strategies",
-      buttonText: "Get Certificate Now !",
+      buttonText: "Practice Now",
       gradient: "from-orange-600 to-red-600",
     },
     {
       id: 4,
       image: bg4,
-      title: "UI/UX Design Complete",
-      subtitle: "Figma, Adobe XD & Prototyping",
+      title: "UI/UX Design Practice",
+      subtitle: "Prepare with Figma, Adobe XD & Prototyping MCQs",
       description: "Create stunning user experiences and interfaces",
-      buttonText: "Get Certificate Now !",
+      buttonText: "Start Practice Tests",
       gradient: "from-pink-600 to-purple-600",
     },
   ];
@@ -343,34 +343,36 @@ export default function Landing() {
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation */}
-      <nav className="bg-black text-white px-6 py-4">
+      <nav className="bg-white border-b-2 border-gray-200 px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-8">
             <Link href="/" className="text-2xl font-bold">
               <img
                 src={premCQLogoLight}
                 alt="PremCQ"
-                className="h-8 dark:block"
+                className="h-8"
               />
             </Link>
             <div className="hidden md:flex space-x-6">
-              <Link href="/exams" className="hover:text-gray-300">
-                Exams
+              <Link href="/exams" className="text-black hover:text-gray-600">
+                Practice Exams
               </Link>
-              <Link href="/virtual-internships" className="hover:text-gray-300">
+              <Link href="/leaderboard" className="text-black hover:text-gray-600">
+                Leaderboard
+              </Link>
+              <Link href="/virtual-internships" className="text-black hover:text-gray-600">
                 Internships
               </Link>
-              {/* <Link href="/business-certifications" className="hover:text-gray-300">Business Pricing</Link> */}
-              <Link href="/sponsor" className="hover:text-gray-300">
+              <Link href="/sponsor" className="text-black hover:text-gray-600">
                 Sponsors
               </Link>
               <Link
                 href="/business-certifications"
-                className="hover:text-gray-300"
+                className="text-black hover:text-gray-600"
               >
                 Business
               </Link>
-              <Link href="/help-center" className="hover:text-gray-300">
+              <Link href="/help-center" className="text-black hover:text-gray-600">
                 Help
               </Link>
             </div>
@@ -381,13 +383,13 @@ export default function Landing() {
                 <Link href="/auth">
                   <Button
                     variant="outline"
-                    className="border-white text-black hover:bg-white hover:text-black"
+                    className="border-black text-black hover:bg-black hover:text-white"
                   >
                     Login
                   </Button>
                 </Link>
                 <Link href="/seller-auth">
-                  <Button className="bg-white text-black hover:bg-gray-200">
+                  <Button className="bg-black text-white hover:bg-gray-800">
                     Become a Reseller
                   </Button>
                 </Link>
@@ -397,13 +399,13 @@ export default function Landing() {
                 <Link href="/dashboard">
                   <Button
                     variant="outline"
-                    className="border-white text-white hover:bg-white hover:text-black bg-black"
+                    className="border-black text-black hover:bg-black hover:text-white"
                   >
                     Dashboard
                   </Button>
                 </Link>
                 <Link href="/logout">
-                  <Button className="bg-white text-black hover:bg-gray-200">
+                  <Button className="bg-black text-white hover:bg-gray-800">
                     Logout
                   </Button>
                 </Link>
@@ -423,14 +425,14 @@ export default function Landing() {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="text-left">
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-black mb-6 leading-tight">
-                <span className="block">India's Premier</span>
-                <span className="bg-black text-white px-4 py-2 block mt-2 mb-2 w-fit">
-                  MCQ CERTIFICATION
+                <span className="block">PRE MCQ:</span>
+                <span className="block mt-2 mb-2">
+                  Practice Before
                 </span>
-                <span className="block">Platform</span>
+                <span className="block">Your Entrance Exams</span>
               </h1>
               <p className="text-lg text-gray-600 mb-8 max-w-xl">
-                Master your skills through rigorous MCQ assessments. Get certified in Technology, Public Sector Exams, and Professional domains with instant verification and lifetime access.
+                Master entrance exams through comprehensive MCQ practice. Prepare for Technology, Public Sector, and Professional exams - and earn real certifications as you excel.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 mb-8">
                 <Link href="/tech-exams">
@@ -438,7 +440,7 @@ export default function Landing() {
                     size="lg"
                     className="bg-black text-white hover:bg-gray-800 px-8 py-4 text-lg w-full sm:w-auto"
                   >
-                    Tech Certifications <ArrowRight className="ml-2 w-5 h-5" />
+                    Practice Tech Exams <ArrowRight className="ml-2 w-5 h-5" />
                   </Button>
                 </Link>
                 <Link href="/public-sector-exams">
@@ -447,18 +449,18 @@ export default function Landing() {
                     size="lg"
                     className="border-black text-black hover:bg-black hover:text-white px-8 py-4 text-lg w-full sm:w-auto"
                   >
-                    Public Sector Exams
+                    Practice Public Sector
                   </Button>
                 </Link>
               </div>
               <div className="flex items-center gap-6 text-sm text-gray-600">
                 <div className="flex items-center gap-2">
                   <CheckCircle className="w-5 h-5 text-green-600" />
-                  <span>Instant Certificates</span>
+                  <span>Real Practice Tests</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle className="w-5 h-5 text-green-600" />
-                  <span>Performance Badges</span>
+                  <span>Earn Certificates</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle className="w-5 h-5 text-green-600" />

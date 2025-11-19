@@ -83,6 +83,9 @@ import {
   type Rating,
   type InsertRating,
   type RatingAggregate,
+  leaderboard,
+  type Leaderboard,
+  type InsertLeaderboard,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, count, sql, or, asc, ilike, gte, lte } from "drizzle-orm";
@@ -238,6 +241,10 @@ export interface IStorage {
   // Skill Assessment operations
   getUserSkillAssessments(userId: number, categoryId?: number): Promise<SkillAssessment[]>;
   getValidSkillAssessment(userId: number, categoryId: number): Promise<SkillAssessment | undefined>;
+  
+  // Leaderboard operations
+  getLeaderboard(courseId?: number, limit?: number): Promise<(Leaderboard & { courseTitle: string | null; courseSlug: string | null })[]>;
+  addToLeaderboard(entry: InsertLeaderboard): Promise<Leaderboard>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -3044,6 +3051,45 @@ export class DatabaseStorage implements IStorage {
           updatedAt: new Date(),
         },
       });
+  }
+
+  // Leaderboard operations
+  async getLeaderboard(courseId?: number, limit: number = 50): Promise<(Leaderboard & { courseTitle: string | null; courseSlug: string | null })[]> {
+    let query = db
+      .select({
+        id: leaderboard.id,
+        courseId: leaderboard.courseId,
+        userId: leaderboard.userId,
+        userName: leaderboard.userName,
+        userEmail: leaderboard.userEmail,
+        score: leaderboard.score,
+        badge: leaderboard.badge,
+        certificateId: leaderboard.certificateId,
+        achievedAt: leaderboard.achievedAt,
+        businessName: leaderboard.businessName,
+        courseTitle: courses.title,
+        courseSlug: courses.slug,
+      })
+      .from(leaderboard)
+      .leftJoin(courses, eq(leaderboard.courseId, courses.id));
+
+    // Apply where clause first if filtering by course
+    if (courseId) {
+      query = query.where(eq(leaderboard.courseId, courseId)) as any;
+    }
+    
+    // Then apply ordering and limit
+    return await query
+      .orderBy(desc(leaderboard.score), asc(leaderboard.achievedAt))
+      .limit(limit);
+  }
+
+  async addToLeaderboard(entry: InsertLeaderboard): Promise<Leaderboard> {
+    const [leaderboardEntry] = await db
+      .insert(leaderboard)
+      .values(entry)
+      .returning();
+    return leaderboardEntry;
   }
 }
 
