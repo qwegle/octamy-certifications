@@ -115,7 +115,9 @@ export async function seedDatabase() {
         categoryId: aiCategory.id,
         duration: 15,
         passingScore: 50,
-        price: "199.00",
+        price: "29.00",
+        originalPrice: "199.00",
+        isOnSale: true,
         isActive: true
       },
       {
@@ -125,7 +127,9 @@ export async function seedDatabase() {
         categoryId: aiCategory.id,
         duration: 20,
         passingScore: 50,
-        price: "249.00",
+        price: "29.00",
+        originalPrice: "249.00",
+        isOnSale: true,
         isActive: true
       },
       {
@@ -135,7 +139,9 @@ export async function seedDatabase() {
         categoryId: aiCategory.id,
         duration: 18,
         passingScore: 50,
-        price: "229.00",
+        price: "29.00",
+        originalPrice: "229.00",
+        isOnSale: true,
         isActive: true
       },
       {
@@ -145,7 +151,9 @@ export async function seedDatabase() {
         categoryId: aiCategory.id,
         duration: 22,
         passingScore: 50,
-        price: "269.00",
+        price: "29.00",
+        originalPrice: "269.00",
+        isOnSale: true,
         isActive: true
       },
       {
@@ -155,7 +163,9 @@ export async function seedDatabase() {
         categoryId: devCategory.id,
         duration: 12,
         passingScore: 50,
-        price: "199.00",
+        price: "29.00",
+        originalPrice: "199.00",
+        isOnSale: true,
         isActive: true
       },
       {
@@ -165,7 +175,9 @@ export async function seedDatabase() {
         categoryId: devCategory.id,
         duration: 16,
         passingScore: 50,
-        price: "219.00",
+        price: "29.00",
+        originalPrice: "219.00",
+        isOnSale: true,
         isActive: true
       },
       {
@@ -175,7 +187,9 @@ export async function seedDatabase() {
         categoryId: devCategory.id,
         duration: 25,
         passingScore: 50,
-        price: "299.00",
+        price: "29.00",
+        originalPrice: "299.00",
+        isOnSale: true,
         isActive: true
       },
       {
@@ -185,7 +199,9 @@ export async function seedDatabase() {
         categoryId: devCategory.id,
         duration: 18,
         passingScore: 50,
-        price: "239.00",
+        price: "29.00",
+        originalPrice: "239.00",
+        isOnSale: true,
         isActive: true
       },
       {
@@ -195,7 +211,9 @@ export async function seedDatabase() {
         categoryId: devCategory.id,
         duration: 20,
         passingScore: 50,
-        price: "259.00",
+        price: "29.00",
+        originalPrice: "259.00",
+        isOnSale: true,
         isActive: true
       },
       {
@@ -205,7 +223,9 @@ export async function seedDatabase() {
         categoryId: businessCategory.id,
         duration: 10,
         passingScore: 50,
-        price: "179.00",
+        price: "29.00",
+        originalPrice: "179.00",
+        isOnSale: true,
         isActive: true
       },
       {
@@ -215,7 +235,9 @@ export async function seedDatabase() {
         categoryId: businessCategory.id,
         duration: 14,
         passingScore: 50,
-        price: "199.00",
+        price: "29.00",
+        originalPrice: "199.00",
+        isOnSale: true,
         isActive: true
       },
       {
@@ -225,7 +247,9 @@ export async function seedDatabase() {
         categoryId: businessCategory.id,
         duration: 12,
         passingScore: 50,
-        price: "189.00",
+        price: "29.00",
+        originalPrice: "189.00",
+        isOnSale: true,
         isActive: true
       },
       {
@@ -235,7 +259,9 @@ export async function seedDatabase() {
         categoryId: dataCategory.id,
         duration: 20,
         passingScore: 50,
-        price: "249.00",
+        price: "29.00",
+        originalPrice: "249.00",
+        isOnSale: true,
         isActive: true
       },
       {
@@ -245,7 +271,9 @@ export async function seedDatabase() {
         categoryId: dataCategory.id,
         duration: 12,
         passingScore: 50,
-        price: "179.00",
+        price: "29.00",
+        originalPrice: "179.00",
+        isOnSale: true,
         isActive: true
       },
       {
@@ -255,7 +283,9 @@ export async function seedDatabase() {
         categoryId: dataCategory.id,
         duration: 10,
         passingScore: 50,
-        price: "169.00",
+        price: "29.00",
+        originalPrice: "169.00",
+        isOnSale: true,
         isActive: true
       },
       {
@@ -265,7 +295,9 @@ export async function seedDatabase() {
         categoryId: upscCategory.id,
         duration: 30,
         passingScore: 60,
-        price: "299.00",
+        price: "29.00",
+        originalPrice: "299.00",
+        isOnSale: true,
         isActive: true
       },
       {
@@ -275,7 +307,9 @@ export async function seedDatabase() {
         categoryId: upscCategory.id,
         duration: 15,
         passingScore: 60,
-        price: "249.00",
+        price: "29.00",
+        originalPrice: "249.00",
+        isOnSale: true,
         isActive: true
       },
       {
@@ -285,7 +319,9 @@ export async function seedDatabase() {
         categoryId: upscCategory.id,
         duration: 20,
         passingScore: 60,
-        price: "349.00",
+        price: "29.00",
+        originalPrice: "349.00",
+        isOnSale: true,
         isActive: true
       },
       {
@@ -295,7 +331,9 @@ export async function seedDatabase() {
         categoryId: sscCategory.id,
         duration: 25,
         passingScore: 60,
-        price: "249.00",
+        price: "29.00",
+        originalPrice: "249.00",
+        isOnSale: true,
         isActive: true
       },
       {
@@ -305,7 +343,9 @@ export async function seedDatabase() {
         categoryId: sscCategory.id,
         duration: 20,
         passingScore: 60,
-        price: "219.00",
+        price: "29.00",
+        originalPrice: "219.00",
+        isOnSale: true,
         isActive: true
       },
       {
@@ -315,7 +355,9 @@ export async function seedDatabase() {
         categoryId: railwayCategory.id,
         duration: 22,
         passingScore: 60,
-        price: "229.00",
+        price: "29.00",
+        originalPrice: "229.00",
+        isOnSale: true,
         isActive: true
       },
       {
@@ -325,7 +367,9 @@ export async function seedDatabase() {
         categoryId: railwayCategory.id,
         duration: 18,
         passingScore: 60,
-        price: "199.00",
+        price: "29.00",
+        originalPrice: "199.00",
+        isOnSale: true,
         isActive: true
       },
       {
@@ -335,7 +379,9 @@ export async function seedDatabase() {
         categoryId: internshipCategory.id,
         duration: 20,
         passingScore: 50,
-        price: "399.00",
+        price: "29.00",
+        originalPrice: "399.00",
+        isOnSale: true,
         isActive: true
       },
       {
@@ -345,7 +391,9 @@ export async function seedDatabase() {
         categoryId: internshipCategory.id,
         duration: 18,
         passingScore: 50,
-        price: "379.00",
+        price: "29.00",
+        originalPrice: "379.00",
+        isOnSale: true,
         isActive: true
       }
     ];
