@@ -28,17 +28,19 @@ export default function PublicSectorExams() {
     queryKey: ["/api/courses"],
   });
 
+  // Only include categories that explicitly start with "Public Sector" or contain government exam keywords
   const publicSectorCategoryIds = categories
     .filter(cat => 
+      cat.name.toLowerCase().includes('public sector') ||
       cat.name.toLowerCase().includes('upsc') ||
       cat.name.toLowerCase().includes('ssc') ||
       cat.name.toLowerCase().includes('railway') ||
       cat.name.toLowerCase().includes('banking') ||
       cat.name.toLowerCase().includes('ias') ||
       cat.name.toLowerCase().includes('ips') ||
-      cat.name.toLowerCase().includes('public') ||
       cat.name.toLowerCase().includes('government')
     )
+    .filter(cat => !cat.name.toLowerCase().includes('internship')) // Explicitly exclude internships
     .map(cat => cat.id);
 
   const publicSectorCategories = categories.filter(cat => publicSectorCategoryIds.includes(cat.id));
@@ -167,59 +169,66 @@ export default function PublicSectorExams() {
               </div>
             </div>
 
-            {/* Category Filter */}
-            <div className="mb-6">
-              <h3 className="text-sm font-semibold text-foreground mb-3 text-center">Filter by Category</h3>
-              <div className="flex flex-wrap justify-center gap-3">
-                <Button
-                  variant={selectedCategory === null ? "default" : "outline"}
-                  onClick={() => setSelectedCategory(null)}
-                  className={selectedCategory === null ? "bg-black text-white" : "border-black text-black hover:bg-black hover:text-white"}
-                  data-testid="button-all-categories"
-                >
-                  All Categories
-                </Button>
-                {publicSectorCategories.map((category) => (
+            {/* Compact Filters - Single Row */}
+            <div className="mb-8 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+              {/* Category Filter */}
+              <div className="flex-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-sm font-medium text-foreground whitespace-nowrap">Category:</span>
                   <Button
-                    key={category.id}
-                    variant={selectedCategory === category.id ? "default" : "outline"}
-                    onClick={() => setSelectedCategory(category.id)}
-                    className={selectedCategory === category.id ? "bg-black text-white" : "border-black text-black hover:bg-black hover:text-white"}
-                    data-testid={`button-category-${category.id}`}
+                    size="sm"
+                    variant={selectedCategory === null ? "default" : "outline"}
+                    onClick={() => setSelectedCategory(null)}
+                    className={selectedCategory === null ? "bg-black text-white" : "border-black text-black hover:bg-black hover:text-white"}
+                    data-testid="button-all-categories"
                   >
-                    {category.name.replace('Public Sector - ', '')}
+                    All
                   </Button>
-                ))}
-              </div>
-            </div>
-
-            {/* Year Filter */}
-            {availableYears.length > 0 && (
-              <div className="mb-12">
-                <h3 className="text-sm font-semibold text-foreground mb-3 text-center">Filter by Year</h3>
-                <div className="flex flex-wrap justify-center gap-3">
-                  <Button
-                    variant={selectedYear === null ? "default" : "outline"}
-                    onClick={() => setSelectedYear(null)}
-                    className={selectedYear === null ? "bg-black text-white" : "border-black text-black hover:bg-black hover:text-white"}
-                    data-testid="button-all-years"
-                  >
-                    All Years
-                  </Button>
-                  {availableYears.map((year) => (
+                  {publicSectorCategories.map((category) => (
                     <Button
-                      key={year}
-                      variant={selectedYear === year ? "default" : "outline"}
-                      onClick={() => setSelectedYear(year)}
-                      className={selectedYear === year ? "bg-black text-white" : "border-black text-black hover:bg-black hover:text-white"}
-                      data-testid={`button-year-${year}`}
+                      key={category.id}
+                      size="sm"
+                      variant={selectedCategory === category.id ? "default" : "outline"}
+                      onClick={() => setSelectedCategory(category.id)}
+                      className={selectedCategory === category.id ? "bg-black text-white" : "border-black text-black hover:bg-black hover:text-white"}
+                      data-testid={`button-category-${category.id}`}
                     >
-                      {year}
+                      {category.name.replace('Public Sector - ', '')}
                     </Button>
                   ))}
                 </div>
               </div>
-            )}
+
+              {/* Year Filter */}
+              {availableYears.length > 0 && (
+                <div className="flex-shrink-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-sm font-medium text-foreground whitespace-nowrap">Year:</span>
+                    <Button
+                      size="sm"
+                      variant={selectedYear === null ? "default" : "outline"}
+                      onClick={() => setSelectedYear(null)}
+                      className={selectedYear === null ? "bg-black text-white" : "border-black text-black hover:bg-black hover:text-white"}
+                      data-testid="button-all-years"
+                    >
+                      All
+                    </Button>
+                    {availableYears.map((year) => (
+                      <Button
+                        key={year}
+                        size="sm"
+                        variant={selectedYear === year ? "default" : "outline"}
+                        onClick={() => setSelectedYear(year)}
+                        className={selectedYear === year ? "bg-black text-white" : "border-black text-black hover:bg-black hover:text-white"}
+                        data-testid={`button-year-${year}`}
+                      >
+                        {year}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredCourses.map((course) => (
