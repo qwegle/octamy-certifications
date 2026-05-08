@@ -28,19 +28,26 @@ export default function Pricing() {
       />
       <Header />
       <main className="flex-1">
-        <section className="py-16 px-4 text-center bg-gradient-to-b from-slate-50 to-white">
-          <div className="max-w-3xl mx-auto">
-            <h1 className="text-4xl md:text-5xl font-semibold text-slate-900 tracking-tight">Simple, transparent pricing</h1>
+        <section className="relative overflow-hidden py-20 px-4 text-center">
+          <div aria-hidden className="pointer-events-none absolute inset-0 bg-grid-slate [mask-image:radial-gradient(ellipse_at_top,black_40%,transparent_75%)]" />
+          <div aria-hidden className="pointer-events-none absolute -top-32 left-1/2 -translate-x-1/2 h-[420px] w-[720px] rounded-full bg-sky-300/25 blur-3xl animate-blob" />
+          <div className="relative max-w-3xl mx-auto">
+            <p className="inline-flex items-center rounded-full border border-slate-200 bg-white/80 backdrop-blur px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-sky-700">
+              Pricing
+            </p>
+            <h1 className="mt-5 text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight">
+              Simple, transparent <span className="bg-gradient-to-r from-sky-700 to-indigo-700 bg-clip-text text-transparent">pricing</span>
+            </h1>
             <p className="mt-4 text-lg text-slate-600">One platform, four roles. Pick what fits.</p>
-            <div className="mt-8 inline-flex items-center bg-white border border-slate-200 rounded-full p-1">
+            <div className="mt-8 inline-flex items-center bg-white border border-slate-200 rounded-full p-1 shadow-sm">
               <button
-                className={`px-4 py-1.5 rounded-full text-sm ${cycle === 'monthly' ? 'bg-slate-900 text-white' : 'text-slate-700'}`}
+                className={`px-4 py-1.5 rounded-full text-sm transition-colors ${cycle === 'monthly' ? 'bg-slate-900 text-white' : 'text-slate-700 hover:bg-slate-50'}`}
                 onClick={() => setCycle('monthly')}
               >
                 Monthly
               </button>
               <button
-                className={`px-4 py-1.5 rounded-full text-sm ${cycle === 'yearly' ? 'bg-slate-900 text-white' : 'text-slate-700'}`}
+                className={`px-4 py-1.5 rounded-full text-sm transition-colors ${cycle === 'yearly' ? 'bg-slate-900 text-white' : 'text-slate-700 hover:bg-slate-50'}`}
                 onClick={() => setCycle('yearly')}
               >
                 Yearly <span className="text-xs opacity-80">· 2 months free</span>

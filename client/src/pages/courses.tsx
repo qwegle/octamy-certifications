@@ -129,32 +129,42 @@ export default function CoursesPage() {
       <Header />
       
       {/* Hero Section */}
-      <section className="bg-black text-white py-16">
-        <div className="max-w-7xl mx-auto px-6">
+      <section className="relative overflow-hidden bg-slate-950 text-white">
+        <div aria-hidden className="pointer-events-none absolute inset-0 bg-grid-slate opacity-20 [mask-image:radial-gradient(ellipse_at_top,black_30%,transparent_70%)]" />
+        <div aria-hidden className="pointer-events-none absolute -top-24 left-1/4 h-[420px] w-[420px] rounded-full bg-sky-500/30 blur-3xl animate-blob" />
+        <div aria-hidden className="pointer-events-none absolute -top-10 right-10 h-[320px] w-[320px] rounded-full bg-indigo-500/25 blur-3xl animate-blob-slow" />
+        <div className="relative max-w-7xl mx-auto px-6 py-20 sm:py-24">
           <div className="text-center">
-            <h1 className="text-5xl md:text-6xl font-bold mb-6">
-              PROFESSIONAL COURSES
-            </h1>
-            <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
-              Master industry-relevant skills with our comprehensive certification courses. 
-              From AI to Development, find your path to professional excellence.
+            <p className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 backdrop-blur px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-sky-300">
+              <Award className="h-3.5 w-3.5" /> Skill verification catalog
             </p>
-            <div className="flex items-center justify-center gap-4 text-sm text-gray-400">
+            <h1 className="mt-6 text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight">
+              <span className="block">Verified skills.</span>
+              <span className="mt-1 block bg-gradient-to-r from-sky-300 via-indigo-300 to-fuchsia-300 bg-clip-text text-transparent">
+                Real career outcomes.
+              </span>
+            </h1>
+            <p className="mt-5 text-lg text-slate-300 max-w-3xl mx-auto leading-relaxed">
+              Master industry-relevant skills with our comprehensive assessments.
+              Free to attempt — pay only when you pass.
+            </p>
+            <div className="mt-7 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-sm text-slate-300">
               <div className="flex items-center gap-2">
-                <Award className="h-4 w-4" />
-                {courses.length}+ Courses
+                <Award className="h-4 w-4 text-sky-300" />
+                {courses.length}+ exams
               </div>
               <div className="flex items-center gap-2">
-                <Users className="h-4 w-4" />
-                {categories.length} Categories
+                <Users className="h-4 w-4 text-sky-300" />
+                {categories.length} categories
               </div>
               <div className="flex items-center gap-2">
-                <Star className="h-4 w-4" />
-                Industry Certified
+                <Star className="h-4 w-4 text-sky-300" />
+                Recruiter-verifiable
               </div>
             </div>
           </div>
         </div>
+        <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
       </section>
 
       {/* Search and Filters */}
