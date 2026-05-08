@@ -19,6 +19,11 @@ if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
 }
 
 export function setupGoogleAuth() {
+  if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
+    // Skip strategy registration entirely — the routes will still mount but
+    // any Google sign-in attempt will redirect with auth_failed.
+    return;
+  }
   // User Google Strategy
   passport.use('google-user', new GoogleStrategy({
     clientID: GOOGLE_CLIENT_ID,
