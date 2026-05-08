@@ -1,46 +1,50 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import {
-  Search,
   Award,
-  Users,
-  TrendingUp,
-  ChevronRight,
-  Star,
-  CheckCircle,
   ArrowRight,
-  Monitor,
-  Video,
-  Brain,
-  Handshake,
-  Play,
-  ChevronLeft,
   Medal,
   Trophy,
   Crown,
-  Shield,
   Sparkles,
+  ShieldCheck,
+  Lock,
+  FileCheck2,
+  Building2,
+  BadgeCheck,
+  Receipt,
+  UserPlus,
+  ClipboardCheck,
+  CheckCircle2,
+  FileBadge,
+  Code,
+  Cpu,
+  LineChart,
+  Cloud,
+  Briefcase,
+  Megaphone,
+  Database,
+  Palette,
+  Layers,
+  GraduationCap,
+  Wallet,
+  Users,
+  Search as SearchIcon,
 } from "lucide-react";
 import CourseCard from "@/components/course-card";
 import { useAuth } from "@/hooks/useAuth";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import type { Category, Course } from "@shared/schema";
-import bg2 from "@/assets/octamy-bg-2.png";
-import bg1 from "@/assets/octamy-bg-3.png";
-import bg3 from "@/assets/octamy-bg-4.png";
-import bg4 from "@/assets/octamy-bg-5.png";
 import { SEO } from "@/components/seo";
 
 const PREMIUM_CATEGORY_SLUGS: string[] = (
@@ -49,22 +53,28 @@ const PREMIUM_CATEGORY_SLUGS: string[] = (
   .split(",")
   .map((s: string) => s.trim().toLowerCase())
   .filter(Boolean);
-// Certificate Slider Component with infinite auto-scroll
+
+// ---------- Recent certifications marquee (lightened) ----------
 function CertificateSlider() {
   const { data: certificates = [] } = useQuery<any[]>({
     queryKey: ["/api/recent-certificates"],
   });
 
-  // Duplicate certificates for seamless infinite scroll
   const duplicatedCertificates =
     certificates.length > 0 ? [...certificates, ...certificates] : [];
+
   return (
-    <div className="bg-black text-white py-8">
+    <section className="bg-slate-50 py-12">
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-8">
-          <h3 className="text-2xl font-bold">Recent Certifications</h3>
-          <p className="text-gray-400 mt-2">
-            Join thousands of professionals who have earned their certificates
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-700">
+            Live proof
+          </p>
+          <h3 className="mt-3 text-3xl font-bold text-slate-900">
+            Recent certifications
+          </h3>
+          <p className="text-slate-500 mt-2">
+            Real candidates earning verified credentials.
           </p>
         </div>
 
@@ -74,256 +84,64 @@ function CertificateSlider() {
               {duplicatedCertificates.map((cert, index) => (
                 <div
                   key={`${cert.name}-${cert.course}-${index}`}
-                  className="flex-shrink-0 bg-gray-900 rounded-lg p-6 min-w-[300px]"
+                  className="flex-shrink-0 bg-white border border-slate-200 rounded-xl p-6 min-w-[300px] shadow-sm"
                 >
                   <div className="flex items-center space-x-3 mb-3">
-                    <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center">
-                      <Award className="w-6 h-6 text-black" />
+                    <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center ring-1 ring-slate-200">
+                      <Award className="w-6 h-6 text-slate-900" />
                     </div>
                     <div>
-                      <h4 className="font-semibold">{cert.name}</h4>
-                      <p className="text-sm text-gray-400">{cert.company}</p>
+                      <h4 className="font-semibold text-slate-900">
+                        {cert.name}
+                      </h4>
+                      <p className="text-sm text-slate-500">{cert.company}</p>
                     </div>
                   </div>
-                  <p className="text-sm mb-2">
+                  <p className="text-sm mb-2 text-slate-700">
                     Certified in{" "}
-                    <span className="font-semibold">{cert.course}</span>
+                    <span className="font-semibold text-slate-900">
+                      {cert.course}
+                    </span>
                   </p>
                   <div className="flex items-center justify-between">
                     <Badge
                       variant="outline"
-                      className="border-white text-white"
+                      className="border-slate-300 text-slate-700"
                     >
                       {cert.badge} Badge
                     </Badge>
-                    <span className="text-xs text-gray-400">Score: ••%</span>
+                    <span className="text-xs text-slate-500">Score: ••%</span>
                   </div>
                 </div>
               ))}
             </div>
           </div>
         ) : (
-          // Loading placeholder
           <div className="flex overflow-x-auto space-x-6 pb-4">
             {Array.from({ length: 3 }).map((_, index) => (
               <div
                 key={index}
-                className="flex-shrink-0 bg-gray-900 rounded-lg p-6 min-w-[300px] animate-pulse"
+                className="flex-shrink-0 bg-white border border-slate-200 rounded-xl p-6 min-w-[300px] animate-pulse"
               >
                 <div className="flex items-center space-x-3 mb-3">
-                  <div className="w-12 h-12 bg-gray-700 rounded-full"></div>
+                  <div className="w-12 h-12 bg-slate-200 rounded-full"></div>
                   <div>
-                    <div className="h-4 bg-gray-700 rounded w-24 mb-2"></div>
-                    <div className="h-3 bg-gray-700 rounded w-16"></div>
+                    <div className="h-4 bg-slate-200 rounded w-24 mb-2"></div>
+                    <div className="h-3 bg-slate-200 rounded w-16"></div>
                   </div>
                 </div>
-                <div className="h-3 bg-gray-700 rounded w-32 mb-2"></div>
-                <div className="h-6 bg-gray-700 rounded w-20"></div>
+                <div className="h-3 bg-slate-200 rounded w-32 mb-2"></div>
+                <div className="h-6 bg-slate-200 rounded w-20"></div>
               </div>
             ))}
           </div>
         )}
       </div>
-    </div>
+    </section>
   );
 }
 
-const BannerSlider = () => {
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
-
-  // Sample banner data (you can replace with your own images)
-  const banners = [
-    {
-      id: 1,
-      image:  bg1 ,
-      title: "Meet your new AI conversation coach",
-      subtitle:
-        "Role Play is the interactive way to practice your business and communication skills.",
-      description: "Build full-stack applications with modern technologies",
-      buttonText: "Get Certificate Now !",
-      gradient: "from-blue-600 to-purple-600",
-    },
-    {
-      id: 2,
-      image: bg2,
-      title: "Data Science Bootcamp",
-      subtitle: "Python, Machine Learning & AI",
-      description: "Transform your career with data science skills",
-      buttonText: "Get Certificate Now !",
-      gradient: "from-green-600 to-teal-600",
-    },
-    {
-      id: 3,
-      image:bg3,
-      title: "Digital Marketing Mastery",
-      subtitle: "SEO, Social Media & Analytics",
-      description: "Grow your business with proven marketing strategies",
-      buttonText: "Get Certificate Now !",
-      gradient: "from-orange-600 to-red-600",
-    },
-    {
-      id: 4,
-      image: bg4,
-      title: "UI/UX Design Complete",
-      subtitle: "Figma, Adobe XD & Prototyping",
-      description: "Create stunning user experiences and interfaces",
-      buttonText: "Get Certificate Now !",
-      gradient: "from-pink-600 to-purple-600",
-    },
-  ];
-
-  // Auto-play functionality
-  // useEffect(() => {
-  //   if (!isAutoPlaying) return;
-
-  //   const interval = setInterval(() => {
-  //     setCurrentSlide((prev) => (prev + 1) % banners.length);
-  //   }, 5000);
-
-  //   return () => clearInterval(interval);
-  // }, [isAutoPlaying, banners.length]);
-
-  const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % banners.length);
-  };
-
-  const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + banners.length) % banners.length);
-  };
-
-  const goToSlide = (index: any) => {
-    setCurrentSlide(index);
-  };
-
-  const handleMouseEnter = () => {
-    setIsAutoPlaying(false);
-  };
-
-  const handleMouseLeave = () => {
-    setIsAutoPlaying(true);
-  };
-
-  return (
-    <div className="relative w-full p-4 mx-auto">
-      {/* Main Slider Container */}
-      <div
-        className="relative overflow-hidden rounded-lg shadow-2xl bg-gray-900"
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-      >
-        {/* Slides */}
-        <div
-          className="flex transition-transform duration-500 ease-in-out"
-          style={{ transform: `translateX(-${currentSlide * 100}%)` }}
-        >
-          {banners.map((banner) => (
-            <div key={banner.id} className="min-w-full relative">
-              {/* Background Image */}
-              <div className="relative h-96 ">
-                <img
-                  src={banner.image}
-                  alt={banner.title}
-                  className="w-full h-full object-cover"
-                />
-                {/* Gradient Overlay */}
-                <div
-                  className={`absolute inset-0 bg-gradient-to-r ${banner.gradient} opacity-60`}
-                ></div>
-
-                {/* Content */}
-                <div className="absolute inset-0 flex items-center">
-                  <div className=" ml-20 bg-white rounded-md max-w-md px-6">
-                    <div className="max-w-md text-black py-4">
-                      {/* Badge */}
-                      {/* <div className="inline-flex items-center px-3 py-1 rounded-full bg-white/20 backdrop-blur-sm text-sm font-medium mb-4">
-                          <Play className="w-4 h-4 mr-2" />
-                          Featured Course
-                        </div> */}
-
-                      {/* Title */}
-                      <h1 className="text-3xl font-bold mb-2 leading-tight">
-                        {banner.title}
-                      </h1>
-
-                      {/* Subtitle */}
-                      <h2 className="text-lg  mb-2 ">{banner.subtitle}</h2>
-
-                      {/* Description */}
-                      {/* <p className="text-lg mb-6 text-gray-300 leading-relaxed">
-                          {banner.description}
-                        </p> */}
-
-                      {/* Course Stats */}
-                      {/* <div className="flex items-center gap-6 mb-8">
-                          <div className="flex items-center">
-                            <Star className="w-5 h-5 text-yellow-400 fill-current" />
-                            <span className="ml-1 font-semibold">
-                              {banner.rating}
-                            </span>
-                          </div>
-                          <div className="text-gray-300">
-                            {banner.students} students
-                          </div>
-                          <div className="text-gray-300">
-                            By {banner.instructor}
-                          </div>
-                        </div> */}
-
-                      {/* CTA Button */}
-                      <button className="bg-black text-white px-8 py-2 rounded-lg font-semibold text-md hover:bg-gray-900 transform transition duration-300 hover:scale-105 shadow-lg">
-                        {banner.buttonText}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Navigation Arrows */}
-        <button
-          onClick={prevSlide}
-          className="absolute left-4 top-1/2 -translate-y-1/2 bg-white backdrop-blur-sm rounded-full p-3 transition-all"
-        >
-          <ChevronLeft className="w-6 h-6 text-black" />
-        </button>
-
-        <button
-          onClick={nextSlide}
-          className="absolute right-4 top-1/2 -translate-y-1/2 bg-white backdrop-blur-sm rounded-full p-3 transition-all"
-        >
-          <ChevronRight className="w-6 h-6 text-black" />
-        </button>
-      </div>
-
-      {/* Dots Indicator */}
-      {/* <div className="flex justify-center mt-6 space-x-2">
-          {banners.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => goToSlide(index)}
-              className={`w-3 h-3 rounded-full transition-all ${
-                index === currentSlide
-                  ? "bg-blue-600 w-8"
-                  : "bg-gray-300 hover:bg-gray-400"
-              }`}
-            />
-          ))}
-        </div> */}
-
-      {/* Progress Bar */}
-      {/* <div className=" bg-gray-200 rounded-full h-1 overflow-hidden">
-          <div
-            className="h-full bg-blue-600 transition-all duration-500 ease-out"
-            style={{ width: `${((currentSlide + 1) / banners.length) * 100}%` }}
-          />
-        </div> */}
-    </div>
-  );
-};
-
+// ---------- Badge tier card ----------
 function BadgeTier({
   tier,
   range,
@@ -360,10 +178,77 @@ function BadgeTier({
   );
 }
 
+// ---------- Category icon mapping ----------
+const CATEGORY_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+  development: Code,
+  "web-development": Code,
+  programming: Code,
+  ai: Cpu,
+  "artificial-intelligence": Cpu,
+  "machine-learning": Cpu,
+  "data-science": LineChart,
+  data: Database,
+  analytics: LineChart,
+  cloud: Cloud,
+  devops: Cloud,
+  cybersecurity: ShieldCheck,
+  security: ShieldCheck,
+  business: Briefcase,
+  management: Briefcase,
+  marketing: Megaphone,
+  design: Palette,
+  "ui-ux": Palette,
+  finance: Wallet,
+  education: GraduationCap,
+  hr: Users,
+};
+
+function iconForCategory(slug: string | null | undefined) {
+  const key = (slug || "").toLowerCase();
+  return CATEGORY_ICONS[key] || Layers;
+}
+
+// ---------- FAQ data ----------
+const FAQS: { q: string; a: string }[] = [
+  {
+    q: "Is the certificate recognized by employers?",
+    a: "Octamy certificates are skill-verification credentials that record your assessment score and badge tier. Recruiters can verify any certificate at octamy.com/verify. They are an independent signal of competence — not a degree or government qualification.",
+  },
+  {
+    q: "What happens if I fail an assessment?",
+    a: "There is no charge for failing. You simply do not earn a certificate. You can retake the assessment after the cool-off period. We never ask for payment up front.",
+  },
+  {
+    q: "Do I have to pay before taking the test?",
+    a: "No. Every assessment is free to attempt. You only pay when you pass with a score of 50% or higher and choose to claim your verified certificate.",
+  },
+  {
+    q: "How is verification done?",
+    a: "Each certificate has a unique ID and QR code. Anyone — employers, agencies, institutions — can paste the ID at octamy.com/verify to confirm the holder, score, badge tier and issue date in real time.",
+  },
+  {
+    q: "Can institutes / companies bulk-certify their teams?",
+    a: "Yes. Partner organisations can co-brand certificates and bulk-enrol candidates. Reach out via the Partners page for volume pricing and an analytics dashboard.",
+  },
+  {
+    q: "Is there a refund policy?",
+    a: "Because the assessment itself is free and payment only happens after a passing score, certificate purchases are generally final. For genuine technical issues we review on a case-by-case basis — contact support within 7 days.",
+  },
+  {
+    q: "What ID / proof is needed?",
+    a: "You register with a verified email and the name you want printed on the certificate. For premium tracks we may ask for a government-issued ID at the verification step.",
+  },
+  {
+    q: "Are the assessments timed?",
+    a: "Yes. Every assessment has a fixed time limit shown on the exam page before you start. The timer pauses only for sanctioned breaks where applicable.",
+  },
+];
+
+// ---------- Page ----------
 export default function Landing() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const [searchQuery] = useState("");
+  const [selectedCategory] = useState<number | null>(null);
+  const { isAuthenticated } = useAuth();
 
   const { data: categories = [] } = useQuery<Category[]>({
     queryKey: ["/api/categories"],
@@ -383,184 +268,291 @@ export default function Landing() {
     return matchesSearch && matchesCategory;
   });
 
+  // Trust strip items (no vendor logos — lucide only)
+  const trustItems = [
+    { icon: BadgeCheck, label: "ISO 9001:2015" },
+    { icon: Lock, label: "PayU Secure" },
+    { icon: Receipt, label: "GST Registered" },
+    { icon: ShieldCheck, label: "256-bit SSL" },
+    { icon: FileCheck2, label: "DPDP Aligned" },
+    { icon: Building2, label: "MSME Registered" },
+  ];
+
+  // 8-tile featured tracks grid (with course counts)
+  const featuredTracks = categories.slice(0, 8).map((cat) => ({
+    ...cat,
+    count: courses.filter((c) => c.categoryId === cat.id).length,
+    Icon: iconForCategory(cat.slug),
+    isPremium: PREMIUM_CATEGORY_SLUGS.includes((cat.slug || "").toLowerCase()),
+  }));
+
+  const websiteJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "Octamy",
+    url: "https://octamy.com/",
+    potentialAction: {
+      "@type": "SearchAction",
+      target: "https://octamy.com/exams?q={search_term_string}",
+      "query-input": "required name=search_term_string",
+    },
+  };
+
+  const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: FAQS.map((f) => ({
+      "@type": "Question",
+      name: f.q,
+      acceptedAnswer: { "@type": "Answer", text: f.a },
+    })),
+  };
+
   return (
     <div className="min-h-screen bg-white">
       <SEO
         title="Octamy — Skill Verification & Certification Platform"
         description="Take free skill-verification assessments in AI, Development, Cloud, Cybersecurity and more. Pay only for verified certificates. Industry-recognized credentials trusted by recruiters across India."
         path="/"
-        jsonLd={{
-          "@context": "https://schema.org",
-          "@type": "WebSite",
-          name: "Octamy",
-          url: "https://octamy.com/",
-          potentialAction: {
-            "@type": "SearchAction",
-            target: "https://octamy.com/exams?q={search_term_string}",
-            "query-input": "required name=search_term_string",
-          },
-        }}
+        jsonLd={[websiteJsonLd, faqJsonLd]}
       />
-      {/* Navigation */}
       <Header />
 
-      <BannerSlider />
-
-      {/* Certificate Slider */}
-      <CertificateSlider />
-      {/* Hero Section */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-6 text-center">
-          <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold text-black mb-6">
-            PROFESSIONAL
-            <br />
-            <span className="bg-black text-white px-4 py-2 inline-block mt-2">
-              CERTIFICATION
-            </span>
-          </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            Earn verified certificates from industry experts. Build your
-            credibility with performance-based badges and join our global
-            leaderboard.
+      {/* 1. HERO ----------------------------------------------------------- */}
+      <section className="relative overflow-hidden bg-white">
+        {/* subtle radial glow background */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 -z-0"
+          style={{
+            background:
+              "radial-gradient(60% 40% at 50% 0%, rgba(2,132,199,0.08) 0%, rgba(255,255,255,0) 70%)",
+          }}
+        />
+        <div className="relative max-w-7xl mx-auto px-6 pt-20 pb-16 sm:pt-28 sm:pb-24 text-center">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-700">
+            Skill Verification Platform
           </p>
-          <div className="flex md:flex-row flex-col space-y-4 justify-center md:space-x-4 md:space-y-0">
-            <Link href={isAuthenticated ? "/exams" : "/auth"}>
+          <h1 className="mt-4 text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-slate-900">
+            Free assessments.
+            <br className="hidden sm:block" />{" "}
+            <span className="text-slate-900">Pay only when you pass.</span>
+          </h1>
+          <p className="mt-6 max-w-2xl mx-auto text-base sm:text-lg text-slate-600 leading-relaxed">
+            Earn verified, recruiter-checkable credentials across AI,
+            development, cloud, security and business — trusted by hiring teams
+            across India.
+          </p>
+          <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <Link href="/exams">
               <Button
                 size="lg"
-                className="bg-black text-white hover:bg-gray-800 px-8 py-4 text-lg"
+                className="bg-slate-900 hover:bg-black text-white rounded-full px-6 sm:px-8 py-6 text-base"
               >
-                Get Started <ArrowRight className="ml-2 w-5 h-5" />
+                Browse 50+ exams
+                <ArrowRight className="ml-2 w-4 h-4" />
               </Button>
             </Link>
-            <Link href="/partners">
+            <a href="#how">
               <Button
+                size="lg"
                 variant="outline"
-                size="lg"
-                className="border-black text-black hover:bg-black hover:text-white px-8 py-4 text-lg"
+                className="border-slate-300 text-slate-700 hover:bg-slate-50 rounded-full px-6 sm:px-8 py-6 text-base"
               >
-                Become a Partner
+                How it works
               </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
-      {/* Stats Section */}
-      <section className="py-16 bg-gray-50 pt-[25px] pb-[25px]">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-            <div>
-              <div className="bg-black text-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Users className="w-8 h-8" />
-              </div>
-              <h3 className="text-3xl font-bold text-black mb-2">{(courses?.length ?? 0)}+</h3>
-              <p className="text-gray-600">Skill assessments live</p>
-            </div>
-            <div>
-              <div className="bg-black text-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Award className="w-8 h-8" />
-              </div>
-              <h3 className="text-3xl font-bold text-black mb-2">{(categories?.length ?? 0)}</h3>
-              <p className="text-gray-600">Career tracks</p>
-            </div>
-            <div>
-              <div className="bg-black text-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <TrendingUp className="w-8 h-8" />
-              </div>
-              <h3 className="text-3xl font-bold text-black mb-2">100%</h3>
-              <p className="text-gray-600">Verified credentials — pay only after passing</p>
-            </div>
-          </div>
-        </div>
-      </section>
-      {/* Course Discovery Section */}
-      <section className="py-16 bg-white pt-[25px] pb-[25px]">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-black mb-6">
-              Choose Your Assessment
-            </h2>
-            <div className="max-w-md mx-auto">
-              <div className="relative">
-                <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                <Input
-                  type="text"
-                  placeholder="Search exams..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-4 py-3 border-2 border-black focus:border-black"
-                />
-              </div>
-            </div>
+            </a>
           </div>
 
-          {/* Categories */}
-          <div className="flex flex-wrap justify-center gap-3 mb-12">
-            <Button
-              variant={selectedCategory === null ? "default" : "outline"}
-              onClick={() => setSelectedCategory(null)}
-              className={
-                selectedCategory === null
-                  ? "bg-black text-white rounded-full"
-                  : "border-slate-300 text-slate-800 hover:bg-slate-900 hover:text-white rounded-full"
-              }
-            >
-              All Categories
-            </Button>
-            {categories.slice(0, 8).map((category) => {
-              const isPremium = PREMIUM_CATEGORY_SLUGS.includes(category.slug || "");
-              const isActive = selectedCategory === category.id;
-              return (
-                <Button
-                  key={category.id}
-                  variant={isActive ? "default" : "outline"}
-                  onClick={() => setSelectedCategory(category.id)}
-                  className={
-                    "rounded-full " +
-                    (isActive
-                      ? "bg-black text-white"
-                      : "border-slate-300 text-slate-800 hover:bg-slate-900 hover:text-white")
-                  }
+          {/* Trust strip */}
+          <div className="mt-16">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+              Trusted at
+            </p>
+            <div className="mt-5 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-x-6 gap-y-4 max-w-4xl mx-auto">
+              {trustItems.map(({ icon: Icon, label }) => (
+                <div
+                  key={label}
+                  className="flex items-center justify-center gap-2 text-slate-500"
                 >
-                  {isPremium && <Sparkles className="w-3.5 h-3.5 mr-1.5 text-amber-500" />}
-                  {category.name}
-                </Button>
-              );
-            })}
-            {categories.length > 8 && (
-              <Link href="/exams">
-                <Button variant="ghost" className="rounded-full text-slate-600 hover:text-black">
-                  +{categories.length - 8} more →
-                </Button>
-              </Link>
-            )}
+                  <Icon className="w-4 h-4 text-slate-400" />
+                  <span className="text-xs sm:text-sm font-medium">
+                    {label}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 2. HOW OCTAMY WORKS ---------------------------------------------- */}
+      <section id="how" className="py-16 sm:py-24 bg-slate-50 border-y border-slate-200">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center max-w-2xl mx-auto mb-14">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-700">
+              How it works
+            </p>
+            <h2 className="mt-3 text-3xl sm:text-4xl font-bold text-slate-900">
+              How Octamy works
+            </h2>
+            <p className="mt-4 text-base sm:text-lg text-slate-600 leading-relaxed">
+              Four simple steps from sign-up to a recruiter-verifiable
+              certificate.
+            </p>
           </div>
 
-          {/* Courses Grid — capped at 12 */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredCourses.slice(0, 12).map((course) => (
-              <CourseCard key={course.id} course={course} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {[
+              {
+                n: "01",
+                title: "Register free",
+                desc: "Create an account in under a minute — no card required.",
+                Icon: UserPlus,
+              },
+              {
+                n: "02",
+                title: "Take a free assessment",
+                desc: "Pick from 50+ exams across modern career tracks.",
+                Icon: ClipboardCheck,
+              },
+              {
+                n: "03",
+                title: "Pass with 50%+ score",
+                desc: "Earn a recognition tier — Bronze, Silver, Gold or Platinum.",
+                Icon: CheckCircle2,
+              },
+              {
+                n: "04",
+                title: "Buy your certificate",
+                desc: "Optional: claim a verified certificate with QR-based check.",
+                Icon: FileBadge,
+              },
+            ].map((step) => (
+              <div
+                key={step.n}
+                className="rounded-xl border border-slate-200 bg-white p-6 transition-shadow hover:shadow-md"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold tracking-[0.2em] text-sky-700">
+                    {step.n}
+                  </span>
+                  <step.Icon className="w-5 h-5 text-slate-400" />
+                </div>
+                <h3 className="mt-5 text-lg font-semibold text-slate-900">
+                  {step.title}
+                </h3>
+                <p className="mt-2 text-sm text-slate-600 leading-relaxed">
+                  {step.desc}
+                </p>
+              </div>
             ))}
           </div>
 
-          {filteredCourses.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-gray-600 text-lg">
-                No exams found matching your criteria.
+          <p className="mt-10 text-center text-xs text-slate-500 max-w-2xl mx-auto">
+            This program is an assessment and skill-certification initiative
+            and does not constitute employment.
+          </p>
+        </div>
+      </section>
+
+      {/* 3. REAL STATS ---------------------------------------------------- */}
+      <section className="py-16 sm:py-20 bg-white">
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div className="rounded-xl border border-slate-200 bg-white p-8 text-center">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-700">
+                Live exams
+              </p>
+              <p className="mt-3 text-5xl font-extrabold tracking-tight text-slate-900 tabular-nums">
+                {courses.length}
+              </p>
+              <p className="mt-2 text-sm text-slate-600">
+                Skill assessments available right now.
               </p>
             </div>
-          ) : (
-            <div className="mt-12 flex flex-col items-center gap-3">
-              <p className="text-sm text-slate-500">
-                Showing {Math.min(12, filteredCourses.length)} of{" "}
-                {filteredCourses.length}
-                {filteredCourses.length === 1 ? " exam" : " exams"}
+            <div className="rounded-xl border border-slate-200 bg-white p-8 text-center">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-700">
+                Career tracks
               </p>
+              <p className="mt-3 text-5xl font-extrabold tracking-tight text-slate-900 tabular-nums">
+                {categories.length}
+              </p>
+              <p className="mt-2 text-sm text-slate-600">
+                Curated categories spanning tech, business and design.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 4. FEATURED TRACKS GRID ------------------------------------------ */}
+      <section className="py-16 sm:py-24 bg-slate-50 border-y border-slate-200">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center max-w-2xl mx-auto mb-14">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-700">
+              Browse by track
+            </p>
+            <h2 className="mt-3 text-3xl sm:text-4xl font-bold text-slate-900">
+              Featured career tracks
+            </h2>
+            <p className="mt-4 text-base sm:text-lg text-slate-600 leading-relaxed">
+              Pick a discipline and start with a free assessment.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {featuredTracks.map((cat) => {
+              const Icon = cat.Icon;
+              const baseCard =
+                "group relative rounded-xl border p-6 transition-all hover:-translate-y-0.5 hover:shadow-md";
+              const cardClass = cat.isPremium
+                ? `${baseCard} bg-amber-50 border-amber-200 ring-1 ring-amber-200`
+                : `${baseCard} bg-white border-slate-200`;
+              return (
+                <Link
+                  key={cat.id}
+                  href={`/category/${cat.slug}`}
+                  className={cardClass}
+                >
+                  {cat.isPremium && (
+                    <span className="absolute top-3 right-3 inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-amber-700">
+                      <Sparkles className="w-3 h-3" />
+                      Premium
+                    </span>
+                  )}
+                  <div
+                    className={
+                      "flex h-11 w-11 items-center justify-center rounded-lg " +
+                      (cat.isPremium
+                        ? "bg-amber-100 text-amber-700"
+                        : "bg-slate-900 text-white")
+                    }
+                  >
+                    <Icon className="w-5 h-5" />
+                  </div>
+                  <h3 className="mt-5 text-base font-semibold text-slate-900">
+                    {cat.name}
+                  </h3>
+                  <p className="mt-1 text-sm text-slate-500">
+                    {cat.count} {cat.count === 1 ? "exam" : "exams"}
+                  </p>
+                  <span className="mt-4 inline-flex items-center text-sm font-medium text-sky-700 group-hover:underline">
+                    Explore <ArrowRight className="ml-1 w-3.5 h-3.5" />
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+
+          {categories.length > 8 && (
+            <div className="mt-10 text-center">
               <Link href="/exams">
                 <Button
-                  size="lg"
-                  className="bg-slate-900 text-white hover:bg-black rounded-full px-8"
+                  variant="outline"
+                  className="border-slate-300 text-slate-700 rounded-full"
                 >
-                  Browse all {filteredCourses.length} exams
+                  View all {categories.length} tracks
                   <ArrowRight className="ml-2 w-4 h-4" />
                 </Button>
               </Link>
@@ -569,71 +561,63 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Business Certification Section */}
-      <section className="py-16 bg-black text-white">
-        <div className="max-w-7xl mx-auto px-6 text-center">
-          <h2 className="text-4xl font-bold mb-6">Business Certifications</h2>
-          <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-            Get your entire team certified. Business certificates include
-            company branding and bulk pricing.
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            <Card className="bg-gray-900 border-gray-700 text-white">
-              <CardHeader>
-                <CardTitle className="text-white">
-                  Team Certifications
-                </CardTitle>
-                <CardDescription className="text-gray-300">
-                  Certify your entire team under your company name
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <CheckCircle className="w-12 h-12 text-green-400 mb-4" />
-                <p className="text-sm">
-                  Company-branded certificates with business validation
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="bg-gray-900 border-gray-700 text-white">
-              <CardHeader>
-                <CardTitle className="text-white">Bulk Pricing</CardTitle>
-                <CardDescription className="text-gray-300">
-                  Special rates for organizations
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <TrendingUp className="w-12 h-12 text-blue-400 mb-4" />
-                <p className="text-sm">
-                  Volume discounts for teams of 10+ employees
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="bg-gray-900 border-gray-700 text-white">
-              <CardHeader>
-                <CardTitle className="text-white">
-                  Analytics Dashboard
-                </CardTitle>
-                <CardDescription className="text-gray-300">
-                  Track team progress and performance
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Users className="w-12 h-12 text-purple-400 mb-4" />
-                <p className="text-sm">
-                  Real-time insights into team certification progress
-                </p>
-              </CardContent>
-            </Card>
+      {/* 5. WHY OCTAMY / 3 PILLARS --------------------------------------- */}
+      <section className="py-16 sm:py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center max-w-2xl mx-auto mb-14">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-700">
+              Why Octamy
+            </p>
+            <h2 className="mt-3 text-3xl sm:text-4xl font-bold text-slate-900">
+              Built for candidates and the people who hire them
+            </h2>
           </div>
-          <Link href="/sponsor">
-            <Button size="lg" className="bg-white text-black hover:bg-gray-200">
-              Support Our Project
-            </Button>
-          </Link>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {[
+              {
+                Icon: ShieldCheck,
+                title: "Verified",
+                body: "Every certificate carries a unique ID and QR. Recruiters check it instantly at octamy.com/verify — no email back-and-forth.",
+              },
+              {
+                Icon: Wallet,
+                title: "Affordable",
+                body: "Take any assessment for free. Pay only after you pass — no subscriptions, no upfront fees, no surprises.",
+              },
+              {
+                Icon: BadgeCheck,
+                title: "Recruiter-friendly",
+                body: "Score and badge tier (Bronze → Platinum) are printed on the certificate, so hiring teams get a real signal of competence.",
+              },
+            ].map((p) => (
+              <div
+                key={p.title}
+                className="rounded-xl border border-slate-200 bg-white p-8"
+              >
+                <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-slate-900 text-white">
+                  <p.Icon className="w-5 h-5" />
+                </div>
+                <h3 className="mt-5 text-lg font-semibold text-slate-900">
+                  {p.title}
+                </h3>
+                <p className="mt-2 text-sm text-slate-600 leading-relaxed">
+                  {p.body}
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
-      {/* Badge System Section — premium minimalist */}
-      <section className="py-20 bg-white border-t border-slate-200">
+
+      {/* 6. RECENT CERTIFICATIONS MARQUEE -------------------------------- */}
+      <CertificateSlider />
+
+      {/* 7. PERFORMANCE BADGES ------------------------------------------- */}
+      <section
+        id="badges"
+        className="py-16 sm:py-24 bg-white border-t border-slate-200"
+      >
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center max-w-2xl mx-auto mb-14">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-700">
@@ -643,8 +627,9 @@ export default function Landing() {
               Performance-based credentials
             </h2>
             <p className="mt-4 text-slate-600 leading-relaxed">
-              Every certificate carries a recognition tier based on your assessment
-              score — a transparent signal of competence for employers and recruiters.
+              Every certificate carries a recognition tier based on your
+              assessment score — a transparent signal of competence for
+              employers and recruiters.
             </p>
           </div>
 
@@ -688,7 +673,176 @@ export default function Landing() {
           </p>
         </div>
       </section>
-      {/* Footer */}
+
+      {/* 8. FEATURED EXAM CARDS ------------------------------------------ */}
+      <section className="py-16 sm:py-24 bg-slate-50 border-y border-slate-200">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center max-w-2xl mx-auto mb-12">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-700">
+              Featured exams
+            </p>
+            <h2 className="mt-3 text-3xl sm:text-4xl font-bold text-slate-900">
+              Start with a free assessment
+            </h2>
+            <p className="mt-4 text-base sm:text-lg text-slate-600 leading-relaxed">
+              A handpicked selection from across our catalogue.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {filteredCourses.slice(0, 12).map((course) => (
+              <CourseCard key={course.id} course={course} />
+            ))}
+          </div>
+
+          {filteredCourses.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-slate-100 text-slate-400 mb-3">
+                <SearchIcon className="w-5 h-5" />
+              </div>
+              <p className="text-slate-600">
+                No exams available yet — check back shortly.
+              </p>
+            </div>
+          ) : (
+            <div className="mt-12 flex flex-col items-center gap-3">
+              <p className="text-sm text-slate-500">
+                Showing {Math.min(12, filteredCourses.length)} of{" "}
+                {filteredCourses.length}
+                {filteredCourses.length === 1 ? " exam" : " exams"}
+              </p>
+              <Link href={isAuthenticated ? "/exams" : "/exams"}>
+                <Button
+                  size="lg"
+                  className="bg-slate-900 hover:bg-black text-white rounded-full px-8"
+                >
+                  Browse all {filteredCourses.length} exams
+                  <ArrowRight className="ml-2 w-4 h-4" />
+                </Button>
+              </Link>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* 9. RECRUITERS / SELLERS SPLIT CTA ------------------------------- */}
+      <section className="py-16 sm:py-24 bg-slate-900">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="rounded-2xl border border-slate-700/60 bg-slate-800/40 p-8">
+              <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-white/10 text-white">
+                <Users className="w-5 h-5" />
+              </div>
+              <h3 className="mt-5 text-2xl font-bold text-white">
+                For Recruiters
+              </h3>
+              <p className="mt-2 text-slate-300 leading-relaxed">
+                Verify candidate skills in seconds. Check certificates by ID and
+                shortlist with confidence.
+              </p>
+              <Link href="/recruiter/auth">
+                <Button
+                  variant="outline"
+                  className="mt-6 border-white/30 bg-transparent text-white hover:bg-white hover:text-slate-900 rounded-full"
+                >
+                  Hiring? Verify candidates
+                  <ArrowRight className="ml-2 w-4 h-4" />
+                </Button>
+              </Link>
+            </div>
+            <div className="rounded-2xl border border-slate-700/60 bg-slate-800/40 p-8">
+              <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-white/10 text-white">
+                <Briefcase className="w-5 h-5" />
+              </div>
+              <h3 className="mt-5 text-2xl font-bold text-white">
+                For Sellers & Partners
+              </h3>
+              <p className="mt-2 text-slate-300 leading-relaxed">
+                Publish your own assessments on Octamy and earn a commission
+                each time a candidate buys a certificate.
+              </p>
+              <Link href="/partners">
+                <Button
+                  variant="outline"
+                  className="mt-6 border-white/30 bg-transparent text-white hover:bg-white hover:text-slate-900 rounded-full"
+                >
+                  Sell assessments? Earn commission
+                  <ArrowRight className="ml-2 w-4 h-4" />
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 10. FAQ ---------------------------------------------------------- */}
+      <section className="py-16 sm:py-24 bg-white">
+        <div className="max-w-3xl mx-auto px-6">
+          <div className="text-center mb-12">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-700">
+              Questions
+            </p>
+            <h2 className="mt-3 text-3xl sm:text-4xl font-bold text-slate-900">
+              Frequently asked
+            </h2>
+          </div>
+          <Accordion type="single" collapsible className="w-full">
+            {FAQS.map((f, i) => (
+              <AccordionItem
+                key={i}
+                value={`item-${i}`}
+                className="border-slate-200"
+              >
+                <AccordionTrigger className="text-left text-slate-900 hover:no-underline">
+                  {f.q}
+                </AccordionTrigger>
+                <AccordionContent className="text-slate-600 leading-relaxed">
+                  {f.a}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </div>
+      </section>
+
+      {/* 11. FINAL CTA BAND ---------------------------------------------- */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 to-black">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(50% 50% at 50% 0%, rgba(56,189,248,0.12) 0%, rgba(0,0,0,0) 70%)",
+          }}
+        />
+        <div className="relative max-w-4xl mx-auto px-6 py-20 sm:py-28 text-center">
+          <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white">
+            Start your first assessment — free.
+          </h2>
+          <p className="mt-5 text-base sm:text-lg text-slate-300 leading-relaxed max-w-2xl mx-auto">
+            Pick an exam, prove your skill, and walk away with a recruiter-
+            verifiable credential. No subscription, no card required to start.
+          </p>
+          <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <Link href="/exams">
+              <Button
+                size="lg"
+                className="bg-white text-slate-900 hover:bg-slate-100 rounded-full px-8 py-6 text-base font-semibold"
+              >
+                Browse exams
+                <ArrowRight className="ml-2 w-4 h-4" />
+              </Button>
+            </Link>
+            <a
+              href="#how"
+              className="text-sm font-medium text-slate-300 hover:text-white"
+            >
+              How it works →
+            </a>
+          </div>
+        </div>
+      </section>
+
       <Footer />
     </div>
   );
