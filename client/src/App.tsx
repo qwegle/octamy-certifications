@@ -1,4 +1,5 @@
 import { Switch, Route } from "wouter";
+import { lazy, Suspense } from "react";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -79,6 +80,17 @@ import {
   RecruiterProtectedRoute
 } from "../../recruiter";
 import InternShipPayment from "./pages/offlinInternshipPayment.tsx";
+
+// P1 Question Bank Pro — lazy-loaded
+const QuestionBanksList = lazy(() => import("@/pages/question-banks-list"));
+const QuestionBankDetail = lazy(() => import("@/pages/question-bank-detail"));
+const BlueprintEditor = lazy(() => import("@/pages/blueprint-editor"));
+
+const QBLoader = () => (
+  <div className="min-h-screen flex items-center justify-center text-gray-500">
+    Loading…
+  </div>
+);
 
 function Router() {
   return (
@@ -211,7 +223,18 @@ function Router() {
       </Route>
       <Route path="/recruiter/payment-success" component={PaymentSuccess} />
       <Route path="/recruiter/payment-failed" component={PaymentFailed} />
-      
+
+      {/* P1 Question Bank Pro */}
+      <Route path="/question-banks">
+        {() => <Suspense fallback={<QBLoader />}><QuestionBanksList /></Suspense>}
+      </Route>
+      <Route path="/question-banks/:id">
+        {() => <Suspense fallback={<QBLoader />}><QuestionBankDetail /></Suspense>}
+      </Route>
+      <Route path="/admin/courses/:courseId/blueprint">
+        {() => <Suspense fallback={<QBLoader />}><BlueprintEditor /></Suspense>}
+      </Route>
+
       <Route component={NotFound} />
     </Switch>
   );

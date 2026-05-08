@@ -19,12 +19,23 @@ import {
   creators,
   institutes,
   instituteMembers,
+  questionBanks,
+  questionTopics,
+  questionVersions,
+  courseQuestionBlueprint,
   type Creator,
   type InsertCreator,
   type Institute,
   type InsertInstitute,
   type InstituteMember,
   type InsertInstituteMember,
+  type QuestionBank,
+  type InsertQuestionBank,
+  type QuestionTopic,
+  type InsertQuestionTopic,
+  type QuestionVersion,
+  type CourseBlueprintItem,
+  type InsertCourseBlueprintItem,
   interviews,
   interviewQuestions,
   recruiters,
@@ -270,6 +281,39 @@ export interface IStorage {
     isSeller: boolean;
     isAdmin: boolean;
   }>;
+
+  // ===== P1 Question Bank Pro =====
+  createQuestionBank(data: InsertQuestionBank): Promise<QuestionBank>;
+  getQuestionBank(id: number): Promise<QuestionBank | undefined>;
+  getQuestionBankBySlug(ownerType: string, ownerId: number | null, slug: string): Promise<QuestionBank | undefined>;
+  listQuestionBanks(filter: { ownerType?: string; ownerId?: number | null; visibility?: string; userId?: number; search?: string }): Promise<QuestionBank[]>;
+  updateQuestionBank(id: number, data: Partial<InsertQuestionBank>): Promise<QuestionBank | undefined>;
+  deleteQuestionBank(id: number): Promise<void>;
+
+  createQuestionTopic(data: InsertQuestionTopic): Promise<QuestionTopic>;
+  listQuestionTopics(bankId: number): Promise<QuestionTopic[]>;
+  updateQuestionTopic(id: number, data: Partial<InsertQuestionTopic>): Promise<QuestionTopic | undefined>;
+  deleteQuestionTopic(id: number): Promise<void>;
+
+  createQuestionInBank(data: { bankId: number; topicId?: number | null; createdBy?: number | null } & Partial<InsertQuestion> & {
+    questionFormat?: string;
+    expectedAnswer?: string | null;
+    negativeMarks?: number;
+    timeLimitSec?: number | null;
+    tags?: string[];
+    explanation?: string | null;
+    imageUrl?: string | null;
+    codeLanguage?: string | null;
+  }): Promise<Question>;
+  updateQuestionWithVersioning(id: number, data: Record<string, unknown>, changedBy?: number, changeNote?: string): Promise<Question | undefined>;
+  deleteBankQuestion(id: number): Promise<void>;
+  bulkCreateQuestions(bankId: number, rows: Array<Record<string, unknown>>, createdBy?: number): Promise<{ created: number; errors: Array<{ row: number; message: string }> }>;
+  listQuestionsByBank(bankId: number, opts: { topicId?: number; format?: string; search?: string; page?: number; perPage?: number }): Promise<{ items: Question[]; total: number; page: number; perPage: number }>;
+  getQuestionVersions(questionId: number): Promise<QuestionVersion[]>;
+
+  getCourseBlueprint(courseId: number): Promise<CourseBlueprintItem[]>;
+  setCourseBlueprint(courseId: number, items: Array<Omit<InsertCourseBlueprintItem, "courseId">>): Promise<CourseBlueprintItem[]>;
+  materializeBlueprintForAttempt(courseId: number): Promise<Question[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -3150,6 +3194,216 @@ export class DatabaseStorage implements IStorage {
       isSeller,
       isAdmin,
     };
+  }
+
+  // ===== P1 Question Bank Pro =====
+  async createQuestionBank(data: InsertQuestionBank): Promise<QuestionBank> {
+    const [row] = await db.insert(questionBanks).values(data).returning();
+    return row;
+  }
+
+  async getQuestionBank(id: number): Promise<QuestionBank | undefined> {
+    const [row] = await db.select().from(questionBanks).where(eq(questionBanks.id, id));
+    return row || undefined;
+  }
+
+  async getQuestionBankBySlug(ownerType: string, ownerId: number | null, slug: string): Promise<QuestionBank | undefined> {
+    const conds = [eq(questionBanks.ownerType, ownerType), eq(questionBanks.slug, slug)];
+    const ownerIdCond = ownerId === null
+      ? sql`${questionBanks.ownerId} is null`
+      : eq(questionBanks.ownerId, ownerId);
+    const [row] = await db.select().from(questionBanks).where(and(...conds, ownerIdCond));
+    return row || undefined;
+  }
+
+  async listQuestionBanks(filter: { ownerType?: string; ownerId?: number | null; visibility?: string; userId?: number; search?: string }): Promise<QuestionBank[]> {
+    const where: any[] = [];
+    if (filter.ownerType) where.push(eq(questionBanks.ownerType, filter.ownerType));
+    if (filter.ownerId !== undefined) {
+      where.push(filter.ownerId === null
+        ? sql`${questionBanks.ownerId} is null`
+        : eq(questionBanks.ownerId, filter.ownerId));
+    }
+    if (filter.visibility) where.push(eq(questionBanks.visibility, filter.visibility));
+    if (filter.search) where.push(ilike(questionBanks.name, `%${filter.search}%`));
+    const q = db.select().from(questionBanks);
+    const rows = where.length ? await q.where(and(...where)).orderBy(desc(questionBanks.updatedAt)) : await q.orderBy(desc(questionBanks.updatedAt));
+    return rows;
+  }
+
+  async updateQuestionBank(id: number, data: Partial<InsertQuestionBank>): Promise<QuestionBank | undefined> {
+    const [row] = await db.update(questionBanks).set({ ...data, updatedAt: new Date() }).where(eq(questionBanks.id, id)).returning();
+    return row || undefined;
+  }
+
+  async deleteQuestionBank(id: number): Promise<void> {
+    await db.delete(questionBanks).where(eq(questionBanks.id, id));
+  }
+
+  async createQuestionTopic(data: InsertQuestionTopic): Promise<QuestionTopic> {
+    const [row] = await db.insert(questionTopics).values(data).returning();
+    return row;
+  }
+
+  async listQuestionTopics(bankId: number): Promise<QuestionTopic[]> {
+    return db.select().from(questionTopics).where(eq(questionTopics.bankId, bankId)).orderBy(asc(questionTopics.sortOrder), asc(questionTopics.id));
+  }
+
+  async updateQuestionTopic(id: number, data: Partial<InsertQuestionTopic>): Promise<QuestionTopic | undefined> {
+    const [row] = await db.update(questionTopics).set({ ...data, updatedAt: new Date() }).where(eq(questionTopics.id, id)).returning();
+    return row || undefined;
+  }
+
+  async deleteQuestionTopic(id: number): Promise<void> {
+    await db.delete(questionTopics).where(eq(questionTopics.id, id));
+  }
+
+  async createQuestionInBank(data: any): Promise<Question> {
+    const insertVals: any = {
+      courseId: data.courseId ?? null,
+      bankId: data.bankId,
+      topicId: data.topicId ?? null,
+      question: data.question,
+      options: data.options ?? [],
+      correctAnswer: typeof data.correctAnswer === "number" ? data.correctAnswer : 0,
+      questionType: data.questionType ?? "multiple_choice",
+      questionFormat: data.questionFormat ?? "mcq_single",
+      difficulty: data.difficulty ?? "medium",
+      maxPoints: data.maxPoints ?? 1,
+      negativeMarks: data.negativeMarks ?? 0,
+      timeLimitSec: data.timeLimitSec ?? null,
+      imageUrl: data.imageUrl ?? null,
+      codeLanguage: data.codeLanguage ?? null,
+      expectedAnswer: data.expectedAnswer ?? null,
+      tags: data.tags ?? [],
+      explanation: data.explanation ?? null,
+      version: 1,
+      createdBy: data.createdBy ?? null,
+      isActive: true,
+    };
+    const [row] = await db.insert(questions).values(insertVals).returning();
+    await db.update(questionBanks)
+      .set({ questionCount: sql`${questionBanks.questionCount} + 1`, updatedAt: new Date() })
+      .where(eq(questionBanks.id, data.bankId));
+    return row;
+  }
+
+  async updateQuestionWithVersioning(id: number, data: Record<string, unknown>, changedBy?: number, changeNote?: string): Promise<Question | undefined> {
+    const [existing] = await db.select().from(questions).where(eq(questions.id, id));
+    if (!existing) return undefined;
+    await db.insert(questionVersions).values({
+      questionId: id,
+      version: existing.version ?? 1,
+      snapshot: existing as unknown as Record<string, unknown>,
+      changeNote: changeNote ?? null,
+      changedBy: changedBy ?? null,
+    });
+    const nextVersion = (existing.version ?? 1) + 1;
+    const [row] = await db.update(questions)
+      .set({ ...data, version: nextVersion, updatedAt: new Date() } as any)
+      .where(eq(questions.id, id))
+      .returning();
+    return row || undefined;
+  }
+
+  async deleteBankQuestion(id: number): Promise<void> {
+    const [existing] = await db.select().from(questions).where(eq(questions.id, id));
+    if (!existing) return;
+    await db.delete(questions).where(eq(questions.id, id));
+    if (existing.bankId) {
+      await db.update(questionBanks)
+        .set({ questionCount: sql`GREATEST(${questionBanks.questionCount} - 1, 0)`, updatedAt: new Date() })
+        .where(eq(questionBanks.id, existing.bankId));
+    }
+  }
+
+  async bulkCreateQuestions(bankId: number, rows: Array<Record<string, any>>, createdBy?: number): Promise<{ created: number; errors: Array<{ row: number; message: string }> }> {
+    const errors: Array<{ row: number; message: string }> = [];
+    let created = 0;
+    // cache topics by name
+    const topicCache = new Map<string, number>();
+    const existing = await this.listQuestionTopics(bankId);
+    for (const t of existing) topicCache.set(t.name.toLowerCase(), t.id);
+
+    for (let i = 0; i < rows.length; i++) {
+      const r = rows[i];
+      try {
+        let topicId: number | null = null;
+        const topicName = (r.topic ?? "").toString().trim();
+        if (topicName) {
+          const key = topicName.toLowerCase();
+          if (!topicCache.has(key)) {
+            const slug = topicName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || `topic-${Date.now()}`;
+            const t = await this.createQuestionTopic({ bankId, name: topicName, slug, sortOrder: 0, parentId: null } as any);
+            topicCache.set(key, t.id);
+          }
+          topicId = topicCache.get(key)!;
+        }
+        await this.createQuestionInBank({
+          bankId,
+          topicId,
+          createdBy: createdBy ?? null,
+          ...r,
+        });
+        created++;
+      } catch (e: any) {
+        errors.push({ row: i + 1, message: e?.message || "Insert failed" });
+      }
+    }
+    return { created, errors };
+  }
+
+  async listQuestionsByBank(bankId: number, opts: { topicId?: number; format?: string; search?: string; page?: number; perPage?: number }): Promise<{ items: Question[]; total: number; page: number; perPage: number }> {
+    const page = Math.max(1, opts.page ?? 1);
+    const perPage = Math.min(200, Math.max(1, opts.perPage ?? 25));
+    const where: any[] = [eq(questions.bankId, bankId)];
+    if (opts.topicId) where.push(eq(questions.topicId, opts.topicId));
+    if (opts.format) where.push(eq(questions.questionFormat, opts.format));
+    if (opts.search) where.push(ilike(questions.question, `%${opts.search}%`));
+    const condition = and(...where);
+    const items = await db.select().from(questions).where(condition).orderBy(desc(questions.id)).limit(perPage).offset((page - 1) * perPage);
+    const [{ c }] = await db.select({ c: count() }).from(questions).where(condition);
+    return { items, total: Number(c), page, perPage };
+  }
+
+  async getQuestionVersions(questionId: number): Promise<QuestionVersion[]> {
+    return db.select().from(questionVersions).where(eq(questionVersions.questionId, questionId)).orderBy(desc(questionVersions.version));
+  }
+
+  async getCourseBlueprint(courseId: number): Promise<CourseBlueprintItem[]> {
+    return db.select().from(courseQuestionBlueprint).where(eq(courseQuestionBlueprint.courseId, courseId)).orderBy(asc(courseQuestionBlueprint.sortOrder), asc(courseQuestionBlueprint.id));
+  }
+
+  async setCourseBlueprint(courseId: number, items: Array<Omit<InsertCourseBlueprintItem, "courseId">>): Promise<CourseBlueprintItem[]> {
+    await db.delete(courseQuestionBlueprint).where(eq(courseQuestionBlueprint.courseId, courseId));
+    if (!items.length) return [];
+    const vals = items.map((it, idx) => ({ ...it, courseId, sortOrder: it.sortOrder ?? idx }));
+    const inserted = await db.insert(courseQuestionBlueprint).values(vals as any).returning();
+    return inserted;
+  }
+
+  async materializeBlueprintForAttempt(courseId: number): Promise<Question[]> {
+    const items = await this.getCourseBlueprint(courseId);
+    if (!items.length) throw new Error("Course has no blueprint configured");
+    const result: Question[] = [];
+    for (const item of items) {
+      const where: any[] = [eq(questions.topicId, item.topicId), eq(questions.isActive, true)];
+      if (item.difficulty && item.difficulty !== "mixed") {
+        where.push(eq(questions.difficulty, item.difficulty));
+      }
+      const pool = await db.select().from(questions).where(and(...where));
+      if (pool.length < item.questionCount) {
+        throw new Error(`Topic ${item.topicId} has only ${pool.length} ${item.difficulty} questions, blueprint requires ${item.questionCount}`);
+      }
+      // Fisher-Yates shuffle then slice
+      const shuffled = [...pool];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      result.push(...shuffled.slice(0, item.questionCount));
+    }
+    return result;
   }
 }
 

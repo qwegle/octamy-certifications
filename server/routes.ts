@@ -37,6 +37,7 @@ import { v2 as cloudinary } from "cloudinary";
 import multer from "multer";
 import apiRoutes from "./routes/index";
 import certificateRoutes from "./routes/certificateRoutes";
+import questionBanksRouter, { courseBlueprintRouter } from "./routes/question-banks";
 import { emailService } from "./utils/emailService";
 import { generateCertificateHTML } from "./utils/certificateGenerator";
 import bcrypt from "bcrypt";
@@ -2263,6 +2264,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Register API routes (includes certificate routes)
   app.use("/api", apiRoutes);
   app.use("/api/certificates", certificateRoutes);
+  app.use("/api/question-banks", questionBanksRouter);
+  app.use("/api/courses", courseBlueprintRouter);
 
   // Catch-all handler: send back React's index.html file for non-API routes
   // This ensures that client-side routing works for direct URL access

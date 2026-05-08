@@ -241,6 +241,9 @@ export const courses = pgTable("courses", {
   ownerType: text("owner_type").default("admin").notNull(), // admin | creator | institute
   ownerId: integer("owner_id"),
   visibility: text("visibility").default("public").notNull(), // public | unlisted | private
+  // P1: opt-in flag — when true, exam questions are materialized from the
+  // course's blueprint + bank rather than the legacy `questions.courseId` rows.
+  useBlueprintEngine: boolean("use_blueprint_engine").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -335,7 +338,9 @@ export type InsertInstituteMember = z.infer<typeof insertInstituteMemberSchema>;
 
 export const questions = pgTable("questions", {
   id: serial("id").primaryKey(),
-  courseId: integer("course_id").references(() => courses.id).notNull(),
+  // Legacy: questions tied directly to a course. Now nullable; bank-scoped
+  // questions are linked via bankId/topicId and may have no course.
+  courseId: integer("course_id").references(() => courses.id),
   question: text("question").notNull(),
   options: json("options").$type<string[]>().notNull(),
   correctAnswer: integer("correct_answer").notNull(),
@@ -346,7 +351,102 @@ export const questions = pgTable("questions", {
   expectedKeywords: text("expected_keywords").array(), // Keywords to look for in responses
   maxPoints: integer("max_points").default(100).notNull(), // Points for this question
   difficulty: text("difficulty").default("medium").notNull(), // easy, medium, hard
+
+  // P1 Question Bank Pro additions
+  bankId: integer("bank_id").references(() => questionBanks.id),
+  topicId: integer("topic_id").references(() => questionTopics.id),
+  questionFormat: text("question_format").default("mcq_single").notNull(),
+  // mcq_single | mcq_multi | true_false | fill_blank | short | long | code | numeric | match
+  imageUrl: text("image_url"),
+  codeLanguage: text("code_language"),
+  expectedAnswer: text("expected_answer"), // for non-mcq formats (free-text)
+  negativeMarks: integer("negative_marks").default(0).notNull(),
+  timeLimitSec: integer("time_limit_sec"),
+  tags: json("tags").$type<string[]>().default([]),
+  explanation: text("explanation"),
+  version: integer("version").default(1).notNull(),
+  createdBy: integer("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
+
+// ── P1 Question Bank Pro tables ────────────────────────────────────────────
+export const questionBanks = pgTable("question_banks", {
+  id: serial("id").primaryKey(),
+  slug: text("slug").notNull(),
+  name: text("name").notNull(),
+  description: text("description"),
+  ownerType: text("owner_type").default("admin").notNull(), // admin | creator | institute
+  ownerId: integer("owner_id"), // null = admin global
+  visibility: text("visibility").default("private").notNull(), // private | unlisted | public
+  language: text("language").default("en").notNull(),
+  tags: json("tags").$type<string[]>().default([]),
+  questionCount: integer("question_count").default(0).notNull(),
+  createdBy: integer("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (t) => ({
+  ownerSlugUniq: unique("qb_owner_slug_uniq").on(t.ownerType, t.ownerId, t.slug),
+}));
+
+export const questionTopics = pgTable("question_topics", {
+  id: serial("id").primaryKey(),
+  bankId: integer("bank_id").references(() => questionBanks.id, { onDelete: "cascade" }).notNull(),
+  parentId: integer("parent_id"),
+  name: text("name").notNull(),
+  slug: text("slug").notNull(),
+  sortOrder: integer("sort_order").default(0).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const questionVersions = pgTable("question_versions", {
+  id: serial("id").primaryKey(),
+  questionId: integer("question_id").references(() => questions.id, { onDelete: "cascade" }).notNull(),
+  version: integer("version").notNull(),
+  snapshot: json("snapshot").$type<Record<string, unknown>>().notNull(),
+  changeNote: text("change_note"),
+  changedBy: integer("changed_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const courseQuestionBlueprint = pgTable("course_question_blueprint", {
+  id: serial("id").primaryKey(),
+  courseId: integer("course_id").references(() => courses.id, { onDelete: "cascade" }).notNull(),
+  topicId: integer("topic_id").references(() => questionTopics.id).notNull(),
+  questionCount: integer("question_count").notNull(),
+  difficulty: text("difficulty").default("mixed").notNull(), // easy | medium | hard | mixed
+  marksPerQuestion: integer("marks_per_question").default(1).notNull(),
+  negativeMarks: integer("negative_marks").default(0).notNull(),
+  sortOrder: integer("sort_order").default(0).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertQuestionBankSchema = createInsertSchema(questionBanks).omit({
+  id: true,
+  questionCount: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export const insertQuestionTopicSchema = createInsertSchema(questionTopics).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export const insertCourseBlueprintSchema = createInsertSchema(courseQuestionBlueprint).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type QuestionBank = typeof questionBanks.$inferSelect;
+export type InsertQuestionBank = z.infer<typeof insertQuestionBankSchema>;
+export type QuestionTopic = typeof questionTopics.$inferSelect;
+export type InsertQuestionTopic = z.infer<typeof insertQuestionTopicSchema>;
+export type QuestionVersion = typeof questionVersions.$inferSelect;
+export type CourseBlueprintItem = typeof courseQuestionBlueprint.$inferSelect;
+export type InsertCourseBlueprintItem = z.infer<typeof insertCourseBlueprintSchema>;
 
 export const examAttempts = pgTable("exam_attempts", {
   id: serial("id").primaryKey(),
