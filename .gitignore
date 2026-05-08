@@ -4,3 +4,10 @@ dist
 server/public
 vite.config.ts.*
 *.tar.gz
+.env
+.env.*
+!.env.example
+cookies.txt
+test-certificate*.pdf
+__pycache__/
+*.pyc

@@ -41,7 +41,7 @@ export default function Header() {
             </Link>
             {/* <Link href="/learning-paths" className="hover:text-gray-300">Learning Paths</Link> */}
             <Link href="/virtual-internships" className="hover:text-gray-300">
-              Internships
+              Skill Verification
             </Link>
             <Link href="/sponsor" className="hover:text-gray-300">
               Sponsors
@@ -131,7 +131,7 @@ export default function Header() {
                 className="block text-white hover:text-gray-300 font-medium py-2"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Internships
+                Skill Verification
               </Link>
               <Link
                 href="/sponsor"

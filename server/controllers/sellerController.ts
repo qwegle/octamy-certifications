@@ -17,6 +17,13 @@ export class SellerController {
   static async register(req: Request, res: Response) {
     try {
       const { email, password, name, phone } = insertSellerSchema.parse(req.body);
+      const { agreementAccepted } = req.body as { agreementAccepted?: boolean };
+      
+      if (!agreementAccepted) {
+        return res.status(400).json({
+          message: "You must accept the Reseller / Affiliate Agreement, Terms of Service, and Privacy Policy to register.",
+        });
+      }
       
       // Check if seller already exists
       const existingSeller = await storage.getSellerByEmail(email);
@@ -35,8 +42,11 @@ export class SellerController {
         phone,
         isApproved: false,
         isActive: true,
-        referralCode: `REF${Date.now()}${Math.random().toString(36).substr(2, 9)}`.toUpperCase()
-      });
+        referralCode: `REF${Date.now()}${Math.random().toString(36).substr(2, 9)}`.toUpperCase(),
+        agreementAccepted: true,
+        agreementAcceptedAt: new Date(),
+        agreementVersion: "v1.0-2026-05-08",
+      } as any);
 
       // Generate token
       const token = jwt.sign(

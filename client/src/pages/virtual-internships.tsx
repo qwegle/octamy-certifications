@@ -187,25 +187,30 @@ export default function VirtualInternshipsPage() {
       <section className="bg-black text-white py-16">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center">
+            <div className="inline-block bg-yellow-500/20 border border-yellow-400/40 text-yellow-100 text-xs uppercase tracking-wider px-3 py-1 rounded-full mb-4">
+              Assessment-Based Skill Verification Program
+            </div>
             <h1 className="text-5xl md:text-6xl font-bold mb-6">
-              VIRTUAL INTERNSHIPS
+              SKILL VERIFICATION INTERNSHIP PROGRAMS
             </h1>
-            <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
-              Gain real-world experience with industry-leading virtual internship programs. 
-              Build your portfolio and advance your career from anywhere.
+            <p className="text-xl text-gray-300 mb-4 max-w-3xl mx-auto">
+              Take a free industry-aligned assessment, get evaluated, and — only if you pass — choose to receive a verified digital certificate. Build a credible portfolio without paying upfront.
             </p>
-            <div className="flex items-center justify-center gap-4 text-sm text-gray-400">
+            <p className="text-sm text-gray-400 max-w-3xl mx-auto mb-8">
+              This program is an assessment and skill-certification initiative and does <strong>not</strong> constitute employment, a paid internship, or any guarantee of placement.
+            </p>
+            <div className="flex items-center justify-center gap-4 text-sm text-gray-400 flex-wrap">
               <div className="flex items-center gap-2">
                 <Briefcase className="h-4 w-4" />
                 {internshipCourses.length}+ Programs
               </div>
               <div className="flex items-center gap-2">
                 <MapPin className="h-4 w-4" />
-                Remote Friendly
+                100% Remote Assessment
               </div>
               <div className="flex items-center gap-2">
                 <Award className="h-4 w-4" />
-                Industry Recognized
+                Verified Credential on Pass
               </div>
             </div>
           </div>
@@ -219,7 +224,7 @@ export default function VirtualInternshipsPage() {
           <div className="relative mb-6">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
             <Input
-              placeholder="Search internship programs, skills, or companies..."
+              placeholder="Search assessment programs, skills, or domains..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 h-12 text-lg border-2 focus:border-black"

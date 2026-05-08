@@ -889,11 +889,18 @@ function generateCertificateHTML(data: CertificateData): string {
           />
 
           <p class="completion-text">
-            has successfully demonstrated mastery and completed the
-            comprehensive professional certification program
+            ${data.courseTitle.toLowerCase().includes("internship")
+              ? "has successfully passed the assessment requirements of the Skill Verification Internship Program in"
+              : "has successfully demonstrated mastery and completed the comprehensive professional certification program"}
           </p>
 
           <p class="course-title">${data.courseTitle}</p>
+
+          ${data.courseTitle.toLowerCase().includes("internship") ? `
+          <p style="font-size:10px;color:#6b7280;max-width:80%;margin:8px auto 0;line-height:1.4;text-align:center;">
+            This program is an assessment and skill-certification initiative and does not constitute employment, a paid internship, or any guarantee of placement.
+          </p>
+          ` : ""}
         </div>
 
         <!-- Footer -->

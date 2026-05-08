@@ -20,6 +20,8 @@ export default function SellerAuth() {
   });
   const [isLoading, setIsLoading] = useState(false);
   
+  const [acceptedAgreement, setAcceptedAgreement] = useState(false);
+  
   const { login, register } = useSellerAuth();
   const { toast } = useToast();
   
@@ -28,6 +30,14 @@ export default function SellerAuth() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isLogin && !acceptedAgreement) {
+      toast({
+        title: "Agreement required",
+        description: "Please accept the Reseller / Affiliate Agreement to continue.",
+        variant: "destructive",
+      });
+      return;
+    }
     setIsLoading(true);
 
     try {
@@ -39,7 +49,7 @@ export default function SellerAuth() {
         });
         // Don't redirect immediately - let the auth provider handle it
       } else {
-        await register(formData.email, formData.password, formData.name, formData.phone);
+        await register(formData.email, formData.password, formData.name, formData.phone, acceptedAgreement);
         toast({
           title: "Success",
           description: "Account created successfully. Awaiting admin approval.",
@@ -160,11 +170,29 @@ export default function SellerAuth() {
 
               <Button
                 type="submit"
-                disabled={isLoading}
-                className="w-full bg-black text-white hover:bg-gray-800 border-2 border-black py-6 text-lg font-bold"
+                disabled={isLoading || (!isLogin && !acceptedAgreement)}
+                className="w-full bg-black text-white hover:bg-gray-800 border-2 border-black py-6 text-lg font-bold disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? "Processing..." : (isLogin ? "LOGIN" : "CREATE ACCOUNT")}
               </Button>
+
+              {!isLogin && (
+                <label className="flex items-start gap-2 text-xs text-gray-700 mt-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={acceptedAgreement}
+                    onChange={(e) => setAcceptedAgreement(e.target.checked)}
+                    className="mt-0.5"
+                    aria-label="Accept reseller agreement"
+                  />
+                  <span>
+                    I have read and agree to the{" "}
+                    <a href="/reseller-agreement" target="_blank" rel="noopener noreferrer" className="underline font-semibold">Reseller / Affiliate Agreement</a>,{" "}
+                    <a href="/terms-of-service" target="_blank" rel="noopener noreferrer" className="underline">Terms of Service</a>, and{" "}
+                    <a href="/privacy-policy" target="_blank" rel="noopener noreferrer" className="underline">Privacy Policy</a>. I understand that I am an independent marketing affiliate and that payouts are subject to KYC, TDS §194H, and a minimum threshold of ₹500.
+                  </span>
+                </label>
+              )}
             </form>
 
             <div className="mt-6">

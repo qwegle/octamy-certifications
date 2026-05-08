@@ -3560,9 +3560,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   );
 
   try {
-    const { default: interviewRoutes } = await import("./routes/interviews.js");
+    // AI Interview routes removed.
     const { default: analyticsRoutes } = await import("./routes/analytics.js");
-    app.use("/api", interviewRoutes);
     app.use("/api", analyticsRoutes);
   } catch (error) {
     console.log("Additional routes loading...");

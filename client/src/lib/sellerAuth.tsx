@@ -13,7 +13,7 @@ interface SellerAuthContextType {
   seller: Seller | null;
   token: string | null;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, name: string, phone?: string) => Promise<void>;
+  register: (email: string, password: string, name: string, phone?: string, agreementAccepted?: boolean) => Promise<void>;
   logout: () => void;
   isLoading: boolean;
 }
@@ -90,13 +90,13 @@ export function SellerAuthProvider({ children }: { children: ReactNode }) {
     }, 100);
   };
 
-  const register = async (email: string, password: string, name: string, phone?: string) => {
+  const register = async (email: string, password: string, name: string, phone?: string, agreementAccepted?: boolean) => {
     const response = await fetch("/api/sellers/register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ email, password, name, phone }),
+      body: JSON.stringify({ email, password, name, phone, agreementAccepted: !!agreementAccepted }),
     });
 
     if (!response.ok) {

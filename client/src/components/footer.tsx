@@ -102,7 +102,7 @@ export default function Footer() {
 
           {/* Support */}
           <div>
-            <h4 className="text-lg font-semibold mb-4">Support</h4>
+            <h4 className="text-lg font-semibold mb-4">Legal & Support</h4>
             <ul className="space-y-2">
               <li>
                 <Link
@@ -110,6 +110,14 @@ export default function Footer() {
                   className="text-gray-300 hover:text-white transition-colors"
                 >
                   Help Center
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/trust"
+                  className="text-gray-300 hover:text-white transition-colors"
+                >
+                  Trust & Compliance
                 </Link>
               </li>
               <li>
@@ -129,6 +137,38 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
+                <Link
+                  href="/refund-policy"
+                  className="text-gray-300 hover:text-white transition-colors"
+                >
+                  Refund Policy
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/cookie-policy"
+                  className="text-gray-300 hover:text-white transition-colors"
+                >
+                  Cookie Policy
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/disclaimer"
+                  className="text-gray-300 hover:text-white transition-colors"
+                >
+                  Disclaimer
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/reseller-agreement"
+                  className="text-gray-300 hover:text-white transition-colors"
+                >
+                  Reseller Agreement
+                </Link>
+              </li>
+              <li>
                 <a
                   href="mailto:support@octamy.com"
                   className="text-gray-300 hover:text-white transition-colors"
@@ -140,10 +180,19 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-gray-800 mt-12 pt-8 text-center">
-          <p className="text-gray-300">
-            &copy; 2024 Octamy. All rights reserved.
-          </p>
+        <div className="border-t border-gray-800 mt-12 pt-8">
+          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 text-xs text-gray-400">
+            <div className="space-y-1">
+              <p className="font-semibold text-gray-300">Octamy Solutions Private Limited</p>
+              <p>CIN: [TODO: insert CIN] · GSTIN: [TODO: insert GSTIN]</p>
+              <p>Registered Office: [TODO: insert registered address]</p>
+              <p>Grievance Officer: <a href="mailto:grievance@octamy.com" className="underline">grievance@octamy.com</a> · Support: <a href="mailto:support@octamy.com" className="underline">support@octamy.com</a></p>
+              <p className="italic max-w-2xl">Skill-Verification Internship Programs on this platform are assessment and skill-certification initiatives only and do not constitute employment or any guarantee of placement.</p>
+            </div>
+            <p className="text-gray-300 md:text-right">
+              &copy; {new Date().getFullYear()} Octamy. All rights reserved.
+            </p>
+          </div>
         </div>
       </div>
     </footer>

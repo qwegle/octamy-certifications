@@ -359,6 +359,12 @@ export const sellers = pgTable("sellers", {
   bankIFSC: text("bank_ifsc"),
   bankName: text("bank_name"),
   accountHolderName: text("account_holder_name"),
+  panNumber: text("pan_number"),
+  gstin: text("gstin"),
+  address: text("address"),
+  agreementAccepted: boolean("agreement_accepted").default(false).notNull(),
+  agreementAcceptedAt: timestamp("agreement_accepted_at"),
+  agreementVersion: text("agreement_version"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

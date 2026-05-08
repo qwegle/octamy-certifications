@@ -19,6 +19,14 @@ import CourseDetail from "@/pages/course-detail";
 import HelpCenter from "@/pages/help-center";
 import PrivacyPolicy from "@/pages/privacy-policy";
 import TermsOfService from "@/pages/terms-of-service";
+import TrustPage from "@/pages/legal/trust";
+import RefundPolicy from "@/pages/legal/refund-policy";
+import CookiePolicy from "@/pages/legal/cookie-policy";
+import AcceptableUse from "@/pages/legal/acceptable-use";
+import DisclaimerPage from "@/pages/legal/disclaimer";
+import ResellerAgreement from "@/pages/legal/reseller-agreement";
+import AccessibilityPage from "@/pages/legal/accessibility";
+import { CookieConsent } from "@/components/cookie-consent";
 import InternshipPayment from "@/pages/internship-payment";
 import SellerAuth from "@/pages/seller-auth";
 import SellerDashboard from "@/pages/seller-dashboard";
@@ -29,10 +37,7 @@ import DemoBusinessCertificate from "@/pages/demo-business-certificate";
 import DemoInternshipCertificate from "@/pages/demo-internship-certificate";
 import BusinessCertificates from "@/pages/business-certificates";
 import InternshipForm from "@/pages/internship-form";
-import AIInterviews from "@/pages/ai-interviews";
 import ProfileEdit from "@/pages/profile-edit";
-import InterviewPayment from "@/pages/interview-payment";
-import InterviewSession from "@/pages/interview-session";
 import Verify from "@/pages/verify";
 import Preferences from "@/pages/preferences";
 import Progress from "@/pages/progress";
@@ -99,6 +104,15 @@ function Router() {
       <Route path="/help-center" component={HelpCenter} />
       <Route path="/privacy-policy" component={PrivacyPolicy} />
       <Route path="/terms-of-service" component={TermsOfService} />
+      <Route path="/trust" component={TrustPage} />
+      <Route path="/legal" component={TrustPage} />
+      <Route path="/compliance" component={TrustPage} />
+      <Route path="/refund-policy" component={RefundPolicy} />
+      <Route path="/cookie-policy" component={CookiePolicy} />
+      <Route path="/acceptable-use" component={AcceptableUse} />
+      <Route path="/disclaimer" component={DisclaimerPage} />
+      <Route path="/reseller-agreement" component={ResellerAgreement} />
+      <Route path="/accessibility" component={AccessibilityPage} />
       <Route path="/seller-auth" component={SellerAuth} />
       <Route path="/partners" component={SellerAuth} />
       <Route path="/partner-dashboard" component={SellerDashboard} />
@@ -110,12 +124,7 @@ function Router() {
       <Route path="/business-certificates" component={BusinessCertificates} />
       <Route path="/internship/:slug" component={InternshipForm} />
       <Route path="/contact" component={Contact} />
-      <Route path="/ai-interviews" component={AIInterviews} />
       <Route path="/profile-edit" component={ProfileEdit} />
-      <Route path="/interview/:id" component={InterviewSession} />
-      <Route path="/interviews/:id" component={InterviewSession} />
-      <Route path="/interview-results/:id" component={InterviewSession} />
-      <Route path="/interviews/:id/payment" component={InterviewPayment} />
       
       {/* Recruiter Portal Routes */}
       <Route path="/recruiter/auth" component={RecruiterAuth} />
@@ -180,6 +189,7 @@ function App() {
               <TooltipProvider>
                 <Toaster />
                 <Router />
+                <CookieConsent />
               </TooltipProvider>
             </RecruiterAuthProvider>
           </SellerAuthProvider>
