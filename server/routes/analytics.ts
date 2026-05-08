@@ -10,7 +10,7 @@ import {
 } from '../../shared/schema.js';
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
+const JWT_SECRET = process.env.JWT_SECRET!;
 
 interface AuthenticatedRequest extends Request {
   user?: {

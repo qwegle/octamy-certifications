@@ -12,6 +12,7 @@ import Header from "@/components/header";
 import Footer from "@/components/footer";
 import CourseCard from "@/components/course-card";
 import type { Course, Category } from "@shared/schema";
+import { SEO } from "@/components/seo";
 
 const sortOptions = [
   { value: "popularity", label: "Most Popular", icon: TrendingUp },
@@ -114,6 +115,11 @@ export default function CoursesPage() {
 
   return (
     <div className="min-h-screen bg-white">
+      <SEO
+        title="Professional Certifications & Skill Verification Courses"
+        description="Browse industry-recognized professional certifications across AI, Development, Cloud, Cybersecurity, Business and more. Free assessments, optional verified certificate."
+        path="/courses"
+      />
       <Header />
       
       {/* Hero Section */}

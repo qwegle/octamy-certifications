@@ -4,7 +4,7 @@ import { storage } from './storage';
 import jwt from 'jsonwebtoken';
 import { generateUniqueReferralCode } from './utils/referralCodeGenerator';
 
-const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
+const JWT_SECRET = process.env.JWT_SECRET!;
 
 // Google OAuth Configuration
 const GOOGLE_CLIENT_ID = "sxt8OEXPWxrFXVK95WLtqfhlACiqa87k";

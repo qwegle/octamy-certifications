@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { GoogleAuthButton } from "@/components/google-auth-button";
 import { useSellerGoogleAuthHandler } from "@/utils/google-auth-handler";
 import { Eye, EyeOff } from "lucide-react";
+import { SEO } from "@/components/seo";
 
 export default function SellerAuth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -76,6 +77,12 @@ export default function SellerAuth() {
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center p-4">
+      <SEO
+        title="Octamy Partner Portal — Reseller Sign-In"
+        description="Sign in to the Octamy Partner Portal to manage your reseller dashboard, referral codes, sales and commission earnings."
+        path="/seller-auth"
+        noIndex
+      />
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">

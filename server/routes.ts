@@ -66,7 +66,7 @@ interface SellerAuthenticatedRequest extends Request {
   };
 }
 
-const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
+const JWT_SECRET = process.env.JWT_SECRET!;
 
 // Middleware to verify JWT token
 const authenticateAdminToken = (
@@ -518,7 +518,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Generate JWT token
       const token = jwt.sign(
         { recruiterId: recruiter.id, email: recruiter.email },
-        process.env.JWT_SECRET || "your-secret-key",
+        process.env.JWT_SECRET!,
         { expiresIn: "7d" }
       );
 
@@ -579,7 +579,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Generate JWT token
       const token = jwt.sign(
         { recruiterId: recruiter.id, email: recruiter.email },
-        process.env.JWT_SECRET || "your-secret-key",
+        process.env.JWT_SECRET!,
         { expiresIn: "7d" }
       );
 
@@ -1493,6 +1493,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
               "host"
             )}/payment-failed?error=payment_not_found&courseId=${courseId}`
           );
+        }
+
+        // IDEMPOTENCY: PayU may POST /payment/success twice (browser + webhook
+        // retry). If we already finalised this payment, just redirect to the
+        // existing certificate instead of double-creating exam attempt + cert
+        // + sale (which would also double-credit the seller commission).
+        if (payment.status === "completed" && payment.certificateId) {
+          const existingCert = await storage.getCertificate(payment.certificateId);
+          if (existingCert) {
+            return res.redirect(
+              `${req.protocol}://${req.get(
+                "host"
+              )}/payment-success?certificateId=${existingCert.certificateId}`
+            );
+          }
         }
 
         // Get persisted exam data

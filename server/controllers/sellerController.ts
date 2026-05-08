@@ -11,7 +11,7 @@ interface SellerAuthenticatedRequest extends Request {
   };
 }
 
-const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
+const JWT_SECRET = process.env.JWT_SECRET!;
 
 export class SellerController {
   static async register(req: Request, res: Response) {

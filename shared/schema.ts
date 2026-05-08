@@ -371,7 +371,7 @@ export const sellers = pgTable("sellers", {
 export const sales = pgTable("sales", {
   id: serial("id").primaryKey(),
   sellerId: integer("seller_id").references(() => sellers.id).notNull(),
-  certificateId: integer("certificate_id").references(() => certificates.id).notNull(),
+  certificateId: integer("certificate_id").references(() => certificates.id).notNull().unique(),
   courseId: integer("course_id").references(() => courses.id).notNull(),
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
   commission: decimal("commission", { precision: 10, scale: 2 }).notNull(),

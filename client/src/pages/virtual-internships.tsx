@@ -11,6 +11,7 @@ import { Search, Filter, Clock, Users, Star, TrendingUp, Award, Grid, List, MapP
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import type { Course, Category } from "@shared/schema";
+import { SEO } from "@/components/seo";
 
 const durations = [
   { label: "1-2 weeks", min: 1, max: 2 },
@@ -181,6 +182,11 @@ export default function VirtualInternshipsPage() {
 
   return (
     <div className="min-h-screen bg-white">
+      <SEO
+        title="Virtual Internships — Skill Verification Internship Program"
+        description="Assessment-based virtual internships in Data Analytics, AI, Cloud, Cybersecurity & more. Take a project assessment, earn a verified certificate. Not employment — pure skill verification."
+        path="/virtual-internships"
+      />
       <Header />
       
       {/* Hero Section */}

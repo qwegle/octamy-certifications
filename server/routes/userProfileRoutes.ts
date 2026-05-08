@@ -4,7 +4,7 @@ import { z } from 'zod';
 import jwt from 'jsonwebtoken';
 
 // Use the same JWT_SECRET pattern as routes.ts for consistency
-const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
+const JWT_SECRET = process.env.JWT_SECRET!;
 
 interface AuthenticatedRequest extends Request {
   user?: {
