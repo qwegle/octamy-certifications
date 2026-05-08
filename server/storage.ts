@@ -3237,7 +3237,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteQuestionBank(id: number): Promise<void> {
-    await db.delete(questionBanks).where(eq(questionBanks.id, id));
+    await db.transaction(async (tx) => {
+      // Detach questions before deleting topics/bank to avoid FK deadlocks/failures.
+      await tx
+        .update(questions)
+        .set({ bankId: null, topicId: null, updatedAt: new Date() })
+        .where(eq(questions.bankId, id));
+
+      await tx.delete(questionTopics).where(eq(questionTopics.bankId, id));
+      await tx.delete(questionBanks).where(eq(questionBanks.id, id));
+    });
   }
 
   async createQuestionTopic(data: InsertQuestionTopic): Promise<QuestionTopic> {
@@ -3255,7 +3264,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteQuestionTopic(id: number): Promise<void> {
-    await db.delete(questionTopics).where(eq(questionTopics.id, id));
+    await db.transaction(async (tx) => {
+      await tx
+        .update(questions)
+        .set({ topicId: null, updatedAt: new Date() })
+        .where(eq(questions.topicId, id));
+      await tx.delete(questionTopics).where(eq(questionTopics.id, id));
+    });
   }
 
   async createQuestionInBank(data: any): Promise<Question> {
