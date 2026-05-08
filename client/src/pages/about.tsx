@@ -34,7 +34,7 @@ export default function About() {
               <Link href="/courses">
                 <Button className="bg-sky-700 hover:bg-sky-800 text-white">Browse assessments</Button>
               </Link>
-              <Link href="/seller-auth">
+              <Link href="/partners/login">
                 <Button variant="outline" className="border-slate-300">Become a partner</Button>
               </Link>
             </div>

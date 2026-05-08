@@ -75,7 +75,7 @@ export default function Landing() {
                   Become Partner
                 </Button>
               </Link>
-              <Link href="/auth">
+              <Link href="/login">
                 <Button className="bg-white text-black hover:bg-gray-100">
                   Login
                 </Button>

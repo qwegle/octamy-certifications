@@ -371,13 +371,13 @@ function GuestLoginEncouragement() {
           </div>
         </div>
         <div className="flex gap-2 shrink-0">
-          <Link href="/auth?mode=signup">
+          <Link href="/register">
             <Button size="sm" className="bg-slate-900 hover:bg-black text-white">
               <UserPlus className="h-4 w-4 mr-1.5" />
               Create account
             </Button>
           </Link>
-          <Link href="/auth">
+          <Link href="/login">
             <Button size="sm" variant="outline">
               Sign in
             </Button>

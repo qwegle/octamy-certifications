@@ -14,6 +14,14 @@ import Dashboard from "@/pages/dashboard";
 import Admin from "@/pages/admin";
 import Verification from "@/pages/verification";
 import Auth from "@/pages/auth";
+import Login from "@/pages/login";
+import Register from "@/pages/register";
+import ForgotPassword from "@/pages/forgot-password";
+import ResetPassword from "@/pages/reset-password";
+import CreatorLanding from "@/pages/creator-landing";
+import InstituteLanding from "@/pages/institute-landing";
+import RecruiterLanding from "@/pages/recruiter-landing";
+import Pricing from "@/pages/pricing";
 import NotFound from "@/pages/not-found";
 import CourseDetail from "@/pages/course-detail";
 import HelpCenter from "@/pages/help-center";
@@ -75,9 +83,29 @@ function Router() {
     <Switch>
       <Route path="/" component={Landing} />
       <Route path="/auth" component={Auth} />
-      <Route path="/login" component={Auth} />
-      <Route path="/register" component={Auth} />
+      <Route path="/login" component={Login} />
+      <Route path="/register" component={Register} />
+      <Route path="/forgot-password" component={ForgotPassword} />
+      <Route path="/reset-password/:token" component={ResetPassword} />
       <Route path="/logout" component={Auth} />
+
+      {/* Role-prefixed canonical auth — all unified Login / Register */}
+      <Route path="/partners/login" component={Login} />
+      <Route path="/partners/register" component={Register} />
+      <Route path="/recruiter/login" component={Login} />
+      <Route path="/recruiter/register" component={Register} />
+      <Route path="/creator/login" component={Login} />
+      <Route path="/creator/register" component={Register} />
+      <Route path="/institute/login" component={Login} />
+      <Route path="/institute/register" component={Register} />
+
+      {/* Marketing landings */}
+      <Route path="/creator" component={CreatorLanding} />
+      <Route path="/institute" component={InstituteLanding} />
+      <Route path="/for-recruiters" component={RecruiterLanding} />
+
+      {/* Pricing */}
+      <Route path="/pricing" component={Pricing} />
       <Route path="/exams" component={Courses} />
       <Route path="/courses" component={Courses} />
       <Route path="/skill-verification" component={Courses} />

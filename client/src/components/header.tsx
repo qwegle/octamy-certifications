@@ -196,7 +196,7 @@ export default function Header() {
           <div className="flex items-center gap-5 text-slate-300">
             <Link href="/verify" className="hover:text-white">Verify credential</Link>
             <span className="opacity-40">•</span>
-            <Link href="/recruiter/auth" className="hover:text-white">For recruiters</Link>
+            <Link href="/recruiter/login" className="hover:text-white">For recruiters</Link>
             <span className="opacity-40">•</span>
             <Link href="/partners" className="hover:text-white">Become a seller</Link>
           </div>
@@ -237,10 +237,10 @@ export default function Header() {
 
               {!isLoading && !isAuthenticated ? (
                 <div className="hidden md:flex items-center gap-2">
-                  <Link href="/auth">
+                  <Link href="/login">
                     <Button variant="ghost" className="text-slate-700 hover:text-slate-900 hover:bg-slate-100">Sign in</Button>
                   </Link>
-                  <Link href="/auth?mode=signup">
+                  <Link href="/register">
                     <Button className="bg-slate-900 hover:bg-black text-white rounded-full px-5">Get started</Button>
                   </Link>
                 </div>
@@ -319,10 +319,10 @@ export default function Header() {
               <div className="pt-4 mt-2 border-t border-slate-200 space-y-2">
                 {!isAuthenticated ? (
                   <>
-                    <Link href="/auth">
+                    <Link href="/login">
                       <Button variant="outline" className="w-full">Sign in</Button>
                     </Link>
-                    <Link href="/auth?mode=signup">
+                    <Link href="/register">
                       <Button className="w-full bg-slate-900 hover:bg-black text-white">Get started</Button>
                     </Link>
                   </>

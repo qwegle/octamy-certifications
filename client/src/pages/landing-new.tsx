@@ -740,7 +740,7 @@ export default function Landing() {
                 Verify candidate skills in seconds. Check certificates by ID and
                 shortlist with confidence.
               </p>
-              <Link href="/recruiter/auth">
+              <Link href="/recruiter/login">
                 <Button
                   variant="outline"
                   className="mt-6 border-white/30 bg-transparent text-white hover:bg-white hover:text-slate-900 rounded-full"

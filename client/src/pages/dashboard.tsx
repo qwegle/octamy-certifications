@@ -111,7 +111,7 @@ export default function Dashboard() {
               <p className="text-octamy-gray-600 mb-6">
                 Please log in to view your certificate dashboard.
               </p>
-              <Link href="/auth">
+              <Link href="/login">
                 <Button className="bg-octamy-black text-white hover:bg-octamy-gray-800">
                   Login
                 </Button>

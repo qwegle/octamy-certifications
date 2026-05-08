@@ -198,6 +198,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Register Google OAuth routes
   app.use('/api', googleAuthRoutes);
 
+  // SEO: 301 redirects from deprecated auth URLs to canonical SEO-clean routes.
+  // Must be registered before the SPA fallback so fresh page loads land on the new URL.
+  app.get('/auth', (_req, res) => res.redirect(301, '/login'));
+  app.get('/seller-auth', (_req, res) => res.redirect(301, '/partners/login'));
+  app.get('/recruiter/auth', (_req, res) => res.redirect(301, '/recruiter/login'));
+
   // 410 Gone for the removed AI Interview feature. Any inline endpoint mounted
   // later in this file is intercepted here so the feature is fully unreachable
   // without having to surgically delete ~500 lines of legacy code below.
@@ -996,6 +1002,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         { path: "/business-certifications", priority: "0.8" },
         { path: "/learning-paths", priority: "0.7" },
         { path: "/partners", priority: "0.8" },
+        { path: "/creator", priority: "0.8" },
+        { path: "/institute", priority: "0.8" },
+        { path: "/for-recruiters", priority: "0.8" },
+        { path: "/pricing", priority: "0.8" },
+        { path: "/login", priority: "0.5" },
+        { path: "/register", priority: "0.6" },
+        { path: "/forgot-password", priority: "0.2" },
         { path: "/sponsor", priority: "0.6" },
         { path: "/about", priority: "0.7" },
         { path: "/contact", priority: "0.6" },
