@@ -26,6 +26,11 @@ import {
   Handshake,
   Play,
   ChevronLeft,
+  Medal,
+  Trophy,
+  Crown,
+  Shield,
+  Sparkles,
 } from "lucide-react";
 import CourseCard from "@/components/course-card";
 import { useAuth } from "@/hooks/useAuth";
@@ -37,6 +42,13 @@ import bg1 from "@/assets/octamy-bg-3.png";
 import bg3 from "@/assets/octamy-bg-4.png";
 import bg4 from "@/assets/octamy-bg-5.png";
 import { SEO } from "@/components/seo";
+
+const PREMIUM_CATEGORY_SLUGS: string[] = (
+  import.meta.env.VITE_PREMIUM_CATEGORY_SLUGS || ""
+)
+  .split(",")
+  .map((s: string) => s.trim().toLowerCase())
+  .filter(Boolean);
 // Certificate Slider Component with infinite auto-scroll
 function CertificateSlider() {
   const { data: certificates = [] } = useQuery<any[]>({
@@ -312,6 +324,42 @@ const BannerSlider = () => {
   );
 };
 
+function BadgeTier({
+  tier,
+  range,
+  label,
+  icon,
+  accent,
+}: {
+  tier: string;
+  range: string;
+  label: string;
+  icon: React.ReactNode;
+  accent: string;
+}) {
+  return (
+    <div className="group rounded-xl border border-slate-200 bg-white p-6 text-center transition-shadow hover:shadow-md">
+      <div
+        className={
+          "mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full ring-1 " +
+          accent
+        }
+      >
+        {icon}
+      </div>
+      <h3 className="text-base font-semibold text-slate-900 tracking-wide">
+        {tier}
+      </h3>
+      <p className="mt-1 text-2xl font-bold text-slate-900 tabular-nums">
+        {range}
+      </p>
+      <p className="mt-2 text-xs uppercase tracking-wider text-slate-500">
+        {label}
+      </p>
+    </div>
+  );
+}
+
 export default function Landing() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
@@ -446,48 +494,76 @@ export default function Landing() {
           </div>
 
           {/* Categories */}
-          <div className="flex flex-wrap justify-center gap-4 mb-12">
+          <div className="flex flex-wrap justify-center gap-3 mb-12">
             <Button
               variant={selectedCategory === null ? "default" : "outline"}
               onClick={() => setSelectedCategory(null)}
               className={
                 selectedCategory === null
-                  ? "bg-black text-white"
-                  : "border-black text-black hover:bg-black hover:text-white"
+                  ? "bg-black text-white rounded-full"
+                  : "border-slate-300 text-slate-800 hover:bg-slate-900 hover:text-white rounded-full"
               }
             >
               All Categories
             </Button>
-            {categories.map((category) => (
-              <Button
-                key={category.id}
-                variant={
-                  selectedCategory === category.id ? "default" : "outline"
-                }
-                onClick={() => setSelectedCategory(category.id)}
-                className={
-                  selectedCategory === category.id
-                    ? "bg-black text-white"
-                    : "border-black text-black hover:bg-black hover:text-white"
-                }
-              >
-                {category.name}
-              </Button>
-            ))}
+            {categories.slice(0, 8).map((category) => {
+              const isPremium = PREMIUM_CATEGORY_SLUGS.includes(category.slug || "");
+              const isActive = selectedCategory === category.id;
+              return (
+                <Button
+                  key={category.id}
+                  variant={isActive ? "default" : "outline"}
+                  onClick={() => setSelectedCategory(category.id)}
+                  className={
+                    "rounded-full " +
+                    (isActive
+                      ? "bg-black text-white"
+                      : "border-slate-300 text-slate-800 hover:bg-slate-900 hover:text-white")
+                  }
+                >
+                  {isPremium && <Sparkles className="w-3.5 h-3.5 mr-1.5 text-amber-500" />}
+                  {category.name}
+                </Button>
+              );
+            })}
+            {categories.length > 8 && (
+              <Link href="/exams">
+                <Button variant="ghost" className="rounded-full text-slate-600 hover:text-black">
+                  +{categories.length - 8} more →
+                </Button>
+              </Link>
+            )}
           </div>
 
-          {/* Courses Grid */}
+          {/* Courses Grid — capped at 12 */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredCourses.map((course) => (
+            {filteredCourses.slice(0, 12).map((course) => (
               <CourseCard key={course.id} course={course} />
             ))}
           </div>
 
-          {filteredCourses.length === 0 && (
+          {filteredCourses.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-gray-600 text-lg">
-                No courses found matching your criteria.
+                No exams found matching your criteria.
               </p>
+            </div>
+          ) : (
+            <div className="mt-12 flex flex-col items-center gap-3">
+              <p className="text-sm text-slate-500">
+                Showing {Math.min(12, filteredCourses.length)} of{" "}
+                {filteredCourses.length}
+                {filteredCourses.length === 1 ? " exam" : " exams"}
+              </p>
+              <Link href="/exams">
+                <Button
+                  size="lg"
+                  className="bg-slate-900 text-white hover:bg-black rounded-full px-8"
+                >
+                  Browse all {filteredCourses.length} exams
+                  <ArrowRight className="ml-2 w-4 h-4" />
+                </Button>
+              </Link>
             </div>
           )}
         </div>
@@ -556,46 +632,60 @@ export default function Landing() {
           </Link>
         </div>
       </section>
-      {/* Badge System Section */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-6 text-center">
-          <h2 className="text-4xl font-bold text-black mb-6">
-            Performance-Based Badges
-          </h2>
-          <p className="text-xl text-gray-600 mb-12 max-w-2xl mx-auto">
-            Earn badges based on your exam performance. Show your expertise
-            level to employers.
-          </p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <div className="text-center">
-              <div className="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-3xl">🥉</span>
-              </div>
-              <h3 className="font-bold text-lg mb-2">Bronze</h3>
-              <p className="text-sm text-gray-600">50-70% Score</p>
-            </div>
-            <div className="text-center">
-              <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-3xl">🥈</span>
-              </div>
-              <h3 className="font-bold text-lg mb-2">Silver</h3>
-              <p className="text-sm text-gray-600">70-80% Score</p>
-            </div>
-            <div className="text-center">
-              <div className="w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-3xl">🥇</span>
-              </div>
-              <h3 className="font-bold text-lg mb-2">Gold</h3>
-              <p className="text-sm text-gray-600">80-90% Score</p>
-            </div>
-            <div className="text-center">
-              <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-3xl">💎</span>
-              </div>
-              <h3 className="font-bold text-lg mb-2">Platinum</h3>
-              <p className="text-sm text-gray-600">90-100% Score</p>
-            </div>
+      {/* Badge System Section — premium minimalist */}
+      <section className="py-20 bg-white border-t border-slate-200">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="text-center max-w-2xl mx-auto mb-14">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-700">
+              Recognition
+            </p>
+            <h2 className="mt-3 text-3xl sm:text-4xl font-bold text-slate-900">
+              Performance-based credentials
+            </h2>
+            <p className="mt-4 text-slate-600 leading-relaxed">
+              Every certificate carries a recognition tier based on your assessment
+              score — a transparent signal of competence for employers and recruiters.
+            </p>
           </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+            <BadgeTier
+              tier="Bronze"
+              range="50–69%"
+              label="Verified Pass"
+              icon={<Medal className="w-7 h-7" />}
+              accent="text-amber-700 bg-amber-50 ring-amber-200"
+            />
+            <BadgeTier
+              tier="Silver"
+              range="70–79%"
+              label="Strong Pass"
+              icon={<Award className="w-7 h-7" />}
+              accent="text-slate-700 bg-slate-100 ring-slate-300"
+            />
+            <BadgeTier
+              tier="Gold"
+              range="80–89%"
+              label="Distinction"
+              icon={<Trophy className="w-7 h-7" />}
+              accent="text-yellow-700 bg-yellow-50 ring-yellow-200"
+            />
+            <BadgeTier
+              tier="Platinum"
+              range="90–100%"
+              label="Top 10% globally"
+              icon={<Crown className="w-7 h-7" />}
+              accent="text-sky-800 bg-sky-50 ring-sky-200"
+            />
+          </div>
+
+          <p className="mt-10 text-center text-xs text-slate-500">
+            Tier is recorded on the certificate and verifiable at{" "}
+            <Link href="/verify" className="text-sky-700 hover:underline">
+              octamy.com/verify
+            </Link>
+            .
+          </p>
         </div>
       </section>
       {/* Footer */}

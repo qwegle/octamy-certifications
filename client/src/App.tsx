@@ -18,6 +18,7 @@ import NotFound from "@/pages/not-found";
 import CourseDetail from "@/pages/course-detail";
 import HelpCenter from "@/pages/help-center";
 import About from "@/pages/about";
+import CategoryPage from "@/pages/category";
 import PrivacyPolicy from "@/pages/privacy-policy";
 import TermsOfService from "@/pages/terms-of-service";
 import TrustPage from "@/pages/legal/trust";
@@ -106,6 +107,7 @@ function Router() {
       <Route path="/courses/:slug" component={CourseDetail} />
       <Route path="/help-center" component={HelpCenter} />
       <Route path="/about" component={About} />
+      <Route path="/category/:slug" component={CategoryPage} />
       <Route path="/privacy-policy" component={PrivacyPolicy} />
       <Route path="/terms-of-service" component={TermsOfService} />
       <Route path="/trust" component={TrustPage} />

@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -42,6 +42,7 @@ export default function CoursesPage() {
   const [sortBy, setSortBy] = useState("popularity");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [showFilters, setShowFilters] = useState(false);
+  const [visible, setVisible] = useState(12);
 
   const { data: categories = [] } = useQuery<Category[]>({
     queryKey: ['/api/categories'],
@@ -102,6 +103,11 @@ export default function CoursesPage() {
 
     return filtered;
   }, [courses, searchQuery, selectedCategory, selectedDifficulty, selectedPriceRange, sortBy]);
+
+  // Reset pagination when filters change
+  useEffect(() => {
+    setVisible(12);
+  }, [searchQuery, selectedCategory, selectedDifficulty, selectedPriceRange, sortBy]);
 
   const clearFilters = () => {
     setSearchQuery("");
@@ -308,29 +314,43 @@ export default function CoursesPage() {
             </div>
           ) : filteredAndSortedCourses.length === 0 ? (
             <div className="text-center py-16">
-              <div className="text-6xl mb-4">📚</div>
-              <h3 className="text-2xl font-bold mb-2">No courses found</h3>
+              <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                <Search className="h-7 w-7" />
+              </div>
+              <h3 className="text-2xl font-bold mb-2">No exams found</h3>
               <p className="text-gray-600 mb-6">
-                Try adjusting your filters or search terms to find more courses.
+                Try adjusting your filters or search terms to find more exams.
               </p>
               <Button onClick={clearFilters} variant="outline">
                 Clear Filters
               </Button>
             </div>
           ) : (
-            <div className={`grid gap-8 ${
-              viewMode === "grid" 
-                ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" 
-                : "grid-cols-1"
-            }`}>
-              {filteredAndSortedCourses.map((course) => (
-                <CourseCard
-                  key={course.id}
-                  course={course}
-                  viewMode={viewMode}
-                />
-              ))}
-            </div>
+            <>
+              <div className={`grid gap-8 ${
+                viewMode === "grid" 
+                  ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" 
+                  : "grid-cols-1"
+              }`}>
+                {filteredAndSortedCourses.slice(0, visible).map((course) => (
+                  <CourseCard
+                    key={course.id}
+                    course={course}
+                    viewMode={viewMode}
+                  />
+                ))}
+              </div>
+              {visible < filteredAndSortedCourses.length && (
+                <div className="mt-10 text-center">
+                  <Button
+                    onClick={() => setVisible((v) => v + 12)}
+                    className="bg-slate-900 hover:bg-black text-white rounded-full px-8"
+                  >
+                    Load more ({filteredAndSortedCourses.length - visible} remaining)
+                  </Button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </section>

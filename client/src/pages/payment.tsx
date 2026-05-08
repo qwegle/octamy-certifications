@@ -8,7 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import Header from '@/components/header';
 import PayUMoneyForm from '@/components/payumoney-form';
-import { QrCode, Download, Share2, Trophy, Calendar, Award, Truck, MapPin } from 'lucide-react';
+import { QrCode, Download, Share2, Trophy, Calendar, Award, Truck, MapPin, UserPlus, ShieldCheck } from 'lucide-react';
+import { Link } from 'wouter';
+import { useAuth } from '@/hooks/useAuth';
 import type { Certificate } from '@shared/schema';
 import { useState, useEffect } from 'react';
 import { apiRequest } from '@/lib/queryClient';
@@ -84,6 +86,7 @@ export default function Payment() {
   return (
     <div className="min-h-screen bg-white">
       <Header />
+      <GuestLoginEncouragement />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {!certificate.isPaid ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -343,6 +346,43 @@ export default function Payment() {
             </CardContent>
           </Card>
         )}
+      </div>
+    </div>
+  );
+}
+function GuestLoginEncouragement() {
+  const { isAuthenticated, isLoading } = useAuth();
+  if (isLoading || isAuthenticated) return null;
+  return (
+    <div className="bg-gradient-to-r from-sky-50 via-white to-amber-50 border-b border-slate-200">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-6">
+        <div className="flex items-start gap-3 flex-1">
+          <span className="mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-full bg-sky-100 text-sky-700 ring-1 ring-sky-200">
+            <ShieldCheck className="h-4 w-4" />
+          </span>
+          <div className="text-sm">
+            <p className="font-semibold text-slate-900">
+              Save this certificate to your free Octamy account
+            </p>
+            <p className="text-slate-600">
+              Track verification, re-download anytime, and showcase your badge to recruiters.
+              Guest checkout is fine — but signing up takes 30 seconds.
+            </p>
+          </div>
+        </div>
+        <div className="flex gap-2 shrink-0">
+          <Link href="/auth?mode=signup">
+            <Button size="sm" className="bg-slate-900 hover:bg-black text-white">
+              <UserPlus className="h-4 w-4 mr-1.5" />
+              Create account
+            </Button>
+          </Link>
+          <Link href="/auth">
+            <Button size="sm" variant="outline">
+              Sign in
+            </Button>
+          </Link>
+        </div>
       </div>
     </div>
   );
