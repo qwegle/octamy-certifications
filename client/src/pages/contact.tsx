@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "wouter";
+import Header from "@/components/header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -60,27 +61,7 @@ export default function Contact() {
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation */}
-      <nav className="bg-black text-white px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center space-x-8">
-            <Link href="/" className="text-2xl font-bold">OCTAMY</Link>
-            <div className="hidden md:flex space-x-6">
-              <Link href="/exams" className="hover:text-gray-300">Exams</Link>
-              <Link href="/virtual-internships" className="hover:text-gray-300">Internships</Link>
-              <Link href="/business-certifications" className="hover:text-gray-300">Business Pricing</Link>
-              <Link href="/partners" className="hover:text-gray-300">Partners</Link>
-              <Link href="/help-center" className="hover:text-gray-300">Help</Link>
-            </div>
-          </div>
-          <div className="flex items-center space-x-4">
-            <Link href="/auth">
-              <Button variant="outline" className=" border-white transition duration-500 hover:bg-white hover:scale-105 text-black">
-                Login
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <Header />
 
       <div className="max-w-7xl mx-auto px-6 py-12">
         {/* Back Button */}

@@ -1,5 +1,6 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
+import Header from "@/components/header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Award, Calendar, Shield, Download, Share2, Building } from "lucide-react";
@@ -8,52 +9,7 @@ export default function DemoBusinessCertificate() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Navigation */}
-      <nav className="bg-black text-white px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center space-x-8">
-            <Link href="/" className="text-2xl font-bold">OCTAMY</Link>
-            <div className="hidden md:flex space-x-6">
-              <Link href="/" className="hover:text-gray-300">Courses</Link>
-              <Link href="/partners" className="hover:text-gray-300">Partners</Link>
-              <Link href="/help-center" className="hover:text-gray-300">Help</Link>
-            </div>
-          </div>
-          <div className="flex items-center space-x-4">
-            <Link href="/auth">
-              <Button variant="outline" className="border-white text-white hover:bg-white hover:text-black">
-                Login
-              </Button>
-            </Link>
-            <div className="relative group">
-              <Button className="bg-white text-black hover:bg-gray-200">
-                View Demo Certificates ↓
-              </Button>
-              <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                <div className="p-2">
-                  <Link href="/demo-certificate">
-                    <div className="p-3 hover:bg-gray-50 rounded-lg cursor-pointer">
-                      <div className="font-medium text-black">Professional Certificate</div>
-                      <div className="text-sm text-gray-600">Standard course completion certificate</div>
-                    </div>
-                  </Link>
-                  <Link href="/demo-business-certificate">
-                    <div className="p-3 hover:bg-gray-50 rounded-lg cursor-pointer bg-gray-50">
-                      <div className="font-medium text-black">Business Certificate</div>
-                      <div className="text-sm text-gray-600">Company-branded team certificate</div>
-                    </div>
-                  </Link>
-                  <Link href="/demo-internship-certificate">
-                    <div className="p-3 hover:bg-gray-50 rounded-lg cursor-pointer">
-                      <div className="font-medium text-black">Internship Certificate</div>
-                      <div className="text-sm text-gray-600">Virtual internship completion</div>
-                    </div>
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <Header />
 
       <div className="max-w-6xl mx-auto px-6 py-12">
         <div className="mb-8">

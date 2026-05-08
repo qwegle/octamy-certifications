@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "wouter";
+import Header from "@/components/header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -40,41 +41,7 @@ export default function Verify() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Navigation */}
-      <nav className="bg-black text-white px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center space-x-8">
-            <Link href="/" className="text-2xl font-bold">
-              {" "}
-              <img
-                src={octamyLogoLight}
-                alt="Octamy"
-                className="h-8 dark:block"
-              />
-            </Link>
-            <div className="hidden md:flex space-x-6">
-              <Link href="/exams" className="hover:text-gray-300">
-                Exams
-              </Link>
-              <Link href="/partners" className="hover:text-gray-300">
-                Partners
-              </Link>
-              <Link href="/help-center" className="hover:text-gray-300">
-                Help
-              </Link>
-            </div>
-          </div>
-          <div className="flex items-center space-x-4">
-            <Link href="/auth">
-              <Button
-                variant="outline"
-                className="border-white text-white hover:bg-white hover:text-black"
-              >
-                Login
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <Header />
 
       <div className="max-w-4xl mx-auto px-6 py-12">
         <div className="mb-8">
