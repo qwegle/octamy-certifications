@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { storage } from '../storage';
+import { loadQuestionMapping, deleteQuestionMapping } from '../utils/examState';
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -15,8 +16,8 @@ export class ExamController {
       const userId = req.user?.userId; // Optional for anonymous users
       const finalTimeTaken = timeTaken || timeSpent || 60;
 
-      // Get correct answers from session mapping
-      const correctAnswersMapping = (global as any).questionMappings?.[sessionId] || {};
+      // Get correct answers from persisted session mapping
+      const correctAnswersMapping = (await loadQuestionMapping(sessionId)) || {};
       
       // Transform answers array to Record<string, number> format
       const answersRecord: Record<string, number> = {};
@@ -41,10 +42,8 @@ export class ExamController {
         }
       }
       
-      // Clean up session data
-      if ((global as any).questionMappings?.[sessionId]) {
-        delete (global as any).questionMappings[sessionId];
-      }
+      // Clean up persisted session mapping
+      await deleteQuestionMapping(sessionId).catch(() => {});
       
       const score = Math.round((correctAnswers / totalQuestions) * 100);
       const passed = score >= 50;

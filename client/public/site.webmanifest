@@ -1,0 +1,16 @@
+{
+  "name": "Octamy",
+  "short_name": "Octamy",
+  "description": "Skill Verification & Certification Platform",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0369A1",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any"
+    }
+  ]
+}

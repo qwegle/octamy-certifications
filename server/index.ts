@@ -1,13 +1,17 @@
+import "./bootstrap-env";
 import express, { type Request, Response, NextFunction } from "express";
+import rateLimit from "express-rate-limit";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
-import dotenv from "dotenv";
 import path from "path";
 import { generateCertificateHTML } from "./utils/newCertificateGenerator";
 import { fileURLToPath } from "url";
 
-dotenv.config()
 const app = express();
+
+// Behind nginx + Cloudflare; trust 1 hop so req.ip / X-Forwarded-* work.
+app.set("trust proxy", 1);
+app.disable("x-powered-by");
 
 // Enhanced security headers for SSL/HTTPS protection
 app.use((req, res, next) => {
@@ -22,13 +26,37 @@ app.use((req, res, next) => {
   res.setHeader('X-Frame-Options', 'SAMEORIGIN');
   res.setHeader('X-XSS-Protection', '1; mode=block');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-  res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' https://secure.payu.in https://test.payu.in; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://secure.payu.in https://test.payu.in;");
-  
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=(self "https://secure.payu.in")');
+  res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' https://secure.payu.in https://test.payu.in https://accounts.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; frame-src 'self' https://secure.payu.in https://test.payu.in https://accounts.google.com; connect-src 'self' https://secure.payu.in https://test.payu.in https://accounts.google.com;");
+
   next();
 });
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+// Body parsers — capped to mitigate DoS; raise on specific upload routes if needed.
+app.use(express.json({ limit: "1mb" }));
+app.use(express.urlencoded({ extended: false, limit: "1mb" }));
+
+// Rate limiters: applied to the most abusable endpoints.
+// Keyed on IP (works because trust proxy is set above).
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: "Too many attempts, please try again later." },
+});
+const writeLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: "Slow down — too many requests." },
+});
+app.use(["/api/login", "/api/auth/login", "/api/register", "/api/auth/register",
+         "/api/admin/login", "/api/sellers/login", "/api/sellers/register",
+         "/api/recruiter/login", "/api/recruiter/register"], authLimiter);
+app.use(["/api/contact", "/api/contact-submission", "/api/sponsors",
+         "/api/seller/withdrawal-requests", "/api/referral/track-click"], writeLimiter);
 // const __filename = fileURLToPath(import.meta.url);
 // const __dirname = path.dirname(__filename);
 // app.use(express.static(path.join(__dirname, 'public')));
@@ -67,12 +95,20 @@ app.use((req, res, next) => {
 (async () => {
   const server = await registerRoutes(app);
 
+  // JSON 404 for unknown /api/* routes — must come before SPA catch-all.
+  app.use("/api", (_req: Request, res: Response) => {
+    res.status(404).json({ message: "API route not found" });
+  });
+
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
-
-    res.status(status).json({ message });
-    throw err;
+    if (!res.headersSent) {
+      res.status(status).json({ message });
+    }
+    // Log but DO NOT re-throw — re-throwing crashes the worker via uncaughtException.
+    // eslint-disable-next-line no-console
+    console.error("[unhandled-route-error]", err);
   });
 
   // importantly only setup vite in development and after

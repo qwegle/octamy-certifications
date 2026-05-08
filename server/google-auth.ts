@@ -41,10 +41,14 @@ export function setupGoogleAuth() {
         
         user = await storage.createUser(userData);
       } else if (!user.googleId) {
-        // Link existing account with Google
-        await storage.updateUser(user.id, { googleId: profile.id, isGoogleUser: true });
-        user.googleId = profile.id;
-        user.isGoogleUser = true;
+        // SECURITY: do NOT auto-link Google to a password account by email match.
+        // The owner of the password account may not control this Google identity.
+        // Force them to log in with email/password and link from settings.
+        const err: any = new Error(
+          "An account with this email already exists. Sign in with your password and link Google from your profile settings."
+        );
+        err.code = "GOOGLE_LINK_REQUIRED";
+        return done(err, null);
       }
 
       return done(null, user);
@@ -90,10 +94,12 @@ export function setupGoogleAuth() {
         
         seller = await storage.createSeller(sellerData);
       } else if (!seller.googleId) {
-        // Link existing account with Google
-        await storage.updateSeller(seller.id, { googleId: profile.id, isGoogleUser: true });
-        seller.googleId = profile.id;
-        seller.isGoogleUser = true;
+        // SECURITY: do NOT auto-link Google to a password seller account by email.
+        const err: any = new Error(
+          "A seller account with this email already exists. Sign in with your password and link Google from your dashboard."
+        );
+        err.code = "GOOGLE_LINK_REQUIRED";
+        return done(err, null);
       }
 
       return done(null, seller);

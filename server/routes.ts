@@ -42,6 +42,15 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { Readable } from "stream";
 import { evaluateAnswersWithAI } from "./utils/openai.js";
+import {
+  saveQuestionMapping,
+  loadQuestionMapping,
+  deleteQuestionMapping,
+  savePendingExam,
+  loadPendingExam,
+  deletePendingExam,
+  startExamStateCron,
+} from "./utils/examState";
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -188,6 +197,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Register Google OAuth routes
   app.use('/api', googleAuthRoutes);
+
+  // 410 Gone for the removed AI Interview feature. Any inline endpoint mounted
+  // later in this file is intercepted here so the feature is fully unreachable
+  // without having to surgically delete ~500 lines of legacy code below.
+  app.all(["/api/interview-technologies",
+           "/api/interviews",
+           "/api/interviews/*",
+           "/api/interview-responses/*",
+           "/api/admin/interview-questions",
+           "/api/admin/interview-questions/*",
+           "/api/user/interviews"], (_req, res) => {
+    res.status(410).json({
+      message: "The AI Interview feature has been retired. Please use Skill Verification assessments instead.",
+      code: "FEATURE_REMOVED",
+    });
+  });
+
+  // Background cleanup of expired exam_sessions / pending_exams rows
+  startExamStateCron();
   
   // Initialize database if in development
   if (process.env.NODE_ENV === "development") {
@@ -884,6 +912,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
     console.error("Failed to load user profile routes:", error);
   }
 
+  // Public XML sitemap (SEO). Generated from DB on every request — small enough.
+  app.get("/sitemap.xml", async (_req, res) => {
+    try {
+      const base = process.env.APP_URL || "https://octamy.com";
+      const today = new Date().toISOString().slice(0, 10);
+      const staticUrls = [
+        "", "/exams", "/courses", "/skill-verification",
+        "/virtual-internships", "/business-certifications", "/learning-paths",
+        "/sponsor", "/seller-auth", "/auth", "/recruiter/auth",
+        "/help-center", "/about", "/contact",
+        "/privacy-policy", "/terms-of-service", "/refund-policy",
+        "/cookie-policy", "/acceptable-use", "/disclaimer",
+        "/reseller-agreement", "/accessibility", "/trust",
+      ];
+      const allCourses = await storage.getCourses().catch(() => []);
+      const allCategories = await storage.getCategories().catch(() => []);
+
+      const urls: Array<{ loc: string; priority: string; freq: string }> = [];
+      for (const u of staticUrls) {
+        urls.push({ loc: `${base}${u}`, priority: u === "" ? "1.0" : "0.7", freq: "weekly" });
+      }
+      for (const c of allCourses as any[]) {
+        if (!c?.slug) continue;
+        urls.push({ loc: `${base}/courses/${c.slug}`, priority: "0.8", freq: "weekly" });
+      }
+      for (const cat of allCategories as any[]) {
+        if (!cat?.slug && !cat?.id) continue;
+        urls.push({ loc: `${base}/category/${cat.slug || cat.id}`, priority: "0.6", freq: "weekly" });
+      }
+
+      const xml =
+        `<?xml version="1.0" encoding="UTF-8"?>\n` +
+        `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
+        urls
+          .map(
+            (u) =>
+              `  <url><loc>${u.loc}</loc><lastmod>${today}</lastmod><changefreq>${u.freq}</changefreq><priority>${u.priority}</priority></url>`,
+          )
+          .join("\n") +
+        `\n</urlset>\n`;
+
+      res.set("Content-Type", "application/xml; charset=utf-8");
+      res.set("Cache-Control", "public, max-age=3600");
+      res.send(xml);
+    } catch (error) {
+      console.error("sitemap generation failed", error);
+      res.status(500).send("sitemap unavailable");
+    }
+  });
+
   // Categories and courses
   app.get("/api/categories", async (req, res) => {
     try {
@@ -991,15 +1069,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         };
       });
 
-      // Store the question mapping using provided session ID
+      // Persist the question mapping (replaces in-memory global.questionMappings)
       const finalSessionId =
         sessionId || `session_${Date.now()}_${Math.random()}`;
-      (global as any).questionMappings = (global as any).questionMappings || {};
-      (global as any).questionMappings[finalSessionId] =
-        questionsWithShuffledOptions.reduce((acc: any, q) => {
-          acc[q.id] = q.correctAnswer;
+      const correctMap = questionsWithShuffledOptions.reduce(
+        (acc: Record<string, number>, q) => {
+          acc[String(q.id)] = q.correctAnswer;
           return acc;
-        }, {});
+        },
+        {},
+      );
+      await saveQuestionMapping(finalSessionId, correctMap, parseInt(req.params.id));
 
       // Remove correct answers from response
       const questionsWithoutAnswers = questionsWithShuffledOptions.map((q) => ({
@@ -1038,20 +1118,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         } = req.body;
         const finalTimeTaken = timeTaken || timeSpent || 60; // Use timeTaken or timeSpent as fallback
 
-        // Get correct answers from session mapping
-        const correctAnswersMapping =
-          (global as any).questionMappings?.[sessionId] || {};
+        // Get correct answers from persisted session mapping
+        const correctAnswersMapping = (await loadQuestionMapping(sessionId)) || {};
 
-        console.log(`Exam submission for session ${sessionId}:`);
         console.log(
-          `- Available sessions: ${Object.keys(
-            (global as any).questionMappings || {}
-          ).join(", ")}`
-        );
-        console.log(
-          `- Questions in this session: ${
-            Object.keys(correctAnswersMapping).length
-          }`
+          `Exam submission for session ${sessionId} — questions in session: ${Object.keys(correctAnswersMapping).length}`,
         );
 
         // Safety check: Ensure we have questions to evaluate
@@ -1101,10 +1172,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             ? Math.round((correctAnswers / totalQuestions) * 100)
             : 0;
 
-        // Clean up session data AFTER score calculation
-        if ((global as any).questionMappings?.[sessionId]) {
-          delete (global as any).questionMappings[sessionId];
-        }
+        // Clean up persisted session mapping AFTER score calculation
+        await deleteQuestionMapping(sessionId).catch(() => {});
 
         // Get course data to check passing score
         const course = await storage.getCourse(courseId);
@@ -1147,14 +1216,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
         }
 
-        // CRITICAL: DO NOT SAVE TO DATABASE YET - Store in memory for payment processing
+        // Persist exam data until payment completion (replaces in-memory global.tempExamData).
         const tempExamId = `temp_${Date.now()}_${Math.random()
           .toString(36)
           .substr(2, 9)}`;
 
-        // Initialize temporary exam storage
-        (global as any).tempExamData = (global as any).tempExamData || {};
-        (global as any).tempExamData[tempExamId] = {
+        await savePendingExam(tempExamId, {
           userId: req.user?.userId || null,
           courseId,
           userEmail,
@@ -1171,9 +1238,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           tabSwitches: req.body.tabSwitches || 0,
           isRetake,
           previousBestScore,
-          course: course,
+          course,
           createdAt: new Date(),
-        };
+        });
 
         // Return comprehensive exam result with temporary ID for payment processing
         res.json({
@@ -1266,8 +1333,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             .json({ message: "Temporary exam ID is required" });
         }
 
-        // Try to get temporary exam data from memory, or reconstruct from tempExamId
-        let examData = (global as any).tempExamData?.[tempExamId];
+        // Try to get persisted exam data
+        let examData = await loadPendingExam<any>(tempExamId);
 
         if (!examData) {
           // Try to reconstruct from tempExamId pattern: temp_{timestamp}_{sessionId}
@@ -1428,10 +1495,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           );
         }
 
-        // Get temporary exam data from memory
-        const examData = (global as any).tempExamData?.[tempExamId];
+        // Get persisted exam data
+        const examData = await loadPendingExam<any>(tempExamId);
         if (!examData) {
-          console.error("Temporary exam data not found for ID:", tempExamId);
+          console.error("Pending exam data not found for ID:", tempExamId);
           return res.redirect(
             `${req.protocol}://${req.get(
               "host"
@@ -1492,8 +1559,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           razorpayOrderId: responseData.txnid,
         });
 
-        // 4. Clean up temporary exam data
-        delete (global as any).tempExamData[tempExamId];
+        // 4. Clean up persisted exam data
+        await deletePendingExam(tempExamId).catch(() => {});
 
         // 5. Handle seller commission if applicable
         if (sellerCode) {
@@ -1536,16 +1603,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 );
               }
 
-              // Update seller's total earnings
-              const currentEarnings = parseFloat(seller.totalEarnings || "0");
-              const newEarnings = currentEarnings + commissionAmount;
-              console.log(
-                `Updating seller earnings from ${currentEarnings} to ${newEarnings}`
-              );
-
-              await storage.updateSeller(seller.id, {
-                totalEarnings: newEarnings.toString(),
-              });
+              // Atomic increment to avoid read-modify-write race
+              await storage.incrementSellerEarnings(seller.id, commissionAmount);
             }
           } else {
             console.log(

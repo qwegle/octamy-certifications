@@ -411,6 +411,26 @@ export const referralClicks = pgTable("referral_clicks", {
   userId: integer("user_id").references(() => users.id), // set when user actually purchases
 });
 
+// Persistent exam state — replaces in-process global.questionMappings.
+// Maps a session id to the per-question correct-answer index after option shuffle.
+export const examSessions = pgTable("exam_sessions", {
+  id: text("id").primaryKey(),
+  courseId: integer("course_id"),
+  correctMap: jsonb("correct_map").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+});
+
+// Persistent payment-time exam handoff — replaces global.tempExamData.
+// Holds the calculated score + metadata until PayU redirects back, at which
+// point the row is consumed and an exam_attempt row is created.
+export const pendingExams = pgTable("pending_exams", {
+  id: text("id").primaryKey(),
+  payload: jsonb("payload").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+});
+
 // Leaderboard table for gamification
 export const leaderboard = pgTable("leaderboard", {
   id: serial("id").primaryKey(),

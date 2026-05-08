@@ -724,6 +724,19 @@ export class DatabaseStorage implements IStorage {
     return seller;
   }
 
+  // Atomic earnings increment — avoids read-modify-write race when multiple
+  // payments for the same seller commit concurrently.
+  async incrementSellerEarnings(id: number, delta: number): Promise<Seller> {
+    const [seller] = await db
+      .update(sellers)
+      .set({
+        totalEarnings: sql`coalesce(${sellers.totalEarnings}::numeric, 0) + ${delta}`,
+      })
+      .where(eq(sellers.id, id))
+      .returning();
+    return seller;
+  }
+
   // Sales operations
   async createSale(insertSale: InsertSale): Promise<Sale> {
     const [sale] = await db

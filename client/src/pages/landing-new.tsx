@@ -35,6 +35,7 @@ import bg1 from "@/assets/octamy-bg-3.png";
 import bg3 from "@/assets/octamy-bg-4.png";
 import bg4 from "@/assets/octamy-bg-5.png";
 import octamyLogoLight from "@/assets/image_1750054465427.png";
+import { SEO } from "@/components/seo";
 // Certificate Slider Component with infinite auto-scroll
 function CertificateSlider() {
   const { data: certificates = [] } = useQuery<any[]>({
@@ -336,6 +337,22 @@ export default function Landing() {
 
   return (
     <div className="min-h-screen bg-white">
+      <SEO
+        title="Octamy — Skill Verification & Certification Platform"
+        description="Take free skill-verification assessments in AI, Development, Cloud, Cybersecurity and more. Pay only for verified certificates. Industry-recognized credentials trusted by recruiters across India."
+        path="/"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "Octamy",
+          url: "https://octamy.com/",
+          potentialAction: {
+            "@type": "SearchAction",
+            target: "https://octamy.com/exams?q={search_term_string}",
+            "query-input": "required name=search_term_string",
+          },
+        }}
+      />
       {/* Navigation */}
       <nav className="bg-black text-white px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -541,153 +558,6 @@ export default function Landing() {
               </p>
             </div>
           )}
-        </div>
-      </section>
-
-      {/* AI-Powered Technical Assessment Section */}
-      <section className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-6 text-center">
-          <h2 className="text-4xl font-bold text-black mb-6">
-            AI-Powered Technical Interview
-          </h2>
-          <p className="text-xl text-gray-600 mb-12 max-w-3xl mx-auto">
-            Professional technical interviews with AI evaluation - 44+
-            technologies, instant scoring, recruiter-ready certificates
-          </p>
-
-          {/* How It Works - 4 Steps */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
-            <div className="text-center">
-              <div className="w-20 h-20 bg-black rounded-full flex items-center justify-center mx-auto mb-4">
-                <Monitor className="w-10 h-10 text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-black mb-3">
-                Choose Your Technology
-              </h3>
-              <p className="text-gray-600 text-sm">
-                Select from 44+ professional technologies: React, Python, Data
-                Science, Machine Learning, Java, JavaScript, and more
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="w-20 h-20 bg-black rounded-full flex items-center justify-center mx-auto mb-4">
-                <Video className="w-10 h-10 text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-black mb-3">
-                Professional Interview Session
-              </h3>
-              <p className="text-gray-600 text-sm">
-                Complete comprehensive video-recorded technical interviews with
-                live coding, system design, and behavioral assessment
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="w-20 h-20 bg-black rounded-full flex items-center justify-center mx-auto mb-4">
-                <Brain className="w-10 h-10 text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-black mb-3">
-                AI-Powered Performance Analysis
-              </h3>
-              <p className="text-gray-600 text-sm">
-                Receive instant AI scoring, detailed technical feedback,
-                competency analysis, and professional performance report
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="w-20 h-20 bg-black rounded-full flex items-center justify-center mx-auto mb-4">
-                <Handshake className="w-10 h-10 text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-black mb-3">
-                Get Hired by Top Recruiters
-              </h3>
-              <p className="text-gray-600 text-sm">
-                Share verified assessment certificates with employers and
-                demonstrate your technical competency to hiring managers
-              </p>
-            </div>
-          </div>
-
-          {/* Key Benefits - 3 Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-            <Card className="border-2 border-gray-200 hover:border-black transition-colors">
-              <CardHeader>
-                <CardTitle className="text-black">
-                  Industry-Standard Assessment Experience
-                </CardTitle>
-                <CardDescription className="text-gray-600">
-                  Professional video evaluation with integrity monitoring for
-                  authentic technical assessment
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <CheckCircle className="w-12 h-12 text-green-500 mb-4" />
-                <p className="text-sm text-gray-600">
-                  Real-time monitoring and professional evaluation standards
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="border-2 border-gray-200 hover:border-black transition-colors">
-              <CardHeader>
-                <CardTitle className="text-black">
-                  Advanced AI Evaluation Engine
-                </CardTitle>
-                <CardDescription className="text-gray-600">
-                  Machine learning algorithms analyze coding proficiency,
-                  problem-solving methodology, and communication skills
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Brain className="w-12 h-12 text-blue-500 mb-4" />
-                <p className="text-sm text-gray-600">
-                  Comprehensive AI analysis with detailed performance insights
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="border-2 border-gray-200 hover:border-black transition-colors">
-              <CardHeader>
-                <CardTitle className="text-black">
-                  Recruiter-Ready Certification
-                </CardTitle>
-                <CardDescription className="text-gray-600">
-                  Industry-recognized professional certificates at ₹99 per
-                  session - trusted by hiring managers and tech recruiters
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Award className="w-12 h-12 text-purple-500 mb-4" />
-                <p className="text-sm text-gray-600">
-                  Professional validation that employers trust and value
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Call to Action */}
-          <div className="text-center">
-            {!isLoading && !isAuthenticated ? (
-              <Link href="/auth">
-                <Button
-                  size="lg"
-                  className="bg-black text-white hover:bg-gray-800 px-8 py-4 text-lg"
-                  aria-label="Begin AI-powered technical interview assessment"
-                >
-                  Start Professional Interview{" "}
-                  <ArrowRight className="ml-2 w-5 h-5" />
-                </Button>
-              </Link>
-            ) : (
-              <Link href="/ai-interviews">
-                <Button
-                  size="lg"
-                  className="bg-black text-white hover:bg-gray-800 px-8 py-4 text-lg"
-                  aria-label="Begin AI-powered technical interview assessment"
-                >
-                  Start Professional Interview{" "}
-                  <ArrowRight className="ml-2 w-5 h-5" />
-                </Button>
-              </Link>
-            )}
-          </div>
         </div>
       </section>
 

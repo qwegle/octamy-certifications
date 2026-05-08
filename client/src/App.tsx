@@ -77,6 +77,8 @@ function Router() {
       <Route path="/register" component={Auth} />
       <Route path="/logout" component={Auth} />
       <Route path="/exams" component={Courses} />
+      <Route path="/courses" component={Courses} />
+      <Route path="/skill-verification" component={Courses} />
       <Route path="/virtual-internships" component={VirtualInternships} />
       <Route path="/business-certifications" component={BusinessCertificationsPage} />
       <Route path="/learning-paths" component={LearningPaths} />
