@@ -212,6 +212,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/auth', (_req, res) => res.redirect(301, '/login'));
   app.get('/seller-auth', (_req, res) => res.redirect(301, '/partners/login'));
   app.get('/recruiter/auth', (_req, res) => res.redirect(301, '/recruiter/login'));
+  app.get('/course/:slug', (req, res) => res.redirect(301, `/exam/${req.params.slug}`));
+  app.get('/courses/:slug', (req, res) => res.redirect(301, `/exam/${req.params.slug}`));
 
   // 410 Gone for the removed AI Interview feature. Any inline endpoint mounted
   // later in this file is intercepted here so the feature is fully unreachable

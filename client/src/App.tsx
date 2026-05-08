@@ -146,8 +146,6 @@ function Router() {
       <Route path="/verify" component={Verify} />
       <Route path="/verify/:certificateId" component={Verify} />
       <Route path="/certificates/:certificateId" component={Certificate} />
-      <Route path="/course/:slug" component={Exam} />
-      <Route path="/courses/:slug" component={Exam} />
       <Route path="/help-center" component={HelpCenter} />
       <Route path="/about" component={About} />
       <Route path="/category/:slug" component={CategoryPage} />
