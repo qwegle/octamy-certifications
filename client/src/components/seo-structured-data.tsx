@@ -30,7 +30,7 @@ export function CourseStructuredData({ course, rating }: StructuredDataProps) {
     "@type": "Course",
     name: course.title,
     description: course.description || `Learn ${course.title} with our comprehensive certification course`,
-    url: `${window.location.origin}/course/${courseSlug}`,
+    url: `${window.location.origin}/exam/${courseSlug}`,
     courseCode: courseSlug,
     provider: {
       "@type": "Organization",

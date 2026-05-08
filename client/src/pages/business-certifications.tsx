@@ -212,7 +212,7 @@ export default function BusinessCertificationsPage() {
                   One-time payment
                 </div>
               </div>
-              <Link href={`/course/${certification.id}`}>
+              <Link href={`/exam/${certification.slug || certification.id}`}>
                 <Button className="bg-black hover:bg-gray-800 text-white group">
                   Get Certified
                   <ChevronRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />

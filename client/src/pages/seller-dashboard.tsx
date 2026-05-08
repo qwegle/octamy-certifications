@@ -245,7 +245,7 @@ export default function SellerDashboard() {
   };
 
   const copyReferralLink = (courseId: number) => {
-    const referralLink = `${window.location.origin}/course/${courseId}?ref=${seller?.email}`;
+    const referralLink = `${window.location.origin}/exam/${courseId}?ref=${seller?.email}`;
     navigator.clipboard.writeText(referralLink);
     toast({
       title: "Copied!",

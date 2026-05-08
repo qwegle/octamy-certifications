@@ -320,65 +320,65 @@ export default function Landing() {
 
       {/* 1. HERO ----------------------------------------------------------- */}
       <section className="relative overflow-hidden bg-white">
-        {/* subtle radial glow background */}
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 -z-0"
           style={{
             background:
-              "radial-gradient(60% 40% at 50% 0%, rgba(2,132,199,0.08) 0%, rgba(255,255,255,0) 70%)",
+              "radial-gradient(60% 45% at 50% 0%, rgba(2,132,199,0.15) 0%, rgba(99,102,241,0.08) 30%, rgba(255,255,255,0) 72%)",
           }}
         />
-        <div className="relative max-w-7xl mx-auto px-6 pt-20 pb-16 sm:pt-28 sm:pb-24 text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-700">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-slate-300 to-transparent" />
+        <div className="relative max-w-7xl mx-auto px-6 pt-20 pb-16 sm:pt-28 sm:pb-24">
+          <div className="mx-auto max-w-4xl text-center">
+            <p className="inline-flex items-center rounded-full border border-slate-200 bg-white/90 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-sky-700 shadow-sm">
             Skill Verification Platform
-          </p>
-          <h1 className="mt-4 text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-slate-900">
-            Free assessments.
-            <br className="hidden sm:block" />{" "}
-            <span className="text-slate-900">Pay only when you pass.</span>
-          </h1>
-          <p className="mt-6 max-w-2xl mx-auto text-base sm:text-lg text-slate-600 leading-relaxed">
-            Earn verified, recruiter-checkable credentials across AI,
-            development, cloud, security and business — trusted by hiring teams
-            across India.
-          </p>
-          <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <Link href="/exams">
-              <Button
-                size="lg"
-                className="bg-slate-900 hover:bg-black text-white rounded-full px-6 sm:px-8 py-6 text-base"
-              >
-                Browse 50+ exams
-                <ArrowRight className="ml-2 w-4 h-4" />
-              </Button>
-            </Link>
-            <a href="#how">
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-slate-300 text-slate-700 hover:bg-slate-50 rounded-full px-6 sm:px-8 py-6 text-base"
-              >
-                How it works
-              </Button>
-            </a>
+            </p>
+            <h1 className="mt-6 text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-slate-900">
+              <span className="block">Free assessments.</span>
+              <span className="mt-1 block bg-gradient-to-r from-slate-900 via-sky-800 to-indigo-700 bg-clip-text text-transparent">
+                Pay only when you pass.
+              </span>
+            </h1>
+            <p className="mt-6 max-w-2xl mx-auto text-base sm:text-lg text-slate-600 leading-relaxed">
+              Earn verified, recruiter-checkable credentials across AI,
+              development, cloud, security and business — trusted by hiring
+              teams across India.
+            </p>
+            <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
+              <Link href="/exams">
+                <Button
+                  size="lg"
+                  className="bg-slate-900 hover:bg-black text-white rounded-full px-6 sm:px-8 py-6 text-base shadow-lg shadow-slate-900/15"
+                >
+                  Browse 50+ exams
+                  <ArrowRight className="ml-2 w-4 h-4" />
+                </Button>
+              </Link>
+              <a href="#how">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-slate-300 bg-white text-slate-700 hover:bg-slate-50 rounded-full px-6 sm:px-8 py-6 text-base"
+                >
+                  How it works
+                </Button>
+              </a>
+            </div>
           </div>
 
-          {/* Trust strip */}
-          <div className="mt-16">
+          <div className="mt-16 rounded-2xl border border-slate-200/80 bg-white/80 backdrop-blur-sm px-4 py-6 sm:px-8">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
               Trusted at
             </p>
-            <div className="mt-5 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-x-6 gap-y-4 max-w-4xl mx-auto">
+            <div className="mt-5 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-x-4 gap-y-3 max-w-5xl mx-auto">
               {trustItems.map(({ icon: Icon, label }) => (
                 <div
                   key={label}
-                  className="flex items-center justify-center gap-2 text-slate-500"
+                  className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-slate-600"
                 >
-                  <Icon className="w-4 h-4 text-slate-400" />
-                  <span className="text-xs sm:text-sm font-medium">
-                    {label}
-                  </span>
+                  <Icon className="w-4 h-4 text-slate-500" />
+                  <span className="text-xs sm:text-sm font-semibold">{label}</span>
                 </div>
               ))}
             </div>

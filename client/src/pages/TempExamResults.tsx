@@ -16,6 +16,7 @@ interface TempExamResults {
   totalQuestions: number;
   course: {
     id: number;
+    slug?: string;
     title: string;
     passingScore: number;
     price: string;
@@ -251,8 +252,11 @@ export default function TempExamResults() {
             <Button variant="outline" onClick={() => navigate("/")}>
               Go Home
             </Button>
-            <Button variant="outline" onClick={() => navigate(`/course/${results.course.id}`)}>
-              View Course
+            <Button
+              variant="outline"
+              onClick={() => navigate(results.course.slug ? `/exam/${results.course.slug}` : "/exams")}
+            >
+              View Exam
             </Button>
           </div>
         </div>

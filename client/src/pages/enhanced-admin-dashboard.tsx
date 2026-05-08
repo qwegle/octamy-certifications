@@ -449,7 +449,7 @@ function EnhancedAdminDashboard() {
                                 variant="outline" 
                                 size="sm" 
                                 className="bg-white text-black border-gray-300 hover:bg-gray-100"
-                                onClick={() => window.open(`/course/${course.slug}`, '_blank')}
+                                onClick={() => window.open(`/exam/${course.slug}`, '_blank')}
                               >
                                 <Eye className="h-3 w-3" />
                               </Button>

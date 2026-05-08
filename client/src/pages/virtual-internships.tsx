@@ -167,7 +167,7 @@ export default function VirtualInternshipsPage() {
               <div className="text-2xl font-bold text-black">
                 ₹{internship.price}
               </div>
-              <Link href={`/course/${internship.id}`}>
+              <Link href={`/exam/${internship.slug || internship.id}`}>
                 <Button className="bg-black hover:bg-gray-800 text-white group">
                   Apply Now
                   <ChevronRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />

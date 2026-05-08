@@ -215,7 +215,7 @@ export default function CourseCard({
                   </div>
                 )}
               </div>
-              <Link href={`/course/${courseSlug}`}>
+              <Link href={`/exam/${courseSlug}`}>
                 <Button className="bg-black hover:bg-gray-800 text-white group">
                   Learn More
                   <ChevronRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />

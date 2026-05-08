@@ -263,7 +263,7 @@ export default function Exam() {
 
   if (!examStarted) {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-slate-50">
         <Helmet>
           <title>{course?.title ? `${course.title} - Certification Exam | Octamy` : 'Certification Exam | Octamy'}</title>
           <meta name="description" content={course?.title ? `Take the ${course.title} certification exam and earn your professional credential. Comprehensive assessment with instant results.` : 'Take your certification exam and earn your professional credential.'} />
@@ -276,26 +276,43 @@ export default function Exam() {
         {course && <ExamStructuredData course={course} rating={course.rating} />}
         
         <Header />
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <Card>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <Card className="border-slate-200 shadow-sm">
             <CardHeader>
-              <CardTitle className="text-2xl text-center">
-                {course?.title} - Certification Exam
+              <CardTitle className="text-3xl text-center tracking-tight text-slate-900">
+                {course?.title} Assessment
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="text-center space-y-4">
-                <p className="text-lg text-octamy-gray-600">
-                  You are about to take the certification exam for {course?.title}.
+                <p className="text-lg text-slate-600">
+                  Enterprise-grade skill verification for {course?.title}.
                 </p>
-                <div className="bg-octamy-gray-50 p-6 rounded-lg">
-                  <h3 className="font-semibold mb-4">Exam Instructions:</h3>
-                  <ul className="text-left space-y-2 text-sm text-octamy-gray-600">
-                    <li>• Duration: {course?.duration} minutes</li>
-                    <li>• Questions: 10-15 multiple choice questions</li>
-                    <li>• Passing Score: 50% or higher</li>
-                    <li>• You cannot pause or restart the exam once started</li>
-                    <li>• Certificate fee: ₹{course?.price} (payable after passing)</li>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-left">
+                  <div className="rounded-xl border border-slate-200 bg-white p-4">
+                    <p className="text-xs uppercase tracking-wide text-slate-500">Duration</p>
+                    <p className="mt-1 text-lg font-semibold text-slate-900">{course?.duration} min</p>
+                  </div>
+                  <div className="rounded-xl border border-slate-200 bg-white p-4">
+                    <p className="text-xs uppercase tracking-wide text-slate-500">Question Type</p>
+                    <p className="mt-1 text-lg font-semibold text-slate-900">MCQ</p>
+                  </div>
+                  <div className="rounded-xl border border-slate-200 bg-white p-4">
+                    <p className="text-xs uppercase tracking-wide text-slate-500">Pass Score</p>
+                    <p className="mt-1 text-lg font-semibold text-slate-900">{course?.passingScore}%+</p>
+                  </div>
+                  <div className="rounded-xl border border-slate-200 bg-white p-4">
+                    <p className="text-xs uppercase tracking-wide text-slate-500">Certificate</p>
+                    <p className="mt-1 text-lg font-semibold text-slate-900">Pay after pass</p>
+                  </div>
+                </div>
+                <div className="rounded-xl border border-slate-200 bg-white p-6">
+                  <h3 className="font-semibold mb-4 text-slate-900">Before you start</h3>
+                  <ul className="text-left space-y-2 text-sm text-slate-600">
+                    <li>• Keep this tab active during the entire assessment.</li>
+                    <li>• You cannot pause or restart once the timer begins.</li>
+                    <li>• Your score is calculated instantly on submission.</li>
+                    <li>• Certificate payment is required only after a passing score.</li>
                   </ul>
                 </div>
               </div>
@@ -311,7 +328,7 @@ export default function Exam() {
                         type="text"
                         value={userInfo.name}
                         onChange={(e) => setUserInfo(prev => ({ ...prev, name: e.target.value }))}
-                        className="w-full mt-1 px-3 py-2 border border-octamy-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-octamy-black"
+                        className="w-full mt-1 px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-slate-900"
                         placeholder="Enter your full name"
                       />
                     </div>
@@ -322,7 +339,7 @@ export default function Exam() {
                         type="email"
                         value={userInfo.email}
                         onChange={(e) => setUserInfo(prev => ({ ...prev, email: e.target.value }))}
-                        className="w-full mt-1 px-3 py-2 border border-octamy-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-octamy-black"
+                        className="w-full mt-1 px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-slate-900"
                         placeholder="Enter your email address"
                       />
                     </div>
@@ -333,7 +350,7 @@ export default function Exam() {
               <div className="text-center">
                 <Button
                   onClick={startExam}
-                  className="bg-octamy-black text-white px-8 py-3 text-lg hover:bg-octamy-gray-800"
+                  className="bg-slate-900 text-white px-10 py-3 text-lg hover:bg-black rounded-full shadow-lg shadow-slate-900/20"
                   disabled={!userInfo.name || !userInfo.email}
                 >
                   Start Exam
@@ -348,10 +365,10 @@ export default function Exam() {
 
   if (questions.length === 0) {
     return (
-      <div className="min-h-screen bg-white">
-        <Header />
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <Card>
+    <div className="min-h-screen bg-slate-50">
+      <Header />
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <Card className="border-slate-200 shadow-sm">
             <CardContent className="text-center py-12">
               <p>Loading exam questions...</p>
             </CardContent>
