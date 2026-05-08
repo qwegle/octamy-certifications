@@ -123,6 +123,36 @@ export default function PaymentTemp() {
       const response = await apiRequest("POST", "/api/payment/initiate", paymentData);
       const data = await response.json();
       
+      if (data.success && data.gateway === "cashfree") {
+        if (data.paymentSessionId) {
+          const existing = document.querySelector('script[data-cashfree-sdk="true"]');
+          if (!existing && !(window as any).Cashfree) {
+            await new Promise<void>((resolve, reject) => {
+              const script = document.createElement("script");
+              script.src = "https://sdk.cashfree.com/js/v3/cashfree.js";
+              script.async = true;
+              script.dataset.cashfreeSdk = "true";
+              script.onload = () => resolve();
+              script.onerror = () => reject(new Error("Failed to load Cashfree SDK"));
+              document.head.appendChild(script);
+            });
+          }
+          const cashfree = (window as any).Cashfree({
+            mode: (import.meta.env.VITE_CASHFREE_ENV || "production").toLowerCase(),
+          });
+          await cashfree.checkout({
+            paymentSessionId: data.paymentSessionId,
+            redirectTarget: "_self",
+          });
+          return;
+        }
+        if (data.paymentLink) {
+          window.location.href = data.paymentLink;
+          return;
+        }
+        throw new Error("Cashfree checkout details missing");
+      }
+
       if (data.success && data.paymentForm) {
         // Create and submit the PayUMoney form directly
         const form = document.createElement('form');

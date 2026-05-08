@@ -26,14 +26,19 @@ app.use((req, res, next) => {
   res.setHeader('X-Frame-Options', 'SAMEORIGIN');
   res.setHeader('X-XSS-Protection', '1; mode=block');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=(self "https://secure.payu.in")');
-  res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' https://secure.payu.in https://test.payu.in https://accounts.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; frame-src 'self' https://secure.payu.in https://test.payu.in https://accounts.google.com; connect-src 'self' https://secure.payu.in https://test.payu.in https://accounts.google.com;");
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=(self "https://secure.payu.in" "https://api.cashfree.com" "https://sandbox.cashfree.com")');
+  res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' https://secure.payu.in https://test.payu.in https://accounts.google.com https://sdk.cashfree.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; frame-src 'self' https://secure.payu.in https://test.payu.in https://accounts.google.com https://api.cashfree.com https://sandbox.cashfree.com; connect-src 'self' https://secure.payu.in https://test.payu.in https://accounts.google.com https://api.cashfree.com https://sandbox.cashfree.com;");
 
   next();
 });
 
 // Body parsers — capped to mitigate DoS; raise on specific upload routes if needed.
-app.use(express.json({ limit: "1mb" }));
+app.use(express.json({
+  limit: "1mb",
+  verify: (req: Request, _res, buf) => {
+    (req as any).rawBody = buf.toString("utf8");
+  },
+}));
 app.use(express.urlencoded({ extended: false, limit: "1mb" }));
 
 // Rate limiters: applied to the most abusable endpoints.

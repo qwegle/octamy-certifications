@@ -32,14 +32,29 @@ export default function PayUMoneyForm({
 }: PayUMoneyFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const defaultGateway = (import.meta.env.VITE_PAYMENT_DEFAULT_GATEWAY || "cashfree").toLowerCase();
+
+  const loadCashfreeSdk = async () => {
+    if ((window as any).Cashfree) return;
+    await new Promise<void>((resolve, reject) => {
+      const existing = document.querySelector('script[data-cashfree-sdk="true"]');
+      if (existing) return resolve();
+      const script = document.createElement("script");
+      script.src = "https://sdk.cashfree.com/js/v3/cashfree.js";
+      script.async = true;
+      script.dataset.cashfreeSdk = "true";
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error("Failed to load Cashfree SDK"));
+      document.head.appendChild(script);
+    });
+  };
 
   const handlePayment = async () => {
     try {
       setIsLoading(true);
 
-      // Initiate payment with PayUMoney
       const response = await apiRequest('POST', '/api/payment/initiate', {
-        certificateId,
+        tempExamId: certificateId,
         courseId,
         userEmail,
         userName,
@@ -53,6 +68,25 @@ export default function PayUMoneyForm({
       });
 
       const data = await response.json();
+
+      if (data.success && data.gateway === "cashfree") {
+        if (data.paymentSessionId) {
+          await loadCashfreeSdk();
+          const cashfree = (window as any).Cashfree({
+            mode: (import.meta.env.VITE_CASHFREE_ENV || "production").toLowerCase(),
+          });
+          await cashfree.checkout({
+            paymentSessionId: data.paymentSessionId,
+            redirectTarget: "_self",
+          });
+          return;
+        }
+        if (data.paymentLink) {
+          window.location.href = data.paymentLink;
+          return;
+        }
+        throw new Error("Cashfree checkout details missing");
+      }
 
       if (data.success && data.paymentForm) {
         // Create a form and submit to PayUMoney
@@ -111,7 +145,11 @@ export default function PayUMoneyForm({
 
         <div className="flex items-center gap-2 text-sm text-gray-600">
           <Shield className="h-4 w-4" />
-          <span>Secured by PayUMoney with 256-bit SSL encryption</span>
+          <span>
+            {defaultGateway === "cashfree"
+              ? "Secure checkout powered by Cashfree"
+              : "Secured by PayUMoney with 256-bit SSL encryption"}
+          </span>
         </div>
 
         <Button

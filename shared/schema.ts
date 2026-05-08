@@ -506,9 +506,13 @@ export const payments = pgTable("payments", {
   userId: integer("user_id").references(() => users.id),
   courseId: integer("course_id").references(() => courses.id),
   transactionId: text("transaction_id").notNull().unique(),
+  gateway: text("gateway").default("payumoney").notNull(), // payumoney | cashfree
   paymentMethod: text("payment_method").default("payumoney").notNull(),
   razorpayPaymentId: text("razorpay_payment_id"),
   razorpayOrderId: text("razorpay_order_id"),
+  cashfreeOrderId: text("cashfree_order_id"),
+  cashfreePaymentId: text("cashfree_payment_id"),
+  gatewayStatusRaw: jsonb("gateway_status_raw"),
 
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
   currency: text("currency").default("INR").notNull(),

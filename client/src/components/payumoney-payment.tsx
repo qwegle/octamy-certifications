@@ -62,6 +62,30 @@ export default function PayUMoneyPayment({ course, sellerCode, onSuccess }: PayU
       const data = await response.json();
 
       if (data.success) {
+        if (data.gateway === "cashfree") {
+          if (data.paymentLink) {
+            window.location.href = data.paymentLink;
+            return;
+          }
+          if (data.paymentSessionId) {
+            if (!(window as any).Cashfree) {
+              await new Promise<void>((resolve, reject) => {
+                const script = document.createElement("script");
+                script.src = "https://sdk.cashfree.com/js/v3/cashfree.js";
+                script.async = true;
+                script.onload = () => resolve();
+                script.onerror = () => reject(new Error("Failed to load Cashfree SDK"));
+                document.head.appendChild(script);
+              });
+            }
+            const cashfree = (window as any).Cashfree({
+              mode: (import.meta.env.VITE_CASHFREE_ENV || "production").toLowerCase(),
+            });
+            await cashfree.checkout({ paymentSessionId: data.paymentSessionId, redirectTarget: "_self" });
+            return;
+          }
+        }
+
         // Create and submit secure PayUMoney form
         const form = document.createElement('form');
         form.method = data.paymentForm.method;

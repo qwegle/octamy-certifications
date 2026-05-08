@@ -29,6 +29,13 @@ import { db, pool } from "./db";
 import { LearningPathController } from "./controllers/learningPathController";
 import { payuMoneyService } from "./payumoney";
 import {
+  createCashfreeOrder,
+  fetchCashfreeOrderStatus,
+  getDefaultPaymentGateway,
+  normalizeCashfreePaymentStatus,
+  verifyCashfreeWebhookSignature,
+} from "./lib/cashfree";
+import {
   getBadgeFromScore,
   generateCertificateNumber,
   calculateExpiryDate,
@@ -1409,12 +1416,131 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
-  // Initialize PayUMoney payment - PAYMENT-FIRST APPROACH
+  const createCashfreeCertificateOrder = async (
+    req: Request,
+    payload: {
+      tempExamId: string;
+      userPhone?: string;
+      sellerCode?: string;
+      includesPhysicalCopy?: boolean;
+      selectedAddressId?: number | null;
+    }
+  ) => {
+    const examData = await loadPendingExam<any>(payload.tempExamId);
+    if (!examData) {
+      throw new Error("Exam data not found or expired. Please retake the assessment.");
+    }
+    if (!examData.passed) {
+      throw new Error("Exam not passed");
+    }
+
+    const course = await storage.getCourse(examData.courseId);
+    if (!course) {
+      throw new Error("Course not found");
+    }
+
+    const includesPhysicalCopy = Boolean(payload.includesPhysicalCopy);
+    const baseAmount = parseFloat(course.price);
+    const shippingCost = includesPhysicalCopy ? 50 : 0;
+    const totalAmount = (baseAmount + shippingCost).toFixed(2);
+
+    const orderId = `CF_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    const payment = await storage.createPayment({
+      userId: examData.userId || null,
+      courseId: examData.courseId,
+      transactionId: orderId,
+      gateway: "cashfree",
+      paymentMethod: "cashfree",
+      amount: totalAmount,
+      certificateAmount: baseAmount.toFixed(2),
+      shippingAmount: shippingCost.toFixed(2),
+      includesPhysicalCopy,
+      currency: "INR",
+      status: "pending",
+      cashfreeOrderId: orderId,
+      gatewayStatusRaw: {
+        tempExamId: payload.tempExamId,
+        sellerCode: payload.sellerCode || "",
+        selectedAddressId: payload.selectedAddressId || null,
+      },
+    } as any);
+
+    const baseUrl = `${req.protocol}://${req.get("host")}`;
+    const order = await createCashfreeOrder({
+      orderId,
+      amount: totalAmount,
+      customerId: `oct_user_${examData.userId || "guest"}`,
+      customerName: examData.userName || "Octamy User",
+      customerEmail: examData.userEmail,
+      customerPhone: payload.userPhone || "9999999999",
+      returnUrl: `${baseUrl}/payment-success?order_id=${orderId}`,
+      notifyUrl: `${baseUrl}/api/webhooks/cashfree`,
+      notes: {
+        paymentDbId: String(payment.id),
+        courseId: String(examData.courseId),
+        tempExamId: payload.tempExamId,
+        sellerCode: payload.sellerCode || "",
+        userId: examData.userId ? String(examData.userId) : "",
+      },
+    });
+
+    await storage.updatePayment(payment.id, {
+      cashfreeOrderId: order.orderId,
+      gatewayStatusRaw: order.raw,
+    } as any);
+
+    return {
+      paymentDbId: payment.id,
+      orderId: order.orderId,
+      paymentSessionId: order.paymentSessionId,
+      paymentLink: order.paymentLink,
+      amount: totalAmount,
+    };
+  };
+
+  // Initialize payment (Cashfree default, PayU fallback) - PAYMENT-FIRST APPROACH
   app.post(
     "/api/payment/initiate",
     optionalAuth,
     async (req: AuthenticatedRequest, res: Response) => {
       try {
+        const defaultGateway = getDefaultPaymentGateway();
+        if (defaultGateway === "cashfree") {
+          const {
+            tempExamId,
+            userPhone,
+            sellerCode,
+            includesPhysicalCopy = false,
+            selectedAddressId = null,
+          } = req.body;
+
+          if (!tempExamId) {
+            return res.status(400).json({ message: "Temporary exam ID is required" });
+          }
+
+          try {
+            const order = await createCashfreeCertificateOrder(req, {
+              tempExamId,
+              userPhone,
+              sellerCode,
+              includesPhysicalCopy,
+              selectedAddressId,
+            });
+
+            return res.json({
+              success: true,
+              gateway: "cashfree",
+              orderId: order.orderId,
+              transactionId: order.orderId,
+              amount: order.amount,
+              paymentSessionId: order.paymentSessionId,
+              paymentLink: order.paymentLink,
+            });
+          } catch (cashfreeError) {
+            console.error("Cashfree init failed, falling back to PayU:", cashfreeError);
+          }
+        }
+
         const {
           tempExamId, // Use temporary exam ID instead of certificate ID
           courseId,
@@ -1483,6 +1609,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           userId: req.user?.userId || null,
           courseId: examData.courseId,
           transactionId: txnid,
+          gateway: "payumoney",
           paymentMethod: "payumoney",
           amount: formattedAmount,
           certificateAmount: baseAmount.toFixed(2),
@@ -1526,6 +1653,234 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     }
   );
+
+  app.post(
+    "/api/payments/cashfree/create-order",
+    optionalAuth,
+    async (req: AuthenticatedRequest, res: Response) => {
+      try {
+        const {
+          tempExamId,
+          userPhone,
+          sellerCode,
+          includesPhysicalCopy = false,
+          selectedAddressId = null,
+        } = req.body || {};
+
+        if (!tempExamId) {
+          return res.status(400).json({ message: "Temporary exam ID is required" });
+        }
+
+        const order = await createCashfreeCertificateOrder(req, {
+          tempExamId,
+          userPhone,
+          sellerCode,
+          includesPhysicalCopy,
+          selectedAddressId,
+        });
+
+        res.json({
+          success: true,
+          gateway: "cashfree",
+          orderId: order.orderId,
+          paymentSessionId: order.paymentSessionId,
+          paymentLink: order.paymentLink,
+          amount: order.amount,
+          currency: "INR",
+        });
+      } catch (error: any) {
+        console.error("Error creating Cashfree order:", error);
+        res.status(500).json({ message: error.message || "Failed to create Cashfree order" });
+      }
+    }
+  );
+
+  app.get("/api/payments/cashfree/:orderId/status", async (req: Request, res: Response) => {
+    try {
+      const orderId = req.params.orderId;
+      if (!orderId) {
+        return res.status(400).json({ message: "orderId is required" });
+      }
+      const [localPayment, providerStatus] = await Promise.all([
+        storage.getPaymentByTransactionId(orderId),
+        fetchCashfreeOrderStatus(orderId),
+      ]);
+      res.json({
+        orderId,
+        localStatus: localPayment?.status || null,
+        providerStatus,
+      });
+    } catch (error: any) {
+      console.error("Error fetching Cashfree order status:", error);
+      res.status(500).json({ message: error.message || "Failed to fetch status" });
+    }
+  });
+
+  app.post("/api/webhooks/cashfree", async (req: Request, res: Response) => {
+    try {
+      const signature =
+        (req.header("x-webhook-signature") ||
+          req.header("x-cashfree-signature") ||
+          req.header("x-signature")) as string | undefined;
+      const timestamp =
+        (req.header("x-webhook-timestamp") ||
+          req.header("x-cashfree-timestamp") ||
+          req.header("x-timestamp")) as string | undefined;
+      const rawBody = (req as any).rawBody || JSON.stringify(req.body || {});
+
+      if (!signature || !verifyCashfreeWebhookSignature(rawBody, signature, timestamp)) {
+        console.error("Cashfree webhook signature verification failed");
+        return res.status(401).json({ message: "Invalid webhook signature" });
+      }
+
+      const payload: any = req.body || {};
+      const status = normalizeCashfreePaymentStatus(payload);
+      const orderId = String(
+        payload?.data?.order?.order_id || payload?.data?.order?.orderId || payload?.order_id || payload?.orderId || "",
+      );
+      const cashfreePaymentId = String(
+        payload?.data?.payment?.cf_payment_id || payload?.data?.payment?.cfPaymentId || payload?.cf_payment_id || "",
+      );
+
+      if (!orderId) {
+        return res.status(400).json({ message: "Missing order id" });
+      }
+
+      const payment = await storage.getPaymentByTransactionId(orderId);
+      if (!payment) {
+        console.warn("Cashfree webhook for unknown order:", orderId);
+        return res.status(200).json({ ok: true, ignored: "unknown_order" });
+      }
+
+      if (status === "failed") {
+        await storage.updatePayment(payment.id, {
+          status: "failed",
+          cashfreePaymentId: cashfreePaymentId || payment.cashfreePaymentId,
+          gatewayStatusRaw: payload,
+        } as any);
+        return res.status(200).json({ ok: true, status: "failed" });
+      }
+
+      if (status !== "success") {
+        await storage.updatePayment(payment.id, {
+          status: "pending",
+          gatewayStatusRaw: payload,
+        } as any);
+        return res.status(200).json({ ok: true, status: "pending" });
+      }
+
+      // Idempotency for duplicate success webhooks.
+      if (payment.status === "completed" && payment.certificateId) {
+        return res.status(200).json({ ok: true, status: "already_completed" });
+      }
+
+      const meta = (payment.gatewayStatusRaw || {}) as Record<string, any>;
+      const tempExamId = String(payload?.data?.order?.order_note?.tempExamId || meta.tempExamId || "");
+      const sellerCode = String(payload?.data?.order?.order_note?.sellerCode || meta.sellerCode || "");
+      const userId = payment.userId || null;
+      const courseId = payment.courseId || 0;
+
+      const examData = await loadPendingExam<any>(tempExamId);
+      if (!examData) {
+        await storage.updatePayment(payment.id, {
+          status: "failed",
+          gatewayStatusRaw: { ...(payload || {}), reason: "pending_exam_missing" },
+        } as any);
+        return res.status(200).json({ ok: true, status: "failed_exam_missing" });
+      }
+
+      const examAttempt = await storage.createExamAttempt({
+        userId: examData.userId,
+        courseId: examData.courseId,
+        userEmail: examData.userEmail,
+        userName: examData.userName,
+        score: examData.score,
+        totalQuestions: examData.totalQuestions,
+        answers: examData.answers,
+        timeTaken: examData.timeTaken,
+        passed: examData.passed,
+        mastered: examData.mastered,
+        sessionId: examData.sessionId,
+        ipAddress: examData.ipAddress,
+        userAgent: examData.userAgent,
+        tabSwitches: examData.tabSwitches,
+      });
+
+      const certificateId = `OCT-${new Date().getFullYear()}-${examData.course.title
+        .replace(/\s+/g, "")
+        .toUpperCase()
+        .slice(0, 3)}-${Date.now()}`;
+      const badge = getBadgeFromScore(examData.score);
+      const certificateNumber = generateCertificateNumber();
+      const certificate = await storage.createCertificate({
+        certificateId,
+        examAttemptId: examAttempt.id,
+        userId: examData.userId,
+        courseId: examData.courseId,
+        userEmail: examData.userEmail,
+        userName: examData.userName,
+        score: examData.score,
+        courseTitle: examData.course.title,
+        badge,
+        certificateNumber,
+        expiresAt: calculateExpiryDate(),
+        isPaid: true,
+        paymentId: cashfreePaymentId || orderId,
+      });
+
+      await storage.updatePayment(payment.id, {
+        status: "completed",
+        paymentMethod: "cashfree",
+        gateway: "cashfree",
+        certificateId: certificate.id,
+        cashfreeOrderId: orderId,
+        cashfreePaymentId: cashfreePaymentId || null,
+        gatewayStatusRaw: payload,
+      } as any);
+
+      await deletePendingExam(tempExamId).catch(() => {});
+
+      if (sellerCode) {
+        const seller = await storage.getSellerByReferralCode(sellerCode);
+        if (seller && seller.isApproved) {
+          const actualPaymentAmount = parseFloat(payment.amount);
+          const commissionAmount = (actualPaymentAmount * parseFloat(seller.commissionRate)) / 100;
+          await storage.createSale({
+            sellerId: seller.id,
+            courseId,
+            certificateId: certificate.id,
+            amount: actualPaymentAmount.toString(),
+            commission: commissionAmount.toString(),
+            referralCode: sellerCode,
+            status: "completed",
+          });
+          if (userId) {
+            await storage.updateReferralConversion(sellerCode, courseId, userId);
+          }
+          await storage.incrementSellerEarnings(seller.id, commissionAmount);
+        }
+      }
+
+      if (userId) {
+        await storage.createNotification({
+          userId,
+          title: "Certificate Payment Successful",
+          type: "payment_success",
+          message: `Your payment for certificate ${certificate.certificateId} has been processed successfully. You can now download your certificate.`,
+          data: {
+            certificateId: certificate.certificateId,
+            actionUrl: `/certificates/${certificate.certificateId}`,
+            priority: "high",
+          },
+        });
+      }
+
+      return res.status(200).json({ ok: true, status: "completed" });
+    } catch (error: any) {
+      console.error("Cashfree webhook processing error:", error);
+      return res.status(500).json({ message: "Webhook processing failed" });
+    }
+  });
 
   // PayUMoney success callback - PAYMENT-FIRST APPROACH
   app.post("/api/payment/success", async (req: Request, res: Response) => {
@@ -1639,6 +1994,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // 3. Update payment record with certificate ID
         await storage.updatePayment(payment.id, {
           status: "completed",
+          gateway: "payumoney",
           paymentMethod: "payumoney",
           certificateId: certificate.id,
           razorpayPaymentId: responseData.mihpayid,
