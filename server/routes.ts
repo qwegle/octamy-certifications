@@ -989,21 +989,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const base = process.env.APP_URL || "https://octamy.com";
       const today = new Date().toISOString().slice(0, 10);
-      const staticUrls = [
-        "", "/exams", "/courses", "/skill-verification",
-        "/virtual-internships", "/business-certifications", "/learning-paths",
-        "/sponsor", "/seller-auth", "/auth", "/recruiter/auth",
-        "/help-center", "/about", "/contact",
-        "/privacy-policy", "/terms-of-service", "/refund-policy",
-        "/cookie-policy", "/acceptable-use", "/disclaimer",
-        "/reseller-agreement", "/accessibility", "/trust",
+      const staticUrls: Array<{ path: string; priority: string }> = [
+        { path: "", priority: "1.0" },
+        { path: "/courses", priority: "0.9" },
+        { path: "/virtual-internships", priority: "0.9" },
+        { path: "/business-certifications", priority: "0.8" },
+        { path: "/learning-paths", priority: "0.7" },
+        { path: "/partners", priority: "0.8" },
+        { path: "/sponsor", priority: "0.6" },
+        { path: "/about", priority: "0.7" },
+        { path: "/contact", priority: "0.6" },
+        { path: "/help-center", priority: "0.5" },
+        { path: "/verify", priority: "0.5" },
+        { path: "/trust", priority: "0.4" },
+        { path: "/privacy-policy", priority: "0.3" },
+        { path: "/terms-of-service", priority: "0.3" },
+        { path: "/refund-policy", priority: "0.3" },
+        { path: "/cookie-policy", priority: "0.3" },
+        { path: "/acceptable-use", priority: "0.3" },
+        { path: "/disclaimer", priority: "0.3" },
+        { path: "/reseller-agreement", priority: "0.3" },
+        { path: "/accessibility", priority: "0.3" },
       ];
       const allCourses = await storage.getCourses().catch(() => []);
       const allCategories = await storage.getCategories().catch(() => []);
 
       const urls: Array<{ loc: string; priority: string; freq: string }> = [];
       for (const u of staticUrls) {
-        urls.push({ loc: `${base}${u}`, priority: u === "" ? "1.0" : "0.7", freq: "weekly" });
+        urls.push({ loc: `${base}${u.path}`, priority: u.priority, freq: "weekly" });
       }
       for (const c of allCourses as any[]) {
         if (!c?.slug) continue;
@@ -1994,7 +2007,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     authenticateAdminToken,
     async (req: AuthenticatedRequest, res: Response) => {
       try {
-        const customers = await storage.getCustomersForAdmin();
+        const search = (req.query.search as string) || undefined;
+        const paginated = req.query.page !== undefined;
+        if (paginated) {
+          const page = Math.max(parseInt(String(req.query.page)) || 1, 1);
+          const pageSize = Math.min(Math.max(parseInt(String(req.query.pageSize)) || 50, 1), 200);
+          const [items, total] = await Promise.all([
+            storage.getCustomersForAdmin({ limit: pageSize, offset: (page - 1) * pageSize, search }),
+            storage.countCustomersForAdmin(search),
+          ]);
+          return res.json({ items, total, page, pageSize, totalPages: Math.ceil(total / pageSize) });
+        }
+        const customers = await storage.getCustomersForAdmin({ search });
         res.json(customers);
       } catch (error) {
         console.error("Error fetching customers:", error);
@@ -2008,6 +2032,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     authenticateAdminToken,
     async (req: AuthenticatedRequest, res: Response) => {
       try {
+        const paginated = req.query.page !== undefined;
+        if (paginated) {
+          const page = Math.max(parseInt(String(req.query.page)) || 1, 1);
+          const pageSize = Math.min(Math.max(parseInt(String(req.query.pageSize)) || 50, 1), 200);
+          const [items, total] = await Promise.all([
+            storage.getCoursesForAdmin({ limit: pageSize, offset: (page - 1) * pageSize }),
+            storage.countCoursesForAdmin(),
+          ]);
+          return res.json({ items, total, page, pageSize, totalPages: Math.ceil(total / pageSize) });
+        }
         const courses = await storage.getCoursesForAdmin();
         res.json(courses);
       } catch (error) {
@@ -2123,6 +2157,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     authenticateAdminToken,
     async (req: AuthenticatedRequest, res: Response) => {
       try {
+        const paginated = req.query.page !== undefined;
+        if (paginated) {
+          const page = Math.max(parseInt(String(req.query.page)) || 1, 1);
+          const pageSize = Math.min(Math.max(parseInt(String(req.query.pageSize)) || 50, 1), 200);
+          const [items, total] = await Promise.all([
+            storage.getTransactionsForAdmin({ limit: pageSize, offset: (page - 1) * pageSize }),
+            storage.countTransactionsForAdmin(),
+          ]);
+          return res.json({ items, total, page, pageSize, totalPages: Math.ceil(total / pageSize) });
+        }
         const transactions = await storage.getTransactionsForAdmin();
         res.json(transactions);
       } catch (error) {
@@ -2137,6 +2181,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     authenticateAdminToken,
     async (req: AuthenticatedRequest, res: Response) => {
       try {
+        const paginated = req.query.page !== undefined;
+        if (paginated) {
+          const page = Math.max(parseInt(String(req.query.page)) || 1, 1);
+          const pageSize = Math.min(Math.max(parseInt(String(req.query.pageSize)) || 50, 1), 200);
+          const [items, total] = await Promise.all([
+            storage.getPartnersForAdmin({ limit: pageSize, offset: (page - 1) * pageSize }),
+            storage.countPartnersForAdmin(),
+          ]);
+          return res.json({ items, total, page, pageSize, totalPages: Math.ceil(total / pageSize) });
+        }
         const partners = await storage.getPartnersForAdmin();
         res.json(partners);
       } catch (error) {

@@ -1815,24 +1815,54 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Get customers for admin dashboard
-  async getCustomersForAdmin() {
-    return await db.select({
+  async getCustomersForAdmin(opts?: { limit?: number; offset?: number; search?: string }) {
+    const limit = Math.min(Math.max(opts?.limit ?? 1000, 1), 5000);
+    const offset = Math.max(opts?.offset ?? 0, 0);
+    const search = opts?.search?.trim();
+    let query: any = db.select({
       id: users.id,
       name: users.name,
       email: users.email,
       phone: users.phone,
       isAdmin: users.isAdmin,
       createdAt: users.createdAt,
-      certificateCount: sql`(SELECT COUNT(*) FROM certificates WHERE user_id = ${users.id})::int`.as('certificateCount'),
-      totalSpent: sql`COALESCE((SELECT SUM(CAST(certificate_amount AS DECIMAL)) FROM payments WHERE user_id = ${users.id} AND status = 'completed'), 0)::int`.as('totalSpent')
-    })
-    .from(users)
-    .orderBy(desc(users.createdAt))
-    .limit(100);
+      certificateCount: sql`(SELECT COUNT(*) FROM certificates WHERE user_email = ${users.email} AND is_paid = true)::int`.as('certificateCount'),
+      totalSpent: sql`COALESCE((SELECT SUM(CAST(certificate_amount AS DECIMAL)) FROM payments WHERE user_id = ${users.id} AND status = 'completed'), 0)::int`.as('totalSpent'),
+      examAttempts: sql`(SELECT COUNT(*) FROM exam_attempts WHERE user_id = ${users.id})::int`.as('examAttempts')
+    }).from(users);
+
+    if (search) {
+      query = query.where(
+        or(
+          ilike(users.name, `%${search}%`),
+          ilike(users.email, `%${search}%`),
+          eq(users.id, isNaN(parseInt(search)) ? -1 : parseInt(search))
+        )
+      );
+    }
+
+    return await query.orderBy(desc(users.createdAt)).limit(limit).offset(offset);
+  }
+
+  async countCustomersForAdmin(search?: string): Promise<number> {
+    let query: any = db.select({ c: sql<number>`COUNT(*)::int` }).from(users);
+    if (search?.trim()) {
+      query = query.where(
+        or(
+          ilike(users.name, `%${search}%`),
+          ilike(users.email, `%${search}%`),
+          eq(users.id, isNaN(parseInt(search)) ? -1 : parseInt(search))
+        )
+      );
+    }
+    const [r] = await query;
+    return Number(r?.c ?? 0);
   }
 
   // Get courses for admin dashboard
-  async getCoursesForAdmin() {
+  async getCoursesForAdmin(opts?: { limit?: number; offset?: number }) {
+    const limit = Math.min(Math.max(opts?.limit ?? 1000, 1), 5000);
+    const offset = Math.max(opts?.offset ?? 0, 0);
     return await db.select({
       id: courses.id,
       title: courses.title,
@@ -1855,11 +1885,19 @@ export class DatabaseStorage implements IStorage {
     .from(courses)
     .leftJoin(categories, eq(courses.categoryId, categories.id))
     .orderBy(desc(courses.createdAt))
-    .limit(100);
+    .limit(limit)
+    .offset(offset);
+  }
+
+  async countCoursesForAdmin(): Promise<number> {
+    const [r] = await db.select({ c: sql<number>`COUNT(*)::int` }).from(courses);
+    return Number(r?.c ?? 0);
   }
 
   // Get transactions for admin dashboard
-  async getTransactionsForAdmin() {
+  async getTransactionsForAdmin(opts?: { limit?: number; offset?: number }) {
+    const limit = Math.min(Math.max(opts?.limit ?? 1000, 1), 5000);
+    const offset = Math.max(opts?.offset ?? 0, 0);
     return await db.select({
       id: payments.id,
       certificateId: certificates.certificateId,
@@ -1877,11 +1915,19 @@ export class DatabaseStorage implements IStorage {
     .leftJoin(users, eq(payments.userId, users.id))
     .leftJoin(courses, eq(certificates.courseId, courses.id))
     .orderBy(desc(payments.createdAt))
-    .limit(100);
+    .limit(limit)
+    .offset(offset);
+  }
+
+  async countTransactionsForAdmin(): Promise<number> {
+    const [r] = await db.select({ c: sql<number>`COUNT(*)::int` }).from(payments);
+    return Number(r?.c ?? 0);
   }
 
   // Get partners for admin dashboard
-  async getPartnersForAdmin() {
+  async getPartnersForAdmin(opts?: { limit?: number; offset?: number }) {
+    const limit = Math.min(Math.max(opts?.limit ?? 1000, 1), 5000);
+    const offset = Math.max(opts?.offset ?? 0, 0);
     return await db.select({
       id: sellers.id,
       name: sellers.name,
@@ -1897,7 +1943,13 @@ export class DatabaseStorage implements IStorage {
     })
     .from(sellers)
     .orderBy(desc(sellers.createdAt))
-    .limit(100);
+    .limit(limit)
+    .offset(offset);
+  }
+
+  async countPartnersForAdmin(): Promise<number> {
+    const [r] = await db.select({ c: sql<number>`COUNT(*)::int` }).from(sellers);
+    return Number(r?.c ?? 0);
   }
 
   // Get all sellers with detailed analytics
@@ -2338,42 +2390,6 @@ export class DatabaseStorage implements IStorage {
 
     return await query
       .orderBy(desc(sellers.createdAt))
-      .limit(limit);
-  }
-
-  // Get customers for admin with detailed information
-  async getCustomersForAdmin(limit = 1000, search?: string) {
-    let query = db.select({
-      id: users.id,
-      name: users.name,
-      email: users.email,
-      isAdmin: users.isAdmin,
-      createdAt: users.createdAt,
-      certificateCount: sql`(
-        SELECT COUNT(*) FROM certificates WHERE user_email = ${users.email} AND is_paid = true
-      )`.as('certificateCount'),
-      totalSpent: sql`(
-        SELECT COALESCE(SUM(CAST(certificate_amount AS DECIMAL)), 0)
-        FROM payments WHERE user_id = ${users.id} AND status = 'completed'
-      )`.as('totalSpent'),
-      examAttempts: sql`(
-        SELECT COUNT(*) FROM exam_attempts WHERE user_id = ${users.id}
-      )`.as('examAttempts')
-    })
-    .from(users);
-
-    if (search) {
-      query = query.where(
-        or(
-          ilike(users.name, `%${search}%`),
-          ilike(users.email, `%${search}%`),
-          eq(users.id, isNaN(parseInt(search)) ? -1 : parseInt(search))
-        )
-      );
-    }
-
-    return await query
-      .orderBy(desc(users.createdAt))
       .limit(limit);
   }
 

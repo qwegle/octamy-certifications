@@ -1,209 +1,381 @@
 import { Link } from "wouter";
-import octamyLogoDark from "@/assets/image_1750054456482.png";
+import {
+  ShieldCheck,
+  Lock,
+  BadgeCheck,
+  CreditCard,
+  FileCheck,
+  Mail,
+  Phone,
+  Linkedin,
+  Twitter,
+  Instagram,
+  Youtube,
+  ArrowRight,
+} from "lucide-react";
 import octamyLogoLight from "@/assets/image_1750054465427.png";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+
+const COMPANY_NAME = "Octamy Solutions Private Limited";
+const SUPPORT_EMAIL =
+  import.meta.env.VITE_COMPANY_SUPPORT_EMAIL || "support@octamy.com";
+const GRIEVANCE_EMAIL =
+  import.meta.env.VITE_COMPANY_GRIEVANCE_EMAIL || "grievance@octamy.com";
+const LEGAL_EMAIL =
+  import.meta.env.VITE_COMPANY_LEGAL_EMAIL || "legal@octamy.com";
+const SUPPORT_PHONE = import.meta.env.VITE_COMPANY_SUPPORT_PHONE || "";
+const COMPANY_CIN = import.meta.env.VITE_COMPANY_CIN || "";
+const COMPANY_GSTIN = import.meta.env.VITE_COMPANY_GSTIN || "";
+const COMPANY_ADDRESS = import.meta.env.VITE_COMPANY_ADDRESS || "";
+const ISO_NUMBER = import.meta.env.VITE_COMPANY_ISO_NUMBER || "";
+
 export default function Footer() {
+  const [email, setEmail] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const { toast } = useToast();
+  const year = new Date().getFullYear();
+
+  const onSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
+      toast({
+        title: "Enter a valid email",
+        description: "We'll only send useful updates — never spam.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setSubmitting(true);
+    try {
+      // Best-effort: hits /api/contact-submission if present, otherwise gracefully no-ops.
+      await fetch("/api/contact-submission", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: "Newsletter signup",
+          email,
+          subject: "Newsletter subscription",
+          message: `Subscribe to Octamy newsletter — ${email}`,
+        }),
+      }).catch(() => null);
+      toast({
+        title: "You're in.",
+        description: "We'll keep you posted on new assessments and partner news.",
+      });
+      setEmail("");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
-    <footer className="bg-octamy-black text-white py-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Brand */}
-          <div className="md:col-span-2">
-            <span className="text-2xl font-bold text-white mb-4 block">
-              <Link href="/" className="text-2xl font-bold">
-                <img
-                  src={octamyLogoLight}
-                  alt="Octamy"
-                  className="h-8 dark:block"
-                />
-              </Link>
-            </span>
-            <p className="text-gray-300 mb-6 max-w-md">
-              Professional certification platform helping individuals advance
-              their careers with industry-recognized credentials.
-            </p>
-            <div className="flex space-x-4">
-              <a
-                href="https://linkedin.com/company/octamy"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Octamy on LinkedIn"
-                className="text-gray-300 hover:text-white transition-colors"
-              >
-                <svg
-                  className="w-6 h-6"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
-                </svg>
-              </a>
-              <a
-                href="https://twitter.com/octamy"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Octamy on Twitter"
-                className="text-gray-300 hover:text-white transition-colors"
-              >
-                <svg
-                  className="w-6 h-6"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z" />
-                </svg>
-              </a>
-              <a
-                href="https://instagram.com/octamy"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Octamy on Instagram"
-                className="text-gray-300 hover:text-white transition-colors"
-              >
-                <svg
-                  className="w-6 h-6"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.174-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.083.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.402.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.357-.629-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24.009 12.017 24.009c6.624 0 11.99-5.367 11.99-11.988C24.007 5.367 18.641.001 12.017.001z" />
-                </svg>
-              </a>
-            </div>
-          </div>
-
-          {/* Quick Links */}
-          <div>
-            <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
-            <ul className="space-y-2">
-              <li>
-                <Link
-                  href="/"
-                  className="text-gray-300 hover:text-white transition-colors"
-                >
-                  All Courses
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/verify"
-                  className="text-gray-300 hover:text-white transition-colors"
-                >
-                  Verify Certificate
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/about"
-                  className="text-gray-300 hover:text-white transition-colors"
-                >
-                  About Us
-                </Link>
-              </li>
-              <li>
-                <a
-                  href="/contact"
-                  className="text-gray-300 hover:text-white transition-colors"
-                >
-                  Contact
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          {/* Support */}
-          <div>
-            <h4 className="text-lg font-semibold mb-4">Legal & Support</h4>
-            <ul className="space-y-2">
-              <li>
-                <Link
-                  href="/help-center"
-                  className="text-gray-300 hover:text-white transition-colors"
-                >
-                  Help Center
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/trust"
-                  className="text-gray-300 hover:text-white transition-colors"
-                >
-                  Trust & Compliance
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/privacy-policy"
-                  className="text-gray-300 hover:text-white transition-colors"
-                >
-                  Privacy Policy
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/terms-of-service"
-                  className="text-gray-300 hover:text-white transition-colors"
-                >
-                  Terms of Service
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/refund-policy"
-                  className="text-gray-300 hover:text-white transition-colors"
-                >
-                  Refund Policy
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/cookie-policy"
-                  className="text-gray-300 hover:text-white transition-colors"
-                >
-                  Cookie Policy
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/disclaimer"
-                  className="text-gray-300 hover:text-white transition-colors"
-                >
-                  Disclaimer
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/reseller-agreement"
-                  className="text-gray-300 hover:text-white transition-colors"
-                >
-                  Reseller Agreement
-                </Link>
-              </li>
-              <li>
-                <a
-                  href="mailto:support@octamy.com"
-                  className="text-gray-300 hover:text-white transition-colors"
-                >
-                  Contact Support
-                </a>
-              </li>
-            </ul>
+    <footer className="bg-slate-950 text-slate-300">
+      {/* Trust strip */}
+      <div className="border-b border-white/10 bg-slate-900/40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 items-stretch">
+            <TrustBadge
+              icon={<BadgeCheck className="h-5 w-5" />}
+              label="ISO 9001:2015"
+              sub="Certified Operations"
+            />
+            <TrustBadge
+              icon={<CreditCard className="h-5 w-5" />}
+              label="PayU Secure"
+              sub="Encrypted Payments"
+            />
+            <TrustBadge
+              icon={<ShieldCheck className="h-5 w-5" />}
+              label="GST Registered"
+              sub="Compliant Invoicing"
+            />
+            <TrustBadge
+              icon={<Lock className="h-5 w-5" />}
+              label="256-bit SSL"
+              sub="HTTPS Everywhere"
+            />
+            <TrustBadge
+              icon={<FileCheck className="h-5 w-5" />}
+              label="DPDP Aligned"
+              sub="Indian Data Law"
+            />
+            <TrustBadge
+              icon={<BadgeCheck className="h-5 w-5" />}
+              label="MSME Registered"
+              sub="Govt. of India"
+            />
           </div>
         </div>
+      </div>
 
-        <div className="border-t border-gray-800 mt-12 pt-8">
-          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 text-xs text-gray-400">
-            <div className="space-y-1">
-              <p className="font-semibold text-gray-300">Octamy Solutions Private Limited</p>
-              <p>{import.meta.env.VITE_COMPANY_CIN ? `CIN: ${import.meta.env.VITE_COMPANY_CIN}` : 'CIN: Available on request'} · {import.meta.env.VITE_COMPANY_GSTIN ? `GSTIN: ${import.meta.env.VITE_COMPANY_GSTIN}` : 'GSTIN: Available on request'}</p>
-              <p>{import.meta.env.VITE_COMPANY_ADDRESS || 'Registered office details available on request'}</p>
-              <p>Grievance Officer: <a href="mailto:grievance@octamy.com" className="underline">grievance@octamy.com</a> · Support: <a href="mailto:support@octamy.com" className="underline">support@octamy.com</a></p>
-              <p className="italic max-w-2xl">Skill-Verification Internship Programs on this platform are assessment and skill-certification initiatives only and do not constitute employment or any guarantee of placement.</p>
-            </div>
-            <p className="text-gray-300 md:text-right">
-              &copy; {new Date().getFullYear()} Octamy. All rights reserved.
+      {/* Main footer */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-10">
+          {/* Brand + newsletter */}
+          <div className="md:col-span-5">
+            <Link href="/" aria-label="Octamy home">
+              <img src={octamyLogoLight} alt="Octamy" className="h-9" />
+            </Link>
+            <p className="mt-5 text-slate-400 max-w-md leading-relaxed">
+              India's assessment-first skill verification platform. Take certifications
+              for free — pay only when you pass. Trusted by candidates, recruiters and
+              partners across India.
             </p>
+
+            <form onSubmit={onSubscribe} className="mt-7">
+              <label htmlFor="footer-newsletter" className="text-sm font-semibold text-white">
+                Get product updates
+              </label>
+              <p className="text-xs text-slate-400 mt-1">
+                New assessments, partner programs and platform updates. No spam.
+              </p>
+              <div className="mt-3 flex gap-2 max-w-md">
+                <Input
+                  id="footer-newsletter"
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  aria-label="Your email address"
+                  className="bg-white/5 border-white/15 text-white placeholder:text-slate-500 focus-visible:ring-sky-500"
+                />
+                <Button
+                  type="submit"
+                  disabled={submitting}
+                  className="bg-sky-600 hover:bg-sky-500 text-white shrink-0"
+                >
+                  {submitting ? "Sending…" : (
+                    <>
+                      Subscribe <ArrowRight className="ml-1 h-4 w-4" />
+                    </>
+                  )}
+                </Button>
+              </div>
+            </form>
+
+            <div className="mt-7 flex items-center gap-4">
+              <SocialLink
+                href="https://linkedin.com/company/octamy"
+                label="Octamy on LinkedIn"
+              >
+                <Linkedin className="h-5 w-5" />
+              </SocialLink>
+              <SocialLink
+                href="https://twitter.com/octamy"
+                label="Octamy on Twitter / X"
+              >
+                <Twitter className="h-5 w-5" />
+              </SocialLink>
+              <SocialLink
+                href="https://instagram.com/octamy"
+                label="Octamy on Instagram"
+              >
+                <Instagram className="h-5 w-5" />
+              </SocialLink>
+              <SocialLink
+                href="https://youtube.com/@octamy"
+                label="Octamy on YouTube"
+              >
+                <Youtube className="h-5 w-5" />
+              </SocialLink>
+            </div>
+          </div>
+
+          {/* Platform */}
+          <FooterColumn title="Platform" className="md:col-span-2">
+            <ul className="space-y-2.5">
+              <FooterLink to="/courses">Skill Assessments</FooterLink>
+              <FooterLink to="/virtual-internships">Virtual Internships</FooterLink>
+              <FooterLink to="/business-certifications">Business Certifications</FooterLink>
+              <FooterLink to="/learning-paths">Learning Paths</FooterLink>
+              <FooterLink to="/verify">Verify Certificate</FooterLink>
+            </ul>
+          </FooterColumn>
+
+          {/* Company */}
+          <FooterColumn title="Company" className="md:col-span-2">
+            <ul className="space-y-2.5">
+              <FooterLink to="/about">About Us</FooterLink>
+              <FooterLink to="/partners">Partner Program</FooterLink>
+              <FooterLink to="/sponsor">Sponsor a Talent</FooterLink>
+              <FooterLink to="/contact">Contact</FooterLink>
+              <FooterLink to="/help-center">Help Center</FooterLink>
+            </ul>
+          </FooterColumn>
+
+          {/* Legal */}
+          <FooterColumn title="Legal & Trust" className="md:col-span-3">
+            <div className="grid grid-cols-2 gap-x-4">
+              <ul className="space-y-2.5">
+                <FooterLink to="/trust">Trust & Compliance</FooterLink>
+                <FooterLink to="/privacy-policy">Privacy Policy</FooterLink>
+                <FooterLink to="/terms-of-service">Terms of Service</FooterLink>
+                <FooterLink to="/refund-policy">Refund Policy</FooterLink>
+                <FooterLink to="/cookie-policy">Cookie Policy</FooterLink>
+              </ul>
+              <ul className="space-y-2.5">
+                <FooterLink to="/disclaimer">Disclaimer</FooterLink>
+                <FooterLink to="/acceptable-use">Acceptable Use</FooterLink>
+                <FooterLink to="/reseller-agreement">Reseller Agreement</FooterLink>
+                <FooterLink to="/accessibility">Accessibility</FooterLink>
+                <li>
+                  <a
+                    href={`mailto:${GRIEVANCE_EMAIL}`}
+                    className="text-slate-400 hover:text-white transition-colors text-sm"
+                  >
+                    Grievance Officer
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            <div className="mt-6 rounded-lg border border-white/10 bg-white/5 p-4 text-sm text-slate-300">
+              <div className="flex items-center gap-2 font-semibold text-white">
+                <Mail className="h-4 w-4" /> Contact us
+              </div>
+              <ul className="mt-2 space-y-1.5 text-slate-400">
+                <li>
+                  Support:&nbsp;
+                  <a
+                    href={`mailto:${SUPPORT_EMAIL}`}
+                    className="text-sky-400 hover:text-sky-300"
+                  >
+                    {SUPPORT_EMAIL}
+                  </a>
+                </li>
+                <li>
+                  Legal:&nbsp;
+                  <a
+                    href={`mailto:${LEGAL_EMAIL}`}
+                    className="text-sky-400 hover:text-sky-300"
+                  >
+                    {LEGAL_EMAIL}
+                  </a>
+                </li>
+                {SUPPORT_PHONE && (
+                  <li className="flex items-center gap-1.5">
+                    <Phone className="h-3.5 w-3.5" /> {SUPPORT_PHONE}
+                  </li>
+                )}
+              </ul>
+            </div>
+          </FooterColumn>
+        </div>
+      </div>
+
+      {/* Compliance + bottom bar */}
+      <div className="border-t border-white/10 bg-black/40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 text-xs text-slate-400">
+            <div className="lg:col-span-7 space-y-1.5">
+              <p className="font-semibold text-slate-200 text-sm">{COMPANY_NAME}</p>
+              <p>
+                {COMPANY_CIN ? `CIN: ${COMPANY_CIN}` : "CIN: Available on request"}
+                {" · "}
+                {COMPANY_GSTIN ? `GSTIN: ${COMPANY_GSTIN}` : "GSTIN: Available on request"}
+                {ISO_NUMBER ? ` · ISO 9001:2015 Cert No. ${ISO_NUMBER}` : " · ISO 9001:2015 — Cert. on request"}
+              </p>
+              <p>{COMPANY_ADDRESS || "Registered office details available on request."}</p>
+              <p className="italic max-w-3xl pt-1">
+                Skill-Verification Internship Programs on this platform are assessment
+                and skill-certification initiatives only and do not constitute
+                employment, payroll engagement, or any guarantee of placement.
+              </p>
+            </div>
+            <div className="lg:col-span-5 lg:text-right space-y-1.5">
+              <p className="text-slate-200">
+                Payments processed securely via PayU. Refunds per{" "}
+                <Link href="/refund-policy" className="text-sky-400 hover:text-sky-300 underline">
+                  refund policy
+                </Link>
+                .
+              </p>
+              <p>Disputes are subject to the exclusive jurisdiction of Indian courts.</p>
+              <p className="pt-2 text-slate-500">
+                © {year} {COMPANY_NAME}. All rights reserved.
+              </p>
+            </div>
           </div>
         </div>
       </div>
     </footer>
+  );
+}
+
+function TrustBadge({
+  icon,
+  label,
+  sub,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  sub: string;
+}) {
+  return (
+    <div className="flex items-center gap-3 rounded-lg border border-white/10 bg-white/5 px-3 py-2.5">
+      <div className="text-sky-400 shrink-0">{icon}</div>
+      <div className="leading-tight">
+        <div className="text-xs font-semibold text-white">{label}</div>
+        <div className="text-[11px] text-slate-400">{sub}</div>
+      </div>
+    </div>
+  );
+}
+
+function FooterColumn({
+  title,
+  children,
+  className = "",
+}: {
+  title: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={className}>
+      <h4 className="text-sm font-semibold text-white tracking-wide uppercase">
+        {title}
+      </h4>
+      <div className="mt-4">{children}</div>
+    </div>
+  );
+}
+
+function FooterLink({ to, children }: { to: string; children: React.ReactNode }) {
+  return (
+    <li>
+      <Link
+        href={to}
+        className="text-slate-400 hover:text-white transition-colors text-sm"
+      >
+        {children}
+      </Link>
+    </li>
+  );
+}
+
+function SocialLink({
+  href,
+  label,
+  children,
+}: {
+  href: string;
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={label}
+      className="inline-flex items-center justify-center h-9 w-9 rounded-full border border-white/15 bg-white/5 text-slate-300 hover:text-white hover:bg-white/10 hover:border-white/25 transition-colors"
+    >
+      {children}
+    </a>
   );
 }

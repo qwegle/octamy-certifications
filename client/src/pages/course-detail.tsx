@@ -183,6 +183,20 @@ export default function CourseDetail() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-black">
+      {course && (
+        <Helmet>
+          <title>{course.metaTitle || `${course.title} — Skill Certification | Octamy`}</title>
+          <meta
+            name="description"
+            content={course.metaDescription || course.description}
+          />
+          <link rel="canonical" href={`https://octamy.com/courses/${course.slug}`} />
+          <meta property="og:title" content={course.title} />
+          <meta property="og:description" content={course.metaDescription || course.description} />
+          <meta property="og:url" content={`https://octamy.com/courses/${course.slug}`} />
+          <meta property="og:type" content="website" />
+        </Helmet>
+      )}
       {/* Header */}
       <header className="bg-white dark:bg-black shadow-sm border-b border-black dark:border-white">
         <div className="container mx-auto px-4 py-4">

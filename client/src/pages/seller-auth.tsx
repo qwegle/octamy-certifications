@@ -87,7 +87,7 @@ export default function SellerAuth() {
       <SEO
         title="Become an Octamy Partner — Earn ₹ for every certificate sold"
         description="Join the Octamy Partner Program. Share your referral code, earn 10% commission on every certification sold, get paid weekly to UPI or bank. No targets, no inventory, no upfront cost."
-        path="/seller-auth"
+        path="/partners"
       />
 
       {/* Top bar — minimal, just brand and home link */}
