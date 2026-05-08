@@ -90,9 +90,12 @@ export class PayUMoneyService {
       baseUrl: 'https://secure.payu.in/_payment'
     };
 
-    // Only throw error in production
-    if (process.env.NODE_ENV === 'production' && (!this.config.merchantId || !this.config.merchantKey || !this.config.salt)) {
-      throw new Error('PayUMoney configuration is incomplete. Please provide PAYUMONEY_MERCHANT_ID, PAYUMONEY_MERCHANT_KEY, and PAYUMONEY_SALT');
+    // Don't crash the worker if keys are not yet configured. Per-request methods
+    // (generateHash / verifyResponse) already throw a clear error when the
+    // credentials are missing, so payment routes will fail with a proper message
+    // while the rest of the platform stays online.
+    if (!this.config.merchantId || !this.config.merchantKey || !this.config.salt) {
+      console.warn('[payumoney] credentials not configured — payment endpoints will be disabled until PAYU_* env vars are set');
     }
   }
 
