@@ -16,6 +16,15 @@ import {
   skillAssessments,
   sponsors,
   contactSubmissions,
+  creators,
+  institutes,
+  instituteMembers,
+  type Creator,
+  type InsertCreator,
+  type Institute,
+  type InsertInstitute,
+  type InstituteMember,
+  type InsertInstituteMember,
   interviews,
   interviewQuestions,
   recruiters,
@@ -237,6 +246,30 @@ export interface IStorage {
   // Skill Assessment operations
   getUserSkillAssessments(userId: number, categoryId?: number): Promise<SkillAssessment[]>;
   getValidSkillAssessment(userId: number, categoryId: number): Promise<SkillAssessment | undefined>;
+
+  // Creator operations
+  createCreator(data: InsertCreator): Promise<Creator>;
+  getCreatorByUserId(userId: number): Promise<Creator | undefined>;
+  getCreatorBySlug(slug: string): Promise<Creator | undefined>;
+  updateCreator(id: number, data: Partial<InsertCreator>): Promise<Creator | undefined>;
+
+  // Institute operations
+  createInstitute(data: InsertInstitute): Promise<Institute>;
+  getInstituteBySlug(slug: string): Promise<Institute | undefined>;
+  updateInstitute(id: number, data: Partial<InsertInstitute>): Promise<Institute | undefined>;
+  addInstituteMember(instituteId: number, userId: number, role?: string, status?: string): Promise<InstituteMember>;
+  getInstituteMembersByUserId(userId: number): Promise<(InstituteMember & { institute: Institute })[]>;
+  getInstituteByUserId(userId: number): Promise<(Institute & { memberRole: string }) | undefined>;
+
+  // Aggregate roles
+  getUserRoles(userId: number): Promise<{
+    isLearner: boolean;
+    isCreator: boolean;
+    isInstituteMember: boolean;
+    isRecruiter: boolean;
+    isSeller: boolean;
+    isAdmin: boolean;
+  }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -3005,6 +3038,118 @@ export class DatabaseStorage implements IStorage {
           updatedAt: new Date(),
         },
       });
+  }
+
+  // ===== Creator operations =====
+  async createCreator(data: InsertCreator): Promise<Creator> {
+    const [row] = await db.insert(creators).values(data).returning();
+    return row;
+  }
+
+  async getCreatorByUserId(userId: number): Promise<Creator | undefined> {
+    const [row] = await db.select().from(creators).where(eq(creators.userId, userId));
+    return row || undefined;
+  }
+
+  async getCreatorBySlug(slug: string): Promise<Creator | undefined> {
+    const [row] = await db.select().from(creators).where(eq(creators.slug, slug));
+    return row || undefined;
+  }
+
+  async updateCreator(id: number, data: Partial<InsertCreator>): Promise<Creator | undefined> {
+    const [row] = await db
+      .update(creators)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(creators.id, id))
+      .returning();
+    return row || undefined;
+  }
+
+  // ===== Institute operations =====
+  async createInstitute(data: InsertInstitute): Promise<Institute> {
+    const [row] = await db.insert(institutes).values(data).returning();
+    return row;
+  }
+
+  async getInstituteBySlug(slug: string): Promise<Institute | undefined> {
+    const [row] = await db.select().from(institutes).where(eq(institutes.slug, slug));
+    return row || undefined;
+  }
+
+  async updateInstitute(id: number, data: Partial<InsertInstitute>): Promise<Institute | undefined> {
+    const [row] = await db
+      .update(institutes)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(institutes.id, id))
+      .returning();
+    return row || undefined;
+  }
+
+  async addInstituteMember(
+    instituteId: number,
+    userId: number,
+    role: string = "teacher",
+    status: string = "active",
+  ): Promise<InstituteMember> {
+    const [row] = await db
+      .insert(instituteMembers)
+      .values({ instituteId, userId, role, status, joinedAt: new Date() })
+      .returning();
+    return row;
+  }
+
+  async getInstituteMembersByUserId(
+    userId: number,
+  ): Promise<(InstituteMember & { institute: Institute })[]> {
+    const rows = await db
+      .select()
+      .from(instituteMembers)
+      .innerJoin(institutes, eq(instituteMembers.instituteId, institutes.id))
+      .where(eq(instituteMembers.userId, userId));
+    return rows.map((r: any) => ({ ...r.institute_members, institute: r.institutes }));
+  }
+
+  async getInstituteByUserId(
+    userId: number,
+  ): Promise<(Institute & { memberRole: string }) | undefined> {
+    const memberships = await this.getInstituteMembersByUserId(userId);
+    if (memberships.length === 0) return undefined;
+    // Prefer owner > admin > teacher > staff
+    const priority: Record<string, number> = { owner: 0, admin: 1, teacher: 2, staff: 3 };
+    memberships.sort((a, b) => (priority[a.role] ?? 9) - (priority[b.role] ?? 9));
+    const m = memberships[0];
+    return { ...m.institute, memberRole: m.role };
+  }
+
+  // ===== Aggregate roles =====
+  async getUserRoles(userId: number) {
+    const user = await this.getUser(userId);
+    const isAdmin = !!user?.isAdmin;
+    const email = user?.email?.toLowerCase() || "";
+
+    const [creatorRow] = await db.select().from(creators).where(eq(creators.userId, userId));
+    const memberships = await db
+      .select()
+      .from(instituteMembers)
+      .where(eq(instituteMembers.userId, userId));
+
+    let isRecruiter = false;
+    let isSeller = false;
+    if (email) {
+      const [rec] = await db.select().from(recruiters).where(eq(recruiters.email, email));
+      isRecruiter = !!rec;
+      const [sell] = await db.select().from(sellers).where(eq(sellers.email, email));
+      isSeller = !!sell;
+    }
+
+    return {
+      isLearner: true,
+      isCreator: !!creatorRow,
+      isInstituteMember: memberships.length > 0,
+      isRecruiter,
+      isSeller,
+      isAdmin,
+    };
   }
 }
 

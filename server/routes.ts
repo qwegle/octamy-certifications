@@ -22,6 +22,7 @@ import {
   interviewResponses,
   users as usersTable,
   contactSubmissions,
+  recruiters as recruitersTable,
 } from "@shared/schema";
 import { desc, and, eq, not } from "drizzle-orm";
 import { db, pool } from "./db";
@@ -3837,6 +3838,240 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch user rating" });
     }
   });
+
+  // ============================================================
+  // Identity foundation: creators, institutes, role aggregation
+  // ============================================================
+
+  const slugify = (s: string): string =>
+    s
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9\s-]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "")
+      .slice(0, 60) || `user-${Date.now()}`;
+
+  const ensureUniqueCreatorSlug = async (base: string): Promise<string> => {
+    let slug = base;
+    let n = 1;
+    // eslint-disable-next-line no-await-in-loop
+    while (await storage.getCreatorBySlug(slug)) {
+      slug = `${base}-${n++}`;
+      if (n > 50) {
+        slug = `${base}-${Date.now()}`;
+        break;
+      }
+    }
+    return slug;
+  };
+
+  const ensureUniqueInstituteSlug = async (base: string): Promise<string> => {
+    let slug = base;
+    let n = 1;
+    while (await storage.getInstituteBySlug(slug)) {
+      slug = `${base}-${n++}`;
+      if (n > 50) {
+        slug = `${base}-${Date.now()}`;
+        break;
+      }
+    }
+    return slug;
+  };
+
+  // Aggregate role flags for the authenticated user
+  app.get("/api/me/roles", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const roles = await storage.getUserRoles(req.user!.userId);
+      res.json(roles);
+    } catch (error) {
+      console.error("getUserRoles error:", error);
+      res.status(500).json({ message: "Failed to fetch roles" });
+    }
+  });
+
+  // Onboarding: create a Creator profile (idempotent)
+  app.post(
+    "/api/onboarding/creator",
+    authenticateToken,
+    async (req: AuthenticatedRequest, res: Response) => {
+      try {
+        const userId = req.user!.userId;
+        const existing = await storage.getCreatorByUserId(userId);
+        if (existing) return res.json({ creator: existing, created: false });
+
+        const { displayName, slug, bio, avatarUrl, websiteUrl, twitterHandle, instagramHandle } =
+          req.body || {};
+        if (!displayName || typeof displayName !== "string") {
+          return res.status(400).json({ message: "displayName is required" });
+        }
+
+        const finalSlug = await ensureUniqueCreatorSlug(slug ? slugify(slug) : slugify(displayName));
+        const creator = await storage.createCreator({
+          userId,
+          displayName,
+          slug: finalSlug,
+          bio: bio || null,
+          avatarUrl: avatarUrl || null,
+          websiteUrl: websiteUrl || null,
+          twitterHandle: twitterHandle || null,
+          instagramHandle: instagramHandle || null,
+          status: "pending",
+          plan: "free",
+        } as any);
+        res.status(201).json({ creator, created: true });
+      } catch (error) {
+        console.error("creator onboarding error:", error);
+        res.status(500).json({ message: "Failed to create creator profile" });
+      }
+    },
+  );
+
+  // Onboarding: create an Institute and add user as owner (idempotent)
+  app.post(
+    "/api/onboarding/institute",
+    authenticateToken,
+    async (req: AuthenticatedRequest, res: Response) => {
+      try {
+        const userId = req.user!.userId;
+        const existing = await storage.getInstituteByUserId(userId);
+        if (existing) return res.json({ institute: existing, created: false });
+
+        const {
+          name,
+          slug,
+          legalName,
+          contactEmail,
+          contactPhone,
+          sizeRange,
+          industry,
+          websiteUrl,
+          addressLine1,
+          addressLine2,
+          city,
+          state,
+          country,
+          pincode,
+          gstin,
+          pan,
+        } = req.body || {};
+        if (!name || typeof name !== "string") {
+          return res.status(400).json({ message: "name is required" });
+        }
+
+        const finalSlug = await ensureUniqueInstituteSlug(slug ? slugify(slug) : slugify(name));
+        const institute = await storage.createInstitute({
+          name,
+          slug: finalSlug,
+          legalName: legalName || null,
+          contactEmail: contactEmail || null,
+          contactPhone: contactPhone || null,
+          sizeRange: sizeRange || null,
+          industry: industry || null,
+          websiteUrl: websiteUrl || null,
+          addressLine1: addressLine1 || null,
+          addressLine2: addressLine2 || null,
+          city: city || null,
+          state: state || null,
+          country: country || "India",
+          pincode: pincode || null,
+          gstin: gstin || null,
+          pan: pan || null,
+          status: "pending",
+          plan: "starter",
+        } as any);
+
+        await storage.addInstituteMember(institute.id, userId, "owner", "active");
+        res.status(201).json({ institute, created: true });
+      } catch (error) {
+        console.error("institute onboarding error:", error);
+        res.status(500).json({ message: "Failed to create institute" });
+      }
+    },
+  );
+
+  // Onboarding: recruiter (currently a thin pass-through; recruiter portal owns creation)
+  app.post(
+    "/api/onboarding/recruiter",
+    authenticateToken,
+    async (req: AuthenticatedRequest, res: Response) => {
+      try {
+        const userId = req.user!.userId;
+        const user = await storage.getUser(userId);
+        if (!user) return res.status(404).json({ message: "User not found" });
+
+        // If a recruiter row already exists with this email, treat as no-op.
+        const [existing] = await db
+          .select()
+          .from(recruitersTable)
+          .where(eq(recruitersTable.email, user.email));
+        if (existing) {
+          return res.json({ recruiter: existing, created: false });
+        }
+
+        const { companyName, companySize, hiringFor } = req.body || {};
+        if (!companyName) {
+          return res.status(400).json({ message: "companyName is required" });
+        }
+
+        // Minimal recruiter row — the existing recruiter portal handles full KYC.
+        const [recruiter] = await db
+          .insert(recruitersTable)
+          .values({
+            email: user.email,
+            password: "", // OAuth-style; recruiter portal can set later
+            firstName: (user.name || "").split(" ")[0] || "",
+            lastName: (user.name || "").split(" ").slice(1).join(" ") || "",
+            phone: user.phone || "",
+            designation: "",
+            companyName,
+            companySize: companySize || "1-10",
+            industry: hiringFor || "",
+            companyAddress: "",
+            companyCity: "",
+            companyState: "",
+            companyCountry: "India",
+          })
+          .returning();
+        res.status(201).json({ recruiter, created: true });
+      } catch (error) {
+        console.error("recruiter onboarding error:", error);
+        res.status(500).json({ message: "Failed to create recruiter profile" });
+      }
+    },
+  );
+
+  // Read-back endpoints used by dashboards
+  app.get(
+    "/api/me/creator",
+    authenticateToken,
+    async (req: AuthenticatedRequest, res: Response) => {
+      try {
+        const creator = await storage.getCreatorByUserId(req.user!.userId);
+        if (!creator) return res.status(404).json({ message: "Not a creator" });
+        res.json(creator);
+      } catch (error) {
+        console.error("get me/creator error:", error);
+        res.status(500).json({ message: "Failed to fetch creator" });
+      }
+    },
+  );
+
+  app.get(
+    "/api/me/institute",
+    authenticateToken,
+    async (req: AuthenticatedRequest, res: Response) => {
+      try {
+        const institute = await storage.getInstituteByUserId(req.user!.userId);
+        if (!institute) return res.status(404).json({ message: "Not an institute member" });
+        res.json(institute);
+      } catch (error) {
+        console.error("get me/institute error:", error);
+        res.status(500).json({ message: "Failed to fetch institute" });
+      }
+    },
+  );
 
   const httpServer = createServer(app);
   return httpServer;

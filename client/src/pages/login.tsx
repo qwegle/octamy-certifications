@@ -11,6 +11,7 @@ import Footer from '@/components/footer';
 import { GoogleAuthButton } from '@/components/google-auth-button';
 import { useGoogleAuthHandler } from '@/utils/google-auth-handler';
 import { SEO } from '@/components/seo';
+import { apiRequest } from '@/lib/queryClient';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 
 type Variant = 'default' | 'partners' | 'recruiter' | 'creator' | 'institute';
@@ -60,13 +61,62 @@ export default function Login() {
     try {
       await login(email, password);
       toast({ title: 'Welcome back', description: 'Redirecting…' });
+
       let dest = next || '/dashboard';
-      try {
-        const stored = JSON.parse(localStorage.getItem('user') || 'null');
-        if (!next && stored?.isAdmin) dest = '/admin/dashboard';
-        if (!next && variant === 'recruiter') dest = '/recruiter/dashboard';
-        if (!next && variant === 'partners') dest = '/partner-dashboard';
-      } catch {}
+      if (!next) {
+        try {
+          const stored = JSON.parse(localStorage.getItem('user') || 'null');
+          if (stored?.isAdmin) {
+            dest = '/admin/dashboard';
+          } else {
+            // Smart route based on aggregated roles.
+            try {
+              const rolesRes = await apiRequest('GET', '/api/me/roles');
+              const roles = (await rolesRes.json()) as {
+                isCreator: boolean;
+                isInstituteMember: boolean;
+                isRecruiter: boolean;
+                isSeller: boolean;
+                isAdmin: boolean;
+              };
+
+              const variantPref: Record<Exclude<Variant, 'default'>, { has: boolean; path: string }> = {
+                creator: { has: roles.isCreator, path: '/creator/dashboard' },
+                institute: { has: roles.isInstituteMember, path: '/institute/dashboard' },
+                recruiter: { has: roles.isRecruiter, path: '/recruiter/dashboard' },
+                partners: { has: roles.isSeller, path: '/partner-dashboard' },
+              };
+
+              if (variant !== 'default' && variantPref[variant].has) {
+                dest = variantPref[variant].path;
+              } else {
+                if (roles.isAdmin) dest = '/admin/dashboard';
+                else {
+                  const nonLearner = [
+                    roles.isCreator && '/creator/dashboard',
+                    roles.isInstituteMember && '/institute/dashboard',
+                    roles.isRecruiter && '/recruiter/dashboard',
+                    roles.isSeller && '/partner-dashboard',
+                  ].filter(Boolean) as string[];
+                  if (nonLearner.length === 1) dest = nonLearner[0];
+                  else dest = '/dashboard';
+                }
+                if (variant !== 'default') {
+                  toast({
+                    title: 'Signed in',
+                    description: `You don't have a ${variant} profile yet — opening your dashboard.`,
+                  });
+                }
+              }
+            } catch {
+              if (variant === 'recruiter') dest = '/recruiter/dashboard';
+              else if (variant === 'partners') dest = '/partner-dashboard';
+              else if (variant === 'creator') dest = '/creator/dashboard';
+              else if (variant === 'institute') dest = '/institute/dashboard';
+            }
+          }
+        } catch {}
+      }
       setTimeout(() => setLocation(dest), 600);
     } catch (err) {
       toast({

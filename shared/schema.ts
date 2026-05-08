@@ -237,8 +237,101 @@ export const courses = pgTable("courses", {
   isInternship: boolean("is_internship").default(false).notNull(),
   metaTitle: text("meta_title"),
   metaDescription: text("meta_description"),
+  // Ownership & visibility (P0 multi-tenant identity)
+  ownerType: text("owner_type").default("admin").notNull(), // admin | creator | institute
+  ownerId: integer("owner_id"),
+  visibility: text("visibility").default("public").notNull(), // public | unlisted | private
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+// Creators — individuals selling courses on Octamy. 1:1 with users.
+export const creators = pgTable("creators", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull().unique(),
+  displayName: text("display_name").notNull(),
+  slug: text("slug").notNull().unique(),
+  bio: text("bio"),
+  avatarUrl: text("avatar_url"),
+  websiteUrl: text("website_url"),
+  twitterHandle: text("twitter_handle"),
+  instagramHandle: text("instagram_handle"),
+  status: text("status").default("pending").notNull(), // pending | approved | rejected
+  approvedAt: timestamp("approved_at"),
+  approvedBy: integer("approved_by").references(() => users.id),
+  plan: text("plan").default("free").notNull(), // free | pro | premium
+  planRenewsAt: timestamp("plan_renews_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Institutes — organizations using Octamy for cohorts / skill verification.
+export const institutes = pgTable("institutes", {
+  id: serial("id").primaryKey(),
+  slug: text("slug").notNull().unique(),
+  name: text("name").notNull(),
+  legalName: text("legal_name"),
+  logoUrl: text("logo_url"),
+  websiteUrl: text("website_url"),
+  industry: text("industry"),
+  sizeRange: text("size_range"), // 1-10 | 11-50 | 51-200 | 201-1000 | 1000+
+  contactEmail: text("contact_email"),
+  contactPhone: text("contact_phone"),
+  addressLine1: text("address_line1"),
+  addressLine2: text("address_line2"),
+  city: text("city"),
+  state: text("state"),
+  country: text("country").default("India"),
+  pincode: text("pincode"),
+  gstin: text("gstin"),
+  pan: text("pan"),
+  status: text("status").default("pending").notNull(), // pending | verified | rejected
+  plan: text("plan").default("starter").notNull(), // starter | growth | enterprise
+  planRenewsAt: timestamp("plan_renews_at"),
+  studentSeatLimit: integer("student_seat_limit").default(500).notNull(),
+  cohortLimit: integer("cohort_limit").default(5).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Institute members — M:N between users and institutes.
+export const instituteMembers = pgTable("institute_members", {
+  id: serial("id").primaryKey(),
+  instituteId: integer("institute_id").references(() => institutes.id).notNull(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  role: text("role").default("teacher").notNull(), // owner | admin | teacher | staff
+  status: text("status").default("active").notNull(), // active | invited | suspended
+  invitedBy: integer("invited_by").references(() => users.id),
+  invitedAt: timestamp("invited_at"),
+  joinedAt: timestamp("joined_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (t) => ({
+  uniqMember: unique().on(t.instituteId, t.userId),
+}));
+
+export const insertCreatorSchema = createInsertSchema(creators).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  approvedAt: true,
+});
+export const insertInstituteSchema = createInsertSchema(institutes).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export const insertInstituteMemberSchema = createInsertSchema(instituteMembers).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type Creator = typeof creators.$inferSelect;
+export type InsertCreator = z.infer<typeof insertCreatorSchema>;
+export type Institute = typeof institutes.$inferSelect;
+export type InsertInstitute = z.infer<typeof insertInstituteSchema>;
+export type InstituteMember = typeof instituteMembers.$inferSelect;
+export type InsertInstituteMember = z.infer<typeof insertInstituteMemberSchema>;
 
 export const questions = pgTable("questions", {
   id: serial("id").primaryKey(),

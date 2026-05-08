@@ -11,6 +11,7 @@ import Footer from '@/components/footer';
 import { GoogleAuthButton } from '@/components/google-auth-button';
 import { useGoogleAuthHandler } from '@/utils/google-auth-handler';
 import { SEO } from '@/components/seo';
+import { apiRequest } from '@/lib/queryClient';
 import { GraduationCap, Sparkles, Building2, Briefcase, ArrowLeft } from 'lucide-react';
 
 type Role = 'learner' | 'creator' | 'institute' | 'recruiter';
@@ -96,7 +97,7 @@ export default function Register() {
     try {
       await register(email, password, name);
 
-      // Stash role-specific signup intent for later provisioning.
+      // Stash role-specific signup intent (legacy callers may still read this)
       try {
         const intent: Record<string, unknown> = { role, phone };
         if (role === 'creator') Object.assign(intent, { displayName, creatorType, wantsCreator: true });
@@ -105,12 +106,49 @@ export default function Register() {
         localStorage.setItem('octamy.signupIntent', JSON.stringify(intent));
       } catch {}
 
-      toast({ title: 'Account created', description: 'Welcome to Octamy.' });
-
+      // Provision role-specific server-side profile.
       let dest = '/dashboard';
-      if (role === 'creator') dest = '/dashboard?role=creator-pending';
-      if (role === 'institute') dest = '/dashboard?role=institute-pending';
-      if (role === 'recruiter') dest = '/recruiter/onboarding';
+      try {
+        if (role === 'creator') {
+          await apiRequest('POST', '/api/onboarding/creator', {
+            displayName,
+            bio: '',
+          });
+          dest = '/creator/dashboard';
+        } else if (role === 'institute') {
+          await apiRequest('POST', '/api/onboarding/institute', {
+            name: instituteName,
+            contactEmail: email,
+            sizeRange: ['1-10', '11-50', '51-200', '201-1000', '1000+'].includes(instituteType)
+              ? instituteType
+              : '11-50',
+            industry: instituteType,
+            gstin: gstin || undefined,
+          });
+          dest = '/institute/dashboard';
+        } else if (role === 'recruiter') {
+          await apiRequest('POST', '/api/onboarding/recruiter', {
+            companyName,
+            companySize,
+          });
+          dest = '/recruiter/onboarding';
+        }
+      } catch (provisionError) {
+        console.error('Onboarding provisioning failed:', provisionError);
+        toast({
+          title: 'Account created, finishing setup later',
+          description:
+            provisionError instanceof Error
+              ? provisionError.message
+              : 'You can complete your profile from the dashboard.',
+        });
+      }
+
+      try {
+        localStorage.removeItem('octamy.signupIntent');
+      } catch {}
+
+      toast({ title: 'Account created', description: 'Welcome to Octamy.' });
       setTimeout(() => setLocation(dest), 600);
     } catch (e2) {
       toast({

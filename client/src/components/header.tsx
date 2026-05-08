@@ -24,6 +24,24 @@ import {
 } from "lucide-react";
 import octamyLogoLight from "@/assets/image_1750054465427.png";
 import type { Category } from "@shared/schema";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { apiRequest } from "@/lib/queryClient";
+
+type RoleFlags = {
+  isLearner: boolean;
+  isCreator: boolean;
+  isInstituteMember: boolean;
+  isRecruiter: boolean;
+  isSeller: boolean;
+  isAdmin: boolean;
+};
 
 const PREMIUM_CATEGORY_SLUGS: string[] = (
   import.meta.env.VITE_PREMIUM_CATEGORY_SLUGS || ""
@@ -51,6 +69,36 @@ export default function Header() {
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const isAuthenticated = !!user && !!token;
+
+  const { data: roles } = useQuery<RoleFlags>({
+    queryKey: ["/api/me/roles"],
+    enabled: isAuthenticated,
+    queryFn: async () => {
+      const res = await apiRequest("GET", "/api/me/roles");
+      return res.json();
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const hats = (() => {
+    if (!roles) return [] as { key: string; label: string; href: string; matches: (p: string) => boolean }[];
+    const list: { key: string; label: string; href: string; matches: (p: string) => boolean }[] = [
+      { key: "learner", label: "Learner", href: "/dashboard", matches: (p) => p === "/dashboard" || p === "/progress" || p === "/preferences" },
+    ];
+    if (roles.isCreator)
+      list.push({ key: "creator", label: "Creator", href: "/creator/dashboard", matches: (p) => p.startsWith("/creator/") && p !== "/creator" });
+    if (roles.isInstituteMember)
+      list.push({ key: "institute", label: "Institute", href: "/institute/dashboard", matches: (p) => p.startsWith("/institute/") && p !== "/institute" });
+    if (roles.isRecruiter)
+      list.push({ key: "recruiter", label: "Recruiter", href: "/recruiter/dashboard", matches: (p) => p.startsWith("/recruiter/") });
+    if (roles.isSeller)
+      list.push({ key: "seller", label: "Affiliate", href: "/seller-dashboard", matches: (p) => p === "/seller-dashboard" || p === "/partner-dashboard" });
+    if (roles.isAdmin)
+      list.push({ key: "admin", label: "Admin", href: "/admin/dashboard", matches: (p) => p.startsWith("/admin") || p.startsWith("/qwegle") });
+    return list;
+  })();
+
+  const currentHat = hats.find((h) => h.matches(location)) || hats[0];
 
   const { data: categories = [] } = useQuery<Category[]>({
     queryKey: ["/api/categories"],
@@ -246,9 +294,33 @@ export default function Header() {
                 </div>
               ) : !isLoading ? (
                 <div className="hidden md:flex items-center gap-2">
-                  <Link href="/dashboard">
-                    <Button variant="ghost" className="text-slate-700 hover:text-slate-900 hover:bg-slate-100">Dashboard</Button>
-                  </Link>
+                  {hats.length >= 2 ? (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="text-slate-700 hover:text-slate-900 hover:bg-slate-100 gap-1">
+                          {currentHat?.label ?? "Dashboard"}
+                          <ChevronDown className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-48">
+                        <DropdownMenuLabel>Switch hat</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        {hats.map((h) => (
+                          <DropdownMenuItem
+                            key={h.key}
+                            onClick={() => setLocation(h.href)}
+                            className={currentHat?.key === h.key ? "bg-slate-100 font-medium" : ""}
+                          >
+                            {h.label}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  ) : (
+                    <Link href={currentHat?.href ?? "/dashboard"}>
+                      <Button variant="ghost" className="text-slate-700 hover:text-slate-900 hover:bg-slate-100">Dashboard</Button>
+                    </Link>
+                  )}
                   <Button onClick={handleLogout} variant="outline" className="border-slate-300 text-slate-700 rounded-full">Logout</Button>
                 </div>
               ) : null}
@@ -328,9 +400,25 @@ export default function Header() {
                   </>
                 ) : (
                   <>
-                    <Link href="/dashboard">
-                      <Button variant="outline" className="w-full">Dashboard</Button>
-                    </Link>
+                    {hats.length >= 2 ? (
+                      <div className="space-y-2">
+                        <div className="text-xs uppercase tracking-wide text-slate-500 px-1">Switch hat</div>
+                        {hats.map((h) => (
+                          <Link key={h.key} href={h.href}>
+                            <Button
+                              variant={currentHat?.key === h.key ? "default" : "outline"}
+                              className={`w-full ${currentHat?.key === h.key ? "bg-slate-900 text-white" : ""}`}
+                            >
+                              {h.label}
+                            </Button>
+                          </Link>
+                        ))}
+                      </div>
+                    ) : (
+                      <Link href={currentHat?.href ?? "/dashboard"}>
+                        <Button variant="outline" className="w-full">Dashboard</Button>
+                      </Link>
+                    )}
                     <Button onClick={handleLogout} className="w-full bg-slate-900 hover:bg-black text-white">Logout</Button>
                   </>
                 )}

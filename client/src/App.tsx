@@ -16,6 +16,8 @@ import Verification from "@/pages/verification";
 import Auth from "@/pages/auth";
 import Login from "@/pages/login";
 import Register from "@/pages/register";
+import CreatorDashboard from "@/pages/creator-dashboard";
+import InstituteDashboard from "@/pages/institute-dashboard";
 import ForgotPassword from "@/pages/forgot-password";
 import ResetPassword from "@/pages/reset-password";
 import CreatorLanding from "@/pages/creator-landing";
@@ -125,6 +127,8 @@ function Router() {
       <Route path="/internship-payment/:certificateId" component={InternshipPayment} />
       <Route path="/certificate/:certificateId" component={Certificate} />
       <Route path="/dashboard" component={Dashboard} />
+      <Route path="/creator/dashboard" component={CreatorDashboard} />
+      <Route path="/institute/dashboard" component={InstituteDashboard} />
       <Route path="/progress" component={Progress} />
       <Route path="/preferences" component={Preferences} />
       <Route path="/qwegle" component={AdminDashboard} />
