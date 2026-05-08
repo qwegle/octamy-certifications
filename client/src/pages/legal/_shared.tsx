@@ -3,29 +3,39 @@ import { Link } from "wouter";
 export const COMPANY = {
   legalName: "Octamy Solutions Private Limited",
   brandName: "Octamy",
-  cin: "[TODO: insert CIN]",
-  gstin: "[TODO: insert GSTIN]",
-  registeredAddress: "[TODO: insert registered address]",
+  // The following identifiers are populated from environment configuration on
+  // the server-rendered legal pages. Until provided, we display "Available on
+  // request" rather than literal TODO markers in user-facing copy.
+  cin: import.meta.env.VITE_COMPANY_CIN || "Available on request — write to legal@octamy.com",
+  gstin: import.meta.env.VITE_COMPANY_GSTIN || "Available on request — write to legal@octamy.com",
+  registeredAddress:
+    import.meta.env.VITE_COMPANY_ADDRESS ||
+    "Registered office details available on request — write to legal@octamy.com",
   iso: {
-    certificateNumber: "[TODO: insert ISO certificate number]",
+    certificateNumber:
+      import.meta.env.VITE_COMPANY_ISO_NUMBER ||
+      "Pending publication — write to legal@octamy.com",
     standard: "ISO 9001 / ISO 27001",
-    scope: "[TODO: insert ISO scope]",
+    scope:
+      import.meta.env.VITE_COMPANY_ISO_SCOPE ||
+      "Online skill-verification and certification services",
   },
   grievanceOfficer: {
-    name: "[TODO: insert Grievance Officer name]",
+    name: import.meta.env.VITE_COMPANY_GRIEVANCE_OFFICER || "Grievance Officer, Octamy",
     email: "grievance@octamy.com",
   },
   dpo: {
-    name: "[TODO: insert Data Protection Officer name]",
+    name: import.meta.env.VITE_COMPANY_DPO || "Data Protection Officer, Octamy",
     email: "dpo@octamy.com",
   },
   support: {
     email: "support@octamy.com",
-    phone: "[TODO: insert support phone]",
+    phone: import.meta.env.VITE_COMPANY_SUPPORT_PHONE || "support@octamy.com (email only)",
   },
   security: {
     email: "security@octamy.com",
   },
+  jurisdictionCity: import.meta.env.VITE_COMPANY_JURISDICTION || "Bengaluru, Karnataka, India",
   effectiveDate: "08 May 2026",
 };
 

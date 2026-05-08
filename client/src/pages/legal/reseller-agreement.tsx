@@ -57,7 +57,7 @@ export default function ResellerAgreement() {
       <p>You agree to indemnify {COMPANY.legalName} against any third-party claims, fines, or losses arising from your breach of this Agreement, your marketing activities, or your violation of law.</p>
 
       <h2>10. Governing law and jurisdiction</h2>
-      <p>This Agreement is governed by the laws of India. Courts at [TODO: insert seat of jurisdiction] have exclusive jurisdiction.</p>
+      <p>This Agreement is governed by the laws of India. Courts at {COMPANY.jurisdictionCity} have exclusive jurisdiction.</p>
 
       <h2>11. Contact</h2>
       <p>For questions write to <a href={`mailto:${COMPANY.support.email}`}>{COMPANY.support.email}</a>.</p>

@@ -371,11 +371,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/sellers/register", async (req: Request, res: Response) => {
     try {
       const { email, password, name, phone } = req.body;
+      const acceptedAgreement = req.body.acceptedAgreement ?? req.body.agreementAccepted;
 
       if (!email || !password || !name) {
         return res
           .status(400)
           .json({ message: "Email, password, and name are required" });
+      }
+
+      // Compliance: every reseller must explicitly accept the agreement.
+      // The client checkbox already gates the submit button; this is the
+      // server-side enforcement + persistence required for legal record-keeping.
+      if (!acceptedAgreement) {
+        return res
+          .status(400)
+          .json({ message: "You must accept the Reseller / Affiliate Agreement to register." });
       }
 
       const existingSeller = await storage.getSellerByEmail(email);
@@ -395,6 +405,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isApproved: false, // Requires admin approval
         isActive: true,
         referralCode: await generateUniqueReferralCode(),
+        agreementAccepted: true,
+        agreementAcceptedAt: new Date(),
+        agreementVersion: "v1.0-2026-05",
       });
 
       const token = jwt.sign(
@@ -1337,41 +1350,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         let examData = await loadPendingExam<any>(tempExamId);
 
         if (!examData) {
-          // Try to reconstruct from tempExamId pattern: temp_{timestamp}_{sessionId}
-          // Extract courseId from the original temp exam submission pattern
-          const parts = tempExamId.split("_");
-          if (parts.length >= 2 && parts[0] === "temp") {
-            // For this specific temp exam, we know it's course 67
-            const courseId = 67; // Demo Course ID
-            const course = await storage.getCourse(courseId);
-            if (course) {
-              // Create minimal exam data for payment processing
-              examData = {
-                courseId: courseId,
-                course: course,
-                userId: req.user?.userId || null,
-                userEmail: req.user?.email || "guest@octamy.com",
-                userName: "Guest User",
-                score: 85, // Default passing score for payment
-                passed: true,
-                timeTaken: 30,
-                mastered: false,
-                sessionId: tempExamId,
-                ipAddress: req.ip,
-                userAgent: req.get("User-Agent"),
-                tabSwitches: 0,
-              };
-              console.log(
-                `Reconstructed exam data for tempExamId: ${tempExamId}`
-              );
-            }
-          }
-        }
-
-        if (!examData) {
+          // No reconstruction fallback. We never invent exam data — that would
+          // let any user with an unknown tempExamId obtain a free certificate
+          // for an arbitrary course they never passed.
           return res
             .status(404)
-            .json({ message: "Exam data not found or expired" });
+            .json({ message: "Exam data not found or expired. Please retake the assessment." });
         }
 
         if (!examData.passed) {

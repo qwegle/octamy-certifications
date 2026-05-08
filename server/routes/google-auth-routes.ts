@@ -10,26 +10,23 @@ router.get('/auth/google/user',
 );
 
 router.get('/auth/google/user/callback',
-  passport.authenticate('google-user', { session: false }),
-  (req, res) => {
-    try {
-      const user = req.user as any;
-      console.log('Google user callback - User:', user);
-      
+  (req, res, next) => {
+    passport.authenticate('google-user', { session: false }, (err: any, user: any) => {
+      if (err) {
+        const code = err.code === 'GOOGLE_LINK_REQUIRED' ? 'google_link_required' : 'auth_failed';
+        return res.redirect(`/auth?error=${code}`);
+      }
       if (!user) {
-        console.error('No user returned from Google authentication');
         return res.redirect('/auth?error=auth_failed');
       }
-      
-      const token = generateToken(user, 'user');
-      console.log('Generated token for user:', user.email);
-      
-      // Redirect to auth page with token for frontend handling
-      res.redirect(`/auth?token=${token}&success=true`);
-    } catch (error) {
-      console.error('Google auth callback error:', error);
-      res.redirect('/auth?error=auth_failed');
-    }
+      try {
+        const token = generateToken(user, 'user');
+        return res.redirect(`/auth?token=${token}&success=true`);
+      } catch (error) {
+        console.error('Google auth callback error:', error);
+        return res.redirect('/auth?error=auth_failed');
+      }
+    })(req, res, next);
   }
 );
 
@@ -39,26 +36,23 @@ router.get('/auth/google/seller',
 );
 
 router.get('/auth/google/seller/callback',
-  passport.authenticate('google-seller', { session: false }),
-  (req, res) => {
-    try {
-      const seller = req.user as any;
-      console.log('Google seller callback - Seller:', seller);
-      
+  (req, res, next) => {
+    passport.authenticate('google-seller', { session: false }, (err: any, seller: any) => {
+      if (err) {
+        const code = err.code === 'GOOGLE_LINK_REQUIRED' ? 'google_link_required' : 'auth_failed';
+        return res.redirect(`/seller-auth?error=${code}`);
+      }
       if (!seller) {
-        console.error('No seller returned from Google authentication');
         return res.redirect('/seller-auth?error=auth_failed');
       }
-      
-      const token = generateToken(seller, 'seller');
-      console.log('Generated token for seller:', seller.email);
-      
-      // Redirect to seller auth page with token for frontend handling
-      res.redirect(`/seller-auth?token=${token}&success=true`);
-    } catch (error) {
-      console.error('Google seller auth callback error:', error);
-      res.redirect('/seller-auth?error=auth_failed');
-    }
+      try {
+        const token = generateToken(seller, 'seller');
+        return res.redirect(`/seller-auth?token=${token}&success=true`);
+      } catch (error) {
+        console.error('Google seller auth callback error:', error);
+        return res.redirect('/seller-auth?error=auth_failed');
+      }
+    })(req, res, next);
   }
 );
 

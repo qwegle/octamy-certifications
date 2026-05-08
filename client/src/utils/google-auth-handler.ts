@@ -52,9 +52,9 @@ export function useGoogleAuthHandler() {
       
       // Handle authentication error
       let errorMessage = "Google authentication failed. Please try again.";
-      
-      if (error === 'auth_failed') {
-        errorMessage = "Google authentication failed. Please try again.";
+
+      if (error === 'google_link_required') {
+        errorMessage = "An account with this email already exists. Please sign in with your password and link Google from your profile settings.";
       }
       
       toast({
@@ -80,42 +80,26 @@ export function useSellerGoogleAuthHandler() {
     const success = urlParams.get('success');
     const error = urlParams.get('error');
 
-    console.log('Seller Google Auth Handler - URL params:', { token: !!token, success, error });
-
     if (token && success === 'true') {
-      console.log('Seller Google Auth Handler - Processing successful authentication');
-      
       // Store the seller token using the same key as regular seller auth
       localStorage.setItem('sellerToken', token);
-      
-      // Clean up URL
       window.history.replaceState({}, '', window.location.pathname);
-      
-      // Show success toast
       toast({
-        title: "Authentication Successful",
-        description: "Welcome! You've been signed in with Google as a partner.",
+        title: "Welcome, Partner!",
+        description: "You've been signed in with Google.",
       });
-      
-      // Redirect to seller dashboard
-      setTimeout(() => setLocation('/seller-dashboard'), 1000);
+      // CRITICAL: route registered in App.tsx is /partner-dashboard, not /seller-dashboard
+      setTimeout(() => setLocation('/partner-dashboard'), 800);
     } else if (error) {
-      console.log('Seller Google Auth Handler - Processing authentication error:', error);
-      
-      // Handle authentication error
-      let errorMessage = "Google authentication failed. Please try again.";
-      
-      if (error === 'auth_failed') {
-        errorMessage = "Google authentication failed. Please try again.";
+      let errorMessage = "Google sign-in failed. Please try again.";
+      if (error === 'google_link_required') {
+        errorMessage = "A partner account with this email already exists. Sign in with your password and link Google from the dashboard.";
       }
-      
       toast({
-        title: "Authentication Error",
+        title: "Sign-in Error",
         description: errorMessage,
         variant: "destructive",
       });
-      
-      // Clean up URL
       window.history.replaceState({}, '', window.location.pathname);
     }
   }, [setLocation, toast]);

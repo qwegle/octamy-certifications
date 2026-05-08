@@ -184,8 +184,8 @@ export default function Footer() {
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 text-xs text-gray-400">
             <div className="space-y-1">
               <p className="font-semibold text-gray-300">Octamy Solutions Private Limited</p>
-              <p>CIN: [TODO: insert CIN] · GSTIN: [TODO: insert GSTIN]</p>
-              <p>Registered Office: [TODO: insert registered address]</p>
+              <p>{import.meta.env.VITE_COMPANY_CIN ? `CIN: ${import.meta.env.VITE_COMPANY_CIN}` : 'CIN: Available on request'} · {import.meta.env.VITE_COMPANY_GSTIN ? `GSTIN: ${import.meta.env.VITE_COMPANY_GSTIN}` : 'GSTIN: Available on request'}</p>
+              <p>{import.meta.env.VITE_COMPANY_ADDRESS || 'Registered office details available on request'}</p>
               <p>Grievance Officer: <a href="mailto:grievance@octamy.com" className="underline">grievance@octamy.com</a> · Support: <a href="mailto:support@octamy.com" className="underline">support@octamy.com</a></p>
               <p className="italic max-w-2xl">Skill-Verification Internship Programs on this platform are assessment and skill-certification initiatives only and do not constitute employment or any guarantee of placement.</p>
             </div>

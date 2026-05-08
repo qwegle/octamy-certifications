@@ -6,9 +6,17 @@ import { generateUniqueReferralCode } from './utils/referralCodeGenerator';
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 
-// Google OAuth Configuration
-const GOOGLE_CLIENT_ID = "sxt8OEXPWxrFXVK95WLtqfhlACiqa87k";
-const GOOGLE_CLIENT_SECRET = "a7Ku36qnh3aID_ewTrk8sIHvmKiOL99hvSunIG2d8xUTcEPrlFtWSIPp8sDMOPHa";
+// Google OAuth Configuration. Secrets are read from env — never commit credentials.
+// Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in .env (production rotates the
+// previously-leaked values).
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "";
+const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || "";
+
+if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
+  console.warn(
+    "[google-auth] GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET not configured — Google sign-in is disabled."
+  );
+}
 
 export function setupGoogleAuth() {
   // User Google Strategy

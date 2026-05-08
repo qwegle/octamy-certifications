@@ -45,7 +45,6 @@ function CertificateSlider() {
   // Duplicate certificates for seamless infinite scroll
   const duplicatedCertificates =
     certificates.length > 0 ? [...certificates, ...certificates] : [];
-  console.log(duplicatedCertificates);
   return (
     <div className="bg-black text-white py-8">
       <div className="max-w-7xl mx-auto px-6">
@@ -392,7 +391,7 @@ export default function Landing() {
                 <Link href="/auth">
                   <Button
                     variant="outline"
-                    className="border-white text-black hover:bg-white hover:text-black"
+                    className="border-white text-white hover:bg-white hover:text-black"
                   >
                     Login
                   </Button>
@@ -472,22 +471,22 @@ export default function Landing() {
               <div className="bg-black text-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Users className="w-8 h-8" />
               </div>
-              <h3 className="text-3xl font-bold text-black mb-2">50K+</h3>
-              <p className="text-gray-600">Certified Professionals</p>
+              <h3 className="text-3xl font-bold text-black mb-2">{(courses?.length ?? 0)}+</h3>
+              <p className="text-gray-600">Skill assessments live</p>
             </div>
             <div>
               <div className="bg-black text-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Award className="w-8 h-8" />
               </div>
-              <h3 className="text-3xl font-bold text-black mb-2">200+</h3>
-              <p className="text-gray-600">Professional Courses</p>
+              <h3 className="text-3xl font-bold text-black mb-2">{(categories?.length ?? 0)}</h3>
+              <p className="text-gray-600">Career tracks</p>
             </div>
             <div>
               <div className="bg-black text-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                 <TrendingUp className="w-8 h-8" />
               </div>
-              <h3 className="text-3xl font-bold text-black mb-2">98%</h3>
-              <p className="text-gray-600">Success Rate</p>
+              <h3 className="text-3xl font-bold text-black mb-2">100%</h3>
+              <p className="text-gray-600">Verified credentials — pay only after passing</p>
             </div>
           </div>
         </div>
@@ -728,17 +727,10 @@ export default function Landing() {
             </div>
             <div>
               <h4 className="font-semibold mb-4">Connect</h4>
-              <p className="text-gray-400 mb-4">
-                ISO Certified by Octamy Solutions Private Limited
+              <p className="text-gray-400 mb-4 text-sm">
+                Operated by {`Octamy Solutions Private Limited`}.<br/>
+                Compliance & ISO documentation available on request — write to <a href="mailto:legal@octamy.com" className="underline">legal@octamy.com</a>.
               </p>
-              <div className="flex space-x-4">
-                ⭐⭐⭐⭐⭐
-                {/* <Star className="w-5 h-5 text-yellow-400" />
-                <Star className="w-5 h-5 text-yellow-400" />
-                <Star className="w-5 h-5 text-yellow-400" />
-                <Star className="w-5 h-5 text-yellow-400" />
-                <Star className="w-5 h-5 text-yellow-400" /> */}
-              </div>
             </div>
           </div>
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">

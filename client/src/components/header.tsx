@@ -64,7 +64,7 @@ export default function Header() {
                 <Link href="/auth">
                   <Button
                     variant="outline"
-                    className="border-black text-black hover:bg-white hover:text-black"
+                    className="border-white text-white bg-transparent hover:bg-white hover:text-black"
                   >
                     Login
                   </Button>
