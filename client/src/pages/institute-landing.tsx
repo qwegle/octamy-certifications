@@ -5,6 +5,8 @@ import { SEO } from '@/components/seo';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Building2, GraduationCap, Briefcase, Check } from 'lucide-react';
+import { Reveal, Stagger, StaggerItem } from '@/components/motion-primitives';
+import { motion } from 'framer-motion';
 
 const tiers = [
   { name: 'Starter', price: '₹2,999/mo', students: '500 students', cohorts: '5 cohorts', features: ['Bulk CSV enroll', 'Private question banks', 'Results export', 'Your logo on certificates'] },
@@ -29,43 +31,80 @@ export default function InstituteLanding() {
       />
       <Header />
       <main className="flex-1">
-        <section className="py-20 px-4 text-center bg-gradient-to-b from-slate-50 to-white">
-          <div className="max-w-3xl mx-auto">
-            <h1 className="text-4xl md:text-5xl font-semibold text-slate-900 tracking-tight">
-              Verify your students' skills with industry-grade exams
-            </h1>
-            <p className="mt-4 text-lg text-slate-600">
+        <section className="relative overflow-hidden py-24 px-4 text-center">
+          <div aria-hidden className="pointer-events-none absolute inset-0 bg-grid-slate [mask-image:radial-gradient(ellipse_at_top,black_30%,transparent_75%)]" />
+          <div aria-hidden className="pointer-events-none absolute -top-20 left-1/4 h-[420px] w-[420px] rounded-full bg-emerald-300/20 blur-3xl animate-blob" />
+          <div aria-hidden className="pointer-events-none absolute -top-10 right-10 h-[320px] w-[320px] rounded-full bg-sky-300/25 blur-3xl animate-blob-slow" />
+          <div className="relative max-w-3xl mx-auto">
+            <motion.span
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700 bg-white/80 backdrop-blur border border-emerald-200 rounded-full px-3 py-1.5 shadow-sm"
+            >
+              <GraduationCap className="w-3 h-3" /> For institutes & corporates
+            </motion.span>
+            <motion.h1
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="mt-6 text-4xl md:text-6xl font-extrabold text-slate-900 tracking-tight"
+            >
+              Verify your students' skills with{' '}
+              <span className="bg-gradient-to-r from-emerald-700 via-sky-700 to-indigo-700 bg-clip-text text-transparent">industry-grade exams</span>
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="mt-5 text-lg text-slate-600"
+            >
               Bulk-enroll cohorts. Run scheduled exam windows. Issue white-label certificates with your logo.
-            </p>
-            <div className="mt-8 flex justify-center gap-3">
+            </motion.p>
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="mt-8 flex justify-center gap-3"
+            >
               <Link href="/register?role=institute">
-                <Button className="bg-slate-900 hover:bg-black text-white rounded-full px-6">Get started</Button>
+                <motion.span whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} className="inline-block">
+                  <Button className="cta-pulse bg-slate-900 hover:bg-black text-white rounded-full px-6 shadow-xl shadow-slate-900/20">Get started</Button>
+                </motion.span>
               </Link>
               <Link href="/contact">
-                <Button variant="outline" className="rounded-full px-6">Talk to sales</Button>
+                <motion.span whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="inline-block">
+                  <Button variant="outline" className="rounded-full px-6 bg-white/80 backdrop-blur">Talk to sales</Button>
+                </motion.span>
               </Link>
-            </div>
+            </motion.div>
           </div>
         </section>
 
         <section className="py-16 px-4">
           <div className="max-w-5xl mx-auto">
-            <h2 className="text-2xl md:text-3xl font-semibold text-slate-900 text-center">Built for schools, colleges, coaching</h2>
-            <div className="grid md:grid-cols-3 gap-6 mt-10">
+            <Reveal as="h2" className="text-2xl md:text-3xl font-bold text-slate-900 text-center">Built for schools, colleges, coaching</Reveal>
+            <Stagger className="grid md:grid-cols-3 gap-6 mt-10">
               {[
                 { icon: GraduationCap, t: 'Schools & colleges', d: 'Run end-of-term skill assessments and issue verifiable certificates.' },
                 { icon: Building2, t: 'Coaching & test-prep', d: 'Benchmark students against national cohorts and produce ranked results.' },
                 { icon: Briefcase, t: 'Corporate L&D', d: 'Verify employee upskilling with measurable, exportable evidence.' },
               ].map(({ icon: I, t, d }) => (
-                <Card key={t} className="border-slate-200">
-                  <CardContent className="pt-6">
-                    <I className="w-6 h-6 text-slate-700" />
-                    <div className="text-lg font-semibold text-slate-900 mt-3">{t}</div>
-                    <div className="text-sm text-slate-600 mt-2">{d}</div>
-                  </CardContent>
-                </Card>
+                <StaggerItem key={t}>
+                  <motion.div whileHover={{ y: -4 }} transition={{ type: 'spring', stiffness: 260, damping: 18 }}>
+                    <Card className="border-slate-200 h-full transition-shadow hover:shadow-lg">
+                      <CardContent className="pt-6">
+                        <div className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-slate-900 text-white">
+                          <I className="w-5 h-5" />
+                        </div>
+                        <div className="text-lg font-semibold text-slate-900 mt-4">{t}</div>
+                        <div className="text-sm text-slate-600 mt-2">{d}</div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                </StaggerItem>
               ))}
-            </div>
+            </Stagger>
           </div>
         </section>
 

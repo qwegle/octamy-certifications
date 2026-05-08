@@ -159,10 +159,14 @@ function BadgeTier({
   accent: string;
 }) {
   return (
-    <div className="group rounded-xl border border-slate-200 bg-white p-6 text-center transition-shadow hover:shadow-md">
+    <motion.div
+      whileHover={{ y: -6, scale: 1.02 }}
+      transition={{ type: "spring", stiffness: 260, damping: 18 }}
+      className="group rounded-xl border border-slate-200 bg-white p-6 text-center transition-shadow hover:shadow-lg"
+    >
       <div
         className={
-          "mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full ring-1 " +
+          "mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full ring-1 transition-transform group-hover:scale-110 group-hover:rotate-[6deg] " +
           accent
         }
       >
@@ -177,7 +181,7 @@ function BadgeTier({
       <p className="mt-2 text-xs uppercase tracking-wider text-slate-500">
         {label}
       </p>
-    </div>
+    </motion.div>
   );
 }
 
@@ -712,16 +716,16 @@ export default function Landing() {
       {/* 5. WHY OCTAMY / 3 PILLARS --------------------------------------- */}
       <section className="py-16 sm:py-24 bg-white">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center max-w-2xl mx-auto mb-14">
+          <Reveal as="div" className="text-center max-w-2xl mx-auto mb-14">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-700">
               Why Octamy
             </p>
             <h2 className="mt-3 text-3xl sm:text-4xl font-bold text-slate-900">
               Built for candidates and the people who hire them
             </h2>
-          </div>
+          </Reveal>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <Stagger className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {[
               {
                 Icon: ShieldCheck,
@@ -739,22 +743,25 @@ export default function Landing() {
                 body: "Score and badge tier (Bronze → Platinum) are printed on the certificate, so hiring teams get a real signal of competence.",
               },
             ].map((p) => (
-              <div
-                key={p.title}
-                className="rounded-xl border border-slate-200 bg-white p-8"
-              >
-                <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-slate-900 text-white">
-                  <p.Icon className="w-5 h-5" />
-                </div>
-                <h3 className="mt-5 text-lg font-semibold text-slate-900">
-                  {p.title}
-                </h3>
-                <p className="mt-2 text-sm text-slate-600 leading-relaxed">
-                  {p.body}
-                </p>
-              </div>
+              <StaggerItem key={p.title}>
+                <motion.div
+                  whileHover={{ y: -4 }}
+                  transition={{ type: "spring", stiffness: 240, damping: 18 }}
+                  className="h-full rounded-xl border border-slate-200 bg-white p-8 transition-shadow hover:shadow-lg"
+                >
+                  <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-slate-900 text-white">
+                    <p.Icon className="w-5 h-5" />
+                  </div>
+                  <h3 className="mt-5 text-lg font-semibold text-slate-900">
+                    {p.title}
+                  </h3>
+                  <p className="mt-2 text-sm text-slate-600 leading-relaxed">
+                    {p.body}
+                  </p>
+                </motion.div>
+              </StaggerItem>
             ))}
-          </div>
+          </Stagger>
         </div>
       </section>
 
@@ -767,7 +774,7 @@ export default function Landing() {
         className="py-16 sm:py-24 bg-white border-t border-slate-200"
       >
         <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center max-w-2xl mx-auto mb-14">
+          <Reveal as="div" className="text-center max-w-2xl mx-auto mb-14">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-700">
               Recognition
             </p>
@@ -779,38 +786,46 @@ export default function Landing() {
               assessment score — a transparent signal of competence for
               employers and recruiters.
             </p>
-          </div>
+          </Reveal>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-            <BadgeTier
-              tier="Bronze"
-              range="50–69%"
-              label="Verified Pass"
-              icon={<Medal className="w-7 h-7" />}
-              accent="text-amber-700 bg-amber-50 ring-amber-200"
-            />
-            <BadgeTier
-              tier="Silver"
-              range="70–79%"
-              label="Strong Pass"
-              icon={<Award className="w-7 h-7" />}
-              accent="text-slate-700 bg-slate-100 ring-slate-300"
-            />
-            <BadgeTier
-              tier="Gold"
-              range="80–89%"
-              label="Distinction"
-              icon={<Trophy className="w-7 h-7" />}
-              accent="text-yellow-700 bg-yellow-50 ring-yellow-200"
-            />
-            <BadgeTier
-              tier="Platinum"
-              range="90–100%"
-              label="Top 10% globally"
-              icon={<Crown className="w-7 h-7" />}
-              accent="text-sky-800 bg-sky-50 ring-sky-200"
-            />
-          </div>
+          <Stagger className="grid grid-cols-2 md:grid-cols-4 gap-5" step={0.08}>
+            <StaggerItem>
+              <BadgeTier
+                tier="Bronze"
+                range="50–69%"
+                label="Verified Pass"
+                icon={<Medal className="w-7 h-7" />}
+                accent="text-amber-700 bg-amber-50 ring-amber-200"
+              />
+            </StaggerItem>
+            <StaggerItem>
+              <BadgeTier
+                tier="Silver"
+                range="70–79%"
+                label="Strong Pass"
+                icon={<Award className="w-7 h-7" />}
+                accent="text-slate-700 bg-slate-100 ring-slate-300"
+              />
+            </StaggerItem>
+            <StaggerItem>
+              <BadgeTier
+                tier="Gold"
+                range="80–89%"
+                label="Distinction"
+                icon={<Trophy className="w-7 h-7" />}
+                accent="text-yellow-700 bg-yellow-50 ring-yellow-200"
+              />
+            </StaggerItem>
+            <StaggerItem>
+              <BadgeTier
+                tier="Platinum"
+                range="90–100%"
+                label="Top 10% globally"
+                icon={<Crown className="w-7 h-7" />}
+                accent="text-sky-800 bg-sky-50 ring-sky-200"
+              />
+            </StaggerItem>
+          </Stagger>
 
           <p className="mt-10 text-center text-xs text-slate-500">
             Tier is recorded on the certificate and verifiable at{" "}
@@ -874,112 +889,126 @@ export default function Landing() {
       </section>
 
       {/* 9. RECRUITERS / SELLERS SPLIT CTA ------------------------------- */}
-      <section className="py-16 sm:py-24 bg-slate-900">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div className="rounded-2xl border border-slate-700/60 bg-slate-800/40 p-8">
-              <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-white/10 text-white">
-                <Users className="w-5 h-5" />
-              </div>
-              <h3 className="mt-5 text-2xl font-bold text-white">
-                For Recruiters
-              </h3>
-              <p className="mt-2 text-slate-300 leading-relaxed">
-                Verify candidate skills in seconds. Check certificates by ID and
-                shortlist with confidence.
-              </p>
-              <Link href="/recruiter/login">
-                <Button
-                  variant="outline"
-                  className="mt-6 border-white/30 bg-transparent text-white hover:bg-white hover:text-slate-900 rounded-full"
-                >
-                  Hiring? Verify candidates
-                  <ArrowRight className="ml-2 w-4 h-4" />
-                </Button>
-              </Link>
-            </div>
-            <div className="rounded-2xl border border-slate-700/60 bg-slate-800/40 p-8">
-              <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-white/10 text-white">
-                <Briefcase className="w-5 h-5" />
-              </div>
-              <h3 className="mt-5 text-2xl font-bold text-white">
-                For Sellers & Partners
-              </h3>
-              <p className="mt-2 text-slate-300 leading-relaxed">
-                Publish your own assessments on Octamy and earn a commission
-                each time a candidate buys a certificate.
-              </p>
-              <Link href="/partners">
-                <Button
-                  variant="outline"
-                  className="mt-6 border-white/30 bg-transparent text-white hover:bg-white hover:text-slate-900 rounded-full"
-                >
-                  Sell assessments? Earn commission
-                  <ArrowRight className="ml-2 w-4 h-4" />
-                </Button>
-              </Link>
-            </div>
-          </div>
+      <section className="relative overflow-hidden py-16 sm:py-24 bg-slate-900">
+        <div aria-hidden className="pointer-events-none absolute inset-0 bg-grid-slate opacity-20 [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_75%)]" />
+        <div aria-hidden className="pointer-events-none absolute -top-20 left-10 h-[300px] w-[300px] rounded-full bg-sky-500/20 blur-3xl animate-blob" />
+        <div aria-hidden className="pointer-events-none absolute bottom-0 right-10 h-[260px] w-[260px] rounded-full bg-indigo-500/20 blur-3xl animate-blob-slow" />
+        <div className="relative max-w-7xl mx-auto px-6">
+          <Stagger className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <StaggerItem>
+              <motion.div
+                whileHover={{ y: -4 }}
+                transition={{ type: "spring", stiffness: 240, damping: 18 }}
+                className="h-full rounded-2xl border border-slate-700/60 bg-slate-800/40 backdrop-blur p-8 hover:border-sky-400/40 transition-colors"
+              >
+                <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-sky-500/15 text-sky-300 ring-1 ring-sky-400/30">
+                  <Users className="w-5 h-5" />
+                </div>
+                <h3 className="mt-5 text-2xl font-bold text-white">
+                  For Recruiters
+                </h3>
+                <p className="mt-2 text-slate-300 leading-relaxed">
+                  Verify candidate skills in seconds. Check certificates by ID and
+                  shortlist with confidence.
+                </p>
+                <Link href="/recruiter/login">
+                  <Button
+                    variant="outline"
+                    className="mt-6 border-white/30 bg-transparent text-white hover:bg-white hover:text-slate-900 rounded-full"
+                  >
+                    Hiring? Verify candidates
+                    <ArrowRight className="ml-2 w-4 h-4" />
+                  </Button>
+                </Link>
+              </motion.div>
+            </StaggerItem>
+            <StaggerItem>
+              <motion.div
+                whileHover={{ y: -4 }}
+                transition={{ type: "spring", stiffness: 240, damping: 18 }}
+                className="h-full rounded-2xl border border-slate-700/60 bg-slate-800/40 backdrop-blur p-8 hover:border-fuchsia-400/40 transition-colors"
+              >
+                <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-fuchsia-500/15 text-fuchsia-300 ring-1 ring-fuchsia-400/30">
+                  <Briefcase className="w-5 h-5" />
+                </div>
+                <h3 className="mt-5 text-2xl font-bold text-white">
+                  For Sellers & Partners
+                </h3>
+                <p className="mt-2 text-slate-300 leading-relaxed">
+                  Publish your own assessments on Octamy and earn a commission
+                  each time a candidate buys a certificate.
+                </p>
+                <Link href="/partners">
+                  <Button
+                    variant="outline"
+                    className="mt-6 border-white/30 bg-transparent text-white hover:bg-white hover:text-slate-900 rounded-full"
+                  >
+                    Sell assessments? Earn commission
+                    <ArrowRight className="ml-2 w-4 h-4" />
+                  </Button>
+                </Link>
+              </motion.div>
+            </StaggerItem>
+          </Stagger>
         </div>
       </section>
 
       {/* 10. FAQ ---------------------------------------------------------- */}
       <section className="py-16 sm:py-24 bg-white">
         <div className="max-w-3xl mx-auto px-6">
-          <div className="text-center mb-12">
+          <Reveal as="div" className="text-center mb-12">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-700">
               Questions
             </p>
             <h2 className="mt-3 text-3xl sm:text-4xl font-bold text-slate-900">
               Frequently asked
             </h2>
-          </div>
-          <Accordion type="single" collapsible className="w-full">
-            {FAQS.map((f, i) => (
-              <AccordionItem
-                key={i}
-                value={`item-${i}`}
-                className="border-slate-200"
-              >
-                <AccordionTrigger className="text-left text-slate-900 hover:no-underline">
-                  {f.q}
-                </AccordionTrigger>
-                <AccordionContent className="text-slate-600 leading-relaxed">
-                  {f.a}
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
+          </Reveal>
+          <Reveal as="div" delay={0.1}>
+            <Accordion type="single" collapsible className="w-full">
+              {FAQS.map((f, i) => (
+                <AccordionItem
+                  key={i}
+                  value={`item-${i}`}
+                  className="border-slate-200"
+                >
+                  <AccordionTrigger className="text-left text-slate-900 hover:no-underline">
+                    {f.q}
+                  </AccordionTrigger>
+                  <AccordionContent className="text-slate-600 leading-relaxed">
+                    {f.a}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </Reveal>
         </div>
       </section>
 
       {/* 11. FINAL CTA BAND ---------------------------------------------- */}
       <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 to-black">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background:
-              "radial-gradient(50% 50% at 50% 0%, rgba(56,189,248,0.12) 0%, rgba(0,0,0,0) 70%)",
-          }}
-        />
+        <div aria-hidden className="pointer-events-none absolute inset-0 bg-grid-slate opacity-15" />
+        <div aria-hidden className="pointer-events-none absolute -top-32 left-1/2 -translate-x-1/2 h-[420px] w-[720px] rounded-full bg-sky-500/20 blur-3xl animate-blob" />
+        <div aria-hidden className="pointer-events-none absolute bottom-0 left-1/3 h-[300px] w-[300px] rounded-full bg-indigo-500/20 blur-3xl animate-blob-slow" />
         <div className="relative max-w-4xl mx-auto px-6 py-20 sm:py-28 text-center">
-          <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white">
+          <Reveal as="h2" className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white">
             Start your first assessment — free.
-          </h2>
-          <p className="mt-5 text-base sm:text-lg text-slate-300 leading-relaxed max-w-2xl mx-auto">
+          </Reveal>
+          <Reveal as="p" delay={0.1} className="mt-5 text-base sm:text-lg text-slate-300 leading-relaxed max-w-2xl mx-auto">
             Pick an exam, prove your skill, and walk away with a recruiter-
             verifiable credential. No subscription, no card required to start.
-          </p>
-          <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
+          </Reveal>
+          <Reveal as="div" delay={0.2} className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link href="/exams">
-              <Button
-                size="lg"
-                className="bg-white text-slate-900 hover:bg-slate-100 rounded-full px-8 py-6 text-base font-semibold"
-              >
-                Browse exams
-                <ArrowRight className="ml-2 w-4 h-4" />
-              </Button>
+              <motion.span whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} className="inline-block">
+                <Button
+                  size="lg"
+                  className="bg-white text-slate-900 hover:bg-slate-100 rounded-full px-8 py-6 text-base font-semibold shadow-2xl shadow-sky-500/20"
+                >
+                  Browse exams
+                  <ArrowRight className="ml-2 w-4 h-4" />
+                </Button>
+              </motion.span>
             </Link>
             <a
               href="#how"
@@ -987,7 +1016,7 @@ export default function Landing() {
             >
               How it works →
             </a>
-          </div>
+          </Reveal>
         </div>
       </section>
 

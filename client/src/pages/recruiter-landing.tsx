@@ -5,6 +5,8 @@ import { SEO } from '@/components/seo';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { ShieldCheck, Filter, Download, Check } from 'lucide-react';
+import { Reveal, Stagger, StaggerItem } from '@/components/motion-primitives';
+import { motion } from 'framer-motion';
 
 const tiers = [
   { name: 'Starter', price: '₹2,999/mo', views: '50 profile views/mo', searches: '10 saved searches', features: ['Email candidate', 'Score filter', 'Badge filter'] },
@@ -29,43 +31,81 @@ export default function RecruiterLanding() {
       />
       <Header />
       <main className="flex-1">
-        <section className="py-20 px-4 text-center bg-gradient-to-b from-slate-50 to-white">
-          <div className="max-w-3xl mx-auto">
-            <h1 className="text-4xl md:text-5xl font-semibold text-slate-900 tracking-tight">
-              Hire candidates verified by skill, not resumes
-            </h1>
-            <p className="mt-4 text-lg text-slate-600">
+        <section className="relative overflow-hidden py-24 px-4 text-center">
+          <div aria-hidden className="pointer-events-none absolute inset-0 bg-grid-slate [mask-image:radial-gradient(ellipse_at_top,black_30%,transparent_75%)]" />
+          <div aria-hidden className="pointer-events-none absolute -top-20 left-1/4 h-[420px] w-[420px] rounded-full bg-indigo-300/25 blur-3xl animate-blob" />
+          <div aria-hidden className="pointer-events-none absolute -top-10 right-10 h-[320px] w-[320px] rounded-full bg-sky-300/25 blur-3xl animate-blob-slow" />
+          <div className="relative max-w-3xl mx-auto">
+            <motion.span
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-[0.18em] text-indigo-700 bg-white/80 backdrop-blur border border-indigo-200 rounded-full px-3 py-1.5 shadow-sm"
+            >
+              <ShieldCheck className="w-3 h-3" /> For recruiters & hiring teams
+            </motion.span>
+            <motion.h1
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="mt-6 text-4xl md:text-6xl font-extrabold text-slate-900 tracking-tight"
+            >
+              Hire candidates{' '}
+              <span className="bg-gradient-to-r from-indigo-700 via-sky-700 to-emerald-600 bg-clip-text text-transparent">verified by skill</span>
+              , not resumes
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="mt-5 text-lg text-slate-600"
+            >
               Filter on proctored exam scores, badges and skill levels. Export to your ATS. No more CV roulette.
-            </p>
-            <div className="mt-8 flex justify-center gap-3">
+            </motion.p>
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="mt-8 flex justify-center gap-3"
+            >
               <Link href="/register?role=recruiter">
-                <Button className="bg-slate-900 hover:bg-black text-white rounded-full px-6">Start hiring</Button>
+                <motion.span whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} className="inline-block">
+                  <Button className="cta-pulse bg-slate-900 hover:bg-black text-white rounded-full px-6 shadow-xl shadow-slate-900/20">Start hiring</Button>
+                </motion.span>
               </Link>
               <Link href="/pricing">
-                <Button variant="outline" className="rounded-full px-6">See pricing</Button>
+                <motion.span whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="inline-block">
+                  <Button variant="outline" className="rounded-full px-6 bg-white/80 backdrop-blur">See pricing</Button>
+                </motion.span>
               </Link>
-            </div>
+            </motion.div>
           </div>
         </section>
 
         <section className="py-16 px-4">
           <div className="max-w-5xl mx-auto">
-            <h2 className="text-2xl md:text-3xl font-semibold text-slate-900 text-center">Three pillars</h2>
-            <div className="grid md:grid-cols-3 gap-6 mt-10">
+            <Reveal as="h2" className="text-2xl md:text-3xl font-bold text-slate-900 text-center">Three pillars</Reveal>
+            <Stagger className="grid md:grid-cols-3 gap-6 mt-10">
               {[
                 { icon: ShieldCheck, t: 'Verified scores', d: 'Every score is from a proctored exam. Tamper-proof, exportable, third-party verifiable.' },
                 { icon: Filter, t: 'Live skill filters', d: 'Search by skill, score, percentile, badges and recency in real time.' },
                 { icon: Download, t: 'ATS export', d: 'Push shortlisted candidates to Greenhouse, Lever, Zoho Recruit via webhook.' },
               ].map(({ icon: I, t, d }) => (
-                <Card key={t} className="border-slate-200">
-                  <CardContent className="pt-6">
-                    <I className="w-6 h-6 text-slate-700" />
-                    <div className="text-lg font-semibold text-slate-900 mt-3">{t}</div>
-                    <div className="text-sm text-slate-600 mt-2">{d}</div>
-                  </CardContent>
-                </Card>
+                <StaggerItem key={t}>
+                  <motion.div whileHover={{ y: -4 }} transition={{ type: 'spring', stiffness: 260, damping: 18 }}>
+                    <Card className="border-slate-200 h-full transition-shadow hover:shadow-lg">
+                      <CardContent className="pt-6">
+                        <div className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-slate-900 text-white">
+                          <I className="w-5 h-5" />
+                        </div>
+                        <div className="text-lg font-semibold text-slate-900 mt-4">{t}</div>
+                        <div className="text-sm text-slate-600 mt-2">{d}</div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                </StaggerItem>
               ))}
-            </div>
+            </Stagger>
           </div>
         </section>
 
