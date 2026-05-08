@@ -14,17 +14,17 @@ router.get('/auth/google/user/callback',
     passport.authenticate('google-user', { session: false }, (err: any, user: any) => {
       if (err) {
         const code = err.code === 'GOOGLE_LINK_REQUIRED' ? 'google_link_required' : 'auth_failed';
-        return res.redirect(`/auth?error=${code}`);
+        return res.redirect(`/login?error=${code}`);
       }
       if (!user) {
-        return res.redirect('/auth?error=auth_failed');
+        return res.redirect('/login?error=auth_failed');
       }
       try {
         const token = generateToken(user, 'user');
-        return res.redirect(`/auth?token=${token}&success=true`);
+        return res.redirect(`/login?token=${token}&success=true`);
       } catch (error) {
         console.error('Google auth callback error:', error);
-        return res.redirect('/auth?error=auth_failed');
+        return res.redirect('/login?error=auth_failed');
       }
     })(req, res, next);
   }
@@ -40,17 +40,17 @@ router.get('/auth/google/seller/callback',
     passport.authenticate('google-seller', { session: false }, (err: any, seller: any) => {
       if (err) {
         const code = err.code === 'GOOGLE_LINK_REQUIRED' ? 'google_link_required' : 'auth_failed';
-        return res.redirect(`/seller-auth?error=${code}`);
+        return res.redirect(`/partners/login?error=${code}`);
       }
       if (!seller) {
-        return res.redirect('/seller-auth?error=auth_failed');
+        return res.redirect('/partners/login?error=auth_failed');
       }
       try {
         const token = generateToken(seller, 'seller');
-        return res.redirect(`/seller-auth?token=${token}&success=true`);
+        return res.redirect(`/partners/login?token=${token}&success=true`);
       } catch (error) {
         console.error('Google seller auth callback error:', error);
-        return res.redirect('/seller-auth?error=auth_failed');
+        return res.redirect('/partners/login?error=auth_failed');
       }
     })(req, res, next);
   }

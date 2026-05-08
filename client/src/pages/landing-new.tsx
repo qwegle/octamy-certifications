@@ -41,6 +41,7 @@ import {
   Search as SearchIcon,
 } from "lucide-react";
 import CourseCard from "@/components/course-card";
+import { GoogleAuthButton } from "@/components/google-auth-button";
 import { useAuth } from "@/hooks/useAuth";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
@@ -336,63 +337,93 @@ export default function Landing() {
         />
         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-slate-300 to-transparent" />
         <div className="relative max-w-7xl mx-auto px-6 pt-20 pb-16 sm:pt-28 sm:pb-24">
-          <div className="mx-auto max-w-4xl text-center">
-            <p className="inline-flex items-center rounded-full border border-slate-200 bg-white/90 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-sky-700 shadow-sm">
-            Skill Verification Platform
-            </p>
-            <h1 className="mt-6 text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-slate-900">
-              <span className="block">Free assessments.</span>
-              <span className="mt-1 block bg-gradient-to-r from-slate-900 via-sky-800 to-indigo-700 bg-clip-text text-transparent">
-                Pay only when you pass.
-              </span>
-            </h1>
-            <p className="mt-6 max-w-2xl mx-auto text-base sm:text-lg text-slate-600 leading-relaxed">
-              Earn verified, recruiter-checkable credentials across AI,
-              development, cloud, security and business — trusted by hiring
-              teams across India.
-            </p>
-            <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
-              <Link href="/exams">
-                <Button
-                  size="lg"
-                  className="bg-slate-900 hover:bg-black text-white rounded-full px-6 sm:px-8 py-6 text-base shadow-lg shadow-slate-900/15"
-                >
-                  Browse 50+ exams
-                  <ArrowRight className="ml-2 w-4 h-4" />
-                </Button>
-              </Link>
-              <a href="#how">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="border-slate-300 bg-white text-slate-700 hover:bg-slate-50 rounded-full px-6 sm:px-8 py-6 text-base"
-                >
-                  How it works
-                </Button>
-              </a>
-            </div>
-          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            <div className="lg:col-span-8">
+              <p className="inline-flex items-center rounded-full border border-slate-200 bg-white/90 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-sky-700 shadow-sm">
+                Skill Verification Platform
+              </p>
+              <h1 className="mt-6 text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-slate-900">
+                <span className="block">Free assessments.</span>
+                <span className="mt-1 block bg-gradient-to-r from-slate-900 via-sky-800 to-indigo-700 bg-clip-text text-transparent">
+                  Pay only when you pass.
+                </span>
+              </h1>
+              <p className="mt-6 max-w-2xl text-base sm:text-lg text-slate-600 leading-relaxed">
+                Earn verified, recruiter-checkable credentials across AI,
+                development, cloud, security and business — trusted by hiring
+                teams across India.
+              </p>
+              <div className="mt-10 flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                <Link href="/exams">
+                  <Button
+                    size="lg"
+                    className="bg-slate-900 hover:bg-black text-white rounded-full px-6 sm:px-8 py-6 text-base shadow-lg shadow-slate-900/15"
+                  >
+                    Browse 50+ exams
+                    <ArrowRight className="ml-2 w-4 h-4" />
+                  </Button>
+                </Link>
+                <a href="#how">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="border-slate-300 bg-white text-slate-700 hover:bg-slate-50 rounded-full px-6 sm:px-8 py-6 text-base"
+                  >
+                    How it works
+                  </Button>
+                </a>
+              </div>
 
-          <div className="mt-10 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-            <div className="flex gap-3 px-3 py-3 animate-scroll-left">
-              {[...heroBanners, ...heroBanners].map((item, idx) => (
-                <div
-                  key={`${item.title}-${idx}`}
-                  className="shrink-0 min-w-[280px] sm:min-w-[320px] rounded-xl border border-slate-200 bg-slate-50 px-4 py-3"
-                >
-                  <div className="flex items-start gap-3">
-                    <span className="mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-full bg-white ring-1 ring-slate-200">
-                      <item.icon className="h-4 w-4 text-slate-700" />
-                    </span>
-                    <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-sky-700">
-                        {item.title}
-                      </p>
-                      <p className="mt-1 text-sm font-medium text-slate-800">{item.text}</p>
+              <div className="mt-10 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <div className="flex gap-3 px-3 py-3 animate-scroll-left">
+                  {[...heroBanners, ...heroBanners].map((item, idx) => (
+                    <div
+                      key={`${item.title}-${idx}`}
+                      className="shrink-0 min-w-[280px] sm:min-w-[320px] rounded-xl border border-slate-200 bg-slate-50 px-4 py-3"
+                    >
+                      <div className="flex items-start gap-3">
+                        <span className="mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-full bg-white ring-1 ring-slate-200">
+                          <item.icon className="h-4 w-4 text-slate-700" />
+                        </span>
+                        <div>
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-sky-700">
+                            {item.title}
+                          </p>
+                          <p className="mt-1 text-sm font-medium text-slate-800">{item.text}</p>
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  ))}
                 </div>
-              ))}
+              </div>
+            </div>
+
+            <div className="lg:col-span-4">
+              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:sticky lg:top-24">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-sky-700">
+                  Get started
+                </p>
+                <h3 className="mt-2 text-2xl font-bold text-slate-900">Create your free account</h3>
+                <p className="mt-2 text-sm text-slate-600">
+                  Start in under a minute. Use email or continue with Google.
+                </p>
+                <div className="mt-5 space-y-3">
+                  <GoogleAuthButton type="user" />
+                  <Link href="/register">
+                    <Button className="w-full bg-slate-900 hover:bg-black text-white rounded-full">
+                      Register free
+                    </Button>
+                  </Link>
+                  <Link href="/login">
+                    <Button variant="outline" className="w-full rounded-full border-slate-300">
+                      Login
+                    </Button>
+                  </Link>
+                </div>
+                <p className="mt-4 text-xs text-slate-500">
+                  Learners, creators, institutes, and recruiters use the same account system.
+                </p>
+              </div>
             </div>
           </div>
 

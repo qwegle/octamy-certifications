@@ -235,23 +235,7 @@ export default function Header() {
         Skip to main content
       </a>
 
-      <div className="hidden md:block bg-slate-900 text-white text-xs">
-        <div className="max-w-7xl mx-auto px-6 h-8 flex items-center justify-between">
-          <p className="flex items-center gap-2 text-slate-200">
-            <Sparkles className="h-3.5 w-3.5 text-amber-300" />
-            <span>Free skill assessments · Pay only when you pass · ISO 9001:2015 certified platform</span>
-          </p>
-          <div className="flex items-center gap-5 text-slate-300">
-            <Link href="/verify" className="hover:text-white">Verify credential</Link>
-            <span className="opacity-40">•</span>
-            <Link href="/recruiter/login" className="hover:text-white">For recruiters</Link>
-            <span className="opacity-40">•</span>
-            <Link href="/partners" className="hover:text-white">Become a seller</Link>
-          </div>
-        </div>
-      </div>
-
-      <header className="sticky top-2 z-50" onMouseLeave={scheduleClose}>
+      <header className="sticky top-3 z-50" onMouseLeave={scheduleClose}>
         <div
           className={
             "max-w-7xl mx-auto px-4 sm:px-6 rounded-[999px] border backdrop-blur-md transition-all " +
