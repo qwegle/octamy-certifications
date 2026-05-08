@@ -502,6 +502,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
+  // Seller withdrawal request — client posts to /api/sellers/withdrawals
+  app.post(
+    "/api/sellers/withdrawals",
+    authenticateSellerToken,
+    async (req: SellerAuthenticatedRequest, res: Response) => {
+      try {
+        const sellerId = req.seller?.sellerId;
+        if (!sellerId) {
+          return res.status(401).json({ message: "Unauthorized" });
+        }
+
+        const seller = await storage.getSeller(sellerId);
+        if (!seller) {
+          return res.status(404).json({ message: "Seller not found" });
+        }
+
+        const requestedAmount = parseFloat(req.body?.amount || "0");
+        if (!requestedAmount || requestedAmount <= 0) {
+          return res.status(400).json({ message: "Invalid withdrawal amount" });
+        }
+        if (requestedAmount < 500) {
+          return res.status(400).json({ message: "Minimum withdrawal amount is ₹500" });
+        }
+
+        const availableEarnings = parseFloat(seller.totalEarnings || "0");
+        if (requestedAmount > availableEarnings) {
+          return res.status(400).json({ message: "Insufficient earnings for withdrawal" });
+        }
+
+        const withdrawalData = insertWithdrawalRequestSchema.parse({
+          sellerId,
+          amount: req.body.amount,
+          upiId: req.body.upiId || null,
+          bankAccountNumber: req.body.bankAccountNumber || null,
+          ifscCode: req.body.ifscCode || null,
+          accountHolderName: req.body.accountHolderName || null,
+          status: "pending",
+        });
+
+        const withdrawal = await storage.createWithdrawalRequest(withdrawalData);
+
+        return res.status(201).json({
+          message: "Withdrawal request submitted successfully",
+          withdrawal: {
+            id: withdrawal.id,
+            amount: withdrawal.amount,
+            status: withdrawal.status,
+            createdAt: withdrawal.createdAt?.toISOString() || new Date().toISOString(),
+          },
+        });
+      } catch (error: any) {
+        console.error("Withdrawal request error:", error);
+        return res
+          .status(500)
+          .json({ message: "Failed to create withdrawal request", error: error.message });
+      }
+    }
+  );
+
   // API routes moved to proper location with /api prefix to prevent conflicts
 
   // Register recruiter routes

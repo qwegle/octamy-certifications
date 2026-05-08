@@ -23,7 +23,10 @@ export default function Footer() {
             </p>
             <div className="flex space-x-4">
               <a
-                href="#"
+                href="https://linkedin.com/company/octamy"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Octamy on LinkedIn"
                 className="text-gray-300 hover:text-white transition-colors"
               >
                 <svg
@@ -35,7 +38,10 @@ export default function Footer() {
                 </svg>
               </a>
               <a
-                href="#"
+                href="https://twitter.com/octamy"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Octamy on Twitter"
                 className="text-gray-300 hover:text-white transition-colors"
               >
                 <svg
@@ -47,7 +53,10 @@ export default function Footer() {
                 </svg>
               </a>
               <a
-                href="#"
+                href="https://instagram.com/octamy"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Octamy on Instagram"
                 className="text-gray-300 hover:text-white transition-colors"
               >
                 <svg
@@ -82,12 +91,12 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <a
-                  href="#"
+                <Link
+                  href="/about"
                   className="text-gray-300 hover:text-white transition-colors"
                 >
                   About Us
-                </a>
+                </Link>
               </li>
               <li>
                 <a

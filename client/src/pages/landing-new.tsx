@@ -29,12 +29,13 @@ import {
 } from "lucide-react";
 import CourseCard from "@/components/course-card";
 import { useAuth } from "@/hooks/useAuth";
+import Header from "@/components/header";
+import Footer from "@/components/footer";
 import type { Category, Course } from "@shared/schema";
 import bg2 from "@/assets/octamy-bg-2.png";
 import bg1 from "@/assets/octamy-bg-3.png";
 import bg3 from "@/assets/octamy-bg-4.png";
 import bg4 from "@/assets/octamy-bg-5.png";
-import octamyLogoLight from "@/assets/image_1750054465427.png";
 import { SEO } from "@/components/seo";
 // Certificate Slider Component with infinite auto-scroll
 function CertificateSlider() {
@@ -215,7 +216,7 @@ const BannerSlider = () => {
                 />
                 {/* Gradient Overlay */}
                 <div
-                  className={`absolute inset-0 bg-gradient-to-r opacity-80`}
+                  className={`absolute inset-0 bg-gradient-to-r ${banner.gradient} opacity-60`}
                 ></div>
 
                 {/* Content */}
@@ -353,75 +354,7 @@ export default function Landing() {
         }}
       />
       {/* Navigation */}
-      <nav className="bg-black text-white px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center space-x-8">
-            <Link href="/" className="text-2xl font-bold">
-              <img
-                src={octamyLogoLight}
-                alt="Octamy"
-                className="h-8 dark:block"
-              />
-            </Link>
-            <div className="hidden md:flex space-x-6">
-              <Link href="/exams" className="hover:text-gray-300">
-                Exams
-              </Link>
-              <Link href="/virtual-internships" className="hover:text-gray-300">
-                Internships
-              </Link>
-              {/* <Link href="/business-certifications" className="hover:text-gray-300">Business Pricing</Link> */}
-              <Link href="/sponsor" className="hover:text-gray-300">
-                Sponsors
-              </Link>
-              <Link
-                href="/business-certifications"
-                className="hover:text-gray-300"
-              >
-                Business
-              </Link>
-              <Link href="/help-center" className="hover:text-gray-300">
-                Help
-              </Link>
-            </div>
-          </div>
-          <div className="flex items-center space-x-4">
-            {!isLoading && !isAuthenticated ? (
-              <>
-                <Link href="/auth">
-                  <Button
-                    variant="outline"
-                    className="border-white text-white hover:bg-white hover:text-black"
-                  >
-                    Login
-                  </Button>
-                </Link>
-                <Link href="/seller-auth">
-                  <Button className="bg-white text-black hover:bg-gray-200">
-                    Become a Reseller
-                  </Button>
-                </Link>
-              </>
-            ) : (
-              <>
-                <Link href="/dashboard">
-                  <Button
-                    variant="outline"
-                    className="border-white text-white hover:bg-white hover:text-black bg-black"
-                  >
-                    Dashboard
-                  </Button>
-                </Link>
-                <Link href="/logout">
-                  <Button className="bg-white text-black hover:bg-gray-200">
-                    Logout
-                  </Button>
-                </Link>
-              </>
-            )}
-          </div>
-        </div>
-      </nav>
+      <Header />
 
       <BannerSlider />
 
@@ -666,80 +599,7 @@ export default function Landing() {
         </div>
       </section>
       {/* Footer */}
-      <footer className="bg-black text-white py-12">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <h3 className="text-2xl font-bold mb-4">OCTAMY</h3>
-              <p className="text-gray-400">
-                Professional certification platform for the modern workforce.
-              </p>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Exams</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li>
-                  <Link href="/" className="hover:text-white">
-                    AI & Machine Learning
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/" className="hover:text-white">
-                    Development
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/" className="hover:text-white">
-                    Business
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/" className="hover:text-white">
-                    Data Science
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Company</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li>
-                  <Link href="/help-center" className="hover:text-white">
-                    Help Center
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/partners" className="hover:text-white">
-                    Partners
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/privacy-policy" className="hover:text-white">
-                    Privacy Policy
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/terms-of-service" className="hover:text-white">
-                    Terms of Service
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Connect</h4>
-              <p className="text-gray-400 mb-4 text-sm">
-                Operated by {`Octamy Solutions Private Limited`}.<br/>
-                Compliance & ISO documentation available on request — write to <a href="mailto:legal@octamy.com" className="underline">legal@octamy.com</a>.
-              </p>
-            </div>
-          </div>
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>
-              &copy; 2025 Octamy Solutions Private Limited. All rights reserved.
-            </p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

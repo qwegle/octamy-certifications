@@ -157,6 +157,17 @@ export default function Auth() {
               </CardTitle>
             </CardHeader>
             <CardContent>
+              <div className="mb-6">
+                <GoogleAuthButton type="user" isLoading={isLoading} />
+                <div className="relative mt-6">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t border-octamy-gray-300" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-white px-2 text-octamy-gray-500">Or continue with email</span>
+                  </div>
+                </div>
+              </div>
               <form onSubmit={handleSubmit} className="space-y-6">
                 {!isLogin && (
                   <div>
@@ -253,21 +264,6 @@ export default function Auth() {
                   {isLoading ? 'Please wait...' : (isLogin ? 'Sign In' : 'Create Account')}
                 </Button>
               </form>
-
-              <div className="mt-6">
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t border-octamy-gray-300" />
-                  </div>
-                  <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-white px-2 text-octamy-gray-500">Or continue with</span>
-                  </div>
-                </div>
-                
-                <div className="mt-6">
-                  <GoogleAuthButton type="user" isLoading={isLoading} />
-                </div>
-              </div>
 
               <div className="mt-6 text-center">
                 <p className="text-octamy-gray-600">
