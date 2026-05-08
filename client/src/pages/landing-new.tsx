@@ -277,6 +277,12 @@ export default function Landing() {
     { icon: FileCheck2, label: "DPDP Aligned" },
     { icon: Building2, label: "MSME Registered" },
   ];
+  const heroBanners = [
+    { icon: Sparkles, title: "New", text: "AI & Cloud assessment tracks updated weekly" },
+    { icon: ShieldCheck, title: "Trusted", text: "Recruiter-verifiable credentials with QR validation" },
+    { icon: Trophy, title: "Performance", text: "Bronze to Platinum badge tiers on every pass" },
+    { icon: Users, title: "Enterprise", text: "Bulk assessment and verification support for teams" },
+  ];
 
   // 8-tile featured tracks grid (with course counts)
   const featuredTracks = categories.slice(0, 8).map((cat) => ({
@@ -367,7 +373,30 @@ export default function Landing() {
             </div>
           </div>
 
-          <div className="mt-16 rounded-2xl border border-slate-200/80 bg-white/80 backdrop-blur-sm px-4 py-6 sm:px-8">
+          <div className="mt-10 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div className="flex gap-3 px-3 py-3 animate-scroll-left">
+              {[...heroBanners, ...heroBanners].map((item, idx) => (
+                <div
+                  key={`${item.title}-${idx}`}
+                  className="shrink-0 min-w-[280px] sm:min-w-[320px] rounded-xl border border-slate-200 bg-slate-50 px-4 py-3"
+                >
+                  <div className="flex items-start gap-3">
+                    <span className="mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-full bg-white ring-1 ring-slate-200">
+                      <item.icon className="h-4 w-4 text-slate-700" />
+                    </span>
+                    <div>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-sky-700">
+                        {item.title}
+                      </p>
+                      <p className="mt-1 text-sm font-medium text-slate-800">{item.text}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-8 rounded-2xl border border-slate-200/80 bg-white/80 backdrop-blur-sm px-4 py-6 sm:px-8">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
               Trusted at
             </p>

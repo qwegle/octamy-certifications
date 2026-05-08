@@ -22,7 +22,7 @@ import {
   Trophy,
   ChevronRight,
 } from "lucide-react";
-import octamyLogoLight from "@/assets/image_1750054465427.png";
+import octamyLogoDark from "@/assets/image_1750054456482.png";
 import type { Category } from "@shared/schema";
 import {
   DropdownMenu,
@@ -251,17 +251,18 @@ export default function Header() {
         </div>
       </div>
 
-      <header
-        className={
-          "sticky top-0 z-50 bg-white border-b transition-shadow " +
-          (scrolled ? "border-slate-200 shadow-sm" : "border-transparent")
-        }
-        onMouseLeave={scheduleClose}
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+      <header className="sticky top-2 z-50" onMouseLeave={scheduleClose}>
+        <div
+          className={
+            "max-w-7xl mx-auto px-4 sm:px-6 rounded-[999px] border backdrop-blur-md transition-all " +
+            (scrolled
+              ? "bg-white/95 border-slate-200 shadow-md"
+              : "bg-white/90 border-slate-200/80 shadow-sm")
+          }
+        >
           <div className="h-16 flex items-center justify-between gap-4">
             <Link href="/" className="flex items-center shrink-0">
-              <img src={octamyLogoLight} alt="Octamy" className="h-7" />
+              <img src={octamyLogoDark} alt="Octamy" className="h-7 w-auto" />
             </Link>
 
             <nav className="hidden lg:flex items-center gap-1" aria-label="Primary">
@@ -355,7 +356,7 @@ export default function Header() {
 
         {openMenu && (
           <div
-            className="hidden lg:block absolute left-0 right-0 top-full bg-white border-t border-slate-200 shadow-lg"
+            className="hidden lg:block absolute left-0 right-0 top-[calc(100%+10px)] bg-white border border-slate-200 shadow-lg rounded-2xl"
             onMouseEnter={() => openWith(openMenu)}
             onMouseLeave={scheduleClose}
           >
@@ -370,7 +371,7 @@ export default function Header() {
         )}
 
         {mobileOpen && (
-          <div className="lg:hidden border-t border-slate-200 bg-white max-h-[calc(100vh-4rem)] overflow-y-auto">
+          <div className="lg:hidden mt-2 rounded-2xl border border-slate-200 bg-white shadow-lg max-h-[calc(100vh-4rem)] overflow-y-auto">
             <div className="px-4 py-4 space-y-1">
               <MobileGroup
                 title="Exams"
