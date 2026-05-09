@@ -1391,8 +1391,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         const { tempExamId } = req.params;
 
-        // Get temporary exam data from memory
-        const examData = (global as any).tempExamData?.[tempExamId];
+        // Read from the persistent pending-exam store (matches savePendingExam in /api/exam/submit)
+        const examData = await loadPendingExam(tempExamId);
 
         if (!examData) {
           return res
