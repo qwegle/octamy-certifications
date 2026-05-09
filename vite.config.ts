@@ -27,18 +27,17 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
-    chunkSizeWarningLimit: 800,
+    chunkSizeWarningLimit: 1200,
     rollupOptions: {
       output: {
+        // Single vendor strategy: keep React + all its dependents together to
+        // avoid load-order bugs where a chunk uses React.useState before
+        // vendor-react has executed. Only split out a few independent libs
+        // that don't reference React at module init.
         manualChunks(id) {
           if (!id.includes("node_modules")) return undefined;
-          if (id.includes("/react-dom/") || id.match(/\/react\//)) return "vendor-react";
-          if (id.includes("@tanstack")) return "vendor-query";
-          if (id.includes("@radix-ui")) return "vendor-radix";
-          if (id.includes("framer-motion")) return "vendor-motion";
-          if (id.includes("recharts") || id.includes("d3-")) return "vendor-charts";
+          if (id.includes("recharts") || id.includes("/d3-")) return "vendor-charts";
           if (id.includes("lucide-react")) return "vendor-icons";
-          if (id.includes("react-helmet-async") || id.includes("wouter")) return "vendor-router";
           return "vendor";
         },
       },
