@@ -1241,27 +1241,6 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async updateQuestion(id: number, updates: Partial<InsertQuestion>): Promise<Question | undefined> {
-    try {
-      const [question] = await db
-        .update(questions)
-        .set(updates)
-        .where(eq(questions.id, id))
-        .returning();
-      return question || undefined;
-    } catch (error) {
-      console.error('Error updating question:', error);
-      throw error;
-    }
-  }
-
-  async deleteQuestion(id: number): Promise<boolean> {
-    const result = await db
-      .delete(questions)
-      .where(eq(questions.id, id));
-    return result.rowCount > 0;
-  }
-
   // Interview question management for admin
   async getInterviewQuestionsForAdmin(technology?: string, search?: string): Promise<any[]> {
     let query = db.select().from(interviewQuestions);
@@ -1335,44 +1314,6 @@ export class DatabaseStorage implements IStorage {
         updatedAt: new Date()
       })
       .where(eq(payments.transactionId, transactionId));
-  }
-
-  // Interview methods
-  async createInterview(data: any): Promise<any> {
-    const [interview] = await db.insert(interviews).values({
-      userId: data.userId,
-      technology: data.technology,
-      status: data.status || 'available',
-      paymentId: data.paymentId,
-      title: data.title,
-      isPaid: data.isPaid || false,
-      amount: data.amount || 0,
-      createdAt: new Date(),
-    }).returning();
-    
-    return interview;
-  }
-
-  async getInterviewById(id: number): Promise<any> {
-    const [interview] = await db
-      .select()
-      .from(interviews)
-      .where(eq(interviews.id, id));
-    
-    return interview;
-  }
-
-  async updateInterview(id: number, data: any): Promise<any> {
-    const [interview] = await db
-      .update(interviews)
-      .set({
-        ...data,
-        updatedAt: new Date(),
-      })
-      .where(eq(interviews.id, id))
-      .returning();
-    
-    return interview;
   }
 
   // Interview methods
@@ -2202,56 +2143,6 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async updateQuestion(questionId: number, questionData: any) {
-    const [question] = await db.update(questions)
-      .set(questionData)
-      .where(eq(questions.id, questionId))
-      .returning();
-    return question;
-  }
-
-  async deleteQuestion(questionId: number) {
-    const [question] = await db.delete(questions)
-      .where(eq(questions.id, questionId))
-      .returning();
-    return question;
-  }
-
-  // Get all exam attempts for admin with search and limit
-  async getAllExamAttempts(limit = 1000, search?: string) {
-    let query = db.select({
-      id: examAttempts.id,
-      userId: examAttempts.userId,
-      courseId: examAttempts.courseId,
-      userEmail: examAttempts.userEmail,
-      userName: examAttempts.userName,
-      score: examAttempts.score,
-      totalQuestions: examAttempts.totalQuestions,
-      timeTaken: examAttempts.timeTaken,
-      createdAt: examAttempts.createdAt,
-      courseTitle: courses.title,
-      passed: sql`CASE WHEN ${examAttempts.score} >= ${courses.passingScore} THEN true ELSE false END`.as('passed')
-    })
-    .from(examAttempts)
-    .leftJoin(courses, eq(examAttempts.courseId, courses.id));
-
-    if (search) {
-      query = query.where(
-        or(
-          ilike(examAttempts.userName, `%${search}%`),
-          ilike(examAttempts.userEmail, `%${search}%`),
-          ilike(courses.title, `%${search}%`),
-          eq(examAttempts.id, isNaN(parseInt(search)) ? -1 : parseInt(search)),
-          eq(examAttempts.userId, isNaN(parseInt(search)) ? -1 : parseInt(search))
-        )
-      );
-    }
-
-    return await query
-      .orderBy(desc(examAttempts.createdAt))
-      .limit(limit);
-  }
-
   // Admin course management with comprehensive data
   async getAllCoursesForAdmin(limit = 1000, search?: string) {
     let query = db.select({
@@ -2500,14 +2391,6 @@ export class DatabaseStorage implements IStorage {
     return await query
       .orderBy(desc(examAttempts.createdAt))
       .limit(limit);
-  }
-
-  // Get questions for a course (admin)
-  async getQuestionsForAdmin(courseId: number) {
-    return await db.select()
-      .from(questions)
-      .where(eq(questions.courseId, courseId))
-      .orderBy(asc(questions.id));
   }
 
   // Create course (admin)

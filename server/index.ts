@@ -62,6 +62,31 @@ app.use(["/api/login", "/api/auth/login", "/api/register", "/api/auth/register",
          "/api/recruiter/login", "/api/recruiter/register"], authLimiter);
 app.use(["/api/contact", "/api/contact-submission", "/api/sponsors",
          "/api/seller/withdrawal-requests", "/api/referral/track-click"], writeLimiter);
+
+// Exam submission limiter — 10 submits/minute/IP (a candidate cannot legitimately submit faster).
+const examLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: "Slow down — please wait before submitting again." },
+});
+app.use(["/api/exam/submit", "/api/exams/submit", "/api/exam-attempt", "/api/exam-attempts"], examLimiter);
+
+// Health probes — used by uptime monitors and nginx upstream checks.
+app.get("/healthz", (_req, res) => {
+  res.status(200).type("text/plain").send("ok");
+});
+app.get("/readyz", async (_req, res) => {
+  try {
+    const { db } = await import("./db");
+    const { sql } = await import("drizzle-orm");
+    await db.execute(sql`SELECT 1`);
+    res.status(200).json({ status: "ready", db: "ok", uptime: process.uptime() });
+  } catch (err: any) {
+    res.status(503).json({ status: "not_ready", db: "error", error: err?.message });
+  }
+});
 // const __filename = fileURLToPath(import.meta.url);
 // const __dirname = path.dirname(__filename);
 // app.use(express.static(path.join(__dirname, 'public')));
