@@ -86,6 +86,10 @@ export const recruiters = pgTable('recruiters', {
   isActive: boolean('is_active').default(true),
   kycStatus: text('kyc_status').notNull().default('pending'),
   creditsBalance: decimal('credits_balance', { precision: 10, scale: 2 }).default('0.00'),
+
+  // Subscription plan
+  plan: text('plan').notNull().default('starter'), // starter | growth | enterprise
+  planRenewsAt: timestamp('plan_renews_at'),
   
   // Metadata
   registrationStep: integer('registration_step').default(1),
@@ -329,12 +333,87 @@ export const insertInstituteMemberSchema = createInsertSchema(instituteMembers).
   updatedAt: true,
 });
 
+// Cohorts — institute-scoped student groups (e.g. "Batch 2026 - CS").
+export const cohorts = pgTable("cohorts", {
+  id: serial("id").primaryKey(),
+  instituteId: integer("institute_id").references(() => institutes.id).notNull(),
+  name: text("name").notNull(),
+  code: text("code"),
+  description: text("description"),
+  startDate: timestamp("start_date"),
+  endDate: timestamp("end_date"),
+  status: text("status").default("active").notNull(), // active | archived | upcoming
+  createdBy: integer("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Cohort students — students enrolled in an institute cohort (may be invited or active).
+export const cohortStudents = pgTable("cohort_students", {
+  id: serial("id").primaryKey(),
+  cohortId: integer("cohort_id").references(() => cohorts.id).notNull(),
+  instituteId: integer("institute_id").references(() => institutes.id).notNull(),
+  email: text("email").notNull(),
+  name: text("name"),
+  rollNumber: text("roll_number"),
+  userId: integer("user_id").references(() => users.id),
+  status: text("status").default("invited").notNull(), // invited | active | inactive
+  invitedAt: timestamp("invited_at").defaultNow(),
+  joinedAt: timestamp("joined_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => ({
+  uniqMember: unique().on(t.cohortId, t.email),
+}));
+
+// Subscriptions — recurring plans for creator/institute/recruiter personas.
+// Backed by Cashfree one-off orders today (renewal tracked manually);
+// will switch to Cashfree Subscriptions API in a follow-up.
+export const subscriptions = pgTable("subscriptions", {
+  id: serial("id").primaryKey(),
+  ownerType: text("owner_type").notNull(), // creator | institute | recruiter
+  ownerId: integer("owner_id").notNull(),
+  userId: integer("user_id").references(() => users.id),
+  plan: text("plan").notNull(), // free | pro | premium | starter | growth | enterprise
+  status: text("status").default("pending").notNull(), // pending | active | past_due | cancelled
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  currency: text("currency").default("INR").notNull(),
+  cycle: text("cycle").default("monthly").notNull(), // monthly | yearly
+  cashfreeOrderId: text("cashfree_order_id"),
+  cashfreePaymentId: text("cashfree_payment_id"),
+  startsAt: timestamp("starts_at"),
+  renewsAt: timestamp("renews_at"),
+  cancelledAt: timestamp("cancelled_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertCohortSchema = createInsertSchema(cohorts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export const insertCohortStudentSchema = createInsertSchema(cohortStudents).omit({
+  id: true,
+  createdAt: true,
+});
+export const insertSubscriptionSchema = createInsertSchema(subscriptions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export type Creator = typeof creators.$inferSelect;
 export type InsertCreator = z.infer<typeof insertCreatorSchema>;
 export type Institute = typeof institutes.$inferSelect;
 export type InsertInstitute = z.infer<typeof insertInstituteSchema>;
 export type InstituteMember = typeof instituteMembers.$inferSelect;
 export type InsertInstituteMember = z.infer<typeof insertInstituteMemberSchema>;
+export type Cohort = typeof cohorts.$inferSelect;
+export type InsertCohort = z.infer<typeof insertCohortSchema>;
+export type CohortStudent = typeof cohortStudents.$inferSelect;
+export type InsertCohortStudent = z.infer<typeof insertCohortStudentSchema>;
+export type Subscription = typeof subscriptions.$inferSelect;
+export type InsertSubscription = z.infer<typeof insertSubscriptionSchema>;
 
 export const questions = pgTable("questions", {
   id: serial("id").primaryKey(),

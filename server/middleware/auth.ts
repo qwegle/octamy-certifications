@@ -123,3 +123,65 @@ export const authenticateSellerToken = async (req: SellerAuthenticatedRequest, r
     return res.status(401).json({ message: "Invalid seller token" });
   }
 };
+
+// ---------- Role middleware: creator / institute / plan tier --------------
+// All assume `authenticateToken` ran first.
+
+export interface CreatorRequest extends AuthenticatedRequest {
+  creator?: { id: number; userId: number; plan: string; status: string };
+}
+
+export const requireCreator = async (req: CreatorRequest, res: Response, next: NextFunction) => {
+  if (!req.user) return res.status(401).json({ message: "Auth required" });
+  const creator = await storage.getCreatorByUserId(req.user.userId);
+  if (!creator) return res.status(403).json({ message: "Creator profile required" });
+  req.creator = {
+    id: creator.id,
+    userId: creator.userId,
+    plan: creator.plan,
+    status: creator.status,
+  };
+  next();
+};
+
+export interface InstituteRequest extends AuthenticatedRequest {
+  institute?: { id: number; plan: string; memberRole: string };
+}
+
+const INSTITUTE_ROLE_RANK: Record<string, number> = { staff: 1, teacher: 2, admin: 3, owner: 4 };
+
+export const requireInstituteRole = (minRole: 'staff' | 'teacher' | 'admin' | 'owner' = 'teacher') =>
+  async (req: InstituteRequest, res: Response, next: NextFunction) => {
+    if (!req.user) return res.status(401).json({ message: "Auth required" });
+    const inst = await (storage as any).getInstituteByUserId(req.user.userId);
+    if (!inst) return res.status(403).json({ message: "Institute membership required" });
+    if ((INSTITUTE_ROLE_RANK[inst.memberRole] || 0) < INSTITUTE_ROLE_RANK[minRole]) {
+      return res.status(403).json({ message: `Institute ${minRole} role required` });
+    }
+    req.institute = { id: inst.id, plan: inst.plan, memberRole: inst.memberRole };
+    next();
+  };
+
+const PLAN_RANK: Record<string, number> = {
+  free: 0, starter: 1, pro: 2, growth: 2, premium: 3, enterprise: 3,
+};
+
+export const requirePlan = (
+  ownerType: 'creator' | 'institute' | 'recruiter',
+  minPlan: string,
+) => async (req: any, res: Response, next: NextFunction) => {
+  let actualPlan: string | undefined;
+  if (ownerType === 'creator') actualPlan = req.creator?.plan;
+  else if (ownerType === 'institute') actualPlan = req.institute?.plan;
+  else if (ownerType === 'recruiter') actualPlan = req.recruiter?.plan;
+  if (!actualPlan) return res.status(403).json({ message: "Plan context missing" });
+  if ((PLAN_RANK[actualPlan] || 0) < (PLAN_RANK[minPlan] || 0)) {
+    return res.status(402).json({
+      message: `Upgrade required: this feature needs ${minPlan} plan or higher.`,
+      currentPlan: actualPlan,
+      requiredPlan: minPlan,
+      upgradeUrl: `/pricing?role=${ownerType}`,
+    });
+  }
+  next();
+};

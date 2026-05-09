@@ -1750,6 +1750,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const payment = await storage.getPaymentByTransactionId(orderId);
       if (!payment) {
+        // Subscription orders aren't tracked in payments table — handle separately.
+        const orderNote = payload?.data?.order?.order_note || payload?.data?.order_note || {};
+        if (orderNote && orderNote.kind === 'subscription' && status === 'success') {
+          try {
+            const { activatePlan } = await import('./routes/dashboardRoutes');
+            await activatePlan(orderNote.ownerType, Number(orderNote.ownerId), orderNote.plan, orderId);
+            return res.status(200).json({ ok: true, status: 'subscription_activated' });
+          } catch (subErr) {
+            console.error('Subscription activation failed', subErr);
+            return res.status(200).json({ ok: true, status: 'subscription_failed' });
+          }
+        }
         console.warn("Cashfree webhook for unknown order:", orderId);
         return res.status(200).json({ ok: true, ignored: "unknown_order" });
       }
