@@ -291,7 +291,7 @@ export function SmartNotifications() {
                           <span className="text-sm font-semibold">₹{course.price || '99.00'}</span>
                         </div>
                         <Button className="w-full mt-3" size="sm" asChild>
-                          <a href={`/courses/${course.id}`}>
+                          <a href={`/exam/${course.slug || course.id}`}>
                             Explore Course
                           </a>
                         </Button>

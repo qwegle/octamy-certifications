@@ -239,7 +239,7 @@ export class SellerController {
 
       // Generate referral URL using slug
       const baseUrl = `${req.protocol}://${req.get('host')}`;
-      const referralUrl = `${baseUrl}/course/${course.slug}?ref=${seller.referralCode}`;
+      const referralUrl = `${baseUrl}/exam/${course.slug}?ref=${seller.referralCode}`;
 
       res.json({
         referralUrl,

@@ -2184,7 +2184,7 @@ export default function AdminDashboard() {
                                   <Button 
                                     size="sm" 
                                     variant="outline"
-                                    onClick={() => setLocation(`/courses/${course.slug}`)}
+                                    onClick={() => setLocation(`/exam/${course.slug}`)}
                                   >
                                     <Eye className="h-4 w-4" />
                                   </Button>

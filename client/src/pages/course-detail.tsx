@@ -190,10 +190,10 @@ export default function CourseDetail() {
             name="description"
             content={course.metaDescription || course.description}
           />
-          <link rel="canonical" href={`https://octamy.com/courses/${course.slug}`} />
+          <link rel="canonical" href={`https://octamy.com/exam/${course.slug}`} />
           <meta property="og:title" content={course.title} />
           <meta property="og:description" content={course.metaDescription || course.description} />
-          <meta property="og:url" content={`https://octamy.com/courses/${course.slug}`} />
+          <meta property="og:url" content={`https://octamy.com/exam/${course.slug}`} />
           <meta property="og:type" content="website" />
         </Helmet>
       )}

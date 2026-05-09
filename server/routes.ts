@@ -857,7 +857,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         // Generate referral URL using slug
         const baseUrl = `${req.protocol}://${req.get("host")}`;
-        const referralUrl = `${baseUrl}/course/${course.slug}?ref=${seller.referralCode}`;
+        const referralUrl = `${baseUrl}/exam/${course.slug}?ref=${seller.referralCode}`;
 
         res.json({
           referralUrl,
@@ -1054,7 +1054,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       for (const c of allCourses as any[]) {
         if (!c?.slug) continue;
-        urls.push({ loc: `${base}/courses/${c.slug}`, priority: "0.8", freq: "weekly" });
+        urls.push({ loc: `${base}/exam/${c.slug}`, priority: "0.8", freq: "weekly" });
       }
       for (const cat of allCategories as any[]) {
         if (!cat?.slug && !cat?.id) continue;
