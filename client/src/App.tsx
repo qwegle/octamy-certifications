@@ -24,6 +24,9 @@ import CreatorPayouts from "@/pages/creator-payouts";
 import ExamShare from "@/pages/exam-share";
 import InstituteDashboard from "@/pages/institute-dashboard";
 import InstituteStudents from "@/pages/institute-students";
+import InstituteExams from "@/pages/institute-exams";
+import InstituteExamNew from "@/pages/institute-exam-new";
+import InstituteReports from "@/pages/institute-reports";
 import RecruiterSavedSearches from "@/pages/recruiter-saved-searches";
 import ForgotPassword from "@/pages/forgot-password";
 import ResetPassword from "@/pages/reset-password";
@@ -152,6 +155,9 @@ function Router() {
       <Route path="/institute/dashboard" component={InstituteDashboard} />
       <Route path="/institute/students" component={InstituteStudents} />
       <Route path="/institute/cohorts" component={InstituteStudents} />
+      <Route path="/institute/exams" component={InstituteExams} />
+      <Route path="/institute/exams/new" component={InstituteExamNew} />
+      <Route path="/institute/reports" component={InstituteReports} />
       <Route path="/recruiter/saved-searches">
         {() => (
           <RecruiterProtectedRoute>

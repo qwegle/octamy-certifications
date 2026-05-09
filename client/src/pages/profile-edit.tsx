@@ -10,7 +10,7 @@ import { useAuth } from '@/lib/auth.tsx';
 import { useLocation } from 'wouter';
 import Header from '@/components/header';
 import Footer from '@/components/footer';
-import { User, Save, ArrowLeft, Upload, FileText } from 'lucide-react';
+import { User, Save, ArrowLeft, Upload, FileText, Building2, Sparkles } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface UserProfile {
@@ -51,6 +51,17 @@ export default function ProfileEdit() {
   const { toast } = useToast();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadedCvUrl, setUploadedCvUrl] = useState<string>('');
+
+  // Role flags drive the role-aware "Workspace" cards (institute, creator).
+  const { data: roles } = useQuery<{ isCreator: boolean; isInstituteMember: boolean; isRecruiter: boolean }>({
+    queryKey: ['/api/me/roles'],
+    enabled: !!token,
+    queryFn: async () => {
+      const res = await fetch('/api/me/roles', { headers: { Authorization: `Bearer ${token}` } });
+      if (!res.ok) return { isCreator: false, isInstituteMember: false, isRecruiter: false } as any;
+      return res.json();
+    },
+  });
   const [formData, setFormData] = useState<UserProfile>({
     name: user?.name || '',
     email: user?.email || '',
@@ -347,6 +358,34 @@ export default function ProfileEdit() {
 
         <form onSubmit={handleSubmit}>
           <div className="space-y-6">
+            {/* Role-aware workspace cards: link out to org/creator dashboards */}
+            {(roles?.isInstituteMember || roles?.isCreator) && (
+              <Card className="border-slate-200">
+                <CardHeader>
+                  <CardTitle className="flex items-center text-base">
+                    <Building2 className="mr-2 h-5 w-5" /> Your workspaces
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-slate-600 mb-3">
+                    The fields below are your <strong>personal</strong> profile. Manage organisation- and creator-level settings from their own workspace.
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {roles?.isInstituteMember && (
+                      <Button type="button" variant="outline" onClick={() => setLocation('/institute/dashboard')}>
+                        <Building2 className="mr-2 h-4 w-4" /> Open institute workspace
+                      </Button>
+                    )}
+                    {roles?.isCreator && (
+                      <Button type="button" variant="outline" onClick={() => setLocation('/creator/dashboard')}>
+                        <Sparkles className="mr-2 h-4 w-4" /> Open creator workspace
+                      </Button>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Basic Information */}
             <Card>
               <CardHeader>

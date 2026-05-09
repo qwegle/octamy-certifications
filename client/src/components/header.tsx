@@ -70,6 +70,50 @@ export default function Header() {
 
   const isAuthenticated = !!user && !!token;
 
+  // Routes where the public mega-menu is hidden (auth, dashboards, in-app tools).
+  // On these we render a slim header (logo + role switcher + logout) so the
+  // workspace doesn't look like the marketing site.
+  const APP_ROUTE_PREFIXES = [
+    "/login",
+    "/register",
+    "/forgot-password",
+    "/reset-password",
+    "/onboarding",
+    "/dashboard",
+    "/progress",
+    "/preferences",
+    "/profile-edit",
+    "/profile",
+    "/creator/dashboard",
+    "/creator/courses",
+    "/creator/payouts",
+    "/institute/dashboard",
+    "/institute/students",
+    "/institute/cohorts",
+    "/institute/exams",
+    "/institute/reports",
+    "/recruiter/dashboard",
+    "/recruiter/search",
+    "/recruiter/wallet",
+    "/recruiter/profile",
+    "/recruiter/settings",
+    "/recruiter/saved-searches",
+    "/recruiter/onboarding",
+    "/recruiter/auth",
+    "/admin",
+    "/qwegle",
+    "/enhanced-admin",
+    "/seller-dashboard",
+    "/partner-dashboard",
+    "/question-banks",
+    "/take-exam",
+    "/exam-results",
+    "/exam-results-temp",
+  ];
+  const isAppRoute =
+    APP_ROUTE_PREFIXES.some((p) => location === p || location.startsWith(p + "/")) ||
+    /^\/(creator|institute|recruiter)\/(login|register)/.test(location);
+
   const { data: roles } = useQuery<RoleFlags>({
     queryKey: ["/api/me/roles"],
     enabled: isAuthenticated,
@@ -262,7 +306,7 @@ export default function Header() {
               <img src={octamyLogoDark} alt="Octamy" className="h-7 w-auto" />
             </Link>
 
-            <nav className="hidden lg:flex items-center gap-1" aria-label="Primary">
+            <nav className={`hidden lg:flex items-center gap-1 ${isAppRoute ? "lg:hidden" : ""}`} aria-label="Primary">
               <MegaTrigger label="Exams" isOpen={openMenu === "exams"} onOpen={() => openWith("exams")} onClose={scheduleClose} />
               <MegaTrigger label="Skill Verification" isOpen={openMenu === "verify"} onOpen={() => openWith("verify")} onClose={scheduleClose} />
               <MegaTrigger label="For Business" isOpen={openMenu === "biz"} onOpen={() => openWith("biz")} onClose={scheduleClose} />
@@ -274,14 +318,14 @@ export default function Header() {
               <button
                 type="button"
                 onClick={() => setSearchOpen((v) => !v)}
-                className="hidden md:inline-flex items-center justify-center h-9 w-9 rounded-full text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                className={`hidden md:inline-flex items-center justify-center h-9 w-9 rounded-full text-slate-600 hover:text-slate-900 hover:bg-slate-100 ${isAppRoute ? "md:hidden" : ""}`}
                 aria-label="Search exams"
                 aria-expanded={searchOpen}
               >
                 <Search className="h-4 w-4" />
               </button>
 
-              {!isLoading && !isAuthenticated ? (
+              {!isLoading && !isAuthenticated && !isAppRoute ? (
                 <div className="hidden md:flex items-center gap-1">
                   <Link href="/creator">
                     <Button variant="ghost" className="text-slate-700 hover:text-slate-900 hover:bg-slate-100 text-sm font-semibold">Teach on Octamy</Button>
@@ -327,7 +371,7 @@ export default function Header() {
               ) : null}
 
               <button
-                className="lg:hidden inline-flex items-center justify-center h-10 w-10 rounded-md text-slate-700 hover:bg-slate-100"
+                className={`lg:hidden inline-flex items-center justify-center h-10 w-10 rounded-md text-slate-700 hover:bg-slate-100 ${isAppRoute ? "hidden" : ""}`}
                 onClick={() => setMobileOpen((v) => !v)}
                 aria-label={mobileOpen ? "Close menu" : "Open menu"}
                 aria-expanded={mobileOpen}
@@ -370,7 +414,7 @@ export default function Header() {
           </div>
         )}
 
-        {mobileOpen && (
+        {mobileOpen && !isAppRoute && (
           <div className="lg:hidden mt-2 rounded-2xl border border-slate-200 bg-white shadow-lg max-h-[calc(100vh-4rem)] overflow-y-auto">
             <div className="px-4 py-4 space-y-1">
               <MobileGroup

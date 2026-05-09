@@ -298,14 +298,53 @@ router.get('/institute/stats', authenticateToken, requireInstituteRole('teacher'
   try {
     const [cohortRow] = await db.execute(sql`SELECT COUNT(*)::int AS c FROM cohorts WHERE institute_id = ${req.institute!.id}`);
     const [studentRow] = await db.execute(sql`SELECT COUNT(*)::int AS c FROM cohort_students WHERE institute_id = ${req.institute!.id}`);
+    const [examRow] = await db.execute(sql`SELECT COUNT(*)::int AS c FROM exam_instances WHERE owner_type='institute' AND owner_id = ${req.institute!.id} AND status='live'`);
     res.json({
       cohorts: (cohortRow as any)?.c ?? 0,
       students: (studentRow as any)?.c ?? 0,
+      activeExams: (examRow as any)?.c ?? 0,
       plan: req.institute!.plan,
     });
   } catch (err: any) {
     console.error('GET /institute/stats', err);
     res.status(500).json({ message: 'Failed to load stats' });
+  }
+});
+
+router.get('/institute/reports', authenticateToken, requireInstituteRole('teacher'), async (req: InstituteRequest, res: Response) => {
+  try {
+    const id = req.institute!.id;
+    const [cohorts] = await db.execute(sql`SELECT COUNT(*)::int AS c FROM cohorts WHERE institute_id = ${id}`);
+    const [students] = await db.execute(sql`SELECT COUNT(*)::int AS c FROM cohort_students WHERE institute_id = ${id}`);
+    const [attempts] = await db.execute(sql`
+      SELECT COUNT(*)::int AS total,
+             COUNT(*) FILTER (WHERE a.passed = true)::int AS passed,
+             COUNT(*) FILTER (WHERE a.status = 'submitted')::int AS submitted
+      FROM exam_instance_attempts a
+      JOIN exam_instances i ON i.id = a.instance_id
+      WHERE i.owner_type='institute' AND i.owner_id = ${id}
+    `);
+    const recent = await db.execute(sql`
+      SELECT a.id, a.email, a.score, a.passed, a.submitted_at, i.title AS exam_title
+      FROM exam_instance_attempts a
+      JOIN exam_instances i ON i.id = a.instance_id
+      WHERE i.owner_type='institute' AND i.owner_id = ${id}
+      ORDER BY a.id DESC LIMIT 25
+    `) as any as Array<{ id: number; email: string | null; score: number | null; passed: boolean | null; submitted_at: string | null; exam_title: string }>;
+    res.json({
+      cohorts: (cohorts as any)?.c ?? 0,
+      students: (students as any)?.c ?? 0,
+      attempts: (attempts as any)?.total ?? 0,
+      passed: (attempts as any)?.passed ?? 0,
+      submitted: (attempts as any)?.submitted ?? 0,
+      passRate: ((attempts as any)?.submitted ?? 0) > 0
+        ? Math.round((((attempts as any).passed ?? 0) / ((attempts as any).submitted ?? 1)) * 100)
+        : 0,
+      recent,
+    });
+  } catch (err: any) {
+    console.error('GET /institute/reports', err);
+    res.status(500).json({ message: 'Failed to load reports' });
   }
 });
 

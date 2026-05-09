@@ -26,6 +26,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
+import Breadcrumbs from "@/components/breadcrumbs";
 import { Plus, Database, Lock, Globe, EyeOff, Building2, User, Shield } from "lucide-react";
 import type { QuestionBank } from "@shared/schema";
 
@@ -109,6 +110,7 @@ export default function QuestionBanksList() {
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header />
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-10">
+        <Breadcrumbs items={[{ label: "Question Banks" }]} />
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight flex items-center gap-2">

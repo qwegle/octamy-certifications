@@ -37,6 +37,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
+import Breadcrumbs from "@/components/breadcrumbs";
 import {
   Plus,
   Upload,
@@ -217,6 +218,12 @@ export default function QuestionBankDetail() {
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header />
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-4 sm:py-6">
+        <Breadcrumbs
+          items={[
+            { label: "Question Banks", href: "/question-banks" },
+            { label: bank.name },
+          ]}
+        />
         {/* Top bar */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
           <div className="flex items-center gap-3 min-w-0">

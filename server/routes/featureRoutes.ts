@@ -363,6 +363,36 @@ router.post('/exam-instances', authenticateToken, async (req: any, res: Response
   }
 });
 
+router.get('/exam-instances', authenticateToken, async (req: any, res: Response) => {
+  try {
+    const ownerType = String(req.query.ownerType || '');
+    const ownerId = Number(req.query.ownerId);
+    if (!['creator', 'institute', 'admin'].includes(ownerType) || !Number.isFinite(ownerId)) {
+      return res.status(400).json({ message: 'ownerType and ownerId required' });
+    }
+    if (ownerType === 'institute') {
+      const inst = await db.execute(sql`
+        SELECT i.id FROM institutes i
+        JOIN institute_members m ON m.institute_id = i.id
+        WHERE i.id = ${ownerId} AND m.user_id = ${req.user.userId} AND m.role IN ('owner','admin','teacher')
+        LIMIT 1
+      `) as any as Array<{ id: number }>;
+      if (!inst[0]) return res.status(403).json({ message: 'Not your institute' });
+    } else if (ownerType === 'creator') {
+      const [c] = await db.select({ id: creators.id }).from(creators).where(and(eq(creators.id, ownerId), eq(creators.userId, req.user.userId)));
+      if (!c) return res.status(403).json({ message: 'Not your creator profile' });
+    }
+    const rows = await db.select().from(examInstances)
+      .where(and(eq(examInstances.ownerType, ownerType), eq(examInstances.ownerId, ownerId)))
+      .orderBy(desc(examInstances.id))
+      .limit(100);
+    res.json(rows.map((r) => ({ ...r, shareUrl: `${req.protocol}://${req.get('host')}/x/${r.shareCode}` })));
+  } catch (err: any) {
+    logger.error('exam-instances.list.error', { err });
+    res.status(500).json({ message: 'Failed' });
+  }
+});
+
 router.get('/x/:code', async (req: Request, res: Response) => {
   try {
     const [inst] = await db.select().from(examInstances).where(eq(examInstances.shareCode, req.params.code));

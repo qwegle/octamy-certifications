@@ -16,6 +16,8 @@ import {
   Award,
   Settings as SettingsIcon,
   FileQuestion,
+  BarChart3,
+  Plus,
 } from 'lucide-react';
 
 type Institute = {
@@ -33,7 +35,8 @@ const SIDEBAR = [
   { key: 'students', label: 'Students', icon: Users, href: '/institute/students' },
   { key: 'cohorts', label: 'Cohorts', icon: Layers, href: '/institute/students' },
   { key: 'banks', label: 'Question Banks', icon: FileQuestion, href: '/question-banks' },
-  { key: 'exams', label: 'Exams', icon: ClipboardList, href: '/exams' },
+  { key: 'exams', label: 'Exams', icon: ClipboardList, href: '/institute/exams' },
+  { key: 'reports', label: 'Reports', icon: BarChart3, href: '/institute/reports' },
   { key: 'certificates', label: 'Certificates', icon: Award, href: '/business-certificates' },
   { key: 'settings', label: 'Settings', icon: SettingsIcon, href: '/profile-edit' },
 ] as const;
@@ -83,8 +86,8 @@ export default function InstituteDashboard() {
                 {!institute && 'Finish setting up your institute profile.'}
               </p>
             </div>
-            <Button className="bg-slate-900 hover:bg-black text-white">
-              <GraduationCap className="w-4 h-4 mr-2" /> Invite teacher
+            <Button onClick={() => setLocation('/institute/exams/new')} className="bg-slate-900 hover:bg-black text-white">
+              <Plus className="w-4 h-4 mr-2" /> Create exam
             </Button>
           </div>
 
@@ -124,11 +127,15 @@ export default function InstituteDashboard() {
               </CardHeader>
               <CardContent className="space-y-3">
                 <p className="text-sm text-slate-600">
-                  Add students, organize cohorts, and assign verified exams. Plan upgrades unlock more seats and bulk import.
+                  Add students, build question banks, and ship exams with share links. Reports show pass rates and recent attempts.
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  <Button onClick={() => setLocation('/institute/students')} className="bg-slate-900 text-white">Manage students</Button>
-                  <Button onClick={() => setLocation('/exams')} variant="outline">Browse exams</Button>
+                  <Button onClick={() => setLocation('/institute/exams/new')} className="bg-slate-900 text-white">
+                    <Plus className="w-4 h-4 mr-1" /> Create exam
+                  </Button>
+                  <Button onClick={() => setLocation('/institute/students')} variant="outline">Manage students</Button>
+                  <Button onClick={() => setLocation('/question-banks')} variant="outline">Question banks</Button>
+                  <Button onClick={() => setLocation('/institute/reports')} variant="outline">View reports</Button>
                   <Button onClick={() => setLocation('/pricing')} variant="outline">Upgrade plan</Button>
                 </div>
               </CardContent>
