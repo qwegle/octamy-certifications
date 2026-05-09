@@ -1,6 +1,8 @@
 import "./bootstrap-env";
+import "./lib/sentry"; // must precede other imports so Sentry can patch them
 import express, { type Request, Response, NextFunction } from "express";
 import rateLimit from "express-rate-limit";
+import * as Sentry from "@sentry/node";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import path from "path";
@@ -133,6 +135,9 @@ app.use((req, res, next) => {
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
+    if (status >= 500 && process.env.SENTRY_DSN) {
+      Sentry.captureException(err);
+    }
     if (!res.headersSent) {
       res.status(status).json({ message });
     }

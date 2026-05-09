@@ -537,4 +537,25 @@ router.get('/me/subscription', authenticateToken, async (req: any, res: Response
   }
 });
 
+// =================================================================
+// ADMIN — audit log viewer
+// =================================================================
+router.get('/admin/audit-logs', authenticateToken, async (req: any, res: Response) => {
+  try {
+    if (!req.user?.isAdmin) return res.status(403).json({ message: 'Forbidden' });
+    const limit = Math.min(Number(req.query.limit) || 100, 500);
+    const offset = Math.max(Number(req.query.offset) || 0, 0);
+    const action = req.query.action ? String(req.query.action) : null;
+
+    const rows = action
+      ? await db.execute(sql`SELECT * FROM audit_logs WHERE action = ${action} ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`)
+      : await db.execute(sql`SELECT * FROM audit_logs ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`);
+    const data = (rows as any).rows ?? rows;
+    res.json({ logs: data, limit, offset });
+  } catch (err: any) {
+    console.error('GET /admin/audit-logs', err);
+    res.status(500).json({ message: 'Failed to load audit logs' });
+  }
+});
+
 export default router;

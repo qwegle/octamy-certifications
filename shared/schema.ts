@@ -415,6 +415,29 @@ export type InsertCohortStudent = z.infer<typeof insertCohortStudentSchema>;
 export type Subscription = typeof subscriptions.$inferSelect;
 export type InsertSubscription = z.infer<typeof insertSubscriptionSchema>;
 
+// Audit log — append-only, captures sensitive actions for forensic / compliance review.
+export const auditLogs = pgTable("audit_logs", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id),
+  actorEmail: text("actor_email"),
+  actorRole: text("actor_role"), // user | admin | seller | recruiter | creator | institute | system
+  action: text("action").notNull(), // e.g. login.success, admin.user.delete, payment.refund
+  resourceType: text("resource_type"), // user | course | payment | certificate | subscription
+  resourceId: text("resource_id"),
+  ip: text("ip"),
+  userAgent: text("user_agent"),
+  metadata: jsonb("metadata"),
+  status: text("status").default("success").notNull(), // success | failure
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => ({
+  byActor: index("audit_logs_user_idx").on(t.userId),
+  byAction: index("audit_logs_action_idx").on(t.action),
+  byCreated: index("audit_logs_created_idx").on(t.createdAt),
+}));
+
+export type AuditLog = typeof auditLogs.$inferSelect;
+export type InsertAuditLog = typeof auditLogs.$inferInsert;
+
 export const questions = pgTable("questions", {
   id: serial("id").primaryKey(),
   // Legacy: questions tied directly to a course. Now nullable; bank-scoped

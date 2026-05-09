@@ -26,6 +26,7 @@ import {
 } from "@shared/schema";
 import { desc, and, eq, not } from "drizzle-orm";
 import { db, pool } from "./db";
+import { audit } from "./lib/audit";
 import { LearningPathController } from "./controllers/learningPathController";
 import { payuMoneyService } from "./payumoney";
 import {
@@ -296,6 +297,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Find admin user
       const user = await storage.getUserByEmail(email);
       if (!user || !user.isAdmin) {
+        audit({ action: 'admin.login', status: 'failure', actorEmail: email, req, metadata: { reason: 'no_admin' } });
         return res.status(401).json({ message: "Invalid admin credentials" });
       }
 
@@ -305,6 +307,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         user.password || ""
       );
       if (!isValidPassword) {
+        audit({ action: 'admin.login', status: 'failure', userId: user.id, actorEmail: email, req, metadata: { reason: 'bad_password' } });
         return res.status(401).json({ message: "Invalid admin credentials" });
       }
 
@@ -330,6 +333,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           isAdmin: user.isAdmin,
         },
       });
+      audit({ action: 'admin.login', userId: user.id, actorEmail: user.email, actorRole: 'admin', req });
     } catch (error) {
       console.error("Admin login error:", error);
       res.status(500).json({ message: "Login failed" });
@@ -909,8 +913,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           isAdmin: user.isAdmin || false,
         },
       });
+      audit({ action: 'auth.register', userId: user.id, actorEmail: user.email, actorRole: 'user', req });
     } catch (error) {
       console.error("Registration error:", error);
+      audit({ action: 'auth.register', status: 'failure', actorEmail: req.body?.email, req, metadata: { error: String(error) } });
       res.status(500).json({ message: "Registration failed" });
     }
   };
@@ -925,14 +931,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const user = await storage.getUserByEmail(email);
       if (!user) {
+        audit({ action: 'auth.login', status: 'failure', actorEmail: email, req, metadata: { reason: 'no_user' } });
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
       if (!user.password) {
+        audit({ action: 'auth.login', status: 'failure', userId: user.id, actorEmail: email, req, metadata: { reason: 'no_password' } });
         return res.status(401).json({ message: "Invalid credentials" });
       }
       const validPassword = await bcrypt.compare(password, user.password);
       if (!validPassword) {
+        audit({ action: 'auth.login', status: 'failure', userId: user.id, actorEmail: email, req, metadata: { reason: 'bad_password' } });
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
@@ -955,6 +964,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           isAdmin: user.isAdmin || false,
         },
       });
+      audit({ action: 'auth.login', userId: user.id, actorEmail: user.email, actorRole: user.isAdmin ? 'admin' : 'user', req });
     } catch (error) {
       console.error("Login error:", error);
       res.status(500).json({ message: "Login failed" });
@@ -1732,6 +1742,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (!signature || !verifyCashfreeWebhookSignature(rawBody, signature, timestamp)) {
         console.error("Cashfree webhook signature verification failed");
+        audit({ action: 'payment.webhook.invalid_signature', status: 'failure', actorRole: 'system', req, metadata: { orderId: req.body?.data?.order?.order_id } });
         return res.status(401).json({ message: "Invalid webhook signature" });
       }
 
@@ -1756,9 +1767,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           try {
             const { activatePlan } = await import('./routes/dashboardRoutes');
             await activatePlan(orderNote.ownerType, Number(orderNote.ownerId), orderNote.plan, orderId);
+            audit({ action: 'subscription.activated', actorRole: 'system', resourceType: 'subscription', resourceId: orderId, req, metadata: { ownerType: orderNote.ownerType, ownerId: orderNote.ownerId, plan: orderNote.plan } });
             return res.status(200).json({ ok: true, status: 'subscription_activated' });
           } catch (subErr) {
             console.error('Subscription activation failed', subErr);
+            audit({ action: 'subscription.activate_failed', status: 'failure', actorRole: 'system', resourceType: 'subscription', resourceId: orderId, req, metadata: { error: String(subErr) } });
             return res.status(200).json({ ok: true, status: 'subscription_failed' });
           }
         }
