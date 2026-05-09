@@ -182,13 +182,26 @@ export default function Header() {
 
   const businessItems: MegaItem[] = [
     {
-      href: "/business-certifications",
-      title: "Team Certifications",
-      description: "Bulk-certify your workforce with branded credentials.",
+      href: "/creator",
+      title: "Teach on Octamy",
+      description: "Sell your courses & exams to verified candidates.",
+      icon: <Sparkles className="h-5 w-5" />,
+      badge: "New",
+    },
+    {
+      href: "/institute",
+      title: "For Institutes",
+      description: "Run cohorts, private banks & branded certificates.",
       icon: <Building2 className="h-5 w-5" />,
     },
     {
-      href: "/recruiter/auth",
+      href: "/business-certifications",
+      title: "Team Certifications",
+      description: "Bulk-certify your workforce with branded credentials.",
+      icon: <Briefcase className="h-5 w-5" />,
+    },
+    {
+      href: "/for-recruiters",
       title: "For Recruiters",
       description: "Hire verified, score-graded candidates.",
       icon: <Users className="h-5 w-5" />,
@@ -269,7 +282,10 @@ export default function Header() {
               </button>
 
               {!isLoading && !isAuthenticated ? (
-                <div className="hidden md:flex items-center gap-2">
+                <div className="hidden md:flex items-center gap-1">
+                  <Link href="/creator">
+                    <Button variant="ghost" className="text-slate-700 hover:text-slate-900 hover:bg-slate-100 text-sm font-semibold">Teach on Octamy</Button>
+                  </Link>
                   <Link href="/login">
                     <Button variant="ghost" className="text-slate-700 hover:text-slate-900 hover:bg-slate-100">Sign in</Button>
                   </Link>

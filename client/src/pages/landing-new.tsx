@@ -331,203 +331,205 @@ export default function Landing() {
       />
       <Header />
 
-      {/* 1. HERO ----------------------------------------------------------- */}
+      {/* 1. HERO — reflective black left rail · clean white right ---------- */}
       <section className="relative overflow-hidden bg-white">
-        {/* Ambient grid */}
-        <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 bg-grid-slate [mask-image:radial-gradient(ellipse_at_top,black_30%,transparent_75%)]" />
-        {/* Animated colored blobs */}
-        <div aria-hidden className="pointer-events-none absolute -top-24 -left-24 -z-10 h-[420px] w-[420px] rounded-full bg-sky-400/20 blur-3xl animate-blob" />
-        <div aria-hidden className="pointer-events-none absolute -top-10 right-0 -z-10 h-[360px] w-[360px] rounded-full bg-indigo-400/20 blur-3xl animate-blob-slow" />
-        <div aria-hidden className="pointer-events-none absolute bottom-0 left-1/3 -z-10 h-[280px] w-[280px] rounded-full bg-fuchsia-300/15 blur-3xl animate-blob" />
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-slate-300 to-transparent" />
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-12 sm:pt-14 sm:pb-16">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-stretch">
 
-        <div className="relative max-w-7xl mx-auto px-6 pt-20 pb-16 sm:pt-28 sm:pb-24">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            {/* LEFT — glossy black hero panel */}
             <div className="lg:col-span-8">
-              <motion.p
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-                className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/90 backdrop-blur px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-sky-700 shadow-sm"
-              >
-                <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sky-400 opacity-75" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-sky-500" />
-                </span>
-                Skill Verification Platform
-              </motion.p>
+              <div className="glossy-black relative overflow-hidden rounded-3xl px-6 sm:px-10 py-12 sm:py-16 min-h-[480px] flex flex-col justify-between">
+                {/* subtle ambient highlights inside the black panel */}
+                <div aria-hidden className="pointer-events-none absolute inset-0 bg-grid-white [mask-image:radial-gradient(ellipse_at_top_right,black_30%,transparent_70%)] opacity-60" />
+                <div aria-hidden className="pointer-events-none absolute -top-24 -right-24 h-[360px] w-[360px] rounded-full bg-white/[0.06] blur-3xl animate-blob-slow" />
+                <div aria-hidden className="pointer-events-none absolute bottom-0 left-1/4 h-[260px] w-[260px] rounded-full bg-white/[0.04] blur-3xl animate-blob" />
 
-              <motion.h1
-                initial="hidden"
-                animate="show"
-                variants={{
-                  hidden: {},
-                  show: { transition: { staggerChildren: 0.08, delayChildren: 0.1 } },
-                }}
-                className="mt-6 text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-slate-900"
-              >
-                <motion.span
-                  variants={{ hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0 } }}
-                  transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                  className="block"
+                <div className="relative z-10 max-w-2xl">
+                  <motion.p
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                    className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.04] backdrop-blur px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/85"
+                  >
+                    <span className="relative flex h-2 w-2">
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white/60 opacity-75" />
+                      <span className="relative inline-flex h-2 w-2 rounded-full bg-white" />
+                    </span>
+                    The Udemy for skill verification
+                  </motion.p>
+
+                  <motion.h1
+                    initial={{ opacity: 0, y: 18 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.7, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+                    className="mt-6 text-4xl sm:text-5xl md:text-[56px] leading-[1.05] font-extrabold tracking-tight text-white"
+                  >
+                    Take the exam.
+                    <br />
+                    <span className="text-chrome">Earn the credential.</span>
+                  </motion.h1>
+
+                  <motion.p
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.25 }}
+                    className="mt-5 max-w-xl text-base sm:text-lg text-white/70 leading-relaxed"
+                  >
+                    Free assessments. Pay only when you pass. Verified by recruiters across India — across AI, development, cloud, security and business.
+                  </motion.p>
+
+                  <motion.div
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.35 }}
+                    className="mt-8 flex flex-col sm:flex-row gap-3"
+                  >
+                    <Link href="/exams">
+                      <Button size="lg" className="bg-white text-slate-900 hover:bg-slate-100 rounded-full px-6 py-6 text-base font-semibold shadow-xl shadow-black/30">
+                        Browse 50+ exams
+                        <ArrowRight className="ml-2 w-4 h-4" />
+                      </Button>
+                    </Link>
+                    <a href="#how">
+                      <Button size="lg" variant="outline" className="rounded-full px-6 py-6 text-base border-white/20 bg-white/[0.04] text-white hover:bg-white/[0.1] backdrop-blur">
+                        How it works
+                      </Button>
+                    </a>
+                  </motion.div>
+                </div>
+
+                {/* Live stats anchored bottom-left */}
+                <motion.div
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.5 }}
+                  className="relative z-10 mt-10 grid grid-cols-3 gap-3 max-w-xl"
                 >
-                  Free assessments.
-                </motion.span>
-                <motion.span
-                  variants={{ hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0 } }}
-                  transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                  className="mt-1 block bg-gradient-to-r from-slate-900 via-sky-700 to-indigo-700 bg-clip-text text-transparent"
-                >
-                  Pay only when you pass.
-                </motion.span>
-              </motion.h1>
-
-              <motion.p
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.25 }}
-                className="mt-6 max-w-2xl text-base sm:text-lg text-slate-600 leading-relaxed"
-              >
-                Earn verified, recruiter-checkable credentials across AI,
-                development, cloud, security and business — trusted by hiring
-                teams across India.
-              </motion.p>
-
-              <motion.div
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.35 }}
-                className="mt-10 flex flex-col sm:flex-row items-start sm:items-center gap-3"
-              >
-                <Link href="/exams">
-                  <motion.span whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} className="inline-block">
-                    <Button
-                      size="lg"
-                      className="cta-pulse bg-slate-900 hover:bg-black text-white rounded-full px-6 sm:px-8 py-6 text-base shadow-xl shadow-slate-900/20"
-                    >
-                      Browse 50+ exams
-                      <ArrowRight className="ml-2 w-4 h-4" />
-                    </Button>
-                  </motion.span>
-                </Link>
-                <a href="#how">
-                  <motion.span whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="inline-block">
-                    <Button
-                      size="lg"
-                      variant="outline"
-                      className="border-slate-300 bg-white/80 backdrop-blur text-slate-700 hover:bg-white rounded-full px-6 sm:px-8 py-6 text-base"
-                    >
-                      How it works
-                    </Button>
-                  </motion.span>
-                </a>
-              </motion.div>
-
-              {/* Live stats row */}
-              <motion.div
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.45 }}
-                className="mt-10 grid grid-cols-3 gap-3 max-w-xl"
-              >
-                {[
-                  { v: 50, s: "+", l: "Live exams" },
-                  { v: 12, s: "k+", l: "Assessments taken" },
-                  { v: 300, s: "+", l: "Recruiters verifying" },
-                ].map((s) => (
-                  <div key={s.l} className="rounded-xl border border-slate-200 bg-white/70 backdrop-blur px-4 py-3">
-                    <p className="text-2xl font-bold text-slate-900 tabular-nums">
-                      <CountUp to={s.v} suffix={s.s} />
-                    </p>
-                    <p className="text-[11px] uppercase tracking-wider text-slate-500 mt-1">{s.l}</p>
-                  </div>
-                ))}
-              </motion.div>
-
-              <div className="mt-10 overflow-hidden rounded-2xl border border-slate-200 bg-white/80 backdrop-blur shadow-sm">
-                <div className="flex gap-3 px-3 py-3 animate-scroll-left">
-                  {[...heroBanners, ...heroBanners].map((item, idx) => (
-                    <div
-                      key={`${item.title}-${idx}`}
-                      className="shrink-0 min-w-[280px] sm:min-w-[320px] rounded-xl border border-slate-200 bg-slate-50 px-4 py-3"
-                    >
-                      <div className="flex items-start gap-3">
-                        <span className="mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-full bg-white ring-1 ring-slate-200">
-                          <item.icon className="h-4 w-4 text-slate-700" />
-                        </span>
-                        <div>
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-sky-700">
-                            {item.title}
-                          </p>
-                          <p className="mt-1 text-sm font-medium text-slate-800">{item.text}</p>
-                        </div>
-                      </div>
+                  {[
+                    { v: 50, s: "+", l: "Live exams" },
+                    { v: 12, s: "k+", l: "Assessments taken" },
+                    { v: 300, s: "+", l: "Recruiters verifying" },
+                  ].map((s) => (
+                    <div key={s.l} className="rounded-xl border border-white/10 bg-white/[0.04] backdrop-blur px-4 py-3">
+                      <p className="text-2xl font-bold text-white tabular-nums">
+                        <CountUp to={s.v} suffix={s.s} />
+                      </p>
+                      <p className="text-[10px] uppercase tracking-wider text-white/50 mt-1">{s.l}</p>
                     </div>
                   ))}
-                </div>
+                </motion.div>
               </div>
             </div>
 
+            {/* RIGHT — clean auth card (no rotating border) */}
             <div className="lg:col-span-4">
               <motion.div
-                initial={{ opacity: 0, y: 24 }}
+                initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.7, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-                className="lg:sticky lg:top-24"
+                transition={{ duration: 0.7, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+                className="h-full"
               >
-                <div className="gradient-ring rounded-2xl bg-white/95 backdrop-blur p-6 shadow-xl shadow-slate-900/10">
+                <div className="h-full rounded-3xl border border-slate-200 bg-white p-6 sm:p-7 shadow-xl shadow-slate-900/5 flex flex-col">
                   <div className="flex items-center gap-2">
-                    <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-sky-100 text-sky-700">
+                    <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-900 text-white">
                       <Sparkles className="h-3.5 w-3.5" />
                     </span>
-                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-sky-700">
-                      Get started
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-700">
+                      Get started — free
                     </p>
                   </div>
-                  <h3 className="mt-3 text-2xl font-bold text-slate-900">Create your free account</h3>
-                  <p className="mt-2 text-sm text-slate-600">
-                    Start in under a minute. Use email or continue with Google.
+                  <h3 className="mt-3 text-2xl font-bold text-slate-900 leading-tight">
+                    Create your account
+                  </h3>
+                  <p className="mt-1.5 text-sm text-slate-600">
+                    One account for learners, creators, institutes &amp; recruiters.
                   </p>
-                  <div className="mt-5 space-y-3">
+                  <div className="mt-5 space-y-2.5">
                     <GoogleAuthButton type="user" />
                     <Link href="/register">
-                      <Button className="w-full bg-slate-900 hover:bg-black text-white rounded-full">
-                        Register free
-                      </Button>
-                    </Link>
-                    <Link href="/login">
-                      <Button variant="outline" className="w-full rounded-full border-slate-300">
-                        Login
+                      <Button className="w-full bg-slate-900 hover:bg-black text-white rounded-full h-11">
+                        Continue with email
                       </Button>
                     </Link>
                   </div>
-                  <div className="mt-4 flex items-center gap-2 text-xs text-slate-500">
+                  <div className="my-4 flex items-center gap-3 text-[11px] text-slate-400">
+                    <span className="h-px flex-1 bg-slate-200" />
+                    ALREADY ON OCTAMY?
+                    <span className="h-px flex-1 bg-slate-200" />
+                  </div>
+                  <Link href="/login">
+                    <Button variant="outline" className="w-full rounded-full border-slate-300 h-11">
+                      Sign in
+                    </Button>
+                  </Link>
+
+                  <div className="mt-auto pt-5 flex items-center gap-2 text-[11px] text-slate-500">
                     <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
                     256-bit SSL · DPDP aligned · No card required
                   </div>
-                  <p className="mt-3 text-xs text-slate-500">
-                    Learners, creators, institutes, and recruiters use the same account system.
-                  </p>
                 </div>
               </motion.div>
             </div>
           </div>
 
-          <Reveal as="div" delay={0.1} className="mt-10 rounded-2xl border border-slate-200/80 bg-white/80 backdrop-blur-sm px-4 py-6 sm:px-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-              Trusted at
-            </p>
-            <Stagger className="mt-5 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-x-4 gap-y-3 max-w-5xl mx-auto">
-              {trustItems.map(({ icon: Icon, label }) => (
-                <StaggerItem
-                  key={label}
-                  className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-slate-600 transition-shadow hover:shadow-sm"
+          {/* Category chip rail — Udemy-style "popular topics" */}
+          {categories.length > 0 && (
+            <Reveal as="div" delay={0.05} className="mt-10">
+              <div className="flex items-center justify-between mb-3 px-1">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Popular categories</p>
+                <Link href="/exams" className="text-xs font-semibold text-slate-700 hover:text-slate-900 inline-flex items-center gap-1">
+                  See all <ArrowRight className="h-3 w-3" />
+                </Link>
+              </div>
+              <div className="chip-rail flex gap-2 overflow-x-auto pb-1">
+                {categories.slice(0, 14).map((c) => (
+                  <Link key={c.id} href={`/exams?category=${c.slug}`}>
+                    <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:border-slate-900 hover:text-slate-900 transition-colors">
+                      {c.name}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </Reveal>
+          )}
+
+          {/* Onboarding strip — explicit CTAs for every persona */}
+          <Reveal as="div" delay={0.1} className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            {[
+              { href: "/exams", title: "I want to get certified", sub: "Take a free assessment", icon: GraduationCap },
+              { href: "/creator", title: "Teach on Octamy", sub: "Sell courses & exams", icon: Sparkles },
+              { href: "/institute", title: "For institutes", sub: "Run cohorts & banks", icon: Building2 },
+              { href: "/for-recruiters", title: "For recruiters", sub: "Hire verified talent", icon: Users },
+            ].map((cta) => (
+              <Link key={cta.href} href={cta.href}>
+                <motion.div
+                  whileHover={{ y: -3 }}
+                  className="group h-full rounded-2xl border border-slate-200 bg-white px-5 py-4 hover:border-slate-900 hover:shadow-lg transition-all flex items-start gap-3"
                 >
-                  <Icon className="w-4 h-4 text-slate-500" />
-                  <span className="text-xs sm:text-sm font-semibold">{label}</span>
-                </StaggerItem>
+                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-white">
+                    <cta.icon className="h-5 w-5" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-slate-900">{cta.title}</p>
+                    <p className="text-xs text-slate-500 mt-0.5">{cta.sub}</p>
+                  </div>
+                  <ArrowRight className="ml-auto h-4 w-4 text-slate-400 group-hover:text-slate-900 group-hover:translate-x-0.5 transition-all" />
+                </motion.div>
+              </Link>
+            ))}
+          </Reveal>
+
+          {/* Trusted-at strip — compressed */}
+          <Reveal as="div" delay={0.15} className="mt-8 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 sm:px-6">
+            <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400 mr-2">Trusted at</p>
+              {trustItems.map(({ icon: Icon, label }) => (
+                <span key={label} className="inline-flex items-center gap-1.5 text-slate-500 text-xs sm:text-sm font-medium">
+                  <Icon className="w-3.5 h-3.5 text-slate-400" />
+                  {label}
+                </span>
               ))}
-            </Stagger>
+            </div>
           </Reveal>
         </div>
       </section>
