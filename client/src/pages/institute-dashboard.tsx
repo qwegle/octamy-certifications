@@ -30,12 +30,12 @@ type Institute = {
 };
 
 const SIDEBAR = [
-  { key: 'students', label: 'Students', icon: Users },
-  { key: 'cohorts', label: 'Cohorts', icon: Layers },
-  { key: 'banks', label: 'Question Banks', icon: FileQuestion },
-  { key: 'exams', label: 'Exams', icon: ClipboardList },
-  { key: 'certificates', label: 'Certificates', icon: Award },
-  { key: 'settings', label: 'Settings', icon: SettingsIcon },
+  { key: 'students', label: 'Students', icon: Users, href: '/institute/students' },
+  { key: 'cohorts', label: 'Cohorts', icon: Layers, href: '/institute/students' },
+  { key: 'banks', label: 'Question Banks', icon: FileQuestion, href: '/question-banks' },
+  { key: 'exams', label: 'Exams', icon: ClipboardList, href: '/exams' },
+  { key: 'certificates', label: 'Certificates', icon: Award, href: '/business-certificates' },
+  { key: 'settings', label: 'Settings', icon: SettingsIcon, href: '/profile-edit' },
 ] as const;
 
 export default function InstituteDashboard() {
@@ -55,6 +55,12 @@ export default function InstituteDashboard() {
       const res = await apiRequest('GET', '/api/me/institute');
       return res.json();
     },
+  });
+
+  const { data: stats } = useQuery<{ students: number; cohorts: number; activeExams: number }>({
+    queryKey: ['/api/institute/stats'],
+    enabled: !!user && !!token && institute?.status === 'verified',
+    queryFn: async () => (await apiRequest('GET', '/api/institute/stats')).json(),
   });
 
   if (!user) return null;
@@ -91,9 +97,9 @@ export default function InstituteDashboard() {
           ) : null}
 
           <div className="grid sm:grid-cols-3 gap-4 mb-8">
-            <StatCard label="Students" value={`0 / ${institute?.studentSeatLimit ?? 500}`} icon={<Users className="w-5 h-5" />} />
-            <StatCard label="Cohorts" value={`0 / ${institute?.cohortLimit ?? 5}`} icon={<Layers className="w-5 h-5" />} />
-            <StatCard label="Active exams" value="0" icon={<ClipboardList className="w-5 h-5" />} />
+            <StatCard label="Students" value={`${stats?.students ?? 0} / ${institute?.studentSeatLimit ?? 500}`} icon={<Users className="w-5 h-5" />} />
+            <StatCard label="Cohorts" value={`${stats?.cohorts ?? 0} / ${institute?.cohortLimit ?? 5}`} icon={<Layers className="w-5 h-5" />} />
+            <StatCard label="Active exams" value={String(stats?.activeExams ?? 0)} icon={<ClipboardList className="w-5 h-5" />} />
           </div>
 
           <div className="grid lg:grid-cols-[220px_1fr] gap-6">
@@ -103,6 +109,7 @@ export default function InstituteDashboard() {
                 return (
                   <button
                     key={item.key}
+                    onClick={() => setLocation(item.href)}
                     className="w-full flex items-center gap-3 px-3 py-2 text-sm rounded-md text-slate-700 hover:bg-slate-100 text-left"
                   >
                     <Icon className="w-4 h-4" />
@@ -113,14 +120,17 @@ export default function InstituteDashboard() {
             </aside>
             <Card className="border-slate-200">
               <CardHeader>
-                <CardTitle className="text-base font-medium text-slate-900">Coming soon — P3</CardTitle>
+                <CardTitle className="text-base font-medium text-slate-900">Quick actions</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-3">
                 <p className="text-sm text-slate-600">
-                  The full institute toolkit — students, cohorts, question banks, exams, and certificate
-                  issuance — ships in P3. We've already provisioned your workspace, so your historical
-                  data will be ready when this lights up.
+                  Add students, organize cohorts, and assign verified exams. Plan upgrades unlock more seats and bulk import.
                 </p>
+                <div className="flex flex-wrap gap-2">
+                  <Button onClick={() => setLocation('/institute/students')} className="bg-slate-900 text-white">Manage students</Button>
+                  <Button onClick={() => setLocation('/exams')} variant="outline">Browse exams</Button>
+                  <Button onClick={() => setLocation('/pricing')} variant="outline">Upgrade plan</Button>
+                </div>
               </CardContent>
             </Card>
           </div>

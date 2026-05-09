@@ -1,11 +1,14 @@
 import { useState } from 'react';
-import { Link } from 'wouter';
+import { Link, useLocation } from 'wouter';
 import Header from '@/components/header';
 import Footer from '@/components/footer';
 import { SEO } from '@/components/seo';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Check } from 'lucide-react';
+import { useAuth } from '@/lib/auth.tsx';
+import { apiRequest } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
 
 type Cycle = 'monthly' | 'yearly';
 
@@ -18,6 +21,40 @@ function discounted(monthly: number, cycle: Cycle): string {
 
 export default function Pricing() {
   const [cycle, setCycle] = useState<Cycle>('monthly');
+  const { user, token } = useAuth();
+  const [, setLocation] = useLocation();
+  const { toast } = useToast();
+
+  async function subscribe(ownerType: 'creator' | 'institute' | 'recruiter', plan: string, registerRole: string) {
+    if (!user || !token) {
+      setLocation(`/register?role=${registerRole}&plan=${plan}`);
+      return;
+    }
+    try {
+      const res = await apiRequest('POST', '/api/subscriptions/checkout', { ownerType, plan, cycle });
+      const data = await res.json();
+      if (!res.ok) {
+        if (res.status === 404 && data?.message?.toLowerCase?.().includes('profile')) {
+          toast({ title: 'Set up your profile first', description: `Create your ${ownerType} profile to subscribe.` });
+          setLocation(`/${ownerType}/register?plan=${plan}`);
+          return;
+        }
+        throw new Error(data.message || 'Failed to start checkout');
+      }
+      if (data.activated) {
+        toast({ title: 'Plan activated', description: `You're on ${plan.toUpperCase()} now.` });
+        setLocation(`/${ownerType}/dashboard`);
+        return;
+      }
+      if (data.paymentLink) {
+        window.location.href = data.paymentLink;
+        return;
+      }
+      toast({ title: 'Checkout started', description: 'Awaiting payment provider response.' });
+    } catch (e: any) {
+      toast({ title: 'Could not start checkout', description: e.message, variant: 'destructive' });
+    }
+  }
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
@@ -80,7 +117,7 @@ export default function Pricing() {
                 price="Free"
                 meta="1 active course · 30% platform fee"
                 features={['Basic analytics', 'Octamy-branded checkout']}
-                cta={{ label: 'Start free', href: '/register?role=creator&plan=starter' }}
+                cta={{ label: 'Start free', onClick: () => subscribe('creator', 'free', 'creator') }}
               />
               <Tier
                 name="Pro"
@@ -88,14 +125,14 @@ export default function Pricing() {
                 meta="10 active courses · 20% platform fee"
                 highlight
                 features={['Custom subdomain', 'Drip release', 'Coupon codes', 'Priority review']}
-                cta={{ label: 'Choose Pro', href: '/register?role=creator&plan=pro' }}
+                cta={{ label: 'Choose Pro', onClick: () => subscribe('creator', 'pro', 'creator') }}
               />
               <Tier
                 name="Premium"
                 price={discounted(1999, cycle)}
                 meta="Unlimited courses · 10% platform fee"
                 features={['White-label', 'Video transcoding', 'Affiliate commissioning', 'API access']}
-                cta={{ label: 'Choose Premium', href: '/register?role=creator&plan=premium' }}
+                cta={{ label: 'Choose Premium', onClick: () => subscribe('creator', 'premium', 'creator') }}
               />
             </Column>
 
@@ -106,7 +143,7 @@ export default function Pricing() {
                 price={discounted(2999, cycle)}
                 meta="500 students · 5 cohorts"
                 features={['Bulk CSV enroll', 'Private question banks', 'Results export', 'Your logo on certs']}
-                cta={{ label: 'Choose Starter', href: '/register?role=institute&plan=starter' }}
+                cta={{ label: 'Choose Starter', onClick: () => subscribe('institute', 'starter', 'institute') }}
               />
               <Tier
                 name="Growth"
@@ -114,7 +151,7 @@ export default function Pricing() {
                 meta="5,000 students · Unlimited cohorts"
                 highlight
                 features={['White-label certificates', 'Scheduled exam windows', 'API access', 'Priority support']}
-                cta={{ label: 'Choose Growth', href: '/register?role=institute&plan=growth' }}
+                cta={{ label: 'Choose Growth', onClick: () => subscribe('institute', 'growth', 'institute') }}
               />
               <Tier
                 name="Enterprise"
@@ -132,7 +169,7 @@ export default function Pricing() {
                 price={discounted(2999, cycle)}
                 meta="50 profile views/mo · 10 saved searches"
                 features={['Email candidate', 'Score filter', 'Badge filter']}
-                cta={{ label: 'Choose Starter', href: '/register?role=recruiter&plan=starter' }}
+                cta={{ label: 'Choose Starter', onClick: () => subscribe('recruiter', 'starter', 'recruiter') }}
               />
               <Tier
                 name="Growth"
@@ -140,7 +177,7 @@ export default function Pricing() {
                 meta="200 profile views/mo · Unlimited saved searches"
                 highlight
                 features={['CSV export', 'ATS webhook', 'Team seats (3)']}
-                cta={{ label: 'Choose Growth', href: '/register?role=recruiter&plan=growth' }}
+                cta={{ label: 'Choose Growth', onClick: () => subscribe('recruiter', 'growth', 'recruiter') }}
               />
               <Tier
                 name="Enterprise"
@@ -178,8 +215,18 @@ function Tier({
   name, price, meta, features, highlight, cta,
 }: {
   name: string; price: string; meta?: string; features: string[]; highlight?: boolean;
-  cta: { label: string; href: string };
+  cta: { label: string; href?: string; onClick?: () => void };
 }) {
+  const button = (
+    <Button
+      onClick={cta.onClick}
+      className={`w-full mt-5 ${highlight ? 'bg-slate-900 hover:bg-black text-white' : ''}`}
+      variant={highlight ? 'default' : 'outline'}
+      size="sm"
+    >
+      {cta.label}
+    </Button>
+  );
   return (
     <Card className={`border ${highlight ? 'border-slate-900 shadow-md' : 'border-slate-200'}`}>
       <CardContent className="pt-6">
@@ -194,11 +241,7 @@ function Tier({
             <li key={f} className="flex gap-2"><Check className="w-4 h-4 text-slate-700 shrink-0 mt-0.5" />{f}</li>
           ))}
         </ul>
-        <Link href={cta.href}>
-          <Button className={`w-full mt-5 ${highlight ? 'bg-slate-900 hover:bg-black text-white' : ''}`} variant={highlight ? 'default' : 'outline'} size="sm">
-            {cta.label}
-          </Button>
-        </Link>
+        {cta.href ? <Link href={cta.href}>{button}</Link> : button}
       </CardContent>
     </Card>
   );

@@ -38,6 +38,12 @@ export default function CreatorDashboard() {
     },
   });
 
+  const { data: stats } = useQuery<{ coursesCount: number; attempts: number; certificates: number; revenueINR: number; plan: string; status: string }>({
+    queryKey: ['/api/creator/stats'],
+    enabled: !!user && !!token && creator?.status === 'approved',
+    queryFn: async () => (await apiRequest('GET', '/api/creator/stats')).json(),
+  });
+
   if (!user) return null;
 
   return (
@@ -75,9 +81,9 @@ export default function CreatorDashboard() {
           ) : null}
 
           <div className="grid sm:grid-cols-3 gap-4">
-            <StatCard icon={<BookOpen className="w-5 h-5" />} label="My courses" value="0" cta="Create your first course →" onClick={() => setLocation('/creator/courses/new')} />
-            <StatCard icon={<Wallet className="w-5 h-5" />} label="Earnings" value="₹0" sub="Lifetime gross" />
-            <StatCard icon={<Sparkles className="w-5 h-5" />} label="Plan" value={(creator?.plan || 'free').toUpperCase()} sub="Upgrade for more reach" />
+            <StatCard icon={<BookOpen className="w-5 h-5" />} label="My courses" value={String(stats?.coursesCount ?? 0)} cta="Manage courses →" onClick={() => setLocation('/creator/courses')} />
+            <StatCard icon={<Wallet className="w-5 h-5" />} label="Earnings" value={`₹${(stats?.revenueINR ?? 0).toLocaleString('en-IN')}`} sub={`${stats?.attempts ?? 0} attempts · ${stats?.certificates ?? 0} certificates`} />
+            <StatCard icon={<Sparkles className="w-5 h-5" />} label="Plan" value={(creator?.plan || 'free').toUpperCase()} cta="Upgrade plan →" onClick={() => setLocation('/pricing')} />
           </div>
 
           <Tabs defaultValue="courses" className="w-full">
@@ -87,13 +93,33 @@ export default function CreatorDashboard() {
               <TabsTrigger value="settings">Settings</TabsTrigger>
             </TabsList>
             <TabsContent value="courses">
-              <PanelComingSoon title="Course builder coming in P4" body="You'll be able to create paid courses, set pricing, and publish to Octamy." />
+              <Card className="border-slate-200 mt-4">
+                <CardContent className="py-10 text-center">
+                  <h3 className="text-lg font-medium text-slate-900">Build, list, and track your courses</h3>
+                  <p className="text-sm text-slate-600 mt-2 max-w-md mx-auto">Submit a course for review. Once approved, learners can enroll, take the exam, and earn a verified certificate.</p>
+                  <div className="flex items-center justify-center gap-2 mt-5">
+                    <Button onClick={() => setLocation('/creator/courses')} variant="outline">View all</Button>
+                    <Button onClick={() => setLocation('/creator/courses/new')} className="bg-slate-900 text-white">Create new</Button>
+                  </div>
+                </CardContent>
+              </Card>
             </TabsContent>
             <TabsContent value="earnings">
-              <PanelComingSoon title="Earnings & payouts — P4" body="Track sales, commissions, and request payouts to UPI or bank." />
+              <Card className="border-slate-200 mt-4">
+                <CardContent className="py-10 text-center">
+                  <h3 className="text-lg font-medium text-slate-900">Lifetime earnings: ₹{(stats?.revenueINR ?? 0).toLocaleString('en-IN')}</h3>
+                  <p className="text-sm text-slate-600 mt-2">Payout requests open from the Wallet tab in the next release.</p>
+                </CardContent>
+              </Card>
             </TabsContent>
             <TabsContent value="settings">
-              <PanelComingSoon title="Profile settings — P4" body="Edit your public creator page, social links, and tax details." />
+              <Card className="border-slate-200 mt-4">
+                <CardContent className="py-10 text-center">
+                  <h3 className="text-lg font-medium text-slate-900">Profile settings</h3>
+                  <p className="text-sm text-slate-600 mt-2">Edit your public creator page from your profile.</p>
+                  <Button onClick={() => setLocation('/profile-edit')} variant="outline" className="mt-4">Edit profile</Button>
+                </CardContent>
+              </Card>
             </TabsContent>
           </Tabs>
         </div>

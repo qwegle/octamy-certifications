@@ -18,7 +18,11 @@ import Auth from "@/pages/auth";
 import Login from "@/pages/login";
 import Register from "@/pages/register";
 import CreatorDashboard from "@/pages/creator-dashboard";
+import CreatorCourses from "@/pages/creator-courses";
+import CreatorCourseNew from "@/pages/creator-course-new";
 import InstituteDashboard from "@/pages/institute-dashboard";
+import InstituteStudents from "@/pages/institute-students";
+import RecruiterSavedSearches from "@/pages/recruiter-saved-searches";
 import ForgotPassword from "@/pages/forgot-password";
 import ResetPassword from "@/pages/reset-password";
 import CreatorLanding from "@/pages/creator-landing";
@@ -139,7 +143,18 @@ function Router() {
       <Route path="/certificate/:certificateId" component={Certificate} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/creator/dashboard" component={CreatorDashboard} />
+      <Route path="/creator/courses" component={CreatorCourses} />
+      <Route path="/creator/courses/new" component={CreatorCourseNew} />
       <Route path="/institute/dashboard" component={InstituteDashboard} />
+      <Route path="/institute/students" component={InstituteStudents} />
+      <Route path="/institute/cohorts" component={InstituteStudents} />
+      <Route path="/recruiter/saved-searches">
+        {() => (
+          <RecruiterProtectedRoute>
+            <RecruiterSavedSearches />
+          </RecruiterProtectedRoute>
+        )}
+      </Route>
       <Route path="/progress" component={Progress} />
       <Route path="/preferences" component={Preferences} />
       <Route path="/qwegle" component={AdminDashboard} />
