@@ -438,6 +438,158 @@ export const auditLogs = pgTable("audit_logs", {
 export type AuditLog = typeof auditLogs.$inferSelect;
 export type InsertAuditLog = typeof auditLogs.$inferInsert;
 
+// =================================================================
+// LMS — course curriculum (creator builder + lesson progress)
+// =================================================================
+export const courseSections = pgTable("course_sections", {
+  id: serial("id").primaryKey(),
+  courseId: integer("course_id").references(() => courses.id).notNull(),
+  title: text("title").notNull(),
+  position: integer("position").default(0).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const lessons = pgTable("lessons", {
+  id: serial("id").primaryKey(),
+  sectionId: integer("section_id").references(() => courseSections.id).notNull(),
+  courseId: integer("course_id").references(() => courses.id).notNull(),
+  title: text("title").notNull(),
+  kind: text("kind").default("video").notNull(), // video | pdf | text | quiz | link
+  contentUrl: text("content_url"),
+  contentText: text("content_text"),
+  durationSec: integer("duration_sec").default(0),
+  position: integer("position").default(0).notNull(),
+  isPreview: boolean("is_preview").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => ({
+  bySection: index("lessons_section_idx").on(t.sectionId),
+  byCourse: index("lessons_course_idx").on(t.courseId),
+}));
+
+export const lessonProgress = pgTable("lesson_progress", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  lessonId: integer("lesson_id").references(() => lessons.id).notNull(),
+  courseId: integer("course_id").references(() => courses.id).notNull(),
+  status: text("status").default("started").notNull(), // started | completed
+  positionSec: integer("position_sec").default(0),
+  completedAt: timestamp("completed_at"),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (t) => ({
+  uniq: unique().on(t.userId, t.lessonId),
+  byUserCourse: index("lesson_progress_user_course_idx").on(t.userId, t.courseId),
+}));
+
+export const courseReviews = pgTable("course_reviews", {
+  id: serial("id").primaryKey(),
+  courseId: integer("course_id").references(() => courses.id).notNull(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  rating: integer("rating").notNull(), // 1..5
+  comment: text("comment"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => ({
+  uniq: unique().on(t.courseId, t.userId),
+}));
+
+// =================================================================
+// EXAM — standalone scheduled exams (separate from course free exams)
+// =================================================================
+export const examInstances = pgTable("exam_instances", {
+  id: serial("id").primaryKey(),
+  bankId: integer("bank_id").references(() => questionBanks.id),
+  courseId: integer("course_id").references(() => courses.id),
+  ownerType: text("owner_type").notNull(), // creator | institute | admin
+  ownerId: integer("owner_id").notNull(),
+  title: text("title").notNull(),
+  shareCode: text("share_code").notNull().unique(),
+  passwordHash: text("password_hash"),
+  cohortId: integer("cohort_id").references(() => cohorts.id),
+  startsAt: timestamp("starts_at"),
+  endsAt: timestamp("ends_at"),
+  durationMin: integer("duration_min").default(30).notNull(),
+  passingScore: integer("passing_score").default(50).notNull(),
+  maxAttempts: integer("max_attempts").default(1).notNull(),
+  status: text("status").default("draft").notNull(), // draft | live | closed
+  createdBy: integer("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const examInstanceAttempts = pgTable("exam_instance_attempts", {
+  id: serial("id").primaryKey(),
+  instanceId: integer("instance_id").references(() => examInstances.id).notNull(),
+  userId: integer("user_id").references(() => users.id),
+  email: text("email"),
+  startedAt: timestamp("started_at").defaultNow().notNull(),
+  lastHeartbeatAt: timestamp("last_heartbeat_at").defaultNow().notNull(),
+  submittedAt: timestamp("submitted_at"),
+  score: integer("score").default(0),
+  totalQuestions: integer("total_questions").default(0),
+  passed: boolean("passed").default(false),
+  answers: jsonb("answers"),
+  status: text("status").default("in_progress").notNull(), // in_progress | submitted | abandoned
+}, (t) => ({
+  byInstance: index("exam_instance_attempts_instance_idx").on(t.instanceId),
+}));
+
+// =================================================================
+// PAY — split payouts + payout requests
+// =================================================================
+export const splitPayouts = pgTable("split_payouts", {
+  id: serial("id").primaryKey(),
+  paymentId: integer("payment_id").references(() => payments.id),
+  cashfreeOrderId: text("cashfree_order_id"),
+  beneficiaryType: text("beneficiary_type").notNull(), // creator | institute | nodukan | platform
+  beneficiaryId: integer("beneficiary_id"),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  currency: text("currency").default("INR").notNull(),
+  status: text("status").default("pending").notNull(), // pending | settled | failed
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const payoutRequests = pgTable("payout_requests", {
+  id: serial("id").primaryKey(),
+  ownerType: text("owner_type").notNull(), // creator | institute
+  ownerId: integer("owner_id").notNull(),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  currency: text("currency").default("INR").notNull(),
+  upi: text("upi"),
+  bankAccount: text("bank_account"),
+  ifsc: text("ifsc"),
+  status: text("status").default("pending").notNull(), // pending | approved | paid | rejected
+  notes: text("notes"),
+  approvedBy: integer("approved_by").references(() => users.id),
+  paidAt: timestamp("paid_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// =================================================================
+// CREATOR — third-party integrations (Nodukan etc)
+// =================================================================
+export const creatorIntegrations = pgTable("creator_integrations", {
+  id: serial("id").primaryKey(),
+  creatorId: integer("creator_id").references(() => creators.id).notNull(),
+  provider: text("provider").notNull(), // nodukan | youtube | substack
+  accessToken: text("access_token"),
+  refreshToken: text("refresh_token"),
+  externalAccountId: text("external_account_id"),
+  config: jsonb("config"),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => ({
+  uniq: unique().on(t.creatorId, t.provider),
+}));
+
+export type CourseSection = typeof courseSections.$inferSelect;
+export type Lesson = typeof lessons.$inferSelect;
+export type LessonProgress = typeof lessonProgress.$inferSelect;
+export type CourseReview = typeof courseReviews.$inferSelect;
+export type ExamInstance = typeof examInstances.$inferSelect;
+export type ExamInstanceAttempt = typeof examInstanceAttempts.$inferSelect;
+export type SplitPayout = typeof splitPayouts.$inferSelect;
+export type PayoutRequest = typeof payoutRequests.$inferSelect;
+export type CreatorIntegration = typeof creatorIntegrations.$inferSelect;
+
 export const questions = pgTable("questions", {
   id: serial("id").primaryKey(),
   // Legacy: questions tied directly to a course. Now nullable; bank-scoped

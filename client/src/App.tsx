@@ -20,6 +20,8 @@ import Register from "@/pages/register";
 import CreatorDashboard from "@/pages/creator-dashboard";
 import CreatorCourses from "@/pages/creator-courses";
 import CreatorCourseNew from "@/pages/creator-course-new";
+import CreatorPayouts from "@/pages/creator-payouts";
+import ExamShare from "@/pages/exam-share";
 import InstituteDashboard from "@/pages/institute-dashboard";
 import InstituteStudents from "@/pages/institute-students";
 import RecruiterSavedSearches from "@/pages/recruiter-saved-searches";
@@ -145,6 +147,8 @@ function Router() {
       <Route path="/creator/dashboard" component={CreatorDashboard} />
       <Route path="/creator/courses" component={CreatorCourses} />
       <Route path="/creator/courses/new" component={CreatorCourseNew} />
+      <Route path="/creator/payouts" component={CreatorPayouts} />
+      <Route path="/x/:code" component={ExamShare} />
       <Route path="/institute/dashboard" component={InstituteDashboard} />
       <Route path="/institute/students" component={InstituteStudents} />
       <Route path="/institute/cohorts" component={InstituteStudents} />

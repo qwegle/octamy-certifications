@@ -1,16 +1,20 @@
 {
-  "name": "Octamy",
+  "name": "Octamy — Skill Verification",
   "short_name": "Octamy",
-  "description": "Skill Verification & Certification Platform",
+  "description": "Free assessments. Pay only when you pass. Recruiter-verified credentials.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#0369A1",
+  "orientation": "portrait",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
+  "categories": ["education", "productivity"],
   "icons": [
-    {
-      "src": "/favicon.svg",
-      "type": "image/svg+xml",
-      "sizes": "any"
-    }
+    { "src": "/favicon.svg", "type": "image/svg+xml", "sizes": "any", "purpose": "any maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Browse exams", "url": "/courses", "description": "All certification exams" },
+    { "name": "My dashboard", "url": "/dashboard", "description": "Your learning" }
   ]
 }
+

@@ -82,7 +82,7 @@ export default function CreatorDashboard() {
 
           <div className="grid sm:grid-cols-3 gap-4">
             <StatCard icon={<BookOpen className="w-5 h-5" />} label="My courses" value={String(stats?.coursesCount ?? 0)} cta="Manage courses →" onClick={() => setLocation('/creator/courses')} />
-            <StatCard icon={<Wallet className="w-5 h-5" />} label="Earnings" value={`₹${(stats?.revenueINR ?? 0).toLocaleString('en-IN')}`} sub={`${stats?.attempts ?? 0} attempts · ${stats?.certificates ?? 0} certificates`} />
+            <StatCard icon={<Wallet className="w-5 h-5" />} label="Earnings" value={`₹${(stats?.revenueINR ?? 0).toLocaleString('en-IN')}`} sub={`${stats?.attempts ?? 0} attempts · ${stats?.certificates ?? 0} certificates`} cta="Request payout →" onClick={() => setLocation('/creator/payouts')} />
             <StatCard icon={<Sparkles className="w-5 h-5" />} label="Plan" value={(creator?.plan || 'free').toUpperCase()} cta="Upgrade plan →" onClick={() => setLocation('/pricing')} />
           </div>
 
