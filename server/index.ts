@@ -5,6 +5,7 @@ import rateLimit from "express-rate-limit";
 import * as Sentry from "@sentry/node";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { logger } from "./lib/logger";
 import path from "path";
 import { generateCertificateHTML } from "./utils/newCertificateGenerator";
 import { fileURLToPath } from "url";
@@ -96,29 +97,21 @@ app.use(express.static('server/public'));
 
 app.use((req, res, next) => {
   const start = Date.now();
-  const path = req.path;
-  let capturedJsonResponse: Record<string, any> | undefined = undefined;
-
-  const originalResJson = res.json;
-  res.json = function (bodyJson, ...args) {
-    capturedJsonResponse = bodyJson;
-    return originalResJson.apply(res, [bodyJson, ...args]);
-  };
+  const reqPath = req.path;
 
   res.on("finish", () => {
+    if (!reqPath.startsWith("/api")) return;
     const duration = Date.now() - start;
-    if (path.startsWith("/api")) {
-      let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
-      if (capturedJsonResponse) {
-        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
-      }
-
-      if (logLine.length > 80) {
-        logLine = logLine.slice(0, 79) + "…";
-      }
-
-      log(logLine);
-    }
+    const meta: Record<string, any> = {
+      method: req.method,
+      path: reqPath,
+      status: res.statusCode,
+      durMs: duration,
+      ip: req.header('x-forwarded-for')?.split(',')[0]?.trim() || req.ip,
+    };
+    if (res.statusCode >= 500) logger.error('http.request', meta);
+    else if (res.statusCode >= 400) logger.warn('http.request', meta);
+    else logger.info('http.request', meta);
   });
 
   next();
@@ -141,9 +134,7 @@ app.use((req, res, next) => {
     if (!res.headersSent) {
       res.status(status).json({ message });
     }
-    // Log but DO NOT re-throw — re-throwing crashes the worker via uncaughtException.
-    // eslint-disable-next-line no-console
-    console.error("[unhandled-route-error]", err);
+    logger.error("unhandled.route_error", { status, msg: message, err });
   });
 
   // importantly only setup vite in development and after

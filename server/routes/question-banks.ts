@@ -2,7 +2,7 @@ import { Router, Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import multer from "multer";
 import Papa from "papaparse";
-import * as XLSX from "xlsx";
+import * as XLSX from "exceljs";
 import { z } from "zod";
 import { storage } from "../storage";
 import { db } from "../db";
@@ -367,9 +367,33 @@ router.post("/:id/questions/import", requireAuth, withCtx, upload.single("file")
       const parsed = Papa.parse<Record<string, any>>(text, { header: true, skipEmptyLines: true });
       raw = parsed.data;
     } else if (filename.endsWith(".xlsx") || filename.endsWith(".xls")) {
-      const wb = XLSX.read(req.file.buffer, { type: "buffer" });
-      const sheet = wb.Sheets[wb.SheetNames[0]];
-      raw = XLSX.utils.sheet_to_json<Record<string, any>>(sheet);
+      const wb = new XLSX.Workbook();
+      await wb.xlsx.load(req.file.buffer as any);
+      const sheet = wb.worksheets[0];
+      if (!sheet) {
+        return res.status(400).json({ message: "Workbook has no sheets" });
+      }
+      const headerRow = sheet.getRow(1);
+      const headers: string[] = [];
+      headerRow.eachCell((cell, colIdx) => {
+        headers[colIdx - 1] = String(cell.value ?? '').trim();
+      });
+      raw = [];
+      sheet.eachRow((row, rowIdx) => {
+        if (rowIdx === 1) return; // skip header
+        const obj: Record<string, any> = {};
+        let hasAny = false;
+        row.eachCell((cell, colIdx) => {
+          const key = headers[colIdx - 1];
+          if (!key) return;
+          let v: any = cell.value;
+          if (v && typeof v === 'object' && 'text' in v) v = (v as any).text;
+          if (v && typeof v === 'object' && 'result' in v) v = (v as any).result;
+          if (v != null && v !== '') hasAny = true;
+          obj[key] = v;
+        });
+        if (hasAny) raw.push(obj);
+      });
     } else {
       return res.status(400).json({ message: "Only .csv, .xlsx, .xls supported" });
     }
