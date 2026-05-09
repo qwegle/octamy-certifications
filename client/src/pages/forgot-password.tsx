@@ -7,15 +7,30 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { SEO } from '@/components/seo';
+import { apiRequest } from '@/lib/queryClient';
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: wire up real email infrastructure. For now, simulate success.
-    setSent(true);
+    setError(null);
+    setSubmitting(true);
+    try {
+      const r = await apiRequest('POST', '/api/auth/forgot-password', { email });
+      if (!r.ok) {
+        const data = await r.json().catch(() => ({}));
+        throw new Error(data.message || 'Failed to send reset email');
+      }
+      setSent(true);
+    } catch (err: any) {
+      setError(err.message || 'Something went wrong. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -40,7 +55,8 @@ export default function ForgotPassword() {
                     <Label className="text-slate-700">Email</Label>
                     <Input className="mt-1" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />
                   </div>
-                  <Button type="submit" className="w-full bg-slate-900 hover:bg-black text-white">Send reset link</Button>
+                  {error && <p className="text-sm text-red-600">{error}</p>}
+                  <Button type="submit" disabled={submitting} className="w-full bg-slate-900 hover:bg-black text-white">{submitting ? 'Sending…' : 'Send reset link'}</Button>
                 </form>
               )}
             </CardContent>

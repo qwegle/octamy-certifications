@@ -1102,12 +1102,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/courses/:id", async (req, res) => {
     try {
-      const course = await storage.getCourse(parseInt(req.params.id));
+      const idParam = String(req.params.id);
+      // Graceful fallback: if frontend passes a slug here, look it up by slug.
+      const isNumeric = /^\d+$/.test(idParam);
+      const course = isNumeric
+        ? await storage.getCourse(parseInt(idParam, 10))
+        : await storage.getCourseBySlug(idParam);
       if (!course) {
         return res.status(404).json({ message: "Course not found" });
       }
       res.json(course);
     } catch (error) {
+      console.error("Error fetching course:", error);
       res.status(500).json({ message: "Failed to fetch course" });
     }
   });

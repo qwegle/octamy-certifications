@@ -223,6 +223,30 @@ class EmailService {
       html: htmlContent,
     });
   }
+
+  async sendPasswordResetEmail(userEmail: string, userName: string, resetLink: string): Promise<boolean> {
+    const html = `
+      <!DOCTYPE html><html><body style="font-family:Arial,sans-serif;line-height:1.6;color:#111;background:#f6f6f6;padding:24px">
+        <div style="max-width:560px;margin:0 auto;background:#fff;border-radius:8px;overflow:hidden;border:1px solid #e5e5e5">
+          <div style="background:#000;color:#fff;padding:20px 24px"><h2 style="margin:0">Reset your Octamy password</h2></div>
+          <div style="padding:24px">
+            <p>Hi ${userName},</p>
+            <p>We received a request to reset the password for your Octamy account. Click the button below to set a new password. This link expires in 1 hour.</p>
+            <p style="text-align:center;margin:24px 0">
+              <a href="${resetLink}" style="display:inline-block;background:#000;color:#fff;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:600">Reset password</a>
+            </p>
+            <p style="font-size:13px;color:#666">If the button doesn't work, copy this link into your browser:<br><a href="${resetLink}" style="color:#000">${resetLink}</a></p>
+            <p style="font-size:13px;color:#666">If you didn't request this, you can safely ignore this email — your password won't change.</p>
+          </div>
+          <div style="background:#fafafa;padding:16px 24px;font-size:12px;color:#888;text-align:center;border-top:1px solid #eee">© Octamy Solutions Pvt. Ltd. · support@octamy.com</div>
+        </div>
+      </body></html>`;
+    return this.sendEmail({
+      to: userEmail,
+      subject: 'Reset your Octamy password',
+      html,
+    });
+  }
 }
 
 export const emailService = new EmailService();

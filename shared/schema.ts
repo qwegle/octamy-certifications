@@ -590,6 +590,22 @@ export type SplitPayout = typeof splitPayouts.$inferSelect;
 export type PayoutRequest = typeof payoutRequests.$inferSelect;
 export type CreatorIntegration = typeof creatorIntegrations.$inferSelect;
 
+// =================================================================
+// AUTH — password reset tokens
+// =================================================================
+export const passwordResetTokens = pgTable("password_reset_tokens", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  tokenHash: text("token_hash").notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  usedAt: timestamp("used_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => ({
+  byHash: index("password_reset_tokens_hash_idx").on(t.tokenHash),
+  byUser: index("password_reset_tokens_user_idx").on(t.userId),
+}));
+export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
+
 export const questions = pgTable("questions", {
   id: serial("id").primaryKey(),
   // Legacy: questions tied directly to a course. Now nullable; bank-scoped
