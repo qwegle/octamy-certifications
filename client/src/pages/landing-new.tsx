@@ -57,87 +57,93 @@ const PREMIUM_CATEGORY_SLUGS: string[] = (
   .map((s: string) => s.trim().toLowerCase())
   .filter(Boolean);
 
-// ---------- Recent certifications marquee (lightened) ----------
+// ---------- Recent / sample certifications ----------
+const SAMPLE_CERTS = [
+  { name: "Aarav Shah",     company: "Acme Corp",       course: "Python Developer",          badge: "Gold",     score: 86, color: "from-amber-500 to-amber-700" },
+  { name: "Priya Iyer",     company: "Infosys",          course: "Generative AI Foundations", badge: "Platinum", score: 92, color: "from-slate-900 to-slate-700" },
+  { name: "Rahul Verma",    company: "TCS",              course: "AWS Cloud Practitioner",    badge: "Silver",   score: 74, color: "from-slate-500 to-slate-700" },
+  { name: "Ananya Reddy",   company: "Flipkart",         course: "Cybersecurity Analyst",     badge: "Gold",     score: 81, color: "from-amber-500 to-amber-700" },
+  { name: "Vikram Singh",   company: "Razorpay",         course: "Full-Stack JavaScript",     badge: "Platinum", score: 95, color: "from-slate-900 to-slate-700" },
+  { name: "Meera Nair",     company: "Wipro",            course: "Data Science Essentials",   badge: "Silver",   score: 71, color: "from-slate-500 to-slate-700" },
+];
+
 function CertificateSlider() {
-  const { data: certificates = [] } = useQuery<any[]>({
+  const { data: liveCerts = [] } = useQuery<any[]>({
     queryKey: ["/api/recent-certificates"],
   });
 
-  const duplicatedCertificates =
-    certificates.length > 0 ? [...certificates, ...certificates] : [];
+  const showLive = liveCerts.length > 0;
+  const items = showLive ? liveCerts : SAMPLE_CERTS;
 
   return (
-    <section className="bg-slate-50 py-12">
+    <section className="bg-slate-50 py-16 sm:py-20 border-y border-slate-200">
       <div className="max-w-7xl mx-auto px-6">
-        <div className="text-center mb-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-700">
-            Live proof
+        <Reveal as="div" className="text-center max-w-2xl mx-auto mb-10">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+            {showLive ? "Live proof" : "Sample credentials"}
           </p>
-          <h3 className="mt-3 text-3xl font-bold text-slate-900">
-            Recent certifications
+          <h3 className="mt-3 text-3xl sm:text-4xl font-bold text-slate-900">
+            {showLive ? "Recent certifications" : "What an Octamy credential looks like"}
           </h3>
-          <p className="text-slate-500 mt-2">
-            Real candidates earning verified credentials.
+          <p className="text-slate-600 mt-3">
+            {showLive
+              ? "Real candidates earning verified credentials."
+              : "Every passed exam mints a verifiable, recruiter-checkable certificate. Yours can be next."}
           </p>
-        </div>
+        </Reveal>
 
-        {certificates.length > 0 ? (
-          <div className="relative overflow-hidden">
-            <div className="flex space-x-6 animate-scroll-left">
-              {duplicatedCertificates.map((cert, index) => (
-                <div
-                  key={`${cert.name}-${cert.course}-${index}`}
-                  className="flex-shrink-0 bg-white border border-slate-200 rounded-xl p-6 min-w-[300px] shadow-sm"
-                >
-                  <div className="flex items-center space-x-3 mb-3">
-                    <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center ring-1 ring-slate-200">
-                      <Award className="w-6 h-6 text-slate-900" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-slate-900">
-                        {cert.name}
-                      </h4>
-                      <p className="text-sm text-slate-500">{cert.company}</p>
-                    </div>
+        <Stagger className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {items.slice(0, 6).map((cert, idx) => (
+            <StaggerItem key={`${cert.name}-${idx}`}>
+              <motion.div
+                whileHover={{ y: -4 }}
+                transition={{ type: "spring", stiffness: 220, damping: 18 }}
+                className="group h-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-xl"
+              >
+                {/* Mini certificate preview */}
+                <div className={`relative h-32 bg-gradient-to-br ${cert.color || "from-slate-900 to-slate-700"} text-white p-5 flex flex-col justify-between overflow-hidden`}>
+                  <div aria-hidden className="absolute inset-0 bg-grid-white opacity-30" />
+                  <div className="relative flex items-center justify-between">
+                    <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/80">Octamy Certified</span>
+                    <Award className="h-5 w-5 text-white/90" />
                   </div>
-                  <p className="text-sm mb-2 text-slate-700">
-                    Certified in{" "}
-                    <span className="font-semibold text-slate-900">
-                      {cert.course}
-                    </span>
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <Badge
-                      variant="outline"
-                      className="border-slate-300 text-slate-700"
-                    >
+                  <div className="relative">
+                    <p className="text-[10px] uppercase tracking-wider text-white/60">Awarded to</p>
+                    <p className="text-lg font-bold leading-tight truncate">{cert.name}</p>
+                  </div>
+                </div>
+                <div className="p-5">
+                  <p className="text-sm text-slate-500">Certified in</p>
+                  <p className="font-semibold text-slate-900 truncate">{cert.course}</p>
+                  <div className="mt-3 flex items-center justify-between">
+                    <Badge variant="outline" className="border-slate-300 text-slate-700 text-[11px]">
                       {cert.badge} Badge
                     </Badge>
-                    <span className="text-xs text-slate-500">Score: ••%</span>
+                    <span className="text-xs font-medium text-slate-600 tabular-nums">
+                      {showLive ? "Score: ••%" : `Score: ${cert.score}%`}
+                    </span>
+                  </div>
+                  <div className="mt-3 flex items-center gap-2 text-[11px] text-slate-500">
+                    <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
+                    QR-verifiable · {cert.company || "Octamy.com"}
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
-        ) : (
-          <div className="flex overflow-x-auto space-x-6 pb-4">
-            {Array.from({ length: 3 }).map((_, index) => (
-              <div
-                key={index}
-                className="flex-shrink-0 bg-white border border-slate-200 rounded-xl p-6 min-w-[300px] animate-pulse"
-              >
-                <div className="flex items-center space-x-3 mb-3">
-                  <div className="w-12 h-12 bg-slate-200 rounded-full"></div>
-                  <div>
-                    <div className="h-4 bg-slate-200 rounded w-24 mb-2"></div>
-                    <div className="h-3 bg-slate-200 rounded w-16"></div>
-                  </div>
-                </div>
-                <div className="h-3 bg-slate-200 rounded w-32 mb-2"></div>
-                <div className="h-6 bg-slate-200 rounded w-20"></div>
-              </div>
-            ))}
-          </div>
+              </motion.div>
+            </StaggerItem>
+          ))}
+        </Stagger>
+
+        {!showLive && (
+          <Reveal as="div" className="mt-8 text-center">
+            <p className="text-xs text-slate-500 italic">
+              Sample preview · Live certificates appear here once candidates pass their first exam.
+            </p>
+            <Link href="/exams">
+              <Button className="mt-4 bg-slate-900 hover:bg-black text-white rounded-full px-6">
+                Take a free assessment <ArrowRight className="ml-2 w-4 h-4" />
+              </Button>
+            </Link>
+          </Reveal>
         )}
       </div>
     </section>
@@ -659,44 +665,58 @@ export default function Landing() {
             {featuredTracks.map((cat) => {
               const Icon = cat.Icon;
               const baseCard =
-                "group relative h-full rounded-xl border p-6 transition-all hover:shadow-xl";
+                "group relative flex flex-col h-full rounded-xl border p-6 transition-all hover:-translate-y-1 hover:shadow-xl";
               const cardClass = cat.isPremium
                 ? `${baseCard} bg-gradient-to-br from-amber-50 to-white border-amber-200 ring-1 ring-amber-200`
-                : `${baseCard} bg-white border-slate-200`;
+                : `${baseCard} bg-white border-slate-200 hover:border-slate-900`;
               return (
-                <StaggerItem key={cat.id}>
-                  <MagneticCard className="h-full">
-                    <Link href={`/category/${cat.slug}`} className={cardClass}>
-                      {cat.isPremium && (
-                        <span className="absolute top-3 right-3 inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-amber-700">
-                          <Sparkles className="w-3 h-3" />
-                          Premium
-                        </span>
-                      )}
-                      <div
-                        className={
-                          "flex h-11 w-11 items-center justify-center rounded-lg transition-transform group-hover:scale-110 " +
-                          (cat.isPremium
-                            ? "bg-amber-100 text-amber-700"
-                            : "bg-slate-900 text-white")
-                        }
-                      >
-                        <Icon className="w-5 h-5" />
-                      </div>
-                      <h3 className="mt-5 text-base font-semibold text-slate-900">
-                        {cat.name}
-                      </h3>
-                      <p className="mt-1 text-sm text-slate-500">
-                        {cat.count} {cat.count === 1 ? "exam" : "exams"}
-                      </p>
-                      <span className="mt-4 inline-flex items-center text-sm font-medium text-sky-700 transition-all group-hover:gap-2">
-                        Explore <ArrowRight className="ml-1 w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
+                <StaggerItem key={cat.id} className="h-full">
+                  <Link href={`/category/${cat.slug}`} className={cardClass}>
+                    {cat.isPremium && (
+                      <span className="absolute top-3 right-3 inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-amber-700">
+                        <Sparkles className="w-3 h-3" />
+                        Premium
                       </span>
-                    </Link>
-                  </MagneticCard>
+                    )}
+                    <div
+                      className={
+                        "flex h-11 w-11 items-center justify-center rounded-lg transition-transform group-hover:scale-110 " +
+                        (cat.isPremium
+                          ? "bg-amber-100 text-amber-700"
+                          : "bg-slate-900 text-white")
+                      }
+                    >
+                      <Icon className="w-5 h-5" />
+                    </div>
+                    <h3 className="mt-5 text-base font-semibold text-slate-900">
+                      {cat.name}
+                    </h3>
+                    <p className="mt-1 text-sm text-slate-500">
+                      {cat.count} {cat.count === 1 ? "exam" : "exams"} · 50–80% to pass
+                    </p>
+                    <span className="mt-auto pt-4 inline-flex items-center text-sm font-medium text-slate-700 transition-all group-hover:gap-2">
+                      Explore <ArrowRight className="ml-1 w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
+                    </span>
+                  </Link>
                 </StaggerItem>
               );
             })}
+            {featuredTracks.length === 0 &&
+              ["AI", "Development", "Cloud", "Cybersecurity", "Data Science", "Design", "Business", "DevOps"].map((name, i) => (
+                <StaggerItem key={name} className="h-full">
+                  <Link href="/exams" className="group relative flex flex-col h-full rounded-xl border border-slate-200 bg-white p-6 transition-all hover:-translate-y-1 hover:border-slate-900 hover:shadow-xl">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-slate-900 text-white">
+                      <GraduationCap className="w-5 h-5" />
+                    </div>
+                    <h3 className="mt-5 text-base font-semibold text-slate-900">{name}</h3>
+                    <p className="mt-1 text-sm text-slate-500">Free assessment · Pass to certify</p>
+                    <span className="mt-auto pt-4 inline-flex items-center text-sm font-medium text-slate-700">
+                      Explore <ArrowRight className="ml-1 w-3.5 h-3.5" />
+                    </span>
+                  </Link>
+                </StaggerItem>
+              ))
+            }
           </Stagger>
 
           {categories.length > 8 && (
