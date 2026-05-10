@@ -88,7 +88,7 @@ export default function DashboardLayout({ role, title, description, breadcrumbs,
   };
 
   return (
-    <div className="min-h-screen bg-cream-soft flex">
+    <div className="min-h-screen flex bg-cream-soft" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(15,23,42,0.06) 1px, transparent 0)', backgroundSize: '24px 24px' }}>
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div className="fixed inset-0 bg-slate-900/40 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />
@@ -97,15 +97,16 @@ export default function DashboardLayout({ role, title, description, breadcrumbs,
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed lg:sticky top-0 left-0 z-50 h-screen w-64 bg-cream border-r border-cream-deep flex flex-col transition-transform lg:translate-x-0",
+          "fixed lg:sticky top-0 left-0 z-50 h-screen w-64 flex flex-col transition-transform lg:translate-x-0",
+          "bg-cream-soft/70 backdrop-blur-xl backdrop-saturate-150 border-r-2 border-slate-900/90 shadow-[4px_0_0_0_rgba(15,23,42,0.05)]",
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
         {/* Brand */}
-        <div className="px-4 py-4 border-b border-cream-deep flex items-center justify-between">
+        <div className="px-4 py-4 border-b-2 border-slate-900/90 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-slate-900 text-white grid place-items-center font-bold">O</div>
-            <span className="font-semibold text-slate-900">Octamy</span>
+            <div className="w-9 h-9 rounded-xl bg-slate-900 text-white grid place-items-center font-bold border-2 border-slate-900 shadow-[2px_2px_0_0_rgba(15,23,42,0.9)]">O</div>
+            <span className="font-bold text-slate-900 text-lg">Octamy</span>
           </Link>
           <button className="lg:hidden text-slate-500" onClick={() => setSidebarOpen(false)} aria-label="Close menu">
             <X className="w-5 h-5" />
@@ -114,9 +115,9 @@ export default function DashboardLayout({ role, title, description, breadcrumbs,
 
         {/* Role badge */}
         <div className="px-4 py-3 border-b border-cream-deep">
-          <div className="flex items-center gap-2 px-3 py-2 bg-white rounded-lg border border-cream-deep">
+          <div className="flex items-center gap-2 px-3 py-2 bg-white/70 backdrop-blur rounded-xl border-2 border-slate-900/90 shadow-[2px_2px_0_0_rgba(15,23,42,0.9)]">
             <RoleIcon className={cn("w-4 h-4", meta.color)} />
-            <span className="text-xs font-medium text-slate-700 uppercase tracking-wide">{meta.label} workspace</span>
+            <span className="text-xs font-bold text-slate-800 uppercase tracking-wide">{meta.label}</span>
           </div>
         </div>
 
@@ -124,8 +125,8 @@ export default function DashboardLayout({ role, title, description, breadcrumbs,
         <nav className="flex-1 overflow-y-auto px-2 py-3 space-y-4">
           {Object.entries(groups).map(([group, items]) => (
             <div key={group}>
-              <div className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400">{group}</div>
-              <ul className="space-y-0.5">
+              <div className="px-3 mb-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">{group}</div>
+              <ul className="space-y-1">
                 {items.map((item) => {
                   const Icon = item.icon;
                   const active = location === item.href || (item.href !== "/" && location.startsWith(item.href + "/"));
@@ -135,10 +136,10 @@ export default function DashboardLayout({ role, title, description, breadcrumbs,
                         href={item.href}
                         onClick={() => setSidebarOpen(false)}
                         className={cn(
-                          "flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors",
+                          "flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm transition-all",
                           active
-                            ? "bg-slate-900 text-white font-medium shadow-sm"
-                            : "text-slate-700 hover:bg-cream-deep"
+                            ? "bg-slate-900 text-white font-semibold border-2 border-slate-900 shadow-[3px_3px_0_0_rgba(15,23,42,0.9)]"
+                            : "text-slate-700 hover:bg-white/60 hover:backdrop-blur border-2 border-transparent hover:border-slate-900/20"
                         )}
                       >
                         <Icon className="w-4 h-4 shrink-0" />
@@ -153,8 +154,8 @@ export default function DashboardLayout({ role, title, description, breadcrumbs,
         </nav>
 
         {/* Switch role / public site */}
-        <div className="px-4 py-3 border-t border-cream-deep space-y-1">
-          <Link href="/" className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-slate-600 hover:bg-cream-deep">
+        <div className="px-4 py-3 border-t-2 border-slate-900/90 space-y-1">
+          <Link href="/" className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium text-slate-600 hover:bg-white/60 hover:backdrop-blur">
             <ChevronRight className="w-3 h-3 rotate-180" /> Back to public site
           </Link>
         </div>
@@ -163,7 +164,7 @@ export default function DashboardLayout({ role, title, description, breadcrumbs,
       {/* Main column */}
       <div className="flex-1 min-w-0 flex flex-col">
         {/* Top bar */}
-        <header className="sticky top-0 z-30 bg-cream-soft/90 backdrop-blur border-b border-cream-deep">
+        <header className="sticky top-0 z-30 bg-cream/60 backdrop-blur-xl backdrop-saturate-150 border-b-2 border-slate-900/90">
           <div className="flex items-center justify-between gap-3 px-4 sm:px-6 py-3">
             <div className="flex items-center gap-3 min-w-0">
               <button

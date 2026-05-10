@@ -3,30 +3,30 @@
 @tailwind utilities;
 
 :root {
-  /* Octamy iOS-cream palette */
-  --background: hsl(40, 38%, 96%);
+  /* Octamy iOS-cream palette — very light cream */
+  --background: hsl(40, 50%, 98%);
   --foreground: hsl(0, 0%, 6%);
-  --muted: hsl(40, 30%, 92%);
+  --muted: hsl(40, 38%, 95%);
   --muted-foreground: hsl(0, 0%, 40%);
-  --popover: hsl(40, 40%, 98%);
+  --popover: hsl(40, 60%, 99%);
   --popover-foreground: hsl(0, 0%, 6%);
-  --card: hsl(40, 50%, 99%);
+  --card: hsl(40, 60%, 99.5%);
   --card-foreground: hsl(0, 0%, 6%);
-  --border: hsl(36, 18%, 85%);
-  --input: hsl(36, 18%, 85%);
+  --border: hsl(36, 22%, 84%);
+  --input: hsl(36, 22%, 84%);
   --primary: hsl(0, 0%, 6%);
-  --primary-foreground: hsl(40, 50%, 99%);
-  --secondary: hsl(40, 30%, 92%);
+  --primary-foreground: hsl(40, 60%, 99%);
+  --secondary: hsl(40, 38%, 95%);
   --secondary-foreground: hsl(0, 0%, 9%);
-  --accent: hsl(40, 30%, 92%);
+  --accent: hsl(40, 38%, 95%);
   --accent-foreground: hsl(0, 0%, 9%);
   --destructive: hsl(0, 84%, 60%);
   --destructive-foreground: hsl(0, 0%, 98%);
   --ring: hsl(0, 0%, 6%);
   --radius: 1rem;
-  --cream: hsl(40, 38%, 96%);
-  --cream-soft: hsl(40, 50%, 99%);
-  --cream-deep: hsl(36, 28%, 90%);
+  --cream: hsl(40, 50%, 98%);
+  --cream-soft: hsl(40, 60%, 99.5%);
+  --cream-deep: hsl(36, 30%, 88%);
   --octamy-black: hsl(0, 0%, 0%);
   --octamy-white: hsl(0, 0%, 100%);
   --octamy-gray-50: hsl(0, 0%, 97%);
