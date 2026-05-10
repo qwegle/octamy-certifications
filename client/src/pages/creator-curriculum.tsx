@@ -3,6 +3,7 @@ import { useParams, useLocation, Link } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
+import DashboardLayout from "@/components/dashboard-layout";
 import Breadcrumbs from "@/components/breadcrumbs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -124,17 +125,22 @@ export default function CreatorCurriculum() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-cream-soft flex flex-col">
+    <DashboardLayout
+      role="creator"
+      title="Curriculum"
+      description="Organize your course into sections and lessons. Learners see them in order."
+      breadcrumbs={[
+        { label: "Courses", href: "/creator/courses" },
+        { label: `Curriculum #${courseId}` },
+      ]}
+      actions={(
+        <Link href={`/creator/courses`}>
+          <Button variant="outline">Back to courses</Button>
+        </Link>
+      )}
+    >
       <SEO title="Curriculum · Creator" description="Build your course curriculum." path={`/creator/courses/${courseId}/curriculum`} />
-      <Header />
-      <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-10">
-        <Breadcrumbs
-          items={[
-            { label: "Creator", href: "/creator/dashboard" },
-            { label: "Courses", href: "/creator/courses" },
-            { label: `Curriculum #${courseId}` },
-          ]}
-        />
+      <div className="hidden">
         <div className="flex items-end justify-between mb-6 gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-semibold text-slate-900">Curriculum</h1>
@@ -144,6 +150,7 @@ export default function CreatorCurriculum() {
             <Button variant="outline">Back to courses</Button>
           </Link>
         </div>
+      </div>
 
         <Card className="border-cream-deep mb-6">
           <CardHeader><CardTitle className="text-base">Add section</CardTitle></CardHeader>
@@ -240,8 +247,6 @@ export default function CreatorCurriculum() {
             })}
           </div>
         )}
-      </main>
-      <Footer />
-    </div>
+    </DashboardLayout>
   );
 }

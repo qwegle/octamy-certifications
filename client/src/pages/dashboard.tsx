@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/auth.tsx";
 import { Link, useLocation } from "wouter";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
+import DashboardLayout from "@/components/dashboard-layout";
 import {
   Download,
   Eye,
@@ -83,28 +84,24 @@ export default function Dashboard() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-cream-soft">
-        <Header />
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <Card>
-            <CardContent className="text-center py-12">
-              <AlertCircle className="w-16 h-16 text-octamy-gray-400 mx-auto mb-4" />
-              <h2 className="text-2xl font-bold text-octamy-black mb-2">
-                Login Required
-              </h2>
-              <p className="text-octamy-gray-600 mb-6">
-                Please log in to view your certificate dashboard.
-              </p>
-              <Link href="/login">
-                <Button className="bg-octamy-black text-white hover:bg-octamy-gray-800">
-                  Login
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-        </div>
-        <Footer />
-      </div>
+      <DashboardLayout role="learner" title="Login required">
+        <Card>
+          <CardContent className="text-center py-12">
+            <AlertCircle className="w-16 h-16 text-octamy-gray-400 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-octamy-black mb-2">
+              Login Required
+            </h2>
+            <p className="text-octamy-gray-600 mb-6">
+              Please log in to view your certificate dashboard.
+            </p>
+            <Link href="/login">
+              <Button className="bg-octamy-black text-white hover:bg-octamy-gray-800">
+                Login
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </DashboardLayout>
     );
   }
 
@@ -157,34 +154,15 @@ export default function Dashboard() {
     .slice(0, 3);
 
   return (
-    <div className="min-h-screen bg-cream-soft">
-      <Header />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="mb-8">
-          <div className="flex items-center md:flex-row flex-col justify-between gap-4">
-            <div>
-              <h1 className="text-4xl font-bold text-black mb-2">
-                Welcome back, {user.name}!
-              </h1>
-              <p className="text-xl text-gray-600">
-                Manage your certificates and track your progress
-              </p>
-            </div>
-            <div className="flex items-center gap-4">
-              <Link href="/profile-edit">
-                <Button
-                  variant="outline"
-                  className="border-black text-black hover:bg-black hover:text-white"
-                >
-                  <Edit className="w-4 h-4 mr-2" />
-                  {userProfile?.profileCompleteness === 100 ? "Edit Profile" : "Complete Profile"}
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-
-        {/* Key Performance Cards */}
+    <DashboardLayout role="learner" title={`Welcome back, ${user.name}!`} description="Manage your certificates and track your progress" actions={(
+      <Link href="/profile-edit">
+        <Button variant="outline" className="border-black text-black hover:bg-black hover:text-white">
+          <Edit className="w-4 h-4 mr-2" />
+          {userProfile?.profileCompleteness === 100 ? "Edit Profile" : "Complete Profile"}
+        </Button>
+      </Link>
+    )}>
+      {/* Key Performance Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <Card className="border-2 border-black">
             <CardContent className="p-6 text-center bg-gradient-to-br from-gray-50 to-white">
@@ -546,8 +524,6 @@ export default function Dashboard() {
             </Card>
           )}
         </div>
-      </div>
-      <Footer />
-    </div>
+    </DashboardLayout>
   );
 }

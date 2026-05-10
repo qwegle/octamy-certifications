@@ -88,7 +88,12 @@ export default function DashboardLayout({ role, title, description, breadcrumbs,
   };
 
   return (
-    <div className="min-h-screen flex bg-cream-soft" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(15,23,42,0.06) 1px, transparent 0)', backgroundSize: '24px 24px' }}>
+    <div className="min-h-screen flex bg-cream-soft relative overflow-hidden" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(15,23,42,0.06) 1px, transparent 0)', backgroundSize: '24px 24px' }}>
+      {/* Glassmorphism blobs */}
+      <div aria-hidden className="pointer-events-none fixed -top-32 -left-32 h-[420px] w-[420px] rounded-full bg-amber-300/35 blur-3xl" />
+      <div aria-hidden className="pointer-events-none fixed top-1/3 -right-32 h-[460px] w-[460px] rounded-full bg-sky-300/30 blur-3xl" />
+      <div aria-hidden className="pointer-events-none fixed bottom-0 left-1/3 h-[360px] w-[360px] rounded-full bg-rose-200/30 blur-3xl" />
+
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div className="fixed inset-0 bg-slate-900/40 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />

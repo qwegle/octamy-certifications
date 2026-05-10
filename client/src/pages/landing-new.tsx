@@ -427,15 +427,17 @@ export default function Landing() {
               </div>
             </div>
 
-            {/* RIGHT — clean auth card (no rotating border) */}
-            <div className="lg:col-span-4">
+            {/* RIGHT — glassmorphic auth card */}
+            <div className="lg:col-span-4 relative">
+              <div aria-hidden className="pointer-events-none absolute -top-10 -right-10 h-[280px] w-[280px] rounded-full bg-amber-300/40 blur-3xl" />
+              <div aria-hidden className="pointer-events-none absolute -bottom-10 -left-6 h-[220px] w-[220px] rounded-full bg-sky-300/40 blur-3xl" />
               <motion.div
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
-                className="h-full"
+                className="h-full relative"
               >
-                <div className="h-full rounded-3xl border border-cream-deep bg-cream-soft p-6 sm:p-7 shadow-xl shadow-slate-900/5 flex flex-col">
+                <div className="h-full rounded-3xl border-2 border-slate-900/90 bg-white/40 backdrop-blur-2xl p-6 sm:p-7 shadow-[6px_6px_0_0_rgba(15,23,42,0.9)] flex flex-col">
                   <div className="flex items-center gap-2">
                     <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-900 text-white">
                       <Sparkles className="h-3.5 w-3.5" />
@@ -450,21 +452,21 @@ export default function Landing() {
                   <p className="mt-1.5 text-sm text-slate-600">
                     One account for learners, creators, institutes &amp; recruiters.
                   </p>
-                  <div className="mt-5 space-y-2.5">
+                  <div className="mt-5 space-y-4">
                     <GoogleAuthButton type="user" />
                     <Link href="/register">
-                      <Button className="w-full bg-slate-900 hover:bg-black text-white rounded-full h-11">
+                      <Button className="w-full bg-slate-900 hover:bg-black text-white rounded-xl h-11 border-2 border-slate-900 shadow-[3px_3px_0_0_rgba(15,23,42,0.9)] hover:shadow-[5px_5px_0_0_rgba(15,23,42,0.9)] hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all">
                         Continue with email
                       </Button>
                     </Link>
                   </div>
-                  <div className="my-4 flex items-center gap-3 text-[11px] text-slate-400">
+                  <div className="my-5 flex items-center gap-3 text-[11px] text-slate-400">
                     <span className="h-px flex-1 bg-slate-200" />
                     ALREADY ON OCTAMY?
                     <span className="h-px flex-1 bg-slate-200" />
                   </div>
                   <Link href="/login">
-                    <Button variant="outline" className="w-full rounded-full border-slate-300 h-11">
+                    <Button variant="outline" className="w-full rounded-xl h-11">
                       Sign in
                     </Button>
                   </Link>

@@ -16,6 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
+import DashboardLayout from "@/components/dashboard-layout";
 import { ChevronLeft, Plus, Trash2, Save } from "lucide-react";
 import type { CourseBlueprintItem, QuestionBank, QuestionTopic } from "@shared/schema";
 
@@ -93,14 +94,9 @@ export default function BlueprintEditor() {
   const topicMap = new Map((topicsQuery.data ?? []).map((t) => [t.id, t.name]));
 
   return (
-    <div className="min-h-screen flex flex-col bg-cream-deep">
-      <Header />
-      <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-6">
-        <div className="flex items-center gap-2 mb-4">
-          <Link href="/qwegle/dashboard"><Button size="sm" variant="ghost"><ChevronLeft className="w-4 h-4" /></Button></Link>
-          <h1 className="text-2xl font-bold">Blueprint — Course #{courseId}</h1>
-        </div>
-
+    <DashboardLayout role="admin" title={`Blueprint — Course #${courseId}`} breadcrumbs={[{ label: "Admin", href: "/qwegle/dashboard" }, { label: `Course #${courseId}` }]} actions={(
+      <Link href="/qwegle/dashboard"><Button size="sm" variant="outline"><ChevronLeft className="w-4 h-4 mr-1" />Back</Button></Link>
+    )}>
         <Card className="mb-4">
           <CardContent className="p-4 space-y-3">
             <Label>Question bank</Label>
@@ -195,13 +191,11 @@ export default function BlueprintEditor() {
               </div>
               <Button onClick={() => saveMut.mutate()} disabled={saveMut.isPending}>
                 <Save className="w-4 h-4 mr-1" />
-                {saveMut.isPending ? "Saving…" : "Save Blueprint"}
+                              {saveMut.isPending ? "Saving…" : "Save Blueprint"}
               </Button>
             </div>
           </CardContent>
         </Card>
-      </main>
-      <Footer />
-    </div>
+    </DashboardLayout>
   );
 }

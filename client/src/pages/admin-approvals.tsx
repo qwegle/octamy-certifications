@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import Header from "@/components/header";
+import DashboardLayout from "@/components/dashboard-layout";
 import Breadcrumbs from "@/components/breadcrumbs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -79,15 +80,10 @@ export default function AdminApprovals() {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <DashboardLayout role="admin" title="Approval queue" description="Review and approve pending creators, institutes, and recruiters." breadcrumbs={[{ label: "Admin", href: "/qwegle/dashboard" }, { label: "Approvals" }]}>
       <SEO title="Approval queue · Admin" description="Approve creators, institutes, recruiters" path="/admin/approvals" noIndex />
-      <Header />
-      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-8">
-        <Breadcrumbs items={[{ label: "Admin", href: "/qwegle/dashboard" }, { label: "Approvals" }]} />
-        <h1 className="text-3xl font-semibold text-slate-900">Approval queue</h1>
-        <p className="text-sm text-slate-600 mt-1 mb-6">Review and approve pending creators, institutes, and recruiters.</p>
 
-        <div className="flex gap-2 mb-6 flex-wrap">
+      <div className="flex gap-2 mb-6 flex-wrap">
           {TABS.map(({ key, label, icon: Icon, count }) => (
             <button
               key={key}
@@ -158,7 +154,6 @@ export default function AdminApprovals() {
             ))}
           </div>
         )}
-      </main>
-    </div>
+    </DashboardLayout>
   );
 }
