@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { SEO } from "@/components/seo";
 
 type Institute = { id: number; name: string; status: string };
+type Bank = { id: number; name: string; questionCount: number; ownerType: string; ownerId: number | null };
 
 export default function InstituteExamNew() {
   const { user, token, isLoading: authLoading } = useAuth();
@@ -21,6 +22,7 @@ export default function InstituteExamNew() {
   const { toast } = useToast();
 
   const [title, setTitle] = useState("");
+  const [bankId, setBankId] = useState<number | null>(null);
   const [durationMin, setDurationMin] = useState(30);
   const [passingScore, setPassingScore] = useState(50);
   const [maxAttempts, setMaxAttempts] = useState(1);
@@ -38,10 +40,17 @@ export default function InstituteExamNew() {
     queryFn: async () => (await apiRequest("GET", "/api/me/institute")).json(),
   });
 
+  const { data: banks } = useQuery<Bank[]>({
+    queryKey: ["/api/question-banks"],
+    enabled: !!user && !!token,
+    queryFn: async () => (await apiRequest("GET", "/api/question-banks")).json(),
+  });
+
   const create = useMutation({
     mutationFn: async () => {
       const body: any = {
         title,
+        bankId,
         durationMin: Number(durationMin),
         passingScore: Number(passingScore),
         maxAttempts: Number(maxAttempts),
@@ -90,6 +99,27 @@ export default function InstituteExamNew() {
               <Label htmlFor="title">Title</Label>
               <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Mid-term Java OOP" />
             </div>
+            <div>
+              <Label htmlFor="bank">Question bank <span className="text-red-500">*</span></Label>
+              <select
+                id="bank"
+                value={bankId ?? ""}
+                onChange={(e) => setBankId(e.target.value ? Number(e.target.value) : null)}
+                className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+              >
+                <option value="">— Select a question bank —</option>
+                {(banks ?? []).filter((b) => (b.questionCount ?? 0) > 0).map((b) => (
+                  <option key={b.id} value={b.id}>
+                    {b.name} ({b.questionCount} questions)
+                  </option>
+                ))}
+              </select>
+              {(banks ?? []).length === 0 && (
+                <p className="text-xs text-amber-600 mt-1">
+                  No question banks found. <a href="/question-banks" className="underline">Create or import one first</a>.
+                </p>
+              )}
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
                 <Label htmlFor="dur">Duration (min)</Label>
@@ -121,7 +151,7 @@ export default function InstituteExamNew() {
             <div className="flex gap-2 pt-2">
               <Button
                 onClick={() => create.mutate()}
-                disabled={!title || title.length < 3 || !institute?.id || create.isPending}
+                disabled={!title || title.length < 3 || !institute?.id || !bankId || create.isPending}
                 className="bg-slate-900 text-white"
               >
                 {create.isPending ? "Creating…" : "Create exam"}

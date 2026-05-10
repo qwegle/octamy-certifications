@@ -390,7 +390,7 @@ router.post('/exam-instances', authenticateToken, async (req: any, res: Response
   try {
     const schema = z.object({
       title: z.string().min(3).max(160),
-      bankId: z.number().int().optional(),
+      bankId: z.number().int(),
       courseId: z.number().int().optional(),
       cohortId: z.number().int().optional(),
       durationMin: z.number().int().min(5).max(360).default(30),
@@ -546,13 +546,54 @@ router.post('/exam-attempts/:id/heartbeat', async (req: Request, res: Response) 
   }
 });
 
+// Fetch questions for an in-progress attempt (sanitised — no correct answers)
+router.get('/exam-attempts/:id/questions', async (req: Request, res: Response) => {
+  try {
+    const id = Number(req.params.id);
+    const [attempt] = await db.select().from(examInstanceAttempts).where(eq(examInstanceAttempts.id, id));
+    if (!attempt) return res.status(404).json({ message: 'Attempt not found' });
+    if (attempt.submittedAt) return res.status(400).json({ message: 'Already submitted' });
+    const [inst] = await db.select().from(examInstances).where(eq(examInstances.id, attempt.instanceId));
+    if (!inst) return res.status(404).json({ message: 'Exam instance gone' });
+    if (!inst.bankId) return res.status(400).json({ message: 'Exam has no question bank attached. Contact the exam owner.' });
+
+    const rows = await execRows(sql`
+      SELECT id, question, options, question_type, question_format, image_url, code_language, time_limit_sec, max_points
+      FROM questions
+      WHERE bank_id = ${inst.bankId} AND is_active = true
+      ORDER BY random()
+      LIMIT 50
+    `) as any as Array<{ id: number; question: string; options: string[]; question_type: string; question_format: string; image_url: string | null; code_language: string | null; time_limit_sec: number | null; max_points: number }>;
+
+    if (rows.length === 0) return res.status(400).json({ message: 'Question bank is empty.' });
+
+    res.json({
+      attemptId: id,
+      durationMin: inst.durationMin,
+      questions: rows.map((r) => ({
+        id: r.id,
+        question: r.question,
+        options: r.options,
+        type: r.question_type,
+        format: r.question_format,
+        imageUrl: r.image_url,
+        codeLanguage: r.code_language,
+        timeLimitSec: r.time_limit_sec,
+        maxPoints: r.max_points,
+      })),
+    });
+  } catch (err: any) {
+    logger.error('exam-attempt.questions.error', { err });
+    res.status(500).json({ message: 'Failed to load questions' });
+  }
+});
+
 router.post('/exam-attempts/:id/submit', async (req: Request, res: Response) => {
   try {
     const id = Number(req.params.id);
     const schema = z.object({
-      answers: z.record(z.any()).default({}),
-      score: z.number().int().min(0),
-      totalQuestions: z.number().int().min(1),
+      // answers map: { [questionId]: number (option index) | string (free text) }
+      answers: z.record(z.union([z.number(), z.string(), z.array(z.number())])).default({}),
     });
     const parsed = schema.safeParse(req.body);
     if (!parsed.success) return res.status(400).json({ errors: parsed.error.flatten() });
@@ -562,19 +603,49 @@ router.post('/exam-attempts/:id/submit', async (req: Request, res: Response) => 
     const [inst] = await db.select().from(examInstances).where(eq(examInstances.id, attempt.instanceId));
     if (!inst) return res.status(404).json({ message: 'Exam instance gone' });
 
-    // Server clamps score to total to defend against tampering
-    const safeScore = Math.min(parsed.data.score, parsed.data.totalQuestions);
-    const passed = (safeScore / parsed.data.totalQuestions) * 100 >= inst.passingScore;
+    // Server-side grading: pull correct answers for the questions the user answered
+    const submittedAnswers = parsed.data.answers;
+    const questionIds = Object.keys(submittedAnswers).map((k) => Number(k)).filter((n) => Number.isFinite(n));
+
+    let score = 0;
+    let totalQuestions = 0;
+
+    if (inst.bankId) {
+      // Pull correct answers for this bank — only score questions that belong to it (defend against tampering)
+      const correctRows = questionIds.length
+        ? await execRows(sql`
+            SELECT id, correct_answer FROM questions
+            WHERE bank_id = ${inst.bankId} AND id = ANY(${questionIds})
+          `) as any as Array<{ id: number; correct_answer: number }>
+        : [];
+      // Also count the bank's total questions to compute denominator fairly
+      const [{ c: bankTotal }] = await execRows(sql`
+        SELECT COUNT(*)::int AS c FROM questions WHERE bank_id = ${inst.bankId} AND is_active = true
+      `) as any as Array<{ c: number }>;
+      totalQuestions = Math.min(bankTotal, 50);
+      for (const row of correctRows) {
+        const submitted = submittedAnswers[String(row.id)];
+        if (typeof submitted === 'number' && submitted === row.correct_answer) score++;
+      }
+    } else {
+      // Legacy/no-bank: accept client-reported only as a hard fallback (will be 0)
+      totalQuestions = 1;
+      score = 0;
+    }
+
+    const denom = Math.max(totalQuestions, 1);
+    const scorePct = Math.round((score / denom) * 100);
+    const passed = scorePct >= inst.passingScore;
     await db.update(examInstanceAttempts).set({
-      answers: parsed.data.answers,
-      score: safeScore,
-      totalQuestions: parsed.data.totalQuestions,
+      answers: submittedAnswers as any,
+      score,
+      totalQuestions,
       passed,
       submittedAt: new Date(),
       status: 'submitted',
     }).where(eq(examInstanceAttempts.id, id));
 
-    res.json({ ok: true, passed, scorePct: Math.round((safeScore / parsed.data.totalQuestions) * 100) });
+    res.json({ ok: true, passed, scorePct, score, totalQuestions });
   } catch (err: any) {
     logger.error('exam-attempt.submit.error', { err });
     res.status(500).json({ message: 'Failed' });
