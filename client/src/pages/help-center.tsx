@@ -190,14 +190,14 @@ export default function HelpCenter() {
   ];
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
+    <div className="min-h-screen bg-cream-soft dark:bg-gray-900">
       <SEO
         title="Help Center"
         description="Get answers to common questions about exams, certificates, refunds, and account on Octamy."
         path="/help-center"
       />
       {/* Header */}
-      <header className="bg-white dark:bg-gray-900 shadow-sm border-b border-gray-200 dark:border-gray-700">
+      <header className="bg-cream-soft dark:bg-gray-900 shadow-sm border-b border-cream-deep dark:border-gray-700">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <Button variant="ghost" onClick={() => setLocation("/")}>
@@ -367,7 +367,7 @@ export default function HelpCenter() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="flex items-center space-x-3 p-3 bg-cream-deep dark:bg-gray-800 rounded-lg">
                   <Mail className="h-5 w-5 text-blue-600" />
                   <div>
                     <p className="font-medium">Email Support</p>
@@ -377,7 +377,7 @@ export default function HelpCenter() {
                   </div>
                 </div>
 
-                <div className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="flex items-center space-x-3 p-3 bg-cream-deep dark:bg-gray-800 rounded-lg">
                   <Phone className="h-5 w-5 text-green-600" />
                   <div>
                     <p className="font-medium">Phone Support</p>
@@ -388,7 +388,7 @@ export default function HelpCenter() {
                 </div>
 
                 <div 
-                  className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors"
+                  className="flex items-center space-x-3 p-3 bg-cream-deep dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors"
                   onClick={openLiveChat}
                 >
                   <MessageCircle className="h-5 w-5 text-purple-600" />

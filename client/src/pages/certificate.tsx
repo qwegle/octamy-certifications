@@ -176,7 +176,7 @@ View certificate: ${window.location.href}`;
           <p className="text-gray-400 mb-8">
             Please verify the certificate ID and try again.
           </p>
-          <Button asChild className="bg-white text-black hover:bg-gray-200">
+          <Button asChild className="bg-cream-soft text-black hover:bg-gray-200">
             <a href="/">Return to Home</a>
           </Button>
         </div>
@@ -247,7 +247,7 @@ View certificate: ${window.location.href}`;
                 {certificate.isPaid ? (
                   <iframe
                     src={`/api/certificates/${certificateId}/download`}
-                    className="w-full h-[600px] border border-white-700 rounded bg-white"
+                    className="w-full h-[600px] border border-white-700 rounded bg-cream-soft"
                     title="Certificate Preview"
                     style={{ backgroundColor: "white" }}
                   />
@@ -287,7 +287,7 @@ View certificate: ${window.location.href}`;
               <Button
                 onClick={handleDownload}
                 disabled={!certificate.isPaid || isDownloading}
-                className="bg-white text-black hover:bg-gray-200 disabled:opacity-50"
+                className="bg-cream-soft text-black hover:bg-gray-200 disabled:opacity-50"
               >
                 {isDownloading ? (
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -301,7 +301,7 @@ View certificate: ${window.location.href}`;
                 variant="outline"
                 onClick={handlePrint}
                 disabled={!certificate.isPaid || isPrinting}
-                className="border-white-600 bg-white text-black  hover:bg-white-800 disabled:opacity-50"
+                className="border-white-600 bg-cream-soft text-black  hover:bg-white-800 disabled:opacity-50"
               >
                 {isPrinting ? (
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -314,7 +314,7 @@ View certificate: ${window.location.href}`;
               <Button
                 variant="outline"
                 onClick={handleShare}
-                className="border-white-600 bg-white text-black  hover:bg-white-800"
+                className="border-white-600 bg-cream-soft text-black  hover:bg-white-800"
               >
                 <Share2 className="w-4 h-4 mr-2" />
                 Share

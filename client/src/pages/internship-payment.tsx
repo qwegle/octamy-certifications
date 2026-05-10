@@ -159,7 +159,7 @@ export default function InternshipPayment() {
                   Congratulations! Your virtual internship certificate has been generated and is ready for download.
                 </p>
                 
-                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6">
+                <div className="bg-cream-deep dark:bg-gray-800 rounded-lg p-6">
                   <h3 className="font-semibold mb-4">Certificate Details</h3>
                   <div className="space-y-2 text-left">
                     <p><strong>Course:</strong> {certificate.courseTitle}</p>

@@ -263,7 +263,7 @@ export default function Exam() {
 
   if (!examStarted) {
     return (
-      <div className="min-h-screen bg-slate-50">
+      <div className="min-h-screen bg-cream-deep">
         <Helmet>
           <title>{course?.title ? `${course.title} - Certification Exam | Octamy` : 'Certification Exam | Octamy'}</title>
           <meta name="description" content={course?.title ? `Take the ${course.title} certification exam and earn your professional credential. Comprehensive assessment with instant results.` : 'Take your certification exam and earn your professional credential.'} />
@@ -277,7 +277,7 @@ export default function Exam() {
         
         <Header />
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <Card className="border-slate-200 shadow-sm">
+          <Card className="border-cream-deep shadow-sm">
             <CardHeader>
               <CardTitle className="text-3xl text-center tracking-tight text-slate-900">
                 {course?.title} Assessment
@@ -289,24 +289,24 @@ export default function Exam() {
                   Enterprise-grade skill verification for {course?.title}.
                 </p>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-left">
-                  <div className="rounded-xl border border-slate-200 bg-white p-4">
+                  <div className="rounded-xl border border-cream-deep bg-cream-soft p-4">
                     <p className="text-xs uppercase tracking-wide text-slate-500">Duration</p>
                     <p className="mt-1 text-lg font-semibold text-slate-900">{course?.duration} min</p>
                   </div>
-                  <div className="rounded-xl border border-slate-200 bg-white p-4">
+                  <div className="rounded-xl border border-cream-deep bg-cream-soft p-4">
                     <p className="text-xs uppercase tracking-wide text-slate-500">Question Type</p>
                     <p className="mt-1 text-lg font-semibold text-slate-900">MCQ</p>
                   </div>
-                  <div className="rounded-xl border border-slate-200 bg-white p-4">
+                  <div className="rounded-xl border border-cream-deep bg-cream-soft p-4">
                     <p className="text-xs uppercase tracking-wide text-slate-500">Pass Score</p>
                     <p className="mt-1 text-lg font-semibold text-slate-900">{course?.passingScore}%+</p>
                   </div>
-                  <div className="rounded-xl border border-slate-200 bg-white p-4">
+                  <div className="rounded-xl border border-cream-deep bg-cream-soft p-4">
                     <p className="text-xs uppercase tracking-wide text-slate-500">Certificate</p>
                     <p className="mt-1 text-lg font-semibold text-slate-900">Pay after pass</p>
                   </div>
                 </div>
-                <div className="rounded-xl border border-slate-200 bg-white p-6">
+                <div className="rounded-xl border border-cream-deep bg-cream-soft p-6">
                   <h3 className="font-semibold mb-4 text-slate-900">Before you start</h3>
                   <ul className="text-left space-y-2 text-sm text-slate-600">
                     <li>• Keep this tab active during the entire assessment.</li>
@@ -365,10 +365,10 @@ export default function Exam() {
 
   if (questions.length === 0) {
     return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-cream-deep">
       <Header />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <Card className="border-slate-200 shadow-sm">
+        <Card className="border-cream-deep shadow-sm">
             <CardContent className="text-center py-12">
               <p>Loading exam questions...</p>
             </CardContent>
@@ -381,7 +381,7 @@ export default function Exam() {
   const currentQ = questions[currentQuestion];
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-cream-soft">
       <Header />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <Card>

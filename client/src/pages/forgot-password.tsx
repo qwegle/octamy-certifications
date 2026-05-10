@@ -34,7 +34,7 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-cream-soft flex flex-col">
       <SEO title="Forgot password" description="Reset your Octamy password." path="/forgot-password" />
       <Header />
       <main className="flex-1 flex items-center justify-center py-12 px-4">
@@ -43,7 +43,7 @@ export default function ForgotPassword() {
             <h1 className="text-3xl font-semibold text-slate-900">Forgot password?</h1>
             <p className="mt-2 text-sm text-slate-600">We'll send a reset link to your email.</p>
           </div>
-          <Card className="border-slate-200">
+          <Card className="border-cream-deep">
             <CardContent className="pt-6">
               {sent ? (
                 <p className="text-sm text-slate-700">

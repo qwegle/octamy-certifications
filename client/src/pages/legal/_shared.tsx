@@ -47,7 +47,7 @@ interface LegalLayoutProps {
 
 export function LegalLayout({ title, effective, children }: LegalLayoutProps) {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-cream-soft">
       <div className="max-w-4xl mx-auto px-6 py-12">
         <Link href="/" className="text-sm text-gray-500 hover:text-black">← Home</Link>
         <h1 className="text-4xl font-bold mt-4 mb-2">{title}</h1>

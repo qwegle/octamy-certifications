@@ -63,7 +63,7 @@ export default function ExamShare() {
   if (!inst) return <div className="min-h-screen grid place-items-center"><Card className="max-w-md"><CardContent className="p-6 text-center"><XCircle className="w-10 h-10 mx-auto text-red-500 mb-3" /><h1 className="font-semibold mb-2">Exam not found</h1><p className="text-sm text-zinc-500">This share-link is invalid or has expired.</p></CardContent></Card></div>;
 
   return (
-    <div className="min-h-screen bg-zinc-50 grid place-items-center px-4 py-12">
+    <div className="min-h-screen bg-cream-deep grid place-items-center px-4 py-12">
       <SEO title={`${inst.title} — Exam`} description="Octamy share-link exam" />
       <Card className="w-full max-w-2xl">
         <CardHeader>

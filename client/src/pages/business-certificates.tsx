@@ -95,7 +95,7 @@ export default function BusinessCertificates() {
   const discountedPrice = totalPrice * 0.7; // 30% bulk discount
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-cream-deep">
       {/* Navigation */}
       <Header />
 
@@ -182,7 +182,7 @@ export default function BusinessCertificates() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <div className="text-center p-6 bg-gray-50 rounded-lg">
+                    <div className="text-center p-6 bg-cream-deep rounded-lg">
                       <Award className="w-12 h-12 text-black mx-auto mb-4" />
                       <h3 className="font-bold text-lg mb-2">Professional Team Certification</h3>
                       <p className="text-sm text-gray-600 mb-4">
@@ -304,7 +304,7 @@ export default function BusinessCertificates() {
 
                       <div>
                         <FormLabel>Select Courses</FormLabel>
-                        <div className="mt-2 space-y-2 max-h-64 overflow-y-auto border border-gray-200 rounded-md p-4">
+                        <div className="mt-2 space-y-2 max-h-64 overflow-y-auto border border-cream-deep rounded-md p-4">
                           {courses.map((course) => (
                             <label key={course.id} className="flex items-center space-x-3 cursor-pointer">
                               <input

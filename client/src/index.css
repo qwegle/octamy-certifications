@@ -189,6 +189,11 @@
   .bg-cream { background-color: var(--cream); }
   .bg-cream-soft { background-color: var(--cream-soft); }
   .bg-cream-deep { background-color: var(--cream-deep); }
+  .border-cream { border-color: var(--cream); }
+  .border-cream-soft { border-color: var(--cream-soft); }
+  .border-cream-deep { border-color: var(--cream-deep); }
+  .text-cream-deep { color: var(--cream-deep); }
+  .ring-cream-deep { --tw-ring-color: var(--cream-deep); }
 
   /* Glass card — frosted iOS panel */
   .glass {

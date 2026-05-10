@@ -38,7 +38,7 @@ export default function CreatorCourses() {
   });
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-cream-soft flex flex-col">
       <SEO title="My courses" description="Manage your Octamy courses." path="/creator/courses" />
       <Header />
       <main className="flex-1">
@@ -69,9 +69,9 @@ export default function CreatorCourses() {
               </CardContent>
             </Card>
           ) : (
-            <div className="border border-slate-200 rounded-lg divide-y divide-slate-200 bg-white">
+            <div className="border border-slate-200 rounded-lg divide-y divide-slate-200 bg-cream-soft">
               {courses.map((c) => (
-                <div key={c.id} className="flex items-center justify-between gap-4 p-4 hover:bg-slate-50">
+                <div key={c.id} className="flex items-center justify-between gap-4 p-4 hover:bg-cream-deep">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
                       <p className="font-medium text-slate-900 truncate">{c.title}</p>

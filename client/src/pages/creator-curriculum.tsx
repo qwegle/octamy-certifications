@@ -124,7 +124,7 @@ export default function CreatorCurriculum() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-cream-soft flex flex-col">
       <SEO title="Curriculum · Creator" description="Build your course curriculum." path={`/creator/courses/${courseId}/curriculum`} />
       <Header />
       <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-10">
@@ -145,7 +145,7 @@ export default function CreatorCurriculum() {
           </Link>
         </div>
 
-        <Card className="border-slate-200 mb-6">
+        <Card className="border-cream-deep mb-6">
           <CardHeader><CardTitle className="text-base">Add section</CardTitle></CardHeader>
           <CardContent>
             <div className="flex gap-2">
@@ -170,7 +170,7 @@ export default function CreatorCurriculum() {
             {sections.map((s) => {
               const draft = newLessonBy[s.id] || { title: "", kind: "video", url: "" };
               return (
-                <Card key={s.id} className="border-slate-200">
+                <Card key={s.id} className="border-cream-deep">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0">
                     <CardTitle className="text-base">{s.title}</CardTitle>
                     <Button size="sm" variant="ghost" onClick={() => delSection.mutate(s.id)} disabled={delSection.isPending}>

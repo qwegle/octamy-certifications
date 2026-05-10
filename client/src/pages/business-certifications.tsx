@@ -145,7 +145,7 @@ export default function BusinessCertificationsPage() {
             <Building className="h-16 w-16 text-white" />
           </div>
           <div className="absolute top-4 left-4">
-            <Badge variant="secondary" className="bg-white text-black font-bold">
+            <Badge variant="secondary" className="bg-cream-soft text-black font-bold">
               BUSINESS
             </Badge>
           </div>
@@ -226,7 +226,7 @@ export default function BusinessCertificationsPage() {
   );
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-cream-soft">
       <Header />
       
       {/* Hero Section */}
@@ -259,7 +259,7 @@ export default function BusinessCertificationsPage() {
       </section>
 
       {/* Search and Filters */}
-      <section className="py-8 bg-gray-50 border-b">
+      <section className="py-8 bg-cream-deep border-b">
         <div className="max-w-7xl mx-auto px-6">
           {/* Search Bar */}
           <div className="relative mb-6">
@@ -421,7 +421,7 @@ export default function BusinessCertificationsPage() {
       </section>
 
       {/* Business Value Proposition */}
-      <section className="py-12 bg-white">
+      <section className="py-12 bg-cream-soft">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
             <Card className="text-center border-2 hover:border-black transition-colors">
@@ -465,7 +465,7 @@ export default function BusinessCertificationsPage() {
       </section>
 
       {/* Business Certifications Grid */}
-      <section className="py-12 bg-gray-50">
+      <section className="py-12 bg-cream-deep">
         <div className="max-w-7xl mx-auto px-6">
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">

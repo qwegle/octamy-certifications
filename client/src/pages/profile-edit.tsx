@@ -302,7 +302,7 @@ export default function ProfileEdit() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-cream-soft">
         <Header />
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center">
@@ -317,7 +317,7 @@ export default function ProfileEdit() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-cream-soft">
         <Header />
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="animate-pulse">
@@ -335,7 +335,7 @@ export default function ProfileEdit() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-cream-soft">
       <Header />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header */}
@@ -360,7 +360,7 @@ export default function ProfileEdit() {
           <div className="space-y-6">
             {/* Role-aware workspace cards: link out to org/creator dashboards */}
             {(roles?.isInstituteMember || roles?.isCreator) && (
-              <Card className="border-slate-200">
+              <Card className="border-cream-deep">
                 <CardHeader>
                   <CardTitle className="flex items-center text-base">
                     <Building2 className="mr-2 h-5 w-5" /> Your workspaces
@@ -706,7 +706,7 @@ export default function ProfileEdit() {
                     />
                     
                     {selectedFile && (
-                      <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center justify-between p-3 bg-cream-deep rounded-lg">
                         <div className="flex items-center">
                           <FileText className="h-4 w-4 mr-2 text-gray-600" />
                           <span className="text-sm font-medium">{selectedFile.name}</span>

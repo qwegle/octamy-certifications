@@ -82,14 +82,14 @@ export default function InstituteTeam() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-cream-soft flex flex-col">
       <SEO title="Team · Institute" description="Manage teachers and admins for your institute." path="/institute/team" />
       <Header />
       <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-10">
         <Breadcrumbs items={[{ label: "Institute", href: "/institute/dashboard" }, { label: "Team" }]} />
         <h1 className="text-2xl sm:text-3xl font-semibold text-slate-900 mb-6">Team</h1>
 
-        <Card className="border-slate-200 mb-6">
+        <Card className="border-cream-deep mb-6">
           <CardHeader><CardTitle className="text-base">Invite a teammate</CardTitle></CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 sm:grid-cols-[1fr_180px_auto] gap-3">
@@ -124,7 +124,7 @@ export default function InstituteTeam() {
           </CardContent>
         </Card>
 
-        <Card className="border-slate-200">
+        <Card className="border-cream-deep">
           <CardHeader><CardTitle className="text-base">Members</CardTitle></CardHeader>
           <CardContent>
             {isLoading ? (

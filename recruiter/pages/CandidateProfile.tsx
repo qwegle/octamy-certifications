@@ -259,7 +259,7 @@ export default function CandidateProfile() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-cream-deep flex items-center justify-center">
         <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full" />
       </div>
     );
@@ -267,7 +267,7 @@ export default function CandidateProfile() {
 
   if (!candidate) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-cream-deep flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-xl font-semibold text-gray-900 mb-2">Candidate Not Found</h2>
           <p className="text-gray-600">The candidate profile you're looking for doesn't exist.</p>
@@ -277,9 +277,9 @@ export default function CandidateProfile() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-cream-deep">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200">
+      <div className="bg-cream-soft border-b border-cream-deep">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -630,7 +630,7 @@ export default function CandidateProfile() {
       {/* Video Modal */}
       {watchingVideo && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-cream-soft rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xl font-semibold">
                 {watchingVideo.interview.technology} Interview - {candidate?.name}
@@ -675,7 +675,7 @@ export default function CandidateProfile() {
             {watchingVideo.interview.feedback && (
               <div className="mt-4">
                 <h4 className="font-medium mb-2">AI Feedback</h4>
-                <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
+                <p className="text-sm text-gray-600 bg-cream-deep p-3 rounded-lg">
                   {watchingVideo.interview.feedback}
                 </p>
               </div>

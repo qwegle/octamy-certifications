@@ -107,7 +107,7 @@ export default function QuestionBanksList() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="min-h-screen flex flex-col bg-cream-deep">
       <Header />
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-10">
         <Breadcrumbs items={[{ label: "Question Banks" }]} />

@@ -7,7 +7,7 @@ import { ArrowLeft, Award, Calendar, Shield, Download, Share2, Users, Briefcase 
 
 export default function DemoInternshipCertificate() {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-cream-deep">
       {/* Navigation */}
       <Header />
 
@@ -26,7 +26,7 @@ export default function DemoInternshipCertificate() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Certificate Display */}
           <div className="lg:col-span-2">
-            <Card className="bg-white shadow-2xl border-4 border-blue-200 overflow-hidden">
+            <Card className="bg-cream-soft shadow-2xl border-4 border-blue-200 overflow-hidden">
               <div className="bg-gradient-to-r from-blue-900 via-blue-800 to-blue-900 p-8 text-white">
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center space-x-3">

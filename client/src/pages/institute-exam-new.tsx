@@ -68,7 +68,7 @@ export default function InstituteExamNew() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-cream-soft flex flex-col">
       <SEO title="Create exam" description="Create a new cohort exam." path="/institute/exams/new" />
       <Header />
       <main className="flex-1 max-w-3xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-10">
@@ -80,7 +80,7 @@ export default function InstituteExamNew() {
           ]}
         />
         <h1 className="text-2xl sm:text-3xl font-semibold text-slate-900 mb-6">Create exam</h1>
-        <Card className="border-slate-200">
+        <Card className="border-cream-deep">
           <CardHeader>
             <CardTitle className="text-base">Exam details</CardTitle>
           </CardHeader>

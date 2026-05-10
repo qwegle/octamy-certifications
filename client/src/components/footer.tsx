@@ -141,7 +141,7 @@ export default function Footer() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
                   aria-label="Your email address"
-                  className="bg-white/5 border-white/15 text-white placeholder:text-slate-500 focus-visible:ring-sky-500"
+                  className="bg-cream-soft/5 border-white/15 text-white placeholder:text-slate-500 focus-visible:ring-sky-500"
                 />
                 <Button
                   type="submit"
@@ -233,7 +233,7 @@ export default function Footer() {
               </ul>
             </div>
 
-            <div className="mt-6 rounded-lg border border-white/10 bg-white/5 p-4 text-sm text-slate-300">
+            <div className="mt-6 rounded-lg border border-white/10 bg-cream-soft/5 p-4 text-sm text-slate-300">
               <div className="flex items-center gap-2 font-semibold text-white">
                 <Mail className="h-4 w-4" /> Contact us
               </div>
@@ -316,7 +316,7 @@ function TrustBadge({
   sub: string;
 }) {
   return (
-    <div className="flex items-center gap-3 rounded-lg border border-white/10 bg-white/5 px-3 py-2.5">
+    <div className="flex items-center gap-3 rounded-lg border border-white/10 bg-cream-soft/5 px-3 py-2.5">
       <div className="text-sky-400 shrink-0">{icon}</div>
       <div className="leading-tight">
         <div className="text-xs font-semibold text-white">{label}</div>
@@ -373,7 +373,7 @@ function SocialLink({
       target="_blank"
       rel="noopener noreferrer"
       aria-label={label}
-      className="inline-flex items-center justify-center h-9 w-9 rounded-full border border-white/15 bg-white/5 text-slate-300 hover:text-white hover:bg-white/10 hover:border-white/25 transition-colors"
+      className="inline-flex items-center justify-center h-9 w-9 rounded-full border border-white/15 bg-cream-soft/5 text-slate-300 hover:text-white hover:bg-cream-soft/10 hover:border-white/25 transition-colors"
     >
       {children}
     </a>

@@ -17,8 +17,8 @@ export default function About() {
         <link rel="canonical" href="https://octamy.com/about" />
       </Helmet>
       <Header />
-      <main id="main-content" className="bg-white text-slate-900">
-        <section className="border-b border-slate-200 bg-gradient-to-b from-sky-50 to-white">
+      <main id="main-content" className="bg-cream-soft text-slate-900">
+        <section className="border-b border-cream-deep bg-gradient-to-b from-sky-50 to-white">
           <div className="max-w-5xl mx-auto px-6 py-16 sm:py-24">
             <p className="text-sm font-semibold uppercase tracking-wider text-sky-700">About Octamy</p>
             <h1 className="mt-3 text-3xl sm:text-4xl font-bold leading-tight">
@@ -67,7 +67,7 @@ export default function About() {
           </div>
         </section>
 
-        <section className="bg-slate-50 border-y border-slate-200">
+        <section className="bg-cream-deep border-y border-cream-deep">
           <div className="max-w-5xl mx-auto px-6 py-16">
             <h2 className="text-2xl font-bold">Compliance & legal</h2>
             <p className="mt-4 text-slate-700 max-w-3xl">
@@ -104,7 +104,7 @@ export default function About() {
 
 function Feature({ icon, title, body }: { icon: React.ReactNode; title: string; body: string }) {
   return (
-    <div className="rounded-xl border border-slate-200 p-6 bg-white">
+    <div className="rounded-xl border border-cream-deep p-6 bg-cream-soft">
       <div className="flex items-center gap-3">
         <div className="rounded-lg bg-sky-50 p-2">{icon}</div>
         <h3 className="text-lg font-semibold">{title}</h3>

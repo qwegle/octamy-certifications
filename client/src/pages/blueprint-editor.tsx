@@ -93,7 +93,7 @@ export default function BlueprintEditor() {
   const topicMap = new Map((topicsQuery.data ?? []).map((t) => [t.id, t.name]));
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="min-h-screen flex flex-col bg-cream-deep">
       <Header />
       <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-6">
         <div className="flex items-center gap-2 mb-4">
@@ -143,7 +143,7 @@ export default function BlueprintEditor() {
                   <div>Topic</div><div>Questions</div><div>Difficulty</div><div>Marks/Q</div><div>-Marks</div><div></div>
                 </div>
                 {rows.map((row, i) => (
-                  <div key={i} className="grid grid-cols-1 sm:grid-cols-[2fr_1fr_1fr_1fr_1fr_auto] gap-2 items-center bg-white border rounded p-2">
+                  <div key={i} className="grid grid-cols-1 sm:grid-cols-[2fr_1fr_1fr_1fr_1fr_auto] gap-2 items-center bg-cream-soft border rounded p-2">
                     <Select value={String(row.topicId)} onValueChange={(v) => {
                       const next = [...rows]; next[i] = { ...next[i], topicId: Number(v) }; setRows(next);
                     }}>

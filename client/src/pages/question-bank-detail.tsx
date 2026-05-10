@@ -215,7 +215,7 @@ export default function QuestionBankDetail() {
   const canEdit = bank.canEdit;
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="min-h-screen flex flex-col bg-cream-deep">
       <Header />
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-4 sm:py-6">
         <Breadcrumbs
@@ -260,7 +260,7 @@ export default function QuestionBankDetail() {
 
         <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-4">
           {/* Topic tree */}
-          <aside className="bg-white border rounded-lg p-3 h-max sticky top-4">
+          <aside className="bg-cream-soft border rounded-lg p-3 h-max sticky top-4">
             <div className="flex items-center justify-between mb-2">
               <h3 className="font-semibold text-sm">Topics</h3>
               {canEdit && (
@@ -270,7 +270,7 @@ export default function QuestionBankDetail() {
               )}
             </div>
             <button
-              className={`w-full text-left px-2 py-1.5 rounded text-sm ${topicFilter === null ? "bg-purple-50 text-purple-700 font-medium" : "hover:bg-gray-50"}`}
+              className={`w-full text-left px-2 py-1.5 rounded text-sm ${topicFilter === null ? "bg-purple-50 text-purple-700 font-medium" : "hover:bg-cream-deep"}`}
               onClick={() => { setTopicFilter(null); setPage(1); }}
             >
               All topics
@@ -278,7 +278,7 @@ export default function QuestionBankDetail() {
             {bank.topics.map((t) => (
               <div key={t.id} className="group flex items-center">
                 <button
-                  className={`flex-1 text-left px-2 py-1.5 rounded text-sm ${topicFilter === t.id ? "bg-purple-50 text-purple-700 font-medium" : "hover:bg-gray-50"}`}
+                  className={`flex-1 text-left px-2 py-1.5 rounded text-sm ${topicFilter === t.id ? "bg-purple-50 text-purple-700 font-medium" : "hover:bg-cream-deep"}`}
                   onClick={() => { setTopicFilter(t.id); setPage(1); }}
                 >
                   {t.name}
@@ -326,7 +326,7 @@ export default function QuestionBankDetail() {
                 <CardContent className="p-0">
                   <div className="divide-y">
                     {questionsQuery.data.items.map((q) => (
-                      <div key={q.id} className="p-3 flex items-start gap-3 hover:bg-gray-50 cursor-pointer" onClick={() => setEditing(q)}>
+                      <div key={q.id} className="p-3 flex items-start gap-3 hover:bg-cream-deep cursor-pointer" onClick={() => setEditing(q)}>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium line-clamp-2">{q.question}</p>
                           <div className="flex flex-wrap gap-2 mt-1.5">

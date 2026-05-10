@@ -60,7 +60,7 @@ export default function InstituteExams() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-cream-soft flex flex-col">
       <SEO title="Exams · Institute" description="Create and manage cohort exams." path="/institute/exams" />
       <Header />
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-10">
@@ -103,7 +103,7 @@ export default function InstituteExams() {
         ) : (
           <div className="grid gap-3">
             {instances.map((x) => (
-              <Card key={x.id} className="border-slate-200">
+              <Card key={x.id} className="border-cream-deep">
                 <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">

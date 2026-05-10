@@ -70,7 +70,7 @@ export default function InstituteDashboard() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-cream-soft flex flex-col">
       <SEO title="Institute dashboard" description="Skill-verify your students at scale." path="/institute/dashboard" />
       <Header />
       <main className="flex-1">
@@ -122,7 +122,7 @@ export default function InstituteDashboard() {
                 );
               })}
             </aside>
-            <Card className="border-slate-200">
+            <Card className="border-cream-deep">
               <CardHeader>
                 <CardTitle className="text-base font-medium text-slate-900">Quick actions</CardTitle>
               </CardHeader>
@@ -151,7 +151,7 @@ export default function InstituteDashboard() {
 
 function StatCard({ label, value, icon }: { label: string; value: string; icon: React.ReactNode }) {
   return (
-    <Card className="border-slate-200">
+    <Card className="border-cream-deep">
       <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
         <CardTitle className="text-sm font-medium text-slate-600">{label}</CardTitle>
         <div className="text-slate-400">{icon}</div>

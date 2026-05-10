@@ -42,7 +42,7 @@ export default function RecruiterSavedSearches() {
   });
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-cream-soft flex flex-col">
       <SEO title="Saved searches" description="Reusable candidate filters for your team." path="/recruiter/saved-searches" />
       <Header />
       <main className="flex-1">
@@ -72,7 +72,7 @@ export default function RecruiterSavedSearches() {
             {list.isLoading && <p className="text-sm text-slate-500">Loading…</p>}
             {list.data?.length === 0 && <p className="text-sm text-slate-500">No saved searches yet.</p>}
             {list.data?.map((s) => (
-              <div key={s.id} className="flex items-center justify-between border border-slate-200 rounded-md p-4 bg-white hover:bg-slate-50">
+              <div key={s.id} className="flex items-center justify-between border border-cream-deep rounded-md p-4 bg-cream-soft hover:bg-cream-deep">
                 <div>
                   <p className="font-medium text-slate-900">{s.name}</p>
                   <p className="text-xs text-slate-500 mt-0.5">

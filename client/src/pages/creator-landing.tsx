@@ -23,7 +23,7 @@ const faqs = [
 
 export default function CreatorLanding() {
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-cream-soft flex flex-col">
       <SEO
         title="Sell your courses on Octamy"
         description="Reach 10,000+ verified learners. Keep up to 90% revenue. Cashfree payouts, custom subdomain, full creator dashboard."
@@ -40,7 +40,7 @@ export default function CreatorLanding() {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-[0.18em] text-fuchsia-700 bg-white/80 backdrop-blur border border-fuchsia-200 rounded-full px-3 py-1.5 shadow-sm"
+              className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-[0.18em] text-fuchsia-700 bg-cream-soft/80 backdrop-blur border border-fuchsia-200 rounded-full px-3 py-1.5 shadow-sm"
             >
               <Sparkles className="w-3 h-3" /> For creators & coaches
             </motion.span>
@@ -74,7 +74,7 @@ export default function CreatorLanding() {
               </Link>
               <Link href="/pricing">
                 <motion.span whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="inline-block">
-                  <Button variant="outline" className="rounded-full px-6 bg-white/80 backdrop-blur">See pricing</Button>
+                  <Button variant="outline" className="rounded-full px-6 bg-cream-soft/80 backdrop-blur">See pricing</Button>
                 </motion.span>
               </Link>
             </motion.div>
@@ -95,7 +95,7 @@ export default function CreatorLanding() {
                     whileHover={{ y: -4 }}
                     transition={{ type: 'spring', stiffness: 260, damping: 18 }}
                   >
-                    <Card className="border-slate-200 hover:shadow-lg transition-shadow h-full">
+                    <Card className="border-cream-deep hover:shadow-lg transition-shadow h-full">
                       <CardContent className="pt-6">
                         <div className="inline-flex h-7 px-2 items-center rounded-full bg-sky-50 text-[11px] font-bold tracking-[0.2em] text-sky-700 ring-1 ring-sky-200">{s.n}</div>
                         <div className="text-lg font-semibold text-slate-900 mt-3">{s.t}</div>
@@ -109,7 +109,7 @@ export default function CreatorLanding() {
           </div>
         </section>
 
-        <section className="py-16 px-4 bg-slate-50">
+        <section className="py-16 px-4 bg-cream-deep">
           <div className="max-w-5xl mx-auto">
             <Reveal as="h2" className="text-2xl md:text-3xl font-bold text-slate-900 text-center">What you can sell</Reveal>
             <Stagger className="grid md:grid-cols-4 gap-4 mt-10" step={0.06}>
@@ -124,7 +124,7 @@ export default function CreatorLanding() {
                     whileHover={{ y: -4, scale: 1.02 }}
                     transition={{ type: 'spring', stiffness: 260, damping: 18 }}
                   >
-                    <Card className="border-slate-200 h-full transition-shadow hover:shadow-lg">
+                    <Card className="border-cream-deep h-full transition-shadow hover:shadow-lg">
                       <CardContent className="pt-6 text-center">
                         <I className="w-6 h-6 mx-auto text-slate-700" />
                         <div className="mt-3 font-medium text-slate-900">{t}</div>
@@ -175,12 +175,12 @@ export default function CreatorLanding() {
           </div>
         </section>
 
-        <section className="py-16 px-4 bg-slate-50">
+        <section className="py-16 px-4 bg-cream-deep">
           <div className="max-w-3xl mx-auto">
             <Reveal as="h2" className="text-2xl md:text-3xl font-bold text-slate-900 text-center">Frequently asked</Reveal>
             <Reveal as="div" delay={0.1} className="mt-8 space-y-3">
               {faqs.map((f) => (
-                <details key={f.q} className="bg-white border border-slate-200 rounded-xl p-4 group hover:shadow-sm transition-shadow">
+                <details key={f.q} className="bg-cream-soft border border-cream-deep rounded-xl p-4 group hover:shadow-sm transition-shadow">
                   <summary className="cursor-pointer font-medium text-slate-900 list-none flex justify-between items-center">
                     {f.q}<span className="text-slate-400 group-open:rotate-45 transition-transform">+</span>
                   </summary>

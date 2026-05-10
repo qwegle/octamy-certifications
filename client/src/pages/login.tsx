@@ -133,7 +133,7 @@ export default function Login() {
     variant === 'default' ? '/register' : `/register?role=${variant === 'partners' ? 'creator' : variant}`;
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-cream-soft flex flex-col">
       <SEO
         title="Login"
         description="Sign in to your Octamy account — one login for learners, creators, institutes, recruiters and partners."
@@ -147,16 +147,16 @@ export default function Login() {
             <p className="mt-2 text-sm text-slate-600">{v.sub}</p>
           </div>
 
-          <Card className="border-slate-200 shadow-sm">
+          <Card className="border-cream-deep shadow-sm">
             <CardHeader className="pb-2">
               <CardTitle className="text-center text-slate-900 text-lg font-medium">Sign in</CardTitle>
             </CardHeader>
             <CardContent className="space-y-5">
               <GoogleAuthButton type="user" isLoading={isLoading} />
               <div className="relative">
-                <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-slate-200" /></div>
+                <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-cream-deep" /></div>
                 <div className="relative flex justify-center text-xs uppercase tracking-wide">
-                  <span className="bg-white px-2 text-slate-500">Or with email</span>
+                  <span className="bg-cream-soft px-2 text-slate-500">Or with email</span>
                 </div>
               </div>
 

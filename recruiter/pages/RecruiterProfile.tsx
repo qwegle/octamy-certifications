@@ -170,7 +170,7 @@ export default function RecruiterProfile() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-white dark:bg-black p-6">
+      <div className="min-h-screen bg-cream-soft dark:bg-black p-6">
         <div className="max-w-4xl mx-auto">
           <div className="animate-pulse space-y-6">
             <div className="h-8 bg-gray-200 dark:bg-gray-800 rounded w-1/4"></div>
@@ -185,7 +185,7 @@ export default function RecruiterProfile() {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-black p-6">
+    <div className="min-h-screen bg-cream-soft dark:bg-black p-6">
       <div className="max-w-4xl mx-auto space-y-6">
         <div className="flex items-center gap-3">
           <User className="h-8 w-8 text-black dark:text-white" />
@@ -194,7 +194,7 @@ export default function RecruiterProfile() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Profile Information */}
-          <Card className="border-2 border-gray-200 dark:border-gray-800">
+          <Card className="border-2 border-cream-deep dark:border-gray-800">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-black dark:text-white">
                 <User className="h-5 w-5" />
@@ -275,7 +275,7 @@ export default function RecruiterProfile() {
           </Card>
 
           {/* Password Change */}
-          <Card className="border-2 border-gray-200 dark:border-gray-800">
+          <Card className="border-2 border-cream-deep dark:border-gray-800">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-black dark:text-white">
                 <Eye className="h-5 w-5" />
@@ -347,7 +347,7 @@ export default function RecruiterProfile() {
         </div>
 
         {/* Account Information */}
-        <Card className="border-2 border-gray-200 dark:border-gray-800">
+        <Card className="border-2 border-cream-deep dark:border-gray-800">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-black dark:text-white">
               <Mail className="h-5 w-5" />

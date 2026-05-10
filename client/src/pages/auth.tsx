@@ -134,7 +134,7 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-cream-soft">
       <Header />
       <div className="min-h-[calc(100vh-64px)] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">
@@ -164,7 +164,7 @@ export default function Auth() {
                     <span className="w-full border-t border-octamy-gray-300" />
                   </div>
                   <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-white px-2 text-octamy-gray-500">Or continue with email</span>
+                    <span className="bg-cream-soft px-2 text-octamy-gray-500">Or continue with email</span>
                   </div>
                 </div>
               </div>

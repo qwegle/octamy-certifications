@@ -79,7 +79,7 @@ export default function ExamResults() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-white dark:bg-black flex items-center justify-center">
+      <div className="min-h-screen bg-cream-soft dark:bg-black flex items-center justify-center">
         <div className="animate-spin w-8 h-8 border-4 border-black dark:border-white border-t-transparent rounded-full" />
       </div>
     );
@@ -87,7 +87,7 @@ export default function ExamResults() {
 
   if (!examResult) {
     return (
-      <div className="min-h-screen bg-white dark:bg-black flex items-center justify-center">
+      <div className="min-h-screen bg-cream-soft dark:bg-black flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-black dark:text-white mb-4">
             Exam Results Not Found
@@ -129,7 +129,7 @@ export default function ExamResults() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-black">
+    <div className="min-h-screen bg-cream-soft dark:bg-black">
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Header */}
         <motion.div 
@@ -161,7 +161,7 @@ export default function ExamResults() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <Card className="mb-6 border-gray-200 dark:border-gray-800">
+          <Card className="mb-6 border-cream-deep dark:border-gray-800">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-black dark:text-white">
                 <Target className="w-5 h-5" />
@@ -230,7 +230,7 @@ export default function ExamResults() {
             className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6"
           >
             {/* Category Breakdown */}
-            <Card className="border-gray-200 dark:border-gray-800">
+            <Card className="border-cream-deep dark:border-gray-800">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-black dark:text-white">
                   <Brain className="w-5 h-5" />
@@ -259,7 +259,7 @@ export default function ExamResults() {
             </Card>
 
             {/* Difficulty Breakdown */}
-            <Card className="border-gray-200 dark:border-gray-800">
+            <Card className="border-cream-deep dark:border-gray-800">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-black dark:text-white">
                   <TrendingUp className="w-5 h-5" />
@@ -292,7 +292,7 @@ export default function ExamResults() {
             className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6"
           >
             {/* Weak Areas */}
-            <Card className="border-gray-200 dark:border-gray-800">
+            <Card className="border-cream-deep dark:border-gray-800">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-black dark:text-white">
                   <AlertTriangle className="w-5 h-5 text-red-600" />
@@ -312,7 +312,7 @@ export default function ExamResults() {
             </Card>
 
             {/* Study Recommendations */}
-            <Card className="border-gray-200 dark:border-gray-800">
+            <Card className="border-cream-deep dark:border-gray-800">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-black dark:text-white">
                   <Lightbulb className="w-5 h-5 text-yellow-600" />
@@ -344,7 +344,7 @@ export default function ExamResults() {
             <>
               <Button
                 onClick={handleRetakeExam}
-                className="bg-black text-white hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200 flex items-center gap-2"
+                className="bg-black text-white hover:bg-gray-800 dark:bg-cream-soft dark:text-black dark:hover:bg-gray-200 flex items-center gap-2"
               >
                 <RotateCcw className="w-4 h-4" />
                 Retake Exam - Pay ₹{course?.price || "99"}
@@ -377,7 +377,7 @@ export default function ExamResults() {
             transition={{ delay: 0.5 }}
             className="mt-8"
           >
-            <Card className="border-gray-200 dark:border-gray-800">
+            <Card className="border-cream-deep dark:border-gray-800">
               <CardHeader>
                 <CardTitle className="text-black dark:text-white">Course Information</CardTitle>
               </CardHeader>

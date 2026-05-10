@@ -120,7 +120,7 @@ export default function CoursesPage() {
   const hasActiveFilters = searchQuery || selectedCategory !== "all" || selectedDifficulty !== "all" || selectedPriceRange !== "all";
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-cream-soft">
       <SEO
         title="Professional Certifications & Skill Verification Courses"
         description="Browse industry-recognized professional certifications across AI, Development, Cloud, Cybersecurity, Business and more. Free assessments, optional verified certificate."
@@ -135,7 +135,7 @@ export default function CoursesPage() {
         <div aria-hidden className="pointer-events-none absolute -top-10 right-10 h-[320px] w-[320px] rounded-full bg-indigo-500/25 blur-3xl animate-blob-slow" />
         <div className="relative max-w-7xl mx-auto px-6 py-20 sm:py-24">
           <div className="text-center">
-            <p className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 backdrop-blur px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-sky-300">
+            <p className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-cream-soft/5 backdrop-blur px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-sky-300">
               <Award className="h-3.5 w-3.5" /> Skill verification catalog
             </p>
             <h1 className="mt-6 text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight">
@@ -168,7 +168,7 @@ export default function CoursesPage() {
       </section>
 
       {/* Search and Filters */}
-      <section className="py-8 bg-gray-50 border-b">
+      <section className="py-8 bg-cream-deep border-b">
         <div className="max-w-7xl mx-auto px-6">
           {/* Search Bar */}
           <div className="relative mb-6">

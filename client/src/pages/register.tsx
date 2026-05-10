@@ -162,7 +162,7 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-cream-soft flex flex-col">
       <SEO
         title="Create account"
         description="Create your Octamy account — choose Learner, Creator, Institute or Recruiter."
@@ -190,13 +190,13 @@ export default function Register() {
                 <p className="mt-2 text-sm text-slate-600">Signing up as {labelFor(role)}.</p>
               </div>
 
-              <Card className="border-slate-200 shadow-sm">
+              <Card className="border-cream-deep shadow-sm">
                 <CardContent className="pt-6 space-y-5">
                   <GoogleAuthButton type="user" isLoading={isLoading} />
                   <div className="relative">
-                    <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-slate-200" /></div>
+                    <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-cream-deep" /></div>
                     <div className="relative flex justify-center text-xs uppercase tracking-wide">
-                      <span className="bg-white px-2 text-slate-500">Or with email</span>
+                      <span className="bg-cream-soft px-2 text-slate-500">Or with email</span>
                     </div>
                   </div>
 
@@ -294,7 +294,7 @@ function RolePicker({ onPick }: { onPick: (r: Role) => void }) {
             <button
               key={r.id}
               onClick={() => onPick(r.id)}
-              className="text-left rounded-2xl border border-slate-200 hover:border-slate-900 hover:shadow-md transition p-6 bg-white group"
+              className="text-left rounded-2xl border border-cream-deep hover:border-slate-900 hover:shadow-md transition p-6 bg-cream-soft group"
             >
               <div className="flex items-start gap-4">
                 <div className="w-11 h-11 rounded-xl bg-slate-100 group-hover:bg-slate-900 group-hover:text-white flex items-center justify-center transition">
@@ -345,7 +345,7 @@ function SelectField({
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="mt-1 w-full h-10 rounded-md border border-slate-200 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
+        className="mt-1 w-full h-10 rounded-md border border-cream-deep bg-cream-soft px-3 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
       >
         {options.map((o) => (<option key={o.value} value={o.value}>{o.label}</option>))}
       </select>

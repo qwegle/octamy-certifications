@@ -300,7 +300,7 @@ export default function SellerDashboard() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen bg-cream-soft flex items-center justify-center">
         <div className="text-center">
           <div className="w-8 h-8 border-4 border-black border-t-transparent rounded-full animate-spin mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading dashboard...</p>
@@ -311,7 +311,7 @@ export default function SellerDashboard() {
 
   if (!dashboardData) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen bg-cream-soft flex items-center justify-center">
         <div className="text-center">
           <p className="text-gray-600">Failed to load dashboard data</p>
           <Button onClick={fetchDashboardData} className="mt-4">
@@ -323,7 +323,7 @@ export default function SellerDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-cream-soft">
       {/* Header */}
       <header className="bg-black text-white p-6">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
@@ -344,7 +344,7 @@ export default function SellerDashboard() {
             <Button 
               onClick={logout}
               variant="outline"
-              className="text-white border-white hover:bg-white hover:text-black"
+              className="text-white border-white hover:bg-cream-soft hover:text-black"
             >
               <LogOut size={16} className="mr-2" />
               Logout
@@ -369,7 +369,7 @@ export default function SellerDashboard() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card className="border-2 border-gray-200">
+          <Card className="border-2 border-cream-deep">
             <CardContent className="p-6">
               <div className="flex items-center">
                 <DollarSign className="h-8 w-8 text-black" />
@@ -381,7 +381,7 @@ export default function SellerDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="border-2 border-gray-200">
+          <Card className="border-2 border-cream-deep">
             <CardContent className="p-6">
               <div className="flex items-center">
                 <TrendingUp className="h-8 w-8 text-black" />
@@ -393,7 +393,7 @@ export default function SellerDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="border-2 border-gray-200">
+          <Card className="border-2 border-cream-deep">
             <CardContent className="p-6">
               <div className="flex items-center">
                 <Users className="h-8 w-8 text-black" />
@@ -405,7 +405,7 @@ export default function SellerDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="border-2 border-gray-200">
+          <Card className="border-2 border-cream-deep">
             <CardContent className="p-6">
               <div className="flex items-center">
                 <CreditCard className="h-8 w-8 text-black" />
@@ -446,7 +446,7 @@ export default function SellerDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="border-2 border-gray-200">
+          <Card className="border-2 border-cream-deep">
             <CardHeader>
               <CardTitle>Partner Guidelines</CardTitle>
             </CardHeader>
@@ -463,21 +463,21 @@ export default function SellerDashboard() {
 
         {/* Click Analytics */}
         {dashboardData.clickAnalytics && (
-          <Card className="border-2 border-gray-200 mb-8">
+          <Card className="border-2 border-cream-deep mb-8">
             <CardHeader>
               <CardTitle className="text-xl font-bold text-black">Click Analytics</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-3 gap-4 mb-6">
-                <div className="text-center p-4 bg-gray-50 rounded-lg">
+                <div className="text-center p-4 bg-cream-deep rounded-lg">
                   <p className="text-3xl font-bold text-black">{dashboardData.clickAnalytics.totalClicks}</p>
                   <p className="text-sm text-gray-600">Total Clicks</p>
                 </div>
-                <div className="text-center p-4 bg-gray-50 rounded-lg">
+                <div className="text-center p-4 bg-cream-deep rounded-lg">
                   <p className="text-3xl font-bold text-black">{dashboardData.clickAnalytics.totalConversions}</p>
                   <p className="text-sm text-gray-600">Conversions</p>
                 </div>
-                <div className="text-center p-4 bg-gray-50 rounded-lg">
+                <div className="text-center p-4 bg-cream-deep rounded-lg">
                   <p className="text-3xl font-bold text-black">{dashboardData.clickAnalytics.conversionRate.toFixed(1)}%</p>
                   <p className="text-sm text-gray-600">Conversion Rate</p>
                 </div>
@@ -487,7 +487,7 @@ export default function SellerDashboard() {
                 <div className="space-y-3">
                   <h4 className="font-semibold text-black">Course Performance</h4>
                   {dashboardData.clickAnalytics.courseWiseAnalytics.map((course) => (
-                    <div key={course.courseId} className="p-4 bg-white border rounded-lg">
+                    <div key={course.courseId} className="p-4 bg-cream-soft border rounded-lg">
                       <div className="flex justify-between items-start mb-2">
                         <h5 className="font-medium text-black">{course.courseTitle}</h5>
                         <span className="text-lg font-bold text-black">{course.conversionRate.toFixed(1)}%</span>
@@ -506,7 +506,7 @@ export default function SellerDashboard() {
         )}
 
         {/* Recent Sales */}
-        <Card className="border-2 border-gray-200 mb-8">
+        <Card className="border-2 border-cream-deep mb-8">
           <CardHeader>
             <CardTitle>Recent Sales</CardTitle>
           </CardHeader>
@@ -515,7 +515,7 @@ export default function SellerDashboard() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-gray-200">
+                    <tr className="border-b border-cream-deep">
                       <th className="text-left p-3">Date</th>
                       <th className="text-left p-3">Course</th>
                       <th className="text-left p-3">Sale Amount</th>
@@ -550,7 +550,7 @@ export default function SellerDashboard() {
         </Card>
 
         {/* Withdrawal History */}
-        <Card className="border-2 border-gray-200">
+        <Card className="border-2 border-cream-deep">
           <CardHeader>
             <CardTitle>Withdrawal History</CardTitle>
           </CardHeader>
@@ -559,7 +559,7 @@ export default function SellerDashboard() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-gray-200">
+                    <tr className="border-b border-cream-deep">
                       <th className="text-left p-3">Date</th>
                       <th className="text-left p-3">Amount</th>
                       <th className="text-left p-3">Status</th>
@@ -599,7 +599,7 @@ export default function SellerDashboard() {
       {/* Partner Sharing Modal */}
       {showShareModal && shareableItems && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-cream-soft p-6 rounded-lg shadow-lg max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-2xl font-bold text-black">Generate Partner Sharing URLs</h3>
               <Button
@@ -628,7 +628,7 @@ export default function SellerDashboard() {
                     const hasUrl = generatedUrls[urlKey];
                     
                     return (
-                      <Card key={course.id} className="border border-gray-200 hover:border-black transition-colors">
+                      <Card key={course.id} className="border border-cream-deep hover:border-black transition-colors">
                         <CardContent className="p-4">
                           <h5 className="font-medium text-black mb-2">{course.title}</h5>
                           <p className="text-sm text-gray-600 mb-3 line-clamp-2">{course.description}</p>
@@ -695,7 +695,7 @@ export default function SellerDashboard() {
                     const hasUrl = generatedUrls[urlKey];
                     
                     return (
-                      <Card key={internship.id} className="border border-gray-200 hover:border-black transition-colors">
+                      <Card key={internship.id} className="border border-cream-deep hover:border-black transition-colors">
                         <CardContent className="p-4">
                           <h5 className="font-medium text-black mb-2">{internship.title}</h5>
                           <p className="text-sm text-gray-600 mb-3 line-clamp-2">{internship.description}</p>
@@ -762,7 +762,7 @@ export default function SellerDashboard() {
                     const hasUrl = generatedUrls[urlKey];
                     
                     return (
-                      <Card key={cert.id} className="border border-gray-200 hover:border-black transition-colors">
+                      <Card key={cert.id} className="border border-cream-deep hover:border-black transition-colors">
                         <CardContent className="p-4">
                           <h5 className="font-medium text-black mb-2">{cert.title}</h5>
                           <p className="text-sm text-gray-600 mb-3 line-clamp-2">{cert.description}</p>

@@ -477,13 +477,13 @@ export default function RecruiterOnboarding() {
             return (
               <div key={step.number} className="flex items-center">
                 <div className={`flex items-center space-x-3 px-6 py-3 rounded-full border-2 transition-all ${
-                  isActive ? 'bg-white text-black border-white' : 
+                  isActive ? 'bg-cream-soft text-black border-white' : 
                   isCompleted ? 'bg-gray-800 text-white border-gray-600' : 
                   'bg-transparent text-gray-400 border-gray-600'
                 }`}>
                   <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
                     isActive ? 'bg-black text-white' : 
-                    isCompleted ? 'bg-white text-black' : 
+                    isCompleted ? 'bg-cream-soft text-black' : 
                     'bg-gray-700 text-gray-400'
                   }`}>
                     {isCompleted ? <CheckCircle className="h-5 w-5" /> : <Icon className="h-4 w-4" />}
@@ -501,8 +501,8 @@ export default function RecruiterOnboarding() {
         </div>
 
         {/* Form Card */}
-        <Card className="bg-white text-black shadow-2xl border-0">
-          <CardHeader className="bg-gray-50 border-b">
+        <Card className="bg-cream-soft text-black shadow-2xl border-0">
+          <CardHeader className="bg-cream-deep border-b">
             <CardTitle className="text-2xl font-bold text-center">
               {steps[currentStep - 1]?.title}
             </CardTitle>
@@ -520,7 +520,7 @@ export default function RecruiterOnboarding() {
                 variant="outline"
                 onClick={handlePrevious}
                 disabled={currentStep === 1}
-                className="flex items-center space-x-2 border-gray-300 text-gray-700 hover:bg-gray-50"
+                className="flex items-center space-x-2 border-gray-300 text-gray-700 hover:bg-cream-deep"
               >
                 <ArrowLeft className="h-4 w-4" />
                 <span>Previous</span>

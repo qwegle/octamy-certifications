@@ -47,7 +47,7 @@ export default function CreatorDashboard() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-cream-soft flex flex-col">
       <SEO title="Creator dashboard" description="Manage your courses and earnings on Octamy." path="/creator/dashboard" />
       <Header />
       <main className="flex-1">
@@ -93,7 +93,7 @@ export default function CreatorDashboard() {
               <TabsTrigger value="settings">Settings</TabsTrigger>
             </TabsList>
             <TabsContent value="courses">
-              <Card className="border-slate-200 mt-4">
+              <Card className="border-cream-deep mt-4">
                 <CardContent className="py-10 text-center">
                   <h3 className="text-lg font-medium text-slate-900">Build, list, and track your courses</h3>
                   <p className="text-sm text-slate-600 mt-2 max-w-md mx-auto">Submit a course for review. Once approved, learners can enroll, take the exam, and earn a verified certificate.</p>
@@ -105,7 +105,7 @@ export default function CreatorDashboard() {
               </Card>
             </TabsContent>
             <TabsContent value="earnings">
-              <Card className="border-slate-200 mt-4">
+              <Card className="border-cream-deep mt-4">
                 <CardContent className="py-10 text-center">
                   <h3 className="text-lg font-medium text-slate-900">Lifetime earnings: ₹{(stats?.revenueINR ?? 0).toLocaleString('en-IN')}</h3>
                   <p className="text-sm text-slate-600 mt-2">See payment-by-payment breakdown, attempts and CSV export.</p>
@@ -117,7 +117,7 @@ export default function CreatorDashboard() {
               </Card>
             </TabsContent>
             <TabsContent value="settings">
-              <Card className="border-slate-200 mt-4">
+              <Card className="border-cream-deep mt-4">
                 <CardContent className="py-10 text-center">
                   <h3 className="text-lg font-medium text-slate-900">Profile settings</h3>
                   <p className="text-sm text-slate-600 mt-2">Edit your public creator page from your profile.</p>
@@ -139,7 +139,7 @@ function StatCard({
   icon: React.ReactNode; label: string; value: string; sub?: string; cta?: string; onClick?: () => void;
 }) {
   return (
-    <Card className="border-slate-200">
+    <Card className="border-cream-deep">
       <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
         <CardTitle className="text-sm font-medium text-slate-600">{label}</CardTitle>
         <div className="text-slate-400">{icon}</div>
@@ -159,7 +159,7 @@ function StatCard({
 
 function PanelComingSoon({ title, body }: { title: string; body: string }) {
   return (
-    <Card className="border-slate-200 mt-4">
+    <Card className="border-cream-deep mt-4">
       <CardContent className="py-12 text-center">
         <h3 className="text-lg font-medium text-slate-900">{title}</h3>
         <p className="text-sm text-slate-600 mt-2 max-w-md mx-auto">{body}</p>

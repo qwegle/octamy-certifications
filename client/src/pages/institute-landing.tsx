@@ -23,7 +23,7 @@ const faqs = [
 
 export default function InstituteLanding() {
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-cream-soft flex flex-col">
       <SEO
         title="Skill verification for institutes"
         description="Verify your students' skills with industry-grade exams. Bulk CSV enroll, private question banks, white-label certificates."
@@ -40,7 +40,7 @@ export default function InstituteLanding() {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700 bg-white/80 backdrop-blur border border-emerald-200 rounded-full px-3 py-1.5 shadow-sm"
+              className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700 bg-cream-soft/80 backdrop-blur border border-emerald-200 rounded-full px-3 py-1.5 shadow-sm"
             >
               <GraduationCap className="w-3 h-3" /> For institutes & corporates
             </motion.span>
@@ -74,7 +74,7 @@ export default function InstituteLanding() {
               </Link>
               <Link href="/contact">
                 <motion.span whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="inline-block">
-                  <Button variant="outline" className="rounded-full px-6 bg-white/80 backdrop-blur">Talk to sales</Button>
+                  <Button variant="outline" className="rounded-full px-6 bg-cream-soft/80 backdrop-blur">Talk to sales</Button>
                 </motion.span>
               </Link>
             </motion.div>
@@ -92,7 +92,7 @@ export default function InstituteLanding() {
               ].map(({ icon: I, t, d }) => (
                 <StaggerItem key={t}>
                   <motion.div whileHover={{ y: -4 }} transition={{ type: 'spring', stiffness: 260, damping: 18 }}>
-                    <Card className="border-slate-200 h-full transition-shadow hover:shadow-lg">
+                    <Card className="border-cream-deep h-full transition-shadow hover:shadow-lg">
                       <CardContent className="pt-6">
                         <div className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-slate-900 text-white">
                           <I className="w-5 h-5" />
@@ -108,7 +108,7 @@ export default function InstituteLanding() {
           </div>
         </section>
 
-        <section className="py-16 px-4 bg-slate-50">
+        <section className="py-16 px-4 bg-cream-deep">
           <div className="max-w-4xl mx-auto">
             <h2 className="text-2xl md:text-3xl font-semibold text-slate-900 text-center">Features that matter</h2>
             <ul className="mt-10 grid sm:grid-cols-2 gap-3">
@@ -120,7 +120,7 @@ export default function InstituteLanding() {
                 'Results export for parents and admins',
                 'Scheduled exam windows and proctoring options',
               ].map((f) => (
-                <li key={f} className="flex gap-2 text-sm text-slate-700 bg-white border border-slate-200 rounded-xl p-4">
+                <li key={f} className="flex gap-2 text-sm text-slate-700 bg-cream-soft border border-cream-deep rounded-xl p-4">
                   <Check className="w-4 h-4 text-slate-900 shrink-0 mt-0.5" />{f}
                 </li>
               ))}
@@ -158,12 +158,12 @@ export default function InstituteLanding() {
           </div>
         </section>
 
-        <section className="py-16 px-4 bg-slate-50">
+        <section className="py-16 px-4 bg-cream-deep">
           <div className="max-w-3xl mx-auto">
             <h2 className="text-2xl md:text-3xl font-semibold text-slate-900 text-center">Frequently asked</h2>
             <div className="mt-8 space-y-3">
               {faqs.map((f) => (
-                <details key={f.q} className="bg-white border border-slate-200 rounded-xl p-4 group">
+                <details key={f.q} className="bg-cream-soft border border-cream-deep rounded-xl p-4 group">
                   <summary className="cursor-pointer font-medium text-slate-900 list-none flex justify-between items-center">
                     {f.q}<span className="text-slate-400 group-open:rotate-45 transition">+</span>
                   </summary>

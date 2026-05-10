@@ -78,7 +78,7 @@ export default function InstituteStudents() {
   });
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-cream-soft flex flex-col">
       <SEO title="Students & cohorts" description="Manage your students on Octamy." path="/institute/students" />
       <Header />
       <main className="flex-1">

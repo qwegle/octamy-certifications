@@ -66,7 +66,7 @@ export default function Payment() {
 
   if (!certificate) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen bg-cream-soft flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-bold mb-4">Certificate Not Found</h2>
           <p className="text-gray-600 mb-4">
@@ -84,7 +84,7 @@ export default function Payment() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-cream-soft">
       <Header />
       <GuestLoginEncouragement />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -354,7 +354,7 @@ function GuestLoginEncouragement() {
   const { isAuthenticated, isLoading } = useAuth();
   if (isLoading || isAuthenticated) return null;
   return (
-    <div className="bg-gradient-to-r from-sky-50 via-white to-amber-50 border-b border-slate-200">
+    <div className="bg-gradient-to-r from-sky-50 via-white to-amber-50 border-b border-cream-deep">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-6">
         <div className="flex items-start gap-3 flex-1">
           <span className="mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-full bg-sky-100 text-sky-700 ring-1 ring-sky-200">

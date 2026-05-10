@@ -230,7 +230,7 @@ export default function LearningPaths() {
         <div className={`flex items-center p-3 rounded-lg border transition-all ${
           node.isCompleted ? 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800' :
           node.isUnlocked ? 'bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800 hover:shadow-md cursor-pointer' :
-          'bg-gray-50 border-gray-200 dark:bg-gray-800 dark:border-gray-700'
+          'bg-cream-deep border-cream-deep dark:bg-gray-800 dark:border-gray-700'
         }`}>
           {getNodeIcon()}
           <div className="ml-3 flex-1">
@@ -245,7 +245,7 @@ export default function LearningPaths() {
         </div>
         
         {node.children.length > 0 && (
-          <div className="ml-4 mt-2 pl-4 border-l-2 border-gray-200 dark:border-gray-700">
+          <div className="ml-4 mt-2 pl-4 border-l-2 border-cream-deep dark:border-gray-700">
             {node.children.map(child => renderTreeNode(child, depth + 1))}
           </div>
         )}
@@ -269,7 +269,7 @@ export default function LearningPaths() {
 
 
   return (
-    <div className="min-h-screen bg-white dark:bg-black">
+    <div className="min-h-screen bg-cream-soft dark:bg-black">
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-black dark:text-white mb-2">
@@ -416,7 +416,7 @@ export default function LearningPaths() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {pathsLoading ? (
                 Array.from({ length: 6 }).map((_, i) => (
-                  <Card key={i} className="animate-pulse border-gray-200 dark:border-gray-800">
+                  <Card key={i} className="animate-pulse border-cream-deep dark:border-gray-800">
                     <CardHeader>
                       <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-3/4"></div>
                       <div className="h-3 bg-gray-200 dark:bg-gray-800 rounded w-1/2"></div>
@@ -447,7 +447,7 @@ export default function LearningPaths() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.1 }}
                     >
-                      <Card className="border-gray-200 dark:border-gray-800 hover:shadow-lg transition-all duration-300 hover:scale-105">
+                      <Card className="border-cream-deep dark:border-gray-800 hover:shadow-lg transition-all duration-300 hover:scale-105">
                         <CardHeader>
                           <div className="flex items-start justify-between">
                             <div className="flex items-center gap-3 flex-1">
@@ -497,7 +497,7 @@ export default function LearningPaths() {
                           <Button
                             onClick={() => enrollMutation.mutate(path.id)}
                             disabled={enrollMutation.isPending}
-                            className="w-full bg-black text-white hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200 flex items-center gap-2"
+                            className="w-full bg-black text-white hover:bg-gray-800 dark:bg-cream-soft dark:text-black dark:hover:bg-gray-200 flex items-center gap-2"
                           >
                             <Play className="w-4 h-4" />
                             {enrollMutation.isPending ? "Enrolling..." : "Start Learning Path"}
@@ -525,7 +525,7 @@ export default function LearningPaths() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {userPathsLoading ? (
                 Array.from({ length: 3 }).map((_, i) => (
-                  <Card key={i} className="animate-pulse border-gray-200 dark:border-gray-800">
+                  <Card key={i} className="animate-pulse border-cream-deep dark:border-gray-800">
                     <CardHeader>
                       <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-3/4"></div>
                       <div className="h-3 bg-gray-200 dark:bg-gray-800 rounded w-1/2"></div>
@@ -549,7 +549,7 @@ export default function LearningPaths() {
                   </p>
                   <Button
                     onClick={() => setActiveTab("discover")}
-                    className="bg-black text-white hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200"
+                    className="bg-black text-white hover:bg-gray-800 dark:bg-cream-soft dark:text-black dark:hover:bg-gray-200"
                   >
                     Explore Learning Paths
                   </Button>
@@ -559,7 +559,7 @@ export default function LearningPaths() {
                   const treeNodes = generateTreeStructure(userPath.learningPath, userPath);
                   
                   return (
-                    <Card key={userPath.id} className="border-gray-200 dark:border-gray-800">
+                    <Card key={userPath.id} className="border-cream-deep dark:border-gray-800">
                       <CardHeader>
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
@@ -590,7 +590,7 @@ export default function LearningPaths() {
                         </div>
 
                         {/* Unique Tree View for this Learning Path */}
-                        <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
+                        <div className="bg-cream-deep dark:bg-gray-900 rounded-lg p-4">
                           <div className="flex items-center gap-2 mb-3">
                             <TreePine className="w-4 h-4 text-green-600" />
                             <span className="text-sm font-medium">Learning Path Tree</span>
@@ -644,7 +644,7 @@ export default function LearningPaths() {
                         )}
 
                         <Button
-                          className="w-full bg-black text-white hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200"
+                          className="w-full bg-black text-white hover:bg-gray-800 dark:bg-cream-soft dark:text-black dark:hover:bg-gray-200"
                         >
                           Continue Learning
                         </Button>
@@ -660,7 +660,7 @@ export default function LearningPaths() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {recommendationsLoading ? (
                 Array.from({ length: 6 }).map((_, i) => (
-                  <Card key={i} className="animate-pulse border-gray-200 dark:border-gray-800">
+                  <Card key={i} className="animate-pulse border-cream-deep dark:border-gray-800">
                     <CardHeader>
                       <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-3/4"></div>
                       <div className="h-3 bg-gray-200 dark:bg-gray-800 rounded w-1/2"></div>
@@ -685,7 +685,7 @@ export default function LearningPaths() {
                 </div>
               ) : (
                 recommendations.map((rec: Recommendation, index: number) => (
-                  <Card key={index} className="border-gray-200 dark:border-gray-800">
+                  <Card key={index} className="border-cream-deep dark:border-gray-800">
                     <CardHeader>
                       <div className="flex items-start justify-between">
                         <CardTitle className="text-lg text-black dark:text-white">
@@ -731,7 +731,7 @@ export default function LearningPaths() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {pathRecommendationsLoading ? (
                 Array.from({ length: 6 }).map((_, i) => (
-                  <Card key={i} className="animate-pulse border-gray-200 dark:border-gray-800">
+                  <Card key={i} className="animate-pulse border-cream-deep dark:border-gray-800">
                     <CardHeader>
                       <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-3/4"></div>
                       <div className="h-3 bg-gray-200 dark:bg-gray-800 rounded w-1/2"></div>
@@ -756,7 +756,7 @@ export default function LearningPaths() {
                 </div>
               ) : (
                 pathRecommendations.map((path: any, index: number) => (
-                  <Card key={index} className="border-gray-200 dark:border-gray-800">
+                  <Card key={index} className="border-cream-deep dark:border-gray-800">
                     <CardHeader>
                       <CardTitle className="text-lg text-black dark:text-white">
                         Suggested Learning Path

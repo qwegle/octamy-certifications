@@ -83,7 +83,7 @@ export default function SellerAuth() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-cream-deep">
       <SEO
         title="Become an Octamy Partner — Earn ₹ for every certificate sold"
         description="Join the Octamy Partner Program. Share your referral code, earn 10% commission on every certification sold, get paid weekly to UPI or bank. No targets, no inventory, no upfront cost."
@@ -91,7 +91,7 @@ export default function SellerAuth() {
       />
 
       {/* Top bar — minimal, just brand and home link */}
-      <header className="border-b border-slate-200 bg-white">
+      <header className="border-b border-cream-deep bg-cream-soft">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <span className="text-2xl font-bold tracking-tight text-slate-900">OCTAMY</span>
@@ -127,15 +127,15 @@ export default function SellerAuth() {
 
           {/* Headline numbers */}
           <div className="mt-8 grid grid-cols-3 gap-3 sm:gap-6 max-w-xl">
-            <div className="rounded-xl border border-slate-200 bg-white p-4">
+            <div className="rounded-xl border border-cream-deep bg-cream-soft p-4">
               <div className="text-2xl sm:text-3xl font-bold text-slate-900">10%</div>
               <div className="text-xs text-slate-500 mt-1 uppercase tracking-wider">Commission rate</div>
             </div>
-            <div className="rounded-xl border border-slate-200 bg-white p-4">
+            <div className="rounded-xl border border-cream-deep bg-cream-soft p-4">
               <div className="text-2xl sm:text-3xl font-bold text-slate-900">₹500</div>
               <div className="text-xs text-slate-500 mt-1 uppercase tracking-wider">Min payout</div>
             </div>
-            <div className="rounded-xl border border-slate-200 bg-white p-4">
+            <div className="rounded-xl border border-cream-deep bg-cream-soft p-4">
               <div className="text-2xl sm:text-3xl font-bold text-slate-900">7 days</div>
               <div className="text-xs text-slate-500 mt-1 uppercase tracking-wider">Payout cycle</div>
             </div>
@@ -196,7 +196,7 @@ export default function SellerAuth() {
             ].map(({ icon: Icon, label }) => (
               <div
                 key={label}
-                className="flex items-start gap-3 p-3 rounded-lg bg-white border border-slate-200"
+                className="flex items-start gap-3 p-3 rounded-lg bg-cream-soft border border-cream-deep"
               >
                 <Icon className="w-5 h-5 text-sky-700 flex-shrink-0 mt-0.5" />
                 <span className="text-sm text-slate-700">{label}</span>
@@ -207,15 +207,15 @@ export default function SellerAuth() {
 
         {/* RIGHT: auth card — sticky on desktop */}
         <section className="lg:col-span-5 lg:sticky lg:top-8">
-          <Card className="border-slate-200 shadow-xl shadow-slate-200/40 overflow-hidden">
+          <Card className="border-cream-deep shadow-xl shadow-slate-200/40 overflow-hidden">
             {/* Tabs */}
-            <div className="grid grid-cols-2 text-sm font-medium border-b border-slate-200 bg-slate-50">
+            <div className="grid grid-cols-2 text-sm font-medium border-b border-cream-deep bg-cream-deep">
               <button
                 type="button"
                 onClick={() => setIsLogin(false)}
                 className={`py-4 transition-colors ${
                   !isLogin
-                    ? "bg-white text-slate-900 border-b-2 border-sky-700"
+                    ? "bg-cream-soft text-slate-900 border-b-2 border-sky-700"
                     : "text-slate-500 hover:text-slate-700"
                 }`}
               >
@@ -226,7 +226,7 @@ export default function SellerAuth() {
                 onClick={() => setIsLogin(true)}
                 className={`py-4 transition-colors ${
                   isLogin
-                    ? "bg-white text-slate-900 border-b-2 border-sky-700"
+                    ? "bg-cream-soft text-slate-900 border-b-2 border-sky-700"
                     : "text-slate-500 hover:text-slate-700"
                 }`}
               >
@@ -257,10 +257,10 @@ export default function SellerAuth() {
 
               <div className="relative my-6">
                 <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-slate-200" />
+                  <span className="w-full border-t border-cream-deep" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase tracking-wider">
-                  <span className="bg-white px-3 text-slate-400">or with email</span>
+                  <span className="bg-cream-soft px-3 text-slate-400">or with email</span>
                 </div>
               </div>
 
@@ -410,7 +410,7 @@ export default function SellerAuth() {
       </main>
 
       {/* FAQ band */}
-      <section className="bg-white border-t border-slate-200">
+      <section className="bg-cream-soft border-t border-cream-deep">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-14">
           <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-8">Common questions</h2>
           <div className="grid md:grid-cols-2 gap-x-12 gap-y-8">
@@ -491,7 +491,7 @@ function EarningsCalculator() {
         className="w-full accent-sky-700"
       />
       <div className="grid grid-cols-2 gap-3 mt-5">
-        <div className="rounded-lg bg-white border border-slate-200 p-4">
+        <div className="rounded-lg bg-cream-soft border border-cream-deep p-4">
           <div className="text-xs uppercase tracking-wider text-slate-500">You earn / month</div>
           <div className="mt-1 text-2xl font-bold text-slate-900">
             ₹{monthly.toLocaleString("en-IN")}

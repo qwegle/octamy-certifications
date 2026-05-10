@@ -274,7 +274,7 @@ function EnhancedAdminDashboard() {
             <Button
               onClick={() => window.location.href = '/admin'}
               variant="outline"
-              className="border-white text-white hover:bg-white hover:text-black"
+              className="border-white text-white hover:bg-cream-soft hover:text-black"
             >
               <Users className="h-4 w-4 mr-2" />
               Standard Version
@@ -282,7 +282,7 @@ function EnhancedAdminDashboard() {
             <Button
               variant="outline"
               onClick={() => window.location.reload()}
-              className="border-white text-white hover:bg-white hover:text-black"
+              className="border-white text-white hover:bg-cream-soft hover:text-black"
             >
               <RefreshCw className="h-4 w-4 mr-2" />
               Refresh
@@ -300,15 +300,15 @@ function EnhancedAdminDashboard() {
 
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList className="grid w-full grid-cols-9 bg-gray-900">
-            <TabsTrigger value="overview" className="data-[state=active]:bg-white data-[state=active]:text-black">Overview</TabsTrigger>
-            <TabsTrigger value="courses" className="data-[state=active]:bg-white data-[state=active]:text-black">Courses</TabsTrigger>
-            <TabsTrigger value="questions" className="data-[state=active]:bg-white data-[state=active]:text-black">Questions</TabsTrigger>
-            <TabsTrigger value="ai-questions" className="data-[state=active]:bg-white data-[state=active]:text-black">AI Interview</TabsTrigger>
-            <TabsTrigger value="contacts" className="data-[state=active]:bg-white data-[state=active]:text-black">Contact</TabsTrigger>
-            <TabsTrigger value="customers" className="data-[state=active]:bg-white data-[state=active]:text-black">Customers</TabsTrigger>
-            <TabsTrigger value="transactions" className="data-[state=active]:bg-white data-[state=active]:text-black">Transactions</TabsTrigger>
-            <TabsTrigger value="partners" className="data-[state=active]:bg-white data-[state=active]:text-black">Partners</TabsTrigger>
-            <TabsTrigger value="exams" className="data-[state=active]:bg-white data-[state=active]:text-black">Exams</TabsTrigger>
+            <TabsTrigger value="overview" className="data-[state=active]:bg-cream-soft data-[state=active]:text-black">Overview</TabsTrigger>
+            <TabsTrigger value="courses" className="data-[state=active]:bg-cream-soft data-[state=active]:text-black">Courses</TabsTrigger>
+            <TabsTrigger value="questions" className="data-[state=active]:bg-cream-soft data-[state=active]:text-black">Questions</TabsTrigger>
+            <TabsTrigger value="ai-questions" className="data-[state=active]:bg-cream-soft data-[state=active]:text-black">AI Interview</TabsTrigger>
+            <TabsTrigger value="contacts" className="data-[state=active]:bg-cream-soft data-[state=active]:text-black">Contact</TabsTrigger>
+            <TabsTrigger value="customers" className="data-[state=active]:bg-cream-soft data-[state=active]:text-black">Customers</TabsTrigger>
+            <TabsTrigger value="transactions" className="data-[state=active]:bg-cream-soft data-[state=active]:text-black">Transactions</TabsTrigger>
+            <TabsTrigger value="partners" className="data-[state=active]:bg-cream-soft data-[state=active]:text-black">Partners</TabsTrigger>
+            <TabsTrigger value="exams" className="data-[state=active]:bg-cream-soft data-[state=active]:text-black">Exams</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview">
@@ -406,7 +406,7 @@ function EnhancedAdminDashboard() {
                     variant="outline"
                     size="sm"
                     onClick={() => window.location.reload()}
-                    className="bg-white text-black border-gray-300 hover:bg-gray-100"
+                    className="bg-cream-soft text-black border-gray-300 hover:bg-gray-100"
                   >
                     <RefreshCw className="h-4 w-4" />
                   </Button>
@@ -448,7 +448,7 @@ function EnhancedAdminDashboard() {
                               <Button 
                                 variant="outline" 
                                 size="sm" 
-                                className="bg-white text-black border-gray-300 hover:bg-gray-100"
+                                className="bg-cream-soft text-black border-gray-300 hover:bg-gray-100"
                                 onClick={() => window.open(`/exam/${course.slug}`, '_blank')}
                               >
                                 <Eye className="h-3 w-3" />
@@ -456,7 +456,7 @@ function EnhancedAdminDashboard() {
                               <Button 
                                 variant="outline" 
                                 size="sm" 
-                                className="bg-white text-black border-gray-300 hover:bg-gray-100"
+                                className="bg-cream-soft text-black border-gray-300 hover:bg-gray-100"
                                 onClick={() => window.location.href = `/admin/courses/${course.id}/edit`}
                               >
                                 <Edit className="h-3 w-3" />
@@ -491,7 +491,7 @@ function EnhancedAdminDashboard() {
                     variant="outline"
                     size="sm"
                     onClick={() => window.location.reload()}
-                    className="bg-white text-black border-gray-300 hover:bg-gray-100"
+                    className="bg-cream-soft text-black border-gray-300 hover:bg-gray-100"
                   >
                     <RefreshCw className="h-4 w-4" />
                   </Button>
@@ -555,7 +555,7 @@ function EnhancedAdminDashboard() {
                     variant="outline"
                     size="sm"
                     onClick={() => window.location.reload()}
-                    className="bg-white text-black border-gray-300 hover:bg-gray-100"
+                    className="bg-cream-soft text-black border-gray-300 hover:bg-gray-100"
                   >
                     <RefreshCw className="h-4 w-4" />
                   </Button>
@@ -814,7 +814,7 @@ function EnhancedAdminDashboard() {
                     variant="outline"
                     size="sm"
                     onClick={() => window.location.reload()}
-                    className="bg-white text-black border-gray-300 hover:bg-gray-100"
+                    className="bg-cream-soft text-black border-gray-300 hover:bg-gray-100"
                   >
                     <RefreshCw className="h-4 w-4" />
                   </Button>
@@ -861,10 +861,10 @@ function EnhancedAdminDashboard() {
                           </TableCell>
                           <TableCell>
                             <div className="flex space-x-1">
-                              <Button variant="outline" size="sm" className="bg-white text-black border-gray-300 hover:bg-gray-100">
+                              <Button variant="outline" size="sm" className="bg-cream-soft text-black border-gray-300 hover:bg-gray-100">
                                 <Eye className="h-3 w-3" />
                               </Button>
-                              <Button variant="outline" size="sm" className="bg-white text-black border-gray-300 hover:bg-gray-100">
+                              <Button variant="outline" size="sm" className="bg-cream-soft text-black border-gray-300 hover:bg-gray-100">
                                 <Edit className="h-3 w-3" />
                               </Button>
                             </div>
@@ -897,7 +897,7 @@ function EnhancedAdminDashboard() {
                     variant="outline"
                     size="sm"
                     onClick={() => window.location.reload()}
-                    className="bg-white text-black border-gray-300 hover:bg-gray-100"
+                    className="bg-cream-soft text-black border-gray-300 hover:bg-gray-100"
                   >
                     <RefreshCw className="h-4 w-4" />
                   </Button>

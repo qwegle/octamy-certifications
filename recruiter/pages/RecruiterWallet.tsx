@@ -170,7 +170,7 @@ export default function RecruiterWallet() {
             <div className="flex items-center justify-between">
               <div>
                 <div className="flex items-center space-x-3 mb-4">
-                  <div className="bg-white bg-opacity-20 p-2 rounded-full">
+                  <div className="bg-cream-soft bg-opacity-20 p-2 rounded-full">
                     <Wallet className="h-6 w-6 text-white" />
                   </div>
                   <h2 className="text-xl font-semibold">Current Balance</h2>
@@ -178,7 +178,7 @@ export default function RecruiterWallet() {
                 <p className="text-4xl font-bold mb-2">{walletData?.balance || '0'}</p>
                 <p className="text-lg text-gray-300">Available Credits</p>
               </div>
-              <div className="text-right bg-white bg-opacity-10 p-4 rounded-lg">
+              <div className="text-right bg-cream-soft bg-opacity-10 p-4 rounded-lg">
                 <p className="text-sm font-semibold mb-3">Credit Pricing</p>
                 <div className="space-y-1 text-xs">
                   <p className="flex justify-between"><span>Profile View:</span><span>1 credit</span></p>
@@ -210,12 +210,12 @@ export default function RecruiterWallet() {
                   className={`relative p-6 border rounded-xl transition-all hover:shadow-lg ${
                     plan.popular
                       ? 'border-black bg-black text-white shadow-xl scale-105'
-                      : 'border-gray-200 bg-white hover:border-gray-300'
+                      : 'border-cream-deep bg-cream-soft hover:border-gray-300'
                   }`}
                 >
                   {plan.popular && (
                     <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                      <Badge className="bg-white text-black font-bold">🚀 Most Popular</Badge>
+                      <Badge className="bg-cream-soft text-black font-bold">🚀 Most Popular</Badge>
                     </div>
                   )}
                   {plan.savings > 0 && (
@@ -235,7 +235,7 @@ export default function RecruiterWallet() {
                     <Button
                       className={`w-full mt-4 font-semibold ${
                         plan.popular 
-                          ? 'bg-white text-black hover:bg-gray-100' 
+                          ? 'bg-cream-soft text-black hover:bg-gray-100' 
                           : 'bg-black text-white hover:bg-gray-800'
                       }`}
                       onClick={() => handlePurchaseCredits(plan.credits)}

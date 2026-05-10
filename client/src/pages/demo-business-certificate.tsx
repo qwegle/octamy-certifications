@@ -7,7 +7,7 @@ import { ArrowLeft, Award, Calendar, Shield, Download, Share2, Building } from "
 
 export default function DemoBusinessCertificate() {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-cream-deep">
       {/* Navigation */}
       <Header />
 
@@ -26,7 +26,7 @@ export default function DemoBusinessCertificate() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Certificate Display */}
           <div className="lg:col-span-2">
-            <Card className="bg-white shadow-2xl border-4 border-gray-300 overflow-hidden">
+            <Card className="bg-cream-soft shadow-2xl border-4 border-gray-300 overflow-hidden">
               <div className="bg-gradient-to-r from-black via-gray-800 to-black p-8 text-white">
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center space-x-3">
@@ -105,7 +105,7 @@ export default function DemoBusinessCertificate() {
                   </div>
                 </div>
 
-                <div className="mt-12 pt-8 border-t-2 border-gray-200">
+                <div className="mt-12 pt-8 border-t-2 border-cream-deep">
                   <div className="grid grid-cols-2 gap-8 text-xs text-gray-500">
                     <div>
                       <p className="font-bold mb-2">Business Certification Features:</p>

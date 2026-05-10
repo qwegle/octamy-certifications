@@ -146,12 +146,12 @@ export default function RecruiterAuth() {
         </div>
         
         {/* Decorative Elements */}
-        <div className="absolute top-0 right-0 w-32 h-32 bg-white bg-opacity-5 rounded-full transform translate-x-16 -translate-y-16" />
-        <div className="absolute bottom-0 left-0 w-48 h-48 bg-white bg-opacity-3 rounded-full transform -translate-x-24 translate-y-24" />
+        <div className="absolute top-0 right-0 w-32 h-32 bg-cream-soft bg-opacity-5 rounded-full transform translate-x-16 -translate-y-16" />
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-cream-soft bg-opacity-3 rounded-full transform -translate-x-24 translate-y-24" />
       </div>
 
       {/* Right Side - Form Section */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-white text-black">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-cream-soft text-black">
         <div className="w-full max-w-md">
           <div className="mb-8">
             <div className="flex items-center lg:hidden mb-6">

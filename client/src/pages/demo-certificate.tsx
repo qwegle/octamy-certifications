@@ -7,7 +7,7 @@ import { ArrowLeft, Award, Calendar, Shield, Download, Share2 } from "lucide-rea
 
 export default function DemoCertificate() {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-cream-deep">
       {/* Navigation */}
       <Header />
 
@@ -28,7 +28,7 @@ export default function DemoCertificate() {
           <div className="lg:col-span-2">
             {/* Professional Certificate Design */}
             <div 
-              className="bg-white shadow-2xl relative w-full overflow-hidden border-8 border-black rounded-2xl"
+              className="bg-cream-soft shadow-2xl relative w-full overflow-hidden border-8 border-black rounded-2xl"
               style={{ 
                 aspectRatio: '1.414/1',
                 background: 'linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%)',
@@ -278,7 +278,7 @@ export default function DemoCertificate() {
 
           {/* Certificate Information Sidebar */}
           <div className="space-y-6">
-            <Card className="bg-white border-2 border-gray-200">
+            <Card className="bg-cream-soft border-2 border-cream-deep">
               <CardContent className="p-6">
                 <div className="flex items-center mb-4">
                   <Shield className="w-6 h-6 text-green-600 mr-3" />
@@ -303,7 +303,7 @@ export default function DemoCertificate() {
               </CardContent>
             </Card>
 
-            <Card className="bg-white border-2 border-gray-200">
+            <Card className="bg-cream-soft border-2 border-cream-deep">
               <CardContent className="p-6">
                 <div className="flex items-center mb-4">
                   <Award className="w-6 h-6 text-yellow-600 mr-3" />
@@ -328,7 +328,7 @@ export default function DemoCertificate() {
               </CardContent>
             </Card>
 
-            <Card className="bg-white border-2 border-gray-200">
+            <Card className="bg-cream-soft border-2 border-cream-deep">
               <CardContent className="p-6">
                 <div className="flex items-center mb-4">
                   <Calendar className="w-6 h-6 text-blue-600 mr-3" />
@@ -347,14 +347,14 @@ export default function DemoCertificate() {
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-black to-gray-800 text-white border-2 border-gray-200">
+            <Card className="bg-gradient-to-br from-black to-gray-800 text-white border-2 border-cream-deep">
               <CardContent className="p-6">
                 <h3 className="text-lg font-semibold mb-4">Get Your Certificate</h3>
                 <p className="text-sm text-gray-300 mb-4">
                   Take any of our professional courses and earn your own verified certificate.
                 </p>
                 <Link href="/">
-                  <Button className="w-full bg-white text-black hover:bg-gray-100">
+                  <Button className="w-full bg-cream-soft text-black hover:bg-gray-100">
                     Browse Courses
                   </Button>
                 </Link>
@@ -365,7 +365,7 @@ export default function DemoCertificate() {
 
         {/* Professional Features Section */}
         <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
-          <Card className="bg-white border-2 border-gray-200">
+          <Card className="bg-cream-soft border-2 border-cream-deep">
             <CardContent className="p-8 text-center">
               <Shield className="w-12 h-12 text-green-600 mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-black mb-2">Blockchain Verified</h3>
@@ -373,7 +373,7 @@ export default function DemoCertificate() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white border-2 border-gray-200">
+          <Card className="bg-cream-soft border-2 border-cream-deep">
             <CardContent className="p-8 text-center">
               <Award className="w-12 h-12 text-yellow-600 mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-black mb-2">Industry Recognized</h3>
@@ -381,7 +381,7 @@ export default function DemoCertificate() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white border-2 border-gray-200">
+          <Card className="bg-cream-soft border-2 border-cream-deep">
             <CardContent className="p-8 text-center">
               <Download className="w-12 h-12 text-blue-600 mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-black mb-2">Lifetime Access</h3>

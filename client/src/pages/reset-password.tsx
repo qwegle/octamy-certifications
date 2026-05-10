@@ -57,7 +57,7 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-cream-soft flex flex-col">
       <SEO title="Reset password" description="Set a new Octamy password." path="/reset-password" noIndex />
       <Header />
       <main className="flex-1 flex items-center justify-center py-12 px-4">
@@ -66,7 +66,7 @@ export default function ResetPassword() {
             <h1 className="text-3xl font-semibold text-slate-900">Set a new password</h1>
             {!token && <p className="mt-2 text-sm text-red-600">No reset token in URL. Use the link from your email.</p>}
           </div>
-          <Card className="border-slate-200">
+          <Card className="border-cream-deep">
             <CardContent className="pt-6">
               {done ? (
                 <p className="text-sm text-slate-700">

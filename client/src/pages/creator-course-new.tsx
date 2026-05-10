@@ -58,7 +58,7 @@ export default function CreatorCourseNew() {
   });
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-cream-soft flex flex-col">
       <SEO title="New course" description="Create a new course on Octamy." path="/creator/courses/new" />
       <Header />
       <main className="flex-1">
@@ -77,13 +77,13 @@ export default function CreatorCourseNew() {
               </Field>
               <div className="grid sm:grid-cols-2 gap-4">
                 <Field label="Category">
-                  <select className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm bg-white" value={form.categoryId} onChange={(e) => setForm({ ...form, categoryId: Number(e.target.value) })}>
+                  <select className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm bg-cream-soft" value={form.categoryId} onChange={(e) => setForm({ ...form, categoryId: Number(e.target.value) })}>
                     <option value={0}>Select a category…</option>
                     {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
                   </select>
                 </Field>
                 <Field label="Level">
-                  <select className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm bg-white" value={form.level} onChange={(e) => setForm({ ...form, level: e.target.value as any })}>
+                  <select className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm bg-cream-soft" value={form.level} onChange={(e) => setForm({ ...form, level: e.target.value as any })}>
                     <option value="novice">Novice</option>
                     <option value="intermediate">Intermediate</option>
                     <option value="advanced">Advanced</option>
@@ -103,7 +103,7 @@ export default function CreatorCourseNew() {
                 </Field>
               </div>
               <Field label="Visibility">
-                <select className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm bg-white" value={form.visibility} onChange={(e) => setForm({ ...form, visibility: e.target.value as any })}>
+                <select className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm bg-cream-soft" value={form.visibility} onChange={(e) => setForm({ ...form, visibility: e.target.value as any })}>
                   <option value="public">Public — listed in catalog</option>
                   <option value="unlisted">Unlisted — direct link only</option>
                   <option value="private">Private — only you</option>

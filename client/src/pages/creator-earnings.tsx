@@ -50,7 +50,7 @@ export default function CreatorEarnings() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-cream-soft flex flex-col">
       <SEO title="Earnings · Creator" description="Track your course revenue, attempts and certificates." path="/creator/earnings" />
       <Header />
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-10">
@@ -74,7 +74,7 @@ export default function CreatorEarnings() {
           <Stat icon={<Award className="w-5 h-5" />} label="Certificates sold" value={data?.totals.certificates ?? 0} />
         </div>
 
-        <Card className="border-slate-200 mb-6">
+        <Card className="border-cream-deep mb-6">
           <CardHeader><CardTitle className="text-base">Recent payments</CardTitle></CardHeader>
           <CardContent>
             {isLoading ? <div className="text-sm text-slate-500 py-6 text-center">Loading…</div>
@@ -104,7 +104,7 @@ export default function CreatorEarnings() {
           </CardContent>
         </Card>
 
-        <Card className="border-slate-200">
+        <Card className="border-cream-deep">
           <CardHeader><CardTitle className="text-base">Recent attempts</CardTitle></CardHeader>
           <CardContent>
             {isLoading ? <div className="text-sm text-slate-500 py-6 text-center">Loading…</div>
@@ -143,7 +143,7 @@ export default function CreatorEarnings() {
 
 function Stat({ icon, label, value }: { icon: React.ReactNode; label: string; value: React.ReactNode }) {
   return (
-    <Card className="border-slate-200">
+    <Card className="border-cream-deep">
       <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
         <CardTitle className="text-sm font-medium text-slate-600">{label}</CardTitle>
         <div className="text-slate-400">{icon}</div>

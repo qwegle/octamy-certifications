@@ -129,7 +129,7 @@ export default function RecruiterSettings() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-white dark:bg-black p-6">
+      <div className="min-h-screen bg-cream-soft dark:bg-black p-6">
         <div className="max-w-4xl mx-auto">
           <div className="animate-pulse space-y-6">
             <div className="h-8 bg-gray-200 dark:bg-gray-800 rounded w-1/4"></div>
@@ -144,7 +144,7 @@ export default function RecruiterSettings() {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-black p-6">
+    <div className="min-h-screen bg-cream-soft dark:bg-black p-6">
       <div className="max-w-4xl mx-auto space-y-6">
         <div className="flex items-center gap-3">
           <Building2 className="h-8 w-8 text-black dark:text-white" />
@@ -152,7 +152,7 @@ export default function RecruiterSettings() {
         </div>
 
         {/* Company Information */}
-        <Card className="border-2 border-gray-200 dark:border-gray-800">
+        <Card className="border-2 border-cream-deep dark:border-gray-800">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-black dark:text-white">
               <Building2 className="h-5 w-5" />
@@ -275,7 +275,7 @@ export default function RecruiterSettings() {
         </Card>
 
         {/* KYC Information */}
-        <Card className="border-2 border-gray-200 dark:border-gray-800">
+        <Card className="border-2 border-cream-deep dark:border-gray-800">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-black dark:text-white">
               <Shield className="h-5 w-5" />
@@ -319,7 +319,7 @@ export default function RecruiterSettings() {
                 </div>
               </div>
 
-              <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
+              <div className="bg-cream-deep dark:bg-gray-900 p-4 rounded-lg">
                 <div className="flex items-center gap-2 mb-2">
                   <Shield className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                   <span className="text-sm font-medium text-gray-600 dark:text-gray-400">KYC Status</span>
@@ -363,7 +363,7 @@ export default function RecruiterSettings() {
         </Card>
 
         {/* Account Status */}
-        <Card className="border-2 border-gray-200 dark:border-gray-800">
+        <Card className="border-2 border-cream-deep dark:border-gray-800">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-black dark:text-white">
               <Users className="h-5 w-5" />

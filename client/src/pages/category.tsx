@@ -74,11 +74,11 @@ export default function CategoryPage() {
         <meta property="og:url" content={url} />
       </Helmet>
       <Header />
-      <main id="main-content" className="bg-white text-slate-900 min-h-screen">
+      <main id="main-content" className="bg-cream-soft text-slate-900 min-h-screen">
         {/* Hero */}
         <section
           className={
-            "border-b border-slate-200 " +
+            "border-b border-cream-deep " +
             (isPremium
               ? "bg-gradient-to-b from-amber-50 via-white to-white"
               : "bg-gradient-to-b from-sky-50 to-white")
@@ -146,7 +146,7 @@ export default function CategoryPage() {
               ))}
             </div>
           ) : !category ? (
-            <div className="rounded-lg border border-slate-200 p-10 text-center">
+            <div className="rounded-lg border border-cream-deep p-10 text-center">
               <h2 className="text-xl font-semibold">Category not found</h2>
               <p className="mt-2 text-slate-600">
                 The category{" "}
@@ -158,7 +158,7 @@ export default function CategoryPage() {
               </Link>
             </div>
           ) : filtered.length === 0 ? (
-            <div className="rounded-lg border border-slate-200 p-10 text-center">
+            <div className="rounded-lg border border-cream-deep p-10 text-center">
               <h2 className="text-xl font-semibold">No exams yet</h2>
               <p className="mt-2 text-slate-600">
                 We're adding more {category.name.toLowerCase()} assessments.

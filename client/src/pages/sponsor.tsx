@@ -215,9 +215,9 @@ export default function SponsorPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-black text-black dark:text-white">
+    <div className="min-h-screen bg-cream-soft dark:bg-black text-black dark:text-white">
       {/* Header */}
-      <header className="bg-white dark:bg-black shadow-sm border-b border-black dark:border-white sticky top-0 z-50">
+      <header className="bg-cream-soft dark:bg-black shadow-sm border-b border-black dark:border-white sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -282,14 +282,14 @@ export default function SponsorPage() {
               {user ? (
                 <Button
                   onClick={() => setLocation("/dashboard")}
-                  className="bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200"
+                  className="bg-black dark:bg-cream-soft text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200"
                 >
                   Dashboard
                 </Button>
               ) : (
                 <Button
                   onClick={() => setLocation("/auth")}
-                  className="bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200"
+                  className="bg-black dark:bg-cream-soft text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200"
                 >
                   Sign In
                 </Button>
@@ -362,7 +362,7 @@ export default function SponsorPage() {
       </header>
 
       {/* Hero Section */}
-      <div className="bg-black dark:bg-white text-white dark:text-black py-20">
+      <div className="bg-black dark:bg-cream-soft text-white dark:text-black py-20">
         <div className="max-w-6xl mx-auto px-4 text-center">
           <div className="flex items-center justify-center mb-6">
             <Heart className="w-12 h-12 text-red-500 mr-4" />
@@ -552,7 +552,7 @@ export default function SponsorPage() {
               {CURRENT_FEATURES.map((feature, index) => (
                 <div
                   key={index}
-                  className="flex items-center space-x-3 p-3 bg-gray-50 rounded border"
+                  className="flex items-center space-x-3 p-3 bg-cream-deep rounded border"
                 >
                   <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
                   <span className="font-medium">{feature}</span>
@@ -659,7 +659,7 @@ export default function SponsorPage() {
         </Card>
 
         {/* Impact Statement */}
-        <div className="text-center mt-16 p-8 bg-gray-50 rounded-lg border-2 border-black">
+        <div className="text-center mt-16 p-8 bg-cream-deep rounded-lg border-2 border-black">
           <h2 className="text-3xl font-bold mb-4">Your Impact Matters</h2>
           <p className="text-lg text-gray-600 max-w-4xl mx-auto">
             Every rupee you contribute helps us keep our certification costs

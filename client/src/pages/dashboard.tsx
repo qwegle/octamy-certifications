@@ -99,7 +99,7 @@ export default function Dashboard() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-cream-soft">
         <Header />
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <Card>
@@ -175,7 +175,7 @@ export default function Dashboard() {
     .slice(0, 3);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-cream-soft">
       <Header />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-8">
@@ -459,7 +459,7 @@ export default function Dashboard() {
                   {recentInterviews.map((interview) => (
                     <Card
                       key={interview.id}
-                      className="flex-shrink-0 w-80 border-2 border-gray-200 hover:border-black transition-colors"
+                      className="flex-shrink-0 w-80 border-2 border-cream-deep hover:border-black transition-colors"
                     >
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between mb-3">

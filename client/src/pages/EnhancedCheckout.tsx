@@ -684,7 +684,7 @@ export default function EnhancedCheckout() {
                     </div>
                     
                     <Button
-                      className="w-full bg-white text-black hover:bg-gray-200"
+                      className="w-full bg-cream-soft text-black hover:bg-gray-200"
                       size="lg"
                       onClick={handleProceedToPayment}
                       disabled={includesPhysicalCopy && (!selectedAddressId || addresses.length === 0)}

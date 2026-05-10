@@ -145,7 +145,7 @@ export default function CourseDetail() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-white dark:bg-black">
+      <div className="min-h-screen bg-cream-soft dark:bg-black">
         <div className="container mx-auto px-4 py-8">
           <div className="animate-pulse">
             <div className="h-8 bg-gray-200 dark:bg-gray-800 rounded mb-4"></div>
@@ -160,7 +160,7 @@ export default function CourseDetail() {
 
   if (!course) {
     return (
-      <div className="min-h-screen bg-white dark:bg-black">
+      <div className="min-h-screen bg-cream-soft dark:bg-black">
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">
             <h1 className="text-4xl font-bold text-black dark:text-white mb-4">
@@ -171,7 +171,7 @@ export default function CourseDetail() {
             </p>
             <Button
               onClick={() => setLocation("/")}
-              className="bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200"
+              className="bg-black dark:bg-cream-soft text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200"
             >
               Back to Home
             </Button>
@@ -182,7 +182,7 @@ export default function CourseDetail() {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-black">
+    <div className="min-h-screen bg-cream-soft dark:bg-black">
       {course && (
         <Helmet>
           <title>{course.metaTitle || `${course.title} — Skill Certification | Octamy`}</title>
@@ -198,7 +198,7 @@ export default function CourseDetail() {
         </Helmet>
       )}
       {/* Header */}
-      <header className="bg-white dark:bg-black shadow-sm border-b border-black dark:border-white">
+      <header className="bg-cream-soft dark:bg-black shadow-sm border-b border-black dark:border-white">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -235,14 +235,14 @@ export default function CourseDetail() {
               {user ? (
                 <Button
                   onClick={() => setLocation("/dashboard")}
-                  className="bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200"
+                  className="bg-black dark:bg-cream-soft text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200"
                 >
                   Dashboard
                 </Button>
               ) : (
                 <Button
                   onClick={() => setLocation("/auth")}
-                  className="bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200"
+                  className="bg-black dark:bg-cream-soft text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200"
                 >
                   Sign In
                 </Button>
@@ -322,7 +322,7 @@ export default function CourseDetail() {
                   </div>
                 </div>
 
-                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 mb-6">
+                <div className="bg-cream-deep dark:bg-gray-800 rounded-lg p-6 mb-6">
                   <h3 className="text-lg font-semibold mb-3">
                     What You'll Learn
                   </h3>
@@ -349,7 +349,7 @@ export default function CourseDetail() {
                 </div>
 
                 {course.isInternship && (
-                  <div className="bg-gray-50 dark:bg-gray-900 border-2 border-green-600 dark:border-green-400 rounded-lg p-6 mb-6">
+                  <div className="bg-cream-deep dark:bg-gray-900 border-2 border-green-600 dark:border-green-400 rounded-lg p-6 mb-6">
                     <h3 className="text-lg font-semibold text-green-600 dark:text-green-400 mb-3">
                       Virtual Internship Program
                     </h3>
@@ -433,7 +433,7 @@ export default function CourseDetail() {
               <CardContent className="space-y-4">
                 <Button
                   onClick={handleGetCertified}
-                  className="w-full bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200"
+                  className="w-full bg-black dark:bg-cream-soft text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200"
                   size="lg"
                 >
                   {course.isInternship

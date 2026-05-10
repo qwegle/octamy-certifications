@@ -119,7 +119,7 @@ export default function VirtualInternshipsPage() {
             <Briefcase className="h-12 w-12 text-white" />
           </div>
           <div className="absolute top-4 left-4">
-            <Badge variant="secondary" className="bg-white text-black font-bold">
+            <Badge variant="secondary" className="bg-cream-soft text-black font-bold">
               INTERNSHIP
             </Badge>
           </div>
@@ -181,7 +181,7 @@ export default function VirtualInternshipsPage() {
   );
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-cream-soft">
       <SEO
         title="Virtual Internships — Skill Verification Internship Program"
         description="Assessment-based virtual internships in Data Analytics, AI, Cloud, Cybersecurity & more. Take a project assessment, earn a verified certificate. Not employment — pure skill verification."
@@ -224,7 +224,7 @@ export default function VirtualInternshipsPage() {
       </section>
 
       {/* Search and Filters */}
-      <section className="py-8 bg-gray-50 border-b">
+      <section className="py-8 bg-cream-deep border-b">
         <div className="max-w-7xl mx-auto px-6">
           {/* Search Bar */}
           <div className="relative mb-6">
@@ -368,7 +368,7 @@ export default function VirtualInternshipsPage() {
       </section>
 
       {/* Benefits Section */}
-      <section className="py-12 bg-white">
+      <section className="py-12 bg-cream-soft">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
             <Card className="text-center">
@@ -403,7 +403,7 @@ export default function VirtualInternshipsPage() {
       </section>
 
       {/* Internships Grid */}
-      <section className="py-12 bg-gray-50">
+      <section className="py-12 bg-cream-deep">
         <div className="max-w-7xl mx-auto px-6">
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">

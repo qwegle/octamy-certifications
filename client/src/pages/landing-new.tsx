@@ -76,7 +76,7 @@ function CertificateSlider() {
   const items = showLive ? liveCerts : SAMPLE_CERTS;
 
   return (
-    <section className="bg-slate-50 py-16 sm:py-20 border-y border-slate-200">
+    <section className="bg-cream-deep py-16 sm:py-20 border-y border-cream-deep">
       <div className="max-w-7xl mx-auto px-6">
         <Reveal as="div" className="text-center max-w-2xl mx-auto mb-10">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
@@ -98,7 +98,7 @@ function CertificateSlider() {
               <motion.div
                 whileHover={{ y: -4 }}
                 transition={{ type: "spring", stiffness: 220, damping: 18 }}
-                className="group h-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-xl"
+                className="group h-full overflow-hidden rounded-2xl border border-cream-deep bg-cream-soft shadow-sm hover:shadow-xl"
               >
                 {/* Mini certificate preview */}
                 <div className={`relative h-32 bg-gradient-to-br ${cert.color || "from-slate-900 to-slate-700"} text-white p-5 flex flex-col justify-between overflow-hidden`}>
@@ -168,7 +168,7 @@ function BadgeTier({
     <motion.div
       whileHover={{ y: -6, scale: 1.02 }}
       transition={{ type: "spring", stiffness: 260, damping: 18 }}
-      className="group rounded-xl border border-slate-200 bg-white p-6 text-center transition-shadow hover:shadow-lg"
+      className="group rounded-xl border border-cream-deep bg-cream-soft p-6 text-center transition-shadow hover:shadow-lg"
     >
       <div
         className={
@@ -328,7 +328,7 @@ export default function Landing() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-cream-soft">
       <SEO
         title="Octamy — Skill Verification & Certification Platform"
         description="Take free skill-verification assessments in AI, Development, Cloud, Cybersecurity and more. Pay only for verified certificates. Industry-recognized credentials trusted by recruiters across India."
@@ -338,7 +338,7 @@ export default function Landing() {
       <Header />
 
       {/* 1. HERO — reflective black left rail · clean white right ---------- */}
-      <section className="relative overflow-hidden bg-white">
+      <section className="relative overflow-hidden bg-cream-soft">
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-12 sm:pt-14 sm:pb-16">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-stretch">
 
@@ -347,19 +347,19 @@ export default function Landing() {
               <div className="glossy-black relative overflow-hidden rounded-3xl px-6 sm:px-10 py-12 sm:py-16 min-h-[480px] flex flex-col justify-between">
                 {/* subtle ambient highlights inside the black panel */}
                 <div aria-hidden className="pointer-events-none absolute inset-0 bg-grid-white [mask-image:radial-gradient(ellipse_at_top_right,black_30%,transparent_70%)] opacity-60" />
-                <div aria-hidden className="pointer-events-none absolute -top-24 -right-24 h-[360px] w-[360px] rounded-full bg-white/[0.06] blur-3xl animate-blob-slow" />
-                <div aria-hidden className="pointer-events-none absolute bottom-0 left-1/4 h-[260px] w-[260px] rounded-full bg-white/[0.04] blur-3xl animate-blob" />
+                <div aria-hidden className="pointer-events-none absolute -top-24 -right-24 h-[360px] w-[360px] rounded-full bg-cream-soft/[0.06] blur-3xl animate-blob-slow" />
+                <div aria-hidden className="pointer-events-none absolute bottom-0 left-1/4 h-[260px] w-[260px] rounded-full bg-cream-soft/[0.04] blur-3xl animate-blob" />
 
                 <div className="relative z-10 max-w-2xl">
                   <motion.p
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5 }}
-                    className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.04] backdrop-blur px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/85"
+                    className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-cream-soft/[0.04] backdrop-blur px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/85"
                   >
                     <span className="relative flex h-2 w-2">
-                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white/60 opacity-75" />
-                      <span className="relative inline-flex h-2 w-2 rounded-full bg-white" />
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cream-soft/60 opacity-75" />
+                      <span className="relative inline-flex h-2 w-2 rounded-full bg-cream-soft" />
                     </span>
                     The Udemy for skill verification
                   </motion.p>
@@ -391,13 +391,13 @@ export default function Landing() {
                     className="mt-8 flex flex-col sm:flex-row gap-3"
                   >
                     <Link href="/exams">
-                      <Button size="lg" className="bg-white text-slate-900 hover:bg-slate-100 rounded-full px-6 py-6 text-base font-semibold shadow-xl shadow-black/30">
+                      <Button size="lg" className="bg-cream-soft text-slate-900 hover:bg-slate-100 rounded-full px-6 py-6 text-base font-semibold shadow-xl shadow-black/30">
                         Browse 50+ exams
                         <ArrowRight className="ml-2 w-4 h-4" />
                       </Button>
                     </Link>
                     <a href="#how">
-                      <Button size="lg" variant="outline" className="rounded-full px-6 py-6 text-base border-white/20 bg-white/[0.04] text-white hover:bg-white/[0.1] backdrop-blur">
+                      <Button size="lg" variant="outline" className="rounded-full px-6 py-6 text-base border-white/20 bg-cream-soft/[0.04] text-white hover:bg-cream-soft/[0.1] backdrop-blur">
                         How it works
                       </Button>
                     </a>
@@ -416,7 +416,7 @@ export default function Landing() {
                     { v: 12, s: "k+", l: "Assessments taken" },
                     { v: 300, s: "+", l: "Recruiters verifying" },
                   ].map((s) => (
-                    <div key={s.l} className="rounded-xl border border-white/10 bg-white/[0.04] backdrop-blur px-4 py-3">
+                    <div key={s.l} className="rounded-xl border border-white/10 bg-cream-soft/[0.04] backdrop-blur px-4 py-3">
                       <p className="text-2xl font-bold text-white tabular-nums">
                         <CountUp to={s.v} suffix={s.s} />
                       </p>
@@ -435,7 +435,7 @@ export default function Landing() {
                 transition={{ duration: 0.7, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
                 className="h-full"
               >
-                <div className="h-full rounded-3xl border border-slate-200 bg-white p-6 sm:p-7 shadow-xl shadow-slate-900/5 flex flex-col">
+                <div className="h-full rounded-3xl border border-cream-deep bg-cream-soft p-6 sm:p-7 shadow-xl shadow-slate-900/5 flex flex-col">
                   <div className="flex items-center gap-2">
                     <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-900 text-white">
                       <Sparkles className="h-3.5 w-3.5" />
@@ -490,7 +490,7 @@ export default function Landing() {
               <div className="chip-rail flex gap-2 overflow-x-auto pb-1">
                 {categories.slice(0, 14).map((c) => (
                   <Link key={c.id} href={`/exams?category=${c.slug}`}>
-                    <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:border-slate-900 hover:text-slate-900 transition-colors">
+                    <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-cream-deep bg-cream-soft px-4 py-2 text-sm font-medium text-slate-700 hover:border-slate-900 hover:text-slate-900 transition-colors">
                       {c.name}
                     </span>
                   </Link>
@@ -510,7 +510,7 @@ export default function Landing() {
               <Link key={cta.href} href={cta.href}>
                 <motion.div
                   whileHover={{ y: -3 }}
-                  className="group h-full rounded-2xl border border-slate-200 bg-white px-5 py-4 hover:border-slate-900 hover:shadow-lg transition-all flex items-start gap-3"
+                  className="group h-full rounded-2xl border border-cream-deep bg-cream-soft px-5 py-4 hover:border-slate-900 hover:shadow-lg transition-all flex items-start gap-3"
                 >
                   <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-white">
                     <cta.icon className="h-5 w-5" />
@@ -526,7 +526,7 @@ export default function Landing() {
           </Reveal>
 
           {/* Trusted-at strip — compressed */}
-          <Reveal as="div" delay={0.15} className="mt-8 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 sm:px-6">
+          <Reveal as="div" delay={0.15} className="mt-8 rounded-2xl border border-cream-deep bg-cream-deep px-4 py-4 sm:px-6">
             <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
               <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400 mr-2">Trusted at</p>
               {trustItems.map(({ icon: Icon, label }) => (
@@ -541,7 +541,7 @@ export default function Landing() {
       </section>
 
       {/* 2. HOW OCTAMY WORKS ---------------------------------------------- */}
-      <section id="how" className="py-16 sm:py-24 bg-slate-50 border-y border-slate-200">
+      <section id="how" className="py-16 sm:py-24 bg-cream-deep border-y border-cream-deep">
         <div className="max-w-7xl mx-auto px-6">
           <Reveal as="div" className="text-center max-w-2xl mx-auto mb-14">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-700">
@@ -588,7 +588,7 @@ export default function Landing() {
                 <motion.div
                   whileHover={{ y: -6 }}
                   transition={{ type: "spring", stiffness: 240, damping: 18 }}
-                  className="relative rounded-xl border border-slate-200 bg-white p-6 transition-shadow hover:shadow-lg"
+                  className="relative rounded-xl border border-cream-deep bg-cream-soft p-6 transition-shadow hover:shadow-lg"
                 >
                   <div className="flex items-center justify-between">
                     <span className="inline-flex h-7 px-2 items-center rounded-full bg-sky-50 text-[11px] font-bold tracking-[0.2em] text-sky-700 ring-1 ring-sky-200">
@@ -617,10 +617,10 @@ export default function Landing() {
       </section>
 
       {/* 3. REAL STATS ---------------------------------------------------- */}
-      <section className="py-16 sm:py-20 bg-white">
+      <section className="py-16 sm:py-20 bg-cream-soft">
         <div className="max-w-5xl mx-auto px-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            <div className="rounded-xl border border-slate-200 bg-white p-8 text-center">
+            <div className="rounded-xl border border-cream-deep bg-cream-soft p-8 text-center">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-700">
                 Live exams
               </p>
@@ -631,7 +631,7 @@ export default function Landing() {
                 Skill assessments available right now.
               </p>
             </div>
-            <div className="rounded-xl border border-slate-200 bg-white p-8 text-center">
+            <div className="rounded-xl border border-cream-deep bg-cream-soft p-8 text-center">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-700">
                 Career tracks
               </p>
@@ -647,7 +647,7 @@ export default function Landing() {
       </section>
 
       {/* 4. FEATURED TRACKS GRID ------------------------------------------ */}
-      <section className="py-16 sm:py-24 bg-slate-50 border-y border-slate-200">
+      <section className="py-16 sm:py-24 bg-cream-deep border-y border-cream-deep">
         <div className="max-w-7xl mx-auto px-6">
           <Reveal as="div" className="text-center max-w-2xl mx-auto mb-14">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-700">
@@ -668,7 +668,7 @@ export default function Landing() {
                 "group relative flex flex-col h-full rounded-xl border p-6 transition-all hover:-translate-y-1 hover:shadow-xl";
               const cardClass = cat.isPremium
                 ? `${baseCard} bg-gradient-to-br from-amber-50 to-white border-amber-200 ring-1 ring-amber-200`
-                : `${baseCard} bg-white border-slate-200 hover:border-slate-900`;
+                : `${baseCard} bg-cream-soft border-cream-deep hover:border-slate-900`;
               return (
                 <StaggerItem key={cat.id} className="h-full">
                   <Link href={`/category/${cat.slug}`} className={cardClass}>
@@ -704,7 +704,7 @@ export default function Landing() {
             {featuredTracks.length === 0 &&
               ["AI", "Development", "Cloud", "Cybersecurity", "Data Science", "Design", "Business", "DevOps"].map((name, i) => (
                 <StaggerItem key={name} className="h-full">
-                  <Link href="/exams" className="group relative flex flex-col h-full rounded-xl border border-slate-200 bg-white p-6 transition-all hover:-translate-y-1 hover:border-slate-900 hover:shadow-xl">
+                  <Link href="/exams" className="group relative flex flex-col h-full rounded-xl border border-cream-deep bg-cream-soft p-6 transition-all hover:-translate-y-1 hover:border-slate-900 hover:shadow-xl">
                     <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-slate-900 text-white">
                       <GraduationCap className="w-5 h-5" />
                     </div>
@@ -736,7 +736,7 @@ export default function Landing() {
       </section>
 
       {/* 5. WHY OCTAMY / 3 PILLARS --------------------------------------- */}
-      <section className="py-16 sm:py-24 bg-white">
+      <section className="py-16 sm:py-24 bg-cream-soft">
         <div className="max-w-7xl mx-auto px-6">
           <Reveal as="div" className="text-center max-w-2xl mx-auto mb-14">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-700">
@@ -769,7 +769,7 @@ export default function Landing() {
                 <motion.div
                   whileHover={{ y: -4 }}
                   transition={{ type: "spring", stiffness: 240, damping: 18 }}
-                  className="h-full rounded-xl border border-slate-200 bg-white p-8 transition-shadow hover:shadow-lg"
+                  className="h-full rounded-xl border border-cream-deep bg-cream-soft p-8 transition-shadow hover:shadow-lg"
                 >
                   <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-slate-900 text-white">
                     <p.Icon className="w-5 h-5" />
@@ -793,7 +793,7 @@ export default function Landing() {
       {/* 7. PERFORMANCE BADGES ------------------------------------------- */}
       <section
         id="badges"
-        className="py-16 sm:py-24 bg-white border-t border-slate-200"
+        className="py-16 sm:py-24 bg-cream-soft border-t border-cream-deep"
       >
         <div className="max-w-6xl mx-auto px-6">
           <Reveal as="div" className="text-center max-w-2xl mx-auto mb-14">
@@ -860,7 +860,7 @@ export default function Landing() {
       </section>
 
       {/* 8. FEATURED EXAM CARDS ------------------------------------------ */}
-      <section className="py-16 sm:py-24 bg-slate-50 border-y border-slate-200">
+      <section className="py-16 sm:py-24 bg-cream-deep border-y border-cream-deep">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center max-w-2xl mx-auto mb-12">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-700">
@@ -936,7 +936,7 @@ export default function Landing() {
                 <Link href="/recruiter/login">
                   <Button
                     variant="outline"
-                    className="mt-6 border-white/30 bg-transparent text-white hover:bg-white hover:text-slate-900 rounded-full"
+                    className="mt-6 border-white/30 bg-transparent text-white hover:bg-cream-soft hover:text-slate-900 rounded-full"
                   >
                     Hiring? Verify candidates
                     <ArrowRight className="ml-2 w-4 h-4" />
@@ -963,7 +963,7 @@ export default function Landing() {
                 <Link href="/partners">
                   <Button
                     variant="outline"
-                    className="mt-6 border-white/30 bg-transparent text-white hover:bg-white hover:text-slate-900 rounded-full"
+                    className="mt-6 border-white/30 bg-transparent text-white hover:bg-cream-soft hover:text-slate-900 rounded-full"
                   >
                     Sell assessments? Earn commission
                     <ArrowRight className="ml-2 w-4 h-4" />
@@ -976,7 +976,7 @@ export default function Landing() {
       </section>
 
       {/* 10. FAQ ---------------------------------------------------------- */}
-      <section className="py-16 sm:py-24 bg-white">
+      <section className="py-16 sm:py-24 bg-cream-soft">
         <div className="max-w-3xl mx-auto px-6">
           <Reveal as="div" className="text-center mb-12">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-700">
@@ -992,7 +992,7 @@ export default function Landing() {
                 <AccordionItem
                   key={i}
                   value={`item-${i}`}
-                  className="border-slate-200"
+                  className="border-cream-deep"
                 >
                   <AccordionTrigger className="text-left text-slate-900 hover:no-underline">
                     {f.q}
@@ -1025,7 +1025,7 @@ export default function Landing() {
               <motion.span whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} className="inline-block">
                 <Button
                   size="lg"
-                  className="bg-white text-slate-900 hover:bg-slate-100 rounded-full px-8 py-6 text-base font-semibold shadow-2xl shadow-sky-500/20"
+                  className="bg-cream-soft text-slate-900 hover:bg-slate-100 rounded-full px-8 py-6 text-base font-semibold shadow-2xl shadow-sky-500/20"
                 >
                   Browse exams
                   <ArrowRight className="ml-2 w-4 h-4" />
