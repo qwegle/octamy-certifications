@@ -24,9 +24,8 @@ import {
 import { useAuth } from "@/lib/auth.tsx";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import Header from "@/components/header";
-import Footer from "@/components/footer";
-import Breadcrumbs from "@/components/breadcrumbs";
+import DashboardLayout from "@/components/dashboard-layout";
+import { useDashboardRole } from "@/lib/use-dashboard-role";
 import { Plus, Database, Lock, Globe, EyeOff, Building2, User, Shield } from "lucide-react";
 import type { QuestionBank } from "@shared/schema";
 
@@ -41,6 +40,7 @@ export default function QuestionBanksList() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const qc = useQueryClient();
+  const role = useDashboardRole();
   const [search, setSearch] = useState("");
   const [createOpen, setCreateOpen] = useState(false);
 
@@ -107,53 +107,45 @@ export default function QuestionBanksList() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-cream-deep">
-      <Header />
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-10">
-        <Breadcrumbs items={[{ label: "Question Banks" }]} />
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight flex items-center gap-2">
-              <Database className="w-7 h-7 text-purple-600" />
-              Question Banks
-            </h1>
-            <p className="text-gray-600 mt-1 text-sm">
-              Reusable pools of questions for your courses, exams, and skill verifications.
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <Input
-              placeholder="Search banks…"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full sm:w-64"
-            />
-            <Button onClick={() => setCreateOpen(true)} className="shrink-0">
-              <Plus className="w-4 h-4 mr-1" /> Create Bank
-            </Button>
-          </div>
-        </div>
-
+    <DashboardLayout
+      role={role}
+      title="Question banks"
+      description="Reusable pools of questions for your courses, exams, and skill verifications."
+      breadcrumbs={[{ label: "Question banks" }]}
+      actions={
+        <>
+          <Input
+            placeholder="Search banks…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full sm:w-64"
+          />
+          <Button onClick={() => setCreateOpen(true)} className="shrink-0">
+            <Plus className="w-4 h-4 mr-1" /> Create bank
+          </Button>
+        </>
+      }
+    >
         {banksQuery.isLoading ? (
-          <div className="text-center py-12 text-gray-500">Loading banks…</div>
+          <div className="text-center py-12 text-slate-500">Loading banks…</div>
         ) : banksQuery.data && banksQuery.data.length > 0 ? (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {banksQuery.data.map((bank) => (
               <Link key={bank.id} href={`/question-banks/${bank.id}`}>
-                <Card className="hover:shadow-md transition cursor-pointer h-full">
+                <Card className="hover:-translate-y-0.5 hover:shadow-[6px_6px_0_0_rgba(15,23,42,0.9)] transition-all cursor-pointer h-full">
                   <CardContent className="p-5">
                     <div className="flex items-start justify-between mb-3">
                       {ownerBadge(bank)}
-                      <span className="text-gray-400 flex items-center gap-1 text-xs uppercase tracking-wide">
+                      <span className="text-slate-400 flex items-center gap-1 text-xs uppercase tracking-wide">
                         {visIcon(bank.visibility)}
                         {bank.visibility}
                       </span>
                     </div>
-                    <h3 className="font-semibold text-lg mb-1 line-clamp-1">{bank.name}</h3>
-                    <p className="text-sm text-gray-600 line-clamp-2 min-h-[2.5rem]">
+                    <h3 className="font-semibold text-lg mb-1 line-clamp-1 text-slate-900">{bank.name}</h3>
+                    <p className="text-sm text-slate-600 line-clamp-2 min-h-[2.5rem]">
                       {bank.description || "No description"}
                     </p>
-                    <div className="flex items-center justify-between mt-4 pt-3 border-t text-xs text-gray-500">
+                    <div className="flex items-center justify-between mt-4 pt-3 border-t border-cream-deep text-xs text-slate-500">
                       <span>{bank.questionCount} questions</span>
                       <span>
                         Updated{" "}
@@ -170,19 +162,17 @@ export default function QuestionBanksList() {
         ) : (
           <Card>
             <CardContent className="p-12 text-center">
-              <Database className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-              <h3 className="font-semibold mb-1">No question banks yet</h3>
-              <p className="text-sm text-gray-600 mb-4">
+              <Database className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+              <h3 className="font-semibold mb-1 text-slate-900">No question banks yet</h3>
+              <p className="text-sm text-slate-600 mb-4">
                 Create your first bank to start building a reusable pool of questions.
               </p>
               <Button onClick={() => setCreateOpen(true)}>
-                <Plus className="w-4 h-4 mr-1" /> Create Bank
+                <Plus className="w-4 h-4 mr-1" /> Create bank
               </Button>
             </CardContent>
           </Card>
         )}
-      </main>
-      <Footer />
 
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
         <DialogContent>
@@ -241,6 +231,6 @@ export default function QuestionBanksList() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </DashboardLayout>
   );
 }

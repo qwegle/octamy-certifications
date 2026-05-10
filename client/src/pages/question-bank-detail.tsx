@@ -35,9 +35,8 @@ import {
 } from "@/components/ui/accordion";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import Header from "@/components/header";
-import Footer from "@/components/footer";
-import Breadcrumbs from "@/components/breadcrumbs";
+import DashboardLayout from "@/components/dashboard-layout";
+import { useDashboardRole } from "@/lib/use-dashboard-role";
 import {
   Plus,
   Upload,
@@ -72,6 +71,7 @@ export default function QuestionBankDetail() {
   const id = Number(params.id);
   const { toast } = useToast();
   const qc = useQueryClient();
+  const role = useDashboardRole();
 
   const [topicFilter, setTopicFilter] = useState<number | null>(null);
   const [formatFilter, setFormatFilter] = useState<string>("");
@@ -187,27 +187,23 @@ export default function QuestionBankDetail() {
 
   if (bankQuery.isLoading) {
     return (
-      <div className="min-h-screen flex flex-col">
-        <Header />
-        <main className="flex-1 flex items-center justify-center text-gray-500">Loading…</main>
-        <Footer />
-      </div>
+      <DashboardLayout role={role} title="Question bank" breadcrumbs={[{ label: "Question banks", href: "/question-banks" }, { label: "Loading…" }]}>
+        <div className="text-center py-12 text-slate-500">Loading…</div>
+      </DashboardLayout>
     );
   }
   if (!bankQuery.data) {
     return (
-      <div className="min-h-screen flex flex-col">
-        <Header />
-        <main className="flex-1 max-w-4xl mx-auto p-8 text-center">
-          <h1 className="text-2xl font-bold mb-2">Bank not found</h1>
+      <DashboardLayout role={role} title="Bank not found" breadcrumbs={[{ label: "Question banks", href: "/question-banks" }, { label: "Not found" }]}>
+        <div className="max-w-xl mx-auto text-center py-12">
+          <h1 className="text-2xl font-bold mb-2 text-slate-900">Bank not found</h1>
           <Link href="/question-banks">
             <Button variant="outline">
               <ChevronLeft className="w-4 h-4 mr-1" /> Back to banks
             </Button>
           </Link>
-        </main>
-        <Footer />
-      </div>
+        </div>
+      </DashboardLayout>
     );
   }
 
@@ -215,15 +211,15 @@ export default function QuestionBankDetail() {
   const canEdit = bank.canEdit;
 
   return (
-    <div className="min-h-screen flex flex-col bg-cream-deep">
-      <Header />
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-4 sm:py-6">
-        <Breadcrumbs
-          items={[
-            { label: "Question Banks", href: "/question-banks" },
-            { label: bank.name },
-          ]}
-        />
+    <DashboardLayout
+      role={role}
+      title={bank.name}
+      description={bank.description || `Reusable bank · ${bank.questionCount} questions`}
+      breadcrumbs={[
+        { label: "Question banks", href: "/question-banks" },
+        { label: bank.name },
+      ]}
+    >
         {/* Top bar */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
           <div className="flex items-center gap-3 min-w-0">
@@ -376,8 +372,6 @@ export default function QuestionBankDetail() {
             )}
           </section>
         </div>
-      </main>
-      <Footer />
 
       {/* Topic dialog */}
       <Dialog open={topicOpen} onOpenChange={setTopicOpen}>
@@ -411,7 +405,7 @@ export default function QuestionBankDetail() {
           qc.invalidateQueries({ queryKey: [`/api/question-banks/${id}/questions`] });
         }} />
       )}
-    </div>
+    </DashboardLayout>
   );
 }
 
