@@ -3,6 +3,7 @@ import { useLocation } from 'wouter';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import Header from '@/components/header';
 import Footer from '@/components/footer';
+import Breadcrumbs from '@/components/breadcrumbs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -82,6 +83,7 @@ export default function InstituteStudents() {
       <Header />
       <main className="flex-1">
         <div className="max-w-7xl mx-auto px-4 py-10">
+          <Breadcrumbs items={[{ label: 'Institute', href: '/institute/dashboard' }, { label: 'Students & cohorts' }]} />
           <p className="text-xs uppercase tracking-wide text-slate-500">Institute</p>
           <h1 className="text-3xl font-semibold text-slate-900 mb-1">Students & cohorts</h1>
           <p className="text-sm text-slate-600 mb-8">Group your learners and invite them to verified assessments.</p>

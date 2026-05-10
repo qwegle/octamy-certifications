@@ -4,6 +4,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import Header from '@/components/header';
 import Footer from '@/components/footer';
+import Breadcrumbs from '@/components/breadcrumbs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -54,6 +55,7 @@ export default function CreatorPayouts() {
       <SEO title="Creator Payouts — Octamy" description="Request earnings payouts" />
       <Header />
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-10">
+        <Breadcrumbs items={[{ label: 'Creator', href: '/creator/dashboard' }, { label: 'Earnings & Payouts' }]} />
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Earnings & Payouts</h1>

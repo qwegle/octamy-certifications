@@ -27,6 +27,9 @@ import InstituteStudents from "@/pages/institute-students";
 import InstituteExams from "@/pages/institute-exams";
 import InstituteExamNew from "@/pages/institute-exam-new";
 import InstituteReports from "@/pages/institute-reports";
+import InstituteTeam from "@/pages/institute-team";
+import CreatorCurriculum from "@/pages/creator-curriculum";
+import CreatorEarnings from "@/pages/creator-earnings";
 import RecruiterSavedSearches from "@/pages/recruiter-saved-searches";
 import ForgotPassword from "@/pages/forgot-password";
 import ResetPassword from "@/pages/reset-password";
@@ -82,6 +85,7 @@ import {
   RecruiterAuth,
   RecruiterOnboarding,
   RecruiterDashboard,
+  RecruiterAnalytics,
   CandidateSearch,
   CandidateProfile,
   RecruiterWallet,
@@ -158,6 +162,9 @@ function Router() {
       <Route path="/institute/exams" component={InstituteExams} />
       <Route path="/institute/exams/new" component={InstituteExamNew} />
       <Route path="/institute/reports" component={InstituteReports} />
+      <Route path="/institute/team" component={InstituteTeam} />
+      <Route path="/creator/courses/:id/curriculum" component={CreatorCurriculum} />
+      <Route path="/creator/earnings" component={CreatorEarnings} />
       <Route path="/recruiter/saved-searches">
         {() => (
           <RecruiterProtectedRoute>
@@ -205,6 +212,13 @@ function Router() {
         {() => (
           <RecruiterProtectedRoute>
             <RecruiterDashboard />
+          </RecruiterProtectedRoute>
+        )}
+      </Route>
+      <Route path="/recruiter/analytics">
+        {() => (
+          <RecruiterProtectedRoute>
+            <RecruiterAnalytics />
           </RecruiterProtectedRoute>
         )}
       </Route>

@@ -269,6 +269,79 @@ router.post('/creator/courses/:id/lessons', authenticateToken, requireCreator, a
   }
 });
 
+router.patch('/creator/courses/:id/sections/:sectionId', authenticateToken, requireCreator, async (req: CreatorRequest, res: Response) => {
+  try {
+    const courseId = Number(req.params.id);
+    const sectionId = Number(req.params.sectionId);
+    const c = await assertCreatorOwnsCourse(req, courseId);
+    if (!c) return res.status(404).json({ message: 'Course not found' });
+    const schema = z.object({ title: z.string().min(2).max(120).optional(), position: z.number().int().min(0).optional() });
+    const parsed = schema.safeParse(req.body);
+    if (!parsed.success) return res.status(400).json({ errors: parsed.error.flatten() });
+    const [updated] = await db.update(courseSections).set(parsed.data).where(and(eq(courseSections.id, sectionId), eq(courseSections.courseId, courseId))).returning();
+    if (!updated) return res.status(404).json({ message: 'Section not found' });
+    res.json(updated);
+  } catch (err: any) {
+    logger.error('section.patch.error', { err });
+    res.status(500).json({ message: 'Failed' });
+  }
+});
+
+router.delete('/creator/courses/:id/sections/:sectionId', authenticateToken, requireCreator, async (req: CreatorRequest, res: Response) => {
+  try {
+    const courseId = Number(req.params.id);
+    const sectionId = Number(req.params.sectionId);
+    const c = await assertCreatorOwnsCourse(req, courseId);
+    if (!c) return res.status(404).json({ message: 'Course not found' });
+    await db.delete(lessons).where(and(eq(lessons.sectionId, sectionId), eq(lessons.courseId, courseId)));
+    await db.delete(courseSections).where(and(eq(courseSections.id, sectionId), eq(courseSections.courseId, courseId)));
+    res.json({ ok: true });
+  } catch (err: any) {
+    logger.error('section.delete.error', { err });
+    res.status(500).json({ message: 'Failed' });
+  }
+});
+
+router.patch('/creator/courses/:id/lessons/:lessonId', authenticateToken, requireCreator, async (req: CreatorRequest, res: Response) => {
+  try {
+    const courseId = Number(req.params.id);
+    const lessonId = Number(req.params.lessonId);
+    const c = await assertCreatorOwnsCourse(req, courseId);
+    if (!c) return res.status(404).json({ message: 'Course not found' });
+    const schema = z.object({
+      title: z.string().min(2).max(160).optional(),
+      kind: z.enum(['video', 'pdf', 'text', 'quiz', 'link']).optional(),
+      contentUrl: z.string().url().nullable().optional(),
+      contentText: z.string().nullable().optional(),
+      durationSec: z.number().int().min(0).optional(),
+      position: z.number().int().min(0).optional(),
+      isPreview: z.boolean().optional(),
+    });
+    const parsed = schema.safeParse(req.body);
+    if (!parsed.success) return res.status(400).json({ errors: parsed.error.flatten() });
+    const [updated] = await db.update(lessons).set(parsed.data).where(and(eq(lessons.id, lessonId), eq(lessons.courseId, courseId))).returning();
+    if (!updated) return res.status(404).json({ message: 'Lesson not found' });
+    res.json(updated);
+  } catch (err: any) {
+    logger.error('lesson.patch.error', { err });
+    res.status(500).json({ message: 'Failed' });
+  }
+});
+
+router.delete('/creator/courses/:id/lessons/:lessonId', authenticateToken, requireCreator, async (req: CreatorRequest, res: Response) => {
+  try {
+    const courseId = Number(req.params.id);
+    const lessonId = Number(req.params.lessonId);
+    const c = await assertCreatorOwnsCourse(req, courseId);
+    if (!c) return res.status(404).json({ message: 'Course not found' });
+    await db.delete(lessons).where(and(eq(lessons.id, lessonId), eq(lessons.courseId, courseId)));
+    res.json({ ok: true });
+  } catch (err: any) {
+    logger.error('lesson.delete.error', { err });
+    res.status(500).json({ message: 'Failed' });
+  }
+});
+
 router.post('/lessons/:id/progress', authenticateToken, async (req: any, res: Response) => {
   try {
     const lessonId = Number(req.params.id);

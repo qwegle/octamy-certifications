@@ -277,12 +277,11 @@ export default function RecruiterDashboard() {
               <p className="text-gray-600 mb-4">
                 Track your recruitment metrics and performance.
               </p>
-              <Button variant="outline" className="w-full" onClick={() => {
-                // For now, show a message until we implement analytics page
-                alert('Analytics dashboard coming soon!');
-              }}>
-                View Analytics
-              </Button>
+              <Link href="/recruiter/analytics">
+                <Button variant="outline" className="w-full">
+                  View Analytics
+                </Button>
+              </Link>
             </CardContent>
           </Card>
         </div>

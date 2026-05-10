@@ -37,6 +37,7 @@ const SIDEBAR = [
   { key: 'banks', label: 'Question Banks', icon: FileQuestion, href: '/question-banks' },
   { key: 'exams', label: 'Exams', icon: ClipboardList, href: '/institute/exams' },
   { key: 'reports', label: 'Reports', icon: BarChart3, href: '/institute/reports' },
+  { key: 'team', label: 'Team', icon: GraduationCap, href: '/institute/team' },
   { key: 'certificates', label: 'Certificates', icon: Award, href: '/business-certificates' },
   { key: 'settings', label: 'Settings', icon: SettingsIcon, href: '/profile-edit' },
 ] as const;

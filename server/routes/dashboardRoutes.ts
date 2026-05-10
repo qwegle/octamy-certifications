@@ -30,6 +30,8 @@ import {
   recruiters,
   creators,
   institutes,
+  instituteMembers,
+  users,
 } from '@shared/schema';
 import { storage } from '../storage';
 import { createCashfreeOrder } from '../lib/cashfree';
@@ -189,6 +191,56 @@ router.get('/creator/stats', authenticateToken, requireCreator, async (req: Crea
   }
 });
 
+// Recent activity feed for the creator earnings tab.
+router.get('/creator/earnings', authenticateToken, requireCreator, async (req: CreatorRequest, res: Response) => {
+  try {
+    const creatorId = req.creator!.id;
+    const myCourseIds = (await db.select({ id: courses.id }).from(courses)
+      .where(and(eq(courses.ownerType, 'creator'), eq(courses.ownerId, creatorId))))
+      .map((r) => r.id);
+
+    if (myCourseIds.length === 0) {
+      return res.json({ payments: [], attempts: [], totals: { revenueINR: 0, attempts: 0, certificates: 0 } });
+    }
+
+    const payments = await db.execute(sql`
+      SELECT p.id, p.amount, p.status, p.created_at, c.title AS course_title
+      FROM payments p
+      LEFT JOIN courses c ON c.id = p.course_id
+      WHERE p.course_id = ANY(${myCourseIds}) AND p.status='completed'
+      ORDER BY p.id DESC LIMIT 25
+    `) as any as Array<{ id: number; amount: string; status: string; created_at: string; course_title: string }>;
+
+    const attempts = await db.execute(sql`
+      SELECT a.id, a.score, a.passed, a.created_at, c.title AS course_title
+      FROM exam_attempts a
+      LEFT JOIN courses c ON c.id = a.course_id
+      WHERE a.course_id = ANY(${myCourseIds})
+      ORDER BY a.id DESC LIMIT 25
+    `) as any as Array<{ id: number; score: number; passed: boolean; created_at: string; course_title: string }>;
+
+    const [totals] = await db.execute(sql`
+      SELECT
+        (SELECT COALESCE(SUM(amount),0) FROM payments WHERE status='completed' AND course_id = ANY(${myCourseIds}))::float AS revenue,
+        (SELECT COUNT(*) FROM exam_attempts WHERE course_id = ANY(${myCourseIds}))::int AS attempts,
+        (SELECT COUNT(*) FROM certificates WHERE is_paid=true AND course_id = ANY(${myCourseIds}))::int AS certs
+    `) as any as Array<{ revenue: number; attempts: number; certs: number }>;
+
+    res.json({
+      payments,
+      attempts,
+      totals: {
+        revenueINR: Math.round((totals?.revenue ?? 0)),
+        attempts: totals?.attempts ?? 0,
+        certificates: totals?.certs ?? 0,
+      },
+    });
+  } catch (err: any) {
+    console.error('GET /creator/earnings', err);
+    res.status(500).json({ message: 'Failed to load earnings' });
+  }
+});
+
 // =================================================================
 // INSTITUTE — cohorts & students
 // =================================================================
@@ -308,6 +360,79 @@ router.get('/institute/stats', authenticateToken, requireInstituteRole('teacher'
   } catch (err: any) {
     console.error('GET /institute/stats', err);
     res.status(500).json({ message: 'Failed to load stats' });
+  }
+});
+
+router.get('/institute/team', authenticateToken, requireInstituteRole('teacher'), async (req: InstituteRequest, res: Response) => {
+  try {
+    const rows = await db.execute(sql`
+      SELECT m.id, m.role, m.status, m.invited_at, m.joined_at, u.id AS user_id, u.name, u.email
+      FROM institute_members m
+      LEFT JOIN users u ON u.id = m.user_id
+      WHERE m.institute_id = ${req.institute!.id}
+      ORDER BY m.id ASC
+    `) as any as Array<{ id: number; role: string; status: string; invited_at: string | null; joined_at: string | null; user_id: number | null; name: string | null; email: string | null }>;
+    res.json(rows);
+  } catch (err: any) {
+    console.error('GET /institute/team', err);
+    res.status(500).json({ message: 'Failed to load team' });
+  }
+});
+
+router.post('/institute/team/invite', authenticateToken, requireInstituteRole('admin'), async (req: InstituteRequest, res: Response) => {
+  try {
+    const schema = z.object({
+      email: z.string().email(),
+      role: z.enum(['admin', 'teacher', 'staff']).default('teacher'),
+    });
+    const parsed = schema.safeParse(req.body);
+    if (!parsed.success) return res.status(400).json({ errors: parsed.error.flatten() });
+
+    // If a user with that email already exists, attach them. Otherwise create
+    // a placeholder member row keyed off invited email so we can re-link on signup.
+    const email = parsed.data.email.toLowerCase();
+    const [existingUser] = await db.select().from(users).where(eq(users.email, email));
+    const userId = existingUser?.id ?? null;
+
+    if (userId) {
+      const [existingMember] = await db.select().from(instituteMembers)
+        .where(and(eq(instituteMembers.instituteId, req.institute!.id), eq(instituteMembers.userId, userId)));
+      if (existingMember) return res.status(409).json({ message: 'Already a member' });
+      const [created] = await db.insert(instituteMembers).values({
+        instituteId: req.institute!.id,
+        userId,
+        role: parsed.data.role,
+        status: 'invited',
+        invitedBy: (req as any).user.userId,
+        invitedAt: new Date(),
+      }).returning();
+      return res.status(201).json(created);
+    }
+
+    // No user yet: store a pending invite by raw SQL so we can keep the email.
+    await db.execute(sql`
+      INSERT INTO institute_invites (institute_id, email, role, invited_by, created_at)
+      VALUES (${req.institute!.id}, ${email}, ${parsed.data.role}, ${(req as any).user.userId}, NOW())
+      ON CONFLICT DO NOTHING
+    `);
+    res.status(202).json({ message: 'Invite recorded; user will be linked when they sign up.', email });
+  } catch (err: any) {
+    console.error('POST /institute/team/invite', err);
+    res.status(500).json({ message: 'Failed to invite' });
+  }
+});
+
+router.delete('/institute/team/:memberId', authenticateToken, requireInstituteRole('admin'), async (req: InstituteRequest, res: Response) => {
+  try {
+    const memberId = Number(req.params.memberId);
+    const [m] = await db.select().from(instituteMembers).where(and(eq(instituteMembers.id, memberId), eq(instituteMembers.instituteId, req.institute!.id)));
+    if (!m) return res.status(404).json({ message: 'Member not found' });
+    if (m.role === 'owner') return res.status(400).json({ message: 'Cannot remove owner' });
+    await db.delete(instituteMembers).where(eq(instituteMembers.id, memberId));
+    res.json({ ok: true });
+  } catch (err: any) {
+    console.error('DELETE /institute/team', err);
+    res.status(500).json({ message: 'Failed' });
   }
 });
 

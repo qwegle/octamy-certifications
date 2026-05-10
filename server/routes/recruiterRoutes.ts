@@ -629,4 +629,62 @@ export function registerRecruiterRoutes(app: any) {
       res.status(500).json({ message: "Failed to access interview video", error: error.message });
     }
   });
+
+  // Analytics aggregations for the recruiter analytics page.
+  app.get('/recruiter/analytics', authenticateRecruiterToken, async (req: AuthenticatedRecruiterRequest, res: Response) => {
+    try {
+      const recruiterId = req.recruiter?.recruiterId;
+      if (!recruiterId) return res.status(401).json({ message: 'Unauthorized' });
+      const { db: drizzleDb } = await import('../db');
+      const { sql } = await import('drizzle-orm');
+
+      const totals = await drizzleDb.execute(sql`
+        SELECT
+          COUNT(*) FILTER (WHERE access_type='profile_view')::int AS profile_views,
+          COUNT(*) FILTER (WHERE access_type='cv_download')::int AS cv_downloads,
+          COUNT(*) FILTER (WHERE access_type='interview_access')::int AS interview_access,
+          COALESCE(SUM(credits_used::numeric), 0)::float AS credits_used
+        FROM profile_access_logs WHERE recruiter_id = ${recruiterId}
+      `) as any as Array<{ profile_views: number; cv_downloads: number; interview_access: number; credits_used: number }>;
+
+      const last30 = await drizzleDb.execute(sql`
+        SELECT date_trunc('day', created_at)::date AS day,
+               COUNT(*)::int AS accesses,
+               COALESCE(SUM(credits_used::numeric),0)::float AS credits
+        FROM profile_access_logs
+        WHERE recruiter_id = ${recruiterId} AND created_at > NOW() - INTERVAL '30 days'
+        GROUP BY 1 ORDER BY 1 ASC
+      `) as any as Array<{ day: string; accesses: number; credits: number }>;
+
+      const recentAccess = await drizzleDb.execute(sql`
+        SELECT pal.id, pal.access_type, pal.credits_used, pal.created_at, u.name AS user_name
+        FROM profile_access_logs pal
+        LEFT JOIN users u ON u.id = pal.user_id
+        WHERE pal.recruiter_id = ${recruiterId}
+        ORDER BY pal.id DESC LIMIT 25
+      `) as any as Array<{ id: number; access_type: string; credits_used: string; created_at: string; user_name: string | null }>;
+
+      const recentTransactions = await drizzleDb.execute(sql`
+        SELECT id, type, amount, description, balance_after, created_at
+        FROM credit_transactions
+        WHERE recruiter_id = ${recruiterId}
+        ORDER BY id DESC LIMIT 25
+      `) as any as Array<{ id: number; type: string; amount: string; description: string; balance_after: string; created_at: string }>;
+
+      res.json({
+        totals: {
+          profileViews: totals[0]?.profile_views ?? 0,
+          cvDownloads: totals[0]?.cv_downloads ?? 0,
+          interviewAccess: totals[0]?.interview_access ?? 0,
+          creditsUsed: totals[0]?.credits_used ?? 0,
+        },
+        daily: last30,
+        recentAccess,
+        recentTransactions,
+      });
+    } catch (err: any) {
+      console.error('GET /recruiter/analytics', err);
+      res.status(500).json({ message: 'Failed to load analytics' });
+    }
+  });
 }

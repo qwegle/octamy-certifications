@@ -1,3 +1,4 @@
+import { SEO } from "@/components/seo";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -190,6 +191,11 @@ export default function HelpCenter() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
+      <SEO
+        title="Help Center"
+        description="Get answers to common questions about exams, certificates, refunds, and account on Octamy."
+        path="/help-center"
+      />
       {/* Header */}
       <header className="bg-white dark:bg-gray-900 shadow-sm border-b border-gray-200 dark:border-gray-700">
         <div className="container mx-auto px-4 py-4">

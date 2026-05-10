@@ -82,7 +82,7 @@ export default function CreatorDashboard() {
 
           <div className="grid sm:grid-cols-3 gap-4">
             <StatCard icon={<BookOpen className="w-5 h-5" />} label="My courses" value={String(stats?.coursesCount ?? 0)} cta="Manage courses →" onClick={() => setLocation('/creator/courses')} />
-            <StatCard icon={<Wallet className="w-5 h-5" />} label="Earnings" value={`₹${(stats?.revenueINR ?? 0).toLocaleString('en-IN')}`} sub={`${stats?.attempts ?? 0} attempts · ${stats?.certificates ?? 0} certificates`} cta="Request payout →" onClick={() => setLocation('/creator/payouts')} />
+            <StatCard icon={<Wallet className="w-5 h-5" />} label="Earnings" value={`₹${(stats?.revenueINR ?? 0).toLocaleString('en-IN')}`} sub={`${stats?.attempts ?? 0} attempts · ${stats?.certificates ?? 0} certificates`} cta="View earnings →" onClick={() => setLocation('/creator/earnings')} />
             <StatCard icon={<Sparkles className="w-5 h-5" />} label="Plan" value={(creator?.plan || 'free').toUpperCase()} cta="Upgrade plan →" onClick={() => setLocation('/pricing')} />
           </div>
 
@@ -108,7 +108,11 @@ export default function CreatorDashboard() {
               <Card className="border-slate-200 mt-4">
                 <CardContent className="py-10 text-center">
                   <h3 className="text-lg font-medium text-slate-900">Lifetime earnings: ₹{(stats?.revenueINR ?? 0).toLocaleString('en-IN')}</h3>
-                  <p className="text-sm text-slate-600 mt-2">Payout requests open from the Wallet tab in the next release.</p>
+                  <p className="text-sm text-slate-600 mt-2">See payment-by-payment breakdown, attempts and CSV export.</p>
+                  <div className="flex items-center justify-center gap-2 mt-4">
+                    <Button onClick={() => setLocation('/creator/earnings')} className="bg-slate-900 text-white">View full report</Button>
+                    <Button onClick={() => setLocation('/creator/payouts')} variant="outline">Payouts</Button>
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>

@@ -316,6 +316,20 @@ export const instituteMembers = pgTable("institute_members", {
   uniqMember: unique().on(t.instituteId, t.userId),
 }));
 
+// Pending invites for institute team members who don't yet have a user account.
+// Resolved on signup (auth controller links new user to any matching invite).
+export const instituteInvites = pgTable("institute_invites", {
+  id: serial("id").primaryKey(),
+  instituteId: integer("institute_id").references(() => institutes.id).notNull(),
+  email: text("email").notNull(),
+  role: text("role").default("teacher").notNull(),
+  invitedBy: integer("invited_by").references(() => users.id),
+  acceptedAt: timestamp("accepted_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => ({
+  uniqInvite: unique().on(t.instituteId, t.email),
+}));
+
 export const insertCreatorSchema = createInsertSchema(creators).omit({
   id: true,
   createdAt: true,
