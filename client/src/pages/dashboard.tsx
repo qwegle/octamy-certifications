@@ -62,22 +62,6 @@ export default function Dashboard() {
     enabled: !!user && !!token,
   });
 
-  // Debug logging for certificate data
-  console.log("Dashboard certificates data:", {
-    certificates,
-    certificatesLoading,
-    certificatesError,
-  });
-
-  // Show debug info if certificates are loading or failed
-  if (certificatesLoading) {
-    console.log("Loading certificates...");
-  }
-
-  if (certificatesError) {
-    console.error("Certificate loading error:", certificatesError);
-  }
-
   const handleDownload = async (certificateId: string) => {
     try {
       // Open certificate in new tab for printing/saving as PDF
@@ -145,14 +129,12 @@ export default function Dashboard() {
   // Users need to complete payment to activate these certificates
   const unpaidCertificates = certificates.filter((cert) => !cert.isPaid);
 
-  // Calculate money saved (difference between original price and paid price)
-  const moneySaved = certificates.reduce((total, cert) => {
-    if (cert.isPaid) {
-      const originalPrice = 199; // Assuming original price is ₹199
-      const paidPrice = 99; // User paid ₹99
-      return total + (originalPrice - paidPrice);
-    }
-    return total;
+  // Money saved: compute from real list price vs amount paid (fallback 0).
+  const moneySaved = certificates.reduce((total, cert: any) => {
+    if (!cert.isPaid) return total;
+    const list = Number(cert.listPrice ?? cert.coursePrice ?? 0);
+    const paid = Number(cert.amountPaid ?? 0);
+    return total + Math.max(0, list - paid);
   }, 0);
 
   // Calculate average score

@@ -1801,6 +1801,14 @@ export default function AdminDashboard() {
             </div>
             <div className="flex items-center space-x-4">
               <Button
+                onClick={() => setLocation("/admin/approvals")}
+                size="sm"
+                className="flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white"
+              >
+                <Shield className="h-4 w-4" />
+                Approval queue
+              </Button>
+              <Button
                 onClick={() => setLocation("/enhanced-admin")}
                 variant="outline"
                 size="sm"

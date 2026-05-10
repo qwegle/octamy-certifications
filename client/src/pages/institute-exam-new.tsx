@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/lib/auth.tsx";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { SEO } from "@/components/seo";
 
@@ -55,7 +55,8 @@ export default function InstituteExamNew() {
       if (!r.ok) throw new Error((await r.json()).message || "Failed");
       return r.json();
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
+      await queryClient.invalidateQueries({ queryKey: ["/api/exam-instances"] });
       toast({
         title: "Exam created",
         description: `Share link: ${data.shareUrl}`,

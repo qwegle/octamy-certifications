@@ -43,7 +43,9 @@ export default function Register() {
     return (['learner', 'creator', 'institute', 'recruiter'] as const).includes(r as Role) ? (r as Role) : null;
   }, []);
 
-  const initialRole = detectRoleFromPath(location) || queryRole;
+  // Default unspecified registrations to learner — most users coming to /register want to take an exam.
+  // For business roles we use /register?role=creator|institute|recruiter or /creators, /institutes, /recruiters/register.
+  const initialRole: Role = (detectRoleFromPath(location) || queryRole || 'learner') as Role;
   const [role, setRole] = useState<Role | null>(initialRole);
 
   // Generic

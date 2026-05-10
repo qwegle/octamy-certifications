@@ -63,7 +63,7 @@ export default function InstituteDashboard() {
 
   const { data: stats } = useQuery<{ students: number; cohorts: number; activeExams: number }>({
     queryKey: ['/api/institute/stats'],
-    enabled: !!user && !!token && institute?.status === 'verified',
+    enabled: !!user && !!token && !!institute?.id,
     queryFn: async () => (await apiRequest('GET', '/api/institute/stats')).json(),
   });
 

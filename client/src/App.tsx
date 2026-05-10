@@ -73,6 +73,7 @@ import LearningPaths from "@/pages/learning-paths";
 import SponsorPage from "@/pages/sponsor";
 import AdminLogin from "@/pages/admin-login";
 import AdminDashboard from "@/pages/admin-dashboard";
+import AdminApprovals from "@/pages/admin-approvals";
 import EnhancedAdminDashboard from "@/pages/enhanced-admin-dashboard";
 import TempExamResults from "@/pages/TempExamResults";
 import PaymentTemp from "@/pages/PaymentTemp";
@@ -89,6 +90,8 @@ import {
   CandidateSearch,
   CandidateProfile,
   RecruiterWallet,
+  RecruiterProfile,
+  RecruiterSettings,
   RecruiterProtectedRoute
 } from "../../recruiter";
 import InternShipPayment from "./pages/offlinInternshipPayment.tsx";
@@ -142,6 +145,8 @@ function Router() {
       <Route path="/intern-payment" component={InternShipPayment} />
       <Route path="/qwegle/login" component={AdminLogin} />
       <Route path="/qwegle/dashboard" component={AdminDashboard} />
+      <Route path="/admin/approvals" component={AdminApprovals} />
+      <Route path="/qwegle/approvals" component={AdminApprovals} />
       <Route path="/enhanced-admin" component={EnhancedAdminDashboard} />
       <Route path="/exam/:slug" component={Exam} />
       <Route path="/exam-results-temp/:tempExamId" component={TempExamResults} />

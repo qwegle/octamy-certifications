@@ -404,6 +404,24 @@ router.post('/exam-instances', authenticateToken, async (req: any, res: Response
     const parsed = schema.safeParse(req.body);
     if (!parsed.success) return res.status(400).json({ errors: parsed.error.flatten() });
     const d = parsed.data;
+
+    // Ownership check — must be member of the institute or owner of the creator profile
+    if (d.ownerType === 'institute') {
+      const inst = await db.execute(sql`
+        SELECT 1 FROM institute_members
+        WHERE institute_id = ${d.ownerId} AND user_id = ${req.user.userId}
+          AND role IN ('owner','admin','teacher','staff')
+        LIMIT 1
+      `) as any as Array<{ id: number }>;
+      if (!inst[0]) return res.status(403).json({ message: 'Not a member of this institute' });
+    } else if (d.ownerType === 'creator') {
+      const [c] = await db.select({ id: creators.id }).from(creators)
+        .where(and(eq(creators.id, d.ownerId), eq(creators.userId, req.user.userId)));
+      if (!c) return res.status(403).json({ message: 'Not your creator profile' });
+    } else if (d.ownerType === 'admin' && !req.user.isAdmin) {
+      return res.status(403).json({ message: 'Admin only' });
+    }
+
     const passwordHash = d.password ? await bcrypt.hash(d.password, 10) : null;
     let code = generateShareCode();
     for (let i = 0; i < 5; i++) {
@@ -447,7 +465,7 @@ router.get('/exam-instances', authenticateToken, async (req: any, res: Response)
       const inst = await db.execute(sql`
         SELECT i.id FROM institutes i
         JOIN institute_members m ON m.institute_id = i.id
-        WHERE i.id = ${ownerId} AND m.user_id = ${req.user.userId} AND m.role IN ('owner','admin','teacher')
+        WHERE i.id = ${ownerId} AND m.user_id = ${req.user.userId} AND m.role IN ('owner','admin','teacher','staff')
         LIMIT 1
       `) as any as Array<{ id: number }>;
       if (!inst[0]) return res.status(403).json({ message: 'Not your institute' });
