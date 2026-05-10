@@ -300,8 +300,8 @@ export default function Header() {
           className={
             "max-w-7xl mx-auto px-4 sm:px-6 rounded-[999px] border backdrop-blur-md transition-all " +
             (scrolled
-              ? "bg-white/95 border-slate-200 shadow-md"
-              : "bg-white/90 border-slate-200/80 shadow-sm")
+              ? "glass-strong border-cream-deep shadow-md"
+              : "glass border-cream-deep/60 shadow-sm")
           }
         >
           <div className="h-16 flex items-center justify-between gap-4">

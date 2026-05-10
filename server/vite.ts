@@ -78,8 +78,72 @@ export function serveStatic(app: Express) {
 
   app.use(express.static(distPath));
 
+  // SSR meta injection for crawlers — rewrites <!--SEO_HEAD--> in index.html for known dynamic routes.
+  const indexPath = path.resolve(distPath, "index.html");
+  let indexHtmlCache: string | null = null;
+  const loadIndex = () => {
+    if (!indexHtmlCache) indexHtmlCache = fs.readFileSync(indexPath, "utf-8");
+    return indexHtmlCache;
+  };
+
+  // Lazy db import to avoid cycles
+  const escapeHtml = (s: string) =>
+    s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+  const renderMeta = (title: string, description: string, url: string, image?: string) => `
+    <title>${escapeHtml(title)}</title>
+    <meta name="description" content="${escapeHtml(description)}" />
+    <link rel="canonical" href="${escapeHtml(url)}" />
+    <meta property="og:title" content="${escapeHtml(title)}" />
+    <meta property="og:description" content="${escapeHtml(description)}" />
+    <meta property="og:url" content="${escapeHtml(url)}" />
+    ${image ? `<meta property="og:image" content="${escapeHtml(image)}" />` : ""}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="${escapeHtml(title)}" />
+    <meta name="twitter:description" content="${escapeHtml(description)}" />
+  `;
+
+  app.get(["/exam/:slug", "/category/:slug"], async (req, res, next) => {
+    try {
+      const html = loadIndex();
+      const slug = String(req.params.slug || "").toLowerCase();
+      const isExam = req.path.startsWith("/exam/");
+      let title = "Octamy";
+      let description = "Free skill-verification assessments. Pay only for verified certificates.";
+      let image: string | undefined;
+
+      try {
+        const { db } = await import("./db");
+        const { courses, categories } = await import("@shared/schema");
+        const { eq } = await import("drizzle-orm");
+        if (isExam) {
+          const [c] = await db.select().from(courses).where(eq(courses.slug, slug)).limit(1);
+          if (c) {
+            title = `${c.title} — Certification Exam | Octamy`;
+            description = (c.description || description).slice(0, 200);
+            image = c.imageUrl || undefined;
+          }
+        } else {
+          const [c] = await db.select().from(categories).where(eq(categories.slug, slug)).limit(1);
+          if (c) {
+            title = `${c.name} Skill Assessments & Certifications | Octamy`;
+            description = `Browse free ${c.name.toLowerCase()} assessments on Octamy.`;
+          }
+        }
+      } catch (e) {
+        // db error — serve generic shell, don't fail
+      }
+
+      const url = `https://octamy.com${req.path}`;
+      const out = html.replace(/<!--\s*SEO_HEAD\s*-->/, renderMeta(title, description, url, image));
+      res.status(200).type("html").send(out);
+    } catch (e) {
+      next(e);
+    }
+  });
+
   // fall through to index.html if the file doesn't exist
   app.use("*", (_req, res) => {
-    res.sendFile(path.resolve(distPath, "index.html"));
+    res.sendFile(indexPath);
   });
 }
