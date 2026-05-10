@@ -5,6 +5,7 @@
  * Mounted at /api by server/routes/index.ts.
  */
 import { Router, type Response, type Request, type NextFunction } from 'express';
+import { execRows } from '../lib/db-exec';
 import { eq, and, desc, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import crypto from 'crypto';
@@ -183,14 +184,14 @@ router.get('/me/plan-limits', authenticateToken, async (req: any, res: Response)
 
     let creatorUsage: any = null;
     if (creatorRow) {
-      const [{ c }] = await db.execute(sql`SELECT COUNT(*)::int AS c FROM courses WHERE owner_type='creator' AND owner_id=${creatorRow.id}`) as any as Array<{ c: number }>;
+      const [{ c }] = await execRows(sql`SELECT COUNT(*)::int AS c FROM courses WHERE owner_type='creator' AND owner_id=${creatorRow.id}`) as any as Array<{ c: number }>;
       creatorUsage = { plan: creatorRow.plan, limits: getCreatorLimits(creatorRow.plan), used: { courses: c } };
     }
 
     let instituteUsage: any = null;
     if (inst) {
-      const [{ s }] = await db.execute(sql`SELECT COUNT(*)::int AS s FROM cohort_students WHERE institute_id=${inst.id}`) as any as Array<{ s: number }>;
-      const [{ ch }] = await db.execute(sql`SELECT COUNT(*)::int AS ch FROM cohorts WHERE institute_id=${inst.id}`) as any as Array<{ ch: number }>;
+      const [{ s }] = await execRows(sql`SELECT COUNT(*)::int AS s FROM cohort_students WHERE institute_id=${inst.id}`) as any as Array<{ s: number }>;
+      const [{ ch }] = await execRows(sql`SELECT COUNT(*)::int AS ch FROM cohorts WHERE institute_id=${inst.id}`) as any as Array<{ ch: number }>;
       instituteUsage = { plan: inst.plan, limits: INSTITUTE_LIMITS[inst.plan] ?? INSTITUTE_LIMITS.starter, used: { students: s, cohorts: ch } };
     }
 
@@ -362,7 +363,7 @@ router.post('/lessons/:id/progress', authenticateToken, async (req: any, res: Re
       completedAt: parsed.data.status === 'completed' ? new Date() : null,
       updatedAt: new Date(),
     };
-    await db.execute(sql`
+    await execRows(sql`
       INSERT INTO lesson_progress (user_id, lesson_id, course_id, status, position_sec, completed_at, updated_at)
       VALUES (${values.userId}, ${values.lessonId}, ${values.courseId}, ${values.status}, ${values.positionSec}, ${values.completedAt}, ${values.updatedAt})
       ON CONFLICT (user_id, lesson_id) DO UPDATE
@@ -407,7 +408,7 @@ router.post('/exam-instances', authenticateToken, async (req: any, res: Response
 
     // Ownership check — must be member of the institute or owner of the creator profile
     if (d.ownerType === 'institute') {
-      const inst = await db.execute(sql`
+      const inst = await execRows(sql`
         SELECT 1 FROM institute_members
         WHERE institute_id = ${d.ownerId} AND user_id = ${req.user.userId}
           AND role IN ('owner','admin','teacher','staff')
@@ -462,7 +463,7 @@ router.get('/exam-instances', authenticateToken, async (req: any, res: Response)
       return res.status(400).json({ message: 'ownerType and ownerId required' });
     }
     if (ownerType === 'institute') {
-      const inst = await db.execute(sql`
+      const inst = await execRows(sql`
         SELECT i.id FROM institutes i
         JOIN institute_members m ON m.institute_id = i.id
         WHERE i.id = ${ownerId} AND m.user_id = ${req.user.userId} AND m.role IN ('owner','admin','teacher','staff')
@@ -588,12 +589,12 @@ router.get('/creator/payouts', authenticateToken, requireCreator, async (req: Cr
     const requests = await db.select().from(payoutRequests).where(and(eq(payoutRequests.ownerType, 'creator'), eq(payoutRequests.ownerId, req.creator!.id))).orderBy(desc(payoutRequests.createdAt));
     const splits = await db.select().from(splitPayouts).where(and(eq(splitPayouts.beneficiaryType, 'creator'), eq(splitPayouts.beneficiaryId, req.creator!.id))).orderBy(desc(splitPayouts.createdAt)).limit(50);
 
-    const [{ available }] = await db.execute(sql`
+    const [{ available }] = await execRows(sql`
       SELECT COALESCE(SUM(amount), 0)::numeric AS available
       FROM split_payouts
       WHERE beneficiary_type='creator' AND beneficiary_id=${req.creator!.id} AND status='settled'
     `) as any as Array<{ available: string }>;
-    const [{ paid }] = await db.execute(sql`
+    const [{ paid }] = await execRows(sql`
       SELECT COALESCE(SUM(amount), 0)::numeric AS paid
       FROM payout_requests
       WHERE owner_type='creator' AND owner_id=${req.creator!.id} AND status='paid'
@@ -673,7 +674,7 @@ router.post('/creator/integrations/:provider/connect', authenticateToken, requir
     const parsed = schema.safeParse(req.body);
     if (!parsed.success) return res.status(400).json({ errors: parsed.error.flatten() });
 
-    await db.execute(sql`
+    await execRows(sql`
       INSERT INTO creator_integrations (creator_id, provider, access_token, external_account_id, is_active)
       VALUES (${req.creator!.id}, ${provider}, ${parsed.data.accessToken}, ${parsed.data.externalAccountId ?? null}, true)
       ON CONFLICT (creator_id, provider) DO UPDATE

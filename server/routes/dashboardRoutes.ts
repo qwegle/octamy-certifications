@@ -9,6 +9,7 @@
  * Mounted at /api by server/routes/index.ts.
  */
 import { Router, type Response } from 'express';
+import { execRows } from '../lib/db-exec';
 import { eq, and, desc, sql } from 'drizzle-orm';
 import { db } from '../db';
 import {
@@ -169,11 +170,11 @@ router.get('/creator/stats', authenticateToken, requireCreator, async (req: Crea
     let revenuePaise = 0;
 
     if (myCourseIds.length > 0) {
-      const [a] = await db.execute(sql`SELECT COUNT(*)::int AS c FROM exam_attempts WHERE course_id = ANY(${myCourseIds})`);
+      const [a] = await execRows(sql`SELECT COUNT(*)::int AS c FROM exam_attempts WHERE course_id = ANY(${myCourseIds})`);
       attemptCount = (a as any)?.c ?? 0;
-      const [cer] = await db.execute(sql`SELECT COUNT(*)::int AS c FROM certificates WHERE course_id = ANY(${myCourseIds}) AND is_paid = true`);
+      const [cer] = await execRows(sql`SELECT COUNT(*)::int AS c FROM certificates WHERE course_id = ANY(${myCourseIds}) AND is_paid = true`);
       certCount = (cer as any)?.c ?? 0;
-      const [rev] = await db.execute(sql`SELECT COALESCE(SUM(amount), 0) AS s FROM payments WHERE status='completed' AND course_id = ANY(${myCourseIds})`);
+      const [rev] = await execRows(sql`SELECT COALESCE(SUM(amount), 0) AS s FROM payments WHERE status='completed' AND course_id = ANY(${myCourseIds})`);
       revenuePaise = Math.round(parseFloat(((rev as any)?.s ?? '0').toString()) * 100);
     }
 
@@ -203,7 +204,7 @@ router.get('/creator/earnings', authenticateToken, requireCreator, async (req: C
       return res.json({ payments: [], attempts: [], totals: { revenueINR: 0, attempts: 0, certificates: 0 } });
     }
 
-    const payments = await db.execute(sql`
+    const payments = await execRows(sql`
       SELECT p.id, p.amount, p.status, p.created_at, c.title AS course_title
       FROM payments p
       LEFT JOIN courses c ON c.id = p.course_id
@@ -211,7 +212,7 @@ router.get('/creator/earnings', authenticateToken, requireCreator, async (req: C
       ORDER BY p.id DESC LIMIT 25
     `) as any as Array<{ id: number; amount: string; status: string; created_at: string; course_title: string }>;
 
-    const attempts = await db.execute(sql`
+    const attempts = await execRows(sql`
       SELECT a.id, a.score, a.passed, a.created_at, c.title AS course_title
       FROM exam_attempts a
       LEFT JOIN courses c ON c.id = a.course_id
@@ -219,7 +220,7 @@ router.get('/creator/earnings', authenticateToken, requireCreator, async (req: C
       ORDER BY a.id DESC LIMIT 25
     `) as any as Array<{ id: number; score: number; passed: boolean; created_at: string; course_title: string }>;
 
-    const [totals] = await db.execute(sql`
+    const [totals] = await execRows(sql`
       SELECT
         (SELECT COALESCE(SUM(amount),0) FROM payments WHERE status='completed' AND course_id = ANY(${myCourseIds}))::float AS revenue,
         (SELECT COUNT(*) FROM exam_attempts WHERE course_id = ANY(${myCourseIds}))::int AS attempts,
@@ -348,9 +349,9 @@ router.post('/institute/students/import', authenticateToken, requireInstituteRol
 
 router.get('/institute/stats', authenticateToken, requireInstituteRole('teacher'), async (req: InstituteRequest, res: Response) => {
   try {
-    const [cohortRow] = await db.execute(sql`SELECT COUNT(*)::int AS c FROM cohorts WHERE institute_id = ${req.institute!.id}`);
-    const [studentRow] = await db.execute(sql`SELECT COUNT(*)::int AS c FROM cohort_students WHERE institute_id = ${req.institute!.id}`);
-    const [examRow] = await db.execute(sql`SELECT COUNT(*)::int AS c FROM exam_instances WHERE owner_type='institute' AND owner_id = ${req.institute!.id} AND status='live'`);
+    const [cohortRow] = await execRows(sql`SELECT COUNT(*)::int AS c FROM cohorts WHERE institute_id = ${req.institute!.id}`);
+    const [studentRow] = await execRows(sql`SELECT COUNT(*)::int AS c FROM cohort_students WHERE institute_id = ${req.institute!.id}`);
+    const [examRow] = await execRows(sql`SELECT COUNT(*)::int AS c FROM exam_instances WHERE owner_type='institute' AND owner_id = ${req.institute!.id} AND status='live'`);
     res.json({
       cohorts: (cohortRow as any)?.c ?? 0,
       students: (studentRow as any)?.c ?? 0,
@@ -365,7 +366,7 @@ router.get('/institute/stats', authenticateToken, requireInstituteRole('teacher'
 
 router.get('/institute/team', authenticateToken, requireInstituteRole('teacher'), async (req: InstituteRequest, res: Response) => {
   try {
-    const rows = await db.execute(sql`
+    const rows = await execRows(sql`
       SELECT m.id, m.role, m.status, m.invited_at, m.joined_at, u.id AS user_id, u.name, u.email
       FROM institute_members m
       LEFT JOIN users u ON u.id = m.user_id
@@ -410,7 +411,7 @@ router.post('/institute/team/invite', authenticateToken, requireInstituteRole('a
     }
 
     // No user yet: store a pending invite by raw SQL so we can keep the email.
-    await db.execute(sql`
+    await execRows(sql`
       INSERT INTO institute_invites (institute_id, email, role, invited_by, created_at)
       VALUES (${req.institute!.id}, ${email}, ${parsed.data.role}, ${(req as any).user.userId}, NOW())
       ON CONFLICT DO NOTHING
@@ -439,9 +440,9 @@ router.delete('/institute/team/:memberId', authenticateToken, requireInstituteRo
 router.get('/institute/reports', authenticateToken, requireInstituteRole('teacher'), async (req: InstituteRequest, res: Response) => {
   try {
     const id = req.institute!.id;
-    const [cohorts] = await db.execute(sql`SELECT COUNT(*)::int AS c FROM cohorts WHERE institute_id = ${id}`);
-    const [students] = await db.execute(sql`SELECT COUNT(*)::int AS c FROM cohort_students WHERE institute_id = ${id}`);
-    const [attempts] = await db.execute(sql`
+    const [cohorts] = await execRows(sql`SELECT COUNT(*)::int AS c FROM cohorts WHERE institute_id = ${id}`);
+    const [students] = await execRows(sql`SELECT COUNT(*)::int AS c FROM cohort_students WHERE institute_id = ${id}`);
+    const [attempts] = await execRows(sql`
       SELECT COUNT(*)::int AS total,
              COUNT(*) FILTER (WHERE a.passed = true)::int AS passed,
              COUNT(*) FILTER (WHERE a.status = 'submitted')::int AS submitted
@@ -449,7 +450,7 @@ router.get('/institute/reports', authenticateToken, requireInstituteRole('teache
       JOIN exam_instances i ON i.id = a.instance_id
       WHERE i.owner_type='institute' AND i.owner_id = ${id}
     `);
-    const recent = await db.execute(sql`
+    const recent = await execRows(sql`
       SELECT a.id, a.email, a.score, a.passed, a.submitted_at, i.title AS exam_title
       FROM exam_instance_attempts a
       JOIN exam_instances i ON i.id = a.instance_id
@@ -550,7 +551,7 @@ router.get('/user/payments', authenticateToken, async (req: any, res: Response) 
 
 router.get('/user/exam-history', authenticateToken, async (req: any, res: Response) => {
   try {
-    const rows = await db.execute(sql`
+    const rows = await execRows(sql`
       SELECT ea.id, ea.course_id AS "courseId", ea.score, ea.total_questions AS "totalQuestions",
              ea.passed, ea.created_at AS "createdAt",
              c.title AS "courseTitle", c.slug AS "courseSlug", c.passing_score AS "passingScore",
@@ -712,8 +713,8 @@ router.get('/admin/audit-logs', authenticateToken, async (req: any, res: Respons
     const action = req.query.action ? String(req.query.action) : null;
 
     const rows = action
-      ? await db.execute(sql`SELECT * FROM audit_logs WHERE action = ${action} ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`)
-      : await db.execute(sql`SELECT * FROM audit_logs ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`);
+      ? await execRows(sql`SELECT * FROM audit_logs WHERE action = ${action} ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`)
+      : await execRows(sql`SELECT * FROM audit_logs ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`);
     const data = (rows as any).rows ?? rows;
     res.json({ logs: data, limit, offset });
   } catch (err: any) {

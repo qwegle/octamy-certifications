@@ -1,5 +1,7 @@
 import { Router, type Request, type Response } from 'express';
+import { execRows } from '../lib/db-exec';
 import { z } from 'zod';
+import { execRows } from '../lib/db-exec';
 import jwt from 'jsonwebtoken';
 import { db } from '../db';
 import { creators, institutes, recruiters, users } from '@shared/schema';
@@ -35,9 +37,9 @@ const StatusSchema = z.object({
 // ===== Pending queue summary =====
 router.get('/admin/approvals/summary', authenticateAdmin, async (_req: Request, res: Response) => {
   try {
-    const [creatorPending] = await db.execute(sql`SELECT COUNT(*)::int AS c FROM creators WHERE status = 'pending'`) as any;
-    const [institutePending] = await db.execute(sql`SELECT COUNT(*)::int AS c FROM institutes WHERE status = 'pending'`) as any;
-    const [recruiterPending] = await db.execute(sql`SELECT COUNT(*)::int AS c FROM recruiters WHERE kyc_status IN ('pending','under_review')`) as any;
+    const [creatorPending] = await execRows(sql`SELECT COUNT(*)::int AS c FROM creators WHERE status = 'pending'`) as any;
+    const [institutePending] = await execRows(sql`SELECT COUNT(*)::int AS c FROM institutes WHERE status = 'pending'`) as any;
+    const [recruiterPending] = await execRows(sql`SELECT COUNT(*)::int AS c FROM recruiters WHERE kyc_status IN ('pending','under_review')`) as any;
     res.json({
       creators: creatorPending?.c ?? 0,
       institutes: institutePending?.c ?? 0,
@@ -53,7 +55,7 @@ router.get('/admin/approvals/summary', authenticateAdmin, async (_req: Request, 
 router.get('/admin/creators', authenticateAdmin, async (req: Request, res: Response) => {
   try {
     const status = String(req.query.status || '');
-    const rows = await db.execute(sql`
+    const rows = await execRows(sql`
       SELECT c.id, c.user_id, c.display_name, c.slug, c.bio, c.status, c.created_at,
              u.email, u.username
       FROM creators c
@@ -88,7 +90,7 @@ router.patch('/admin/creators/:id/status', authenticateAdmin, async (req: Reques
 router.get('/admin/institutes', authenticateAdmin, async (req: Request, res: Response) => {
   try {
     const status = String(req.query.status || '');
-    const rows = await db.execute(sql`
+    const rows = await execRows(sql`
       SELECT i.id, i.name, i.slug, i.contact_email, i.industry, i.size_range, i.status, i.plan, i.created_at
       FROM institutes i
       ${status ? sql`WHERE i.status = ${status}` : sql``}
@@ -121,7 +123,7 @@ router.patch('/admin/institutes/:id/status', authenticateAdmin, async (req: Requ
 router.get('/admin/recruiters', authenticateAdmin, async (req: Request, res: Response) => {
   try {
     const status = String(req.query.status || '');
-    const rows = await db.execute(sql`
+    const rows = await execRows(sql`
       SELECT id, full_name, email, company_name, designation, kyc_status, credits, created_at
       FROM recruiters
       ${status ? sql`WHERE kyc_status = ${status}` : sql``}
