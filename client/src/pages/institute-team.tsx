@@ -1,9 +1,7 @@
 import { useEffect, useState } from "react";
+import DashboardLayout from '@/components/dashboard-layout';
 import { useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import Header from "@/components/header";
-import Footer from "@/components/footer";
-import Breadcrumbs from "@/components/breadcrumbs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -82,12 +80,9 @@ export default function InstituteTeam() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-cream-soft flex flex-col">
+    <DashboardLayout role="institute" title="Team" breadcrumbs={[{ label: 'Institute', href: '/institute/dashboard' }, { label: 'Team' }]}>
       <SEO title="Team · Institute" description="Manage teachers and admins for your institute." path="/institute/team" />
-      <Header />
-      <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-10">
-        <Breadcrumbs items={[{ label: "Institute", href: "/institute/dashboard" }, { label: "Team" }]} />
-        <h1 className="text-2xl sm:text-3xl font-semibold text-slate-900 mb-6">Team</h1>
+              <h1 className="text-2xl sm:text-3xl font-semibold text-slate-900 mb-6">Team</h1>
 
         <Card className="border-cream-deep mb-6">
           <CardHeader><CardTitle className="text-base">Invite a teammate</CardTitle></CardHeader>
@@ -170,8 +165,6 @@ export default function InstituteTeam() {
             )}
           </CardContent>
         </Card>
-      </main>
-      <Footer />
-    </div>
+      </DashboardLayout>
   );
 }

@@ -1,9 +1,7 @@
 import { useEffect } from 'react';
+import DashboardLayout from '@/components/dashboard-layout';
 import { Link, useLocation } from 'wouter';
 import { useQuery } from '@tanstack/react-query';
-import Header from '@/components/header';
-import Footer from '@/components/footer';
-import Breadcrumbs from '@/components/breadcrumbs';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -38,12 +36,9 @@ export default function CreatorCourses() {
   });
 
   return (
-    <div className="min-h-screen bg-cream-soft flex flex-col">
+    <DashboardLayout role="creator" title="My courses" breadcrumbs={[{ label: 'Creator', href: '/creator/dashboard' }, { label: 'My courses' }]}>
       <SEO title="My courses" description="Manage your Octamy courses." path="/creator/courses" />
-      <Header />
-      <main className="flex-1">
-        <div className="max-w-6xl mx-auto px-4 py-10">
-          <Breadcrumbs items={[{ label: 'Creator', href: '/creator/dashboard' }, { label: 'My courses' }]} />
+              <div className="max-w-6xl mx-auto px-4 py-10">
           <div className="flex items-end justify-between mb-8">
             <div>
               <p className="text-xs uppercase tracking-wide text-slate-500">Creator</p>
@@ -94,8 +89,6 @@ export default function CreatorCourses() {
             </div>
           )}
         </div>
-      </main>
-      <Footer />
-    </div>
+      </DashboardLayout>
   );
 }

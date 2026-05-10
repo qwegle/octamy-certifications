@@ -1,9 +1,7 @@
 import { useEffect } from "react";
+import DashboardLayout from '@/components/dashboard-layout';
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
-import Header from "@/components/header";
-import Footer from "@/components/footer";
-import Breadcrumbs from "@/components/breadcrumbs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -55,12 +53,9 @@ export default function InstituteReports() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-cream-soft flex flex-col">
+    <DashboardLayout role="institute" title="Reports" breadcrumbs={[{ label: 'Institute', href: '/institute/dashboard' }, { label: 'Reports' }]}>
       <SEO title="Reports · Institute" description="Attempts, pass rates, and student activity." path="/institute/reports" />
-      <Header />
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-10">
-        <Breadcrumbs items={[{ label: "Institute", href: "/institute/dashboard" }, { label: "Reports" }]} />
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6">
+              <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6">
           <div>
             <h1 className="text-2xl sm:text-3xl font-semibold text-slate-900">Reports</h1>
             <p className="text-sm text-slate-600 mt-1">Live attempts and pass rates across your exams.</p>
@@ -122,9 +117,7 @@ export default function InstituteReports() {
             )}
           </CardContent>
         </Card>
-      </main>
-      <Footer />
-    </div>
+      </DashboardLayout>
   );
 }
 

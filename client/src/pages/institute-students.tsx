@@ -1,9 +1,7 @@
 import { useEffect, useState } from 'react';
+import DashboardLayout from '@/components/dashboard-layout';
 import { useLocation } from 'wouter';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import Header from '@/components/header';
-import Footer from '@/components/footer';
-import Breadcrumbs from '@/components/breadcrumbs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -78,15 +76,9 @@ export default function InstituteStudents() {
   });
 
   return (
-    <div className="min-h-screen bg-cream-soft flex flex-col">
+    <DashboardLayout role="institute" title="Students & cohorts" breadcrumbs={[{ label: 'Institute', href: '/institute/dashboard' }, { label: 'Students & cohorts' }]}>
       <SEO title="Students & cohorts" description="Manage your students on Octamy." path="/institute/students" />
-      <Header />
-      <main className="flex-1">
-        <div className="max-w-7xl mx-auto px-4 py-10">
-          <Breadcrumbs items={[{ label: 'Institute', href: '/institute/dashboard' }, { label: 'Students & cohorts' }]} />
-          <p className="text-xs uppercase tracking-wide text-slate-500">Institute</p>
-          <h1 className="text-3xl font-semibold text-slate-900 mb-1">Students & cohorts</h1>
-          <p className="text-sm text-slate-600 mb-8">Group your learners and invite them to verified assessments.</p>
+          <p className="text-sm text-slate-600 mb-6">Group your learners and invite them to verified assessments.</p>
 
           <div className="grid lg:grid-cols-[260px_1fr] gap-6">
             <aside className="space-y-3">
@@ -174,9 +166,6 @@ export default function InstituteStudents() {
               )}
             </section>
           </div>
-        </div>
-      </main>
-      <Footer />
-    </div>
+      </DashboardLayout>
   );
 }

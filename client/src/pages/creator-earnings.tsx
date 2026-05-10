@@ -1,9 +1,7 @@
 import { useEffect } from "react";
+import DashboardLayout from '@/components/dashboard-layout';
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
-import Header from "@/components/header";
-import Footer from "@/components/footer";
-import Breadcrumbs from "@/components/breadcrumbs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -50,12 +48,9 @@ export default function CreatorEarnings() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-cream-soft flex flex-col">
+    <DashboardLayout role="creator" title="Earnings" breadcrumbs={[{ label: 'Creator', href: '/creator/dashboard' }, { label: 'Earnings' }]}>
       <SEO title="Earnings · Creator" description="Track your course revenue, attempts and certificates." path="/creator/earnings" />
-      <Header />
-      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-10">
-        <Breadcrumbs items={[{ label: "Creator", href: "/creator/dashboard" }, { label: "Earnings" }]} />
-        <div className="flex items-end justify-between gap-4 mb-6">
+              <div className="flex items-end justify-between gap-4 mb-6">
           <div>
             <h1 className="text-2xl sm:text-3xl font-semibold text-slate-900">Earnings</h1>
             <p className="text-sm text-slate-600 mt-1">Live revenue, attempts and certificate sales across your courses.</p>
@@ -135,9 +130,7 @@ export default function CreatorEarnings() {
               )}
           </CardContent>
         </Card>
-      </main>
-      <Footer />
-    </div>
+      </DashboardLayout>
   );
 }
 

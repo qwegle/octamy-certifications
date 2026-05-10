@@ -26,6 +26,7 @@ import InstituteDashboard from "@/pages/institute-dashboard";
 import InstituteStudents from "@/pages/institute-students";
 import InstituteExams from "@/pages/institute-exams";
 import InstituteExamNew from "@/pages/institute-exam-new";
+import InstituteExamEdit from "@/pages/institute-exam-edit";
 import InstituteReports from "@/pages/institute-reports";
 import InstituteTeam from "@/pages/institute-team";
 import CreatorCurriculum from "@/pages/creator-curriculum";
@@ -166,6 +167,7 @@ function Router() {
       <Route path="/institute/cohorts" component={InstituteStudents} />
       <Route path="/institute/exams" component={InstituteExams} />
       <Route path="/institute/exams/new" component={InstituteExamNew} />
+      <Route path="/institute/exams/:id/edit" component={InstituteExamEdit} />
       <Route path="/institute/reports" component={InstituteReports} />
       <Route path="/institute/team" component={InstituteTeam} />
       <Route path="/creator/courses/:id/curriculum" component={CreatorCurriculum} />

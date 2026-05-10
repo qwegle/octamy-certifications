@@ -1,8 +1,7 @@
 import { useEffect } from 'react';
+import DashboardLayout from '@/components/dashboard-layout';
 import { useLocation } from 'wouter';
 import { useQuery } from '@tanstack/react-query';
-import Header from '@/components/header';
-import Footer from '@/components/footer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -47,11 +46,9 @@ export default function CreatorDashboard() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-cream-soft flex flex-col">
+    <DashboardLayout role="creator" title="Dashboard" breadcrumbs={[{ label: 'Creator' }, { label: 'Dashboard' }]}>
       <SEO title="Creator dashboard" description="Manage your courses and earnings on Octamy." path="/creator/dashboard" />
-      <Header />
-      <main className="flex-1">
-        <div className="max-w-6xl mx-auto px-4 py-10 space-y-8">
+              <div className="max-w-6xl mx-auto px-4 py-10 space-y-8">
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
             <div>
               <p className="text-xs uppercase tracking-wide text-slate-500">Creator</p>
@@ -127,9 +124,7 @@ export default function CreatorDashboard() {
             </TabsContent>
           </Tabs>
         </div>
-      </main>
-      <Footer />
-    </div>
+      </DashboardLayout>
   );
 }
 

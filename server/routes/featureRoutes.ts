@@ -485,6 +485,85 @@ router.get('/exam-instances', authenticateToken, async (req: any, res: Response)
   }
 });
 
+// Helper: verify that the current user owns the given exam instance
+async function ensureExamOwnership(userId: number, instanceId: number): Promise<{ ok: boolean; inst?: any; reason?: string }> {
+  const [inst] = await db.select().from(examInstances).where(eq(examInstances.id, instanceId));
+  if (!inst) return { ok: false, reason: 'Exam not found' };
+  if (inst.ownerType === 'institute') {
+    const rows = await execRows(sql`
+      SELECT 1 FROM institute_members
+      WHERE institute_id = ${inst.ownerId} AND user_id = ${userId}
+        AND role IN ('owner','admin','teacher','staff')
+      LIMIT 1
+    `) as any[];
+    if (!rows[0]) return { ok: false, reason: 'Not a member of this institute' };
+  } else if (inst.ownerType === 'creator') {
+    const [c] = await db.select({ id: creators.id }).from(creators).where(and(eq(creators.id, inst.ownerId), eq(creators.userId, userId)));
+    if (!c) return { ok: false, reason: 'Not your exam' };
+  }
+  return { ok: true, inst };
+}
+
+router.patch('/exam-instances/:id', authenticateToken, async (req: any, res: Response) => {
+  try {
+    const id = Number(req.params.id);
+    const ownership = await ensureExamOwnership(req.user.userId, id);
+    if (!ownership.ok) return res.status(ownership.reason === 'Exam not found' ? 404 : 403).json({ message: ownership.reason });
+
+    const schema = z.object({
+      title: z.string().min(3).max(160).optional(),
+      bankId: z.number().int().nullable().optional(),
+      durationMin: z.number().int().min(5).max(360).optional(),
+      passingScore: z.number().int().min(10).max(100).optional(),
+      maxAttempts: z.number().int().min(1).max(10).optional(),
+      startsAt: z.string().datetime().nullable().optional(),
+      endsAt: z.string().datetime().nullable().optional(),
+      password: z.string().min(4).max(60).nullable().optional(),
+      status: z.enum(['draft', 'live', 'closed']).optional(),
+    });
+    const parsed = schema.safeParse(req.body);
+    if (!parsed.success) return res.status(400).json({ errors: parsed.error.flatten() });
+    const d = parsed.data;
+    const update: any = { updatedAt: new Date() };
+    if (d.title !== undefined) update.title = d.title;
+    if (d.bankId !== undefined) update.bankId = d.bankId;
+    if (d.durationMin !== undefined) update.durationMin = d.durationMin;
+    if (d.passingScore !== undefined) update.passingScore = d.passingScore;
+    if (d.maxAttempts !== undefined) update.maxAttempts = d.maxAttempts;
+    if (d.startsAt !== undefined) update.startsAt = d.startsAt ? new Date(d.startsAt) : null;
+    if (d.endsAt !== undefined) update.endsAt = d.endsAt ? new Date(d.endsAt) : null;
+    if (d.status !== undefined) update.status = d.status;
+    if (d.password !== undefined) update.passwordHash = d.password ? await bcrypt.hash(d.password, 10) : null;
+
+    const [updated] = await db.update(examInstances).set(update).where(eq(examInstances.id, id)).returning();
+    audit({ action: 'exam_instance.update', userId: req.user.userId, resourceType: 'exam_instance', resourceId: id, req });
+    res.json({ ...updated, shareUrl: `${req.protocol}://${req.get('host')}/x/${updated.shareCode}` });
+  } catch (err: any) {
+    logger.error('exam-instance.update.error', { err });
+    res.status(500).json({ message: 'Failed' });
+  }
+});
+
+router.delete('/exam-instances/:id', authenticateToken, async (req: any, res: Response) => {
+  try {
+    const id = Number(req.params.id);
+    const ownership = await ensureExamOwnership(req.user.userId, id);
+    if (!ownership.ok) return res.status(ownership.reason === 'Exam not found' ? 404 : 403).json({ message: ownership.reason });
+
+    // Block hard-delete if attempts exist; offer soft-close instead via PATCH status='closed'
+    const attempts = await execRows(sql`SELECT COUNT(*)::int AS c FROM exam_instance_attempts WHERE instance_id = ${id}`) as any as Array<{ c: number }>;
+    if ((attempts[0]?.c ?? 0) > 0) {
+      return res.status(409).json({ message: 'Cannot delete exam with submitted attempts. Close it instead.', attemptCount: attempts[0].c });
+    }
+    await db.delete(examInstances).where(eq(examInstances.id, id));
+    audit({ action: 'exam_instance.delete', userId: req.user.userId, resourceType: 'exam_instance', resourceId: id, req });
+    res.json({ ok: true });
+  } catch (err: any) {
+    logger.error('exam-instance.delete.error', { err });
+    res.status(500).json({ message: 'Failed' });
+  }
+});
+
 router.get('/x/:code', async (req: Request, res: Response) => {
   try {
     const [inst] = await db.select().from(examInstances).where(eq(examInstances.shareCode, req.params.code));
