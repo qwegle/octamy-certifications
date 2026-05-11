@@ -2506,7 +2506,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createRecruiter(data: any) {
-    const [recruiter] = await db.insert(recruiters).values(data).returning();
+    const [recruiter] = await db.insert(recruiters).values({
+      ...data,
+      kycStatus: data.kycStatus ?? 'approved',
+    }).returning();
     return recruiter;
   }
 
@@ -2969,7 +2972,11 @@ export class DatabaseStorage implements IStorage {
 
   // ===== Creator operations =====
   async createCreator(data: InsertCreator): Promise<Creator> {
-    const [row] = await db.insert(creators).values(data).returning();
+    const [row] = await db.insert(creators).values({
+      ...data,
+      status: (data as any).status ?? 'approved',
+      approvedAt: (data as any).approvedAt ?? new Date(),
+    } as any).returning();
     return row;
   }
 
@@ -2994,7 +3001,10 @@ export class DatabaseStorage implements IStorage {
 
   // ===== Institute operations =====
   async createInstitute(data: InsertInstitute): Promise<Institute> {
-    const [row] = await db.insert(institutes).values(data).returning();
+    const [row] = await db.insert(institutes).values({
+      ...data,
+      status: (data as any).status ?? 'verified',
+    } as any).returning();
     return row;
   }
 
