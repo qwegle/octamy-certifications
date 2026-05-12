@@ -20,6 +20,7 @@ export default function ExamShare() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [attemptId, setAttemptId] = useState<number | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
   const [secondsLeft, setSecondsLeft] = useState(0);
   const [result, setResult] = useState<{ passed: boolean; scorePct: number; score: number; totalQuestions: number } | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -37,10 +38,11 @@ export default function ExamShare() {
     mutationFn: async () => (await apiRequest('POST', `/api/x/${code}/start`, { email, password: inst?.requiresPassword ? password : undefined })).json(),
     onSuccess: async (data: any) => {
       setAttemptId(data.attemptId);
+      setAccessToken(data.accessToken);
       setSecondsLeft((data.durationMin ?? inst?.durationMin ?? 30) * 60);
       // Load questions
       try {
-        const qRes = await apiRequest('GET', `/api/exam-attempts/${data.attemptId}/questions`);
+        const qRes = await apiRequest('GET', `/api/exam-attempts/${data.attemptId}/questions?accessToken=${encodeURIComponent(data.accessToken)}`);
         if (!qRes.ok) {
           const j = await qRes.json().catch(() => ({}));
           setLoadError(j.message || 'Failed to load questions.');
@@ -57,7 +59,7 @@ export default function ExamShare() {
 
   const submitM = useMutation({
     mutationFn: async () =>
-      (await apiRequest('POST', `/api/exam-attempts/${attemptId}/submit`, { answers })).json(),
+      (await apiRequest('POST', `/api/exam-attempts/${attemptId}/submit?accessToken=${encodeURIComponent(accessToken || '')}`, { answers })).json(),
     onSuccess: (data: any) => {
       setResult({ passed: data.passed, scorePct: data.scorePct, score: data.score, totalQuestions: data.totalQuestions });
       setPhase('done');
@@ -68,7 +70,7 @@ export default function ExamShare() {
   useEffect(() => {
     if (phase !== 'live' || !attemptId) return;
     const tick = setInterval(() => setSecondsLeft((s) => Math.max(0, s - 1)), 1000);
-    const beat = setInterval(() => { apiRequest('POST', `/api/exam-attempts/${attemptId}/heartbeat`).catch(() => {}); }, 30000);
+    const beat = setInterval(() => { apiRequest('POST', `/api/exam-attempts/${attemptId}/heartbeat?accessToken=${encodeURIComponent(accessToken || '')}`).catch(() => {}); }, 30000);
     return () => { clearInterval(tick); clearInterval(beat); };
   }, [phase, attemptId]);
 

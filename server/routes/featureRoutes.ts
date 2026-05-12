@@ -37,6 +37,68 @@ import {
 import { logger } from '../lib/logger';
 import { audit } from '../lib/audit';
 
+// ====================================================================
+// EXAM ATTEMPT ACCESS CONTROL
+// ----------------------------------------------------------------
+// Attempts can be started two ways:
+//   (A) by an authenticated learner -> attempt.userId is set
+//   (B) anonymously via share link  -> attempt.userId is null
+// To prevent IDOR on numeric attempt ids we issue a short-lived HMAC
+// "attempt token" at start time. Subsequent heartbeat / questions /
+// submit calls must present it (Authorization: Bearer <token> OR
+// `?accessToken=` query OR X-Attempt-Token header). Authenticated owners
+// can also call without the token if their userId matches.
+// ====================================================================
+function attemptTokenSecret() {
+  return process.env.JWT_SECRET || 'dev-secret-please-set-jwt-secret';
+}
+function signAttemptToken(attemptId: number): string {
+  const payload = String(attemptId);
+  const sig = crypto.createHmac('sha256', attemptTokenSecret()).update(payload).digest('base64url');
+  return `${payload}.${sig}`;
+}
+function verifyAttemptToken(token: string | undefined, attemptId: number): boolean {
+  if (!token) return false;
+  const expected = signAttemptToken(attemptId);
+  if (token.length !== expected.length) return false;
+  try { return crypto.timingSafeEqual(Buffer.from(token), Buffer.from(expected)); } catch { return false; }
+}
+function extractAttemptToken(req: Request): string | undefined {
+  const hdr = (req.headers['x-attempt-token'] as string) || undefined;
+  if (hdr) return hdr;
+  const auth = req.headers.authorization;
+  if (auth?.startsWith('AttemptToken ')) return auth.slice('AttemptToken '.length);
+  if (typeof req.query.accessToken === 'string') return req.query.accessToken;
+  return undefined;
+}
+async function loadAttemptOrUnauthorized(req: Request, res: Response): Promise<{ attempt: any; inst: any } | null> {
+  const id = Number(req.params.id);
+  if (!Number.isFinite(id)) { res.status(400).json({ message: 'Bad attempt id' }); return null; }
+  const [attempt] = await db.select().from(examInstanceAttempts).where(eq(examInstanceAttempts.id, id));
+  if (!attempt) { res.status(404).json({ message: 'Attempt not found' }); return null; }
+
+  // Ownership: either valid attempt token, OR authenticated user matches owner.
+  const token = extractAttemptToken(req);
+  let allowed = verifyAttemptToken(token, id);
+  if (!allowed && attempt.userId) {
+    // Try JWT-based fallback for the legitimate owner.
+    try {
+      const authHeader = req.headers.authorization;
+      const bearer = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : undefined;
+      if (bearer) {
+        const jwt = (await import('jsonwebtoken')).default;
+        const decoded: any = jwt.verify(bearer, process.env.JWT_SECRET!);
+        if (decoded?.userId === attempt.userId) allowed = true;
+      }
+    } catch { /* ignore */ }
+  }
+  if (!allowed) { res.status(403).json({ message: 'Attempt access denied' }); return null; }
+
+  const [inst] = await db.select().from(examInstances).where(eq(examInstances.id, attempt.instanceId));
+  if (!inst) { res.status(404).json({ message: 'Exam instance gone' }); return null; }
+  return { attempt, inst };
+}
+
 const router = Router();
 
 // ====================================================================
@@ -608,7 +670,8 @@ router.post('/x/:code/start', async (req: Request, res: Response) => {
       userId,
       email: parsed.data.email ?? null,
     }).returning();
-    res.status(201).json({ attemptId: attempt.id, durationMin: inst.durationMin, startedAt: attempt.startedAt });
+    const accessToken = signAttemptToken(attempt.id);
+    res.status(201).json({ attemptId: attempt.id, accessToken, durationMin: inst.durationMin, startedAt: attempt.startedAt });
   } catch (err: any) {
     logger.error('exam-share.start.error', { err });
     res.status(500).json({ message: 'Failed' });
@@ -617,7 +680,9 @@ router.post('/x/:code/start', async (req: Request, res: Response) => {
 
 router.post('/exam-attempts/:id/heartbeat', async (req: Request, res: Response) => {
   try {
-    const id = Number(req.params.id);
+    const ctx = await loadAttemptOrUnauthorized(req, res);
+    if (!ctx) return;
+    const id = ctx.attempt.id;
     await db.update(examInstanceAttempts).set({ lastHeartbeatAt: new Date() }).where(eq(examInstanceAttempts.id, id));
     res.json({ ok: true });
   } catch (err: any) {
@@ -628,12 +693,11 @@ router.post('/exam-attempts/:id/heartbeat', async (req: Request, res: Response) 
 // Fetch questions for an in-progress attempt (sanitised — no correct answers)
 router.get('/exam-attempts/:id/questions', async (req: Request, res: Response) => {
   try {
-    const id = Number(req.params.id);
-    const [attempt] = await db.select().from(examInstanceAttempts).where(eq(examInstanceAttempts.id, id));
-    if (!attempt) return res.status(404).json({ message: 'Attempt not found' });
+    const ctx = await loadAttemptOrUnauthorized(req, res);
+    if (!ctx) return;
+    const { attempt, inst } = ctx;
+    const id = attempt.id;
     if (attempt.submittedAt) return res.status(400).json({ message: 'Already submitted' });
-    const [inst] = await db.select().from(examInstances).where(eq(examInstances.id, attempt.instanceId));
-    if (!inst) return res.status(404).json({ message: 'Exam instance gone' });
     if (!inst.bankId) return res.status(400).json({ message: 'Exam has no question bank attached. Contact the exam owner.' });
 
     const rows = await execRows(sql`
@@ -669,18 +733,23 @@ router.get('/exam-attempts/:id/questions', async (req: Request, res: Response) =
 
 router.post('/exam-attempts/:id/submit', async (req: Request, res: Response) => {
   try {
-    const id = Number(req.params.id);
+    const ctx = await loadAttemptOrUnauthorized(req, res);
+    if (!ctx) return;
+    const { attempt, inst } = ctx;
+    const id = attempt.id;
     const schema = z.object({
       // answers map: { [questionId]: number (option index) | string (free text) }
       answers: z.record(z.union([z.number(), z.string(), z.array(z.number())])).default({}),
     });
     const parsed = schema.safeParse(req.body);
     if (!parsed.success) return res.status(400).json({ errors: parsed.error.flatten() });
-    const [attempt] = await db.select().from(examInstanceAttempts).where(eq(examInstanceAttempts.id, id));
-    if (!attempt) return res.status(404).json({ message: 'Attempt not found' });
     if (attempt.submittedAt) return res.status(400).json({ message: 'Already submitted' });
-    const [inst] = await db.select().from(examInstances).where(eq(examInstances.id, attempt.instanceId));
-    if (!inst) return res.status(404).json({ message: 'Exam instance gone' });
+
+    // Server-side timer enforcement: reject if past duration + 15s grace.
+    const startedAt = attempt.startedAt instanceof Date ? attempt.startedAt : new Date(attempt.startedAt);
+    const elapsedSec = (Date.now() - startedAt.getTime()) / 1000;
+    const allowedSec = (inst.durationMin * 60) + 15;
+    const timedOut = elapsedSec > allowedSec;
 
     // Server-side grading: pull correct answers for the questions the user answered
     const submittedAnswers = parsed.data.answers;
@@ -721,10 +790,10 @@ router.post('/exam-attempts/:id/submit', async (req: Request, res: Response) => 
       totalQuestions,
       passed,
       submittedAt: new Date(),
-      status: 'submitted',
+      status: timedOut ? 'timed_out' : 'submitted',
     }).where(eq(examInstanceAttempts.id, id));
 
-    res.json({ ok: true, passed, scorePct, score, totalQuestions });
+    res.json({ ok: true, passed, scorePct, score, totalQuestions, timedOut });
   } catch (err: any) {
     logger.error('exam-attempt.submit.error', { err });
     res.status(500).json({ message: 'Failed' });

@@ -2506,9 +2506,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createRecruiter(data: any) {
+    const auto = process.env.AUTO_APPROVE_PROFILES !== 'false';
     const [recruiter] = await db.insert(recruiters).values({
       ...data,
-      kycStatus: data.kycStatus ?? 'approved',
+      kycStatus: data.kycStatus ?? (auto ? 'approved' : 'pending'),
     }).returning();
     return recruiter;
   }
@@ -2972,10 +2973,11 @@ export class DatabaseStorage implements IStorage {
 
   // ===== Creator operations =====
   async createCreator(data: InsertCreator): Promise<Creator> {
+    const auto = process.env.AUTO_APPROVE_PROFILES !== 'false';
     const [row] = await db.insert(creators).values({
       ...data,
-      status: (data as any).status ?? 'approved',
-      approvedAt: (data as any).approvedAt ?? new Date(),
+      status: (data as any).status ?? (auto ? 'approved' : 'pending'),
+      approvedAt: (data as any).approvedAt ?? (auto ? new Date() : null),
     } as any).returning();
     return row;
   }
@@ -3001,9 +3003,10 @@ export class DatabaseStorage implements IStorage {
 
   // ===== Institute operations =====
   async createInstitute(data: InsertInstitute): Promise<Institute> {
+    const auto = process.env.AUTO_APPROVE_PROFILES !== 'false';
     const [row] = await db.insert(institutes).values({
       ...data,
-      status: (data as any).status ?? 'verified',
+      status: (data as any).status ?? (auto ? 'verified' : 'pending'),
     } as any).returning();
     return row;
   }

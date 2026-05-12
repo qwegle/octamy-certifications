@@ -44,10 +44,18 @@ export async function seedDatabase() {
     const insertedCategories = await db.insert(categories).values(categoryData).returning();
     console.log("Categories seeded:", insertedCategories.length);
 
-    // Create an admin user
-    const hashedPassword = await bcrypt.hash("admin123", 10);
+    // Create an admin user — password MUST come from env, never default.
+    const adminPassword = process.env.ADMIN_PASSWORD;
+    if (!adminPassword || adminPassword.length < 12) {
+      throw new Error(
+        "ADMIN_PASSWORD env var is required and must be at least 12 characters. Refusing to seed with a weak default.",
+      );
+    }
+    const adminEmail = process.env.ADMIN_EMAIL || "admin@octamy.com";
+    const bcryptRounds = Number(process.env.BCRYPT_ROUNDS) || 12;
+    const hashedPassword = await bcrypt.hash(adminPassword, bcryptRounds);
     const adminUser = await db.insert(users).values({
-      email: "admin@octamy.com",
+      email: adminEmail,
       password: hashedPassword,
       name: "Admin User",
       isAdmin: true,

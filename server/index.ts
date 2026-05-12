@@ -1,6 +1,7 @@
 import "./bootstrap-env";
 import "./lib/sentry"; // must precede other imports so Sentry can patch them
 import express, { type Request, Response, NextFunction } from "express";
+import cors from "cors";
 import rateLimit from "express-rate-limit";
 import * as Sentry from "@sentry/node";
 import { registerRoutes } from "./routes";
@@ -15,6 +16,24 @@ const app = express();
 // Behind nginx + Cloudflare; trust 1 hop so req.ip / X-Forwarded-* work.
 app.set("trust proxy", 1);
 app.disable("x-powered-by");
+
+// CORS: explicit allowlist; same-origin SPA always works, cross-origin must be listed.
+const CORS_ORIGINS = (process.env.CORS_ORIGIN || "")
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
+app.use(
+  cors({
+    origin: (origin, cb) => {
+      // Same-origin / curl / server-to-server: no Origin header → allow.
+      if (!origin) return cb(null, true);
+      if (CORS_ORIGINS.length === 0) return cb(null, true); // dev convenience
+      if (CORS_ORIGINS.includes(origin)) return cb(null, true);
+      return cb(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
+  }),
+);
 
 // Enhanced security headers for SSL/HTTPS protection
 app.use((req, res, next) => {
@@ -127,14 +146,17 @@ app.use((req, res, next) => {
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
+    const rawMessage = err.message || "Internal Server Error";
     if (status >= 500 && process.env.SENTRY_DSN) {
       Sentry.captureException(err);
     }
+    // Don't leak internal error details in production responses.
+    const isProd = process.env.NODE_ENV === "production";
+    const safeMessage = status >= 500 && isProd ? "Internal Server Error" : rawMessage;
     if (!res.headersSent) {
-      res.status(status).json({ message });
+      res.status(status).json({ message: safeMessage });
     }
-    logger.error("unhandled.route_error", { status, msg: message, err });
+    logger.error("unhandled.route_error", { status, msg: rawMessage, err });
   });
 
   // importantly only setup vite in development and after

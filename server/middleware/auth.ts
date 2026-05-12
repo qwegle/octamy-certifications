@@ -22,25 +22,16 @@ export const authenticateToken = async (req: AuthenticatedRequest, res: Response
     const authHeader = req.headers.authorization;
     const token = authHeader && authHeader.split(' ')[1];
 
-    console.log('Auth middleware - Header:', authHeader);
-    console.log('Auth middleware - Token:', token ? 'Present' : 'Missing');
-
     if (!token) {
-      console.log('Auth middleware - No token provided');
       return res.status(401).json({ message: "Access token required" });
     }
 
-    console.log('Auth middleware - JWT_SECRET available:', !!process.env.JWT_SECRET);
-    console.log('Auth middleware - JWT_SECRET length:', process.env.JWT_SECRET?.length);
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
-    console.log('Auth middleware - Decoded token:', { userId: decoded.userId, email: decoded.email });
-    
+
     // Get fresh user data to ensure user still exists and is active
     const user = await storage.getUser(decoded.userId);
-    console.log('Auth middleware - User lookup result:', user ? 'Found' : 'Not found');
-    
+
     if (!user) {
-      console.log('Auth middleware - User not found in database');
       return res.status(401).json({ message: "Invalid token" });
     }
 
@@ -50,10 +41,8 @@ export const authenticateToken = async (req: AuthenticatedRequest, res: Response
       isAdmin: user.isAdmin
     };
 
-    console.log('Auth middleware - Success, user authenticated:', req.user);
     next();
   } catch (error) {
-    console.error("Auth middleware error:", error);
     return res.status(401).json({ message: "Invalid token" });
   }
 };

@@ -352,7 +352,7 @@ export function registerRecruiterRoutes(app: any) {
     }
   });
 
-  // Purchase Credits
+  // Purchase Credits — REQUIRES gateway-verified order id; client-supplied amount is ignored.
   app.post('/recruiter/purchase-credits', authenticateRecruiterToken, async (req: AuthenticatedRecruiterRequest, res: Response) => {
     try {
       const recruiterId = req.recruiter?.recruiterId;
@@ -360,15 +360,44 @@ export function registerRecruiterRoutes(app: any) {
         return res.status(401).json({ message: "Unauthorized" });
       }
 
-      const { amount, paymentId } = req.body;
-      
-      // Process credit purchase
-      const purchaseResult = await storage.purchaseCredits(recruiterId, amount, paymentId);
-      
+      const { orderId } = req.body as { orderId?: string };
+      if (!orderId || typeof orderId !== 'string') {
+        return res.status(400).json({ message: "orderId required (must be a paid Cashfree order)" });
+      }
+
+      // Idempotency: reject duplicate orderId.
+      const { db } = await import('../db');
+      const { creditTransactions } = await import('@shared/schema');
+      const { sql } = await import('drizzle-orm');
+      const existing = await db.execute(sql`SELECT id FROM credit_transactions WHERE description LIKE ${'%' + orderId + '%'} LIMIT 1`);
+      if ((existing as any).rows?.length) {
+        return res.status(409).json({ message: 'Order already credited' });
+      }
+
+      // Verify with Cashfree.
+      const { fetchCashfreeOrderStatus } = await import('../lib/cashfree.js');
+      let payments: any;
+      try {
+        payments = await fetchCashfreeOrderStatus(orderId);
+      } catch (err: any) {
+        return res.status(400).json({ message: `Order verification failed: ${err.message}` });
+      }
+      const paymentList = Array.isArray(payments) ? payments : [];
+      const successful = paymentList.find((p: any) => (p.payment_status || '').toUpperCase() === 'SUCCESS');
+      if (!successful) {
+        return res.status(402).json({ message: 'No successful payment found for this order' });
+      }
+      const verifiedAmount = Number(successful.payment_amount || successful.order_amount || 0);
+      if (!Number.isFinite(verifiedAmount) || verifiedAmount <= 0) {
+        return res.status(400).json({ message: 'Invalid payment amount' });
+      }
+
+      // Credit recruiter using gateway-verified amount only.
+      const purchaseResult = await storage.purchaseCredits(recruiterId, verifiedAmount, orderId);
       res.json(purchaseResult);
     } catch (error: any) {
-      console.error("Credit purchase error:", error);
-      res.status(500).json({ message: "Failed to purchase credits", error: error.message });
+      console.error("Credit purchase error:", error?.message);
+      res.status(500).json({ message: "Failed to purchase credits" });
     }
   });
 
