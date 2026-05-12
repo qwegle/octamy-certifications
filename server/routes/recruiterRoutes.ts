@@ -47,7 +47,7 @@ export function registerRecruiterRoutes(app: any) {
         return res.status(400).json({ message: "Recruiter already exists with this email" });
       }
 
-      const hashedPassword = await bcrypt.hash(password, 10);
+      const hashedPassword = await bcrypt.hash(password, Number(process.env.BCRYPT_ROUNDS) || 12);
 
       const recruiter = await storage.createRecruiter({
         email,
@@ -421,19 +421,11 @@ export function registerRecruiterRoutes(app: any) {
       }
 
       // Get candidate profile data
-      console.log(`=== CANDIDATE PROFILE API CALLED ===`);
-      console.log(`Request URL: ${req.url}, Method: ${req.method}`);
-      console.log(`Recruiter ID: ${recruiterId}, Candidate ID: ${candidateId}`);
-      console.log(`Fetching candidate profile for ID: ${candidateId}`);
       const candidateProfile = await storage.getCandidateProfile(candidateId);
-      console.log('Profile data received:', candidateProfile ? 'Found' : 'Not found');
-      
       if (!candidateProfile) {
-        console.log('Returning 404 - candidate not found');
         return res.status(404).json({ message: "The candidate profile you're looking for doesn't exist." });
       }
 
-      console.log('Returning profile data for candidate:', candidateProfile.name);
       res.json(candidateProfile);
     } catch (error: any) {
       console.error("Candidate profile error:", error);
@@ -548,7 +540,7 @@ export function registerRecruiterRoutes(app: any) {
       }
 
       // Hash new password
-      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      const hashedPassword = await bcrypt.hash(newPassword, Number(process.env.BCRYPT_ROUNDS) || 12);
       
       // Update password
       await storage.updateRecruiterPassword(recruiterId, hashedPassword);

@@ -3,6 +3,7 @@ import { useLocation } from 'wouter';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import Header from '@/components/header';
 import Footer from '@/components/footer';
+import DashboardLayout from '@/components/dashboard-layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -58,14 +59,9 @@ export default function CreatorCourseNew() {
   });
 
   return (
-    <div className="min-h-screen bg-cream-soft flex flex-col">
+    <DashboardLayout role="creator" title="New course" description="Submit a course for review. Once approved it will be visible to learners." breadcrumbs={[{ label: 'Courses', href: '/creator/courses' }, { label: 'New' }]}>
       <SEO title="New course" description="Create a new course on Octamy." path="/creator/courses/new" />
-      <Header />
-      <main className="flex-1">
-        <div className="max-w-2xl mx-auto px-4 py-10">
-          <p className="text-xs uppercase tracking-wide text-slate-500">Creator</p>
-          <h1 className="text-3xl font-semibold text-slate-900 mb-1">New course</h1>
-          <p className="text-sm text-slate-600 mb-6">Submit a course for review. Once approved it will be visible to learners.</p>
+      <div className="max-w-2xl">
           <Card>
             <CardHeader><CardTitle className="text-base">Course details</CardTitle></CardHeader>
             <CardContent className="space-y-4">
@@ -122,9 +118,7 @@ export default function CreatorCourseNew() {
             </CardContent>
           </Card>
         </div>
-      </main>
-      <Footer />
-    </div>
+    </DashboardLayout>
   );
 }
 

@@ -81,9 +81,12 @@ const writeLimiter = rateLimit({
 });
 app.use(["/api/login", "/api/auth/login", "/api/register", "/api/auth/register",
          "/api/admin/login", "/api/sellers/login", "/api/sellers/register",
-         "/api/recruiter/login", "/api/recruiter/register"], authLimiter);
+         "/api/recruiter/login", "/api/recruiter/register",
+         "/api/auth/forgot-password", "/api/auth/reset-password",
+         "/api/forgot-password", "/api/reset-password"], authLimiter);
 app.use(["/api/contact", "/api/contact-submission", "/api/sponsors",
-         "/api/seller/withdrawal-requests", "/api/referral/track-click"], writeLimiter);
+         "/api/seller/withdrawal-requests", "/api/referral/track-click",
+         "/api/recruiter/purchase-credits"], writeLimiter);
 
 // Exam submission limiter — 10 submits/minute/IP (a candidate cannot legitimately submit faster).
 const examLimiter = rateLimit({

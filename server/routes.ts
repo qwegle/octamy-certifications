@@ -416,7 +416,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .json({ message: "Seller already exists with this email" });
       }
 
-      const hashedPassword = await bcrypt.hash(password, 10);
+      const hashedPassword = await bcrypt.hash(password, Number(process.env.BCRYPT_ROUNDS) || 12);
 
       const seller = await storage.createSeller({
         email,
@@ -647,7 +647,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Hash password
-      const hashedPassword = await bcrypt.hash(password, 10);
+      const hashedPassword = await bcrypt.hash(password, Number(process.env.BCRYPT_ROUNDS) || 12);
 
       // Create recruiter
       const recruiter = await storage.createRecruiter({
@@ -886,7 +886,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "User already exists" });
       }
 
-      const hashedPassword = await bcrypt.hash(password, 10);
+      const hashedPassword = await bcrypt.hash(password, Number(process.env.BCRYPT_ROUNDS) || 12);
       const user = await storage.createUser({
         name,
         email,

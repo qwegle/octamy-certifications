@@ -29,7 +29,7 @@ export class AuthController {
       }
 
       // Hash password
-      const hashedPassword = await bcrypt.hash(password, 10);
+      const hashedPassword = await bcrypt.hash(password, Number(process.env.BCRYPT_ROUNDS) || 12);
 
       // Create user
       const user = await storage.createUser({
@@ -185,7 +185,7 @@ export class AuthController {
         return res.status(400).json({ message: 'Invalid or expired reset token' });
       }
 
-      const hashed = await bcrypt.hash(password, 10);
+      const hashed = await bcrypt.hash(password, Number(process.env.BCRYPT_ROUNDS) || 12);
       await db.update(users).set({ password: hashed }).where(eq(users.id, row.userId));
       await db.update(passwordResetTokens).set({ usedAt: new Date() }).where(eq(passwordResetTokens.id, row.id));
 

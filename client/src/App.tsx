@@ -7,80 +7,78 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "./lib/auth.tsx";
 import { SellerAuthProvider } from "./lib/sellerAuth";
 import { HelmetProvider } from 'react-helmet-async';
-import Landing from "@/pages/landing-new";
-import Exam from "@/pages/exam";
-import Payment from "@/pages/payment";
-import Certificate from "@/pages/certificate";
-import Dashboard from "@/pages/dashboard";
-import Admin from "@/pages/admin";
-import Verification from "@/pages/verification";
-import Auth from "@/pages/auth";
-import Login from "@/pages/login";
-import Register from "@/pages/register";
-import CreatorDashboard from "@/pages/creator-dashboard";
-import CreatorCourses from "@/pages/creator-courses";
-import CreatorCourseNew from "@/pages/creator-course-new";
-import CreatorPayouts from "@/pages/creator-payouts";
-import ExamShare from "@/pages/exam-share";
-import InstituteDashboard from "@/pages/institute-dashboard";
-import InstituteStudents from "@/pages/institute-students";
-import InstituteExams from "@/pages/institute-exams";
-import InstituteExamNew from "@/pages/institute-exam-new";
-import InstituteExamEdit from "@/pages/institute-exam-edit";
-import InstituteReports from "@/pages/institute-reports";
-import InstituteTeam from "@/pages/institute-team";
-import CreatorCurriculum from "@/pages/creator-curriculum";
-import CreatorEarnings from "@/pages/creator-earnings";
-import RecruiterSavedSearches from "@/pages/recruiter-saved-searches";
-import ForgotPassword from "@/pages/forgot-password";
-import ResetPassword from "@/pages/reset-password";
-import CreatorLanding from "@/pages/creator-landing";
-import InstituteLanding from "@/pages/institute-landing";
-import RecruiterLanding from "@/pages/recruiter-landing";
-import Pricing from "@/pages/pricing";
-import NotFound from "@/pages/not-found";
-import HelpCenter from "@/pages/help-center";
-import About from "@/pages/about";
-import CategoryPage from "@/pages/category";
-import PrivacyPolicy from "@/pages/privacy-policy";
-import TermsOfService from "@/pages/terms-of-service";
-import TrustPage from "@/pages/legal/trust";
-import RefundPolicy from "@/pages/legal/refund-policy";
-import CookiePolicy from "@/pages/legal/cookie-policy";
-import AcceptableUse from "@/pages/legal/acceptable-use";
-import DisclaimerPage from "@/pages/legal/disclaimer";
-import ResellerAgreement from "@/pages/legal/reseller-agreement";
-import AccessibilityPage from "@/pages/legal/accessibility";
+const Landing = lazy(() => import("@/pages/landing-new"));
+const Exam = lazy(() => import("@/pages/exam"));
+const Payment = lazy(() => import("@/pages/payment"));
+const Certificate = lazy(() => import("@/pages/certificate"));
+const Dashboard = lazy(() => import("@/pages/dashboard"));
+const Admin = lazy(() => import("@/pages/admin"));
+const Verification = lazy(() => import("@/pages/verification"));
+const Auth = lazy(() => import("@/pages/auth"));
+const Login = lazy(() => import("@/pages/login"));
+const Register = lazy(() => import("@/pages/register"));
+const CreatorDashboard = lazy(() => import("@/pages/creator-dashboard"));
+const CreatorCourses = lazy(() => import("@/pages/creator-courses"));
+const CreatorCourseNew = lazy(() => import("@/pages/creator-course-new"));
+const CreatorPayouts = lazy(() => import("@/pages/creator-payouts"));
+const ExamShare = lazy(() => import("@/pages/exam-share"));
+const InstituteDashboard = lazy(() => import("@/pages/institute-dashboard"));
+const InstituteStudents = lazy(() => import("@/pages/institute-students"));
+const InstituteExams = lazy(() => import("@/pages/institute-exams"));
+const InstituteExamNew = lazy(() => import("@/pages/institute-exam-new"));
+const InstituteExamEdit = lazy(() => import("@/pages/institute-exam-edit"));
+const InstituteReports = lazy(() => import("@/pages/institute-reports"));
+const InstituteTeam = lazy(() => import("@/pages/institute-team"));
+const CreatorCurriculum = lazy(() => import("@/pages/creator-curriculum"));
+const CreatorEarnings = lazy(() => import("@/pages/creator-earnings"));
+const RecruiterSavedSearches = lazy(() => import("@/pages/recruiter-saved-searches"));
+const ForgotPassword = lazy(() => import("@/pages/forgot-password"));
+const ResetPassword = lazy(() => import("@/pages/reset-password"));
+const CreatorLanding = lazy(() => import("@/pages/creator-landing"));
+const InstituteLanding = lazy(() => import("@/pages/institute-landing"));
+const RecruiterLanding = lazy(() => import("@/pages/recruiter-landing"));
+const Pricing = lazy(() => import("@/pages/pricing"));
+const NotFound = lazy(() => import("@/pages/not-found"));
+const HelpCenter = lazy(() => import("@/pages/help-center"));
+const About = lazy(() => import("@/pages/about"));
+const CategoryPage = lazy(() => import("@/pages/category"));
+const PrivacyPolicy = lazy(() => import("@/pages/privacy-policy"));
+const TermsOfService = lazy(() => import("@/pages/terms-of-service"));
+const TrustPage = lazy(() => import("@/pages/legal/trust"));
+const RefundPolicy = lazy(() => import("@/pages/legal/refund-policy"));
+const CookiePolicy = lazy(() => import("@/pages/legal/cookie-policy"));
+const AcceptableUse = lazy(() => import("@/pages/legal/acceptable-use"));
+const DisclaimerPage = lazy(() => import("@/pages/legal/disclaimer"));
+const ResellerAgreement = lazy(() => import("@/pages/legal/reseller-agreement"));
+const AccessibilityPage = lazy(() => import("@/pages/legal/accessibility"));
 import { CookieConsent } from "@/components/cookie-consent";
-import InternshipPayment from "@/pages/internship-payment";
-import SellerAuth from "@/pages/seller-auth";
-import SellerDashboard from "@/pages/seller-dashboard";
-import PaymentSuccess from "@/pages/payment-success";
-import PaymentFailed from "@/pages/payment-failed";
-import DemoCertificate from "@/pages/demo-certificate";
-import DemoBusinessCertificate from "@/pages/demo-business-certificate";
-import DemoInternshipCertificate from "@/pages/demo-internship-certificate";
-import BusinessCertificates from "@/pages/business-certificates";
-import InternshipForm from "@/pages/internship-form";
-import ProfileEdit from "@/pages/profile-edit";
-import Verify from "@/pages/verify";
-import Preferences from "@/pages/preferences";
-import Progress from "@/pages/progress";
-import EnhancedCheckout from "@/pages/EnhancedCheckout";
-import Courses from "@/pages/courses";
-import VirtualInternships from "@/pages/virtual-internships";
-import BusinessCertificationsPage from "@/pages/business-certifications";
-import LearningPaths from "@/pages/learning-paths";
-import SponsorPage from "@/pages/sponsor";
-import AdminLogin from "@/pages/admin-login";
-import AdminDashboard from "@/pages/admin-dashboard";
-import AdminApprovals from "@/pages/admin-approvals";
-import EnhancedAdminDashboard from "@/pages/enhanced-admin-dashboard";
-import TempExamResults from "@/pages/TempExamResults";
-import PaymentTemp from "@/pages/PaymentTemp";
-import Contact from "@/pages/contact";
-
-
+const InternshipPayment = lazy(() => import("@/pages/internship-payment"));
+const SellerAuth = lazy(() => import("@/pages/seller-auth"));
+const SellerDashboard = lazy(() => import("@/pages/seller-dashboard"));
+const PaymentSuccess = lazy(() => import("@/pages/payment-success"));
+const PaymentFailed = lazy(() => import("@/pages/payment-failed"));
+const DemoCertificate = lazy(() => import("@/pages/demo-certificate"));
+const DemoBusinessCertificate = lazy(() => import("@/pages/demo-business-certificate"));
+const DemoInternshipCertificate = lazy(() => import("@/pages/demo-internship-certificate"));
+const BusinessCertificates = lazy(() => import("@/pages/business-certificates"));
+const InternshipForm = lazy(() => import("@/pages/internship-form"));
+const ProfileEdit = lazy(() => import("@/pages/profile-edit"));
+const Verify = lazy(() => import("@/pages/verify"));
+const Preferences = lazy(() => import("@/pages/preferences"));
+const Progress = lazy(() => import("@/pages/progress"));
+const EnhancedCheckout = lazy(() => import("@/pages/EnhancedCheckout"));
+const Courses = lazy(() => import("@/pages/courses"));
+const VirtualInternships = lazy(() => import("@/pages/virtual-internships"));
+const BusinessCertificationsPage = lazy(() => import("@/pages/business-certifications"));
+const LearningPaths = lazy(() => import("@/pages/learning-paths"));
+const SponsorPage = lazy(() => import("@/pages/sponsor"));
+const AdminLogin = lazy(() => import("@/pages/admin-login"));
+const AdminDashboard = lazy(() => import("@/pages/admin-dashboard"));
+const AdminApprovals = lazy(() => import("@/pages/admin-approvals"));
+const EnhancedAdminDashboard = lazy(() => import("@/pages/enhanced-admin-dashboard"));
+const TempExamResults = lazy(() => import("@/pages/TempExamResults"));
+const PaymentTemp = lazy(() => import("@/pages/PaymentTemp"));
+const Contact = lazy(() => import("@/pages/contact"));
 // Recruiter Portal Components
 import { 
   RecruiterAuthProvider,
@@ -110,6 +108,7 @@ const QBLoader = () => (
 
 function Router() {
   return (
+    <Suspense fallback={<QBLoader />}>
     <Switch>
       <Route path="/" component={Landing} />
       <Route path="/auth" component={Auth} />
@@ -280,6 +279,7 @@ function Router() {
 
       <Route component={NotFound} />
     </Switch>
+    </Suspense>
   );
 }
 

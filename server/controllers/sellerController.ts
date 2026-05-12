@@ -32,7 +32,7 @@ export class SellerController {
       }
 
       // Hash password
-      const hashedPassword = await bcrypt.hash(password, 10);
+      const hashedPassword = await bcrypt.hash(password, Number(process.env.BCRYPT_ROUNDS) || 12);
 
       // Create seller
       const seller = await storage.createSeller({

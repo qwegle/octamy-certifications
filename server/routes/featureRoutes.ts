@@ -485,7 +485,7 @@ router.post('/exam-instances', authenticateToken, async (req: any, res: Response
       return res.status(403).json({ message: 'Admin only' });
     }
 
-    const passwordHash = d.password ? await bcrypt.hash(d.password, 10) : null;
+    const passwordHash = d.password ? await bcrypt.hash(d.password, Number(process.env.BCRYPT_ROUNDS) || 12) : null;
     let code = generateShareCode();
     for (let i = 0; i < 5; i++) {
       const [exists] = await db.select({ id: examInstances.id }).from(examInstances).where(eq(examInstances.shareCode, code));
@@ -595,7 +595,7 @@ router.patch('/exam-instances/:id', authenticateToken, async (req: any, res: Res
     if (d.startsAt !== undefined) update.startsAt = d.startsAt ? new Date(d.startsAt) : null;
     if (d.endsAt !== undefined) update.endsAt = d.endsAt ? new Date(d.endsAt) : null;
     if (d.status !== undefined) update.status = d.status;
-    if (d.password !== undefined) update.passwordHash = d.password ? await bcrypt.hash(d.password, 10) : null;
+    if (d.password !== undefined) update.passwordHash = d.password ? await bcrypt.hash(d.password, Number(process.env.BCRYPT_ROUNDS) || 12) : null;
 
     const [updated] = await db.update(examInstances).set(update).where(eq(examInstances.id, id)).returning();
     audit({ action: 'exam_instance.update', userId: req.user.userId, resourceType: 'exam_instance', resourceId: id, req });
