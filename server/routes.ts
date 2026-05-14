@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { seedDatabase } from "./seed";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import { assertStrongPassword } from "./lib/bcrypt-helper";
 import { z } from "zod";
 import passport from "passport";
 import { setupGoogleAuth } from "./google-auth";
