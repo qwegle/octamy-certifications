@@ -2241,13 +2241,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Sponsor support endpoint
   app.post("/api/sponsors", async (req: Request, res: Response) => {
     try {
-      const { name, email, amount, message, isAnonymous } = req.body;
-
-      if (!name || !email || !amount || amount < 1) {
-        return res
-          .status(400)
-          .json({ message: "Missing required fields or invalid amount" });
+      const schema = z.object({
+        name: z.string().trim().min(1).max(120),
+        email: z.string().trim().toLowerCase().email().max(254),
+        amount: z.coerce.number().int().positive().max(1_000_000),
+        message: z.string().trim().max(1000).optional(),
+        isAnonymous: z.boolean().optional(),
+      });
+      const parsed = schema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Invalid sponsor data", issues: parsed.error.flatten() });
       }
+      const { name, email, amount, message, isAnonymous } = parsed.data;
 
       // Generate unique transaction ID
       const transactionId = payuMoneyService.generateTransactionId();
@@ -2256,7 +2261,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const sponsor = await storage.createSponsor({
         name,
         email,
-        amount: parseInt(amount),
+        amount,
         message: message || null,
         paymentMethod: "payumoney",
         transactionId,
@@ -2729,11 +2734,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Contact form submission endpoint
   app.post("/api/contact", async (req: Request, res: Response) => {
     try {
-      const { name, email, subject, message } = req.body;
-
-      if (!name || !email || !subject || !message) {
-        return res.status(400).json({ message: "All fields are required" });
+      const schema = z.object({
+        name: z.string().trim().min(1).max(120),
+        email: z.string().trim().toLowerCase().email().max(254),
+        subject: z.string().trim().min(1).max(200),
+        message: z.string().trim().min(1).max(5000),
+      });
+      const parsed = schema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Invalid contact form data", issues: parsed.error.flatten() });
       }
+      const { name, email, subject, message } = parsed.data;
 
       // Store contact form submission
       await storage.createContactSubmission({
@@ -2754,23 +2765,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Contact submission endpoint for help center
   app.post("/api/contact-submission", async (req: Request, res: Response) => {
     try {
-      const { name, email, phone, subject, message } = req.body;
-
-      if (!name || !email || !subject || !message) {
-        return res.status(400).json({
-          message: "Missing required fields",
-        });
+      const schema = z.object({
+        name: z.string().trim().min(1).max(120),
+        email: z.string().trim().toLowerCase().email().max(254),
+        phone: z.string().trim().max(40).optional(),
+        subject: z.string().trim().min(1).max(200),
+        message: z.string().trim().min(1).max(5000),
+      });
+      const parsed = schema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Invalid form data", issues: parsed.error.flatten() });
       }
+      const { name, email, phone, subject, message } = parsed.data;
 
       // Insert contact submission into database
       const [submission] = await db
         .insert(contactSubmissions)
         .values({
-          name: name.trim(),
-          email: email.trim().toLowerCase(),
-          phone: phone?.trim() || null,
-          subject: subject.trim(),
-          message: message.trim(),
+          name,
+          email,
+          phone: phone || null,
+          subject,
+          message,
           status: "new",
         })
         .returning();

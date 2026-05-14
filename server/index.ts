@@ -193,7 +193,46 @@ app.use((req, res, next) => {
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
   const port = Number(process.env.PORT) || 5000;
-  server.listen(port, () => {
+  const httpServer = server.listen(port, () => {
     log(`serving on port ${port}`);
+  });
+
+  // Tighten timeouts to defeat slowloris-style attacks.
+  // headersTimeout must be > keepAliveTimeout per Node docs.
+  httpServer.keepAliveTimeout = Number(process.env.KEEP_ALIVE_TIMEOUT_MS) || 65_000;
+  httpServer.headersTimeout = Number(process.env.HEADERS_TIMEOUT_MS) || 70_000;
+  httpServer.requestTimeout = Number(process.env.REQUEST_TIMEOUT_MS) || 120_000;
+
+  // Graceful shutdown: stop accepting new connections, drain in-flight, then exit.
+  let shuttingDown = false;
+  const shutdown = (signal: string) => {
+    if (shuttingDown) return;
+    shuttingDown = true;
+    logger.info('server.shutdown.begin', { signal });
+    // After 25s, force-exit so pm2 / docker can restart us instead of hanging.
+    const forceExit = setTimeout(() => {
+      logger.error('server.shutdown.force_exit');
+      process.exit(1);
+    }, 25_000);
+    forceExit.unref();
+    httpServer.close((err) => {
+      if (err) {
+        logger.error('server.shutdown.error', { err: err.message });
+        process.exit(1);
+      }
+      logger.info('server.shutdown.done');
+      process.exit(0);
+    });
+  };
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
+
+  // Surface unhandled errors instead of dying silently — Sentry already
+  // captures via patched hooks, but log them at the application layer too.
+  process.on('unhandledRejection', (reason) => {
+    logger.error('process.unhandled_rejection', { reason: String(reason) });
+  });
+  process.on('uncaughtException', (err) => {
+    logger.error('process.uncaught_exception', { err: err.message, stack: err.stack });
   });
 })();
