@@ -4,6 +4,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import cors from "cors";
 import rateLimit from "express-rate-limit";
 import * as Sentry from "@sentry/node";
+import crypto from "crypto";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { logger } from "./lib/logger";
@@ -63,6 +64,15 @@ app.use(express.json({
 }));
 app.use(express.urlencoded({ extended: false, limit: "1mb" }));
 
+// Request-ID middleware: propagate or generate x-request-id so logs/Sentry can
+// correlate user-reported failures with backend traces.
+app.use((req, res, next) => {
+  const id = (req.header('x-request-id') || crypto.randomUUID()).slice(0, 64);
+  (req as any).requestId = id;
+  res.setHeader('x-request-id', id);
+  next();
+});
+
 // Rate limiters: applied to the most abusable endpoints.
 // Keyed on IP (works because trust proxy is set above).
 const authLimiter = rateLimit({
@@ -103,14 +113,21 @@ app.get("/healthz", (_req, res) => {
   res.status(200).type("text/plain").send("ok");
 });
 app.get("/readyz", async (_req, res) => {
+  const checks: Record<string, any> = { status: "ready", uptime: process.uptime() };
   try {
+    const t0 = Date.now();
     const { db } = await import("./db");
     const { sql } = await import("drizzle-orm");
     await db.execute(sql`SELECT 1`);
-    res.status(200).json({ status: "ready", db: "ok", uptime: process.uptime() });
+    checks.db = { ok: true, latencyMs: Date.now() - t0 };
   } catch (err: any) {
-    res.status(503).json({ status: "not_ready", db: "error", error: err?.message });
+    checks.status = "not_ready";
+    checks.db = { ok: false, error: err?.message };
   }
+  checks.sentry = process.env.SENTRY_DSN ? "configured" : "not_configured";
+  checks.nodeEnv = process.env.NODE_ENV || "development";
+  checks.commit = process.env.GIT_COMMIT || "unknown";
+  res.status(checks.status === "ready" ? 200 : 503).json(checks);
 });
 // const __filename = fileURLToPath(import.meta.url);
 // const __dirname = path.dirname(__filename);
@@ -130,6 +147,7 @@ app.use((req, res, next) => {
       status: res.statusCode,
       durMs: duration,
       ip: req.header('x-forwarded-for')?.split(',')[0]?.trim() || req.ip,
+      reqId: (req as any).requestId,
     };
     if (res.statusCode >= 500) logger.error('http.request', meta);
     else if (res.statusCode >= 400) logger.warn('http.request', meta);

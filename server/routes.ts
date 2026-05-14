@@ -5,6 +5,7 @@ import { seedDatabase } from "./seed";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { assertStrongPassword } from "./lib/bcrypt-helper";
+import { isLocked, recordFailure, recordSuccess } from "./lib/login-throttle";
 import { z } from "zod";
 import passport from "passport";
 import { setupGoogleAuth } from "./google-auth";
@@ -293,9 +294,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .json({ message: "Email and password are required" });
       }
 
+      const adminLock = isLocked('admin:' + email);
+      if (adminLock.locked) {
+        return res.status(429).json({ message: `Account locked. Try again in ${Math.ceil((adminLock.retryAfterSec || 0) / 60)} minutes.` });
+      }
+
       // Find admin user
       const user = await storage.getUserByEmail(email);
       if (!user || !user.isAdmin) {
+        recordFailure('admin:' + email);
         audit({ action: 'admin.login', status: 'failure', actorEmail: email, req, metadata: { reason: 'no_admin' } });
         return res.status(401).json({ message: "Invalid admin credentials" });
       }
@@ -306,10 +313,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         user.password || ""
       );
       if (!isValidPassword) {
+        recordFailure('admin:' + email);
         audit({ action: 'admin.login', status: 'failure', userId: user.id, actorEmail: email, req, metadata: { reason: 'bad_password' } });
         return res.status(401).json({ message: "Invalid admin credentials" });
       }
 
+      recordSuccess('admin:' + email);
       // Generate JWT token with both isAdmin and role for compatibility
       const token = jwt.sign(
         {
@@ -930,23 +939,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const loginHandler = async (req: Request, res: Response) => {
     try {
       const { email, password } = req.body;
+      if (!email || typeof email !== 'string') {
+        return res.status(400).json({ message: "Email and password are required" });
+      }
+
+      const lock = isLocked(email);
+      if (lock.locked) {
+        return res.status(429).json({ message: `Account locked due to failed login attempts. Try again in ${Math.ceil((lock.retryAfterSec || 0) / 60)} minutes.` });
+      }
 
       const user = await storage.getUserByEmail(email);
       if (!user) {
+        recordFailure(email);
         audit({ action: 'auth.login', status: 'failure', actorEmail: email, req, metadata: { reason: 'no_user' } });
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
       if (!user.password) {
+        recordFailure(email);
         audit({ action: 'auth.login', status: 'failure', userId: user.id, actorEmail: email, req, metadata: { reason: 'no_password' } });
         return res.status(401).json({ message: "Invalid credentials" });
       }
       const validPassword = await bcrypt.compare(password, user.password);
       if (!validPassword) {
+        recordFailure(email);
         audit({ action: 'auth.login', status: 'failure', userId: user.id, actorEmail: email, req, metadata: { reason: 'bad_password' } });
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
+      recordSuccess(email);
       const token = jwt.sign(
         {
           userId: user.id,
