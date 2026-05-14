@@ -32,7 +32,9 @@ export async function setupTestData() {
   // Create test category
   const [testCategory] = await testDb.insert(schema.categories).values({
     name: 'Test Category',
-    description: 'Category for testing'
+    description: 'Category for testing',
+    icon: 'Folder',
+    slug: 'test-category',
   }).returning();
 
   // Create test user

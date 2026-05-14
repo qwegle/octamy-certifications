@@ -48,8 +48,6 @@ import certificateRoutes from "./routes/certificateRoutes";
 import questionBanksRouter, { courseBlueprintRouter } from "./routes/question-banks";
 import { emailService } from "./utils/emailService";
 import { generateCertificateHTML } from "./utils/certificateGenerator";
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
 import { Readable } from "stream";
 import { evaluateAnswersWithAI } from "./utils/openai.js";
 import {
@@ -416,6 +414,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .json({ message: "Seller already exists with this email" });
       }
 
+      try { assertStrongPassword(password); } catch (e: any) { return res.status(400).json({ message: e.message }); }
       const hashedPassword = await bcrypt.hash(password, Number(process.env.BCRYPT_ROUNDS) || 12);
 
       const seller = await storage.createSeller({
@@ -646,6 +645,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Email already registered" });
       }
 
+      try { assertStrongPassword(password); } catch (e: any) { return res.status(400).json({ message: e.message }); }
       // Hash password
       const hashedPassword = await bcrypt.hash(password, Number(process.env.BCRYPT_ROUNDS) || 12);
 
@@ -886,6 +886,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "User already exists" });
       }
 
+      try { assertStrongPassword(password); } catch (e: any) { return res.status(400).json({ message: e.message }); }
       const hashedPassword = await bcrypt.hash(password, Number(process.env.BCRYPT_ROUNDS) || 12);
       const user = await storage.createUser({
         name,

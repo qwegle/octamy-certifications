@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
+import { assertStrongPassword } from '../lib/bcrypt-helper';
 import jwt from 'jsonwebtoken';
 import { storage } from '../storage';
 import { insertSellerSchema, insertWithdrawalRequestSchema } from '@shared/schema';
@@ -32,6 +33,7 @@ export class SellerController {
       }
 
       // Hash password
+      try { assertStrongPassword(password); } catch (e: any) { return res.status(400).json({ message: e.message }); }
       const hashedPassword = await bcrypt.hash(password, Number(process.env.BCRYPT_ROUNDS) || 12);
 
       // Create seller

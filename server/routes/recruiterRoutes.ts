@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
+import { assertStrongPassword } from '../lib/bcrypt-helper';
 import crypto from 'crypto';
 import { storage } from '../storage';
 
@@ -47,6 +48,7 @@ export function registerRecruiterRoutes(app: any) {
         return res.status(400).json({ message: "Recruiter already exists with this email" });
       }
 
+      try { assertStrongPassword(password); } catch (e: any) { return res.status(400).json({ message: e.message }); }
       const hashedPassword = await bcrypt.hash(password, Number(process.env.BCRYPT_ROUNDS) || 12);
 
       const recruiter = await storage.createRecruiter({
@@ -540,6 +542,7 @@ export function registerRecruiterRoutes(app: any) {
       }
 
       // Hash new password
+      try { assertStrongPassword(newPassword); } catch (e: any) { return res.status(400).json({ message: e.message }); }
       const hashedPassword = await bcrypt.hash(newPassword, Number(process.env.BCRYPT_ROUNDS) || 12);
       
       // Update password

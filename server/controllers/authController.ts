@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
+import { assertStrongPassword } from '../lib/bcrypt-helper';
 import crypto from 'crypto';
 import { eq, and, isNull, gt } from 'drizzle-orm';
 import { storage } from '../storage';
@@ -29,6 +30,7 @@ export class AuthController {
       }
 
       // Hash password
+      try { assertStrongPassword(password); } catch (e: any) { return res.status(400).json({ message: e.message }); }
       const hashedPassword = await bcrypt.hash(password, Number(process.env.BCRYPT_ROUNDS) || 12);
 
       // Create user
@@ -185,6 +187,7 @@ export class AuthController {
         return res.status(400).json({ message: 'Invalid or expired reset token' });
       }
 
+      try { assertStrongPassword(password); } catch (e: any) { return res.status(400).json({ message: e.message }); }
       const hashed = await bcrypt.hash(password, Number(process.env.BCRYPT_ROUNDS) || 12);
       await db.update(users).set({ password: hashed }).where(eq(users.id, row.userId));
       await db.update(passwordResetTokens).set({ usedAt: new Date() }).where(eq(passwordResetTokens.id, row.id));
