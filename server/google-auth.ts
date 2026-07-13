@@ -11,6 +11,15 @@ const JWT_SECRET = process.env.JWT_SECRET!;
 // previously-leaked values).
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "";
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || "";
+const APP_URL = (process.env.APP_URL || "").replace(/\/$/, "");
+
+export const isGoogleAuthConfigured = Boolean(
+  GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET
+);
+
+function callbackUrl(path: string) {
+  return APP_URL ? `${APP_URL}${path}` : path;
+}
 
 if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
   console.warn(
@@ -19,7 +28,7 @@ if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
 }
 
 export function setupGoogleAuth() {
-  if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
+  if (!isGoogleAuthConfigured) {
     // Skip strategy registration entirely — the routes will still mount but
     // any Google sign-in attempt will redirect with auth_failed.
     return;
@@ -28,15 +37,17 @@ export function setupGoogleAuth() {
   passport.use('google-user', new GoogleStrategy({
     clientID: GOOGLE_CLIENT_ID,
     clientSecret: GOOGLE_CLIENT_SECRET,
-    callbackURL: "/api/auth/google/user/callback"
+    callbackURL: callbackUrl("/api/auth/google/user/callback"),
+    proxy: true,
   },
   async (accessToken, refreshToken, profile, done) => {
     try {
-      const email = profile.emails?.[0]?.value;
+      const googleEmail = profile.emails?.[0];
+      const email = googleEmail?.value?.trim().toLowerCase();
       const name = profile.displayName;
       
       if (!email) {
-        return done(new Error('No email found in Google profile'), null);
+        return done(new Error('No email found in Google profile'), false);
       }
 
       // Check if user exists
@@ -53,20 +64,21 @@ export function setupGoogleAuth() {
         };
         
         user = await storage.createUser(userData);
+      } else if (user.googleId && user.googleId !== profile.id) {
+        return done(new Error("This email is linked to a different Google identity."), false);
       } else if (!user.googleId) {
-        // SECURITY: do NOT auto-link Google to a password account by email match.
-        // The owner of the password account may not control this Google identity.
-        // Force them to log in with email/password and link from settings.
-        const err: any = new Error(
-          "An account with this email already exists. Sign in with your password and link Google from your profile settings."
-        );
-        err.code = "GOOGLE_LINK_REQUIRED";
-        return done(err, null);
+        // Google OAuth only returns an account email after Google has verified it.
+        // Linking by the unique, normalized email keeps one account per person and
+        // prevents an existing password user from being locked out of Google login.
+        user = await storage.updateUser(user.id, {
+          googleId: profile.id,
+          isGoogleUser: true,
+        });
       }
 
       return done(null, user);
     } catch (error) {
-      return done(error, null);
+      return done(error, false);
     }
   }));
 
@@ -74,15 +86,16 @@ export function setupGoogleAuth() {
   passport.use('google-seller', new GoogleStrategy({
     clientID: GOOGLE_CLIENT_ID,
     clientSecret: GOOGLE_CLIENT_SECRET,
-    callbackURL: "/api/auth/google/seller/callback"
+    callbackURL: callbackUrl("/api/auth/google/seller/callback"),
+    proxy: true,
   },
   async (accessToken, refreshToken, profile, done) => {
     try {
-      const email = profile.emails?.[0]?.value;
+      const email = profile.emails?.[0]?.value?.trim().toLowerCase();
       const name = profile.displayName;
       
       if (!email) {
-        return done(new Error('No email found in Google profile'), null);
+        return done(new Error('No email found in Google profile'), false);
       }
 
       // Check if seller exists
@@ -106,18 +119,18 @@ export function setupGoogleAuth() {
         };
         
         seller = await storage.createSeller(sellerData);
+      } else if (seller.googleId && seller.googleId !== profile.id) {
+        return done(new Error("This email is linked to a different Google identity."), false);
       } else if (!seller.googleId) {
-        // SECURITY: do NOT auto-link Google to a password seller account by email.
-        const err: any = new Error(
-          "A seller account with this email already exists. Sign in with your password and link Google from your dashboard."
-        );
-        err.code = "GOOGLE_LINK_REQUIRED";
-        return done(err, null);
+        seller = await storage.updateSeller(seller.id, {
+          googleId: profile.id,
+          isGoogleUser: true,
+        });
       }
 
       return done(null, seller);
     } catch (error) {
-      return done(error, null);
+      return done(error, false);
     }
   }));
 

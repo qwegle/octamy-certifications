@@ -2,27 +2,36 @@ import { useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { useToast } from '@/hooks/use-toast';
 
+function getOAuthParams() {
+  const query = new URLSearchParams(window.location.search);
+  const fragment = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+  return fragment.has('token') ? fragment : query;
+}
+
+function decodeJwtPayload(token: string) {
+  const encoded = token.split('.')[1];
+  if (!encoded) throw new Error('Invalid token');
+  const base64 = encoded.replace(/-/g, '+').replace(/_/g, '/').padEnd(Math.ceil(encoded.length / 4) * 4, '=');
+  return JSON.parse(atob(base64));
+}
+
 export function useGoogleAuthHandler() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
+    const urlParams = getOAuthParams();
     const token = urlParams.get('token');
     const success = urlParams.get('success');
     const error = urlParams.get('error');
 
-    console.log('Google Auth Handler - URL params:', { token: !!token, success, error });
-
     if (token && success === 'true') {
-      console.log('Google Auth Handler - Processing successful authentication');
-      
       // Store the token using the same key as regular auth
       localStorage.setItem('token', token);
       
       // Decode token to get user info
       try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
+        const payload = decodeJwtPayload(token);
         const userData = {
           id: payload.userId,
           email: payload.email,
@@ -48,13 +57,15 @@ export function useGoogleAuthHandler() {
       // Redirect to dashboard
       setTimeout(() => setLocation('/dashboard'), 1000);
     } else if (error) {
-      console.log('Google Auth Handler - Processing authentication error:', error);
-      
       // Handle authentication error
       let errorMessage = "Google authentication failed. Please try again.";
 
       if (error === 'google_link_required') {
         errorMessage = "An account with this email already exists. Please sign in with your password and link Google from your profile settings.";
+      } else if (error === 'google_not_configured') {
+        errorMessage = "Google sign-in is temporarily unavailable. Please continue with email or contact support.";
+      } else if (error === 'invalid_oauth_state') {
+        errorMessage = "Your Google sign-in session expired or could not be verified. Please try again.";
       }
       
       toast({
@@ -75,7 +86,7 @@ export function useSellerGoogleAuthHandler() {
   const { toast } = useToast();
 
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
+    const urlParams = getOAuthParams();
     const token = urlParams.get('token');
     const success = urlParams.get('success');
     const error = urlParams.get('error');
@@ -94,6 +105,10 @@ export function useSellerGoogleAuthHandler() {
       let errorMessage = "Google sign-in failed. Please try again.";
       if (error === 'google_link_required') {
         errorMessage = "A partner account with this email already exists. Sign in with your password and link Google from the dashboard.";
+      } else if (error === 'google_not_configured') {
+        errorMessage = "Google sign-in is temporarily unavailable. Please continue with email or contact support.";
+      } else if (error === 'invalid_oauth_state') {
+        errorMessage = "Your Google sign-in session expired or could not be verified. Please try again.";
       }
       toast({
         title: "Sign-in Error",

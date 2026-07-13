@@ -181,8 +181,17 @@ npm start
 Ensure all environment variables are set in production:
 - Database connection string
 - JWT secret key
+- Canonical `APP_URL` (for example `https://octamy.com`)
+- Google OAuth web client ID and secret, with the user and seller callback URLs from `.env.example`
 - PayUMoney credentials
 - SSL certificates for HTTPS
+
+### Product differentiation
+
+Octamy's core promise is the **Skill Evidence Passport**: a portable record that
+connects a learner's identity, scored assessment, credential tier, and live QR
+verification. Courses may prepare a learner, but the passport is the durable,
+inspectable proof that institutions and hiring teams can trust.
 
 ## Common Issues & Solutions
 

@@ -81,9 +81,10 @@ export async function createCashfreeOrder(input: CreateCashfreeOrderInput): Prom
     order_meta: {
       return_url: input.returnUrl,
       notify_url: input.notifyUrl,
-      ...(input.notes ? { notes: input.notes } : {}),
     },
-    order_note: "Octamy certificate payment",
+    order_note: input.notes
+      ? JSON.stringify(input.notes).slice(0, 180)
+      : "Octamy certificate payment",
   };
 
   const response = await fetch(`${getApiBase(cfg.environment)}/orders`, {

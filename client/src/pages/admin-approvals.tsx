@@ -16,7 +16,7 @@ type Tab = "creators" | "institutes" | "recruiters";
 
 const ADMIN_TOKEN_KEY = "octamy.admin.token";
 function getAdminToken() {
-  return localStorage.getItem(ADMIN_TOKEN_KEY) || localStorage.getItem("auth_token");
+  return localStorage.getItem("adminToken") || localStorage.getItem(ADMIN_TOKEN_KEY) || localStorage.getItem("auth_token");
 }
 
 async function adminFetch(method: string, url: string, body?: any) {
@@ -49,7 +49,7 @@ export default function AdminApprovals() {
       if (!r.ok) {
         if (r.status === 401 || r.status === 403) {
           toast({ title: "Admin login required", variant: "destructive" });
-          setLocation("/admin");
+          setLocation("/qwegle/login");
           return [];
         }
         return [];

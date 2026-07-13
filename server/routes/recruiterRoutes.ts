@@ -3,11 +3,23 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { assertStrongPassword } from '../lib/bcrypt-helper';
 import crypto from 'crypto';
+import multer from 'multer';
+import { v2 as cloudinary } from 'cloudinary';
 import { storage } from '../storage';
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 
-interface AuthenticatedRecruiterRequest extends Request {
+const recruiterKycUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    const allowed = new Set(['application/pdf', 'image/png', 'image/jpeg', 'image/webp']);
+    if (allowed.has(file.mimetype)) cb(null, true);
+    else cb(new Error('Only PDF, PNG, JPG, and WebP files are allowed'));
+  },
+});
+
+export interface AuthenticatedRecruiterRequest extends Request {
   recruiter?: {
     recruiterId: number;
     email: string;
@@ -15,7 +27,7 @@ interface AuthenticatedRecruiterRequest extends Request {
 }
 
 // Middleware to authenticate recruiter token
-const authenticateRecruiterToken = (req: AuthenticatedRecruiterRequest, res: Response, next: NextFunction) => {
+export const authenticateRecruiterToken = (req: AuthenticatedRecruiterRequest, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
   const token = authHeader && authHeader.split(' ')[1];
 
@@ -215,6 +227,38 @@ export function registerRecruiterRoutes(app: any) {
     }
   });
 
+  app.post('/recruiter/kyc-upload', authenticateRecruiterToken, recruiterKycUpload.single('file'), async (req: AuthenticatedRecruiterRequest, res: Response) => {
+    try {
+      const recruiterId = req.recruiter?.recruiterId;
+      if (!recruiterId) return res.status(401).json({ message: 'Unauthorized' });
+      if (!req.file) return res.status(400).json({ message: 'Choose a document to upload' });
+      if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+        return res.status(503).json({ message: 'Secure document storage is not configured' });
+      }
+
+      cloudinary.config({
+        cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+        api_key: process.env.CLOUDINARY_API_KEY,
+        api_secret: process.env.CLOUDINARY_API_SECRET,
+      });
+      const result = await new Promise<any>((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream({
+          folder: `octamy/recruiter-kyc/${recruiterId}`,
+          resource_type: 'auto',
+          type: 'authenticated',
+          access_mode: 'authenticated',
+          use_filename: false,
+          unique_filename: true,
+        }, (error, uploaded) => error ? reject(error) : resolve(uploaded));
+        stream.end(req.file!.buffer);
+      });
+      res.json({ fileUrl: result.secure_url, publicId: result.public_id, fileName: req.file.originalname });
+    } catch (error: any) {
+      console.error('Recruiter KYC upload error:', error?.message);
+      res.status(500).json({ message: error?.message || 'Document upload failed' });
+    }
+  });
+
   // Onboarding Step 3: KYC Documents
   app.post('/recruiter/onboarding/step3', authenticateRecruiterToken, async (req: AuthenticatedRecruiterRequest, res: Response) => {
     try {
@@ -320,15 +364,23 @@ export function registerRecruiterRoutes(app: any) {
       };
 
       const creditsRequired = creditCosts[accessType as keyof typeof creditCosts];
+      if (!creditsRequired || !Number.isInteger(Number(candidateId))) {
+        return res.status(400).json({ message: 'Invalid profile access request' });
+      }
       
       // Check if recruiter has enough credits
-      const currentBalance = parseFloat(recruiter.creditsBalance);
+      const currentBalance = Number(recruiter.creditsBalance || 0);
       if (currentBalance < creditsRequired) {
         return res.status(400).json({ message: "Insufficient credits" });
       }
 
       // Process the access request
-      const accessResult = await storage.processProfileAccess(recruiterId, candidateId, accessType, creditsRequired);
+      const normalizedAccessType = accessType === 'view'
+        ? 'profile_view'
+        : accessType === 'cv'
+          ? 'cv_download'
+          : 'interview_access';
+      const accessResult = await storage.processProfileAccess(recruiterId, Number(candidateId), normalizedAccessType, creditsRequired);
       
       res.json(accessResult);
     } catch (error: any) {
@@ -355,6 +407,47 @@ export function registerRecruiterRoutes(app: any) {
   });
 
   // Purchase Credits — REQUIRES gateway-verified order id; client-supplied amount is ignored.
+  app.post('/recruiter/credit-orders', authenticateRecruiterToken, async (req: AuthenticatedRecruiterRequest, res: Response) => {
+    try {
+      const recruiterId = req.recruiter?.recruiterId;
+      if (!recruiterId) return res.status(401).json({ message: 'Unauthorized' });
+
+      const credits = Number(req.body?.credits);
+      const packages: Record<number, number> = { 100: 1000, 500: 4500, 1000: 8000 };
+      const amount = packages[credits];
+      if (!amount) return res.status(400).json({ message: 'Select a valid credit package' });
+
+      const recruiter = await storage.getRecruiterById(recruiterId);
+      if (!recruiter || !recruiter.isActive) return res.status(403).json({ message: 'Recruiter account is not active' });
+
+      const orderId = `RC_${recruiterId}_${credits}_${crypto.randomBytes(8).toString('hex')}`;
+      const baseUrl = (process.env.APP_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
+      const { createCashfreeOrder } = await import('../lib/cashfree.js');
+      const order = await createCashfreeOrder({
+        orderId,
+        amount: amount.toFixed(2),
+        customerId: `oct_recruiter_${recruiterId}`,
+        customerName: `${recruiter.firstName || ''} ${recruiter.lastName || ''}`.trim() || recruiter.companyName || 'Octamy Recruiter',
+        customerEmail: recruiter.email,
+        customerPhone: recruiter.phone || '9999999999',
+        returnUrl: `${baseUrl}/recruiter/payment-success?order_id=${encodeURIComponent(orderId)}`,
+        notifyUrl: `${baseUrl}/api/webhooks/cashfree`,
+        notes: { kind: 'recruiter_credits', recruiterId: String(recruiterId), credits: String(credits) },
+      });
+
+      res.json({
+        orderId: order.orderId,
+        paymentSessionId: order.paymentSessionId,
+        paymentLink: order.paymentLink,
+        amount,
+        credits,
+      });
+    } catch (error: any) {
+      console.error('Recruiter credit order error:', error?.message);
+      res.status(500).json({ message: error?.message || 'Failed to start credit checkout' });
+    }
+  });
+
   app.post('/recruiter/purchase-credits', authenticateRecruiterToken, async (req: AuthenticatedRecruiterRequest, res: Response) => {
     try {
       const recruiterId = req.recruiter?.recruiterId;
@@ -366,6 +459,13 @@ export function registerRecruiterRoutes(app: any) {
       if (!orderId || typeof orderId !== 'string') {
         return res.status(400).json({ message: "orderId required (must be a paid Cashfree order)" });
       }
+
+      const orderMatch = /^RC_(\d+)_(100|500|1000)_[a-f0-9]{16}$/.exec(orderId);
+      if (!orderMatch || Number(orderMatch[1]) !== recruiterId) {
+        return res.status(403).json({ message: 'This payment order does not belong to your account' });
+      }
+      const credits = Number(orderMatch[2]);
+      const packagePrices: Record<number, number> = { 100: 1000, 500: 4500, 1000: 8000 };
 
       // Idempotency: reject duplicate orderId.
       const { db } = await import('../db');
@@ -390,12 +490,12 @@ export function registerRecruiterRoutes(app: any) {
         return res.status(402).json({ message: 'No successful payment found for this order' });
       }
       const verifiedAmount = Number(successful.payment_amount || successful.order_amount || 0);
-      if (!Number.isFinite(verifiedAmount) || verifiedAmount <= 0) {
-        return res.status(400).json({ message: 'Invalid payment amount' });
+      if (!Number.isFinite(verifiedAmount) || Math.abs(verifiedAmount - packagePrices[credits]) > 0.01) {
+        return res.status(400).json({ message: 'Paid amount does not match the selected credit package' });
       }
 
-      // Credit recruiter using gateway-verified amount only.
-      const purchaseResult = await storage.purchaseCredits(recruiterId, verifiedAmount, orderId);
+      // Credit the server-defined package only after gateway amount verification.
+      const purchaseResult = await storage.purchaseCredits(recruiterId, credits, orderId);
       res.json(purchaseResult);
     } catch (error: any) {
       console.error("Credit purchase error:", error?.message);
@@ -422,6 +522,14 @@ export function registerRecruiterRoutes(app: any) {
         return res.status(403).json({ message: "KYC verification required to view candidate profiles" });
       }
 
+      const { db } = await import('../db');
+      const { profileAccessLogs } = await import('@shared/schema');
+      const { eq, and, desc } = await import('drizzle-orm');
+      const [profileAccess] = await db.select({ id: profileAccessLogs.id }).from(profileAccessLogs)
+        .where(and(eq(profileAccessLogs.recruiterId, recruiterId), eq(profileAccessLogs.userId, candidateId), eq(profileAccessLogs.accessType, 'profile_view')))
+        .orderBy(desc(profileAccessLogs.createdAt)).limit(1);
+      if (!profileAccess) return res.status(402).json({ message: 'Unlock this profile from candidate search first' });
+
       // Get candidate profile data
       const candidateProfile = await storage.getCandidateProfile(candidateId);
       if (!candidateProfile) {
@@ -432,6 +540,38 @@ export function registerRecruiterRoutes(app: any) {
     } catch (error: any) {
       console.error("Candidate profile error:", error);
       res.status(500).json({ message: "Failed to load candidate profile", error: error.message });
+    }
+  });
+
+  app.get('/recruiter/download-cv/:id', authenticateRecruiterToken, async (req: AuthenticatedRecruiterRequest, res: Response) => {
+    try {
+      const recruiterId = req.recruiter?.recruiterId;
+      const candidateId = Number(req.params.id);
+      if (!recruiterId || !Number.isInteger(candidateId)) return res.status(400).json({ message: 'Invalid request' });
+
+      const recruiter = await storage.getRecruiterById(recruiterId);
+      if (!recruiter || recruiter.kycStatus !== 'approved') return res.status(403).json({ message: 'KYC approval required' });
+
+      const { db } = await import('../db');
+      const { users, profileAccessLogs } = await import('@shared/schema');
+      const { eq, and, desc } = await import('drizzle-orm');
+      const [access] = await db.select({ id: profileAccessLogs.id }).from(profileAccessLogs)
+        .where(and(eq(profileAccessLogs.recruiterId, recruiterId), eq(profileAccessLogs.userId, candidateId), eq(profileAccessLogs.accessType, 'cv_download')))
+        .orderBy(desc(profileAccessLogs.createdAt)).limit(1);
+      if (!access) return res.status(403).json({ message: 'Purchase CV access first' });
+
+      const [candidate] = await db.select({ resume: users.resume, visible: users.profileVisibility }).from(users).where(eq(users.id, candidateId));
+      if (!candidate?.visible || !candidate.resume) return res.status(404).json({ message: 'Candidate CV is not available' });
+
+      if (/^https:\/\//i.test(candidate.resume)) return res.redirect(candidate.resume);
+      const localMatch = /^\/api\/uploads\/resumes\/([^/]+)$/.exec(candidate.resume);
+      if (!localMatch || !localMatch[1].startsWith(`${candidateId}-`)) return res.status(404).json({ message: 'Candidate CV is not available' });
+
+      const path = await import('node:path');
+      return res.sendFile(path.join(process.cwd(), 'uploads', 'resumes', path.basename(localMatch[1])));
+    } catch (error: any) {
+      console.error('Recruiter CV download error:', error?.message);
+      res.status(500).json({ message: 'Failed to download CV' });
     }
   });
 
@@ -448,7 +588,8 @@ export function registerRecruiterRoutes(app: any) {
         return res.status(404).json({ message: "Recruiter not found" });
       }
 
-      res.json(recruiter);
+      const { password: _password, ...safeRecruiter } = recruiter;
+      res.json(safeRecruiter);
     } catch (error: any) {
       console.error("Get profile error:", error);
       res.status(500).json({ message: "Failed to fetch profile", error: error.message });
@@ -534,7 +675,6 @@ export function registerRecruiterRoutes(app: any) {
       if (!recruiter) {
         return res.status(404).json({ message: "Recruiter not found" });
       }
-
       // Verify current password
       const validPassword = await bcrypt.compare(currentPassword, recruiter.password);
       if (!validPassword) {
@@ -624,8 +764,11 @@ export function registerRecruiterRoutes(app: any) {
       if (!recruiter) {
         return res.status(404).json({ message: "Recruiter not found" });
       }
+      if (recruiter.kycStatus !== 'approved') {
+        return res.status(403).json({ message: 'KYC verification required' });
+      }
 
-      if (parseFloat(recruiter.creditsBalance) < 2) {
+      if (Number(recruiter.creditsBalance || 0) < 2) {
         return res.status(400).json({ message: "Insufficient credits. Interview videos require 2 credits." });
       }
 
@@ -634,17 +777,20 @@ export function registerRecruiterRoutes(app: any) {
       if (!interview) {
         return res.status(404).json({ message: "Interview not found" });
       }
+      if (interview.userId !== Number(candidateId)) {
+        return res.status(403).json({ message: 'Interview does not belong to this candidate' });
+      }
 
       if (!interview.videoUrl) {
         return res.status(404).json({ message: "Video not available for this interview" });
       }
 
       // Process credit transaction and access logging
-      await storage.processProfileAccess(recruiterId, parseInt(candidateId), 'interview_video', 2);
+      await storage.processProfileAccess(recruiterId, parseInt(candidateId), 'interview_access', 2);
 
       res.json({ 
         videoUrl: interview.videoUrl,
-        creditsRemaining: (parseFloat(recruiter.creditsBalance) - 2).toFixed(2),
+        creditsRemaining: (Number(recruiter.creditsBalance || 0) - 2).toFixed(2),
         message: "Video access granted. 2 credits deducted."
       });
 

@@ -9,6 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import RecruiterLayout from '../components/RecruiterLayout';
+import { useRecruiterAuth } from '../auth/RecruiterAuthProvider';
 import {
   Search,
   Filter,
@@ -74,33 +75,36 @@ const CATEGORIES = ['AI', 'Development', 'Business', 'Data Science', 'DevOps'];
 
 export default function CandidateSearch() {
   const { toast } = useToast();
+  const { updateRecruiter } = useRecruiterAuth();
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [loading, setLoading] = useState(false);
   const [showFilters, setShowFilters] = useState(true);
   const [totalResults, setTotalResults] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
 
-  const [filters, setFilters] = useState<SearchFilters>({
-    technology: [],
-    location: '',
-    experience: { min: 0, max: 20 },
-    noticePeriod: '',
-    workType: [],
-    availability: '',
-    skills: [],
-    category: [],
-    minScore: 0,
-    hasCertificates: false,
-    hasInterviews: false,
+  const [filters, setFilters] = useState<SearchFilters>(() => {
+    const params = new URLSearchParams(window.location.search);
+    const savedSkills = (params.get('skills') || '').split(',').map((skill) => skill.trim()).filter(Boolean);
+    const savedMinScore = Number(params.get('minScore'));
+    return {
+      technology: [],
+      location: '',
+      experience: { min: 0, max: 20 },
+      noticePeriod: '',
+      workType: [],
+      availability: '',
+      skills: savedSkills,
+      category: [],
+      minScore: Number.isFinite(savedMinScore) ? Math.min(100, Math.max(0, savedMinScore)) : 0,
+      hasCertificates: false,
+      hasInterviews: false,
+    };
   });
 
   const searchCandidates = async (page = 1) => {
     setLoading(true);
     try {
-      console.log('Starting search with filters:', filters);
-      
-      // Try the proper recruiter search API first
-      let response = await fetch('/api/recruiter/search', {
+      const response = await fetch('/api/recruiter/search', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('recruiterToken')}`,
@@ -113,13 +117,8 @@ export default function CandidateSearch() {
         })
       });
 
-      console.log('Search response status:', response.status);
-      
-      // If recruiter search succeeds, use the real data
       if (response.ok) {
         const searchData = await response.json();
-        console.log('Found candidates from backend:', searchData.candidates?.length || 0);
-        console.log('Candidate IDs returned:', searchData.candidates?.map(c => c.id) || []);
         
         setCandidates(searchData.candidates || []);
         setTotalResults(searchData.total || searchData.candidates?.length || 0);
@@ -134,7 +133,6 @@ export default function CandidateSearch() {
         }
         return;
       } else {
-        // Handle API errors
         const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
         console.error('Search API error:', errorData);
         
@@ -149,17 +147,6 @@ export default function CandidateSearch() {
         setCurrentPage(1);
         return;
       }
-      
-      // If all else fails, show empty state
-      setCandidates([]);
-      setTotalResults(0);
-      setCurrentPage(1);
-      
-      toast({
-        title: 'Search Unavailable',
-        description: 'Unable to fetch candidate data. Please try again later.',
-        variant: 'destructive',
-      });
       
     } catch (error) {
       console.error('Search Error Details:', error);
@@ -178,12 +165,6 @@ export default function CandidateSearch() {
 
   const handleAccessProfile = async (candidateId: number, accessType: 'view' | 'cv' | 'interview') => {
     try {
-      if (accessType === 'view') {
-        // Navigate to detailed profile page
-        window.location.href = `/recruiter/profile/${candidateId}`;
-        return;
-      }
-
       const response = await apiRequest('POST', '/api/recruiter/access-profile', {
         candidateId,
         accessType,
@@ -195,11 +176,15 @@ export default function CandidateSearch() {
           title: 'Access Granted',
           description: `${data.creditsUsed} credits used. Remaining balance: ${data.remainingCredits}`,
         });
+        updateRecruiter({ creditsBalance: data.remainingCredits });
         
         // Handle the accessed data based on type
-        if (accessType === 'cv') {
+        if (accessType === 'view') {
+          window.location.href = `/recruiter/profile/${candidateId}`;
+        } else if (accessType === 'cv') {
           // Download CV
-          window.open(data.cvUrl, '_blank');
+          if (!data.cvUrl) throw new Error('Candidate CV is not available');
+          window.open(data.cvUrl, '_blank', 'noopener,noreferrer');
         } else if (accessType === 'interview') {
           // Show interview data in modal or redirect
           console.log('Interview data:', data.interviewData);

@@ -25,7 +25,7 @@ export default function Pricing() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
-  async function subscribe(ownerType: 'creator' | 'institute' | 'recruiter', plan: string, registerRole: string) {
+  async function subscribe(ownerType: 'creator' | 'institute', plan: string, registerRole: string) {
     if (!user || !token) {
       setLocation(`/register?role=${registerRole}&plan=${plan}`);
       return;
@@ -48,6 +48,30 @@ export default function Pricing() {
       }
       if (data.paymentLink) {
         window.location.href = data.paymentLink;
+        return;
+      }
+      if (data.paymentSessionId) {
+        if (!(window as any).Cashfree) {
+          await new Promise<void>((resolve, reject) => {
+            const existing = document.querySelector<HTMLScriptElement>('script[data-cashfree-sdk="true"]');
+            if (existing) {
+              existing.addEventListener('load', () => resolve(), { once: true });
+              existing.addEventListener('error', () => reject(new Error('Failed to load Cashfree checkout')), { once: true });
+              return;
+            }
+            const script = document.createElement('script');
+            script.src = 'https://sdk.cashfree.com/js/v3/cashfree.js';
+            script.async = true;
+            script.dataset.cashfreeSdk = 'true';
+            script.onload = () => resolve();
+            script.onerror = () => reject(new Error('Failed to load Cashfree checkout'));
+            document.head.appendChild(script);
+          });
+        }
+        const cashfree = (window as any).Cashfree({
+          mode: (import.meta.env.VITE_CASHFREE_ENV || (import.meta.env.DEV ? 'sandbox' : 'production')).toLowerCase(),
+        });
+        await cashfree.checkout({ paymentSessionId: data.paymentSessionId, redirectTarget: '_self' });
         return;
       }
       toast({ title: 'Checkout started', description: 'Awaiting payment provider response.' });
@@ -124,14 +148,14 @@ export default function Pricing() {
                 price={discounted(499, cycle)}
                 meta="10 active courses · 20% platform fee"
                 highlight
-                features={['Custom subdomain', 'Drip release', 'Coupon codes', 'Priority review']}
+                features={['Curriculum builder', 'Course reporting', 'Payout requests', 'Priority review']}
                 cta={{ label: 'Choose Pro', onClick: () => subscribe('creator', 'pro', 'creator') }}
               />
               <Tier
                 name="Premium"
                 price={discounted(1999, cycle)}
                 meta="Unlimited courses · 10% platform fee"
-                features={['White-label', 'Video transcoding', 'Affiliate commissioning', 'API access']}
+                features={['Lowest platform fee', 'Question-bank workflow', 'Earnings history', 'Priority support']}
                 cta={{ label: 'Choose Premium', onClick: () => subscribe('creator', 'premium', 'creator') }}
               />
             </Column>
@@ -141,57 +165,57 @@ export default function Pricing() {
               <Tier
                 name="Starter"
                 price={discounted(2999, cycle)}
-                meta="500 students · 5 cohorts"
-                features={['Bulk CSV enroll', 'Private question banks', 'Results export', 'Your logo on certs']}
+                meta="Core institute workspace"
+                features={['Bulk CSV enrolment', 'Private question banks', 'Results export', 'Team roles']}
                 cta={{ label: 'Choose Starter', onClick: () => subscribe('institute', 'starter', 'institute') }}
               />
               <Tier
                 name="Growth"
                 price={discounted(9999, cycle)}
-                meta="5,000 students · Unlimited cohorts"
+                meta="Expanded institute workspace"
                 highlight
-                features={['White-label certificates', 'Scheduled exam windows', 'API access', 'Priority support']}
+                features={['Scheduled exam windows', 'Advanced reports', 'Team access', 'Priority support']}
                 cta={{ label: 'Choose Growth', onClick: () => subscribe('institute', 'growth', 'institute') }}
               />
               <Tier
                 name="Enterprise"
                 price="Custom"
                 meta="Unlimited"
-                features={['SSO', 'Dedicated success manager', 'On-prem options', 'Custom SLA']}
+                features={['Integration discovery', 'Dedicated success manager', 'Security review', 'Custom SLA']}
                 cta={{ label: 'Talk to sales', href: '/contact' }}
               />
             </Column>
 
-            {/* RECRUITER */}
-            <Column title="Recruiter" subtitle="Hire on verified skill">
+            {/* RECRUITER — credit packs, fulfilled from the recruiter wallet */}
+            <Column title="Recruiter" subtitle="Pay only for protected access">
               <Tier
-                name="Starter"
-                price={discounted(2999, cycle)}
-                meta="50 profile views/mo · 10 saved searches"
-                features={['Email candidate', 'Score filter', 'Badge filter']}
-                cta={{ label: 'Choose Starter', onClick: () => subscribe('recruiter', 'starter', 'recruiter') }}
+                name="Explore"
+                price="₹1,000"
+                meta="100 credits"
+                features={['Candidate filters', 'Saved searches', 'Credential evidence']}
+                cta={{ label: 'Start recruiting', href: '/recruiter/register' }}
               />
               <Tier
-                name="Growth"
-                price={discounted(9999, cycle)}
-                meta="200 profile views/mo · Unlimited saved searches"
+                name="Hiring"
+                price="₹4,500"
+                meta="500 credits · save 10%"
                 highlight
-                features={['CSV export', 'ATS webhook', 'Team seats (3)']}
-                cta={{ label: 'Choose Growth', onClick: () => subscribe('recruiter', 'growth', 'recruiter') }}
+                features={['Protected profile access', 'CV downloads', 'Interview evidence']}
+                cta={{ label: 'Start recruiting', href: '/recruiter/register' }}
               />
               <Tier
-                name="Enterprise"
-                price="Custom"
-                meta="Unlimited"
-                features={['Bulk credit packs', 'Dedicated CSM', 'Custom integrations']}
-                cta={{ label: 'Talk to sales', href: '/contact' }}
+                name="Scale"
+                price="₹8,000"
+                meta="1,000 credits · save 20%"
+                features={['Full search workspace', 'Activity analytics', 'Transaction history']}
+                cta={{ label: 'Start recruiting', href: '/recruiter/register' }}
               />
             </Column>
           </div>
         </section>
 
         <section className="py-12 px-4 text-center text-sm text-slate-500">
-          Prices in INR. GST extra where applicable. Yearly billing saves 2 months.
+          Prices in INR. GST extra where applicable. Creator and institute yearly billing saves 2 months; recruiter packs do not expire with a monthly cycle.
         </section>
       </main>
       <Footer />

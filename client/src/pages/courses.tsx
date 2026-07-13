@@ -15,16 +15,20 @@ import type { Course, Category } from "@shared/schema";
 import { SEO } from "@/components/seo";
 
 const sortOptions = [
-  { value: "popularity", label: "Most Popular", icon: TrendingUp },
-  { value: "rating", label: "Highest Rated", icon: Star },
+  { value: "newest", label: "Recently Added", icon: TrendingUp },
+  { value: "title", label: "Title A–Z", icon: Star },
   { value: "duration-asc", label: "Shortest Duration", icon: Clock },
   { value: "duration-desc", label: "Longest Duration", icon: Clock },
   { value: "price-asc", label: "Lowest Price", icon: SortAsc },
   { value: "price-desc", label: "Highest Price", icon: SortDesc },
-  { value: "newest", label: "Newest First", icon: Award },
 ];
 
-const difficultyLevels = ["Beginner", "Intermediate", "Advanced", "Expert"];
+const difficultyLevels = [
+  { value: "novice", label: "Beginner" },
+  { value: "intermediate", label: "Intermediate" },
+  { value: "advanced", label: "Advanced" },
+  { value: "expert", label: "Expert" },
+];
 
 const priceRanges = [
   { label: "Free", min: 0, max: 0 },
@@ -39,7 +43,7 @@ export default function CoursesPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>("all");
   const [selectedPriceRange, setSelectedPriceRange] = useState<string>("all");
-  const [sortBy, setSortBy] = useState("popularity");
+  const [sortBy, setSortBy] = useState("newest");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [showFilters, setShowFilters] = useState(false);
   const [visible, setVisible] = useState(12);
@@ -56,15 +60,16 @@ export default function CoursesPage() {
   const filteredAndSortedCourses = useMemo(() => {
     let filtered = courses.filter(course => {
       // Search filter
+      const categoryName = course.category?.name || '';
       const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           course.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           course.category.name.toLowerCase().includes(searchQuery.toLowerCase());
+                           (course.description || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           categoryName.toLowerCase().includes(searchQuery.toLowerCase());
 
       // Category filter
-      const matchesCategory = selectedCategory === "all" || course.category.name === selectedCategory;
+      const matchesCategory = selectedCategory === "all" || categoryName === selectedCategory;
 
       // Difficulty filter
-      const matchesDifficulty = selectedDifficulty === "all" || course.difficulty === selectedDifficulty;
+      const matchesDifficulty = selectedDifficulty === "all" || (course.level || '').toLowerCase() === selectedDifficulty;
 
       // Price filter
       let matchesPrice = true;
@@ -82,10 +87,8 @@ export default function CoursesPage() {
     // Sort courses
     filtered.sort((a, b) => {
       switch (sortBy) {
-        case "popularity":
-          return (b.enrollmentCount || 0) - (a.enrollmentCount || 0);
-        case "rating":
-          return (b.rating || 0) - (a.rating || 0);
+        case "title":
+          return a.title.localeCompare(b.title);
         case "duration-asc":
           return a.duration - b.duration;
         case "duration-desc":
@@ -114,7 +117,7 @@ export default function CoursesPage() {
     setSelectedCategory("all");
     setSelectedDifficulty("all");
     setSelectedPriceRange("all");
-    setSortBy("popularity");
+    setSortBy("newest");
   };
 
   const hasActiveFilters = searchQuery || selectedCategory !== "all" || selectedDifficulty !== "all" || selectedPriceRange !== "all";
@@ -223,6 +226,8 @@ export default function CoursesPage() {
                 variant={viewMode === "grid" ? "default" : "outline"}
                 size="sm"
                 onClick={() => setViewMode("grid")}
+                aria-label="Grid view"
+                aria-pressed={viewMode === "grid"}
               >
                 <Grid className="h-4 w-4" />
               </Button>
@@ -230,6 +235,8 @@ export default function CoursesPage() {
                 variant={viewMode === "list" ? "default" : "outline"}
                 size="sm"
                 onClick={() => setViewMode("list")}
+                aria-label="List view"
+                aria-pressed={viewMode === "list"}
               >
                 <List className="h-4 w-4" />
               </Button>
@@ -279,8 +286,8 @@ export default function CoursesPage() {
                       <SelectContent>
                         <SelectItem value="all">All Levels</SelectItem>
                         {difficultyLevels.map((level) => (
-                          <SelectItem key={level} value={level}>
-                            {level}
+                          <SelectItem key={level.value} value={level.value}>
+                            {level.label}
                           </SelectItem>
                         ))}
                       </SelectContent>

@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import RecruiterLayout from '../components/RecruiterLayout';
+import { useRecruiterAuth } from '../auth/RecruiterAuthProvider';
 import {
   CreditCard,
   Plus,
@@ -32,8 +33,10 @@ interface WalletData {
 
 export default function RecruiterWallet() {
   const { toast } = useToast();
+  const { recruiter } = useRecruiterAuth();
   const [walletData, setWalletData] = useState<WalletData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [purchasingCredits, setPurchasingCredits] = useState<number | null>(null);
 
   useEffect(() => {
     fetchWalletData();
@@ -59,68 +62,45 @@ export default function RecruiterWallet() {
 
   const handlePurchaseCredits = async (amount: number) => {
     try {
-      setLoading(true);
-      
-      // Calculate price (₹50 per credit)
-      const totalPrice = amount * 50;
-      const transactionId = `TXN_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
-      
-      // Create PayUMoney payment form
-      const paymentData = {
-        key: process.env.VITE_PAYUMONEY_MERCHANT_KEY || 'gtKFFx',
-        amount: totalPrice,
-        productinfo: `Credits Purchase - ${amount} credits`,
-        firstname: recruiter?.firstName || 'Recruiter',
-        email: recruiter?.email || '',
-        phone: recruiter?.phone || '',
-        txnid: transactionId,
-        surl: `${window.location.origin}/recruiter/payment-success`,
-        furl: `${window.location.origin}/recruiter/payment-failed`,
-        hash: '', // This would be generated server-side
-        service_provider: 'payu_paisa'
-      };
-
-      // Generate hash server-side
-      const hashResponse = await fetch('/api/recruiter/generate-payment-hash', {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('recruiterToken')}`
-        },
-        body: JSON.stringify(paymentData)
-      });
-
-      if (hashResponse.ok) {
-        const { hash } = await hashResponse.json();
-        paymentData.hash = hash;
-
-        // Create and submit payment form
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = 'https://test.payu.in/_payment'; // Use sandboxsecure.payu.in for production
-        
-        Object.entries(paymentData).forEach(([key, value]) => {
-          const input = document.createElement('input');
-          input.type = 'hidden';
-          input.name = key;
-          input.value = value.toString();
-          form.appendChild(input);
-        });
-
-        document.body.appendChild(form);
-        form.submit();
-      } else {
-        throw new Error('Failed to generate payment hash');
+      setPurchasingCredits(amount);
+      const response = await apiRequest('POST', '/api/recruiter/credit-orders', { credits: amount });
+      const data = await response.json();
+      if (data.paymentLink) {
+        window.location.href = data.paymentLink;
+        return;
       }
+      if (!data.paymentSessionId) throw new Error('Payment provider did not return a checkout session');
+      if (!(window as any).Cashfree) {
+        await new Promise<void>((resolve, reject) => {
+          const existing = document.querySelector<HTMLScriptElement>('script[data-cashfree-sdk="true"]');
+          if (existing) {
+            if ((window as any).Cashfree) return resolve();
+            existing.addEventListener('load', () => resolve(), { once: true });
+            existing.addEventListener('error', () => reject(new Error('Failed to load Cashfree checkout')), { once: true });
+            return;
+          }
+          const script = document.createElement('script');
+          script.src = 'https://sdk.cashfree.com/js/v3/cashfree.js';
+          script.async = true;
+          script.dataset.cashfreeSdk = 'true';
+          script.onload = () => resolve();
+          script.onerror = () => reject(new Error('Failed to load Cashfree checkout'));
+          document.head.appendChild(script);
+        });
+      }
+      const cashfree = (window as any).Cashfree({
+        mode: (import.meta.env.VITE_CASHFREE_ENV || (import.meta.env.DEV ? 'sandbox' : 'production')).toLowerCase(),
+      });
+      await cashfree.checkout({ paymentSessionId: data.paymentSessionId, redirectTarget: '_self' });
     } catch (error) {
       console.error('Payment error:', error);
       toast({
         title: 'Payment Error',
-        description: 'Failed to initiate payment. Please try again.',
+        description: error instanceof Error ? error.message : 'Failed to initiate payment. Please try again.',
         variant: 'destructive',
       });
     } finally {
-      setLoading(false);
+      setPurchasingCredits(null);
     }
   };
 
@@ -239,8 +219,9 @@ export default function RecruiterWallet() {
                           : 'bg-black text-white hover:bg-gray-800'
                       }`}
                       onClick={() => handlePurchaseCredits(plan.credits)}
+                      disabled={purchasingCredits !== null}
                     >
-                      {plan.popular ? 'Get Started' : 'Purchase Now'}
+                      {purchasingCredits === plan.credits ? 'Opening checkout…' : plan.popular ? 'Get Started' : 'Purchase Now'}
                     </Button>
                   </div>
                 </div>

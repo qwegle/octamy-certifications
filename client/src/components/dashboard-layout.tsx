@@ -3,7 +3,7 @@ import { Link, useLocation } from "wouter";
 import {
   LayoutDashboard, BookOpen, Users, ClipboardList, BarChart3, Wallet, Settings,
   GraduationCap, Building2, Briefcase, Search, Award, FileText, Database,
-  Menu, X, ChevronRight, LogOut, User as UserIcon, Bell, Shield, ListChecks,
+  Menu, X, ChevronRight, LogOut, User as UserIcon, Shield, ListChecks, SlidersHorizontal,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth.tsx";
 import { cn } from "@/lib/utils";
@@ -20,7 +20,7 @@ const NAV_BY_ROLE: Record<DashboardRole, NavItem[]> = {
     { label: "Students", href: "/institute/students", icon: GraduationCap, group: "Manage" },
     { label: "Team", href: "/institute/team", icon: Users, group: "Manage" },
     { label: "Reports", href: "/institute/reports", icon: BarChart3, group: "Insights" },
-    { label: "Settings", href: "/profile", icon: Settings, group: "Account" },
+    { label: "Account settings", href: "/profile-edit", icon: Settings, group: "Account" },
   ],
   creator: [
     { label: "Overview", href: "/creator/dashboard", icon: LayoutDashboard, group: "Main" },
@@ -28,24 +28,27 @@ const NAV_BY_ROLE: Record<DashboardRole, NavItem[]> = {
     { label: "Question banks", href: "/question-banks", icon: Database, group: "Manage" },
     { label: "Earnings", href: "/creator/earnings", icon: Wallet, group: "Money" },
     { label: "Payouts", href: "/creator/payouts", icon: Wallet, group: "Money" },
-    { label: "Settings", href: "/profile", icon: Settings, group: "Account" },
+    { label: "Account settings", href: "/profile-edit", icon: Settings, group: "Account" },
   ],
   recruiter: [
     { label: "Overview", href: "/recruiter/dashboard", icon: LayoutDashboard, group: "Main" },
     { label: "Search talent", href: "/recruiter/search", icon: Search, group: "Manage" },
     { label: "Saved searches", href: "/recruiter/saved-searches", icon: ListChecks, group: "Manage" },
-    { label: "Settings", href: "/profile", icon: Settings, group: "Account" },
+    { label: "Profile", href: "/recruiter/profile", icon: UserIcon, group: "Account" },
+    { label: "Company settings", href: "/recruiter/settings", icon: Settings, group: "Account" },
   ],
   learner: [
     { label: "Overview", href: "/dashboard", icon: LayoutDashboard, group: "Main" },
     { label: "My certificates", href: "/my-certificates", icon: Award, group: "Learning" },
+    { label: "Progress", href: "/progress", icon: BarChart3, group: "Learning" },
     { label: "Browse exams", href: "/exams", icon: BookOpen, group: "Learning" },
-    { label: "Settings", href: "/profile", icon: Settings, group: "Account" },
+    { label: "Preferences", href: "/preferences", icon: SlidersHorizontal, group: "Account" },
+    { label: "Profile", href: "/profile-edit", icon: Settings, group: "Account" },
   ],
   admin: [
-    { label: "Overview", href: "/admin/dashboard", icon: LayoutDashboard, group: "Main" },
+    { label: "Overview", href: "/qwegle/dashboard", icon: LayoutDashboard, group: "Main" },
     { label: "Approvals", href: "/admin/approvals", icon: Shield, group: "Moderate" },
-    { label: "Settings", href: "/profile", icon: Settings, group: "Account" },
+    { label: "Public site", href: "/", icon: ChevronRight, group: "Account" },
   ],
 };
 
@@ -83,9 +86,18 @@ export default function DashboardLayout({ role, title, description, breadcrumbs,
   }, {});
 
   const handleLogout = () => {
+    if (role === 'admin') {
+      localStorage.removeItem('adminToken');
+      localStorage.removeItem('adminUser');
+      setLocation('/qwegle/login');
+      return;
+    }
     logout();
     setLocation("/");
   };
+
+  const displayName = role === 'admin' ? 'Administrator' : (user?.name || user?.email || 'Account');
+  const displayEmail = role === 'admin' ? 'Admin workspace' : user?.email;
 
   return (
     <div className="min-h-screen flex bg-cream-soft relative overflow-hidden" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(15,23,42,0.06) 1px, transparent 0)', backgroundSize: '24px 24px' }}>
@@ -198,32 +210,34 @@ export default function DashboardLayout({ role, title, description, breadcrumbs,
 
             {/* User menu */}
             <div className="flex items-center gap-2 relative">
-              <button className="p-1.5 rounded-md hover:bg-cream-deep text-slate-600" aria-label="Notifications">
-                <Bell className="w-4 h-4" />
-              </button>
               <button
                 onClick={() => setUserMenuOpen((v) => !v)}
                 className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-cream-deep"
+                aria-expanded={userMenuOpen}
+                aria-haspopup="menu"
+                aria-label="Open account menu"
               >
                 <div className="w-7 h-7 rounded-full bg-slate-900 text-white grid place-items-center text-xs font-semibold">
-                  {(user?.name || user?.email || "U").charAt(0).toUpperCase()}
+                  {displayName.charAt(0).toUpperCase()}
                 </div>
-                <span className="hidden sm:inline text-sm text-slate-700 max-w-[140px] truncate">{user?.name || user?.email}</span>
+                <span className="hidden sm:inline text-sm text-slate-700 max-w-[140px] truncate">{displayName}</span>
               </button>
               {userMenuOpen && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />
                   <div className="absolute right-0 top-full mt-1 w-56 bg-white rounded-lg shadow-lg border border-cream-deep py-1 z-50">
                     <div className="px-3 py-2 border-b border-cream-deep">
-                      <div className="text-sm font-medium text-slate-900 truncate">{user?.name}</div>
-                      <div className="text-xs text-slate-500 truncate">{user?.email}</div>
+                      <div className="text-sm font-medium text-slate-900 truncate">{displayName}</div>
+                      <div className="text-xs text-slate-500 truncate">{displayEmail}</div>
                     </div>
-                    <Link href="/profile" className="flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-cream-soft">
-                      <UserIcon className="w-4 h-4" /> Profile
-                    </Link>
-                    <Link href="/dashboard" className="flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-cream-soft">
-                      <GraduationCap className="w-4 h-4" /> Switch to learner
-                    </Link>
+                    {role !== 'admin' && <>
+                      <Link href="/profile-edit" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-cream-soft">
+                        <UserIcon className="w-4 h-4" /> Profile
+                      </Link>
+                      <Link href="/dashboard" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-cream-soft">
+                        <GraduationCap className="w-4 h-4" /> Switch to learner
+                      </Link>
+                    </>}
                     <button onClick={handleLogout} className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50">
                       <LogOut className="w-4 h-4" /> Sign out
                     </button>

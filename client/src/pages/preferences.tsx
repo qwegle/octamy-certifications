@@ -2,8 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/lib/auth.tsx";
-import Header from "@/components/header";
-import Footer from "@/components/footer";
+import DashboardLayout from "@/components/dashboard-layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -12,6 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { Settings, Bell, Target, User, Save } from "lucide-react";
+import type { Category } from "@shared/schema";
+import { Link } from "wouter";
 
 interface UserPreferences {
   id: number;
@@ -39,7 +40,7 @@ export default function Preferences() {
     enabled: !!user && !!token,
   });
 
-  const { data: categories = [] } = useQuery({
+  const { data: categories = [] } = useQuery<Category[]>({
     queryKey: ["/api/categories"],
   });
 
@@ -47,14 +48,7 @@ export default function Preferences() {
 
   // Update preferences mutation
   const updatePreferences = useMutation({
-    mutationFn: (data: Partial<UserPreferences>) => 
-      apiRequest("/api/preferences", {
-        method: "PUT",
-        body: JSON.stringify(data),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }),
+    mutationFn: (data: Partial<UserPreferences>) => apiRequest("PUT", "/api/preferences", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/preferences"] });
       toast({
@@ -77,24 +71,22 @@ export default function Preferences() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-cream-soft">
-        <Header />
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <DashboardLayout role="learner" title="Login required">
+        <div className="max-w-4xl mx-auto py-12">
           <div className="text-center">
             <h2 className="text-2xl font-bold text-octamy-black mb-4">Login Required</h2>
             <p className="text-octamy-gray-600">Please log in to access your preferences.</p>
+            <Link href="/login"><Button className="mt-5">Log in</Button></Link>
           </div>
         </div>
-        <Footer />
-      </div>
+      </DashboardLayout>
     );
   }
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-cream-soft">
-        <Header />
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <DashboardLayout role="learner" title="Learning preferences">
+        <div className="max-w-4xl mx-auto py-8">
           <div className="animate-pulse">
             <div className="h-8 bg-gray-200 rounded w-1/3 mb-4"></div>
             <div className="space-y-4">
@@ -104,8 +96,7 @@ export default function Preferences() {
             </div>
           </div>
         </div>
-        <Footer />
-      </div>
+      </DashboardLayout>
     );
   }
 
@@ -124,19 +115,8 @@ export default function Preferences() {
   };
 
   return (
-    <div className="min-h-screen bg-cream-soft">
-      <Header />
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-octamy-black mb-2 flex items-center gap-3">
-            <Settings className="w-8 h-8" />
-            Learning Preferences
-          </h1>
-          <p className="text-xl text-octamy-gray-600">
-            Customize your learning experience and notification settings
-          </p>
-        </div>
-
+    <DashboardLayout role="learner" title="Learning preferences" description="Customize your learning experience and notification settings.">
+      <div className="max-w-4xl mx-auto">
         <div className="space-y-6">
           {/* Personal Learning Profile */}
           <Card>
@@ -375,7 +355,6 @@ export default function Preferences() {
                     <SelectValue placeholder="Select frequency" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="realtime">Real-time (Immediate)</SelectItem>
                     <SelectItem value="daily">Daily (Once per day)</SelectItem>
                     <SelectItem value="weekly">Weekly (Once per week)</SelectItem>
                     <SelectItem value="monthly">Monthly (Once per month)</SelectItem>
@@ -398,7 +377,6 @@ export default function Preferences() {
           </div>
         </div>
       </div>
-      <Footer />
-    </div>
+    </DashboardLayout>
   );
 }

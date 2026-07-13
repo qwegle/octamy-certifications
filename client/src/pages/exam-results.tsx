@@ -67,12 +67,12 @@ export default function ExamResults() {
   const [, setLocation] = useLocation();
   const examAttemptId = params?.examAttemptId;
 
-  const { data: examResult, isLoading } = useQuery({
+  const { data: examResult, isLoading } = useQuery<ExamResult>({
     queryKey: [`/api/exam-results/${examAttemptId}`],
     enabled: !!examAttemptId,
   });
 
-  const { data: course } = useQuery({
+  const { data: course } = useQuery<Course & { slug?: string }>({
     queryKey: [`/api/courses/${examResult?.courseId}`],
     enabled: !!examResult?.courseId,
   });
@@ -125,7 +125,7 @@ export default function ExamResults() {
   };
 
   const handleStudyMore = () => {
-    setLocation(`/exam/${(course as any)?.slug || examResult.courseId}`);
+    setLocation(`/exam/${course?.slug || examResult.courseId}`);
   };
 
   return (

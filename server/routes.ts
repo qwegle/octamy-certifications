@@ -25,6 +25,7 @@ import {
   users as usersTable,
   contactSubmissions,
   recruiters as recruitersTable,
+  subscriptions,
 } from "@shared/schema";
 import { desc, and, eq, not } from "drizzle-orm";
 import { db, pool } from "./db";
@@ -45,6 +46,7 @@ import {
 } from "./utils";
 import { v2 as cloudinary } from "cloudinary";
 import multer from "multer";
+import crypto from "node:crypto";
 import apiRoutes from "./routes/index";
 import certificateRoutes from "./routes/certificateRoutes";
 import questionBanksRouter, { courseBlueprintRouter } from "./routes/question-banks";
@@ -61,6 +63,7 @@ import {
   deletePendingExam,
   startExamStateCron,
 } from "./utils/examState";
+import { normalizeExamAnswers, scoreExam } from "./utils/examScoring";
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -286,7 +289,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin login endpoint
   app.post("/api/admin/login", async (req: Request, res: Response) => {
     try {
-      const { email, password } = req.body;
+      const password = req.body?.password;
+      const email = String(req.body?.email || '').trim().toLowerCase();
 
       if (!email || !password) {
         return res
@@ -351,7 +355,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Direct seller authentication routes (bypass routing issues)
   app.post("/api/sellers/login", async (req: Request, res: Response) => {
     try {
-      const { email, password } = req.body;
+      const password = req.body?.password;
+      const email = String(req.body?.email || '').trim().toLowerCase();
 
       if (!email || !password) {
         return res
@@ -364,6 +369,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
+      if (!seller.password) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
       const isValidPassword = await bcrypt.compare(password, seller.password);
       if (!isValidPassword) {
         return res.status(401).json({ message: "Invalid credentials" });
@@ -399,7 +407,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/sellers/register", async (req: Request, res: Response) => {
     try {
-      const { email, password, name, phone } = req.body;
+      const { password, name, phone } = req.body;
+      const email = String(req.body?.email || '').trim().toLowerCase();
       const acceptedAgreement = req.body.acceptedAgreement ?? req.body.agreementAccepted;
 
       if (!email || !password || !name) {
@@ -597,7 +606,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Recruiter login endpoint
   app.post("/api/recruiter/login", async (req: Request, res: Response) => {
     try {
-      const { email, password } = req.body;
+      const password = req.body?.password;
+      const email = String(req.body?.email || '').trim().toLowerCase();
 
       // Find recruiter by email
       const recruiter = await storage.getRecruiterByEmail(email);
@@ -647,7 +657,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Recruiter registration endpoint
   app.post("/api/recruiter/register", async (req: Request, res: Response) => {
     try {
-      const { email, password } = req.body;
+      const password = req.body?.password;
+      const email = String(req.body?.email || '').trim().toLowerCase();
 
       // Check if recruiter already exists
       const existingRecruiter = await storage.getRecruiterByEmail(email);
@@ -883,7 +894,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Registration endpoint - support both /api/register and /api/auth/register for compatibility
   const registerHandler = async (req: Request, res: Response) => {
     try {
-      const { name, email, password, phone } = req.body;
+      const { name, password, phone } = req.body;
+      const email = String(req.body?.email || '').trim().toLowerCase();
 
       if (!name || !email || !password) {
         return res
@@ -938,7 +950,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Login endpoint - support both /api/login and /api/auth/login for compatibility
   const loginHandler = async (req: Request, res: Response) => {
     try {
-      const { email, password } = req.body;
+      const password = req.body?.password;
+      const email = String(req.body?.email || '').trim().toLowerCase();
       if (!email || typeof email !== 'string') {
         return res.status(400).json({ message: "Email and password are required" });
       }
@@ -1131,7 +1144,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const course = isNumeric
         ? await storage.getCourse(parseInt(idParam, 10))
         : await storage.getCourseBySlug(idParam);
-      if (!course) {
+      if (!course || !course.isActive || course.visibility !== "public") {
         return res.status(404).json({ message: "Course not found" });
       }
       res.json(course);
@@ -1148,7 +1161,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if slug is actually a numeric ID (common mistake)
       if (/^\d+$/.test(slug)) {
         const course = await storage.getCourse(parseInt(slug));
-        if (!course) {
+        if (!course || !course.isActive || course.visibility !== "public") {
           return res.status(404).json({ message: "Course not found" });
         }
         // Get full course with category for consistency
@@ -1170,10 +1183,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Exam routes
   app.post("/api/courses/:id/questions", async (req, res) => {
     try {
-      const { sessionId } = req.body;
-      const questions = await storage.getQuestionsByCourse(
-        parseInt(req.params.id)
-      );
+      const courseId = Number(req.params.id);
+      if (!Number.isInteger(courseId) || courseId <= 0) {
+        return res.status(400).json({ message: "Invalid course ID" });
+      }
+      const course = await storage.getCourse(courseId);
+      if (!course || !course.isActive || course.visibility !== "public") {
+        return res.status(404).json({ message: "Course not found" });
+      }
+      const questions = await storage.getQuestionsByCourse(courseId);
+
+      if (questions.length === 0) {
+        return res.status(409).json({ message: "This assessment has no published questions yet." });
+      }
 
       // Use Fisher-Yates shuffle for proper randomization
       const shuffled = [...questions];
@@ -1218,8 +1240,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // Persist the question mapping (replaces in-memory global.questionMappings)
-      const finalSessionId =
-        sessionId || `session_${Date.now()}_${Math.random()}`;
+      // Always issue the session ID server-side to prevent session fixation or
+      // one candidate overwriting another candidate's answer mapping.
+      const finalSessionId = `session_${crypto.randomUUID()}`;
       const correctMap = questionsWithShuffledOptions.reduce(
         (acc: Record<string, number>, q) => {
           acc[String(q.id)] = q.correctAnswer;
@@ -1227,7 +1250,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
         {},
       );
-      await saveQuestionMapping(finalSessionId, correctMap, parseInt(req.params.id));
+      await saveQuestionMapping(finalSessionId, correctMap, courseId);
 
       // Remove correct answers from response
       const questionsWithoutAnswers = questionsWithShuffledOptions.map((q) => ({
@@ -1264,10 +1287,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
           sessionId,
           tabSwitches,
         } = req.body;
-        const finalTimeTaken = timeTaken || timeSpent || 60; // Use timeTaken or timeSpent as fallback
+        const numericCourseId = Number(courseId);
+        if (!sessionId || typeof sessionId !== "string" ||
+            !Number.isInteger(numericCourseId) || numericCourseId <= 0) {
+          return res.status(400).json({ message: "Valid course and exam session are required" });
+        }
+        const finalTimeTaken = Number(timeTaken || timeSpent || 60);
+        if (!Number.isFinite(finalTimeTaken) || finalTimeTaken <= 0) {
+          return res.status(400).json({ message: "Invalid exam duration" });
+        }
 
         // Get correct answers from persisted session mapping
-        const correctAnswersMapping = (await loadQuestionMapping(sessionId)) || {};
+        const correctAnswersMapping = (await loadQuestionMapping(sessionId, numericCourseId)) || {};
 
         console.log(
           `Exam submission for session ${sessionId} — questions in session: ${Object.keys(correctAnswersMapping).length}`,
@@ -1283,48 +1314,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
         }
 
-        // Transform answers to Record<string, number> format
-        const answersRecord: Record<string, number> = {};
-        if (Array.isArray(answers)) {
-          // Array format: [{questionId: 123, selectedOption: 1}, ...]
-          answers.forEach((answer: any) => {
-            if (answer.questionId && answer.selectedOption !== undefined) {
-              answersRecord[answer.questionId.toString()] =
-                answer.selectedOption;
-            }
-          });
-        } else if (typeof answers === "object" && answers !== null) {
-          // Object format: {questionId: selectedOption, ...}
-          for (const [questionId, selectedOption] of Object.entries(answers)) {
-            if (selectedOption !== undefined && selectedOption !== null) {
-              answersRecord[questionId.toString()] = Number(selectedOption);
-            }
-          }
-        }
-
-        // Calculate score using session-specific correct answers
-        let correctAnswers = 0;
-        // Fix: Use total questions from session mapping, not just answered questions
-        const totalQuestions = Object.keys(correctAnswersMapping).length;
-
-        for (const [questionId, userAnswer] of Object.entries(answersRecord)) {
-          const correctAnswer = correctAnswersMapping[parseInt(questionId)];
-          if (correctAnswer !== undefined && correctAnswer === userAnswer) {
-            correctAnswers++;
-          }
-        }
-
-        // Calculate the final score percentage
-        const score =
-          totalQuestions > 0
-            ? Math.round((correctAnswers / totalQuestions) * 100)
-            : 0;
+        const answersRecord = normalizeExamAnswers(answers);
+        const { correctAnswers, totalQuestions, score } = scoreExam(
+          correctAnswersMapping,
+          answersRecord,
+        );
 
         // Clean up persisted session mapping AFTER score calculation
         await deleteQuestionMapping(sessionId).catch(() => {});
 
         // Get course data to check passing score
-        const course = await storage.getCourse(courseId);
+        const course = await storage.getCourse(numericCourseId);
         if (!course) {
           return res.status(404).json({ message: "Course not found" });
         }
@@ -1340,7 +1340,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (req.user?.userId) {
           const previousAttempts = await storage.getExamAttemptsByUserAndCourse(
             req.user.userId,
-            courseId
+            numericCourseId
           );
 
           if (previousAttempts.length > 0) {
@@ -1365,13 +1365,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
 
         // Persist exam data until payment completion (replaces in-memory global.tempExamData).
-        const tempExamId = `temp_${Date.now()}_${Math.random()
-          .toString(36)
-          .substr(2, 9)}`;
+        const tempExamId = `temp_${crypto.randomUUID()}`;
 
         await savePendingExam(tempExamId, {
           userId: req.user?.userId || null,
-          courseId,
+          courseId: numericCourseId,
           userEmail,
           userName,
           score,
@@ -1790,6 +1788,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const payment = await storage.getPaymentByTransactionId(orderId);
       if (!payment) {
+        const [subscription] = await db
+          .select()
+          .from(subscriptions)
+          .where(eq(subscriptions.cashfreeOrderId, orderId));
+        if (subscription) {
+          if (status === 'success') {
+            const { activatePlan } = await import('./routes/dashboardRoutes');
+            await activatePlan(
+              subscription.ownerType as 'creator' | 'institute' | 'recruiter',
+              subscription.ownerId,
+              subscription.plan,
+              orderId,
+            );
+            return res.status(200).json({ ok: true, status: 'subscription_activated' });
+          }
+          if (status === 'failed') {
+            await db.update(subscriptions)
+              .set({ status: 'past_due', updatedAt: new Date() })
+              .where(eq(subscriptions.id, subscription.id));
+          }
+          return res.status(200).json({ ok: true, status: `subscription_${status}` });
+        }
         // Subscription orders aren't tracked in payments table — handle separately.
         const orderNote = payload?.data?.order?.order_note || payload?.data?.order_note || {};
         if (orderNote && orderNote.kind === 'subscription' && status === 'success') {
@@ -3972,7 +3992,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
 
         const updates = req.body;
-        const question = await storage.updateQuestion(questionId, updates);
+        const question = await storage.updateQuestionAdmin(questionId, updates);
         if (!question) {
           return res.status(404).json({ message: "Question not found" });
         }
@@ -3994,7 +4014,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(400).json({ message: "Invalid question ID" });
         }
 
-        const deleted = await storage.deleteQuestion(questionId);
+        const deleted = await storage.deleteQuestionAdmin(questionId);
         if (!deleted) {
           return res.status(404).json({ message: "Question not found" });
         }

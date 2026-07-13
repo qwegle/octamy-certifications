@@ -7,18 +7,19 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Sparkles, BookOpen, Users, Layers, IndianRupee, Check } from 'lucide-react';
 import { Reveal, Stagger, StaggerItem } from '@/components/motion-primitives';
 import { motion } from 'framer-motion';
+import PortalLandingHero from '@/components/portal-landing-hero';
 
 const tiers = [
   { name: 'Starter', price: 'Free', courses: '1 active course', fee: '30% platform fee', features: ['Basic analytics', 'Octamy-branded checkout'] },
-  { name: 'Pro', price: '₹499/mo', courses: '10 active courses', fee: '20% platform fee', highlight: true, features: ['Custom subdomain', 'Drip release', 'Coupon codes', 'Priority review'] },
-  { name: 'Premium', price: '₹1,999/mo', courses: 'Unlimited', fee: '10% platform fee', features: ['White-label', 'Video transcoding', 'Affiliate commissioning', 'API access'] },
+  { name: 'Pro', price: '₹499/mo', courses: '10 active courses', fee: '20% platform fee', highlight: true, features: ['Curriculum builder', 'Course reporting', 'Payout requests', 'Priority review'] },
+  { name: 'Premium', price: '₹1,999/mo', courses: 'Unlimited', fee: '10% platform fee', features: ['Lowest platform fee', 'Question-bank workflow', 'Earnings history', 'Priority support'] },
 ];
 
 const faqs = [
   { q: 'How much do I keep per sale?', a: 'You keep 70% on Starter, 80% on Pro, and 90% on Premium after Octamy platform fees. Payment processing is handled via Cashfree.' },
-  { q: 'When do I get paid?', a: 'Weekly payouts to your verified bank account, with full transaction history in your dashboard.' },
-  { q: 'Can I bring my existing audience?', a: 'Yes — custom subdomain (Pro+) and affiliate links let you keep your brand front and centre.' },
-  { q: 'Do I need to be approved?', a: 'New creators get reviewed within 48 hours. Priority review for Pro and Premium plans.' },
+  { q: 'How do payouts work?', a: 'Request a payout from your creator workspace and track its status alongside your earnings history.' },
+  { q: 'Can I bring my existing audience?', a: 'Yes. Share your published course and assessment links directly with your existing learners.' },
+  { q: 'Do I need to be approved?', a: 'Yes. Creator profiles and submitted courses are reviewed before they become publicly available.' },
 ];
 
 export default function CreatorLanding() {
@@ -26,60 +27,31 @@ export default function CreatorLanding() {
     <div className="min-h-screen bg-cream-soft flex flex-col">
       <SEO
         title="Sell your courses on Octamy"
-        description="Reach 10,000+ verified learners. Keep up to 90% revenue. Cashfree payouts, custom subdomain, full creator dashboard."
+        description="Publish assessed courses, keep up to 90% of revenue, and manage content and earnings from one creator workspace."
         path="/creator"
       />
       <Header />
       <main className="flex-1">
-        <section className="relative overflow-hidden py-24 px-4 text-center">
-          <div aria-hidden className="pointer-events-none absolute inset-0 bg-grid-slate [mask-image:radial-gradient(ellipse_at_top,black_30%,transparent_75%)]" />
-          <div aria-hidden className="pointer-events-none absolute -top-20 left-1/4 h-[420px] w-[420px] rounded-full bg-fuchsia-300/20 blur-3xl animate-blob" />
-          <div aria-hidden className="pointer-events-none absolute -top-10 right-10 h-[320px] w-[320px] rounded-full bg-sky-300/25 blur-3xl animate-blob-slow" />
-          <div className="relative max-w-3xl mx-auto">
-            <motion.span
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-[0.18em] text-fuchsia-700 bg-cream-soft/80 backdrop-blur border border-fuchsia-200 rounded-full px-3 py-1.5 shadow-sm"
-            >
-              <Sparkles className="w-3 h-3" /> For creators & coaches
-            </motion.span>
-            <motion.h1
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              className="mt-6 text-4xl md:text-6xl font-extrabold text-slate-900 tracking-tight"
-            >
-              Sell your courses on{' '}
-              <span className="bg-gradient-to-r from-fuchsia-600 via-sky-700 to-indigo-700 bg-clip-text text-transparent">Octamy</span>
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="mt-5 text-lg text-slate-600"
-            >
-              Reach 10,000+ learners. Keep up to 90% revenue. Cashfree payouts, custom subdomain, zero infra.
-            </motion.p>
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              className="mt-8 flex justify-center gap-3"
-            >
-              <Link href="/register?role=creator">
-                <motion.span whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} className="inline-block">
-                  <Button className="cta-pulse bg-slate-900 hover:bg-black text-white rounded-full px-6 shadow-xl shadow-slate-900/20">Become a creator</Button>
-                </motion.span>
-              </Link>
-              <Link href="/pricing">
-                <motion.span whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="inline-block">
-                  <Button variant="outline" className="rounded-full px-6 bg-cream-soft/80 backdrop-blur">See pricing</Button>
-                </motion.span>
-              </Link>
-            </motion.div>
-          </div>
-        </section>
+        <PortalLandingHero
+          accent="fuchsia"
+          eyebrow="For creators & coaches"
+          eyebrowIcon={<Sparkles className="h-3.5 w-3.5" />}
+          title={<>Turn expertise into <span className="bg-gradient-to-r from-fuchsia-600 via-violet-600 to-sky-700 bg-clip-text text-transparent">assessed learning</span></>}
+          description="Build courses with structured curriculum and assessments, submit them for review, and manage learner activity, revenue and payouts in one workspace."
+          primary={{ label: 'Become a creator', href: '/register?role=creator' }}
+          secondary={{ label: 'See pricing', href: '/pricing' }}
+          preview={{
+            label: 'Creator workspace', title: 'Course performance', status: 'Ready to publish',
+            metrics: [
+              { label: 'Courses', value: '08' }, { label: 'Attempts', value: '126' }, { label: 'Certificates', value: '84' },
+            ],
+            activity: [
+              { title: 'Curriculum updated', meta: 'Assessment module · just now' },
+              { title: 'Course submitted for review', meta: 'Cloud foundations · today' },
+              { title: 'Earnings report ready', meta: 'Current settlement period' },
+            ],
+          }}
+        />
 
         <section className="py-16 px-4">
           <div className="max-w-5xl mx-auto">
@@ -87,8 +59,8 @@ export default function CreatorLanding() {
             <Stagger className="grid md:grid-cols-3 gap-6 mt-10">
               {[
                 { n: '01', t: 'Apply', d: 'Sign up in 60 seconds and tell us what you teach.' },
-                { n: '02', t: 'Build', d: 'Upload modules, attach assessments, set pricing and coupons.' },
-                { n: '03', t: 'Earn', d: 'We promote, host, certify and pay you out weekly.' },
+                { n: '02', t: 'Build', d: 'Create curriculum modules, attach assessments, and set course pricing.' },
+                { n: '03', t: 'Publish & earn', d: 'Submit for review, share your course, and track earnings and payouts.' },
               ].map((s) => (
                 <StaggerItem key={s.n}>
                   <motion.div
@@ -111,13 +83,13 @@ export default function CreatorLanding() {
 
         <section className="py-16 px-4 bg-cream-deep">
           <div className="max-w-5xl mx-auto">
-            <Reveal as="h2" className="text-2xl md:text-3xl font-bold text-slate-900 text-center">What you can sell</Reveal>
-            <Stagger className="grid md:grid-cols-4 gap-4 mt-10" step={0.06}>
+            <Reveal as="h2" className="text-2xl md:text-3xl font-bold text-slate-900 text-center">Everything in one creator workspace</Reveal>
+            <Stagger className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-10" step={0.06}>
               {[
-                { icon: BookOpen, t: 'Courses' },
-                { icon: Users, t: 'Cohort programs' },
-                { icon: Sparkles, t: 'Webinars' },
-                { icon: Layers, t: 'Bundles' },
+                { icon: BookOpen, t: 'Assessed courses' },
+                { icon: Layers, t: 'Curriculum builder' },
+                { icon: Users, t: 'Learner activity' },
+                { icon: IndianRupee, t: 'Earnings & payouts' },
               ].map(({ icon: I, t }) => (
                 <StaggerItem key={t}>
                   <motion.div

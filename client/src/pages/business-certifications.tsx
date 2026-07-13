@@ -7,10 +7,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Link } from "wouter";
-import { Search, Filter, Clock, Users, Star, TrendingUp, Award, Grid, List, Building, Target, Zap, ShieldCheck, ChevronRight, Calendar } from "lucide-react";
+import { Search, Filter, Clock, Users, Award, Grid, List, Building, Target, Zap, ShieldCheck, ChevronRight, Calendar, FileCheck2 } from "lucide-react";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import type { Course, Category } from "@shared/schema";
+import { SEO } from "@/components/seo";
 
 const businessTypes = [
   "Startup",
@@ -33,7 +34,6 @@ const industryFocus = [
 ];
 
 const sortOptions = [
-  { value: "popularity", label: "Most Popular", icon: TrendingUp },
   { value: "newest", label: "Recently Added", icon: Award },
   { value: "price-asc", label: "Lowest Price", icon: Target },
   { value: "price-desc", label: "Highest Price", icon: Target },
@@ -45,7 +45,7 @@ export default function BusinessCertificationsPage() {
   const [selectedBusinessType, setSelectedBusinessType] = useState<string>("all");
   const [selectedIndustry, setSelectedIndustry] = useState<string>("all");
   const [selectedPriceRange, setSelectedPriceRange] = useState<string>("all");
-  const [sortBy, setSortBy] = useState("popularity");
+  const [sortBy, setSortBy] = useState("newest");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [showFilters, setShowFilters] = useState(false);
 
@@ -59,7 +59,7 @@ export default function BusinessCertificationsPage() {
 
   // Filter for business courses only
   const businessCourses = courses.filter(course => 
-    course.category.name === "Business" || 
+    course.category?.name === "Business" ||
     course.title.toLowerCase().includes("business") ||
     course.description.toLowerCase().includes("business") ||
     course.title.toLowerCase().includes("management") ||
@@ -81,8 +81,9 @@ export default function BusinessCertificationsPage() {
       const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            course.description.toLowerCase().includes(searchQuery.toLowerCase());
 
-      // Business type filter (using difficulty as proxy)
-      const matchesBusinessType = selectedBusinessType === "all" || course.difficulty === selectedBusinessType;
+      const businessHaystack = `${course.title} ${course.description}`.toLowerCase();
+      const matchesBusinessType = selectedBusinessType === "all" ||
+        businessHaystack.includes(selectedBusinessType.toLowerCase());
 
       // Industry filter (using category or description)
       let matchesIndustry = true;
@@ -107,8 +108,6 @@ export default function BusinessCertificationsPage() {
     // Sort certifications
     filtered.sort((a, b) => {
       switch (sortBy) {
-        case "popularity":
-          return (b.enrollmentCount || 0) - (a.enrollmentCount || 0);
         case "newest":
           return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
         case "price-asc":
@@ -130,16 +129,16 @@ export default function BusinessCertificationsPage() {
     setSelectedBusinessType("all");
     setSelectedIndustry("all");
     setSelectedPriceRange("all");
-    setSortBy("popularity");
+    setSortBy("newest");
   };
 
   const hasActiveFilters = searchQuery || selectedBusinessType !== "all" || selectedIndustry !== "all" || selectedPriceRange !== "all";
 
   const BusinessCertificationCard = ({ certification, viewMode }: { certification: Course & { category: Category }, viewMode: "grid" | "list" }) => (
     <Card className={`group hover:shadow-lg transition-all duration-300 border-2 hover:border-black ${
-      viewMode === "list" ? "flex flex-row" : ""
+      viewMode === "list" ? "md:flex md:flex-row" : ""
     }`}>
-      <div className={`${viewMode === "list" ? "w-64 flex-shrink-0" : ""}`}>
+      <div className={`${viewMode === "list" ? "md:w-64 flex-shrink-0" : ""}`}>
         <div className="aspect-video bg-gradient-to-br from-blue-900 to-black rounded-t-lg relative overflow-hidden">
           <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center">
             <Building className="h-16 w-16 text-white" />
@@ -169,9 +168,9 @@ export default function BusinessCertificationsPage() {
             <CardTitle className="text-lg group-hover:text-blue-600 transition-colors">
               {certification.title}
             </CardTitle>
-            <div className="flex items-center gap-1 text-yellow-500">
-              <Star className="h-4 w-4 fill-current" />
-              <span className="text-sm font-medium">{certification.rating || "4.8"}</span>
+            <div className="flex items-center gap-1 text-slate-500">
+              <Target className="h-4 w-4" />
+              <span className="text-sm font-medium">Pass {certification.passingScore}%</span>
             </div>
           </div>
           <p className="text-sm text-gray-600 line-clamp-2">
@@ -184,11 +183,11 @@ export default function BusinessCertificationsPage() {
             <div className="flex items-center gap-4 text-sm text-gray-600">
               <div className="flex items-center gap-1">
                 <Clock className="h-4 w-4" />
-                {certification.duration} days
+                {certification.duration} minutes
               </div>
               <div className="flex items-center gap-1">
                 <Users className="h-4 w-4" />
-                {certification.enrollmentCount || 0} enrolled
+                {certification.level}
               </div>
               <div className="flex items-center gap-1">
                 <Calendar className="h-4 w-4" />
@@ -198,9 +197,9 @@ export default function BusinessCertificationsPage() {
 
             {/* Key Benefits */}
             <div className="flex flex-wrap gap-2">
-              <Badge variant="outline" className="text-xs">Industry Recognized</Badge>
-              <Badge variant="outline" className="text-xs">Lifetime Access</Badge>
-              <Badge variant="outline" className="text-xs">Expert Support</Badge>
+              <Badge variant="outline" className="text-xs">Scored assessment</Badge>
+              <Badge variant="outline" className="text-xs">QR verifiable</Badge>
+              <Badge variant="outline" className="text-xs">Pay after passing</Badge>
             </div>
             
             <div className="flex items-center justify-between">
@@ -214,7 +213,7 @@ export default function BusinessCertificationsPage() {
               </div>
               <Link href={`/exam/${certification.slug || certification.id}`}>
                 <Button className="bg-black hover:bg-gray-800 text-white group">
-                  Get Certified
+                  View assessment
                   <ChevronRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
@@ -227,33 +226,31 @@ export default function BusinessCertificationsPage() {
 
   return (
     <div className="min-h-screen bg-cream-soft">
+      <SEO
+        title="Business skill assessments"
+        description="Free-to-attempt business assessments with scored results and optional QR-verifiable credentials after passing."
+        path="/business-certifications"
+      />
       <Header />
       
       {/* Hero Section */}
-      <section className="bg-black text-white py-16">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center">
-            <h1 className="text-5xl md:text-6xl font-bold mb-6">
-              BUSINESS CERTIFICATIONS
-            </h1>
-            <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
-              Elevate your business expertise with industry-recognized certifications. 
-              Master leadership, strategy, and operations to drive organizational success.
-            </p>
-            <div className="flex items-center justify-center gap-4 text-sm text-gray-400">
-              <div className="flex items-center gap-2">
-                <Building className="h-4 w-4" />
-                {businessCourses.length}+ Certifications
-              </div>
-              <div className="flex items-center gap-2">
-                <Target className="h-4 w-4" />
-                All Business Sizes
-              </div>
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="h-4 w-4" />
-                Industry Verified
-              </div>
-            </div>
+      <section className="relative overflow-hidden bg-slate-950 py-14 text-white sm:py-20">
+        <div aria-hidden className="absolute inset-0 bg-grid-white opacity-25 [mask-image:radial-gradient(ellipse_at_top,black_20%,transparent_75%)]" />
+        <div aria-hidden className="absolute -top-32 left-1/2 h-80 w-[620px] -translate-x-1/2 rounded-full bg-sky-500/20 blur-3xl" />
+        <div className="relative max-w-5xl mx-auto px-5 text-center">
+          <p className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-sky-200">
+            <FileCheck2 className="h-3.5 w-3.5" /> Business skill evidence
+          </p>
+          <h1 className="mx-auto mt-5 max-w-4xl break-words text-4xl font-extrabold leading-[1.02] tracking-[-0.04em] sm:text-5xl md:text-6xl">
+            Validate business judgement with <span className="text-sky-300">scored assessments</span>
+          </h1>
+          <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-slate-300 sm:text-lg">
+            Assess leadership, strategy and operational skills for free. If you pass, choose whether to activate a QR-verifiable credential.
+          </p>
+          <div className="mt-7 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs font-medium text-slate-300 sm:text-sm">
+            <span className="inline-flex items-center gap-2"><Target className="h-4 w-4 text-sky-300" />Free to attempt</span>
+            <span className="inline-flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-sky-300" />Pay only after passing</span>
+            <span className="inline-flex items-center gap-2"><FileCheck2 className="h-4 w-4 text-sky-300" />Public verification record</span>
           </div>
         </div>
       </section>
@@ -289,7 +286,7 @@ export default function BusinessCertificationsPage() {
             </Button>
 
             <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-48">
+              <SelectTrigger className="w-full sm:w-48">
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
               <SelectContent>
@@ -307,19 +304,15 @@ export default function BusinessCertificationsPage() {
               </SelectContent>
             </Select>
 
-            <Link href="/sponsor">
-              <Button variant="outline" className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100">
-                Support Us
-              </Button>
-            </Link>
-
-            <div className="flex items-center gap-2 ml-auto">
+            <div className="flex w-full items-center justify-between gap-2 sm:ml-auto sm:w-auto sm:justify-start">
               <span className="text-sm text-gray-600">{filteredAndSortedCertifications.length} certifications</span>
               <Separator orientation="vertical" className="h-6" />
               <Button
                 variant={viewMode === "grid" ? "default" : "outline"}
                 size="sm"
                 onClick={() => setViewMode("grid")}
+                aria-label="Show certifications as a grid"
+                aria-pressed={viewMode === "grid"}
               >
                 <Grid className="h-4 w-4" />
               </Button>
@@ -327,6 +320,8 @@ export default function BusinessCertificationsPage() {
                 variant={viewMode === "list" ? "default" : "outline"}
                 size="sm"
                 onClick={() => setViewMode("list")}
+                aria-label="Show certifications as a list"
+                aria-pressed={viewMode === "list"}
               >
                 <List className="h-4 w-4" />
               </Button>
@@ -423,14 +418,14 @@ export default function BusinessCertificationsPage() {
       {/* Business Value Proposition */}
       <section className="py-12 bg-cream-soft">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-8 mb-12">
             <Card className="text-center border-2 hover:border-black transition-colors">
               <CardContent className="pt-6">
                 <div className="bg-black rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
                   <Target className="h-8 w-8 text-white" />
                 </div>
-                <h3 className="text-xl font-bold mb-2">Strategic Leadership</h3>
-                <p className="text-gray-600 text-sm">Master strategic thinking and decision-making skills.</p>
+                <h3 className="text-base sm:text-xl font-bold mb-2">Strategic judgement</h3>
+                <p className="text-gray-600 text-xs sm:text-sm">Test reasoning across realistic leadership decisions.</p>
               </CardContent>
             </Card>
             <Card className="text-center border-2 hover:border-black transition-colors">
@@ -438,8 +433,8 @@ export default function BusinessCertificationsPage() {
                 <div className="bg-black rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
                   <Zap className="h-8 w-8 text-white" />
                 </div>
-                <h3 className="text-xl font-bold mb-2">Operational Excellence</h3>
-                <p className="text-gray-600 text-sm">Optimize processes and drive efficiency.</p>
+                <h3 className="text-base sm:text-xl font-bold mb-2">Operational thinking</h3>
+                <p className="text-gray-600 text-xs sm:text-sm">Evaluate process, prioritisation and execution skills.</p>
               </CardContent>
             </Card>
             <Card className="text-center border-2 hover:border-black transition-colors">
@@ -447,8 +442,8 @@ export default function BusinessCertificationsPage() {
                 <div className="bg-black rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
                   <Building className="h-8 w-8 text-white" />
                 </div>
-                <h3 className="text-xl font-bold mb-2">Team Management</h3>
-                <p className="text-gray-600 text-sm">Build and lead high-performing teams.</p>
+                <h3 className="text-base sm:text-xl font-bold mb-2">People management</h3>
+                <p className="text-gray-600 text-xs sm:text-sm">Assess communication and team leadership choices.</p>
               </CardContent>
             </Card>
             <Card className="text-center border-2 hover:border-black transition-colors">
@@ -456,8 +451,8 @@ export default function BusinessCertificationsPage() {
                 <div className="bg-black rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
                   <ShieldCheck className="h-8 w-8 text-white" />
                 </div>
-                <h3 className="text-xl font-bold mb-2">Industry Recognition</h3>
-                <p className="text-gray-600 text-sm">Earn credentials that employers value.</p>
+                <h3 className="text-base sm:text-xl font-bold mb-2">Verifiable result</h3>
+                <p className="text-gray-600 text-xs sm:text-sm">Share a credential ID after passing and activation.</p>
               </CardContent>
             </Card>
           </div>

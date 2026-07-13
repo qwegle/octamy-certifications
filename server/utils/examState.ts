@@ -28,13 +28,17 @@ export async function saveQuestionMapping(
 
 export async function loadQuestionMapping(
   sessionId: string,
+  expectedCourseId?: number,
 ): Promise<CorrectMap | null> {
   const r = await pool.query(
-    `SELECT correct_map FROM exam_sessions
+    `SELECT correct_map, course_id FROM exam_sessions
       WHERE id = $1 AND expires_at > NOW()`,
     [sessionId],
   );
   if (r.rowCount === 0) return null;
+  if (expectedCourseId !== undefined && r.rows[0].course_id !== expectedCourseId) {
+    return null;
+  }
   const raw = r.rows[0].correct_map;
   // pg returns jsonb already-parsed
   return typeof raw === "string" ? JSON.parse(raw) : raw;

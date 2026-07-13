@@ -4,17 +4,23 @@ import { drizzle } from 'drizzle-orm/node-postgres';
 import * as schema from '../shared/schema';
 
 // Test database setup
-const testDbUrl = process.env.TEST_DATABASE_URL || process.env.DATABASE_URL;
+const testDbUrl = process.env.TEST_DATABASE_URL;
+export const testPool = testDbUrl
+  ? new Pool({ connectionString: testDbUrl })
+  : null as unknown as Pool;
+export const testDb = testDbUrl
+  ? drizzle({ client: testPool, schema })
+  : null as unknown as ReturnType<typeof drizzle<typeof schema>>;
 
-if (!testDbUrl) {
-  throw new Error('TEST_DATABASE_URL or DATABASE_URL environment variable is required');
+function requireTestDatabase() {
+  if (!testDbUrl) {
+    throw new Error('TEST_DATABASE_URL is required for database tests. The suite never falls back to DATABASE_URL because it deletes data.');
+  }
 }
-
-export const testPool = new Pool({ connectionString: testDbUrl });
-export const testDb = drizzle({ client: testPool, schema });
 
 // Test data cleanup
 export async function cleanupTestData() {
+  requireTestDatabase();
   // Clean in reverse order to respect foreign key constraints
   await testDb.delete(schema.certificates);
   await testDb.delete(schema.examAttempts);
@@ -29,6 +35,7 @@ export async function cleanupTestData() {
 
 // Setup test users and data
 export async function setupTestData() {
+  requireTestDatabase();
   // Create test category
   const [testCategory] = await testDb.insert(schema.categories).values({
     name: 'Test Category',
@@ -97,14 +104,16 @@ export async function setupTestData() {
 
 // Global test setup
 beforeAll(async () => {
-  await cleanupTestData();
+  if (testDbUrl) await cleanupTestData();
 });
 
 afterAll(async () => {
-  await cleanupTestData();
-  await testPool.end();
+  if (testDbUrl) {
+    await cleanupTestData();
+    await testPool.end();
+  }
 });
 
 beforeEach(async () => {
-  await cleanupTestData();
+  if (testDbUrl) await cleanupTestData();
 });

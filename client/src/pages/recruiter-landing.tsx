@@ -4,21 +4,22 @@ import Footer from '@/components/footer';
 import { SEO } from '@/components/seo';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { ShieldCheck, Filter, Download, Check } from 'lucide-react';
+import { ShieldCheck, Filter, BookmarkCheck, Check } from 'lucide-react';
 import { Reveal, Stagger, StaggerItem } from '@/components/motion-primitives';
 import { motion } from 'framer-motion';
+import PortalLandingHero from '@/components/portal-landing-hero';
 
 const tiers = [
-  { name: 'Starter', price: '₹2,999/mo', views: '50 profile views/mo', searches: '10 saved searches', features: ['Email candidate', 'Score filter', 'Badge filter'] },
-  { name: 'Growth', price: '₹9,999/mo', views: '200 profile views/mo', searches: 'Unlimited saved searches', highlight: true, features: ['CSV export', 'ATS webhook', 'Team seats (3)'] },
-  { name: 'Enterprise', price: 'Custom', views: 'Unlimited', searches: 'Unlimited', features: ['Bulk credit packs', 'Dedicated CSM', 'Custom integrations'] },
+  { name: 'Explore', price: '₹1,000', views: '100 credits', searches: 'Pay as you use', features: ['Candidate filters', 'Saved searches', 'Credential evidence'] },
+  { name: 'Hiring', price: '₹4,500', views: '500 credits', searches: '10% pack saving', highlight: true, features: ['Profile access', 'Protected CV access', 'Interview evidence'] },
+  { name: 'Scale', price: '₹8,000', views: '1,000 credits', searches: '20% pack saving', features: ['Full search workspace', 'Activity analytics', 'Transaction history'] },
 ];
 
 const faqs = [
-  { q: 'How are candidates verified?', a: 'Every score on Octamy is from a proctored, time-bounded exam. Candidates can\'t edit their scores — only re-take and improve.' },
-  { q: 'Can we export to our ATS?', a: 'Yes — Growth includes a webhook that pushes shortlisted candidates to Greenhouse, Lever, Zoho Recruit and others.' },
-  { q: 'Do you handle outreach?', a: 'You can email candidates directly from the dashboard. Bulk outreach is on the Enterprise plan.' },
-  { q: 'How is pricing calculated?', a: 'Per-seat monthly subscription with included profile views. Top up with credit packs at any time.' },
+  { q: 'How is candidate evidence verified?', a: 'Octamy links a completed, scored assessment to a credential ID and public verification record. Candidates cannot edit issued results.' },
+  { q: 'What does a credit unlock?', a: 'Credits unlock protected actions such as profile views, CV downloads and interview evidence. The exact cost is shown before access.' },
+  { q: 'Can anyone browse private candidate data?', a: 'No. Recruiters complete company verification before search access, and protected actions are logged.' },
+  { q: 'How is pricing calculated?', a: 'There is no recurring commitment for recruiter access. Purchase a credit pack and use credits only for protected actions.' },
 ];
 
 export default function RecruiterLanding() {
@@ -26,70 +27,40 @@ export default function RecruiterLanding() {
     <div className="min-h-screen bg-cream-soft flex flex-col">
       <SEO
         title="Hire candidates verified by skill"
-        description="Filter on verified scores and badges, not resumes. ATS export, team seats, dedicated CSM."
+        description="Filter candidates using verified assessment and credential evidence, with privacy-aware profile access and saved searches."
         path="/for-recruiters"
       />
       <Header />
       <main className="flex-1">
-        <section className="relative overflow-hidden py-24 px-4 text-center">
-          <div aria-hidden className="pointer-events-none absolute inset-0 bg-grid-slate [mask-image:radial-gradient(ellipse_at_top,black_30%,transparent_75%)]" />
-          <div aria-hidden className="pointer-events-none absolute -top-20 left-1/4 h-[420px] w-[420px] rounded-full bg-indigo-300/25 blur-3xl animate-blob" />
-          <div aria-hidden className="pointer-events-none absolute -top-10 right-10 h-[320px] w-[320px] rounded-full bg-sky-300/25 blur-3xl animate-blob-slow" />
-          <div className="relative max-w-3xl mx-auto">
-            <motion.span
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-[0.18em] text-indigo-700 bg-cream-soft/80 backdrop-blur border border-indigo-200 rounded-full px-3 py-1.5 shadow-sm"
-            >
-              <ShieldCheck className="w-3 h-3" /> For recruiters & hiring teams
-            </motion.span>
-            <motion.h1
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              className="mt-6 text-4xl md:text-6xl font-extrabold text-slate-900 tracking-tight"
-            >
-              Hire candidates{' '}
-              <span className="bg-gradient-to-r from-indigo-700 via-sky-700 to-emerald-600 bg-clip-text text-transparent">verified by skill</span>
-              , not resumes
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="mt-5 text-lg text-slate-600"
-            >
-              Filter on proctored exam scores, badges and skill levels. Export to your ATS. No more CV roulette.
-            </motion.p>
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              className="mt-8 flex justify-center gap-3"
-            >
-              <Link href="/register?role=recruiter">
-                <motion.span whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} className="inline-block">
-                  <Button className="cta-pulse bg-slate-900 hover:bg-black text-white rounded-full px-6 shadow-xl shadow-slate-900/20">Start hiring</Button>
-                </motion.span>
-              </Link>
-              <Link href="/pricing">
-                <motion.span whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="inline-block">
-                  <Button variant="outline" className="rounded-full px-6 bg-cream-soft/80 backdrop-blur">See pricing</Button>
-                </motion.span>
-              </Link>
-            </motion.div>
-          </div>
-        </section>
+        <PortalLandingHero
+          accent="indigo"
+          eyebrow="For recruiters & hiring teams"
+          eyebrowIcon={<ShieldCheck className="h-3.5 w-3.5" />}
+          title={<>Move from profile claims to <span className="bg-gradient-to-r from-indigo-700 via-blue-600 to-cyan-600 bg-clip-text text-transparent">verified skill evidence</span></>}
+          description="Search candidates by skills, experience and completed evidence. Save useful searches and unlock protected profiles, CVs or interview evidence only when relevant."
+          primary={{ label: 'Start hiring', href: '/recruiter/register' }}
+          secondary={{ label: 'See credit packs', href: '/pricing' }}
+          preview={{
+            label: 'Recruiter workspace', title: 'Evidence-led search', status: 'Company verified',
+            metrics: [
+              { label: 'Saved searches', value: '12' }, { label: 'Profile views', value: '38' }, { label: 'Credits', value: '500' },
+            ],
+            activity: [
+              { title: 'Cloud engineer search saved', meta: 'Skills · experience · availability' },
+              { title: 'Credential evidence reviewed', meta: 'Verified assessment result' },
+              { title: 'Candidate CV unlocked', meta: 'Access recorded in activity' },
+            ],
+          }}
+        />
 
         <section className="py-16 px-4">
           <div className="max-w-5xl mx-auto">
             <Reveal as="h2" className="text-2xl md:text-3xl font-bold text-slate-900 text-center">Three pillars</Reveal>
             <Stagger className="grid md:grid-cols-3 gap-6 mt-10">
               {[
-                { icon: ShieldCheck, t: 'Verified scores', d: 'Every score is from a proctored exam. Tamper-proof, exportable, third-party verifiable.' },
-                { icon: Filter, t: 'Live skill filters', d: 'Search by skill, score, percentile, badges and recency in real time.' },
-                { icon: Download, t: 'ATS export', d: 'Push shortlisted candidates to Greenhouse, Lever, Zoho Recruit via webhook.' },
+                { icon: ShieldCheck, t: 'Verifiable evidence', d: 'Review completed assessment results and credentials with public verification records.' },
+                { icon: Filter, t: 'Useful filters', d: 'Narrow candidates by skills, evidence, experience, availability and work preference.' },
+                { icon: BookmarkCheck, t: 'Repeatable discovery', d: 'Save useful filter combinations and reopen the same search from your workspace.' },
               ].map(({ icon: I, t, d }) => (
                 <StaggerItem key={t}>
                   <motion.div whileHover={{ y: -4 }} transition={{ type: 'spring', stiffness: 260, damping: 18 }}>
@@ -111,7 +82,7 @@ export default function RecruiterLanding() {
 
         <section className="py-16 px-4 bg-cream-deep">
           <div className="max-w-5xl mx-auto">
-            <h2 className="text-2xl md:text-3xl font-semibold text-slate-900 text-center">Recruiter pricing</h2>
+            <h2 className="text-2xl md:text-3xl font-semibold text-slate-900 text-center">Recruiter credit packs</h2>
             <div className="grid md:grid-cols-3 gap-6 mt-10">
               {tiers.map((t) => (
                 <Card key={t.name} className={`border ${t.highlight ? 'border-slate-900 shadow-md' : 'border-slate-200'}`}>
@@ -127,9 +98,9 @@ export default function RecruiterLanding() {
                         <li key={f} className="flex gap-2"><Check className="w-4 h-4 text-slate-700 shrink-0 mt-0.5" />{f}</li>
                       ))}
                     </ul>
-                    <Link href={t.name === 'Enterprise' ? '/contact' : `/register?role=recruiter&plan=${t.name.toLowerCase()}`}>
+                    <Link href="/recruiter/register">
                       <Button className={`w-full mt-6 ${t.highlight ? 'bg-slate-900 hover:bg-black text-white' : ''}`} variant={t.highlight ? 'default' : 'outline'}>
-                        {t.name === 'Enterprise' ? 'Talk to sales' : `Choose ${t.name}`}
+                        Create recruiter account
                       </Button>
                     </Link>
                   </CardContent>

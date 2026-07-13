@@ -1,5 +1,5 @@
 import { useLocation } from 'wouter';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -7,8 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import Header from '@/components/header';
-import PayUMoneyForm from '@/components/payumoney-form';
-import { QrCode, Download, Share2, Trophy, Calendar, Award, Truck, MapPin } from 'lucide-react';
+import { Trophy, Award, Truck, MapPin } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
@@ -26,11 +25,28 @@ interface Address {
   isDefault: boolean;
 }
 
+interface TempExamResult {
+  passed: boolean;
+  score: number;
+  userEmail: string;
+  userName: string;
+}
+
+interface CheckoutCourse {
+  id: number;
+  slug: string;
+  title: string;
+  price: string;
+  originalPrice?: string | null;
+  isOnSale: boolean;
+}
+
 export default function PaymentTemp() {
   const [location, navigate] = useLocation();
   const { toast } = useToast();
   const [includesPhysicalCopy, setIncludesPhysicalCopy] = useState(false);
   const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
+  const hasUserSession = Boolean(localStorage.getItem('token'));
 
 
   // Extract parameters from URL
@@ -39,33 +55,28 @@ export default function PaymentTemp() {
   const courseId = urlParams.get('courseId');
 
   // Fetch temporary exam results
-  const { data: examResults, isLoading: examLoading } = useQuery({
+  const { data: examResults, isLoading: examLoading } = useQuery<TempExamResult>({
     queryKey: [`/api/exam-results-temp/${tempExamId}`],
     enabled: !!tempExamId,
   });
 
   // Fetch course details
-  const { data: course, isLoading: courseLoading } = useQuery({
+  const { data: course, isLoading: courseLoading } = useQuery<CheckoutCourse>({
     queryKey: [`/api/courses/${courseId}`],
     enabled: !!courseId,
   });
 
-  // Type-safe data access
-  const tempExamData = examResults || {};
-  const courseData = course || {};
-
   // Fetch user addresses
   const { data: addresses = [] } = useQuery<Address[]>({
     queryKey: ["/api/user/addresses"],
+    enabled: hasUserSession,
     retry: false,
   });
 
 
 
   useEffect(() => {
-    console.log('PaymentTemp URL params:', { tempExamId, courseId, location });
     if (!tempExamId || !courseId) {
-      console.error('Missing required parameters:', { tempExamId, courseId });
       toast({
         title: "Error",
         description: "Missing payment parameters. Please try taking the exam again.",
@@ -111,13 +122,13 @@ export default function PaymentTemp() {
       const paymentData = {
         tempExamId,
         courseId: parseInt(courseId!),
-        userEmail: (tempExamData as any)?.userEmail || '',
-        userName: (tempExamData as any)?.userName || '',
+        userEmail: examResults.userEmail || '',
+        userName: examResults.userName || '',
         userPhone: "",
         sellerCode: referralCode || "",
         includesPhysicalCopy,
         selectedAddressId,
-        amount: (courseData as any)?.price || '0'
+        amount: course.price || '0'
       };
 
       const response = await apiRequest("POST", "/api/payment/initiate", paymentData);
@@ -138,7 +149,7 @@ export default function PaymentTemp() {
             });
           }
           const cashfree = (window as any).Cashfree({
-            mode: (import.meta.env.VITE_CASHFREE_ENV || "production").toLowerCase(),
+            mode: (import.meta.env.VITE_CASHFREE_ENV || (import.meta.env.DEV ? "sandbox" : "production")).toLowerCase(),
           });
           await cashfree.checkout({
             paymentSessionId: data.paymentSessionId,
@@ -219,7 +230,7 @@ export default function PaymentTemp() {
     );
   }
 
-  if (!(tempExamData as any)?.passed) {
+  if (!examResults.passed) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
         <Header />
@@ -230,7 +241,7 @@ export default function PaymentTemp() {
               <p className="text-muted-foreground mb-4">
                 You need to pass the exam before purchasing a certificate.
               </p>
-              <Button onClick={() => navigate(`/exam/${(courseData as any)?.slug || courseId}`)} className="w-full">
+              <Button onClick={() => navigate(`/exam/${course.slug || courseId}`)} className="w-full">
                 Retake Exam
               </Button>
             </CardContent>
@@ -242,7 +253,7 @@ export default function PaymentTemp() {
 
 
 
-  const baseAmount = parseFloat((courseData as any)?.price || '0');
+  const baseAmount = parseFloat(course.price || '0');
   const shippingCost = includesPhysicalCopy ? 50 : 0;
   const totalAmount = baseAmount + shippingCost;
 
@@ -256,7 +267,7 @@ export default function PaymentTemp() {
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold mb-2">Complete Your Purchase</h1>
             <p className="text-muted-foreground">
-              Get your verified certificate for {(courseData as any)?.title || 'Course'}
+              Get your verified certificate for {course.title || 'Course'}
             </p>
           </div>
 
@@ -278,15 +289,15 @@ export default function PaymentTemp() {
                         Professional Certificate
                       </h3>
                       <p className="text-blue-700 dark:text-blue-300">
-                        {(courseData as any)?.title || 'Course'}
+                        {course.title || 'Course'}
                       </p>
                       <p className="text-sm text-blue-600 dark:text-blue-400">
-                        Awarded to: {(tempExamData as any)?.userName || 'Unknown'}
+                        Awarded to: {examResults.userName || 'Unknown'}
                       </p>
                       <div className="flex justify-center gap-4 text-sm text-blue-600 dark:text-blue-400">
-                        <span>Score: {(tempExamData as any)?.score || 0}%</span>
+                        <span>Score: {examResults.score || 0}%</span>
                         <span>•</span>
-                        <span>Grade: {(tempExamData as any)?.score >= 90 ? 'A+' : (tempExamData as any)?.score >= 80 ? 'A' : 'B+'}</span>
+                        <span>Grade: {examResults.score >= 90 ? 'A+' : examResults.score >= 80 ? 'A' : 'B+'}</span>
                       </div>
                     </div>
                   </div>
@@ -324,15 +335,15 @@ export default function PaymentTemp() {
                   <div className="flex justify-between">
                     <span>Digital Certificate</span>
                     <span className="font-medium">
-                      {(courseData as any)?.isOnSale && (courseData as any)?.originalPrice ? (
+                      {course.isOnSale && course.originalPrice ? (
                         <div className="text-right">
                           <span className="line-through text-muted-foreground mr-2">
-                            ₹{(courseData as any).originalPrice}
+                            ₹{course.originalPrice}
                           </span>
-                          <span className="text-green-600">₹{(courseData as any).price}</span>
+                          <span className="text-green-600">₹{course.price}</span>
                         </div>
                       ) : (
-                        <span>₹{(courseData as any)?.price || 0}</span>
+                        <span>₹{course.price || 0}</span>
                       )}
                     </span>
                   </div>
@@ -387,8 +398,13 @@ export default function PaymentTemp() {
                       ) : (
                         <div className="p-3 border border-dashed rounded-lg text-center">
                           <p className="text-sm text-muted-foreground">No addresses found</p>
-                          <Button variant="outline" size="sm" className="mt-2">
-                            Add Address
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="mt-2"
+                            onClick={() => navigate(hasUserSession ? '/profile-edit' : `/login?next=${encodeURIComponent(location)}`)}
+                          >
+                            {hasUserSession ? 'Add Address' : 'Sign in to add address'}
                           </Button>
                         </div>
                       )}

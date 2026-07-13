@@ -59,12 +59,12 @@ const PREMIUM_CATEGORY_SLUGS: string[] = (
 
 // ---------- Recent / sample certifications ----------
 const SAMPLE_CERTS = [
-  { name: "Aarav Shah",     company: "Acme Corp",       course: "Python Developer",          badge: "Gold",     score: 86, color: "from-amber-500 to-amber-700" },
-  { name: "Priya Iyer",     company: "Infosys",          course: "Generative AI Foundations", badge: "Platinum", score: 92, color: "from-slate-900 to-slate-700" },
-  { name: "Rahul Verma",    company: "TCS",              course: "AWS Cloud Practitioner",    badge: "Silver",   score: 74, color: "from-slate-500 to-slate-700" },
-  { name: "Ananya Reddy",   company: "Flipkart",         course: "Cybersecurity Analyst",     badge: "Gold",     score: 81, color: "from-amber-500 to-amber-700" },
-  { name: "Vikram Singh",   company: "Razorpay",         course: "Full-Stack JavaScript",     badge: "Platinum", score: 95, color: "from-slate-900 to-slate-700" },
-  { name: "Meera Nair",     company: "Wipro",            course: "Data Science Essentials",   badge: "Silver",   score: 71, color: "from-slate-500 to-slate-700" },
+  { name: "Aarav Shah",   company: "Sample credential", course: "Python Developer",           badge: "Gold",     score: 86, color: "from-amber-500 to-amber-700" },
+  { name: "Priya Iyer",   company: "Sample credential", course: "Generative AI Foundations",  badge: "Platinum", score: 92, color: "from-slate-900 to-slate-700" },
+  { name: "Rahul Verma",  company: "Sample credential", course: "AWS Cloud Practitioner",     badge: "Silver",   score: 74, color: "from-slate-500 to-slate-700" },
+  { name: "Ananya Reddy", company: "Sample credential", course: "Cybersecurity Analyst",      badge: "Gold",     score: 81, color: "from-amber-500 to-amber-700" },
+  { name: "Vikram Singh", company: "Sample credential", course: "Full-Stack JavaScript",      badge: "Platinum", score: 95, color: "from-slate-900 to-slate-700" },
+  { name: "Meera Nair",   company: "Sample credential", course: "Data Science Essentials",    badge: "Silver",   score: 71, color: "from-slate-500 to-slate-700" },
 ];
 
 function CertificateSlider() {
@@ -76,7 +76,7 @@ function CertificateSlider() {
   const items = showLive ? liveCerts : SAMPLE_CERTS;
 
   return (
-    <section className="bg-cream-deep py-16 sm:py-20 border-y border-cream-deep">
+    <section className="bg-cream-deep py-12 sm:py-20 border-y border-cream-deep">
       <div className="max-w-7xl mx-auto px-6">
         <Reveal as="div" className="text-center max-w-2xl mx-auto mb-10">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
@@ -92,9 +92,9 @@ function CertificateSlider() {
           </p>
         </Reveal>
 
-        <Stagger className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <Stagger className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3 sm:grid sm:grid-cols-2 sm:overflow-visible sm:pb-0 lg:grid-cols-3">
           {items.slice(0, 6).map((cert, idx) => (
-            <StaggerItem key={`${cert.name}-${idx}`}>
+            <StaggerItem key={`${cert.name}-${idx}`} className="min-w-[86%] snap-start sm:min-w-0">
               <motion.div
                 whileHover={{ y: -4 }}
                 transition={{ type: "spring", stiffness: 220, damping: 18 }}
@@ -330,8 +330,8 @@ export default function Landing() {
   return (
     <div className="min-h-screen bg-cream-soft">
       <SEO
-        title="Octamy — Skill Verification & Certification Platform"
-        description="Take free skill-verification assessments in AI, Development, Cloud, Cybersecurity and more. Pay only for verified certificates. Industry-recognized credentials trusted by recruiters across India."
+        title="Octamy — Evidence-backed Skill Verification"
+        description="Build a portable Skill Evidence Passport with scored assessments and QR-verifiable credentials. Free to assess; pay only when you pass and choose to certify."
         path="/"
         jsonLd={[websiteJsonLd, faqJsonLd]}
       />
@@ -361,7 +361,7 @@ export default function Landing() {
                       <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cream-soft/60 opacity-75" />
                       <span className="relative inline-flex h-2 w-2 rounded-full bg-cream-soft" />
                     </span>
-                    The Udemy for skill verification
+                    Your portable Skill Evidence Passport
                   </motion.p>
 
                   <motion.h1
@@ -370,9 +370,9 @@ export default function Landing() {
                     transition={{ duration: 0.7, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
                     className="mt-6 text-4xl sm:text-5xl md:text-[56px] leading-[1.05] font-extrabold tracking-tight text-white"
                   >
-                    Take the exam.
+                    Prove the skill.
                     <br />
-                    <span className="text-chrome">Earn the credential.</span>
+                    <span className="text-chrome">Carry the evidence.</span>
                   </motion.h1>
 
                   <motion.p
@@ -381,7 +381,7 @@ export default function Landing() {
                     transition={{ duration: 0.6, delay: 0.25 }}
                     className="mt-5 max-w-xl text-base sm:text-lg text-white/70 leading-relaxed"
                   >
-                    Free assessments. Pay only when you pass. Verified by recruiters across India — across AI, development, cloud, security and business.
+                    One trusted record that connects a scored assessment, credential ID and instant verification—built for learners, institutes and hiring teams.
                   </motion.p>
 
                   <motion.div
@@ -392,7 +392,7 @@ export default function Landing() {
                   >
                     <Link href="/exams">
                       <Button size="lg" className="bg-cream-soft text-slate-900 hover:bg-slate-100 rounded-full px-6 py-6 text-base font-semibold shadow-xl shadow-black/30">
-                        Browse 50+ exams
+                        Browse live exams
                         <ArrowRight className="ml-2 w-4 h-4" />
                       </Button>
                     </Link>
@@ -412,9 +412,9 @@ export default function Landing() {
                   className="relative z-10 mt-10 grid grid-cols-3 gap-3 max-w-xl"
                 >
                   {[
-                    { v: 50, s: "+", l: "Live exams" },
-                    { v: 12, s: "k+", l: "Assessments taken" },
-                    { v: 300, s: "+", l: "Recruiters verifying" },
+                    { v: courses.length, s: "", l: "Live exams" },
+                    { v: categories.length, s: "", l: "Skill tracks" },
+                    { v: 1, s: "", l: "Portable passport" },
                   ].map((s) => (
                     <div key={s.l} className="rounded-xl border border-white/10 bg-cream-soft/[0.04] backdrop-blur px-4 py-3">
                       <p className="text-2xl font-bold text-white tabular-nums">
@@ -447,33 +447,53 @@ export default function Landing() {
                     </p>
                   </div>
                   <h3 className="mt-3 text-2xl font-bold text-slate-900 leading-tight">
-                    Create your account
+                    Choose your workspace
                   </h3>
                   <p className="mt-1.5 text-sm text-slate-600">
-                    One account for learners, creators, institutes &amp; recruiters.
+                    Start free. You can add another role from your profile later.
                   </p>
-                  <div className="mt-5 space-y-4">
-                    <GoogleAuthButton type="user" />
+
+                  <div className="mt-5 grid grid-cols-3 gap-2" aria-label="Choose account type">
+                    {[
+                      { label: 'Learner', href: '/register?role=learner', Icon: GraduationCap },
+                      { label: 'Creator', href: '/register?role=creator', Icon: Sparkles },
+                      { label: 'Institute', href: '/register?role=institute', Icon: Building2 },
+                    ].map(({ label, href, Icon }) => (
+                      <Link key={label} href={href} className="group rounded-xl border border-slate-200 bg-white/70 px-2 py-3 text-center transition-all hover:-translate-y-0.5 hover:border-slate-900 hover:shadow-sm">
+                        <Icon className="mx-auto h-4 w-4 text-slate-500 group-hover:text-slate-950" />
+                        <span className="mt-1.5 block text-[11px] font-semibold text-slate-700 group-hover:text-slate-950">{label}</span>
+                      </Link>
+                    ))}
+                  </div>
+
+                  <div className="mt-4 space-y-3">
+                    <GoogleAuthButton type="user" hideWhenUnavailable />
                     <Link href="/register">
                       <Button className="w-full bg-slate-900 hover:bg-black text-white rounded-xl h-11 border-2 border-slate-900 shadow-[3px_3px_0_0_rgba(15,23,42,0.9)] hover:shadow-[5px_5px_0_0_rgba(15,23,42,0.9)] hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all">
-                        Continue with email
+                        Create account with email
                       </Button>
                     </Link>
                   </div>
-                  <div className="my-5 flex items-center gap-3 text-[11px] text-slate-400">
+                  <div className="my-4 flex items-center gap-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
                     <span className="h-px flex-1 bg-slate-200" />
-                    ALREADY ON OCTAMY?
+                    Already have an account?
                     <span className="h-px flex-1 bg-slate-200" />
                   </div>
                   <Link href="/login">
-                    <Button variant="outline" className="w-full rounded-xl h-11">
-                      Sign in
+                    <Button variant="outline" className="w-full rounded-xl h-10 border-slate-300 bg-white/70 font-semibold">
+                      Sign in to Octamy
                     </Button>
                   </Link>
 
-                  <div className="mt-auto pt-5 flex items-center gap-2 text-[11px] text-slate-500">
-                    <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
-                    256-bit SSL · DPDP aligned · No card required
+                  <div className="mt-auto pt-4">
+                    <Link href="/recruiter/login" className="flex items-center justify-between rounded-xl bg-slate-100 px-3 py-2.5 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-200 hover:text-slate-950">
+                      <span className="inline-flex items-center gap-2"><Briefcase className="h-4 w-4" />Recruiter or hiring team?</span>
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </Link>
+                    <div className="mt-3 flex items-center gap-2 text-[10px] text-slate-500">
+                      <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
+                      Secure sign-up · No card required
+                    </div>
                   </div>
                 </div>
               </motion.div>
@@ -502,7 +522,7 @@ export default function Landing() {
           )}
 
           {/* Onboarding strip — explicit CTAs for every persona */}
-          <Reveal as="div" delay={0.1} className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <Reveal as="div" delay={0.1} className="mt-8 grid grid-cols-2 lg:grid-cols-4 gap-3">
             {[
               { href: "/exams", title: "I want to get certified", sub: "Take a free assessment", icon: GraduationCap },
               { href: "/creator", title: "Teach on Octamy", sub: "Sell courses & exams", icon: Sparkles },
@@ -512,9 +532,9 @@ export default function Landing() {
               <Link key={cta.href} href={cta.href}>
                 <motion.div
                   whileHover={{ y: -3 }}
-                  className="group h-full rounded-2xl border border-cream-deep bg-cream-soft px-5 py-4 hover:border-slate-900 hover:shadow-lg transition-all flex items-start gap-3"
+                  className="group h-full rounded-2xl border border-cream-deep bg-cream-soft px-3 py-3 sm:px-5 sm:py-4 hover:border-slate-900 hover:shadow-lg transition-all flex items-start gap-2 sm:gap-3"
                 >
-                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-white">
+                  <span className="inline-flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-white">
                     <cta.icon className="h-5 w-5" />
                   </span>
                   <div className="min-w-0">
@@ -542,8 +562,49 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* USP — one evidence layer across learning and hiring ------------ */}
+      <section className="py-12 sm:py-24 bg-slate-950 text-white border-y border-white/10">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid lg:grid-cols-12 gap-10 lg:gap-16 items-center">
+            <Reveal as="div" className="lg:col-span-5">
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-sky-300">The Octamy difference</p>
+              <h2 className="mt-4 text-3xl sm:text-5xl font-bold tracking-tight">A Skill Evidence Passport, not another completion badge.</h2>
+              <p className="mt-5 text-slate-300 leading-relaxed">
+                Learning records usually stop at “completed.” Octamy connects identity, assessment performance and a live verification record so every credential carries inspectable evidence.
+              </p>
+              <div className="mt-8 flex flex-col sm:flex-row gap-3">
+                <Link href="/exams">
+                  <Button className="rounded-full bg-white text-slate-950 hover:bg-slate-100 px-6">Build my passport <ArrowRight className="ml-2 h-4 w-4" /></Button>
+                </Link>
+                <Link href="/institute">
+                  <Button variant="outline" className="rounded-full border-white/25 bg-transparent text-white hover:bg-white hover:text-slate-950 px-6">For institutions</Button>
+                </Link>
+              </div>
+            </Reveal>
+            <Stagger className="lg:col-span-7 grid sm:grid-cols-3 gap-4">
+              {[
+                { Icon: ClipboardCheck, step: "01", title: "Measured", body: "A scored, timed assessment creates evidence beyond attendance." },
+                { Icon: FileCheck2, step: "02", title: "Portable", body: "One credential ID and QR can travel from classroom to hiring desk." },
+                { Icon: ShieldCheck, step: "03", title: "Verifiable", body: "The live record confirms holder, skill, score tier and issue date." },
+              ].map((item) => (
+                <StaggerItem key={item.title}>
+                  <div className="h-full rounded-2xl border border-white/10 bg-white/[0.05] p-6 backdrop-blur">
+                    <div className="flex items-center justify-between">
+                      <item.Icon className="h-5 w-5 text-sky-300" />
+                      <span className="text-xs font-mono text-white/35">{item.step}</span>
+                    </div>
+                    <h3 className="mt-8 text-lg font-semibold">{item.title}</h3>
+                    <p className="mt-2 text-sm leading-relaxed text-slate-400">{item.body}</p>
+                  </div>
+                </StaggerItem>
+              ))}
+            </Stagger>
+          </div>
+        </div>
+      </section>
+
       {/* 2. HOW OCTAMY WORKS ---------------------------------------------- */}
-      <section id="how" className="py-16 sm:py-24 bg-cream-deep border-y border-cream-deep">
+      <section id="how" className="py-12 sm:py-24 bg-cream-deep border-y border-cream-deep">
         <div className="max-w-7xl mx-auto px-6">
           <Reveal as="div" className="text-center max-w-2xl mx-auto mb-14">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-700">
@@ -558,7 +619,7 @@ export default function Landing() {
             </p>
           </Reveal>
 
-          <Stagger className="relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <Stagger className="relative grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
             <div aria-hidden className="hidden lg:block absolute top-9 left-[12%] right-[12%] h-px bg-gradient-to-r from-transparent via-sky-300 to-transparent" />
             {[
               {
@@ -570,7 +631,7 @@ export default function Landing() {
               {
                 n: "02",
                 title: "Take a free assessment",
-                desc: "Pick from 50+ exams across modern career tracks.",
+                desc: "Pick from the live catalog across modern career tracks.",
                 Icon: ClipboardCheck,
               },
               {
@@ -590,7 +651,7 @@ export default function Landing() {
                 <motion.div
                   whileHover={{ y: -6 }}
                   transition={{ type: "spring", stiffness: 240, damping: 18 }}
-                  className="relative rounded-xl border border-cream-deep bg-cream-soft p-6 transition-shadow hover:shadow-lg"
+                  className="relative rounded-xl border border-cream-deep bg-cream-soft p-4 sm:p-6 transition-shadow hover:shadow-lg"
                 >
                   <div className="flex items-center justify-between">
                     <span className="inline-flex h-7 px-2 items-center rounded-full bg-sky-50 text-[11px] font-bold tracking-[0.2em] text-sky-700 ring-1 ring-sky-200">
@@ -600,7 +661,7 @@ export default function Landing() {
                       <step.Icon className="w-4 h-4" />
                     </span>
                   </div>
-                  <h3 className="mt-5 text-lg font-semibold text-slate-900">
+                  <h3 className="mt-4 sm:mt-5 text-base sm:text-lg font-semibold text-slate-900">
                     {step.title}
                   </h3>
                   <p className="mt-2 text-sm text-slate-600 leading-relaxed">
@@ -619,7 +680,7 @@ export default function Landing() {
       </section>
 
       {/* 3. REAL STATS ---------------------------------------------------- */}
-      <section className="py-16 sm:py-20 bg-cream-soft">
+      <section className="py-12 sm:py-20 bg-cream-soft">
         <div className="max-w-5xl mx-auto px-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div className="rounded-xl border border-cream-deep bg-cream-soft p-8 text-center">
@@ -649,7 +710,7 @@ export default function Landing() {
       </section>
 
       {/* 4. FEATURED TRACKS GRID ------------------------------------------ */}
-      <section className="py-16 sm:py-24 bg-cream-deep border-y border-cream-deep">
+      <section className="py-12 sm:py-24 bg-cream-deep border-y border-cream-deep">
         <div className="max-w-7xl mx-auto px-6">
           <Reveal as="div" className="text-center max-w-2xl mx-auto mb-14">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-700">
@@ -663,11 +724,11 @@ export default function Landing() {
             </p>
           </Reveal>
 
-          <Stagger className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" step={0.06}>
+          <Stagger className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4" step={0.06}>
             {featuredTracks.map((cat) => {
               const Icon = cat.Icon;
               const baseCard =
-                "group relative flex flex-col h-full rounded-xl border p-6 transition-all hover:-translate-y-1 hover:shadow-xl";
+                "group relative flex flex-col h-full rounded-xl border p-4 sm:p-6 transition-all hover:-translate-y-1 hover:shadow-xl";
               const cardClass = cat.isPremium
                 ? `${baseCard} bg-gradient-to-br from-amber-50 to-white border-amber-200 ring-1 ring-amber-200`
                 : `${baseCard} bg-cream-soft border-cream-deep hover:border-slate-900`;
@@ -706,7 +767,7 @@ export default function Landing() {
             {featuredTracks.length === 0 &&
               ["AI", "Development", "Cloud", "Cybersecurity", "Data Science", "Design", "Business", "DevOps"].map((name, i) => (
                 <StaggerItem key={name} className="h-full">
-                  <Link href="/exams" className="group relative flex flex-col h-full rounded-xl border border-cream-deep bg-cream-soft p-6 transition-all hover:-translate-y-1 hover:border-slate-900 hover:shadow-xl">
+                  <Link href="/exams" className="group relative flex flex-col h-full rounded-xl border border-cream-deep bg-cream-soft p-4 sm:p-6 transition-all hover:-translate-y-1 hover:border-slate-900 hover:shadow-xl">
                     <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-slate-900 text-white">
                       <GraduationCap className="w-5 h-5" />
                     </div>
@@ -844,7 +905,7 @@ export default function Landing() {
               <BadgeTier
                 tier="Platinum"
                 range="90–100%"
-                label="Top 10% globally"
+                label="Exceptional score"
                 icon={<Crown className="w-7 h-7" />}
                 accent="text-sky-800 bg-sky-50 ring-sky-200"
               />

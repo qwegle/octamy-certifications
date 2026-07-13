@@ -82,24 +82,24 @@ export default function LearningPaths() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: learningPaths = [], isLoading: pathsLoading } = useQuery({
+  const { data: learningPaths = [], isLoading: pathsLoading } = useQuery<LearningPath[]>({
     queryKey: ["/api/learning-paths"],
   });
 
-  const { data: userPaths = [], isLoading: userPathsLoading } = useQuery({
+  const { data: userPaths = [], isLoading: userPathsLoading } = useQuery<UserLearningPath[]>({
     queryKey: ["/api/user/learning-paths"],
   });
 
-  const { data: recommendations = [], isLoading: recommendationsLoading } = useQuery({
+  const { data: recommendations = [], isLoading: recommendationsLoading } = useQuery<Recommendation[]>({
     queryKey: ["/api/recommendations/personalized"],
   });
 
-  const { data: pathRecommendations = [], isLoading: pathRecommendationsLoading } = useQuery({
+  const { data: pathRecommendations = [], isLoading: pathRecommendationsLoading } = useQuery<any[]>({
     queryKey: ["/api/recommendations/learning-paths"],
   });
 
   // Get course recommendations for enrolled learning paths
-  const { data: enrolledPathRecommendations = [], isLoading: enrolledRecsLoading } = useQuery({
+  const { data: enrolledPathRecommendations = [], isLoading: enrolledRecsLoading } = useQuery<Recommendation[]>({
     queryKey: ["/api/recommendations/enrolled-paths"],
     enabled: userPaths.length > 0,
   });

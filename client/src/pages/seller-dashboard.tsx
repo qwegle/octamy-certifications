@@ -325,13 +325,13 @@ export default function SellerDashboard() {
   return (
     <div className="min-h-screen bg-cream-soft">
       {/* Header */}
-      <header className="bg-black text-white p-6">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
+      <header className="bg-black text-white p-4 sm:p-6">
+        <div className="max-w-7xl mx-auto flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center">
           <div>
             <h1 className="text-3xl font-bold">OCTAMY</h1>
             <p className="text-gray-300">Partner Dashboard</p>
           </div>
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center justify-between gap-3 sm:justify-end sm:space-x-4">
             <div className="text-right">
               <p className="font-medium">{dashboardData.seller.name}</p>
               <Badge 
@@ -347,13 +347,13 @@ export default function SellerDashboard() {
               className="text-white border-white hover:bg-cream-soft hover:text-black"
             >
               <LogOut size={16} className="mr-2" />
-              Logout
+              <span className="hidden sm:inline">Logout</span>
             </Button>
           </div>
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto p-6">
+      <div className="max-w-7xl mx-auto p-4 sm:p-6">
         {/* Approval Status Alert */}
         {!dashboardData.seller.isApproved && (
           <div className="mb-6 p-4 bg-yellow-50 border-l-4 border-yellow-400">
@@ -368,7 +368,7 @@ export default function SellerDashboard() {
         )}
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6 mb-8">
           <Card className="border-2 border-cream-deep">
             <CardContent className="p-6">
               <div className="flex items-center">
@@ -468,7 +468,7 @@ export default function SellerDashboard() {
               <CardTitle className="text-xl font-bold text-black">Click Analytics</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-3 gap-4 mb-6">
+              <div className="grid grid-cols-1 gap-3 mb-6 sm:grid-cols-3 sm:gap-4">
                 <div className="text-center p-4 bg-cream-deep rounded-lg">
                   <p className="text-3xl font-bold text-black">{dashboardData.clickAnalytics.totalClicks}</p>
                   <p className="text-sm text-gray-600">Total Clicks</p>
@@ -492,7 +492,7 @@ export default function SellerDashboard() {
                         <h5 className="font-medium text-black">{course.courseTitle}</h5>
                         <span className="text-lg font-bold text-black">{course.conversionRate.toFixed(1)}%</span>
                       </div>
-                      <div className="grid grid-cols-3 gap-2 text-sm text-gray-600">
+                      <div className="grid grid-cols-1 gap-1 text-sm text-gray-600 sm:grid-cols-3 sm:gap-2">
                         <span><strong>{course.clicks}</strong> clicks</span>
                         <span><strong>{course.conversions}</strong> conversions</span>
                         <span>Latest: {course.latestClick ? new Date(course.latestClick).toLocaleDateString() : 'No clicks yet'}</span>

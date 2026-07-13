@@ -39,6 +39,7 @@ export default function RecruiterDashboard() {
   const { recruiter } = useRecruiterAuth();
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
     fetchDashboardData();
@@ -46,13 +47,14 @@ export default function RecruiterDashboard() {
 
   const fetchDashboardData = async () => {
     try {
+      setLoadError(false);
       const response = await apiRequest('GET', '/api/recruiter/dashboard');
       if (response.ok) {
         const data = await response.json();
         setDashboardData(data);
       }
     } catch (error) {
-      console.error('Failed to fetch dashboard data:', error);
+      setLoadError(true);
     } finally {
       setLoading(false);
     }
@@ -73,11 +75,9 @@ export default function RecruiterDashboard() {
                 <div className="flex-1">
                   <h3 className="font-bold text-yellow-800 text-lg">Verification In Progress</h3>
                   <p className="text-yellow-700 text-sm mt-1">
-                    Complete your profile setup to unlock premium recruitment features.
+                    Complete your company profile to unlock candidate search and protected evidence.
                   </p>
-                  <Button className="mt-3 bg-yellow-600 hover:bg-yellow-700 text-white" size="sm">
-                    Complete Setup
-                  </Button>
+                  <Link href="/recruiter/onboarding"><Button className="mt-3 bg-yellow-600 hover:bg-yellow-700 text-white" size="sm">Complete setup</Button></Link>
                 </div>
               </div>
             </CardContent>
@@ -114,9 +114,7 @@ export default function RecruiterDashboard() {
                   <p className="text-red-700 text-sm mt-1">
                     Please resubmit your documents or contact our support team.
                   </p>
-                  <Button className="mt-3 bg-red-600 hover:bg-red-700 text-white" size="sm">
-                    Resubmit Documents
-                  </Button>
+                  <Link href="/recruiter/settings"><Button className="mt-3 bg-red-600 hover:bg-red-700 text-white" size="sm">Review verification details</Button></Link>
                 </div>
               </div>
             </CardContent>
@@ -133,7 +131,7 @@ export default function RecruiterDashboard() {
                 <div className="flex-1">
                   <h3 className="font-bold text-green-800 text-lg">✓ Fully Verified</h3>
                   <p className="text-green-700 text-sm mt-1">
-                    Welcome to Octamy AI Recruiter! You now have full access to our talent network.
+                    Your company is verified. You now have access to candidate search and evidence controls.
                   </p>
                 </div>
               </div>
@@ -166,6 +164,15 @@ export default function RecruiterDashboard() {
             Here's what's happening with your recruitment activities.
           </p>
         </div>
+
+        {loadError && (
+          <Card className="border-rose-200 bg-rose-50">
+            <CardContent className="flex flex-col gap-3 p-4 text-sm text-rose-900 sm:flex-row sm:items-center sm:justify-between">
+              <span>We couldn't load the latest recruiter activity.</span>
+              <Button size="sm" variant="outline" onClick={fetchDashboardData}>Retry</Button>
+            </CardContent>
+          </Card>
+        )}
 
         {/* KYC Status */}
         {recruiter?.kycStatus !== 'approved' && (
@@ -257,12 +264,7 @@ export default function RecruiterDashboard() {
               <p className="text-gray-600 mb-4">
                 Access profiles you've recently viewed or downloaded.
               </p>
-              <Button variant="outline" className="w-full" onClick={() => {
-                // For now, show a message until we implement history page
-                alert('Recent profile views and downloads coming soon!');
-              }}>
-                View History
-              </Button>
+              <Link href="/recruiter/analytics"><Button variant="outline" className="w-full">View activity</Button></Link>
             </CardContent>
           </Card>
 

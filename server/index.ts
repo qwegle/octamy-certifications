@@ -125,6 +125,14 @@ app.get("/readyz", async (_req, res) => {
     checks.db = { ok: false, error: err?.message };
   }
   checks.sentry = process.env.SENTRY_DSN ? "configured" : "not_configured";
+  checks.googleOAuth = process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
+    ? "configured"
+    : "not_configured";
+  checks.paymentGateway = process.env.CASHFREE_APP_ID && process.env.CASHFREE_SECRET_KEY
+    ? "cashfree"
+    : process.env.PAYUMONEY_MERCHANT_KEY && process.env.PAYUMONEY_SALT
+      ? "payu"
+      : "not_configured";
   checks.nodeEnv = process.env.NODE_ENV || "development";
   checks.commit = process.env.GIT_COMMIT || "unknown";
   res.status(checks.status === "ready" ? 200 : 503).json(checks);

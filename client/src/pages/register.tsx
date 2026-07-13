@@ -1,26 +1,24 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'wouter';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/lib/auth.tsx';
-import Header from '@/components/header';
-import Footer from '@/components/footer';
 import { GoogleAuthButton } from '@/components/google-auth-button';
 import { useGoogleAuthHandler } from '@/utils/google-auth-handler';
 import { SEO } from '@/components/seo';
 import { apiRequest } from '@/lib/queryClient';
-import { GraduationCap, Sparkles, Building2, Briefcase, ArrowLeft } from 'lucide-react';
+import { AuthShell } from '@/components/auth-shell';
+import { ArrowRight, Building2, Briefcase, GraduationCap, ShieldCheck, Sparkles } from 'lucide-react';
 
 type Role = 'learner' | 'creator' | 'institute' | 'recruiter';
 
 const ROLES: { id: Role; title: string; desc: string; plan: string; icon: React.ComponentType<{ className?: string }> }[] = [
   { id: 'learner', title: 'Learner', desc: 'Take exams. Earn verified certificates.', plan: 'Free forever', icon: GraduationCap },
-  { id: 'creator', title: 'Creator', desc: 'Sell your own courses on Octamy.', plan: 'Free + Pro from ₹499/mo', icon: Sparkles },
-  { id: 'institute', title: 'Institute', desc: 'Skill-verify your students at scale.', plan: 'From ₹2,999/mo', icon: Building2 },
-  { id: 'recruiter', title: 'Recruiter', desc: 'Hire candidates verified by skill.', plan: 'From ₹2,999/mo', icon: Briefcase },
+  { id: 'creator', title: 'Creator', desc: 'Publish learning and assessments.', plan: 'Start free', icon: Sparkles },
+  { id: 'institute', title: 'Institute', desc: 'Verify student skills at scale.', plan: 'Team workspace', icon: Building2 },
+  { id: 'recruiter', title: 'Recruiter', desc: 'Hire candidates verified by skill.', plan: 'Verified company signup', icon: Briefcase },
 ];
 
 function detectRoleFromPath(pathname: string): Role | null {
@@ -46,7 +44,7 @@ export default function Register() {
   // Default unspecified registrations to learner — most users coming to /register want to take an exam.
   // For business roles we use /register?role=creator|institute|recruiter or /creators, /institutes, /recruiters/register.
   const initialRole: Role = (detectRoleFromPath(location) || queryRole || 'learner') as Role;
-  const [role, setRole] = useState<Role | null>(initialRole);
+  const [role, setRole] = useState<Role>(initialRole);
 
   // Generic
   const [name, setName] = useState('');
@@ -76,10 +74,16 @@ export default function Register() {
     if (fromPath) setRole(fromPath);
   }, [location]);
 
+  useEffect(() => {
+    if (role === 'recruiter' && location !== '/recruiter/register') {
+      setLocation('/recruiter/register');
+    }
+  }, [location, role, setLocation]);
+
   const validate = (): string | null => {
     if (!name) return 'Please enter your name.';
     if (!email) return 'Please enter your email.';
-    if (!password || password.length < 6) return 'Password must be at least 6 characters.';
+    if (!password || password.length < 8 || !/[A-Za-z]/.test(password) || !/[\d\W_]/.test(password)) return 'Use at least 8 characters with letters and a number or symbol.';
     if (password !== confirm) return 'Passwords do not match.';
     if (role === 'creator' && !agreed) return 'Please accept the creator terms.';
     if (role === 'creator' && !displayName) return 'Please enter your creator display name.';
@@ -164,160 +168,127 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen bg-cream-soft flex flex-col">
+    <>
       <SEO
         title="Create account"
         description="Create your Octamy account — choose Learner, Creator, Institute or Recruiter."
         path="/register"
       />
-      <Header />
-      <main className="flex-1 py-12 px-4">
-        <div className="max-w-3xl mx-auto">
-          {!role ? (
-            <RolePicker onPick={setRole} />
-          ) : (
-            <div className="max-w-md mx-auto space-y-6">
-              <div className="flex items-center justify-between">
-                <button
-                  onClick={() => setRole(null)}
-                  className="text-sm text-slate-500 hover:text-slate-900 inline-flex items-center gap-1"
-                >
-                  <ArrowLeft className="w-4 h-4" /> Change role
-                </button>
-                <span className="text-xs uppercase tracking-wide text-slate-500">{role}</span>
-              </div>
-
-              <div className="text-center">
-                <h1 className="text-3xl font-semibold text-slate-900">Create your account</h1>
-                <p className="mt-2 text-sm text-slate-600">Signing up as {labelFor(role)}.</p>
-              </div>
-
-              <Card className="border-cream-deep shadow-sm">
-                <CardContent className="pt-6 space-y-5">
-                  <GoogleAuthButton type="user" isLoading={isLoading} />
-                  <div className="relative">
-                    <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-cream-deep" /></div>
-                    <div className="relative flex justify-center text-xs uppercase tracking-wide">
-                      <span className="bg-cream-soft px-2 text-slate-500">Or with email</span>
-                    </div>
-                  </div>
-
-                  <form onSubmit={handleSubmit} className="space-y-4">
-                    {role === 'institute' && (
-                      <Field label="Institute name" value={instituteName} onChange={setInstituteName} placeholder="e.g. Acme Public School" />
-                    )}
-                    {role === 'institute' && (
-                      <SelectField label="Institute type" value={instituteType} onChange={setInstituteType} options={[
-                        { value: 'school', label: 'School' },
-                        { value: 'college', label: 'College / University' },
-                        { value: 'coaching', label: 'Coaching / Test prep' },
-                        { value: 'company', label: 'Company / Corporate L&D' },
-                      ]} />
-                    )}
-                    {role === 'recruiter' && (
-                      <Field label="Company name" value={companyName} onChange={setCompanyName} placeholder="e.g. Acme Inc." />
-                    )}
-                    {role === 'recruiter' && (
-                      <SelectField label="Company size" value={companySize} onChange={setCompanySize} options={[
-                        { value: '1-10', label: '1–10' },
-                        { value: '11-50', label: '11–50' },
-                        { value: '51-200', label: '51–200' },
-                        { value: '201-1000', label: '201–1,000' },
-                        { value: '1000+', label: '1,000+' },
-                      ]} />
-                    )}
-
-                    <Field label={role === 'institute' ? 'Admin contact name' : 'Full name'} value={name} onChange={setName} placeholder="Your name" />
-                    <Field label="Email" value={email} onChange={setEmail} type="email" placeholder="you@example.com" autoComplete="email" />
-                    <Field label={role === 'learner' ? 'Phone (optional)' : 'Phone'} value={phone} onChange={setPhone} placeholder="+91…" />
-
-                    {role === 'creator' && (
-                      <>
-                        <Field label="Creator display name" value={displayName} onChange={setDisplayName} placeholder="How learners see you" />
-                        <SelectField label="What best describes you?" value={creatorType} onChange={setCreatorType} options={[
-                          { value: 'educator', label: 'Educator' },
-                          { value: 'coach', label: 'Coach' },
-                          { value: 'freelancer', label: 'Freelancer' },
-                          { value: 'influencer', label: 'Influencer' },
-                          { value: 'other', label: 'Other' },
-                        ]} />
-                      </>
-                    )}
-
-                    {role === 'institute' && (
-                      <Field label="GSTIN (optional)" value={gstin} onChange={setGstin} placeholder="22AAAAA0000A1Z5" />
-                    )}
-
-                    <Field label="Password" value={password} onChange={setPassword} type="password" placeholder="At least 6 characters" autoComplete="new-password" />
-                    <Field label="Confirm password" value={confirm} onChange={setConfirm} type="password" autoComplete="new-password" />
-
-                    {role === 'creator' && (
-                      <label className="flex items-start gap-2 text-sm text-slate-600">
-                        <input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} className="mt-1" />
-                        <span>I agree to the Octamy Creator Terms and revenue-share policy.</span>
-                      </label>
-                    )}
-
-                    <Button type="submit" disabled={isLoading} className="w-full bg-slate-900 hover:bg-black text-white">
-                      {isLoading ? 'Creating account…' : 'Create account'}
-                    </Button>
-                  </form>
-                </CardContent>
-              </Card>
-
-              <p className="text-center text-sm text-slate-600">
-                Already have an account?{' '}
-                <Link href="/login"><a className="text-slate-900 font-medium hover:underline">Sign in</a></Link>
-              </p>
-            </div>
-          )}
+      <AuthShell
+        wide
+        eyebrow="Create your Octamy identity"
+        title="Build a skill record that compounds with every achievement."
+        description="Start in the workspace that fits today. Your credentials, assessment evidence and opportunities remain connected as you grow."
+        highlights={[
+          'Start without a credit card',
+          'Add another role later without a second account',
+          'Credentials designed for instant verification',
+        ]}
+      >
+        <div className="mb-6">
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-fuchsia-700">Get started — free</p>
+          <h1 className="mt-3 text-4xl font-extrabold tracking-[-0.04em] text-slate-950 sm:text-5xl">Create your account</h1>
+          <p className="mt-3 text-sm leading-6 text-slate-600">Start as a learner, creator or institute. Recruiters use a verified company workspace.</p>
         </div>
-      </main>
-      <Footer />
-    </div>
+
+        <div className="mb-5 grid grid-cols-3 gap-2 rounded-2xl border border-slate-200 bg-white p-2 shadow-sm" aria-label="Choose account type">
+          {ROLES.filter((item) => item.id !== 'recruiter').map((item) => {
+            const Icon = item.icon;
+            const selected = role === item.id;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setRole(item.id)}
+                className={`flex min-h-14 items-center justify-center gap-2 rounded-xl px-2 text-xs font-bold transition sm:text-sm ${selected ? 'bg-slate-950 text-white shadow-md' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-950'}`}
+                aria-pressed={selected}
+              >
+                <Icon className="h-4 w-4 shrink-0" /> {item.title}
+              </button>
+            );
+          })}
+        </div>
+
+        <section className="rounded-[1.5rem] border-2 border-slate-900 bg-white p-5 shadow-[7px_7px_0_0_rgba(15,23,42,0.92)] sm:p-7" aria-label="Create account form">
+          <div className="mb-5 flex items-center justify-between gap-4 border-b border-slate-200 pb-4">
+            <div>
+              <p className="font-bold text-slate-950">Signing up as {labelFor(role)}</p>
+              <p className="mt-0.5 text-xs text-slate-500">{ROLES.find((item) => item.id === role)?.desc}</p>
+            </div>
+            <span className="shrink-0 rounded-full bg-emerald-50 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-emerald-700">{ROLES.find((item) => item.id === role)?.plan}</span>
+          </div>
+
+          <GoogleAuthButton type="user" isLoading={isLoading} hideWhenUnavailable className="mb-5" />
+
+          <form onSubmit={handleSubmit} className="grid gap-4 sm:grid-cols-2">
+            {role === 'institute' && (
+              <Field label="Institute name" value={instituteName} onChange={setInstituteName} placeholder="e.g. Acme Public School" />
+            )}
+            {role === 'institute' && (
+              <SelectField label="Institute type" value={instituteType} onChange={setInstituteType} options={[
+                { value: 'school', label: 'School' },
+                { value: 'college', label: 'College / University' },
+                { value: 'coaching', label: 'Coaching / Test prep' },
+                { value: 'company', label: 'Company / Corporate L&D' },
+              ]} />
+            )}
+
+            <Field label={role === 'institute' ? 'Admin contact name' : 'Full name'} value={name} onChange={setName} placeholder="Your name" autoComplete="name" />
+            <Field label="Email" value={email} onChange={setEmail} type="email" placeholder="you@company.com" autoComplete="email" />
+            <Field label={role === 'learner' ? 'Phone (optional)' : 'Phone'} value={phone} onChange={setPhone} placeholder="+91…" autoComplete="tel" />
+
+            {role === 'creator' && (
+              <>
+                <Field label="Creator display name" value={displayName} onChange={setDisplayName} placeholder="How learners see you" />
+                <SelectField label="What best describes you?" value={creatorType} onChange={setCreatorType} options={[
+                  { value: 'educator', label: 'Educator' },
+                  { value: 'coach', label: 'Coach' },
+                  { value: 'freelancer', label: 'Freelancer' },
+                  { value: 'influencer', label: 'Influencer' },
+                  { value: 'other', label: 'Other' },
+                ]} />
+              </>
+            )}
+
+            {role === 'institute' && (
+              <Field label="GSTIN (optional)" value={gstin} onChange={setGstin} placeholder="22AAAAA0000A1Z5" />
+            )}
+
+            <Field label="Password" value={password} onChange={setPassword} type="password" placeholder="8+ characters, letters and a number" autoComplete="new-password" />
+            <Field label="Confirm password" value={confirm} onChange={setConfirm} type="password" placeholder="Repeat your password" autoComplete="new-password" />
+
+            {role === 'creator' && (
+              <label className="flex items-start gap-2 text-xs leading-5 text-slate-600 sm:col-span-2">
+                <input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} className="mt-1 rounded border-slate-300" />
+                <span>I agree to the Octamy Creator Terms and revenue-share policy.</span>
+              </label>
+            )}
+
+            <Button type="submit" disabled={isLoading} className="h-12 rounded-xl bg-slate-950 text-white shadow-[3px_3px_0_0_rgba(217,70,239,0.35)] hover:bg-black sm:col-span-2">
+              {isLoading ? 'Creating account…' : <>Create my account <ArrowRight className="ml-2 h-4 w-4" /></>}
+            </Button>
+          </form>
+
+          <div className="mt-5 flex items-center justify-center gap-2 rounded-xl bg-emerald-50 px-3 py-2.5 text-center text-xs font-medium text-emerald-800">
+            <ShieldCheck className="h-4 w-4 shrink-0" /> Secure signup. No card required.
+          </div>
+        </section>
+
+        <div className="mt-7 space-y-3 text-center text-sm text-slate-600">
+          <p>
+            Already on Octamy? <Link href="/login" className="font-bold text-slate-950 hover:underline">Sign in</Link>
+          </p>
+          <p className="text-xs text-slate-500">
+            Recruiting? <Link href="/recruiter/register" className="font-semibold text-slate-700 hover:underline">Create a verified company workspace</Link>
+          </p>
+        </div>
+      </AuthShell>
+    </>
   );
 }
 
 function labelFor(r: Role) {
   return ({ learner: 'a Learner', creator: 'a Creator', institute: 'an Institute', recruiter: 'a Recruiter' } as const)[r];
-}
-
-function RolePicker({ onPick }: { onPick: (r: Role) => void }) {
-  return (
-    <div className="space-y-8">
-      <div className="text-center">
-        <h1 className="text-3xl md:text-4xl font-semibold text-slate-900">Create your Octamy account</h1>
-        <p className="mt-2 text-slate-600">Pick what best describes you. You can always add another role later.</p>
-      </div>
-      <div className="grid sm:grid-cols-2 gap-4">
-        {ROLES.map((r) => {
-          const Icon = r.icon;
-          return (
-            <button
-              key={r.id}
-              onClick={() => onPick(r.id)}
-              className="text-left rounded-2xl border border-cream-deep hover:border-slate-900 hover:shadow-md transition p-6 bg-cream-soft group"
-            >
-              <div className="flex items-start gap-4">
-                <div className="w-11 h-11 rounded-xl bg-slate-100 group-hover:bg-slate-900 group-hover:text-white flex items-center justify-center transition">
-                  <Icon className="w-5 h-5" />
-                </div>
-                <div className="flex-1">
-                  <div className="text-lg font-semibold text-slate-900">{r.title}</div>
-                  <div className="text-sm text-slate-600 mt-1">{r.desc}</div>
-                  <div className="text-xs text-slate-500 mt-3">{r.plan}</div>
-                </div>
-              </div>
-            </button>
-          );
-        })}
-      </div>
-      <p className="text-center text-sm text-slate-600">
-        Already have an account?{' '}
-        <Link href="/login"><a className="text-slate-900 font-medium hover:underline">Sign in</a></Link>
-      </p>
-    </div>
-  );
 }
 
 function Field({
@@ -332,7 +303,7 @@ function Field({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         autoComplete={autoComplete}
-        className="mt-1"
+        className="mt-1.5 h-11 rounded-xl border-slate-300 bg-slate-50 focus:bg-white"
       />
     </div>
   );
@@ -347,7 +318,7 @@ function SelectField({
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="mt-1 w-full h-10 rounded-md border border-cream-deep bg-cream-soft px-3 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
+        className="mt-1.5 h-11 w-full rounded-xl border border-slate-300 bg-slate-50 px-3 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-900"
       >
         {options.map((o) => (<option key={o.value} value={o.value}>{o.label}</option>))}
       </select>

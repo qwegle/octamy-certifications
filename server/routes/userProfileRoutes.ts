@@ -1,39 +1,10 @@
 import { Router } from 'express';
 import { storage } from '../storage';
 import { z } from 'zod';
-import jwt from 'jsonwebtoken';
-
-// Use the same JWT_SECRET pattern as routes.ts for consistency
-const JWT_SECRET = process.env.JWT_SECRET!;
-
-interface AuthenticatedRequest extends Request {
-  user?: {
-    userId: number;
-    email: string;
-    isAdmin?: boolean;
-  };
-}
-
-// Custom authentication middleware for userProfileRoutes
-const authenticateToken = async (req: any, res: any, next: any) => {
-  try {
-    const authHeader = req.headers.authorization;
-    const token = authHeader && authHeader.split(' ')[1];
-
-    if (!token) {
-      return res.status(401).json({ message: "Access token required" });
-    }
-
-    const decoded = jwt.verify(token, JWT_SECRET) as any;
-    req.user = { userId: decoded.userId, email: decoded.email, isAdmin: decoded.isAdmin };
-    next();
-  } catch (error) {
-    console.error("Profile auth error:", error);
-    res.status(401).json({ message: "Invalid token" });
-  }
-};
+import { authenticateToken } from '../middleware/auth';
 
 const router = Router();
+const requireUser = authenticateToken as any;
 
 // Schema for profile updates
 const updateProfileSchema = z.object({
@@ -55,10 +26,11 @@ const updateProfileSchema = z.object({
   bio: z.string().optional(),
   careerGoals: z.string().optional(),
   profileVisibility: z.boolean().optional(),
+  resume: z.string().max(500).optional(),
 });
 
 // GET /api/user/profile - Get current user's profile
-router.get('/profile', authenticateToken, async (req, res) => {
+router.get('/profile', requireUser, async (req: any, res) => {
   try {
     console.log('Profile GET request - User:', req.user);
     const userId = req.user!.userId;
@@ -91,6 +63,7 @@ router.get('/profile', authenticateToken, async (req, res) => {
       careerGoals: user.careerGoals,
       profileVisibility: user.profileVisibility ?? true,
       profileCompleteness: user.profileCompleteness || 0,
+      resume: user.resume,
     };
 
     res.json(profileData);
@@ -101,9 +74,13 @@ router.get('/profile', authenticateToken, async (req, res) => {
 });
 
 // PUT /api/user/profile - Update current user's profile
-router.put('/profile', authenticateToken, async (req, res) => {
+router.put('/profile', requireUser, async (req: any, res) => {
   try {
     const userId = req.user!.userId;
+    const existingUser = await storage.getUser(userId);
+    if (!existingUser) {
+      return res.status(404).json({ error: 'User not found' });
+    }
     
     // Validate request body
     const validationResult = updateProfileSchema.safeParse(req.body);
@@ -117,13 +94,15 @@ router.put('/profile', authenticateToken, async (req, res) => {
     const updateData = validationResult.data;
     
     // Calculate profile completeness
-    const profileCompleteness = calculateProfileCompleteness(updateData);
+    const profileCompleteness = calculateProfileCompleteness({
+      ...existingUser,
+      ...updateData,
+    });
     
     // Update user profile
     const updatedUser = await storage.updateUserProfile(userId, {
       ...updateData,
       profileCompleteness,
-      updatedAt: new Date(),
     });
 
     if (!updatedUser) {

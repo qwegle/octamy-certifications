@@ -307,27 +307,27 @@ export class LearningPathController {
   }
 
   private static async calculatePopularityScore(courseId: number): Promise<number> {
-    // This would typically query enrollment/completion stats
-    // For now, return a random score between 0-1
-    return Math.random() * 0.3;
+    // Popularity data is not persisted yet. A deterministic neutral score keeps
+    // recommendations stable instead of reordering them randomly on every call.
+    return 0;
   }
 
   private static checkPrerequisites(path: LearningPath, completedCourseIds: number[]): boolean {
-    if (!path.prerequisites?.requiredCourses) return true;
-    
-    return path.prerequisites.requiredCourses.every(reqId => 
+    if (!path.prerequisites?.length) return true;
+
+    return path.prerequisites.every((reqId) =>
       completedCourseIds.includes(reqId)
     );
   }
 
   private static calculateCompletionPotential(path: LearningPath, completedCourseIds: number[]): number {
-    if (!path.courseSequence) return 0;
-    
-    const completedInPath = path.courseSequence.filter(courseId => 
+    if (!path.courseIds.length) return 0;
+
+    const completedInPath = path.courseIds.filter((courseId) =>
       completedCourseIds.includes(courseId)
     ).length;
-    
-    return completedInPath / path.courseSequence.length;
+
+    return completedInPath / path.courseIds.length;
   }
 
   private static estimateTimeToComplete(path: LearningPath, userProgress: UserCourseProgress[]): number {

@@ -60,7 +60,7 @@ function QuestionsManagement() {
     }
   });
 
-  const { data: courses = [] } = useQuery({
+  const { data: courses = [] } = useQuery<any[]>({
     queryKey: ["/api/admin/courses"]
   });
 
@@ -1010,6 +1010,8 @@ interface AdminCourse {
   revenue: number;
   createdAt: string;
   category?: { id: number; name: string };
+  categoryName?: string;
+  certificateCount?: number;
 }
 
 interface ExamAttempt {
@@ -2532,7 +2534,7 @@ export default function AdminDashboard() {
                             <TableCell>
                               <div className="flex gap-2">
                                 {!partner.isApproved && (
-                                  <Button size="sm" onClick={() => handleApprovePartner(partner.id)}>
+                                  <Button size="sm" disabled={approveLoading} onClick={() => approvePartner(partner.id, true)}>
                                     Approve
                                   </Button>
                                 )}

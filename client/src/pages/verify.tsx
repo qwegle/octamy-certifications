@@ -16,8 +16,25 @@ import {
   BookOpen,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import octamyLogoDark from "@/assets/image_1750054456482.png";
-import octamyLogoLight from "@/assets/image_1750054465427.png";
+interface VerificationResponse {
+  valid?: boolean;
+  certificateId?: string;
+  certificateNumber?: string;
+  userName?: string;
+  courseTitle?: string;
+  badge?: string;
+  issuedAt?: string;
+  createdAt?: string;
+  expiresAt?: string;
+  certificate?: VerificationResponse;
+}
+
+function formatCertificateDate(value?: string) {
+  if (!value) return "N/A";
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? "N/A" : date.toLocaleDateString();
+}
+
 export default function Verify() {
   const [certificateId, setCertificateId] = useState("");
   const [searchAttempted, setSearchAttempted] = useState(false);
@@ -26,7 +43,7 @@ export default function Verify() {
     data: certificate,
     isLoading,
     error,
-  } = useQuery({
+  } = useQuery<VerificationResponse>({
     queryKey: [`/api/certificates/verify/${certificateId}`],
     enabled: searchAttempted && certificateId.length > 0,
     retry: false,
@@ -160,17 +177,9 @@ export default function Verify() {
                         <Calendar className="w-5 h-5 text-gray-500" />
                         <div>
                           <p className="text-sm text-gray-500">Issue Date</p>
-                          <p className="font-semibold">
-                            {certificate?.certificate?.issuedAt ||
-                            certificate?.issuedAt ||
-                            certificate?.createdAt
-                              ? new Date(
-                                  certificate?.certificate?.issuedAt ||
-                                    certificate?.issuedAt ||
-                                    certificate?.createdAt
-                                ).toLocaleDateString()
-                              : "N/A"}
-                          </p>
+                          <p className="font-semibold">{formatCertificateDate(
+                            certificate?.certificate?.issuedAt || certificate?.issuedAt || certificate?.createdAt
+                          )}</p>
                         </div>
                       </div>
 
@@ -178,15 +187,9 @@ export default function Verify() {
                         <Calendar className="w-5 h-5 text-gray-500" />
                         <div>
                           <p className="text-sm text-gray-500">Valid Until</p>
-                          <p className="font-semibold">
-                            {certificate?.certificate?.expiresAt ||
-                            certificate?.expiresAt
-                              ? new Date(
-                                  certificate?.certificate?.expiresAt ||
-                                    certificate?.expiresAt
-                                ).toLocaleDateString()
-                              : "N/A"}
-                          </p>
+                          <p className="font-semibold">{formatCertificateDate(
+                            certificate?.certificate?.expiresAt || certificate?.expiresAt
+                          )}</p>
                         </div>
                       </div>
 
@@ -198,7 +201,7 @@ export default function Verify() {
                           </p>
                           <p className="font-mono text-sm">
                             <Link
-                              to={`/certificate/${
+                              href={`/certificate/${
                                 certificate?.certificate?.certificateId ||
                                 certificate?.certificateId ||
                                 certificate?.certificateNumber ||

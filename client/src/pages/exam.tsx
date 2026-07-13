@@ -273,7 +273,7 @@ export default function Exam() {
           <link rel="canonical" href={`${window.location.origin}/exam/${courseSlug}`} />
         </Helmet>
         
-        {course && <ExamStructuredData course={course} rating={course.rating} />}
+        {course && <ExamStructuredData course={course} />}
         
         <Header />
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { apiRequest } from '@/lib/queryClient';
 
-interface Recruiter {
+export interface Recruiter {
   id: number;
   email: string;
   firstName: string;
@@ -10,6 +10,20 @@ interface Recruiter {
   kycStatus: 'pending' | 'under_review' | 'approved' | 'rejected';
   creditsBalance: string;
   registrationStep: number;
+  phone?: string;
+  designation?: string;
+  linkedinProfile?: string;
+  companyWebsite?: string;
+  companySize?: string;
+  industry?: string;
+  companyAddress?: string;
+  companyCity?: string;
+  companyState?: string;
+  companyCountry?: string;
+  gstNumber?: string;
+  panNumber?: string;
+  companyRegistrationNumber?: string;
+  isActive?: boolean;
 }
 
 interface RecruiterAuthContextType {
@@ -19,6 +33,7 @@ interface RecruiterAuthContextType {
   register: (email: string, password: string) => Promise<void>;
   logout: () => void;
   updateRegistrationStep: (step: number) => void;
+  updateRecruiter: (updates: Partial<Recruiter>) => void;
   isLoading: boolean;
 }
 
@@ -36,7 +51,9 @@ export function RecruiterAuthProvider({ children }: { children: ReactNode }) {
     if (storedToken && storedRecruiter) {
       // Check if token is expired before setting
       try {
-        const payload = JSON.parse(atob(storedToken.split('.')[1]));
+        const encodedPayload = storedToken.split('.')[1]?.replace(/-/g, '+').replace(/_/g, '/');
+        if (!encodedPayload) throw new Error('Invalid token');
+        const payload = JSON.parse(atob(encodedPayload.padEnd(Math.ceil(encodedPayload.length / 4) * 4, '=')));
         const currentTime = Date.now() / 1000;
         
         if (payload.exp < currentTime) {
@@ -99,6 +116,15 @@ export function RecruiterAuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const updateRecruiter = (updates: Partial<Recruiter>) => {
+    setRecruiter((current) => {
+      if (!current) return current;
+      const updated = { ...current, ...updates };
+      localStorage.setItem('recruiterData', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
   return (
     <RecruiterAuthContext.Provider value={{ 
       recruiter, 
@@ -107,6 +133,7 @@ export function RecruiterAuthProvider({ children }: { children: ReactNode }) {
       register, 
       logout, 
       updateRegistrationStep,
+      updateRecruiter,
       isLoading 
     }}>
       {children}

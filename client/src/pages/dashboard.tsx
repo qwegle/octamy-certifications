@@ -14,15 +14,12 @@ import {
   Trophy,
   Award,
   AlertCircle,
-  Brain,
   TrendingUp,
   DollarSign,
-  Play,
-  ArrowRight,
   Edit,
-  History,
+  ShieldCheck,
 } from "lucide-react";
-import type { Certificate, Interview } from "@shared/schema";
+import type { Certificate } from "@shared/schema";
 import DashboardAnalytics from "@/components/dashboard-analytics";
 import { useEffect } from "react";
 
@@ -51,14 +48,8 @@ export default function Dashboard() {
     enabled: !!user && !!token,
   });
 
-  // Fetch user's interviews
-  const { data: userInterviews = [] } = useQuery<Interview[]>({
-    queryKey: ["/api/user/interviews"],
-    enabled: !!user && !!token,
-  });
-
   // Fetch user's profile to get completeness
-  const { data: userProfile } = useQuery({
+  const { data: userProfile } = useQuery<{ profileCompleteness?: number }>({
     queryKey: ["/api/user/profile"],
     enabled: !!user && !!token,
   });
@@ -143,16 +134,6 @@ export default function Dashboard() {
         )
       : 0;
 
-  // Get recent interviews (last 3)
-  const recentInterviews = userInterviews
-    .filter((interview) => interview?.status === "completed")
-    .sort(
-      (a, b) =>
-        new Date(b?.completedAt!)?.getTime() -
-        new Date(a.completedAt!).getTime()
-    )
-    .slice(0, 3);
-
   return (
     <DashboardLayout role="learner" title={`Welcome back, ${user.name}!`} description="Manage your certificates and track your progress" actions={(
       <Link href="/profile-edit">
@@ -163,11 +144,11 @@ export default function Dashboard() {
       </Link>
     )}>
       {/* Key Performance Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-6 mb-8">
           <Card className="border-2 border-black">
-            <CardContent className="p-6 text-center bg-gradient-to-br from-gray-50 to-white">
-              <Award className="w-10 h-10 text-black mx-auto mb-3" />
-              <div className="text-3xl font-bold text-black">
+            <CardContent className="p-4 sm:p-6 text-center bg-gradient-to-br from-gray-50 to-white">
+              <Award className="w-8 h-8 sm:w-10 sm:h-10 text-black mx-auto mb-3" />
+              <div className="text-2xl sm:text-3xl font-bold text-black">
                 {certificates.length}
               </div>
               <div className="text-sm text-gray-600 font-medium">
@@ -177,21 +158,21 @@ export default function Dashboard() {
           </Card>
 
           <Card className="border-2 border-black">
-            <CardContent className="p-6 text-center bg-gradient-to-br from-gray-50 to-white">
-              <Brain className="w-10 h-10 text-black mx-auto mb-3" />
-              <div className="text-3xl font-bold text-black">
-                {userInterviews.length}
+            <CardContent className="p-4 sm:p-6 text-center bg-gradient-to-br from-gray-50 to-white">
+              <ShieldCheck className="w-8 h-8 sm:w-10 sm:h-10 text-black mx-auto mb-3" />
+              <div className="text-2xl sm:text-3xl font-bold text-black">
+                {activeCertificates.length}
               </div>
               <div className="text-sm text-gray-600 font-medium">
-                AI Interviews Taken
+                Verified Credentials
               </div>
             </CardContent>
           </Card>
 
           <Card className="border-2 border-black">
-            <CardContent className="p-6 text-center bg-gradient-to-br from-gray-50 to-white">
-              <DollarSign className="w-10 h-10 text-black mx-auto mb-3" />
-              <div className="text-3xl font-bold text-black">₹{moneySaved}</div>
+            <CardContent className="p-4 sm:p-6 text-center bg-gradient-to-br from-gray-50 to-white">
+              <DollarSign className="w-8 h-8 sm:w-10 sm:h-10 text-black mx-auto mb-3" />
+              <div className="text-2xl sm:text-3xl font-bold text-black">₹{moneySaved}</div>
               <div className="text-sm text-gray-600 font-medium">
                 Money Saved
               </div>
@@ -199,9 +180,9 @@ export default function Dashboard() {
           </Card>
 
           <Card className="border-2 border-black">
-            <CardContent className="p-6 text-center bg-gradient-to-br from-gray-50 to-white">
-              <TrendingUp className="w-10 h-10 text-black mx-auto mb-3" />
-              <div className="text-3xl font-bold text-black">
+            <CardContent className="p-4 sm:p-6 text-center bg-gradient-to-br from-gray-50 to-white">
+              <TrendingUp className="w-8 h-8 sm:w-10 sm:h-10 text-black mx-auto mb-3" />
+              <div className="text-2xl sm:text-3xl font-bold text-black">
                 {averageScore}%
               </div>
               <div className="text-sm text-gray-600 font-medium">
@@ -216,6 +197,16 @@ export default function Dashboard() {
           <h2 className="text-2xl font-bold text-black mb-6">
             Your Certificates
           </h2>
+
+          {certificatesLoading && (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3" aria-label="Loading certificates">
+              {[1, 2, 3].map((item) => <div key={item} className="h-52 animate-pulse rounded-xl bg-slate-200/70" />)}
+            </div>
+          )}
+
+          {certificatesError && (
+            <Card className="border-rose-200 bg-rose-50"><CardContent className="p-5 text-sm text-rose-800">We couldn't load your credentials. Refresh the page to try again.</CardContent></Card>
+          )}
 
           {/* Active Certificates */}
           {activeCertificates.length > 0 && (
@@ -319,6 +310,30 @@ export default function Dashboard() {
             </div>
           )}
 
+          {expiredCertificates.length > 0 && (
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-black mb-4">Expired credentials</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {expiredCertificates.map((certificate) => (
+                  <Card key={certificate.id} className="border-2 border-slate-300 bg-slate-50">
+                    <CardHeader className="pb-3">
+                      <Badge variant="outline" className="w-fit bg-white text-slate-700">Expired</Badge>
+                      <CardTitle className="text-lg text-black">{certificate.courseTitle}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <p className="text-sm text-slate-600">Score: <span className="font-semibold text-slate-900">{certificate.score}%</span></p>
+                      <p className="text-sm text-slate-600">Expired {new Date(certificate.expiresAt).toLocaleDateString()}</p>
+                      <div className="flex gap-2">
+                        <Button size="sm" variant="outline" onClick={() => setLocation(`/certificate/${certificate.certificateId}`)}>View record</Button>
+                        <Button size="sm" onClick={() => setLocation('/exams')} className="bg-slate-900 text-white">Retake exam</Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Unpaid Certificates */}
           {unpaidCertificates.length > 0 && (
             <div className="mb-6">
@@ -350,10 +365,8 @@ export default function Dashboard() {
                         </span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span className="text-octamy-gray-600">Expired:</span>
-                        <span className="font-semibold text-red-600">
-                          {new Date(certificate.expiresAt).toLocaleDateString()}
-                        </span>
+                        <span className="text-octamy-gray-600">Status:</span>
+                        <span className="font-semibold text-orange-700">Awaiting activation</span>
                       </div>
                       <div className="flex gap-2 pt-2">
                         <Button
@@ -373,8 +386,9 @@ export default function Dashboard() {
                         <Button
                           size="sm"
                           className="flex-1 bg-octamy-black text-white hover:bg-octamy-gray-800"
+                          onClick={() => setLocation(`/payment/${certificate.certificateId}`)}
                         >
-                          Renew - ₹199
+                          Activate
                         </Button>
                       </div>
                     </CardContent>
@@ -384,127 +398,24 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* AI Interviews Section */}
-          <div className="mb-8">
-            <div className="flex items-center md:flex-row flex-col gap-4 justify-between mb-6">
-              <h2 className="text-2xl font-bold text-black">AI Interviews</h2>
+          <Card className="mb-8 border-2 border-slate-900 bg-slate-950 text-white">
+            <CardContent className="p-8 flex flex-col md:flex-row md:items-center gap-6">
+              <ShieldCheck className="w-12 h-12 text-sky-300 flex-shrink-0" />
+              <div className="flex-1">
+                <h2 className="text-2xl font-bold">Your Skill Evidence Passport</h2>
+                <p className="mt-2 text-slate-300">
+                  Every paid credential is backed by a scored assessment and a live verification record you can share with employers.
+                </p>
+              </div>
               <div className="flex gap-3">
-                {recentInterviews.length > 0 && (
-                  <Link href="/ai-interviews">
-                    <Button
-                      variant="outline"
-                      className="border-black text-black hover:bg-gray-100"
-                    >
-                      <History className="w-4 h-4 mr-2" />
-                      View History
-                    </Button>
-                  </Link>
-                )}
-                <Link href="/ai-interviews">
-                  <Button className="bg-black text-white hover:bg-gray-800">
-                    <Play className="w-4 h-4 mr-2" />
-                    Start Interview Now
-                  </Button>
-                </Link>
+                <Link href="/exams"><Button className="bg-white text-slate-950 hover:bg-slate-100">Add evidence</Button></Link>
+                <Link href="/verify"><Button variant="outline" className="border-white/30 bg-transparent text-white hover:bg-white hover:text-slate-950">Verify a credential</Button></Link>
               </div>
-            </div>
-
-            {/* Recent Interviews Horizontal Scroll */}
-            {recentInterviews.length > 0 ? (
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold text-black mb-4">
-                  Recent Interview Results
-                </h3>
-                <div className="flex gap-4 overflow-x-auto pb-4">
-                  {recentInterviews.map((interview) => (
-                    <Card
-                      key={interview.id}
-                      className="flex-shrink-0 w-80 border-2 border-cream-deep hover:border-black transition-colors"
-                    >
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-between mb-3">
-                          <h4 className="font-semibold text-black">
-                            {interview.technology}
-                          </h4>
-                          <span
-                            className={`px-2 py-1 rounded text-sm font-medium ${
-                              interview.grade?.startsWith("A")
-                                ? "bg-green-100 text-green-800"
-                                : interview.grade?.startsWith("B")
-                                ? "bg-blue-100 text-blue-800"
-                                : interview.grade?.startsWith("C")
-                                ? "bg-yellow-100 text-yellow-800"
-                                : "bg-red-100 text-red-800"
-                            }`}
-                          >
-                            Grade {interview.grade}
-                          </span>
-                        </div>
-                        <div className="text-2xl font-bold text-black mb-2">
-                          {interview.score}/100
-                        </div>
-                        <div className="text-sm text-gray-600 mb-3">
-                          Completed on{" "}
-                          {new Date(
-                            interview.completedAt!
-                          ).toLocaleDateString()}
-                        </div>
-                        <Link href="/ai-interviews">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="w-full border-black text-black hover:bg-black hover:text-white"
-                          >
-                            View Details <ArrowRight className="w-3 h-3 ml-1" />
-                          </Button>
-                        </Link>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <Card className="border-2 border-black mb-6">
-                <CardContent className="p-8 text-center">
-                  <Brain className="w-16 h-16 text-black mx-auto mb-4" />
-                  <h3 className="text-xl font-bold text-black mb-2">
-                    Start Your First AI Interview
-                  </h3>
-                  <p className="text-gray-600 mb-6">
-                    Get personalized feedback, score analysis, and shareable
-                    results for recruiters
-                  </p>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-black">5-7</div>
-                      <div className="text-sm text-gray-600">
-                        Technical Questions
-                      </div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-black">45-60</div>
-                      <div className="text-sm text-gray-600">
-                        Minutes Duration
-                      </div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-black">₹99</div>
-                      <div className="text-sm text-gray-600">Per Session</div>
-                    </div>
-                  </div>
-                  <Link href="/ai-interviews">
-                    <Button className="bg-black text-white hover:bg-gray-800 px-8">
-                      <Play className="w-4 h-4 mr-2" />
-                      Start Your First Interview
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
-            )}
-          </div>
+            </CardContent>
+          </Card>
 
           {/* Empty State */}
-          {certificates.length === 0 && (
+          {!certificatesLoading && !certificatesError && certificates.length === 0 && (
             <Card className="border-2 border-black">
               <CardContent className="text-center py-12">
                 <Award className="w-16 h-16 text-gray-400 mx-auto mb-4" />
@@ -515,7 +426,7 @@ export default function Dashboard() {
                   You haven't taken any certification exams yet. Start your
                   journey today!
                 </p>
-                <Link href="/">
+                <Link href="/exams">
                   <Button className="bg-black text-white hover:bg-gray-800">
                     Browse Courses
                   </Button>

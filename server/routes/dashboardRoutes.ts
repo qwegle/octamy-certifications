@@ -37,6 +37,8 @@ import {
 import { storage } from '../storage';
 import { createCashfreeOrder } from '../lib/cashfree';
 import { z } from 'zod';
+import crypto from 'node:crypto';
+import { authenticateRecruiterToken } from './recruiterRoutes';
 
 const router = Router();
 
@@ -61,6 +63,10 @@ async function uniqueSlug(base: string, attempts = 5): Promise<string> {
     candidate = `${base}-${Math.random().toString(36).slice(2, 6)}`;
   }
   return `${base}-${Date.now()}`;
+}
+
+async function resolveRecruiterByUser(email: string) {
+  return storage.getRecruiterByEmail(email.trim().toLowerCase());
 }
 
 // =================================================================
@@ -475,19 +481,13 @@ router.get('/institute/reports', authenticateToken, requireInstituteRole('teache
 });
 
 // =================================================================
-// RECRUITER — saved searches (uses generic auth — recruiter ID resolved by email)
+// RECRUITER — saved searches
 // =================================================================
 
-async function resolveRecruiterByUser(userEmail: string) {
-  const [rec] = await db.select().from(recruiters).where(eq(recruiters.email, userEmail.toLowerCase()));
-  return rec;
-}
-
-router.get('/recruiter/saved-searches', authenticateToken, async (req: any, res: Response) => {
+router.get('/recruiter/saved-searches', authenticateRecruiterToken, async (req: any, res: Response) => {
   try {
-    const rec = await resolveRecruiterByUser(req.user.email);
-    if (!rec) return res.status(403).json({ message: 'Recruiter profile required' });
-    const rows = await db.select().from(savedSearches).where(eq(savedSearches.recruiterId, rec.id)).orderBy(desc(savedSearches.createdAt));
+    const recruiterId = req.recruiter.recruiterId;
+    const rows = await db.select().from(savedSearches).where(eq(savedSearches.recruiterId, recruiterId)).orderBy(desc(savedSearches.createdAt));
     res.json(rows);
   } catch (err: any) {
     console.error('GET /recruiter/saved-searches', err);
@@ -495,14 +495,13 @@ router.get('/recruiter/saved-searches', authenticateToken, async (req: any, res:
   }
 });
 
-router.post('/recruiter/saved-searches', authenticateToken, async (req: any, res: Response) => {
+router.post('/recruiter/saved-searches', authenticateRecruiterToken, async (req: any, res: Response) => {
   try {
-    const rec = await resolveRecruiterByUser(req.user.email);
-    if (!rec) return res.status(403).json({ message: 'Recruiter profile required' });
+    const recruiterId = req.recruiter.recruiterId;
     const { name, filters } = req.body;
     if (!name || !filters) return res.status(400).json({ message: 'name and filters required' });
     const [row] = await db.insert(savedSearches).values({
-      recruiterId: rec.id,
+      recruiterId,
       name: String(name).trim().slice(0, 100),
       filters,
     }).returning();
@@ -513,12 +512,11 @@ router.post('/recruiter/saved-searches', authenticateToken, async (req: any, res
   }
 });
 
-router.delete('/recruiter/saved-searches/:id', authenticateToken, async (req: any, res: Response) => {
+router.delete('/recruiter/saved-searches/:id', authenticateRecruiterToken, async (req: any, res: Response) => {
   try {
-    const rec = await resolveRecruiterByUser(req.user.email);
-    if (!rec) return res.status(403).json({ message: 'Recruiter profile required' });
+    const recruiterId = req.recruiter.recruiterId;
     const id = Number(req.params.id);
-    await db.delete(savedSearches).where(and(eq(savedSearches.id, id), eq(savedSearches.recruiterId, rec.id)));
+    await db.delete(savedSearches).where(and(eq(savedSearches.id, id), eq(savedSearches.recruiterId, recruiterId)));
     res.json({ ok: true });
   } catch (err: any) {
     console.error('DELETE /recruiter/saved-searches/:id', err);
@@ -576,18 +574,12 @@ router.get('/user/exam-history', authenticateToken, async (req: any, res: Respon
 const SUB_PLANS: Record<string, Record<string, { amount: number; cycle: 'monthly' | 'yearly' }>> = {
   creator: {
     free:    { amount: 0,    cycle: 'monthly' },
-    pro:     { amount: 999,  cycle: 'monthly' },
-    premium: { amount: 2999, cycle: 'monthly' },
+    pro:     { amount: 499,  cycle: 'monthly' },
+    premium: { amount: 1999, cycle: 'monthly' },
   },
   institute: {
-    starter:    { amount: 0,     cycle: 'monthly' },
-    growth:     { amount: 4999,  cycle: 'monthly' },
-    enterprise: { amount: 19999, cycle: 'monthly' },
-  },
-  recruiter: {
-    starter:    { amount: 0,     cycle: 'monthly' },
-    growth:     { amount: 2999,  cycle: 'monthly' },
-    enterprise: { amount: 9999,  cycle: 'monthly' },
+    starter: { amount: 2999, cycle: 'monthly' },
+    growth:  { amount: 9999, cycle: 'monthly' },
   },
 };
 
@@ -595,8 +587,10 @@ router.post('/subscriptions/checkout', authenticateToken, async (req: any, res: 
   try {
     const { ownerType, plan, cycle = 'monthly' } = req.body || {};
     if (!ownerType || !plan) return res.status(400).json({ message: 'ownerType and plan required' });
+    if (cycle !== 'monthly' && cycle !== 'yearly') return res.status(400).json({ message: 'Invalid billing cycle' });
     const planRow = SUB_PLANS[ownerType]?.[plan];
     if (!planRow) return res.status(400).json({ message: 'Unknown plan' });
+    const chargeAmount = cycle === 'yearly' ? planRow.amount * 10 : planRow.amount;
 
     let ownerId: number | null = null;
     if (ownerType === 'creator') {
@@ -616,16 +610,20 @@ router.post('/subscriptions/checkout', authenticateToken, async (req: any, res: 
 
     // Free plan = activate directly, no payment.
     if (planRow.amount === 0) {
-      await activatePlan(ownerType, ownerId!, plan, null);
-      return res.json({ ok: true, free: true, plan });
+      await activatePlan(ownerType, ownerId!, plan, null, cycle);
+      return res.json({ ok: true, activated: true, free: true, plan });
     }
 
-    const baseUrl = process.env.PUBLIC_URL || `https://${req.get('host')}`;
+    const baseUrl = (process.env.APP_URL || process.env.PUBLIC_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
+    const customer = await storage.getUser(req.user.userId);
+    const orderId = `SUB_${crypto.randomUUID()}`;
     const order = await createCashfreeOrder({
-      orderAmount: planRow.amount,
+      orderId,
+      amount: chargeAmount.toFixed(2),
+      customerId: `oct_user_${req.user.userId}`,
       customerEmail: req.user.email,
-      customerName: req.user.email.split('@')[0],
-      customerPhone: '0000000000',
+      customerName: customer?.name || req.user.email.split('@')[0],
+      customerPhone: customer?.phone || '9999999999',
       returnUrl: `${baseUrl}/billing/return?ownerType=${ownerType}&plan=${plan}`,
       notifyUrl: `${baseUrl}/api/webhooks/cashfree`,
       notes: {
@@ -644,7 +642,7 @@ router.post('/subscriptions/checkout', authenticateToken, async (req: any, res: 
       userId: req.user.userId,
       plan,
       status: 'pending',
-      amount: String(planRow.amount),
+      amount: String(chargeAmount),
       cycle,
       cashfreeOrderId: order.orderId,
     }).returning();
@@ -654,7 +652,7 @@ router.post('/subscriptions/checkout', authenticateToken, async (req: any, res: 
       paymentSessionId: order.paymentSessionId,
       paymentLink: order.paymentLink,
       subscriptionId: sub.id,
-      amount: planRow.amount,
+      amount: chargeAmount,
     });
   } catch (err: any) {
     console.error('POST /subscriptions/checkout', err);
@@ -668,8 +666,17 @@ export async function activatePlan(
   ownerId: number,
   plan: string,
   cashfreeOrderId: string | null,
+  requestedCycle: 'monthly' | 'yearly' = 'monthly',
 ) {
-  const renewsAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // +30d
+  let cycle = requestedCycle;
+  if (cashfreeOrderId) {
+    const [subscription] = await db.select({ cycle: subscriptions.cycle })
+      .from(subscriptions)
+      .where(eq(subscriptions.cashfreeOrderId, cashfreeOrderId));
+    if (subscription?.cycle === 'yearly') cycle = 'yearly';
+  }
+  const durationDays = cycle === 'yearly' ? 365 : 30;
+  const renewsAt = new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000);
   if (ownerType === 'creator') {
     await db.update(creators).set({ plan, planRenewsAt: renewsAt }).where(eq(creators.id, ownerId));
   } else if (ownerType === 'institute') {

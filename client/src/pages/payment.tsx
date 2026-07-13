@@ -11,7 +11,7 @@ import PayUMoneyForm from '@/components/payumoney-form';
 import { QrCode, Download, Share2, Trophy, Calendar, Award, Truck, MapPin, UserPlus, ShieldCheck } from 'lucide-react';
 import { Link } from 'wouter';
 import { useAuth } from '@/hooks/useAuth';
-import type { Certificate } from '@shared/schema';
+import type { Certificate, Course } from '@shared/schema';
 import { useState, useEffect } from 'react';
 import { apiRequest } from '@/lib/queryClient';
 
@@ -40,7 +40,7 @@ export default function Payment() {
   });
 
   // Fetch course details to get pricing information
-  const { data: course } = useQuery({
+  const { data: course } = useQuery<Course>({
     queryKey: [`/api/courses/${certificate?.courseId}`],
     enabled: !!certificate?.courseId,
   });
@@ -235,7 +235,7 @@ export default function Payment() {
                       <div className="text-center p-4 border border-dashed rounded-lg">
                         <MapPin className="w-8 h-8 text-gray-400 mx-auto mb-2" />
                         <p className="text-gray-600 mb-2">No shipping addresses found</p>
-                        <Button variant="outline" onClick={() => setLocation('/profile')}>
+                        <Button variant="outline" onClick={() => setLocation('/profile-edit')}>
                           Add Shipping Address
                         </Button>
                       </div>

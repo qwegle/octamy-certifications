@@ -36,6 +36,7 @@ interface UserProfile {
   portfolioUrl?: string;
   careerGoals?: string;
   profileVisibility?: boolean;
+  resume?: string;
 }
 
 interface FileUploadResponse {
@@ -85,6 +86,7 @@ export default function ProfileEdit() {
     portfolioUrl: '',
     careerGoals: '',
     profileVisibility: true,
+    resume: '',
   });
 
   // Initialize form with user data when user context loads
@@ -100,7 +102,7 @@ export default function ProfileEdit() {
   }, [user]);
 
   // Fetch current profile data - Use existing user data as fallback
-  const { data: profile, isLoading } = useQuery({
+  const { data: profile, isLoading } = useQuery<UserProfile>({
     queryKey: ['/api/user/profile'],
     enabled: !!user && !!token,
     queryFn: async () => {
@@ -159,7 +161,9 @@ export default function ProfileEdit() {
           portfolioUrl: data.portfolioUrl || '',
           careerGoals: data.careerGoals || '',
           profileVisibility: data.profileVisibility ?? true,
+          resume: data.resume || '',
         });
+        setUploadedCvUrl(data.resume || '');
         return data;
       } catch (error) {
         console.error('Error fetching profile:', error);
@@ -188,6 +192,7 @@ export default function ProfileEdit() {
     },
     onSuccess: (data) => {
       setUploadedCvUrl(data.fileUrl);
+      setFormData((current) => ({ ...current, resume: data.fileUrl }));
       toast({
         title: 'File Uploaded',
         description: 'Your CV/Resume has been uploaded successfully.',
@@ -219,14 +224,12 @@ export default function ProfileEdit() {
       }
       return response.json();
     },
-    onSuccess: (data) => {
-      if (data.success && data.user) {
-        toast({
-          title: 'Profile Updated',
-          description: 'Your profile has been successfully updated.',
-        });
-        setLocation('/dashboard');
-      }
+    onSuccess: () => {
+      toast({
+        title: 'Profile Updated',
+        description: 'Your profile has been successfully updated.',
+      });
+      setLocation('/dashboard');
     },
     onError: (error: Error) => {
       toast({
@@ -237,7 +240,7 @@ export default function ProfileEdit() {
     },
   });
 
-  const handleInputChange = (field: keyof UserProfile, value: string) => {
+  const handleInputChange = <K extends keyof UserProfile>(field: K, value: UserProfile[K]) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 

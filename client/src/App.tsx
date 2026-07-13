@@ -38,6 +38,7 @@ const CreatorLanding = lazy(() => import("@/pages/creator-landing"));
 const InstituteLanding = lazy(() => import("@/pages/institute-landing"));
 const RecruiterLanding = lazy(() => import("@/pages/recruiter-landing"));
 const Pricing = lazy(() => import("@/pages/pricing"));
+const BillingReturn = lazy(() => import("@/pages/billing-return"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 const HelpCenter = lazy(() => import("@/pages/help-center"));
 const About = lazy(() => import("@/pages/about"));
@@ -119,10 +120,10 @@ function Router() {
       <Route path="/logout" component={Auth} />
 
       {/* Role-prefixed canonical auth — all unified Login / Register */}
-      <Route path="/partners/login" component={Login} />
-      <Route path="/partners/register" component={Register} />
-      <Route path="/recruiter/login" component={Login} />
-      <Route path="/recruiter/register" component={Register} />
+      <Route path="/partners/login" component={SellerAuth} />
+      <Route path="/partners/register" component={SellerAuth} />
+      <Route path="/recruiter/login" component={RecruiterAuth} />
+      <Route path="/recruiter/register" component={RecruiterAuth} />
       <Route path="/creator/login" component={Login} />
       <Route path="/creator/register" component={Register} />
       <Route path="/institute/login" component={Login} />
@@ -135,6 +136,7 @@ function Router() {
 
       {/* Pricing */}
       <Route path="/pricing" component={Pricing} />
+      <Route path="/billing/return" component={BillingReturn} />
       <Route path="/exams" component={Courses} />
       <Route path="/courses" component={Courses} />
       <Route path="/skill-verification" component={Courses} />
@@ -144,7 +146,9 @@ function Router() {
       <Route path="/sponsor" component={SponsorPage} />
       <Route path="/intern-payment" component={InternShipPayment} />
       <Route path="/qwegle/login" component={AdminLogin} />
+      <Route path="/admin/login" component={AdminLogin} />
       <Route path="/qwegle/dashboard" component={AdminDashboard} />
+      <Route path="/admin/dashboard" component={AdminDashboard} />
       <Route path="/admin/approvals" component={AdminApprovals} />
       <Route path="/qwegle/approvals" component={AdminApprovals} />
       <Route path="/enhanced-admin" component={EnhancedAdminDashboard} />
@@ -152,6 +156,8 @@ function Router() {
       <Route path="/exam-results-temp/:tempExamId" component={TempExamResults} />
       <Route path="/payment" component={PaymentTemp} />
       <Route path="/checkout/:courseId" component={EnhancedCheckout} />
+      <Route path="/payment/success" component={PaymentSuccess} />
+      <Route path="/payment/failure" component={PaymentFailed} />
       <Route path="/payment/:certificateId" component={Payment} />
       <Route path="/internship-payment/:certificateId" component={InternshipPayment} />
       <Route path="/certificate/:certificateId" component={Certificate} />
@@ -205,11 +211,14 @@ function Router() {
       <Route path="/payment-failed" component={PaymentFailed} />
       <Route path="/demo-certificate" component={DemoCertificate} />
       <Route path="/demo-business-certificate" component={DemoBusinessCertificate} />
+      <Route path="/business-demo" component={DemoBusinessCertificate} />
       <Route path="/demo-internship-certificate" component={DemoInternshipCertificate} />
       <Route path="/business-certificates" component={BusinessCertificates} />
       <Route path="/internship/:slug" component={InternshipForm} />
       <Route path="/contact" component={Contact} />
       <Route path="/profile-edit" component={ProfileEdit} />
+      <Route path="/profile" component={ProfileEdit} />
+      <Route path="/my-certificates" component={Dashboard} />
       
       {/* Recruiter Portal Routes */}
       <Route path="/recruiter/auth" component={RecruiterAuth} />

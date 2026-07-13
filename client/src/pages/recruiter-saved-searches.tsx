@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'wouter';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import Header from '@/components/header';
-import Footer from '@/components/footer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,8 +8,9 @@ import { apiRequest, queryClient } from '@/lib/queryClient';
 import { SEO } from '@/components/seo';
 import { useToast } from '@/hooks/use-toast';
 import { Bookmark, Trash2, Search } from 'lucide-react';
+import RecruiterLayout from '../../../recruiter/components/RecruiterLayout';
 
-type Saved = { id: number; name: string; query: any; createdAt: string };
+type Saved = { id: number; name: string; filters: { skills?: string[]; minScore?: number }; createdAt: string };
 
 export default function RecruiterSavedSearches() {
   const { toast } = useToast();
@@ -27,7 +26,7 @@ export default function RecruiterSavedSearches() {
   const save = useMutation({
     mutationFn: async () => (await apiRequest('POST', '/api/recruiter/saved-searches', {
       name,
-      query: { skills: skills.split(',').map((s) => s.trim()).filter(Boolean), minScore },
+      filters: { skills: skills.split(',').map((s) => s.trim()).filter(Boolean), minScore },
     })).json(),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/recruiter/saved-searches'] });
@@ -42,10 +41,9 @@ export default function RecruiterSavedSearches() {
   });
 
   return (
-    <div className="min-h-screen bg-cream-soft flex flex-col">
+    <RecruiterLayout><div>
       <SEO title="Saved searches" description="Reusable candidate filters for your team." path="/recruiter/saved-searches" />
-      <Header />
-      <main className="flex-1">
+      <main>
         <div className="max-w-4xl mx-auto px-4 py-10">
           <p className="text-xs uppercase tracking-wide text-slate-500">Recruiter</p>
           <h1 className="text-3xl font-semibold text-slate-900 mb-1">Saved searches</h1>
@@ -76,12 +74,12 @@ export default function RecruiterSavedSearches() {
                 <div>
                   <p className="font-medium text-slate-900">{s.name}</p>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    {Array.isArray(s.query?.skills) && s.query.skills.length > 0 ? s.query.skills.join(', ') : 'Any skill'}
-                    {typeof s.query?.minScore === 'number' ? ` · min ${s.query.minScore}%` : ''}
+                    {Array.isArray(s.filters?.skills) && s.filters.skills.length > 0 ? s.filters.skills.join(', ') : 'Any skill'}
+                    {typeof s.filters?.minScore === 'number' ? ` · min ${s.filters.minScore}%` : ''}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Link href={`/recruiter/search?skills=${encodeURIComponent((s.query?.skills || []).join(','))}&minScore=${s.query?.minScore ?? ''}`}>
+                  <Link href={`/recruiter/search?skills=${encodeURIComponent((s.filters?.skills || []).join(','))}&minScore=${s.filters?.minScore ?? ''}`}>
                     <Button size="sm" variant="outline"><Search className="w-3.5 h-3.5 mr-1.5"/> Open</Button>
                   </Link>
                   <Button size="sm" variant="ghost" onClick={() => del.mutate(s.id)}>
@@ -93,7 +91,6 @@ export default function RecruiterSavedSearches() {
           </div>
         </div>
       </main>
-      <Footer />
-    </div>
+    </div></RecruiterLayout>
   );
 }

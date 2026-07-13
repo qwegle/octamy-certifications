@@ -348,7 +348,7 @@ export class DatabaseStorage implements IStorage {
   async updateUserProfile(id: number, updates: Partial<InsertUser>): Promise<User | undefined> {
     const [user] = await db
       .update(users)
-      .set(updates)
+      .set({ ...updates, updatedAt: new Date() })
       .where(eq(users.id, id))
       .returning();
     return user || undefined;
@@ -476,6 +476,10 @@ export class DatabaseStorage implements IStorage {
         isInternship: courses.isInternship,
         metaTitle: courses.metaTitle,
         metaDescription: courses.metaDescription,
+        ownerType: courses.ownerType,
+        ownerId: courses.ownerId,
+        visibility: courses.visibility,
+        useBlueprintEngine: courses.useBlueprintEngine,
         createdAt: courses.createdAt,
         category: {
           id: categories.id,
@@ -487,7 +491,11 @@ export class DatabaseStorage implements IStorage {
       })
       .from(courses)
       .innerJoin(categories, eq(courses.categoryId, categories.id))
-      .where(categoryId ? eq(courses.categoryId, categoryId) : undefined);
+      .where(and(
+        eq(courses.isActive, true),
+        eq(courses.visibility, "public"),
+        categoryId ? eq(courses.categoryId, categoryId) : undefined,
+      ));
 
     return await query;
   }
@@ -524,6 +532,10 @@ export class DatabaseStorage implements IStorage {
         isInternship: courses.isInternship,
         metaTitle: courses.metaTitle,
         metaDescription: courses.metaDescription,
+        ownerType: courses.ownerType,
+        ownerId: courses.ownerId,
+        visibility: courses.visibility,
+        useBlueprintEngine: courses.useBlueprintEngine,
         createdAt: courses.createdAt,
         category: {
           id: categories.id,
@@ -535,7 +547,11 @@ export class DatabaseStorage implements IStorage {
       })
       .from(courses)
       .innerJoin(categories, eq(courses.categoryId, categories.id))
-      .where(eq(courses.slug, slug));
+      .where(and(
+        eq(courses.slug, slug),
+        eq(courses.isActive, true),
+        eq(courses.visibility, "public"),
+      ));
 
     const [result] = await query;
     return result || undefined;
@@ -1678,19 +1694,15 @@ export class DatabaseStorage implements IStorage {
 
   // Learning Path operations
   async getLearningPaths(filters?: { categoryId?: number; difficulty?: string }): Promise<(LearningPath & { category: Category })[]> {
-    let query = db
+    const conditions = [eq(learningPaths.isActive, true)];
+    if (filters?.categoryId) conditions.push(eq(learningPaths.categoryId, filters.categoryId));
+    if (filters?.difficulty) conditions.push(eq(learningPaths.difficulty, filters.difficulty));
+
+    const query = db
       .select()
       .from(learningPaths)
       .leftJoin(categories, eq(learningPaths.categoryId, categories.id))
-      .where(eq(learningPaths.isActive, true));
-
-    if (filters?.categoryId) {
-      query = query.where(eq(learningPaths.categoryId, filters.categoryId));
-    }
-    
-    if (filters?.difficulty) {
-      query = query.where(eq(learningPaths.difficulty, filters.difficulty));
-    }
+      .where(and(...conditions));
 
     const results = await query.orderBy(desc(learningPaths.createdAt));
     return results.map(row => ({
@@ -1736,20 +1748,31 @@ export class DatabaseStorage implements IStorage {
       ));
 
     if (existing.length > 0) {
-      throw new Error('User is already enrolled in this learning path');
+      return existing[0];
     }
 
     const [result] = await db
       .insert(userLearningPaths)
       .values(enrollment)
+      .onConflictDoNothing({
+        target: [userLearningPaths.userId, userLearningPaths.learningPathId],
+      })
       .returning();
-    return result;
+    if (result) return result;
+    const [concurrentEnrollment] = await db
+      .select()
+      .from(userLearningPaths)
+      .where(and(
+        eq(userLearningPaths.userId, enrollment.userId),
+        eq(userLearningPaths.learningPathId, enrollment.learningPathId),
+      ));
+    return concurrentEnrollment;
   }
 
   async updateLearningPathProgress(userId: number, learningPathId: number, updates: Partial<InsertUserLearningPath>): Promise<UserLearningPath> {
     const [result] = await db
       .update(userLearningPaths)
-      .set({ ...updates, updatedAt: new Date() })
+      .set(updates)
       .where(and(
         eq(userLearningPaths.userId, userId),
         eq(userLearningPaths.learningPathId, learningPathId)
@@ -2436,7 +2459,10 @@ export class DatabaseStorage implements IStorage {
 
   // Delete question (admin)
   async deleteQuestionAdmin(id: number) {
-    await db.delete(questions).where(eq(questions.id, id));
+    const [question] = await db.delete(questions)
+      .where(eq(questions.id, id))
+      .returning();
+    return question;
   }
 
   // Get exam attempts for admin
@@ -2630,14 +2656,52 @@ export class DatabaseStorage implements IStorage {
 
   async searchCandidates(filters: any = {}, page: number = 1, limit: number = 10) {
     try {
-      console.log('Search filters received:', filters);
-      
-      // Simple approach: get all users first 
-      const offset = (page - 1) * limit;
-      
-      // Get all users with basic pagination, no complex filtering for now
-      const allCandidates = await db.select().from(users)
-        .limit(limit)
+      const safePage = Math.max(1, Number(page) || 1);
+      const safeLimit = Math.min(50, Math.max(1, Number(limit) || 10));
+      const offset = (safePage - 1) * safeLimit;
+      const conditions: any[] = [eq(users.profileVisibility, true), eq(users.isAdmin, false)];
+
+      if (typeof filters.location === 'string' && filters.location.trim()) {
+        conditions.push(ilike(users.location, `%${filters.location.trim()}%`));
+      }
+      const minExperience = Number(filters.experience?.min);
+      const maxExperience = Number(filters.experience?.max);
+      if (Number.isFinite(minExperience)) conditions.push(gte(users.experience, Math.max(0, minExperience)));
+      if (Number.isFinite(maxExperience)) conditions.push(lte(users.experience, Math.max(0, maxExperience)));
+      if (typeof filters.availability === 'string' && filters.availability) conditions.push(eq(users.availability, filters.availability));
+      if (typeof filters.noticePeriod === 'string' && filters.noticePeriod) conditions.push(eq(users.noticePeriod, filters.noticePeriod));
+
+      const requestedSkills = [...(Array.isArray(filters.skills) ? filters.skills : []), ...(Array.isArray(filters.technology) ? filters.technology : [])]
+        .map((value: unknown) => String(value).trim())
+        .filter(Boolean);
+      if (requestedSkills.length) conditions.push(sql`${users.skills} && ${requestedSkills}::text[]`);
+      if (Array.isArray(filters.workType) && filters.workType.length) conditions.push(sql`${users.workType} && ${filters.workType}::text[]`);
+      if (Array.isArray(filters.category) && filters.category.length) conditions.push(sql`${users.category} && ${filters.category}::text[]`);
+      if (filters.hasCertificates) conditions.push(sql`EXISTS (SELECT 1 FROM certificates c WHERE c.user_id = ${users.id} AND c.is_active = true AND c.is_paid = true)`);
+      if (filters.hasInterviews) conditions.push(sql`EXISTS (SELECT 1 FROM interviews i WHERE i.user_id = ${users.id})`);
+      const minScore = Number(filters.minScore);
+      if (Number.isFinite(minScore) && minScore > 0) {
+        conditions.push(sql`EXISTS (SELECT 1 FROM certificates c WHERE c.user_id = ${users.id} AND c.is_active = true AND c.is_paid = true AND c.score >= ${Math.min(100, minScore)})`);
+      }
+
+      const whereClause = and(...conditions);
+      const allCandidates = await db.select({
+        id: users.id,
+        name: users.name,
+        location: users.location,
+        experience: users.experience,
+        currentRole: users.currentRole,
+        skills: users.skills,
+        availability: users.availability,
+        noticePeriod: users.noticePeriod,
+        workType: users.workType,
+        category: users.category,
+        profileCompleteness: users.profileCompleteness,
+        lastActive: users.lastActive,
+      }).from(users)
+        .where(whereClause)
+        .orderBy(desc(users.lastActive))
+        .limit(safeLimit)
         .offset(offset);
 
       // Get additional details for each candidate
@@ -2675,17 +2739,14 @@ export class DatabaseStorage implements IStorage {
       );
 
       // Get total count
-      const totalResult = await db.select({ count: sql`count(*)` }).from(users);
+      const totalResult = await db.select({ count: sql`count(*)` }).from(users).where(whereClause);
       const total = Number(totalResult[0]?.count) || 0;
-
-      console.log('Search completed, returning:', candidatesWithDetails.length, 'candidates');
-      console.log('Candidate IDs found:', candidatesWithDetails.map(c => c.id));
 
       return {
         candidates: candidatesWithDetails,
         total,
-        page,
-        totalPages: Math.ceil(total / limit)
+        page: safePage,
+        totalPages: Math.ceil(total / safeLimit)
       };
     } catch (error) {
       console.error('Search error:', error);
@@ -2702,8 +2763,26 @@ export class DatabaseStorage implements IStorage {
     try {
       console.log('Getting candidate profile for ID:', candidateId);
       
-      // Get basic user information with simple select
-      const candidate = await db.select().from(users).where(eq(users.id, candidateId));
+      const candidate = await db.select({
+        id: users.id,
+        email: users.email,
+        name: users.name,
+        location: users.location,
+        experience: users.experience,
+        currentRole: users.currentRole,
+        skills: users.skills,
+        availability: users.availability,
+        noticePeriod: users.noticePeriod,
+        expectedSalary: users.expectedSalary,
+        workType: users.workType,
+        category: users.category,
+        linkedinProfile: users.linkedinProfile,
+        portfolioUrl: users.portfolioUrl,
+        bio: users.bio,
+        careerGoals: users.careerGoals,
+        lastActive: users.lastActive,
+        profileCompleteness: users.profileCompleteness,
+      }).from(users).where(and(eq(users.id, candidateId), eq(users.profileVisibility, true), eq(users.isAdmin, false)));
 
       if (!candidate || candidate.length === 0) {
         console.log('Candidate not found');
@@ -2711,19 +2790,26 @@ export class DatabaseStorage implements IStorage {
       }
 
       const candidateData = candidate[0];
-      console.log('Found candidate:', candidateData.name);
+      const certs = await db.select({
+        id: certificates.id,
+        courseTitle: certificates.courseTitle,
+        score: certificates.score,
+        badge: certificates.badge,
+        issuedAt: certificates.issuedAt,
+        expiresAt: certificates.expiresAt,
+        certificateId: certificates.certificateId,
+      }).from(certificates)
+        .where(and(eq(certificates.userId, candidateId), eq(certificates.isActive, true), eq(certificates.isPaid, true)));
 
-      // Get certificates with simple select
-      const certs = await db.select().from(certificates)
-        .where(eq(certificates.userId, candidateId));
-
-      console.log('Found certificates:', certs.length);
-
-      // Get interviews with simple select
-      const userInterviews = await db.select().from(interviews)
-        .where(eq(interviews.userId, candidateId));
-
-      console.log('Found interviews:', userInterviews.length);
+      const userInterviews = await db.select({
+        id: interviews.id,
+        technology: interviews.technology,
+        status: interviews.status,
+        score: interviews.score,
+        grade: interviews.grade,
+        completedAt: interviews.completedAt,
+      }).from(interviews)
+        .where(and(eq(interviews.userId, candidateId), eq(interviews.status, 'completed')));
 
       return {
         ...candidateData,
@@ -2741,7 +2827,7 @@ export class DatabaseStorage implements IStorage {
     const recruiter = await this.getRecruiterById(recruiterId);
     if (!recruiter) throw new Error('Recruiter not found');
 
-    const currentBalance = parseFloat(recruiter.creditsBalance);
+    const currentBalance = Number(recruiter.creditsBalance || 0);
     const newBalance = currentBalance - creditsRequired;
 
     await db.update(recruiters)
@@ -2805,7 +2891,7 @@ export class DatabaseStorage implements IStorage {
     const recruiter = await this.getRecruiterById(recruiterId);
     if (!recruiter) throw new Error('Recruiter not found');
 
-    const currentBalance = parseFloat(recruiter.creditsBalance);
+    const currentBalance = Number(recruiter.creditsBalance || 0);
     const newBalance = currentBalance + amount;
 
     await db.update(recruiters)

@@ -183,7 +183,7 @@ export class CertificateController {
         return res.status(401).json({ message: "Unauthorized" });
       }
 
-      const certificates = await storage.getCertificates();
+      const certificates = await storage.getUserCertificates(userId);
       res.json(certificates);
     } catch (error) {
       console.error("Get user certificates error:", error);

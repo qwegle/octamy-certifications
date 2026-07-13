@@ -8,12 +8,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Building2, Globe, Users, FileText, Save, Shield } from "lucide-react";
-import { useRecruiterAuth } from "../auth/RecruiterAuthProvider";
+import { useRecruiterAuth, type Recruiter } from "../auth/RecruiterAuthProvider";
+import RecruiterLayout from "../components/RecruiterLayout";
+import { apiRequest } from "@/lib/queryClient";
 
 export default function RecruiterSettings() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { user } = useRecruiterAuth();
+  const { token, updateRecruiter } = useRecruiterAuth();
   const [formData, setFormData] = useState({
     companyName: "",
     companyWebsite: "",
@@ -29,14 +31,10 @@ export default function RecruiterSettings() {
   });
 
   // Fetch recruiter profile data
-  const { data: profile, isLoading } = useQuery({
+  const { data: profile, isLoading, error: profileError } = useQuery<Recruiter>({
     queryKey: ["/api/recruiter/profile"],
-    enabled: !!user?.token,
-    meta: {
-      headers: {
-        Authorization: `Bearer ${user?.token}`
-      }
-    }
+    enabled: !!token,
+    queryFn: async () => (await apiRequest('GET', '/api/recruiter/profile')).json(),
   });
 
   useEffect(() => {
@@ -61,21 +59,7 @@ export default function RecruiterSettings() {
   // Update company information mutation
   const updateCompanyMutation = useMutation({
     mutationFn: async (data: any) => {
-      const response = await fetch("/api/recruiter/company", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${user?.token}`
-        },
-        body: JSON.stringify(data)
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Failed to update company information");
-      }
-      
-      return response.json();
+      return (await apiRequest('PUT', '/api/recruiter/company', data)).json();
     },
     onSuccess: () => {
       toast({
@@ -83,6 +67,7 @@ export default function RecruiterSettings() {
         description: "Company information updated successfully"
       });
       queryClient.invalidateQueries({ queryKey: ["/api/recruiter/profile"] });
+      updateRecruiter({ companyName: formData.companyName });
     },
     onError: (error: any) => {
       toast({
@@ -129,7 +114,7 @@ export default function RecruiterSettings() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-cream-soft dark:bg-black p-6">
+      <RecruiterLayout><div className="p-6">
         <div className="max-w-4xl mx-auto">
           <div className="animate-pulse space-y-6">
             <div className="h-8 bg-gray-200 dark:bg-gray-800 rounded w-1/4"></div>
@@ -139,17 +124,23 @@ export default function RecruiterSettings() {
             </div>
           </div>
         </div>
-      </div>
+      </div></RecruiterLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-cream-soft dark:bg-black p-6">
+    <RecruiterLayout><div className="p-0 sm:p-2">
       <div className="max-w-4xl mx-auto space-y-6">
         <div className="flex items-center gap-3">
           <Building2 className="h-8 w-8 text-black dark:text-white" />
           <h1 className="text-3xl font-bold text-black dark:text-white">Company Settings</h1>
         </div>
+
+        {profileError && (
+          <Card className="border-rose-200 bg-rose-50">
+            <CardContent className="p-4 text-sm text-rose-800">We couldn't load your company settings. Refresh the page or sign in again.</CardContent>
+          </Card>
+        )}
 
         {/* Company Information */}
         <Card className="border-2 border-cream-deep dark:border-gray-800">
@@ -394,6 +385,6 @@ export default function RecruiterSettings() {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </div></RecruiterLayout>
   );
 }

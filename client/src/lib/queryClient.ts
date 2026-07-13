@@ -3,7 +3,14 @@ import { QueryClient, QueryFunction } from "@tanstack/react-query";
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
     const text = (await res.text()) || res.statusText;
-    throw new Error(`${res.status}: ${text}`);
+    let message = text;
+    try {
+      const parsed = JSON.parse(text);
+      message = parsed.message || parsed.error || text;
+    } catch {
+      // Plain-text response; use it as-is.
+    }
+    throw new Error(message || `Request failed (${res.status})`);
   }
 }
 
@@ -44,9 +51,8 @@ export async function apiRequest(
 
   // Handle authentication errors
   if (res.status === 401) {
-    try {
-      const responseData = await res.json();
-      if (responseData.code === "TOKEN_EXPIRED" || responseData.code === "INVALID_TOKEN") {
+    const responseData = await res.clone().json().catch(() => null);
+    if (responseData?.code === "TOKEN_EXPIRED" || responseData?.code === "INVALID_TOKEN") {
         if (isRecruiterRoute) {
           localStorage.removeItem('recruiterToken');
           localStorage.removeItem('recruiterData');
@@ -67,15 +73,6 @@ export async function apiRequest(
           }
         }
         throw new Error("Session expired. Please login again.");
-      }
-    } catch (jsonError) {
-      // If we can't parse JSON, still handle the 401
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      if (!window.location.pathname.includes('/login')) {
-        window.location.href = '/login';
-      }
-      throw new Error("Authentication failed. Please login again.");
     }
   }
 
@@ -91,9 +88,12 @@ export const getQueryFn: <T>(options: {
   async ({ queryKey }) => {
     const url = queryKey[0] as string;
     const isAdminRoute = url.includes('/admin');
-    const token = isAdminRoute 
-      ? localStorage.getItem('adminToken') 
-      : localStorage.getItem('token');
+    const isRecruiterRoute = url.includes('/recruiter');
+    const token = isAdminRoute
+      ? localStorage.getItem('adminToken')
+      : isRecruiterRoute
+        ? localStorage.getItem('recruiterToken')
+        : localStorage.getItem('token');
       
     const headers: Record<string, string> = {};
     
@@ -108,22 +108,17 @@ export const getQueryFn: <T>(options: {
 
     if (res.status === 401) {
       if (!isAdminRoute) {
-        try {
-          const responseData = await res.json();
-          if (responseData.code === "TOKEN_EXPIRED" || responseData.code === "INVALID_TOKEN") {
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            if (!window.location.pathname.includes('/login')) {
-              window.location.href = '/login';
+        const responseData = await res.clone().json().catch(() => null);
+        if (responseData?.code === "TOKEN_EXPIRED" || responseData?.code === "INVALID_TOKEN") {
+            if (isRecruiterRoute) {
+              localStorage.removeItem('recruiterToken');
+              localStorage.removeItem('recruiterData');
+              if (!window.location.pathname.includes('/recruiter/auth')) window.location.href = '/recruiter/auth';
+            } else {
+              localStorage.removeItem('token');
+              localStorage.removeItem('user');
+              if (!window.location.pathname.includes('/login')) window.location.href = '/login';
             }
-          }
-        } catch (jsonError) {
-          // If we can't parse JSON, still handle the 401
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          if (!window.location.pathname.includes('/login')) {
-            window.location.href = '/login';
-          }
         }
       }
       

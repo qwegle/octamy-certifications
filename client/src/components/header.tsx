@@ -150,7 +150,7 @@ export default function Header() {
     if (roles.isSeller)
       list.push({ key: "seller", label: "Affiliate", href: "/seller-dashboard", matches: (p) => p === "/seller-dashboard" || p === "/partner-dashboard" });
     if (roles.isAdmin)
-      list.push({ key: "admin", label: "Admin", href: "/admin/dashboard", matches: (p) => p.startsWith("/admin") || p.startsWith("/qwegle") });
+      list.push({ key: "admin", label: "Admin", href: "/qwegle/dashboard", matches: (p) => p.startsWith("/admin") || p.startsWith("/qwegle") });
     return list;
   })();
 
@@ -349,7 +349,7 @@ export default function Header() {
                     <Button className="bg-slate-900 hover:bg-black text-white rounded-full px-5">Get started</Button>
                   </Link>
                 </div>
-              ) : !isLoading ? (
+              ) : !isLoading && isAuthenticated ? (
                 <div className="hidden md:flex items-center gap-2">
                   {hats.length >= 2 ? (
                     <DropdownMenu>

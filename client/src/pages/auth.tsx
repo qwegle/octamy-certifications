@@ -76,10 +76,10 @@ export default function Auth() {
         return false;
       }
 
-      if (formData.password.length < 6) {
+      if (formData.password.length < 8 || !/[A-Za-z]/.test(formData.password) || !/[\d\W_]/.test(formData.password)) {
         toast({
           title: "Validation Error",
-          description: "Password must be at least 6 characters long.",
+          description: "Use at least 8 characters with letters and a number or symbol.",
           variant: "destructive",
         });
         return false;

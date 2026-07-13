@@ -8,6 +8,8 @@ import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
+import RecruiterLayout from '../components/RecruiterLayout';
+import { useRecruiterAuth } from '../auth/RecruiterAuthProvider';
 import {
   User,
   MapPin,
@@ -66,6 +68,7 @@ interface CandidateProfile {
   interviews: Interview[];
   profileViews: number;
   lastActive: string;
+  profileCompleteness?: number;
   averageScore: number;
   dedicationScore: number;
   technicalStrength: string[];
@@ -80,8 +83,8 @@ export default function CandidateProfile() {
   const [candidate, setCandidate] = useState<CandidateProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [watchingVideo, setWatchingVideo] = useState<{interview: Interview, videoUrl: string} | null>(null);
-  const [activeVideo, setActiveVideo] = useState<string | null>(null);
   const { toast } = useToast();
+  const { updateRecruiter } = useRecruiterAuth();
 
   const candidateId = params?.id;
 
@@ -109,7 +112,19 @@ export default function CandidateProfile() {
       }
       
       const profileData = await response.json();
-      setCandidate(profileData);
+      const certs = Array.isArray(profileData.certificates) ? profileData.certificates : [];
+      setCandidate({
+        ...profileData,
+        location: profileData.location || 'Location not provided',
+        currentRole: profileData.currentRole || 'Role not provided',
+        experience: Number(profileData.experience || 0),
+        skills: Array.isArray(profileData.skills) ? profileData.skills : [],
+        interviews: Array.isArray(profileData.interviews) ? profileData.interviews : [],
+        certificates: certs,
+        averageScore: calculateAverageScore(certs),
+        dedicationScore: Number(profileData.profileCompleteness || 0),
+        technicalStrength: getTechnicalStrengths(certs),
+      });
     } catch (error) {
       console.error('Error fetching candidate profile:', error);
       toast({
@@ -134,7 +149,7 @@ export default function CandidateProfile() {
     
     const skills = new Set<string>();
     certs.forEach(cert => {
-      const course = cert.course?.toLowerCase() || '';
+      const course = (cert.courseTitle || cert.course || '').toLowerCase();
       Object.entries(skillMap).forEach(([key, values]) => {
         if (course.includes(key)) {
           values.forEach(skill => skills.add(skill));
@@ -184,8 +199,8 @@ export default function CandidateProfile() {
 
   const getTechnicalStrengths = (certs: any[]) => {
     const strengths = [];
-    const categories = certs.map(cert => getCategoryFromCourse(cert.course || ''));
-    const uniqueCategories = [...new Set(categories)];
+    const categories = certs.map(cert => getCategoryFromCourse(cert.courseTitle || cert.course || ''));
+    const uniqueCategories = Array.from(new Set(categories));
     
     if (uniqueCategories.includes('Data Science')) strengths.push('Data Analysis');
     if (uniqueCategories.includes('Web Development')) strengths.push('Frontend Development');
@@ -214,15 +229,6 @@ export default function CandidateProfile() {
   };
 
   const handleWatchInterview = async (interview: Interview) => {
-    if (!interview.videoUrl) {
-      toast({
-        title: "Video Not Available",
-        description: "This interview recording is not available.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     try {
       const response = await fetch('/api/recruiter/access-interview-video', {
         method: 'POST',
@@ -247,6 +253,7 @@ export default function CandidateProfile() {
       }
 
       const data = await response.json();
+      updateRecruiter({ creditsBalance: data.creditsRemaining });
       setWatchingVideo({ interview, videoUrl: data.videoUrl });
     } catch (error) {
       toast({
@@ -257,32 +264,45 @@ export default function CandidateProfile() {
     }
   };
 
+  const handleDownloadCv = async () => {
+    if (!candidate) return;
+    try {
+      const response = await apiRequest('POST', '/api/recruiter/access-profile', { candidateId: candidate.id, accessType: 'cv' });
+      const data = await response.json();
+      if (!data.cvUrl) throw new Error('Candidate CV is not available');
+      updateRecruiter({ creditsBalance: data.remainingCredits });
+      window.open(data.cvUrl, '_blank', 'noopener,noreferrer');
+    } catch (error) {
+      toast({ title: 'CV unavailable', description: error instanceof Error ? error.message : 'Could not download this CV', variant: 'destructive' });
+    }
+  };
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-cream-deep flex items-center justify-center">
+      <RecruiterLayout><div className="flex min-h-64 items-center justify-center">
         <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full" />
-      </div>
+      </div></RecruiterLayout>
     );
   }
 
   if (!candidate) {
     return (
-      <div className="min-h-screen bg-cream-deep flex items-center justify-center">
+      <RecruiterLayout><div className="flex min-h-64 items-center justify-center">
         <div className="text-center">
           <h2 className="text-xl font-semibold text-gray-900 mb-2">Candidate Not Found</h2>
           <p className="text-gray-600">The candidate profile you're looking for doesn't exist.</p>
         </div>
-      </div>
+      </div></RecruiterLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-cream-deep">
+    <RecruiterLayout><div>
       {/* Header */}
       <div className="bg-cream-soft border-b border-cream-deep">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex min-w-0 items-center space-x-4">
               <Avatar className="h-16 w-16">
                 <AvatarFallback className="text-2xl font-semibold bg-blue-600 text-white">
                   {candidate.name.split(' ').map(n => n[0]).join('')}
@@ -291,7 +311,7 @@ export default function CandidateProfile() {
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">{candidate.name}</h1>
                 <p className="text-gray-600">{candidate.currentRole}</p>
-                <div className="flex items-center mt-1 space-x-4 text-sm text-gray-500">
+                <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-500">
                   <div className="flex items-center">
                     <MapPin className="h-4 w-4 mr-1" />
                     {candidate.location}
@@ -307,14 +327,10 @@ export default function CandidateProfile() {
                 </div>
               </div>
             </div>
-            <div className="flex items-center space-x-3">
-              <Button variant="outline" size="sm">
+            <div>
+              <Button variant="outline" size="sm" onClick={handleDownloadCv}>
                 <Download className="h-4 w-4 mr-2" />
-                Download CV
-              </Button>
-              <Button size="sm">
-                <Heart className="h-4 w-4 mr-2" />
-                Save Profile
+                Download CV · 1 credit
               </Button>
             </div>
           </div>
@@ -350,22 +366,16 @@ export default function CandidateProfile() {
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-orange-600">{candidate.dedicationScore}%</div>
-                    <div className="text-sm text-gray-500">Dedication</div>
+                    <div className="text-sm text-gray-500">Profile complete</div>
                   </div>
                 </div>
                 
                 <div className="mt-6">
-                  <h4 className="font-medium mb-3">Skill Distribution</h4>
-                  <div className="space-y-3">
-                    {(candidate.technicalStrength || []).map((strength, index) => (
-                      <div key={strength}>
-                        <div className="flex justify-between text-sm mb-1">
-                          <span>{strength}</span>
-                          <span>{85 + index * 5}%</span>
-                        </div>
-                        <Progress value={85 + index * 5} className="h-2" />
-                      </div>
-                    ))}
+                  <h4 className="font-medium mb-3">Evidence areas</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {(candidate.technicalStrength || []).length > 0
+                      ? candidate.technicalStrength.map((strength) => <Badge key={strength} variant="secondary">{strength}</Badge>)
+                      : <span className="text-sm text-gray-500">No category-level evidence available yet.</span>}
                   </div>
                 </div>
               </CardContent>
@@ -373,10 +383,9 @@ export default function CandidateProfile() {
 
             {/* Tabs for detailed information */}
             <Tabs defaultValue="certificates" className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
+              <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="certificates">Certificates</TabsTrigger>
                 <TabsTrigger value="interviews">Interviews</TabsTrigger>
-                <TabsTrigger value="analytics">Advanced Analytics</TabsTrigger>
               </TabsList>
               
               <TabsContent value="certificates" className="space-y-4">
@@ -469,64 +478,6 @@ export default function CandidateProfile() {
                 </Card>
               </TabsContent>
               
-              <TabsContent value="analytics" className="space-y-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center">
-                      <Brain className="h-5 w-5 mr-2" />
-                      Advanced Analytics
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <h4 className="font-medium mb-3">Learning Pattern</h4>
-                        <div className="space-y-3">
-                          <div className="flex justify-between">
-                            <span className="text-sm">Consistency</span>
-                            <span className="text-sm font-medium">High</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-sm">Learning Speed</span>
-                            <span className="text-sm font-medium">Fast</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-sm">Improvement Rate</span>
-                            <span className="text-sm font-medium">15% per month</span>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <h4 className="font-medium mb-3">Engagement Metrics</h4>
-                        <div className="space-y-3">
-                          <div className="flex justify-between">
-                            <span className="text-sm">Platform Activity</span>
-                            <span className="text-sm font-medium">Active</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-sm">Response Time</span>
-                            <span className="text-sm font-medium">&lt; 24 hours</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-sm">Completion Rate</span>
-                            <span className="text-sm font-medium">95%</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-                      <h4 className="font-medium text-blue-900 mb-2">AI Recommendation</h4>
-                      <p className="text-sm text-blue-800">
-                        This candidate shows strong technical aptitude with consistent learning patterns. 
-                        High dedication score indicates reliability for long-term roles. 
-                        Strong performance in {(candidate.technicalStrength || []).join(', ')} areas.
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
             </Tabs>
           </div>
 
@@ -589,26 +540,24 @@ export default function CandidateProfile() {
                 <CardTitle>Quick Actions</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Button className="w-full">
-                  <FileText className="h-4 w-4 mr-2" />
-                  Schedule Interview
-                </Button>
-                <Button variant="outline" className="w-full">
+                <Button className="w-full" onClick={handleDownloadCv}>
                   <Download className="h-4 w-4 mr-2" />
-                  Request Resume
+                  Download CV · 1 credit
                 </Button>
-                <Button variant="outline" className="w-full">
-                  Send Message
+                <Button variant="outline" className="w-full" asChild>
+                  <a href={`mailto:${candidate.email}?subject=${encodeURIComponent('Opportunity from Octamy Recruiter')}`}>
+                    Contact candidate
+                  </a>
                 </Button>
               </CardContent>
             </Card>
 
-            {/* Dedication Score */}
+            {/* Profile completeness */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <Zap className="h-5 w-5 mr-2" />
-                  Dedication Score
+                  <User className="h-5 w-5 mr-2" />
+                  Profile completeness
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -618,7 +567,7 @@ export default function CandidateProfile() {
                   </div>
                   <Progress value={candidate.dedicationScore} className="mb-3" />
                   <p className="text-sm text-gray-600">
-                    Based on learning consistency, performance, and engagement
+                    Based on candidate-provided profile fields.
                   </p>
                 </div>
               </CardContent>
@@ -683,6 +632,6 @@ export default function CandidateProfile() {
           </div>
         </div>
       )}
-    </div>
+    </div></RecruiterLayout>
   );
 }

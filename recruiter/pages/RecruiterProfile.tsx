@@ -8,12 +8,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { User, Building2, Mail, Phone, Save, Eye, EyeOff } from "lucide-react";
-import { useRecruiterAuth } from "../auth/RecruiterAuthProvider";
+import { useRecruiterAuth, type Recruiter } from "../auth/RecruiterAuthProvider";
+import RecruiterLayout from "../components/RecruiterLayout";
+import { apiRequest } from "@/lib/queryClient";
 
 export default function RecruiterProfile() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { user } = useRecruiterAuth();
+  const { token, updateRecruiter } = useRecruiterAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
@@ -27,14 +29,10 @@ export default function RecruiterProfile() {
   });
 
   // Fetch recruiter profile data
-  const { data: profile, isLoading } = useQuery({
+  const { data: profile, isLoading, error: profileError } = useQuery<Recruiter>({
     queryKey: ["/api/recruiter/profile"],
-    enabled: !!user?.token,
-    meta: {
-      headers: {
-        Authorization: `Bearer ${user?.token}`
-      }
-    }
+    enabled: !!token,
+    queryFn: async () => (await apiRequest('GET', '/api/recruiter/profile')).json(),
   });
 
   useEffect(() => {
@@ -53,21 +51,7 @@ export default function RecruiterProfile() {
   // Update profile mutation
   const updateProfileMutation = useMutation({
     mutationFn: async (data: any) => {
-      const response = await fetch("/api/recruiter/profile", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${user?.token}`
-        },
-        body: JSON.stringify(data)
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Failed to update profile");
-      }
-      
-      return response.json();
+      return (await apiRequest('PUT', '/api/recruiter/profile', data)).json();
     },
     onSuccess: () => {
       toast({
@@ -75,6 +59,11 @@ export default function RecruiterProfile() {
         description: "Profile updated successfully"
       });
       queryClient.invalidateQueries({ queryKey: ["/api/recruiter/profile"] });
+      updateRecruiter({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        phone: formData.phone,
+      });
     },
     onError: (error: any) => {
       toast({
@@ -88,21 +77,7 @@ export default function RecruiterProfile() {
   // Change password mutation
   const changePasswordMutation = useMutation({
     mutationFn: async (data: any) => {
-      const response = await fetch("/api/recruiter/change-password", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${user?.token}`
-        },
-        body: JSON.stringify(data)
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Failed to change password");
-      }
-      
-      return response.json();
+      return (await apiRequest('PUT', '/api/recruiter/change-password', data)).json();
     },
     onSuccess: () => {
       toast({
@@ -151,10 +126,10 @@ export default function RecruiterProfile() {
       return;
     }
     
-    if (formData.newPassword.length < 6) {
+    if (formData.newPassword.length < 8 || !/[A-Za-z]/.test(formData.newPassword) || !/[\d\W_]/.test(formData.newPassword)) {
       toast({
         title: "Error",
-        description: "Password must be at least 6 characters long",
+        description: "Use at least 8 characters with letters and a number or symbol",
         variant: "destructive"
       });
       return;
@@ -170,7 +145,7 @@ export default function RecruiterProfile() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-cream-soft dark:bg-black p-6">
+      <RecruiterLayout><div className="p-6">
         <div className="max-w-4xl mx-auto">
           <div className="animate-pulse space-y-6">
             <div className="h-8 bg-gray-200 dark:bg-gray-800 rounded w-1/4"></div>
@@ -180,17 +155,23 @@ export default function RecruiterProfile() {
             </div>
           </div>
         </div>
-      </div>
+      </div></RecruiterLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-cream-soft dark:bg-black p-6">
+    <RecruiterLayout><div className="p-0 sm:p-2">
       <div className="max-w-4xl mx-auto space-y-6">
         <div className="flex items-center gap-3">
           <User className="h-8 w-8 text-black dark:text-white" />
           <h1 className="text-3xl font-bold text-black dark:text-white">My Profile</h1>
         </div>
+
+        {profileError && (
+          <Card className="border-rose-200 bg-rose-50">
+            <CardContent className="p-4 text-sm text-rose-800">We couldn't load your recruiter profile. Refresh the page or sign in again.</CardContent>
+          </Card>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Profile Information */}
@@ -315,7 +296,7 @@ export default function RecruiterProfile() {
                     value={formData.newPassword}
                     onChange={(e) => setFormData(prev => ({ ...prev, newPassword: e.target.value }))}
                     className="border-gray-300 dark:border-gray-700"
-                    minLength={6}
+                    minLength={8}
                     required
                   />
                 </div>
@@ -328,7 +309,7 @@ export default function RecruiterProfile() {
                     value={formData.confirmPassword}
                     onChange={(e) => setFormData(prev => ({ ...prev, confirmPassword: e.target.value }))}
                     className="border-gray-300 dark:border-gray-700"
-                    minLength={6}
+                    minLength={8}
                     required
                   />
                 </div>
@@ -380,6 +361,6 @@ export default function RecruiterProfile() {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </div></RecruiterLayout>
   );
 }

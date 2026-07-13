@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Link } from "wouter";
-import { Search, Filter, Clock, Users, Star, TrendingUp, Award, Grid, List, MapPin, Calendar, Briefcase, GraduationCap, ChevronRight } from "lucide-react";
+import { Search, Filter, Clock, Award, Grid, List, MapPin, Briefcase, GraduationCap, ChevronRight, FileCheck2 } from "lucide-react";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import type { Course, Category } from "@shared/schema";
@@ -21,20 +21,28 @@ const durations = [
 ];
 
 const sortOptions = [
-  { value: "popularity", label: "Most Popular", icon: TrendingUp },
   { value: "newest", label: "Recently Added", icon: Award },
   { value: "duration-asc", label: "Shortest Duration", icon: Clock },
   { value: "duration-desc", label: "Longest Duration", icon: Clock },
 ];
 
-const skillLevels = ["Entry Level", "Intermediate", "Advanced"];
+const skillLevels = [
+  { value: "novice", label: "Entry level" },
+  { value: "intermediate", label: "Intermediate" },
+  { value: "advanced", label: "Advanced" },
+  { value: "expert", label: "Expert" },
+];
+
+const formatLevel = (level: string) => level === "novice"
+  ? "Entry level"
+  : level.charAt(0).toUpperCase() + level.slice(1);
 
 export default function VirtualInternshipsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedDuration, setSelectedDuration] = useState<string>("all");
   const [selectedSkillLevel, setSelectedSkillLevel] = useState<string>("all");
-  const [sortBy, setSortBy] = useState("popularity");
+  const [sortBy, setSortBy] = useState("newest");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [showFilters, setShowFilters] = useState(false);
 
@@ -48,9 +56,9 @@ export default function VirtualInternshipsPage() {
 
   // Filter for internship courses only
   const internshipCourses = courses.filter(course => 
-    course.category.name === "Internships" || 
+    course.category?.name === "Internships" ||
     course.title.toLowerCase().includes("internship") ||
-    course.description.toLowerCase().includes("internship")
+    course.description?.toLowerCase().includes("internship")
   );
 
   // Filter and sort internships
@@ -75,7 +83,7 @@ export default function VirtualInternshipsPage() {
       }
 
       // Skill level filter
-      const matchesSkillLevel = selectedSkillLevel === "all" || course.difficulty === selectedSkillLevel;
+      const matchesSkillLevel = selectedSkillLevel === "all" || course.level === selectedSkillLevel;
 
       return matchesSearch && matchesCategory && matchesDuration && matchesSkillLevel;
     });
@@ -83,8 +91,6 @@ export default function VirtualInternshipsPage() {
     // Sort internships
     filtered.sort((a, b) => {
       switch (sortBy) {
-        case "popularity":
-          return (b.enrollmentCount || 0) - (a.enrollmentCount || 0);
         case "newest":
           return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
         case "duration-asc":
@@ -104,16 +110,16 @@ export default function VirtualInternshipsPage() {
     setSelectedCategory("all");
     setSelectedDuration("all");
     setSelectedSkillLevel("all");
-    setSortBy("popularity");
+    setSortBy("newest");
   };
 
   const hasActiveFilters = searchQuery || selectedCategory !== "all" || selectedDuration !== "all" || selectedSkillLevel !== "all";
 
   const InternshipCard = ({ internship, viewMode }: { internship: Course & { category: Category }, viewMode: "grid" | "list" }) => (
     <Card className={`group hover:shadow-lg transition-all duration-300 border-2 hover:border-black ${
-      viewMode === "list" ? "flex flex-row" : ""
+      viewMode === "list" ? "md:flex md:flex-row" : ""
     }`}>
-      <div className={`${viewMode === "list" ? "w-64 flex-shrink-0" : ""}`}>
+      <div className={`${viewMode === "list" ? "md:w-64 flex-shrink-0" : ""}`}>
         <div className="aspect-video bg-gradient-to-br from-gray-900 to-black rounded-t-lg relative overflow-hidden">
           <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center">
             <Briefcase className="h-12 w-12 text-white" />
@@ -155,21 +161,18 @@ export default function VirtualInternshipsPage() {
               </div>
               <div className="flex items-center gap-1">
                 <GraduationCap className="h-4 w-4" />
-                {internship.difficulty || "All Levels"}
-              </div>
-              <div className="flex items-center gap-1">
-                <Users className="h-4 w-4" />
-                {internship.enrollmentCount || 0} enrolled
+                {formatLevel(internship.level)}
               </div>
             </div>
             
             <div className="flex items-center justify-between">
-              <div className="text-2xl font-bold text-black">
-                ₹{internship.price}
+              <div>
+                <div className="text-xs text-gray-500">Assessment fee</div>
+                <div className="text-2xl font-bold text-black">₹{internship.price}</div>
               </div>
               <Link href={`/exam/${internship.slug || internship.id}`}>
                 <Button className="bg-black hover:bg-gray-800 text-white group">
-                  Apply Now
+                  View assessment
                   <ChevronRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
@@ -279,6 +282,8 @@ export default function VirtualInternshipsPage() {
                 variant={viewMode === "grid" ? "default" : "outline"}
                 size="sm"
                 onClick={() => setViewMode("grid")}
+                aria-label="Show programs as a grid"
+                aria-pressed={viewMode === "grid"}
               >
                 <Grid className="h-4 w-4" />
               </Button>
@@ -286,6 +291,8 @@ export default function VirtualInternshipsPage() {
                 variant={viewMode === "list" ? "default" : "outline"}
                 size="sm"
                 onClick={() => setViewMode("list")}
+                aria-label="Show programs as a list"
+                aria-pressed={viewMode === "list"}
               >
                 <List className="h-4 w-4" />
               </Button>
@@ -353,8 +360,8 @@ export default function VirtualInternshipsPage() {
                       <SelectContent>
                         <SelectItem value="all">All Levels</SelectItem>
                         {skillLevels.map((level) => (
-                          <SelectItem key={level} value={level}>
-                            {level}
+                          <SelectItem key={level.value} value={level.value}>
+                            {level.label}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -376,8 +383,8 @@ export default function VirtualInternshipsPage() {
                 <div className="bg-black rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
                   <Briefcase className="h-8 w-8 text-white" />
                 </div>
-                <h3 className="text-xl font-bold mb-2">Real Projects</h3>
-                <p className="text-gray-600">Work on actual industry projects with real companies and impact.</p>
+                <h3 className="text-xl font-bold mb-2">Applied assessments</h3>
+                <p className="text-gray-600">Demonstrate practical judgement through role-aligned assessment scenarios.</p>
               </CardContent>
             </Card>
             <Card className="text-center">
@@ -385,17 +392,17 @@ export default function VirtualInternshipsPage() {
                 <div className="bg-black rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
                   <GraduationCap className="h-8 w-8 text-white" />
                 </div>
-                <h3 className="text-xl font-bold mb-2">Expert Mentorship</h3>
-                <p className="text-gray-600">Get guidance from industry professionals and experienced mentors.</p>
+                <h3 className="text-xl font-bold mb-2">Evidence you control</h3>
+                <p className="text-gray-600">Add passed assessments to a portable evidence profile for employers.</p>
               </CardContent>
             </Card>
             <Card className="text-center">
               <CardContent className="pt-6">
                 <div className="bg-black rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                  <Award className="h-8 w-8 text-white" />
+                  <FileCheck2 className="h-8 w-8 text-white" />
                 </div>
-                <h3 className="text-xl font-bold mb-2">Portfolio Building</h3>
-                <p className="text-gray-600">Build a portfolio of work that showcases your skills to employers.</p>
+                <h3 className="text-xl font-bold mb-2">Verifiable result</h3>
+                <p className="text-gray-600">Successful learners can activate a credential with a public verification record.</p>
               </CardContent>
             </Card>
           </div>

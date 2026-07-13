@@ -9,44 +9,30 @@ import { apiRequest } from '@/lib/queryClient';
 
 export default function PaymentSuccess() {
   const [, setLocation] = useLocation();
-  const { recruiter } = useRecruiterAuth();
+  const { updateRecruiter } = useRecruiterAuth();
   const [paymentDetails, setPaymentDetails] = useState<any>(null);
   const [processing, setProcessing] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const txnid = urlParams.get('txnid');
-    const amount = urlParams.get('amount');
-    const credits = urlParams.get('credits');
-
-    if (txnid && amount && credits) {
-      setPaymentDetails({
-        transactionId: txnid,
-        amount: parseFloat(amount),
-        credits: parseInt(credits)
-      });
-      
-      // Process the credit addition
-      processCreditAddition(parseInt(credits), txnid);
+    const orderId = urlParams.get('order_id');
+    if (orderId) processCreditAddition(orderId);
+    else {
+      setError('Payment reference is missing. Your account has not been credited.');
+      setProcessing(false);
     }
   }, []);
 
-  const processCreditAddition = async (credits: number, paymentId: string) => {
+  const processCreditAddition = async (orderId: string) => {
     try {
-      const response = await apiRequest('POST', '/api/recruiter/purchase-credits', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          amount: credits,
-          paymentId: paymentId
-        })
-      });
-
-      if (response.ok) {
-        setProcessing(false);
-      }
+      const response = await apiRequest('POST', '/api/recruiter/purchase-credits', { orderId });
+      const result = await response.json();
+      setPaymentDetails({ transactionId: orderId, credits: result.creditsAdded, balance: result.newBalance });
+      updateRecruiter({ creditsBalance: result.newBalance });
     } catch (error) {
-      console.error('Error processing credit addition:', error);
+      setError(error instanceof Error ? error.message : 'We could not verify this payment.');
+    } finally {
       setProcessing(false);
     }
   };
@@ -60,6 +46,20 @@ export default function PaymentSuccess() {
             <p className="text-gray-600">Processing your payment...</p>
           </div>
         </div>
+      </RecruiterLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <RecruiterLayout>
+        <Card className="mx-auto max-w-xl border-rose-200 bg-rose-50">
+          <CardContent className="p-8 text-center">
+            <h1 className="text-2xl font-bold text-rose-950">Payment verification pending</h1>
+            <p className="mt-2 text-sm text-rose-800">{error}</p>
+            <Button className="mt-6" onClick={() => setLocation('/recruiter/wallet')}>Return to wallet</Button>
+          </CardContent>
+        </Card>
       </RecruiterLayout>
     );
   }
@@ -89,7 +89,7 @@ export default function PaymentSuccess() {
             </div>
             <div className="flex justify-between items-center py-2 border-b">
               <span className="text-gray-600">Amount Paid</span>
-              <span className="font-semibold">₹{paymentDetails?.amount}</span>
+              <span className="font-semibold">Verified by Cashfree</span>
             </div>
             <div className="flex justify-between items-center py-2 border-b">
               <span className="text-gray-600">Credits Added</span>

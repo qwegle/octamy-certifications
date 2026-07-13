@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { storage } from '../storage';
 import { loadQuestionMapping, deleteQuestionMapping } from '../utils/examState';
+import { normalizeExamAnswers, scoreExam } from '../utils/examScoring';
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -17,35 +18,21 @@ export class ExamController {
       const finalTimeTaken = timeTaken || timeSpent || 60;
 
       // Get correct answers from persisted session mapping
-      const correctAnswersMapping = (await loadQuestionMapping(sessionId)) || {};
-      
-      // Transform answers array to Record<string, number> format
-      const answersRecord: Record<string, number> = {};
-      if (Array.isArray(answers)) {
-        answers.forEach((answer: any) => {
-          if (answer.questionId && answer.selectedOption !== undefined) {
-            answersRecord[answer.questionId.toString()] = answer.selectedOption;
-          }
-        });
-      } else {
-        Object.assign(answersRecord, answers);
+      const numericCourseId = Number(courseId);
+      if (!sessionId || !Number.isInteger(numericCourseId) || numericCourseId <= 0) {
+        return res.status(400).json({ message: "Valid course and exam session are required" });
       }
-
-      // Calculate score using session-specific correct answers
-      let correctAnswers = 0;
-      const totalQuestions = Object.keys(answersRecord).length;
+      const correctAnswersMapping = (await loadQuestionMapping(sessionId, numericCourseId)) || {};
       
-      for (const [questionId, userAnswer] of Object.entries(answersRecord)) {
-        const correctAnswer = correctAnswersMapping[parseInt(questionId)];
-        if (correctAnswer !== undefined && correctAnswer === userAnswer) {
-          correctAnswers++;
-        }
-      }
+      const answersRecord = normalizeExamAnswers(answers);
+      const { correctAnswers, totalQuestions, score } = scoreExam(
+        correctAnswersMapping,
+        answersRecord,
+      );
       
       // Clean up persisted session mapping
       await deleteQuestionMapping(sessionId).catch(() => {});
       
-      const score = Math.round((correctAnswers / totalQuestions) * 100);
       const passed = score >= 50;
       const mastered = score >= 90;
       
@@ -61,7 +48,7 @@ export class ExamController {
       // Create exam attempt with anti-cheating data
       const examAttempt = await storage.createExamAttempt({
         userId: userId || null,
-        courseId: parseInt(courseId.toString()),
+        courseId: numericCourseId,
         userEmail: userEmail || 'anonymous@example.com',
         userName: userName || 'Anonymous User',
         score: score,

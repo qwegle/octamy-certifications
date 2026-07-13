@@ -5,6 +5,7 @@ interface User {
   id: number;
   email: string;
   name: string;
+  phone?: string;
   isAdmin?: boolean;
 }
 
@@ -24,53 +25,65 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Function to check and set token/user
-  const checkAndSetAuth = () => {
+  const clearAuth = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setToken(null);
+    setUser(null);
+  };
+
+  // Treat local storage as a cache, not proof of authentication. A valid session
+  // must also be accepted by the API so stale or fabricated browser data cannot
+  // expose authenticated navigation.
+  const checkAndSetAuth = async () => {
     const storedToken = localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
-    
+
     if (storedToken && storedUser) {
-      // Check if token is expired before setting
       try {
-        const payload = JSON.parse(atob(storedToken.split('.')[1]));
+        const encodedPayload = storedToken.split('.')[1];
+        if (!encodedPayload) throw new Error('Invalid token');
+        const paddedPayload = encodedPayload.replace(/-/g, '+').replace(/_/g, '/').padEnd(Math.ceil(encodedPayload.length / 4) * 4, '=');
+        const payload = JSON.parse(atob(paddedPayload));
         const currentTime = Date.now() / 1000;
-        
-        if (payload.exp < currentTime) {
-          // Token expired, clear storage
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          setToken(null);
-          setUser(null);
-        } else {
-          setToken(storedToken);
-          setUser(JSON.parse(storedUser));
+
+        if (!payload.exp || payload.exp < currentTime) throw new Error('Expired token');
+
+        const response = await fetch('/api/auth/me', {
+          headers: { Authorization: `Bearer ${storedToken}` },
+          cache: 'no-store',
+        });
+        if (!response.ok) throw new Error('Session rejected');
+
+        const verifiedUser = (await response.json()) as User;
+        if (!verifiedUser?.id || (payload.userId && payload.userId !== verifiedUser.id)) {
+          throw new Error('Session user mismatch');
         }
-      } catch (error) {
-        // Invalid token format, clear storage
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        setToken(null);
-        setUser(null);
+
+        setToken(storedToken);
+        setUser(verifiedUser);
+        localStorage.setItem('user', JSON.stringify(verifiedUser));
+      } catch {
+        clearAuth();
       }
     } else {
-      setToken(null);
-      setUser(null);
+      clearAuth();
     }
     setIsLoading(false);
   };
 
   useEffect(() => {
-    checkAndSetAuth();
+    void checkAndSetAuth();
   }, []);
 
   // Listen for storage changes and custom auth events (for Google OAuth)
   useEffect(() => {
     const handleStorageChange = () => {
-      checkAndSetAuth();
+      void checkAndSetAuth();
     };
     
     const handleAuthUpdate = () => {
-      checkAndSetAuth();
+      void checkAndSetAuth();
     };
     
     window.addEventListener('storage', handleStorageChange);

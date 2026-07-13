@@ -9,6 +9,10 @@ import { registerRecruiterRoutes } from './recruiterRoutes';
 import dashboardRoutes from './dashboardRoutes';
 import featureRoutes from './featureRoutes';
 import adminApprovalRoutes from './adminApprovalRoutes';
+import progressRoutes from './progressRoutes';
+import learningPathRoutes from './learningPathRoutes';
+import uploadRoutes from './upload';
+import preferenceRoutes from './preferenceRoutes';
 // Remove sellerRoutes import to prevent conflicts - seller routes are handled directly in main routes.ts
 
 const router = Router();
@@ -24,6 +28,10 @@ router.use('/', analyticsRoutes); // Mount analytics routes at root level for /a
 router.use('/', dashboardRoutes); // Dashboard CRUD: creator/institute/recruiter + subscriptions
 router.use('/', featureRoutes); // Plan limits, uploads/sign, exam instances, payouts, integrations
 router.use('/', adminApprovalRoutes); // Admin approval queues for creators/institutes/recruiters
+router.use('/', progressRoutes); // Learner progress and achievements
+router.use('/', learningPathRoutes); // Learning paths and personalized recommendations
+router.use('/', uploadRoutes); // Authenticated résumé uploads
+router.use('/', preferenceRoutes); // Learner preferences
 // Remove seller routes mounting - handled directly in main routes.ts
 
 // Register recruiter routes

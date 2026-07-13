@@ -20,51 +20,40 @@ interface Props {
   userId?: number;
 }
 
+type UserAchievementWithDetails = UserAchievement & { achievement?: Achievement | null };
+
 export function CourseProgressVisualization({ courseId, userId }: Props) {
-  const [newAchievements, setNewAchievements] = useState<UserAchievement[]>([]);
+  const [newAchievements, setNewAchievements] = useState<UserAchievementWithDetails[]>([]);
   const [showAchievementModal, setShowAchievementModal] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState<number | null>(courseId || null);
 
   // Fetch course progress data
-  const { data: progressData = [], isLoading: progressLoading } = useQuery({
+  const { data: progressData = [], isLoading: progressLoading } = useQuery<UserCourseProgress[]>({
     queryKey: ['/api/progress'],
   });
 
   // Fetch user achievements
-  const { data: achievementsData = [], isLoading: achievementsLoading } = useQuery({
+  const { data: achievementsData = [], isLoading: achievementsLoading } = useQuery<UserAchievementWithDetails[]>({
     queryKey: ['/api/user/achievements'],
   });
 
   // Fetch courses data
-  const { data: coursesData = [], isLoading: coursesLoading } = useQuery({
+  const { data: coursesData = [], isLoading: coursesLoading } = useQuery<Course[]>({
     queryKey: ['/api/courses'],
   });
 
   // Check for new achievements mutation
-  const checkAchievements = useMutation({
-    mutationFn: (data: { courseId?: number }) => 
-      apiRequest('/api/achievements/check', {
-        method: 'POST',
-        body: data,
-      }),
-    onSuccess: (newAchievements: UserAchievement[]) => {
+  const checkAchievements = useMutation<UserAchievementWithDetails[], Error, { courseId?: number }>({
+    mutationFn: async (data) => {
+      const response = await apiRequest('POST', '/api/achievements/check', data);
+      return response.json();
+    },
+    onSuccess: (newAchievements) => {
       if (newAchievements && newAchievements.length > 0) {
         setNewAchievements(newAchievements);
         setShowAchievementModal(true);
         queryClient.invalidateQueries({ queryKey: ['/api/user/achievements'] });
       }
-    },
-  });
-
-  // Update progress mutation
-  const updateProgress = useMutation({
-    mutationFn: (progressData: Partial<UserCourseProgress>) =>
-      apiRequest('/api/progress', {
-        method: 'POST',
-        body: progressData,
-      }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/progress'] });
     },
   });
 
@@ -104,12 +93,12 @@ export function CourseProgressVisualization({ courseId, userId }: Props) {
   });
 
   // Get recent achievements (last 5)
-  const recentAchievements = (achievementsData as UserAchievement[]).map(achievement => {
+  const recentAchievements = achievementsData.map(achievement => {
     const achievementDetails = achievement.achievement;
     return { ...achievement, achievement: achievementDetails };
   }).slice(0, 5);
 
-  const AchievementCard = ({ achievement }: { achievement: UserAchievement }) => (
+  const AchievementCard = ({ achievement }: { achievement: UserAchievementWithDetails }) => (
     <motion.div
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}

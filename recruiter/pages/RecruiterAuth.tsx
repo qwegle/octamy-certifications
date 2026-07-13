@@ -6,14 +6,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useRecruiterAuth } from '../auth/RecruiterAuthProvider';
-import { Eye, EyeOff, Mail, Lock, Building2, Users, Target, Zap, Shield, TrendingUp, Award } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, Building2, BadgeCheck, Target, Zap, Shield, FileCheck2, UserCheck } from 'lucide-react';
 
 export default function RecruiterAuth() {
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const { login, register } = useRecruiterAuth();
   const { toast } = useToast();
   
-  const [isLogin, setIsLogin] = useState(true);
+  const [isLogin, setIsLogin] = useState(location !== '/recruiter/register');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -42,10 +42,10 @@ export default function RecruiterAuth() {
         return false;
       }
 
-      if (formData.password.length < 6) {
+      if (formData.password.length < 8 || !/[A-Za-z]/.test(formData.password) || !/[\d\W_]/.test(formData.password)) {
         toast({
           title: "Validation Error",
-          description: "Password must be at least 6 characters long.",
+          description: "Use at least 8 characters with letters and a number or symbol.",
           variant: "destructive",
         });
         return false;
@@ -102,43 +102,43 @@ export default function RecruiterAuth() {
         <div className="relative z-10 flex flex-col justify-center items-center p-12 text-center">
           <div className="mb-8">
             <Building2 className="h-16 w-16 text-white mx-auto mb-4" />
-            <h1 className="text-4xl font-bold mb-2">Octamy AI Recruiter</h1>
-            <p className="text-xl text-gray-300">Next-Generation Talent Acquisition</p>
+            <h1 className="text-4xl font-bold mb-2">Octamy Recruiter</h1>
+            <p className="text-xl text-gray-300">Evidence-led talent discovery</p>
           </div>
           
           <div className="max-w-md space-y-8">
             <blockquote className="text-2xl font-light italic text-gray-200">
-              "Finding exceptional talent shouldn't be exceptional effort"
+              “Hire from verified evidence, not profile claims.”
             </blockquote>
             
             <div className="grid grid-cols-2 gap-6 text-center">
               <div className="space-y-2">
-                <Users className="h-8 w-8 text-white mx-auto" />
-                <p className="text-sm text-gray-300">AI-Verified Candidates</p>
+                <BadgeCheck className="h-8 w-8 text-white mx-auto" />
+                <p className="text-sm text-gray-300">Verified credentials</p>
               </div>
               <div className="space-y-2">
                 <Target className="h-8 w-8 text-white mx-auto" />
-                <p className="text-sm text-gray-300">Precision Matching</p>
+                <p className="text-sm text-gray-300">Evidence filters</p>
               </div>
               <div className="space-y-2">
                 <Zap className="h-8 w-8 text-white mx-auto" />
-                <p className="text-sm text-gray-300">Instant Access</p>
+                <p className="text-sm text-gray-300">Saved searches</p>
               </div>
               <div className="space-y-2">
                 <Shield className="h-8 w-8 text-white mx-auto" />
-                <p className="text-sm text-gray-300">Secure Platform</p>
+                <p className="text-sm text-gray-300">Consent-based access</p>
               </div>
             </div>
 
             <div className="border-t border-gray-700 pt-6">
               <div className="flex items-center justify-center space-x-6 text-sm text-gray-400">
                 <div className="flex items-center space-x-2">
-                  <TrendingUp className="h-4 w-4" />
-                  <span>98% Match Accuracy</span>
+                  <FileCheck2 className="h-4 w-4" />
+                  <span>Assessment evidence</span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Award className="h-4 w-4" />
-                  <span>500+ Companies</span>
+                  <UserCheck className="h-4 w-4" />
+                  <span>Privacy-aware profiles</span>
                 </div>
               </div>
             </div>
@@ -159,12 +159,12 @@ export default function RecruiterAuth() {
               <span className="text-xl font-bold">Octamy Recruiter</span>
             </div>
             <h2 className="text-3xl font-bold text-black mb-2">
-              {isLogin ? 'Welcome Back' : 'Join Elite Recruiters'}
+              {isLogin ? 'Welcome back' : 'Create a recruiter workspace'}
             </h2>
             <p className="text-gray-600">
               {isLogin 
-                ? 'Access your AI-powered recruitment dashboard' 
-                : 'Start building your dream team today'
+                ? 'Access your hiring workspace and saved searches'
+                : 'Search verified learning and assessment evidence'
               }
             </p>
           </div>
@@ -244,13 +244,13 @@ export default function RecruiterAuth() {
                   <span>{isLogin ? 'Signing In...' : 'Creating Account...'}</span>
                 </div>
               ) : (
-                isLogin ? 'Sign In to Dashboard' : 'Start Free Trial'
+                isLogin ? 'Sign in to dashboard' : 'Create recruiter account'
               )}
             </Button>
 
             {!isLogin && (
               <p className="text-xs text-gray-500 text-center">
-                By creating an account, you agree to our Terms of Service and Privacy Policy
+                By creating an account, you agree to our <a className="underline" href="/terms-of-service">Terms of Service</a> and <a className="underline" href="/privacy-policy">Privacy Policy</a>.
               </p>
             )}
           </form>

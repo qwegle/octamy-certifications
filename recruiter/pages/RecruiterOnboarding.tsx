@@ -16,7 +16,8 @@ import {
   CheckCircle, 
   Upload,
   ArrowLeft,
-  ArrowRight
+  ArrowRight,
+  Shield,
 } from 'lucide-react';
 import { step1Schema, step2Schema, step3Schema, type Step1Data, type Step2Data, type Step3Data } from '../schema';
 
@@ -36,7 +37,7 @@ const INDUSTRIES = [
 
 export default function RecruiterOnboarding() {
   const [, setLocation] = useLocation();
-  const { recruiter, updateRegistrationStep, token } = useRecruiterAuth();
+  const { recruiter, updateRegistrationStep, updateRecruiter, token, isLoading: authLoading } = useRecruiterAuth();
   const { toast } = useToast();
   
   const [currentStep, setCurrentStep] = useState(1);
@@ -73,6 +74,10 @@ export default function RecruiterOnboarding() {
   });
 
   useEffect(() => {
+    if (!authLoading && (!recruiter || !token)) {
+      setLocation('/recruiter/auth');
+      return;
+    }
     if (recruiter) {
       setCurrentStep(recruiter.registrationStep || 1);
       
@@ -81,7 +86,7 @@ export default function RecruiterOnboarding() {
         setLocation('/recruiter/dashboard');
       }
     }
-  }, [recruiter, setLocation]);
+  }, [authLoading, recruiter, token, setLocation]);
 
   const handleFileUpload = async (file: File, fieldName: string) => {
     if (!file) return;
@@ -90,23 +95,23 @@ export default function RecruiterOnboarding() {
 
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('upload_preset', 'recruiter_kyc');
-
     try {
-      const response = await fetch(`https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_CLOUD_NAME}/upload`, {
+      const response = await fetch('/api/recruiter/kyc-upload', {
         method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
         body: formData,
       });
 
       if (!response.ok) {
-        throw new Error('Upload failed');
+        const error = await response.json().catch(() => null);
+        throw new Error(error?.message || 'Upload failed');
       }
 
       const data = await response.json();
       
       setStep3Data(prev => ({
         ...prev,
-        [fieldName]: data.secure_url,
+        [fieldName]: data.fileUrl,
       }));
 
       toast({
@@ -116,7 +121,7 @@ export default function RecruiterOnboarding() {
     } catch (error) {
       toast({
         title: "Upload Failed",
-        description: "Failed to upload file. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to upload file. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -188,7 +193,11 @@ export default function RecruiterOnboarding() {
       setCurrentStep(nextStep);
       updateRegistrationStep(nextStep);
 
+      if (currentStep === 1) updateRecruiter({ firstName: step1Data.firstName, lastName: step1Data.lastName, phone: step1Data.phone });
+      if (currentStep === 2) updateRecruiter({ companyName: step2Data.companyName });
+
       if (currentStep === 3) {
+        updateRecruiter({ kycStatus: 'under_review' });
         toast({
           title: "Registration Complete!",
           description: "Your profile has been submitted for KYC review.",
@@ -219,7 +228,7 @@ export default function RecruiterOnboarding() {
 
   const renderStep1 = () => (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="firstName">First Name *</Label>
           <Input
@@ -294,7 +303,7 @@ export default function RecruiterOnboarding() {
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="companySize">Company Size *</Label>
           <Select value={step2Data.companySize} onValueChange={(value) => setStep2Data({ ...step2Data, companySize: value as any })}>
@@ -339,7 +348,7 @@ export default function RecruiterOnboarding() {
         />
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="space-y-2">
           <Label htmlFor="companyCity">City *</Label>
           <Input
@@ -385,7 +394,7 @@ export default function RecruiterOnboarding() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
         <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="gstNumber">GST Number</Label>
@@ -456,6 +465,10 @@ export default function RecruiterOnboarding() {
     { number: 3, title: 'KYC Documents', icon: FileText, component: renderStep3 },
   ];
 
+  if (authLoading || !recruiter || !token) {
+    return <div className="min-h-screen bg-black grid place-items-center"><div className="h-8 w-8 animate-spin rounded-full border-4 border-white border-t-transparent" /></div>;
+  }
+
   return (
     <div className="min-h-screen bg-black text-white py-8" style={{ fontFamily: 'Poppins, sans-serif' }}>
       <div className="max-w-5xl mx-auto px-4">
@@ -468,7 +481,7 @@ export default function RecruiterOnboarding() {
         </div>
 
         {/* Progress Steps */}
-        <div className="flex items-center justify-center mb-12">
+        <div className="mb-8 flex items-center justify-start overflow-x-auto pb-3 sm:mb-12 sm:justify-center">
           {steps.map((step, index) => {
             const Icon = step.icon;
             const isActive = currentStep === step.number;
@@ -476,7 +489,7 @@ export default function RecruiterOnboarding() {
             
             return (
               <div key={step.number} className="flex items-center">
-                <div className={`flex items-center space-x-3 px-6 py-3 rounded-full border-2 transition-all ${
+                <div className={`flex shrink-0 items-center space-x-2 rounded-full border-2 px-3 py-3 transition-all sm:space-x-3 sm:px-6 ${
                   isActive ? 'bg-cream-soft text-black border-white' : 
                   isCompleted ? 'bg-gray-800 text-white border-gray-600' : 
                   'bg-transparent text-gray-400 border-gray-600'
@@ -488,10 +501,10 @@ export default function RecruiterOnboarding() {
                   }`}>
                     {isCompleted ? <CheckCircle className="h-5 w-5" /> : <Icon className="h-4 w-4" />}
                   </div>
-                  <span className="font-medium text-sm">{step.title}</span>
+                  <span className="hidden text-sm font-medium sm:inline">{step.title}</span>
                 </div>
                 {index < steps.length - 1 && (
-                  <div className={`h-0.5 w-16 mx-4 ${
+                  <div className={`mx-2 h-0.5 w-5 shrink-0 sm:mx-4 sm:w-16 ${
                     isCompleted ? 'bg-white' : 'bg-gray-600'
                   }`} />
                 )}
@@ -512,7 +525,7 @@ export default function RecruiterOnboarding() {
               {currentStep === 3 && "Verify your business credentials"}
             </p>
           </CardHeader>
-          <CardContent className="p-8">
+          <CardContent className="p-4 sm:p-8">
             {steps[currentStep - 1]?.component()}
 
             <div className="flex justify-between mt-10">

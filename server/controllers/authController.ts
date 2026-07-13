@@ -21,7 +21,8 @@ interface AuthenticatedRequest extends Request {
 export class AuthController {
   static async register(req: Request, res: Response) {
     try {
-      const { email, password, name } = req.body;
+      const { password, name } = req.body;
+      const email = String(req.body?.email || '').trim().toLowerCase();
       
       // Check if user already exists
       const existingUser = await storage.getUserByEmail(email);
@@ -60,7 +61,8 @@ export class AuthController {
 
   static async login(req: Request, res: Response) {
     try {
-      const { email, password } = req.body;
+      const password = req.body?.password;
+      const email = String(req.body?.email || '').trim().toLowerCase();
 
       // Find user
       const user = await storage.getUserByEmail(email);
@@ -69,6 +71,9 @@ export class AuthController {
       }
 
       // Verify password
+      if (!user.password || typeof password !== 'string') {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
       const isValidPassword = await bcrypt.compare(password, user.password);
       if (!isValidPassword) {
         return res.status(401).json({ message: "Invalid credentials" });

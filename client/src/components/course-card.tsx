@@ -28,7 +28,6 @@ import AWSCloudArchitectProfessional from "@/assets/course-images/AWS.png";
 import reactImage from "@/assets/course-images/react-development-mastery.jpg";
 import nodejsImage from "@/assets/course-images/nodejs-backend-development.jpg";
 import mlImage from "@/assets/course-images/machine-learning-fundamentals.jpg";
-import dataScienceImage from "@/assets/course-images/data-science-internship.jpg";
 import pythonImage from "@/assets/course-images/python-programming-mastery.jpg";
 import cloudImage from "@/assets/course-images/cloud-computing-essentials.jpg";
 
@@ -41,8 +40,8 @@ interface CourseCardProps {
 
 export default function CourseCard({
   course,
-  certifiedCount = 10,
-  rating = 4.8,
+  certifiedCount,
+  rating,
   viewMode = "grid",
 }: CourseCardProps) {
   const courseSlug = course.slug || course.title.toLowerCase()
@@ -85,8 +84,6 @@ export default function CourseCard({
         return nodejsImage;
       case 'machine-learning-fundamentals':
         return mlImage;
-      case 'data-science-internship':
-        return dataScienceImage;
       case 'python-programming-mastery':
         return pythonImage;
       case 'cloud-computing-essentials':
@@ -110,10 +107,10 @@ export default function CourseCard({
   return (
     <Card
       className={`group hover:shadow-lg transition-all duration-300 border-2 hover:border-black relative ${
-        viewMode === "list" ? "flex flex-row" : ""
+        viewMode === "list" ? "flex flex-col sm:flex-row" : ""
       }`}
     >
-      <div className={`${viewMode === "list" ? "w-64 flex-shrink-0" : ""}`}>
+      <div className={`${viewMode === "list" ? "w-full sm:w-64 flex-shrink-0" : ""}`}>
         <div className="aspect-video bg-gradient-to-br from-gray-900 to-black rounded-t-lg relative overflow-hidden">
           <img 
             src={getCourseImage(courseSlug, course.category.name)} 
@@ -151,10 +148,12 @@ export default function CourseCard({
             <CardTitle className="text-lg group-hover:text-blue-600 transition-colors">
               {course.title}
             </CardTitle>
-            <div className="flex items-center gap-1 text-yellow-500">
-              <Star className="h-4 w-4 fill-current" />
-              <span className="text-sm font-medium">{rating}</span>
-            </div>
+            {typeof rating === 'number' && rating > 0 && (
+              <div className="flex items-center gap-1 text-yellow-500" aria-label={`${rating} out of 5 rating`}>
+                <Star className="h-4 w-4 fill-current" />
+                <span className="text-sm font-medium">{rating.toFixed(1)}</span>
+              </div>
+            )}
           </div>
           <p className="text-sm text-gray-600 line-clamp-2">
             {course.description}
@@ -168,10 +167,12 @@ export default function CourseCard({
                 <Clock className="h-4 w-4" />
                 {course.duration} mins
               </div>
-              <div className="flex items-center gap-1">
-                <Users className="h-4 w-4" />
-                {certifiedCount}+ certified
-              </div>
+              {typeof certifiedCount === 'number' && certifiedCount > 0 && (
+                <div className="flex items-center gap-1">
+                  <Users className="h-4 w-4" />
+                  {certifiedCount.toLocaleString()} certified
+                </div>
+              )}
               <div className="flex items-center gap-1">
                 <Award className="h-4 w-4" />
                 {course.level || "All Levels"}
@@ -217,7 +218,7 @@ export default function CourseCard({
               </div>
               <Link href={`/exam/${courseSlug}`}>
                 <Button className="bg-black hover:bg-gray-800 text-white group">
-                  Learn More
+                  View assessment
                   <ChevronRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>

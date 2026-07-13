@@ -148,7 +148,7 @@ export const users = pgTable("users", {
   isAdmin: boolean("is_admin").default(false).notNull(),
   
   // Google OAuth fields
-  googleId: text("google_id"),
+  googleId: text("google_id").unique(),
   isGoogleUser: boolean("is_google_user").default(false).notNull(),
   
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -392,7 +392,7 @@ export const subscriptions = pgTable("subscriptions", {
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
   currency: text("currency").default("INR").notNull(),
   cycle: text("cycle").default("monthly").notNull(), // monthly | yearly
-  cashfreeOrderId: text("cashfree_order_id"),
+  cashfreeOrderId: text("cashfree_order_id").unique(),
   cashfreePaymentId: text("cashfree_payment_id"),
   startsAt: timestamp("starts_at"),
   renewsAt: timestamp("renews_at"),
@@ -744,7 +744,9 @@ export const examAttempts = pgTable("exam_attempts", {
   timeTaken: integer("time_taken").notNull(), // in seconds
   passed: boolean("passed").notNull(),
   mastered: boolean("mastered").default(false).notNull(),
-  sessionId: text("session_id"),
+  // One server-issued exam session may produce at most one persisted attempt.
+  // PostgreSQL permits multiple NULLs, so legacy/imported attempts remain valid.
+  sessionId: text("session_id").unique(),
   ipAddress: text("ip_address"),
   userAgent: text("user_agent"),
   tabSwitches: integer("tab_switches").default(0).notNull(),
@@ -830,7 +832,7 @@ export const sellers = pgTable("sellers", {
   isActive: boolean("is_active").default(true).notNull(),
   
   // Google OAuth fields
-  googleId: text("google_id"),
+  googleId: text("google_id").unique(),
   isGoogleUser: boolean("is_google_user").default(false).notNull(),
   commissionRate: decimal("commission_rate", { precision: 5, scale: 2 }).default("10.00").notNull(),
   totalEarnings: decimal("total_earnings", { precision: 10, scale: 2 }).default("0.00").notNull(),
@@ -1029,7 +1031,9 @@ export const userLearningPaths = pgTable("user_learning_paths", {
   enrolledAt: timestamp("enrolled_at").defaultNow().notNull(),
   completedAt: timestamp("completed_at"),
   isActive: boolean("is_active").default(true).notNull(),
-});
+}, (table) => [
+  unique("user_learning_paths_user_path_unique").on(table.userId, table.learningPathId),
+]);
 
 export const skillAssessments = pgTable("skill_assessments", {
   id: serial("id").primaryKey(),
@@ -1064,7 +1068,9 @@ export const userCourseProgress = pgTable("user_course_progress", {
   completedAt: timestamp("completed_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+}, (table) => [
+  unique("user_course_progress_user_course_unique").on(table.userId, table.courseId),
+]);
 
 // Achievement system
 export const achievements = pgTable("achievements", {
