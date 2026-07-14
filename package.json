@@ -13,6 +13,13 @@
     "db:migrate": "node scripts/run-migrations.mjs",
     "db:migrate:drizzle-kit": "drizzle-kit migrate",
     "db:validate": "node scripts/validate-migrations.mjs",
+    "questions:generate-original": "tsx scripts/generate-original-question-pack.ts",
+    "questions:register-source": "tsx scripts/register-question-pack-source.ts",
+    "questions:import": "tsx scripts/import-question-pack.ts",
+    "questions:inventory": "tsx scripts/question-pack-inventory.ts",
+    "questions:verify-integration": "tsx scripts/verify-question-pack-integration.ts",
+    "assessments:sync-inhouse": "tsx scripts/sync-inhouse-assessment-catalog.ts",
+    "admin:bootstrap-local": "tsx scripts/bootstrap-local-admin.ts",
     "test": "jest --passWithNoTests"
   },
   "dependencies": {

@@ -170,7 +170,7 @@ export default function VirtualInternshipsPage() {
                 <div className="text-xs text-gray-500">Assessment fee</div>
                 <div className="text-2xl font-bold text-black">₹{internship.price}</div>
               </div>
-              <Link href={`/exam/${internship.slug || internship.id}`}>
+              <Link href={`/assessments/${internship.slug || internship.id}`}>
                 <Button className="bg-black hover:bg-gray-800 text-white group">
                   View assessment
                   <ChevronRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />

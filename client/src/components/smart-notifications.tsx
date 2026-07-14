@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { publicProductPath } from "@shared/public-assessment-routes";
 
 interface Notification {
   id: number;
@@ -29,6 +30,7 @@ interface RecommendedCourse {
   description?: string;
   price?: string | number;
   level?: string;
+  productType?: "assessment" | "video_course" | "ebook" | "bundle";
   category?: {
     name?: string;
   } | null;
@@ -299,7 +301,7 @@ export function SmartNotifications() {
                           <span className="text-sm font-semibold">₹{course.price || '99.00'}</span>
                         </div>
                         <Button className="w-full mt-3" size="sm" asChild>
-                          <a href={`/exam/${course.slug || course.id}`}>
+                          <a href={publicProductPath(course.slug || course.id, course.productType || "assessment")}>
                             Explore Course
                           </a>
                         </Button>

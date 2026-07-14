@@ -4,6 +4,7 @@ import path from "path";
 import { randomUUID } from "node:crypto";
 import type { ServerOptions } from "vite";
 import { type Server } from "http";
+import { PUBLIC_ASSESSMENT_PRODUCT_TYPES } from "@shared/public-assessment-routes";
 
 export function log(message: string, source = "express") {
   const formattedTime = new Date().toLocaleTimeString("en-US", {
@@ -90,54 +91,128 @@ export function serveStatic(app: Express) {
   // Lazy db import to avoid cycles
   const escapeHtml = (s: string) =>
     s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  const withOctamyBrand = (title: string) => /octamy/i.test(title) ? title : `${title} | Octamy`;
 
-  const renderMeta = (title: string, description: string, url: string, image?: string) => `
-    <title>${escapeHtml(title)}</title>
-    <meta name="description" content="${escapeHtml(description)}" />
-    <link rel="canonical" href="${escapeHtml(url)}" />
-    <meta property="og:title" content="${escapeHtml(title)}" />
-    <meta property="og:description" content="${escapeHtml(description)}" />
-    <meta property="og:url" content="${escapeHtml(url)}" />
-    ${image ? `<meta property="og:image" content="${escapeHtml(image)}" />` : ""}
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="${escapeHtml(title)}" />
-    <meta name="twitter:description" content="${escapeHtml(description)}" />
+  const renderMeta = (title: string, description: string, url: string, image: string, noIndex = false) => `
+    <title data-react-helmet="true">${escapeHtml(title)}</title>
+    <meta data-react-helmet="true" name="description" content="${escapeHtml(description)}" />
+    <meta data-react-helmet="true" name="author" content="Octamy Solutions Private Limited" />
+    <meta data-react-helmet="true" name="robots" content="${noIndex ? "noindex, follow" : "index, follow, max-image-preview:large, max-snippet:-1"}" />
+    <link data-react-helmet="true" rel="canonical" href="${escapeHtml(url)}" />
+    <meta data-react-helmet="true" property="og:site_name" content="Octamy" />
+    <meta data-react-helmet="true" property="og:type" content="website" />
+    <meta data-react-helmet="true" property="og:title" content="${escapeHtml(title)}" />
+    <meta data-react-helmet="true" property="og:description" content="${escapeHtml(description)}" />
+    <meta data-react-helmet="true" property="og:url" content="${escapeHtml(url)}" />
+    <meta data-react-helmet="true" property="og:image" content="${escapeHtml(image)}" />
+    <meta data-react-helmet="true" property="og:locale" content="en_IN" />
+    <meta data-react-helmet="true" name="twitter:card" content="summary_large_image" />
+    <meta data-react-helmet="true" name="twitter:title" content="${escapeHtml(title)}" />
+    <meta data-react-helmet="true" name="twitter:description" content="${escapeHtml(description)}" />
+    <meta data-react-helmet="true" name="twitter:image" content="${escapeHtml(image)}" />
   `;
 
-  app.get(["/exam/:slug", "/category/:slug"], async (req, res, next) => {
+  const replaceSeoHead = (html: string, meta: string) => {
+    const markedHead = /<!--\s*SEO_HEAD\s*-->[\s\S]*?<!--\s*SEO_HEAD_END\s*-->/;
+    return markedHead.test(html)
+      ? html.replace(markedHead, meta)
+      : html.replace(/<!--\s*SEO_HEAD\s*-->/, meta);
+  };
+
+  app.get(["/assessments/categories/:slug", "/assessments/:slug"], async (req, res, next) => {
     try {
       const html = loadIndex();
       const slug = String(req.params.slug || "").toLowerCase();
-      const isExam = req.path.startsWith("/exam/");
+      const isExam = !req.path.startsWith("/assessments/categories/");
+      const base = (process.env.APP_URL || "https://octamy.com").replace(/\/+$/, "");
       let title = "Octamy";
-      let description = "Free skill-verification assessments. Pay only for verified certificates.";
-      let image: string | undefined;
+      let description = "Take reviewed skill assessments free and choose whether to activate a verifiable credential after passing.";
+      let image = `${base}/og-image.png`;
+      let resourceFound = false;
+      let indexable = false;
+      let lookupComplete = false;
+      let canonicalPath = req.path;
 
       try {
         const { db } = await import("./db");
         const { courses, categories } = await import("@shared/schema");
-        const { eq } = await import("drizzle-orm");
+        const { and, eq, inArray, sql } = await import("drizzle-orm");
         if (isExam) {
-          const [c] = await db.select().from(courses).where(eq(courses.slug, slug)).limit(1);
+          const numericId = /^\d+$/.test(slug) ? Number(slug) : null;
+          const identityCondition = numericId && Number.isSafeInteger(numericId) && numericId > 0
+            ? eq(courses.id, numericId)
+            : eq(courses.slug, slug);
+          const [c] = await db.select({
+            slug: courses.slug,
+            title: courses.title,
+            description: courses.description,
+            metaTitle: courses.metaTitle,
+            metaDescription: courses.metaDescription,
+            thumbnailUrl: courses.thumbnailUrl,
+          }).from(courses)
+            .innerJoin(categories, eq(categories.id, courses.categoryId))
+            .where(and(
+              identityCondition,
+              inArray(courses.ownerType, ["admin", "creator"]),
+              inArray(courses.productType, [...PUBLIC_ASSESSMENT_PRODUCT_TYPES]),
+              eq(courses.isActive, true),
+              eq(courses.visibility, "public"),
+              eq(courses.reviewStatus, "approved"),
+              eq(categories.isActive, true),
+            )).limit(1);
           if (c) {
-            title = `${c.title} — Certification Exam | Octamy`;
-            description = (c.description || description).slice(0, 200);
-            image = undefined;
+            resourceFound = true;
+            indexable = true;
+            title = withOctamyBrand(c.metaTitle || `${c.title} assessment`);
+            description = (c.metaDescription || c.description || description).slice(0, 300);
+            image = c.thumbnailUrl || image;
+            canonicalPath = `/assessments/${c.slug}`;
           }
         } else {
           const [c] = await db.select().from(categories).where(eq(categories.slug, slug)).limit(1);
-          if (c) {
-            title = `${c.name} Skill Assessments & Certifications | Octamy`;
-            description = `Browse free ${c.name.toLowerCase()} assessments on Octamy.`;
+          if (c?.isActive) {
+            resourceFound = true;
+            title = withOctamyBrand(c.metaTitle || `${c.name} assessments`);
+            description = (c.metaDescription || c.description || `Browse reviewed ${c.name.toLowerCase()} assessments on Octamy.`).slice(0, 300);
+            canonicalPath = `/assessments/categories/${c.slug}`;
+
+            const [publicAssessment] = await db.select({ id: courses.id }).from(courses)
+              .where(and(
+                eq(courses.ownerType, "admin"),
+                inArray(courses.productType, [...PUBLIC_ASSESSMENT_PRODUCT_TYPES]),
+                eq(courses.isActive, true),
+                eq(courses.visibility, "public"),
+                eq(courses.reviewStatus, "approved"),
+                sql`${courses.categoryId} IN (
+                  WITH RECURSIVE selected_categories AS (
+                    SELECT id FROM ${categories}
+                    WHERE id = ${c.id} AND is_active = true
+                    UNION ALL
+                    SELECT child.id FROM ${categories} child
+                    INNER JOIN selected_categories parent ON child.parent_id = parent.id
+                    WHERE child.is_active = true
+                  )
+                  SELECT id FROM selected_categories
+                )`,
+              )).limit(1);
+            indexable = Boolean(publicAssessment);
           }
         }
+        lookupComplete = true;
       } catch (e) {
         // db error — serve generic shell, don't fail
       }
 
-      const url = `https://octamy.com${req.path}`;
-      const out = html.replace(/<!--\s*SEO_HEAD\s*-->/, renderMeta(title, description, url, image));
-      res.status(200).type("html").send(out);
+      if (image?.startsWith("/")) image = `${base}${image}`;
+      if (resourceFound && req.path !== canonicalPath) {
+        const queryIndex = req.originalUrl.indexOf("?");
+        const query = queryIndex >= 0 ? req.originalUrl.slice(queryIndex) : "";
+        return res.redirect(301, `${canonicalPath}${query}`);
+      }
+      const url = `${base}${canonicalPath}`;
+      const out = replaceSeoHead(html, renderMeta(title, description, url, image, !indexable));
+      const status = lookupComplete && !resourceFound ? 404 : 200;
+      res.status(status).type("html").send(out);
     } catch (e) {
       next(e);
     }

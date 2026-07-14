@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "sourceKey": "octamy-original:quant-science:v1",
+  "name": "Octamy Original Quantitative and Numerical Practice Bank",
+  "publisher": "Octamy",
+  "datasetVersion": "1.0.0",
+  "description": "First-party, deterministically generated Mathematics, quantitative aptitude, Physics and Chemistry numerical practice items. These items are review drafts and are not official previous-year questions.",
+  "sourceUrl": "https://octamy.com/about",
+  "retrievedAt": "2026-07-14T00:00:00.000Z",
+  "license": {
+    "identifier": "Proprietary-Octamy-Original-1.0",
+    "name": "Octamy original-content rights",
+    "url": "https://octamy.com/terms-of-service",
+    "rightsBasis": "owned",
+    "commercialUseAllowed": true,
+    "derivativesAllowed": true,
+    "shareAlikeObligation": "none",
+    "attributionText": "Octamy original practice content",
+    "evidenceReference": "octamy-original-generator:quant-science:v1:source-controlled-implementation"
+  },
+  "provenance": {
+    "acquisitionMethod": "first_party",
+    "originalFormat": "JSONL",
+    "chainOfTitle": "Every prompt, option, answer and explanation is produced by Octamy's source-controlled deterministic template implementation without copying third-party assessment question text.",
+    "notes": "Registration confirms ownership of the first-party generator output only. It does not approve, activate, certify or publish any imported question."
+  }
+}

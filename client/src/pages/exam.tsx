@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useLocation } from 'wouter';
+import { Link, useParams, useLocation } from 'wouter';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,10 +11,9 @@ import { apiRequest } from '@/lib/queryClient';
 import { useAuth } from '@/lib/auth.tsx';
 import Header from '@/components/header';
 import ExamTimer from '@/components/exam-timer';
-import { Helmet } from 'react-helmet-async';
 import { ExamStructuredData } from '@/components/seo-structured-data';
-
-import type { Course, Question } from '@shared/schema';
+import { SEO } from '@/components/seo';
+import { publicAssessmentCategoryPath, publicAssessmentPath } from '@shared/public-assessment-routes';
 import { AlertTriangle } from 'lucide-react';
 
 interface ExamQuestion {
@@ -22,6 +21,29 @@ interface ExamQuestion {
   question: string;
   options: string[];
 }
+
+type PublicAssessment = {
+  id: number;
+  title: string;
+  description: string;
+  slug: string;
+  categoryId: number;
+  duration: number;
+  passingScore: number;
+  price: string;
+  productType: "assessment";
+  level: string;
+  language: string;
+  thumbnailUrl: string | null;
+  metaTitle: string | null;
+  metaDescription: string | null;
+  origin: "octamy" | "creator";
+  originLabel: string;
+  certificationLabel: string;
+  canonicalPath: string;
+  category: { id: number; name: string; slug: string; kind: string };
+  creator: { displayName: string; slug: string } | null;
+};
 
 export default function Exam() {
   const { slug } = useParams();
@@ -42,12 +64,26 @@ export default function Exam() {
     email: user?.email || ''
   });
 
-  const { data: course } = useQuery<Course>({
-    queryKey: [`/api/courses/slug/${slug}`],
+  const { data: course, isLoading: courseLoading, error: courseError } = useQuery<PublicAssessment>({
+    queryKey: ["/api/assessments", slug],
     enabled: !!slug,
+    retry: false,
+    queryFn: async () => (await apiRequest("GET", `/api/assessments/${encodeURIComponent(String(slug || ""))}`)).json(),
   });
 
-  const { data: questionsData } = useQuery<{questions: ExamQuestion[], sessionId: string}>({
+  useEffect(() => {
+    if (!course?.canonicalPath || typeof window === "undefined") return;
+    if (window.location.pathname !== course.canonicalPath) {
+      setLocation(`${course.canonicalPath}${window.location.search}`, { replace: true });
+    }
+  }, [course?.canonicalPath, setLocation]);
+
+  const {
+    data: questionsData,
+    error: questionsError,
+    isLoading: questionsLoading,
+    refetch: refetchQuestions,
+  } = useQuery<{questions: ExamQuestion[], sessionId: string}>({
     queryKey: [`/api/courses/${course?.id}/questions`, examStarted, examStartTime],
     queryFn: async () => {
       // Always generate a fresh session for each exam attempt
@@ -62,11 +98,13 @@ export default function Exam() {
         }),
       });
       if (!response.ok) {
-        throw new Error('Failed to fetch questions');
+        const body = await response.json().catch(() => ({}));
+        throw new Error(body.message || 'Failed to fetch questions');
       }
       return response.json();
     },
     enabled: !!course?.id && examStarted,
+    retry: 2,
   });
 
   const questions = questionsData?.questions || [];
@@ -257,26 +295,39 @@ export default function Exam() {
   const progress = questions.length > 0 ? ((currentQuestion + 1) / questions.length) * 100 : 0;
   const answeredCount = Object.keys(answers).length;
 
-  const courseSlug = course?.slug || course?.title.toLowerCase()
-    .replace(/[^a-zA-Z0-9\s]/g, '')
-    .replace(/\s+/g, '-');
+  if (courseLoading) {
+    return <div className="min-h-screen bg-slate-50"><SEO title="Loading assessment" path={publicAssessmentPath(slug)} noIndex /><Header /><main className="mx-auto max-w-5xl px-5 py-16"><div className="h-96 animate-pulse rounded-3xl bg-slate-200" /></main></div>;
+  }
+
+  if (!course || courseError) {
+    return (
+      <div className="min-h-screen bg-slate-50">
+        <SEO title="Assessment not found" description="This assessment is unavailable or is no longer public." path={publicAssessmentPath(slug)} noIndex />
+        <Header />
+        <main className="mx-auto max-w-xl px-5 py-20 text-center">
+          <h1 className="text-3xl font-black text-slate-950">Assessment unavailable</h1>
+          <p className="mt-3 leading-7 text-slate-600">The link may be incorrect, or this assessment is no longer published.</p>
+          <Button asChild variant="outline" className="mt-6"><Link href="/assessments">Browse public assessments</Link></Button>
+        </main>
+      </div>
+    );
+  }
+
+  const canonicalPath = course.canonicalPath || publicAssessmentPath(course.slug);
+  const metaDescription = course.metaDescription || `Take the ${course.title} assessment free. Review the published passing threshold before you begin; credential activation is optional after a passing result.`;
 
   if (!examStarted) {
     return (
       <div className="min-h-screen bg-cream-deep">
-        <Helmet>
-          <title>{course?.title ? `${course.title} - Certification Exam | Octamy` : 'Certification Exam | Octamy'}</title>
-          <meta name="description" content={course?.title ? `Take the ${course.title} certification exam and earn your professional credential. Comprehensive assessment with instant results.` : 'Take your certification exam and earn your professional credential.'} />
-          <meta property="og:title" content={course?.title ? `${course.title} - Certification Exam | Octamy` : 'Certification Exam | Octamy'} />
-          <meta property="og:description" content={course?.title ? `Take the ${course.title} certification exam and earn your professional credential.` : 'Take your certification exam and earn your professional credential.'} />
-          <meta property="og:url" content={`${window.location.origin}/exam/${courseSlug}`} />
-          <link rel="canonical" href={`${window.location.origin}/exam/${courseSlug}`} />
-        </Helmet>
+        <SEO title={course.metaTitle || `${course.title} assessment`} description={metaDescription} path={canonicalPath} image={course.thumbnailUrl || undefined} />
         
-        {course && <ExamStructuredData course={course} />}
+        <ExamStructuredData course={course} />
         
         <Header />
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <nav aria-label="Breadcrumb" className="mb-5 flex flex-wrap items-center gap-2 text-sm text-slate-500">
+            <Link href={course.origin === "creator" ? "/creator-assessments" : "/assessments"} className="hover:text-slate-950">{course.origin === "creator" ? "Creator assessments" : "Assessments"}</Link><span aria-hidden="true">/</span><Link href={course.origin === "creator" ? `/creator-assessments?category=${encodeURIComponent(course.category.slug)}` : publicAssessmentCategoryPath(course.category.slug)} className="hover:text-slate-950">{course.category.name}</Link><span aria-hidden="true">/</span><span className="font-medium text-slate-800" aria-current="page">{course.title}</span>
+          </nav>
           <Card className="border-cream-deep shadow-sm">
             <CardHeader>
               <CardTitle className="text-3xl text-center tracking-tight text-slate-900">
@@ -286,7 +337,7 @@ export default function Exam() {
             <CardContent className="space-y-6">
               <div className="text-center space-y-4">
                 <p className="text-lg text-slate-600">
-                  Enterprise-grade skill verification for {course?.title}.
+                  {course.originLabel} · {course.certificationLabel}
                 </p>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-left">
                   <div className="rounded-xl border border-cream-deep bg-cream-soft p-4">
@@ -363,9 +414,32 @@ export default function Exam() {
     );
   }
 
-  if (questions.length === 0) {
+  if (questionsError) {
+    return (
+      <div className="min-h-screen bg-cream-deep">
+        <SEO title={`${course.title} assessment unavailable`} description={metaDescription} path={canonicalPath} noIndex />
+        <Header />
+        <main className="mx-auto max-w-xl px-4 py-16 text-center sm:px-6">
+          <Card className="border-amber-200 shadow-sm">
+            <CardContent className="py-12">
+              <AlertTriangle className="mx-auto h-9 w-9 text-amber-600" />
+              <h1 className="mt-4 text-2xl font-black text-slate-950">Assessment session could not start</h1>
+              <p className="mt-3 leading-7 text-slate-600">{questionsError instanceof Error ? questionsError.message : "The reviewed question pool is temporarily unavailable."}</p>
+              <div className="mt-6 flex flex-wrap justify-center gap-3">
+                <Button onClick={() => refetchQuestions()}>Try again</Button>
+                <Button variant="outline" onClick={() => setExamStarted(false)}>Back to assessment</Button>
+              </div>
+            </CardContent>
+          </Card>
+        </main>
+      </div>
+    );
+  }
+
+  if (questionsLoading || questions.length === 0) {
     return (
     <div className="min-h-screen bg-cream-deep">
+      <SEO title={`${course.title} assessment session`} description={metaDescription} path={canonicalPath} noIndex />
       <Header />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <Card className="border-cream-deep shadow-sm">
@@ -382,6 +456,7 @@ export default function Exam() {
 
   return (
     <div className="min-h-screen bg-cream-soft">
+      <SEO title={`${course.title} assessment session`} description={metaDescription} path={canonicalPath} noIndex />
       <Header />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <Card>

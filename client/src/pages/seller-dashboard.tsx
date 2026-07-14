@@ -244,15 +244,6 @@ export default function SellerDashboard() {
     }
   };
 
-  const copyReferralLink = (courseId: number) => {
-    const referralLink = `${window.location.origin}/exam/${courseId}?ref=${seller?.email}`;
-    navigator.clipboard.writeText(referralLink);
-    toast({
-      title: "Copied!",
-      description: "Referral link copied to clipboard",
-    });
-  };
-
   const handleWithdrawalSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     

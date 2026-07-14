@@ -1,4 +1,4 @@
-import { Switch, Route } from "wouter";
+import { Redirect, Route, Switch, useParams, useSearch } from "wouter";
 import { lazy, Suspense } from "react";
 import { MotionConfig } from "framer-motion";
 import { queryClient } from "./lib/queryClient";
@@ -109,6 +109,11 @@ import {
   RecruiterProtectedRoute
 } from "../../recruiter";
 import InternShipPayment from "./pages/offlinInternshipPayment.tsx";
+import {
+  ASSESSMENT_HUB_PATH,
+  publicAssessmentCategoryPath,
+  publicAssessmentPath,
+} from "@shared/public-assessment-routes";
 
 // P1 Question Bank Pro — lazy-loaded
 const QuestionBanksList = lazy(() => import("@/pages/question-banks-list"));
@@ -120,6 +125,18 @@ const QBLoader = () => (
     Loading…
   </div>
 );
+
+function LegacyAssessmentRedirect({ category = false }: { category?: boolean }) {
+  const { slug = "" } = useParams<{ slug: string }>();
+  const search = useSearch();
+  const destination = category ? publicAssessmentCategoryPath(slug) : publicAssessmentPath(slug);
+  return <Redirect to={`${destination}${search ? `?${search}` : ""}`} replace />;
+}
+
+function LegacyAssessmentHubRedirect() {
+  const search = useSearch();
+  return <Redirect to={`${ASSESSMENT_HUB_PATH}${search ? `?${search}` : ""}`} replace />;
+}
 
 function Router() {
   return (
@@ -154,12 +171,14 @@ function Router() {
       {/* Pricing */}
       <Route path="/pricing" component={Pricing} />
       <Route path="/billing/return" component={BillingReturn} />
-      <Route path="/exams" component={Assessments} />
+      <Route path="/exams" component={LegacyAssessmentHubRedirect} />
+      <Route path="/assessments/categories/:slug" component={CategoryPage} />
+      <Route path="/assessments/:slug" component={Exam} />
       <Route path="/assessments" component={Assessments} />
       <Route path="/creator-assessments" component={CreatorAssessments} />
       <Route path="/courses" component={Courses} />
       <Route path="/learn/:slug" component={CourseLearning} />
-      <Route path="/skill-verification" component={Assessments} />
+      <Route path="/skill-verification" component={LegacyAssessmentHubRedirect} />
       <Route path="/virtual-internships" component={VirtualInternships} />
       <Route path="/business-certifications" component={BusinessCertificationsPage} />
       <Route path="/learning-paths" component={LearningPaths} />
@@ -172,7 +191,7 @@ function Router() {
       <Route path="/admin/approvals" component={AdminApprovals} />
       <Route path="/qwegle/approvals" component={AdminApprovals} />
       <Route path="/enhanced-admin" component={EnhancedAdminDashboard} />
-      <Route path="/exam/:slug" component={Exam} />
+      <Route path="/exam/:slug">{() => <LegacyAssessmentRedirect />}</Route>
       <Route path="/exam-results-temp/:tempExamId" component={TempExamResults} />
       <Route path="/payment" component={PaymentTemp} />
       <Route path="/checkout/:courseId" component={EnhancedCheckout} />
@@ -222,7 +241,7 @@ function Router() {
       <Route path="/help-center" component={HelpCenter} />
       <Route path="/about" component={About} />
       <Route path="/vision" component={Vision} />
-      <Route path="/category/:slug" component={CategoryPage} />
+      <Route path="/category/:slug">{() => <LegacyAssessmentRedirect category />}</Route>
       <Route path="/privacy-policy" component={PrivacyPolicy} />
       <Route path="/terms-of-service" component={TermsOfService} />
       <Route path="/trust" component={TrustPage} />

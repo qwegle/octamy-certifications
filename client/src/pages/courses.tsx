@@ -154,7 +154,7 @@ export default function CoursesPage() {
       <SEO
         title="Skill Assessments & Assessment-backed Credentials"
         description="Browse scored assessments across AI, Development, Cloud, Cybersecurity and Business. Assess free and optionally activate a publicly checkable credential after passing."
-        path="/exams"
+        path="/courses"
       />
       <Header />
       <main id="main-content" tabIndex={-1}>

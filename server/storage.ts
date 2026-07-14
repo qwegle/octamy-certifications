@@ -21,6 +21,7 @@ import {
   instituteMembers,
   questionBanks,
   questionTopics,
+  questionProvenance,
   questionVersions,
   courseQuestionBlueprint,
   type Creator,
@@ -327,7 +328,7 @@ export interface IStorage {
     codeLanguage?: string | null;
   }): Promise<Question>;
   updateQuestionWithVersioning(id: number, data: Record<string, unknown>, changedBy?: number, changeNote?: string, expectedVersion?: number): Promise<Question | undefined>;
-  deleteBankQuestion(id: number): Promise<void>;
+  deleteBankQuestion(id: number, retiredBy?: number): Promise<void>;
   bulkCreateQuestions(bankId: number, rows: Array<Record<string, unknown>>, createdBy?: number): Promise<{ created: number; errors: Array<{ row: number; message: string }> }>;
   listQuestionsByBank(bankId: number, opts: { topicId?: number; format?: string; search?: string; page?: number; perPage?: number }): Promise<{ items: Question[]; total: number; page: number; perPage: number }>;
   getQuestionVersions(questionId: number): Promise<QuestionVersion[]>;
@@ -2246,7 +2247,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteQuestion(id: number): Promise<void> {
-    await db.delete(questions).where(eq(questions.id, id));
+    await this.deleteBankQuestion(id);
   }
 
   // Admin course management with comprehensive data
@@ -2548,11 +2549,43 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Delete question (admin)
-  async deleteQuestionAdmin(id: number) {
-    const [question] = await db.delete(questions)
-      .where(eq(questions.id, id))
-      .returning();
-    return question;
+  async deleteQuestionAdmin(id: number, retiredBy?: number) {
+    return db.transaction(async (tx) => {
+      const [existing] = await tx.select().from(questions)
+        .where(eq(questions.id, id))
+        .for("update");
+      if (!existing) return undefined;
+      const [lineage] = await tx.select({ id: questionProvenance.id })
+        .from(questionProvenance)
+        .where(eq(questionProvenance.questionId, id))
+        .limit(1);
+
+      let result: Question;
+      if (lineage) {
+        if (existing.reviewStatus === "retired") return existing;
+        await tx.insert(questionVersions).values({
+          questionId: id,
+          version: existing.version ?? 1,
+          snapshot: existing as unknown as Record<string, unknown>,
+          changeNote: "Retired by admin; imported provenance retained",
+          changedBy: retiredBy ?? null,
+        });
+        [result] = await tx.update(questions).set({
+          reviewStatus: "retired",
+          isActive: false,
+          version: (existing.version ?? 1) + 1,
+          updatedAt: new Date(),
+        }).where(eq(questions.id, id)).returning();
+      } else {
+        [result] = await tx.delete(questions).where(eq(questions.id, id)).returning();
+      }
+      if (existing.bankId && existing.reviewStatus !== "retired") {
+        await tx.update(questionBanks)
+          .set({ questionCount: sql`GREATEST(${questionBanks.questionCount} - 1, 0)`, updatedAt: new Date() })
+          .where(eq(questionBanks.id, existing.bankId));
+      }
+      return result;
+    });
   }
 
   // Get exam attempts for admin
@@ -3657,15 +3690,46 @@ export class DatabaseStorage implements IStorage {
     });
   }
 
-  async deleteBankQuestion(id: number): Promise<void> {
-    const [existing] = await db.select().from(questions).where(eq(questions.id, id));
-    if (!existing) return;
-    await db.delete(questions).where(eq(questions.id, id));
-    if (existing.bankId) {
-      await db.update(questionBanks)
-        .set({ questionCount: sql`GREATEST(${questionBanks.questionCount} - 1, 0)`, updatedAt: new Date() })
-        .where(eq(questionBanks.id, existing.bankId));
-    }
+  async deleteBankQuestion(id: number, retiredBy?: number): Promise<void> {
+    await db.transaction(async (tx) => {
+      const [existing] = await tx.select().from(questions)
+        .where(eq(questions.id, id))
+        .for("update");
+      if (!existing) return;
+
+      const [lineage] = await tx.select({ id: questionProvenance.id })
+        .from(questionProvenance)
+        .where(eq(questionProvenance.questionId, id))
+        .limit(1);
+
+      if (lineage) {
+        // Imported lineage is an audit record. A UI "delete" therefore retires
+        // the question instead of violating (or bypassing) the provenance FK.
+        if (existing.reviewStatus !== "retired") {
+          await tx.insert(questionVersions).values({
+            questionId: id,
+            version: existing.version ?? 1,
+            snapshot: existing as unknown as Record<string, unknown>,
+            changeNote: "Retired; imported provenance retained",
+            changedBy: retiredBy ?? null,
+          });
+          await tx.update(questions).set({
+            reviewStatus: "retired",
+            isActive: false,
+            version: (existing.version ?? 1) + 1,
+            updatedAt: new Date(),
+          }).where(eq(questions.id, id));
+        }
+      } else {
+        await tx.delete(questions).where(eq(questions.id, id));
+      }
+
+      if (existing.bankId && existing.reviewStatus !== "retired") {
+        await tx.update(questionBanks)
+          .set({ questionCount: sql`GREATEST(${questionBanks.questionCount} - 1, 0)`, updatedAt: new Date() })
+          .where(eq(questionBanks.id, existing.bankId));
+      }
+    });
   }
 
   async bulkCreateQuestions(bankId: number, rows: Array<Record<string, any>>, createdBy?: number): Promise<{ created: number; errors: Array<{ row: number; message: string }> }> {
@@ -3707,7 +3771,10 @@ export class DatabaseStorage implements IStorage {
   async listQuestionsByBank(bankId: number, opts: { topicId?: number; format?: string; search?: string; page?: number; perPage?: number }): Promise<{ items: Question[]; total: number; page: number; perPage: number }> {
     const page = Math.max(1, opts.page ?? 1);
     const perPage = Math.min(200, Math.max(1, opts.perPage ?? 25));
-    const where: any[] = [eq(questions.bankId, bankId)];
+    const where: any[] = [
+      eq(questions.bankId, bankId),
+      sql`${questions.reviewStatus} <> 'retired'`,
+    ];
     if (opts.topicId) where.push(eq(questions.topicId, opts.topicId));
     if (opts.format) where.push(eq(questions.questionFormat, opts.format));
     if (opts.search) where.push(ilike(questions.question, `%${opts.search}%`));

@@ -1,4 +1,4 @@
-import { pgTable, text, varchar, serial, integer, boolean, timestamp, decimal, json, index, jsonb, unique, check, type AnyPgColumn } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, serial, integer, boolean, timestamp, decimal, json, index, uniqueIndex, jsonb, unique, check, foreignKey, type AnyPgColumn } from "drizzle-orm/pg-core";
 import { relations, eq, desc, and, asc, sql } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -850,6 +850,57 @@ export const passwordResetTokens = pgTable("password_reset_tokens", {
 }));
 export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
 
+// Registered question-pack sources are immutable rights/provenance manifests.
+// The ingestion CLI only accepts sources whose commercial and derivative-use
+// rights have been explicitly reviewed; repository/code licensing alone is not
+// treated as chain-of-title for third-party assessment content.
+export const questionPackSources = pgTable("question_pack_sources", {
+  id: serial("id").primaryKey(),
+  sourceKey: text("source_key").notNull().unique(),
+  name: text("name").notNull(),
+  publisher: text("publisher").notNull(),
+  datasetVersion: text("dataset_version").notNull(),
+  description: text("description"),
+  sourceUrl: text("source_url").notNull(),
+  retrievedAt: timestamp("retrieved_at").notNull(),
+  manifestSha256: text("manifest_sha256").notNull(),
+  licenseIdentifier: text("license_identifier").notNull(),
+  licenseName: text("license_name").notNull(),
+  licenseUrl: text("license_url").notNull(),
+  rightsBasis: text("rights_basis").notNull(), // owned | contract | permission | open_license | public_domain
+  commercialUseAllowed: boolean("commercial_use_allowed").default(false).notNull(),
+  derivativesAllowed: boolean("derivatives_allowed").default(false).notNull(),
+  shareAlikeObligation: text("share_alike_obligation").default("none").notNull(),
+  attributionText: text("attribution_text").notNull(),
+  evidenceReference: text("evidence_reference").notNull(),
+  provenance: jsonb("provenance").$type<Record<string, unknown>>().default({}).notNull(),
+  rightsReviewStatus: text("rights_review_status").default("pending").notNull(), // pending | verified | rejected
+  rightsReviewedAt: timestamp("rights_reviewed_at"),
+  rightsReviewedBy: text("rights_reviewed_by"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (t) => ({
+  rightsInventory: index("question_pack_sources_rights_idx").on(t.rightsReviewStatus, t.publisher),
+  validSourceKey: check("question_pack_sources_key_check", sql`${t.sourceKey} ~ '^[a-z0-9][a-z0-9._:/-]{2,159}$'`),
+  manifestHash: check("question_pack_sources_manifest_hash_check", sql`${t.manifestSha256} ~ '^[0-9a-f]{64}$'`),
+  rightsBasis: check("question_pack_sources_rights_basis_check", sql`${t.rightsBasis} IN ('owned','contract','permission','open_license','public_domain')`),
+  reviewStatus: check("question_pack_sources_review_status_check", sql`${t.rightsReviewStatus} IN ('pending','verified','rejected')`),
+  provenanceObject: check("question_pack_sources_provenance_object_check", sql`jsonb_typeof(${t.provenance}) = 'object'`),
+  verifiedRights: check("question_pack_sources_verified_rights_check", sql`
+    ${t.rightsReviewStatus} <> 'verified'
+    OR (
+      ${t.commercialUseAllowed} = true
+      AND ${t.derivativesAllowed} = true
+      AND ${t.rightsReviewedAt} IS NOT NULL
+      AND length(btrim(COALESCE(${t.rightsReviewedBy}, ''))) >= 3
+      AND length(btrim(${t.licenseIdentifier})) >= 3
+      AND length(btrim(${t.licenseUrl})) >= 8
+      AND length(btrim(${t.sourceUrl})) >= 8
+      AND length(btrim(${t.evidenceReference})) >= 8
+    )
+  `),
+}));
+
 export const questions = pgTable("questions", {
   id: serial("id").primaryKey(),
   // Legacy: questions tied directly to a course. Now nullable; bank-scoped
@@ -880,6 +931,10 @@ export const questions = pgTable("questions", {
   timeLimitSec: integer("time_limit_sec"),
   tags: json("tags").$type<string[]>().default([]),
   explanation: text("explanation"),
+  // Canonical pedagogical-content identity for scalable, per-bank dedupe.
+  // Legacy/manual questions remain nullable until deliberately normalized.
+  contentHash: text("content_hash"),
+  answerMetadata: jsonb("answer_metadata").$type<Record<string, unknown> | null>(),
   reviewStatus: text("review_status").default("draft").notNull(),
   generationSource: text("generation_source").default("human").notNull(),
   reviewedBy: integer("reviewed_by").references(() => users.id),
@@ -888,7 +943,15 @@ export const questions = pgTable("questions", {
   createdBy: integer("created_by").references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (t) => ({
+  canonicalHash: check("questions_content_hash_check", sql`${t.contentHash} IS NULL OR ${t.contentHash} ~ '^[0-9a-f]{64}$'`),
+  answerMetadataObject: check("questions_answer_metadata_object_check", sql`${t.answerMetadata} IS NULL OR jsonb_typeof(${t.answerMetadata}) = 'object'`),
+  bankContentHashUnique: uniqueIndex("questions_bank_content_hash_unique")
+    .on(t.bankId, t.contentHash)
+    .where(sql`${t.bankId} IS NOT NULL AND ${t.contentHash} IS NOT NULL`),
+  ingestionInventory: index("questions_ingestion_inventory_idx")
+    .on(t.bankId, t.generationSource, t.reviewStatus, t.isActive),
+}));
 
 // ── P1 Question Bank Pro tables ────────────────────────────────────────────
 export const questionBanks = pgTable("question_banks", {
@@ -918,7 +981,102 @@ export const questionTopics = pgTable("question_topics", {
   sortOrder: integer("sort_order").default(0).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+}, (t) => ({
+  bankSlugUnique: uniqueIndex("question_topics_bank_slug_unique").on(t.bankId, t.slug),
+}));
+
+// One durable row per physical JSONL input. A unique source/bank/file hash
+// makes whole-pack retries idempotent, while batch counters allow safe resume
+// after a process or network interruption.
+export const questionPackImportRuns = pgTable("question_pack_import_runs", {
+  id: serial("id").primaryKey(),
+  sourceId: integer("source_id").references(() => questionPackSources.id, { onDelete: "restrict" }).notNull(),
+  bankId: integer("bank_id").references(() => questionBanks.id, { onDelete: "restrict" }).notNull(),
+  inputName: text("input_name").notNull(),
+  inputSha256: text("input_sha256").notNull(),
+  status: text("status").default("validating").notNull(), // validating | importing | completed | failed
+  operator: text("operator").notNull(),
+  batchSize: integer("batch_size").notNull(),
+  maxRows: integer("max_rows").default(100_000).notNull(),
+  totalRows: integer("total_rows").default(0).notNull(),
+  validRows: integer("valid_rows").default(0).notNull(),
+  invalidRows: integer("invalid_rows").default(0).notNull(),
+  sourceDuplicateRows: integer("source_duplicate_rows").default(0).notNull(),
+  contentDuplicateRows: integer("content_duplicate_rows").default(0).notNull(),
+  processedRows: integer("processed_rows").default(0).notNull(),
+  insertedQuestions: integer("inserted_questions").default(0).notNull(),
+  linkedProvenance: integer("linked_provenance").default(0).notNull(),
+  failureCode: text("failure_code"),
+  failureMessage: text("failure_message"),
+  startedAt: timestamp("started_at").defaultNow().notNull(),
+  completedAt: timestamp("completed_at"),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (t) => ({
+  sourceBankInputUnique: unique("question_pack_runs_source_bank_input_unique").on(t.sourceId, t.bankId, t.inputSha256),
+  idSourceUnique: unique("question_pack_runs_id_source_unique").on(t.id, t.sourceId),
+  byStatus: index("question_pack_runs_status_idx").on(t.status, t.startedAt),
+  byBank: index("question_pack_runs_bank_idx").on(t.bankId, t.startedAt),
+  status: check("question_pack_runs_status_check", sql`${t.status} IN ('validating','importing','completed','failed')`),
+  inputHash: check("question_pack_runs_input_hash_check", sql`${t.inputSha256} ~ '^[0-9a-f]{64}$'`),
+  batchBounds: check("question_pack_runs_batch_size_check", sql`${t.batchSize} BETWEEN 1 AND 2000`),
+  rowBounds: check("question_pack_runs_max_rows_check", sql`${t.maxRows} BETWEEN 1 AND 100000`),
+  counts: check("question_pack_runs_counts_check", sql`
+    ${t.totalRows} >= 0 AND ${t.validRows} >= 0 AND ${t.invalidRows} >= 0
+    AND ${t.sourceDuplicateRows} >= 0 AND ${t.contentDuplicateRows} >= 0
+    AND ${t.processedRows} >= 0 AND ${t.insertedQuestions} >= 0 AND ${t.linkedProvenance} >= 0
+    AND ${t.validRows} + ${t.invalidRows} <= ${t.totalRows}
+    AND ${t.sourceDuplicateRows} <= ${t.validRows}
+    AND ${t.contentDuplicateRows} <= ${t.validRows}
+    AND ${t.processedRows} <= ${t.validRows}
+    AND ${t.insertedQuestions} <= ${t.processedRows}
+    AND ${t.linkedProvenance} <= ${t.processedRows}
+  `),
+}));
+
+// Immutable source-record lineage. Multiple licensed source records may resolve
+// to one canonical question when their pedagogical content hashes match.
+export const questionProvenance = pgTable("question_provenance", {
+  id: serial("id").primaryKey(),
+  questionId: integer("question_id").references(() => questions.id, { onDelete: "restrict" }).notNull(),
+  sourceId: integer("source_id").references(() => questionPackSources.id, { onDelete: "restrict" }).notNull(),
+  importRunId: integer("import_run_id").references(() => questionPackImportRuns.id, { onDelete: "restrict" }).notNull(),
+  sourceRecordId: text("source_record_id").notNull(),
+  sourceRecordHash: text("source_record_hash").notNull(),
+  contentHash: text("content_hash").notNull(),
+  disposition: text("disposition").notNull(), // created | deduplicated
+  language: text("language").notNull(),
+  syllabus: text("syllabus"),
+  examName: text("exam_name"),
+  examYear: integer("exam_year"),
+  subject: text("subject").notNull(),
+  sourceTopic: text("source_topic").notNull(),
+  objective: text("objective"),
+  sourceLocator: text("source_locator").notNull(),
+  questionOrigin: text("question_origin").notNull(),
+  answerEvidence: text("answer_evidence").notNull(),
+  explanationOrigin: text("explanation_origin").notNull(),
+  sourceMetadata: jsonb("source_metadata").$type<Record<string, unknown>>().default({}).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => ({
+  sourceRecordUnique: unique("question_provenance_source_record_unique").on(t.sourceId, t.sourceRecordId),
+  runSourceReference: foreignKey({
+    columns: [t.importRunId, t.sourceId],
+    foreignColumns: [questionPackImportRuns.id, questionPackImportRuns.sourceId],
+    name: "question_provenance_run_source_fk",
+  }).onDelete("restrict"),
+  byQuestion: index("question_provenance_question_idx").on(t.questionId),
+  byRun: index("question_provenance_run_idx").on(t.importRunId),
+  byContent: index("question_provenance_source_content_idx").on(t.sourceId, t.contentHash),
+  sourceRecordId: check("question_provenance_record_id_check", sql`${t.sourceRecordId} = btrim(${t.sourceRecordId}) AND length(${t.sourceRecordId}) BETWEEN 3 AND 300`),
+  sourceRecordHash: check("question_provenance_record_hash_check", sql`${t.sourceRecordHash} ~ '^[0-9a-f]{64}$'`),
+  canonicalHash: check("question_provenance_content_hash_check", sql`${t.contentHash} ~ '^[0-9a-f]{64}$'`),
+  disposition: check("question_provenance_disposition_check", sql`${t.disposition} IN ('created','deduplicated')`),
+  questionOrigin: check("question_provenance_origin_check", sql`${t.questionOrigin} IN ('original','licensed_verbatim','licensed_adapted')`),
+  explanationOrigin: check("question_provenance_explanation_origin_check", sql`${t.explanationOrigin} IN ('original','licensed_verbatim','licensed_adapted')`),
+  examYear: check("question_provenance_exam_year_check", sql`${t.examYear} IS NULL OR ${t.examYear} BETWEEN 1900 AND 2100`),
+  evidence: check("question_provenance_evidence_check", sql`length(btrim(${t.sourceLocator})) >= 3 AND length(btrim(${t.answerEvidence})) >= 10`),
+  sourceMetadataObject: check("question_provenance_metadata_object_check", sql`jsonb_typeof(${t.sourceMetadata}) = 'object'`),
+}));
 
 export const questionVersions = pgTable("question_versions", {
   id: serial("id").primaryKey(),
@@ -965,6 +1123,9 @@ export type InsertQuestionBank = z.infer<typeof insertQuestionBankSchema>;
 export type QuestionTopic = typeof questionTopics.$inferSelect;
 export type InsertQuestionTopic = z.infer<typeof insertQuestionTopicSchema>;
 export type QuestionVersion = typeof questionVersions.$inferSelect;
+export type QuestionPackSource = typeof questionPackSources.$inferSelect;
+export type QuestionPackImportRun = typeof questionPackImportRuns.$inferSelect;
+export type QuestionProvenance = typeof questionProvenance.$inferSelect;
 export type CourseBlueprintItem = typeof courseQuestionBlueprint.$inferSelect;
 export type InsertCourseBlueprintItem = z.infer<typeof insertCourseBlueprintSchema>;
 

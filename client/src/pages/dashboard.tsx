@@ -235,7 +235,7 @@ function CredentialCard({
 
           {(status === "expired" || status === "revoked") && (
             <Button asChild className="min-h-11 px-3">
-              <Link href="/exams" aria-label={`Browse assessments to refresh ${certificate.courseTitle}`}>
+              <Link href="/assessments" aria-label={`Browse assessments to refresh ${certificate.courseTitle}`}>
                 <RotateCcw className="h-4 w-4" aria-hidden="true" />
                 Retake
               </Link>
@@ -416,7 +416,7 @@ export default function Dashboard() {
         eyebrow: "Start your evidence journey",
         title: "Validate your first skill",
         description: "Choose an assessment, demonstrate what you know, and create evidence employers can independently verify.",
-        href: "/exams",
+        href: "/assessments",
         label: "Explore assessments",
       };
     }
@@ -446,7 +446,7 @@ export default function Dashboard() {
         eyebrow: "Keep evidence current",
         title: "Refresh a historical skill credential",
         description: "Retake an assessment to replace expired or revoked evidence with a current, independently verifiable result.",
-        href: "/exams",
+        href: "/assessments",
         label: "Find an assessment",
       };
     }
@@ -455,7 +455,7 @@ export default function Dashboard() {
       eyebrow: "Continue building",
       title: "Add another verified skill",
       description: "Broaden your Evidence Passport with an assessment that supports your next role or learning goal.",
-      href: "/exams",
+      href: "/assessments",
       label: "Browse assessments",
     };
   }, [
@@ -605,9 +605,9 @@ export default function Dashboard() {
                       <ArrowRight className="h-4 w-4" aria-hidden="true" />
                     </Link>
                   </Button>
-                  {nextAction.href !== "/exams" && (
+                  {nextAction.href !== "/assessments" && (
                     <Button asChild variant="outline" className="border-slate-700 bg-slate-900 text-white hover:border-slate-600 hover:bg-slate-800 hover:text-white">
-                      <Link href="/exams">
+                      <Link href="/assessments">
                         <BookOpen className="h-4 w-4" aria-hidden="true" />
                         Browse assessments
                       </Link>
@@ -769,7 +769,7 @@ export default function Dashboard() {
                 <p className="mt-1 text-sm leading-6 text-slate-600">View, activate, download, and share your assessment-backed credentials.</p>
               </div>
               <Button asChild variant="outline" className="w-full sm:w-auto">
-                <Link href="/exams">
+                <Link href="/assessments">
                   <BookOpen className="h-4 w-4" aria-hidden="true" />
                   Browse assessments
                 </Link>
@@ -804,7 +804,7 @@ export default function Dashboard() {
                     Complete an assessment to create a scored evidence record. Activate the credential when you are ready to share it.
                   </p>
                   <Button asChild className="mt-6 w-full sm:w-auto">
-                    <Link href="/exams">
+                    <Link href="/assessments">
                       Explore assessments
                       <ArrowRight className="h-4 w-4" aria-hidden="true" />
                     </Link>

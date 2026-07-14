@@ -26,7 +26,7 @@ type RoleFlags = {
 };
 
 const PUBLIC_LINKS = [
-  { href: "/exams", label: "Assessments" },
+  { href: "/assessments", label: "Assessments" },
   { href: "/creator", label: "For creators" },
   { href: "/institute", label: "For institutes" },
   { href: "/for-recruiters", label: "For recruiters" },
@@ -103,7 +103,7 @@ export default function Header() {
     event.preventDefault();
     const query = searchQuery.trim();
     if (!query) return;
-    setLocation(`/exams?q=${encodeURIComponent(query)}`);
+    setLocation(`/assessments?q=${encodeURIComponent(query)}`);
     setSearchQuery("");
     setSearchOpen(false);
     setMobileOpen(false);

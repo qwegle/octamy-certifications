@@ -15,6 +15,11 @@ import {
   parseAssessmentCatalogQuery,
   type AssessmentCatalogFilters,
 } from "@/lib/assessment-catalog-query";
+import {
+  ASSESSMENT_HUB_PATH,
+  publicAssessmentCategoryPath,
+  publicAssessmentPath,
+} from "@shared/public-assessment-routes";
 
 type CatalogMode = "octamy" | "creator";
 type CatalogItem = {
@@ -92,7 +97,7 @@ export function AssessmentCatalog({ mode }: { mode: CatalogMode }) {
       <SEO
         title={octamy ? "Octamy-certified assessments" : "Creator assessment marketplace"}
         description={octamy ? "Take reviewed in-house Octamy assessments with controlled evidence and credential policies." : "Discover approved creator assessments with clearly identified credential issuers."}
-        path={octamy ? "/assessments" : "/creator-assessments"}
+        path={octamy ? ASSESSMENT_HUB_PATH : "/creator-assessments"}
       />
       <Header />
       <main id="main-content" tabIndex={-1}>
@@ -108,7 +113,7 @@ export function AssessmentCatalog({ mode }: { mode: CatalogMode }) {
                   : "Creators own the assessment and credential unless an item explicitly shows completed Octamy co-certification. Marketplace approval is not the same as Octamy certification."}
               </p>
               <div className="mt-7 flex flex-wrap gap-3">
-                <Button asChild variant="secondary"><Link href={octamy ? "/creator-assessments" : "/assessments"}>{octamy ? "Browse creator assessments" : "Browse Octamy assessments"}</Link></Button>
+                <Button asChild variant="secondary"><Link href={octamy ? "/creator-assessments" : ASSESSMENT_HUB_PATH}>{octamy ? "Browse creator assessments" : "Browse Octamy assessments"}</Link></Button>
                 <Button asChild variant="outline" className="border-white/25 bg-transparent text-white hover:bg-white/10 hover:text-white"><Link href="/vision">How evidence works</Link></Button>
               </div>
             </div>
@@ -168,13 +173,13 @@ export function AssessmentCatalog({ mode }: { mode: CatalogMode }) {
                     {item.subscriptionEligible && <Badge className="absolute right-4 top-4 bg-emerald-500 text-emerald-950 hover:bg-emerald-500">All Access</Badge>}
                   </div>
                   <CardContent className="p-5">
-                    <div className="flex flex-wrap gap-2 text-xs"><Badge variant="outline">{item.category.name}</Badge><Badge variant="outline">{levelLabels[item.level] || item.level}</Badge></div>
+                    <div className="flex flex-wrap gap-2 text-xs"><Link href={octamy ? publicAssessmentCategoryPath(item.category.slug) : `/creator-assessments?category=${encodeURIComponent(item.category.slug)}`}><Badge variant="outline" className="hover:border-slate-400">{item.category.name}</Badge></Link><Badge variant="outline">{levelLabels[item.level] || item.level}</Badge></div>
                     <h2 className="mt-4 text-xl font-bold tracking-tight text-slate-950">{item.title}</h2>
                     <p className="mt-2 line-clamp-3 text-sm leading-6 text-slate-600">{item.description}</p>
                     <div className="mt-4 flex flex-wrap gap-1.5">{item.audienceBands.slice(0, 3).map((band) => <span key={band.id} className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-600">{band.label}</span>)}</div>
                     <div className="mt-5 grid grid-cols-2 gap-2 rounded-2xl bg-slate-50 p-3 text-xs text-slate-600"><span className="flex items-center gap-1.5"><Clock3 className="h-3.5 w-3.5" />{item.duration} minutes</span><span className="flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5" />Pass {item.passingScore}%</span></div>
                     <div className="mt-4 flex items-start gap-2 text-xs leading-5 text-slate-600"><Award className="mt-0.5 h-4 w-4 shrink-0 text-violet-700" /><span>{item.certificationLabel}{item.creator ? ` · ${item.creator.displayName}` : ""}</span></div>
-                    <div className="mt-5 flex items-end justify-between gap-4"><div><p className="text-sm font-bold text-emerald-700">Free attempt</p><p className="text-xs text-slate-500">Credential activation ₹{item.price}</p></div><Button asChild><Link href={`/exam/${item.slug}`}>View assessment</Link></Button></div>
+                    <div className="mt-5 flex items-end justify-between gap-4"><div><p className="text-sm font-bold text-emerald-700">Free attempt</p><p className="text-xs text-slate-500">Credential activation ₹{item.price}</p></div><Button asChild><Link href={publicAssessmentPath(item.slug)}>View assessment</Link></Button></div>
                   </CardContent>
                 </Card>
               ))}

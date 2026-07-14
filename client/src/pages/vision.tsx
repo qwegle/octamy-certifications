@@ -83,7 +83,7 @@ export default function VisionPage() {
               We want every learner to carry inspectable skill evidence from education into opportunity—without paying before proving, and without losing control of who can discover them.
             </p>
             <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-              <Link href="/exams"><Button size="lg" className="w-full rounded-xl bg-white text-slate-950 hover:bg-slate-100 sm:w-auto">Explore assessments <ArrowRight className="ml-2 h-4 w-4" /></Button></Link>
+              <Link href="/assessments"><Button size="lg" className="w-full rounded-xl bg-white text-slate-950 hover:bg-slate-100 sm:w-auto">Explore assessments <ArrowRight className="ml-2 h-4 w-4" /></Button></Link>
               <Link href="/institute"><Button size="lg" variant="outline" className="w-full rounded-xl border-white/20 bg-white/5 text-white hover:bg-white/10 hover:text-white sm:w-auto">Build an institute workspace</Button></Link>
             </div>
           </div>

@@ -47,6 +47,7 @@ import Header from "@/components/header";
 import Footer from "@/components/footer";
 import type { Category, Course } from "@shared/schema";
 import { SEO } from "@/components/seo";
+import { publicAssessmentCategoryPath } from "@shared/public-assessment-routes";
 
 const PREMIUM_CATEGORY_SLUGS: string[] = (
   import.meta.env.VITE_PREMIUM_CATEGORY_SLUGS || ""
@@ -137,7 +138,7 @@ function CertificateSlider() {
               Sample preview · Live certificates appear here once candidates pass their first exam.
             </p>
             <Button asChild className="mt-4 bg-slate-900 hover:bg-black text-white rounded-full px-6">
-              <Link href="/exams">
+              <Link href="/assessments">
                 Take a free assessment <ArrowRight className="ml-2 w-4 h-4" />
               </Link>
             </Button>
@@ -311,7 +312,7 @@ export default function Landing() {
     url: "https://octamy.com/",
     potentialAction: {
       "@type": "SearchAction",
-      target: "https://octamy.com/exams?q={search_term_string}",
+      target: "https://octamy.com/assessments?q={search_term_string}",
       "query-input": "required name=search_term_string",
     },
   };
@@ -391,7 +392,7 @@ export default function Landing() {
                     className="mt-8 flex flex-col sm:flex-row gap-3"
                   >
                     <Button asChild size="lg" className="rounded-full border-white bg-white px-6 py-6 text-base font-semibold text-slate-950 shadow-xl shadow-black/30 hover:bg-slate-100">
-                      <Link href="/exams">
+                      <Link href="/assessments">
                         Take a free assessment
                         <ArrowRight className="ml-2 w-4 h-4" />
                       </Link>
@@ -528,7 +529,7 @@ export default function Landing() {
               <p className="mt-3 text-xs leading-5 text-slate-500">Today this is assessment-backed account evidence—not government-ID verification, accreditation or proof that someone can perform every part of a job.</p>
               <div className="mt-8 flex flex-col sm:flex-row gap-3">
                 <Button asChild className="rounded-full bg-white text-slate-950 hover:bg-slate-100 px-6">
-                  <Link href="/exams">Build my passport <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                  <Link href="/assessments">Build my passport <ArrowRight className="ml-2 h-4 w-4" /></Link>
                 </Button>
                 <Button asChild variant="outline" className="rounded-full border-white/25 bg-transparent text-white hover:bg-white hover:text-slate-950 px-6">
                   <Link href="/institute">For institutions</Link>
@@ -688,7 +689,7 @@ export default function Landing() {
                 : `${baseCard} bg-cream-soft border-cream-deep hover:border-slate-900`;
               return (
                 <StaggerItem key={cat.id} className="h-full">
-                  <Link href={`/category/${cat.slug}`} className={cardClass}>
+                  <Link href={publicAssessmentCategoryPath(cat.slug)} className={cardClass}>
                     {cat.isPremium && (
                       <span className="absolute top-3 right-3 inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-amber-700">
                         <Sparkles className="w-3 h-3" />
@@ -721,7 +722,7 @@ export default function Landing() {
             {featuredTracks.length === 0 &&
               ["AI", "Development", "Cloud", "Cybersecurity", "Data Science", "Design", "Business", "DevOps"].map((name, i) => (
                 <StaggerItem key={name} className="h-full">
-                  <Link href="/exams" className="group relative flex flex-col h-full rounded-xl border border-cream-deep bg-cream-soft p-4 sm:p-6 transition-all hover:-translate-y-1 hover:border-slate-900 hover:shadow-xl">
+                  <Link href="/assessments" className="group relative flex flex-col h-full rounded-xl border border-cream-deep bg-cream-soft p-4 sm:p-6 transition-all hover:-translate-y-1 hover:border-slate-900 hover:shadow-xl">
                     <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-slate-900 text-white">
                       <GraduationCap className="w-5 h-5" />
                     </div>
@@ -743,7 +744,7 @@ export default function Landing() {
                   variant="outline"
                   className="border-slate-300 text-slate-700 rounded-full"
                 >
-                <Link href="/exams">
+                <Link href="/assessments">
                   View all {categories.length} tracks
                   <ArrowRight className="ml-2 w-4 h-4" />
                 </Link>
@@ -922,7 +923,7 @@ export default function Landing() {
                   size="lg"
                   className="bg-slate-900 hover:bg-black text-white rounded-full px-8"
                 >
-                <Link href="/exams">
+                <Link href="/assessments">
                   Browse all {filteredCourses.length} exams
                   <ArrowRight className="ml-2 w-4 h-4" />
                 </Link>
@@ -1051,7 +1052,7 @@ export default function Landing() {
                   size="lg"
                   className="bg-cream-soft text-slate-900 hover:bg-slate-100 rounded-full px-8 py-6 text-base font-semibold shadow-2xl shadow-sky-500/20"
                 >
-                  <Link href="/exams">
+                  <Link href="/assessments">
                   Browse exams
                   <ArrowRight className="ml-2 w-4 h-4" />
                   </Link>

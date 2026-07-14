@@ -19,6 +19,7 @@ import { useAuth } from "@/lib/auth.tsx";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { publicProductPath } from "@shared/public-assessment-routes";
 
 import { 
   Shield, 
@@ -2509,7 +2510,7 @@ export default function AdminDashboard() {
                                   <Button 
                                     size="sm" 
                                     variant="outline"
-                                    onClick={() => setLocation(`/exam/${course.slug}`)}
+                                    onClick={() => setLocation(publicProductPath(course.slug, course.productType))}
                                   >
                                     <Eye className="h-4 w-4" />
                                   </Button>

@@ -126,7 +126,7 @@ export default function InternshipFormPage() {
 
       <div className="max-w-4xl mx-auto px-6 py-12">
         <div className="mb-8">
-          <Link href={`/exam/${slug}`}>
+          <Link href={`/assessments/${slug}`}>
             <Button variant="outline" className="border-black text-black hover:bg-black hover:text-white mb-4">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Course

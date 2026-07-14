@@ -100,7 +100,7 @@ const NAV_BY_ROLE: Record<DashboardRole, NavItem[]> = {
     { label: "Overview", href: "/dashboard", icon: LayoutDashboard, group: "Main" },
     { label: "My certificates", href: "/my-certificates", icon: Award, group: "Learning" },
     { label: "Progress", href: "/progress", icon: BarChart3, group: "Learning" },
-    { label: "Browse exams", href: "/exams", icon: BookOpen, group: "Learning" },
+    { label: "Browse exams", href: "/assessments", icon: BookOpen, group: "Learning" },
     { label: "Preferences", href: "/preferences", icon: SlidersHorizontal, group: "Account" },
     { label: "Profile", href: "/profile-edit", icon: Settings, group: "Account" },
   ],

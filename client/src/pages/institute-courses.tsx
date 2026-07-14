@@ -127,7 +127,12 @@ export default function InstituteCourses() {
                   {!course.isActive && course.visibility === "private" && institute?.status === "verified" && (
                     <Button size="sm" variant="outline" onClick={() => submit.mutate(course.id)} disabled={submit.isPending}>Submit for review</Button>
                   )}
-                  {course.isActive && <Link href={`/exam/${course.slug}`} className="text-sm font-medium text-slate-700 hover:underline">View live →</Link>}
+                  {course.isActive && ["assessment", "bundle"].includes(course.productType) && (
+                    <Link href="/institute/exams/new" className="text-sm font-medium text-slate-700 hover:underline">Set up cohort exam →</Link>
+                  )}
+                  {course.isActive && !["assessment", "bundle"].includes(course.productType) && (
+                    <span className="text-xs font-medium text-slate-500">Approved · private learner access</span>
+                  )}
                 </div>
               </div>
             );

@@ -125,7 +125,7 @@ export default function ExamResults() {
   };
 
   const handleStudyMore = () => {
-    setLocation(`/exam/${course?.slug || examResult.courseId}`);
+    setLocation(`/assessments/${course?.slug || examResult.courseId}`);
   };
 
   return (

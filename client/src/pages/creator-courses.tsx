@@ -10,6 +10,7 @@ import { apiRequest } from '@/lib/queryClient';
 import { SEO } from '@/components/seo';
 import { Plus, BookOpen, EyeOff, Eye } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { publicProductPath } from '@shared/public-assessment-routes';
 
 type Course = {
   id: number;
@@ -19,6 +20,7 @@ type Course = {
   visibility: 'public' | 'unlisted' | 'private';
   price: string;
   level: string;
+  productType: 'assessment' | 'video_course' | 'ebook' | 'bundle';
   createdAt: string;
 };
 
@@ -111,7 +113,7 @@ export default function CreatorCourses() {
                       <Button size="sm" variant="outline" onClick={() => submit.mutate(c.id)} disabled={submit.isPending}>Submit for review</Button>
                     )}
                     {c.isActive && (
-                      <Link href={`/exam/${c.slug}`} className="text-sm text-slate-700 hover:underline">View →</Link>
+                      <Link href={publicProductPath(c.slug, c.productType)} className="text-sm text-slate-700 hover:underline">View →</Link>
                     )}
                   </div>
                 </div>

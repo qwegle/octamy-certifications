@@ -96,6 +96,13 @@ import {
   parseGuestExamIdentity,
   publicPendingCourseSnapshot,
 } from "./lib/pending-exam-access";
+import {
+  canonicalPublicSlug,
+  PUBLIC_ASSESSMENT_PRODUCT_TYPES,
+  publicAssessmentCategoryPath,
+  publicAssessmentPath,
+  publicProductPath,
+} from "@shared/public-assessment-routes";
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -369,8 +376,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/auth', (_req, res) => res.redirect(301, '/login'));
   app.get('/seller-auth', (_req, res) => res.redirect(301, '/partners/login'));
   app.get('/recruiter/auth', (_req, res) => res.redirect(301, '/recruiter/login'));
-  app.get('/course/:slug', (req, res) => res.redirect(301, `/exam/${req.params.slug}`));
-  app.get('/courses/:slug', (req, res) => res.redirect(301, `/exam/${req.params.slug}`));
+  const redirectLegacyCourse = async (req: Request, res: Response) => {
+    const course = await storage.getCourseBySlug(String(req.params.slug || "")).catch(() => undefined);
+    const target = course
+      ? publicProductPath(course.slug, course.productType)
+      : publicAssessmentPath(req.params.slug);
+    const queryIndex = req.originalUrl.indexOf("?");
+    const query = queryIndex >= 0 ? req.originalUrl.slice(queryIndex) : "";
+    res.redirect(301, `${target}${query}`);
+  };
+  app.get('/course/:slug', redirectLegacyCourse);
+  app.get('/courses/:slug', redirectLegacyCourse);
 
   // 410 Gone for the removed AI Interview feature. Any inline endpoint mounted
   // later in this file is intercepted here so the feature is fully unreachable
@@ -932,6 +948,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
             message: "Your reseller account must be approved and active before sharing inventory.",
           });
         }
+        if (!seller.referralCode) {
+          return res.status(409).json({ message: "A referral code has not been assigned to this reseller yet." });
+        }
 
         // Get course details to use slug instead of ID
         const parsedCourseId = Number(targetCourseId);
@@ -944,8 +963,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
 
         // Generate referral URL using slug
-        const baseUrl = `${req.protocol}://${req.get("host")}`;
-        const referralUrl = `${baseUrl}/exam/${course.slug}?ref=${seller.referralCode}`;
+        const baseUrl = (process.env.APP_URL || `${req.protocol}://${req.get("host")}`).replace(/\/+$/, "");
+        const referralUrl = `${baseUrl}${publicProductPath(course.slug, course.productType)}?ref=${encodeURIComponent(seller.referralCode)}`;
 
         res.json({
           referralUrl,
@@ -1114,13 +1133,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     console.error("Failed to load user profile routes:", error);
   }
 
+  // Canonical public assessment URLs. Keep legacy links working for existing
+  // bookmarks and search indexes, but consolidate ranking signals on the
+  // descriptive /assessments hierarchy.
+  const redirectAssessmentPath = (req: Request, res: Response, pathname: string) => {
+    const queryIndex = req.originalUrl.indexOf("?");
+    const query = queryIndex >= 0 ? req.originalUrl.slice(queryIndex) : "";
+    res.redirect(301, `${pathname}${query}`);
+  };
+  app.get("/exams", (req, res) => redirectAssessmentPath(req, res, "/assessments"));
+  app.get("/skill-verification", (req, res) => redirectAssessmentPath(req, res, "/assessments"));
+  app.get("/exam/:slug", (req, res) => redirectAssessmentPath(
+    req,
+    res,
+    publicAssessmentPath(req.params.slug),
+  ));
+  app.get("/category/:slug", (req, res) => redirectAssessmentPath(
+    req,
+    res,
+    publicAssessmentCategoryPath(req.params.slug),
+  ));
+
   // Public XML sitemap (SEO). Generated from DB on every request — small enough.
   app.get("/sitemap.xml", async (_req, res) => {
     try {
-      const base = process.env.APP_URL || "https://octamy.com";
+      const base = (process.env.APP_URL || "https://octamy.com").replace(/\/+$/, "");
       const today = new Date().toISOString().slice(0, 10);
       const staticUrls: Array<{ path: string; priority: string }> = [
         { path: "", priority: "1.0" },
+        { path: "/assessments", priority: "0.9" },
+        { path: "/creator-assessments", priority: "0.8" },
         { path: "/courses", priority: "0.9" },
         { path: "/virtual-internships", priority: "0.9" },
         { path: "/business-certifications", priority: "0.8" },
@@ -1150,19 +1192,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
       ];
       const allCourses = await storage.getCourses().catch(() => []);
       const allCategories = await storage.getCategories().catch(() => []);
+      const categoryById = new Map((allCategories as any[]).map((category) => [category.id, category]));
+      const sitemapCategoryIds = new Set<number>();
+      const assessmentCourses = (allCourses as any[]).filter((course) => (
+        PUBLIC_ASSESSMENT_PRODUCT_TYPES.includes(course.productType)
+        && canonicalPublicSlug(course.slug)
+      ));
+
+      for (const course of assessmentCourses) {
+        if (course.ownerType !== "admin") continue;
+        let categoryId = Number(course.categoryId || course.category?.id);
+        const visited = new Set<number>();
+        while (Number.isInteger(categoryId) && categoryId > 0 && !visited.has(categoryId)) {
+          visited.add(categoryId);
+          sitemapCategoryIds.add(categoryId);
+          const category = categoryById.get(categoryId);
+          categoryId = Number(category?.parentId);
+        }
+      }
 
       const urls: Array<{ loc: string; priority: string; freq: string }> = [];
       for (const u of staticUrls) {
         urls.push({ loc: `${base}${u.path}`, priority: u.priority, freq: "weekly" });
       }
-      for (const c of allCourses as any[]) {
-        if (!c?.slug) continue;
-        urls.push({ loc: `${base}/exam/${c.slug}`, priority: "0.8", freq: "weekly" });
+      for (const c of assessmentCourses) {
+        urls.push({ loc: `${base}${publicAssessmentPath(c.slug)}`, priority: "0.8", freq: "weekly" });
       }
       for (const cat of allCategories as any[]) {
-        if (!cat?.slug && !cat?.id) continue;
-        urls.push({ loc: `${base}/category/${cat.slug || cat.id}`, priority: "0.6", freq: "weekly" });
+        if (!sitemapCategoryIds.has(cat.id) || !canonicalPublicSlug(cat.slug)) continue;
+        urls.push({ loc: `${base}${publicAssessmentCategoryPath(cat.slug)}`, priority: "0.6", freq: "weekly" });
       }
+
+      const xmlEscape = (value: string) => value
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&apos;");
 
       const xml =
         `<?xml version="1.0" encoding="UTF-8"?>\n` +
@@ -1170,7 +1236,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         urls
           .map(
             (u) =>
-              `  <url><loc>${u.loc}</loc><lastmod>${today}</lastmod><changefreq>${u.freq}</changefreq><priority>${u.priority}</priority></url>`,
+              `  <url><loc>${xmlEscape(u.loc)}</loc><lastmod>${today}</lastmod><changefreq>${u.freq}</changefreq><priority>${u.priority}</priority></url>`,
           )
           .join("\n") +
         `\n</urlset>\n`;
@@ -1258,7 +1324,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!course || !course.isActive || course.visibility !== "public" || course.reviewStatus !== "approved" || course.ownerType === "institute") {
         return res.status(404).json({ message: "Course not found" });
       }
-      const questions = await storage.getQuestionsByCourse(courseId);
+      const questions = course.useBlueprintEngine
+        ? await storage.materializeBlueprintForAttempt(courseId)
+        : await storage.getQuestionsByCourse(courseId);
 
       if (questions.length === 0) {
         return res.status(409).json({ message: "This assessment has no published questions yet." });
@@ -1271,8 +1339,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
       }
 
-      // Select random number of questions (10-15) for variety
-      const questionCount = Math.floor(Math.random() * 6) + 10; // 10 to 15 questions
+      // Blueprint-backed assessments already encode the exact topic and
+      // difficulty quotas. Legacy assessments retain their historical 10–15
+      // item sampling until they are migrated to a reviewed bank blueprint.
+      const questionCount = course.useBlueprintEngine
+        ? questions.length
+        : Math.floor(Math.random() * 6) + 10;
       const limitedQuestions = shuffled.slice(
         0,
         Math.min(questionCount, questions.length)
@@ -1332,6 +1404,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error("Error fetching questions:", error);
+      if (error instanceof Error && (
+        error.message === "Course has no blueprint configured"
+        || /^Topic \d+ has only \d+ /.test(error.message)
+      )) {
+        return res.status(409).json({
+          message: "This assessment's reviewed question pool is not ready yet.",
+          code: "ASSESSMENT_QUESTION_POOL_NOT_READY",
+        });
+      }
       res.status(500).json({ message: "Failed to fetch questions" });
     }
   });
@@ -4792,11 +4873,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(400).json({ message: "Invalid question ID" });
         }
 
-        const deleted = await storage.deleteQuestionAdmin(questionId);
+        const reviewerId = Number(req.user?.userId);
+        const deleted = await storage.deleteQuestionAdmin(
+          questionId,
+          Number.isInteger(reviewerId) && reviewerId > 0 ? reviewerId : undefined,
+        );
         if (!deleted) {
           return res.status(404).json({ message: "Question not found" });
         }
-        res.json({ message: "Question deleted successfully" });
+        res.json({
+          message: deleted.reviewStatus === "retired"
+            ? "Question retired; imported provenance retained"
+            : "Question deleted successfully",
+          status: deleted.reviewStatus === "retired" ? "retired" : "deleted",
+        });
       } catch (error) {
         console.error("Error deleting question:", error);
         res.status(500).json({ message: "Failed to delete question" });

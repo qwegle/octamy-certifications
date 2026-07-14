@@ -301,7 +301,7 @@ export default function TempExamResults() {
             </Button>
             <Button
               variant="outline"
-              onClick={() => navigate(results.course.slug ? `/exam/${results.course.slug}` : "/exams")}
+              onClick={() => navigate(results.course.slug ? `/assessments/${results.course.slug}` : "/assessments")}
             >
               View Exam
             </Button>

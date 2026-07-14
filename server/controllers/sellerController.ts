@@ -5,6 +5,7 @@ import jwt from 'jsonwebtoken';
 import { storage } from '../storage';
 import { insertSellerSchema, insertWithdrawalRequestSchema } from '@shared/schema';
 import { isResellerCourseEligible } from '../lib/reseller-inventory';
+import { publicProductPath } from '@shared/public-assessment-routes';
 
 interface SellerAuthenticatedRequest extends Request {
   seller?: {
@@ -251,6 +252,9 @@ export class SellerController {
           message: "Your reseller account must be approved and active before sharing inventory.",
         });
       }
+      if (!seller.referralCode) {
+        return res.status(409).json({ message: "A referral code has not been assigned to this reseller yet." });
+      }
 
       // Get course details to use slug instead of ID
       const parsedCourseId = Number(targetCourseId);
@@ -263,8 +267,8 @@ export class SellerController {
       }
 
       // Generate referral URL using slug
-      const baseUrl = `${req.protocol}://${req.get('host')}`;
-      const referralUrl = `${baseUrl}/exam/${course.slug}?ref=${seller.referralCode}`;
+      const baseUrl = (process.env.APP_URL || `${req.protocol}://${req.get('host')}`).replace(/\/+$/, '');
+      const referralUrl = `${baseUrl}${publicProductPath(course.slug, course.productType)}?ref=${encodeURIComponent(seller.referralCode)}`;
 
       res.json({
         referralUrl,

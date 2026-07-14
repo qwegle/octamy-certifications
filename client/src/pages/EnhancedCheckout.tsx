@@ -284,7 +284,7 @@ export default function EnhancedCheckout() {
             description: "You need to take and pass the exam before purchasing a certificate.",
             variant: "destructive",
           });
-          navigate(`/exam/${course.id}`);
+          navigate(`/assessments/${course.id}`);
         }
       } else {
         // User needs to take exam first
@@ -293,7 +293,7 @@ export default function EnhancedCheckout() {
           description: "You need to take and pass the exam before purchasing a certificate.",
           variant: "destructive",
         });
-        navigate(`/exam/${course.id}`);
+        navigate(`/assessments/${course.id}`);
       }
     } catch (error) {
       toast({

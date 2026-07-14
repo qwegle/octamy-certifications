@@ -177,7 +177,7 @@ export default function DemoInternshipCertificate() {
                   <p className="mt-3 text-sm leading-6 text-violet-100">
                     Take an assessment without buying a credential. If you pass, choose whether to activate and share the evidence.
                   </p>
-                  <Link href="/exams">
+                  <Link href="/assessments">
                     <Button className="mt-6 w-full rounded-xl bg-white text-violet-800 hover:bg-violet-50">
                       Browse assessments
                       <ArrowRight className="ml-2 h-4 w-4" />

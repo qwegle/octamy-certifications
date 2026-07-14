@@ -6,7 +6,7 @@ import * as XLSX from "exceljs";
 import { z } from "zod";
 import { storage } from "../storage";
 import { db } from "../db";
-import { creators, questionBanks, questions, questionTopics } from "@shared/schema";
+import { creators, questionBanks, questionPackImportRuns, questions, questionTopics } from "@shared/schema";
 import { eq, and, count, sql } from "drizzle-orm";
 import { audit } from "../lib/audit";
 import {
@@ -277,7 +277,10 @@ router.get("/:id", requireAuth, withCtx, async (req: AuthedRequest, res) => {
   if (!bank) return res.status(404).json({ message: "Bank not found" });
   if (!canViewBank(req.ctx!, bank)) return res.status(403).json({ message: "Forbidden" });
   const topics = await storage.listQuestionTopics(id);
-  const [{ c }] = await db.select({ c: count() }).from(questions).where(eq(questions.bankId, id));
+  const [{ c }] = await db.select({ c: count() }).from(questions).where(and(
+    eq(questions.bankId, id),
+    sql`${questions.reviewStatus} <> 'retired'`,
+  ));
   res.json({ ...bank, topics, questionCount: Number(c), canEdit: canEditBank(req.ctx!, bank) });
 });
 
@@ -304,6 +307,15 @@ router.delete("/:id", requireAuth, withCtx, async (req: AuthedRequest, res) => {
   const bank = await storage.getQuestionBank(id);
   if (!bank) return res.status(404).json({ message: "Bank not found" });
   if (!canEditBank(req.ctx!, bank)) return res.status(403).json({ message: "Forbidden" });
+  const [{ importRunCount }] = await db.select({ importRunCount: count() })
+    .from(questionPackImportRuns)
+    .where(eq(questionPackImportRuns.bankId, id));
+  if (Number(importRunCount) > 0) {
+    return res.status(409).json({
+      message: "This bank has immutable import history and cannot be deleted. Make it private and retire its questions instead.",
+      code: "QUESTION_BANK_HAS_IMPORT_HISTORY",
+    });
+  }
   await storage.deleteQuestionBank(id);
   res.status(204).end();
 });
@@ -642,7 +654,7 @@ router.delete("/:id/questions/:qid", requireAuth, withCtx, async (req: AuthedReq
   if (!bank) return res.status(404).json({ message: "Bank not found" });
   if (!canEditBank(req.ctx!, bank)) return res.status(403).json({ message: "Forbidden" });
   if (!(await questionBelongsToBank(questionId, bankId))) return res.status(404).json({ message: "Question not found in this bank" });
-  await storage.deleteBankQuestion(questionId);
+  await storage.deleteBankQuestion(questionId, req.ctx!.user.id);
   res.status(204).end();
 });
 

@@ -240,7 +240,7 @@ export default function SponsorPage() {
             <nav className="hidden md:flex items-center space-x-6">
               <Button
                 variant="ghost"
-                onClick={() => setLocation("/exams")}
+                onClick={() => setLocation("/assessments")}
                 className="text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-900"
               >
                 Exams
@@ -316,7 +316,7 @@ export default function SponsorPage() {
                 <Button
                   variant="ghost"
                   onClick={() => {
-                    setLocation("/exams");
+                    setLocation("/assessments");
                     setMobileMenuOpen(false);
                   }}
                   className="justify-start text-black dark:text-white"
