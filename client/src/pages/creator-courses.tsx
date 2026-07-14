@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import DashboardLayout from '@/components/dashboard-layout';
 import { Link, useLocation } from 'wouter';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -9,6 +9,7 @@ import { useAuth } from '@/lib/auth.tsx';
 import { apiRequest } from '@/lib/queryClient';
 import { SEO } from '@/components/seo';
 import { Plus, BookOpen, EyeOff, Eye } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 type Course = {
   id: number;
@@ -21,9 +22,17 @@ type Course = {
   createdAt: string;
 };
 
+function courseState(course: Course) {
+  if (course.isActive) return { label: 'Live', className: 'bg-emerald-100 text-emerald-800' };
+  if (course.visibility === 'private') return { label: 'Draft', className: 'bg-slate-100 text-slate-700' };
+  return { label: 'Submitted', className: 'bg-amber-100 text-amber-800' };
+}
+
 export default function CreatorCourses() {
   const [, setLocation] = useLocation();
   const { user, token, isLoading: authLoading } = useAuth();
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   useEffect(() => {
     if (!authLoading && (!user || !token)) setLocation('/creator/login');
@@ -33,6 +42,27 @@ export default function CreatorCourses() {
     queryKey: ['/api/creator/courses'],
     enabled: !!user && !!token,
     queryFn: async () => (await apiRequest('GET', '/api/creator/courses')).json(),
+  });
+  const { data: creator } = useQuery<{ status: string }>({
+    queryKey: ['/api/me/creator'],
+    enabled: !!user && !!token,
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/me/creator');
+      if (!response.ok) throw new Error('Creator profile unavailable');
+      return response.json();
+    },
+  });
+  const submit = useMutation({
+    mutationFn: async (courseId: number) => {
+      const response = await apiRequest('PATCH', `/api/creator/courses/${courseId}`, { visibility: 'public' });
+      if (!response.ok) throw new Error((await response.json().catch(() => ({}))).message || 'Course could not be submitted');
+      return response.json();
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['/api/creator/courses'] });
+      toast({ title: 'Course submitted', description: 'It remains unavailable to learners until an Octamy admin approves it.' });
+    },
+    onError: (submitError: Error) => toast({ title: 'Submission unavailable', description: submitError.message }),
   });
 
   return (
@@ -61,13 +91,14 @@ export default function CreatorCourses() {
             </Card>
           ) : (
             <div className="border border-slate-200 rounded-lg divide-y divide-slate-200 bg-cream-soft">
-              {courses.map((c) => (
+              {courses.map((c) => {
+                const state = courseState(c);
+                return (
                 <div key={c.id} className="flex flex-col items-start justify-between gap-4 p-4 hover:bg-cream-deep sm:flex-row sm:items-center">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
                       <p className="font-medium text-slate-900 truncate">{c.title}</p>
-                      {!c.isActive && <Badge variant="secondary" className="text-amber-700 bg-amber-100">Pending review</Badge>}
-                      {c.isActive && <Badge className="bg-emerald-100 text-emerald-800">Live</Badge>}
+                      <Badge variant="secondary" className={state.className}>{state.label}</Badge>
                       <Badge variant="outline" className="capitalize">{c.level}</Badge>
                     </div>
                     <p className="text-xs text-slate-500 mt-1">
@@ -76,12 +107,16 @@ export default function CreatorCourses() {
                   </div>
                   <div className="flex flex-wrap items-center gap-3 shrink-0">
                     <Link href={`/creator/courses/${c.id}/curriculum`} className="text-sm text-slate-700 hover:underline">Edit curriculum →</Link>
+                    {!c.isActive && c.visibility === 'private' && creator?.status === 'approved' && (
+                      <Button size="sm" variant="outline" onClick={() => submit.mutate(c.id)} disabled={submit.isPending}>Submit for review</Button>
+                    )}
                     {c.isActive && (
                       <Link href={`/exam/${c.slug}`} className="text-sm text-slate-700 hover:underline">View →</Link>
                     )}
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

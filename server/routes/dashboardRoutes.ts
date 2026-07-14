@@ -10,7 +10,7 @@
  */
 import { Router, type Response } from 'express';
 import { execRows } from '../lib/db-exec';
-import { eq, and, desc, sql } from 'drizzle-orm';
+import { eq, and, desc, inArray, sql } from 'drizzle-orm';
 import { db } from '../db';
 import {
   authenticateToken,
@@ -21,6 +21,7 @@ import {
 } from '../middleware/auth';
 import {
   courses,
+  categories,
   certificates,
   examAttempts,
   payments,
@@ -32,6 +33,9 @@ import {
   creators,
   institutes,
   instituteMembers,
+  audienceBands,
+  courseAudienceBands,
+  mediaAssets,
   users,
 } from '@shared/schema';
 import { storage } from '../storage';
@@ -39,6 +43,7 @@ import { createCashfreeOrder } from '../lib/cashfree';
 import { z } from 'zod';
 import crypto from 'node:crypto';
 import { authenticateRecruiterToken } from './recruiterRoutes';
+import { audit } from '../lib/audit';
 
 const router = Router();
 
@@ -88,28 +93,73 @@ router.get('/creator/courses', authenticateToken, requireCreator, async (req: Cr
 });
 
 const courseCreateSchema = z.object({
-  title: z.string().min(3).max(200),
-  description: z.string().min(10),
-  categoryId: z.number().int().positive(),
-  duration: z.number().int().min(5).max(600),
-  passingScore: z.number().int().min(10).max(100).default(60),
+  title: z.string().trim().min(3, 'Title must be at least 3 characters').max(200),
+  description: z.string().trim().min(10, 'Description must be at least 10 characters').max(10_000),
+  categoryId: z.coerce.number().int().positive('Select a category'),
+  duration: z.coerce.number().int().min(5).max(600),
+  passingScore: z.coerce.number().int().min(10).max(100).default(60),
   price: z.coerce.number().min(0).default(199),
+  productType: z.enum(['assessment', 'video_course', 'ebook', 'bundle']).default('assessment'),
+  contentPrice: z.coerce.number().min(0).max(1_000_000).nullable().optional(),
   level: z.enum(['novice', 'intermediate', 'advanced', 'expert']).default('novice'),
   visibility: z.enum(['public', 'unlisted', 'private']).default('public'),
+  language: z.string().trim().min(2).max(20).default('en'),
+  certificationMode: z.enum(['creator', 'institute', 'octamy_creator', 'octamy_institute']).optional(),
+  defaultReviewPolicy: z.enum(['immediate', 'after_final_attempt', 'after_window', 'score_only']).default('after_final_attempt'),
+  audienceBandIds: z.array(z.coerce.number().int().positive()).max(7).default([]),
+  thumbnailUrl: z.string().trim().max(2000).refine(
+    (value) => value.startsWith('/api/media/files/') || /^https?:\/\//i.test(value),
+    'Thumbnail must be an Octamy media URL or an http(s) URL',
+  ).nullable().optional(),
 });
 
-router.post('/creator/courses', authenticateToken, requireCreator, async (req: CreatorRequest, res: Response) => {
-  try {
-    if (req.creator!.status !== 'approved') {
-      return res.status(403).json({ message: 'Your creator profile must be approved before publishing courses.' });
-    }
-    const parsed = courseCreateSchema.safeParse(req.body);
-    if (!parsed.success) return res.status(400).json({ message: 'Invalid input', errors: parsed.error.flatten() });
-    const data = parsed.data;
-    const baseSlug = makeSlug(data.title);
-    const slug = await uniqueSlug(baseSlug);
+const courseUpdateSchema = courseCreateSchema.partial().refine(
+  (value) => Object.keys(value).length > 0,
+  { message: 'Provide at least one course field to update' },
+);
 
-    const [created] = await db.insert(courses).values({
+function validationResponse(error: z.ZodError) {
+  const flattened = error.flatten();
+  const first = Object.values(flattened.fieldErrors).flat().find(Boolean);
+  return { message: first || flattened.formErrors[0] || 'Check the highlighted fields', errors: flattened };
+}
+
+class CourseInputError extends Error {}
+
+async function insertOwnedCourse(
+  data: z.infer<typeof courseCreateSchema>,
+  ownerType: 'creator' | 'institute',
+  ownerId: number,
+  ownerApproved: boolean,
+) {
+  const baseSlug = makeSlug(data.title) || 'course';
+  const slug = await uniqueSlug(baseSlug);
+  // An unapproved workspace may build safely, but cannot request public listing.
+  // For approved workspaces, public/unlisted + inactive represents "submitted";
+  // private + inactive represents a draft; active is controlled by an admin.
+  const visibility = ownerApproved ? data.visibility : 'private';
+  const allowedCertificationModes = ownerType === 'creator'
+    ? new Set(['creator', 'octamy_creator'])
+    : new Set(['institute', 'octamy_institute']);
+  const requestedCertificationMode = data.certificationMode || ownerType;
+  const certificationMode = allowedCertificationModes.has(requestedCertificationMode)
+    ? requestedCertificationMode
+    : ownerType;
+  const reviewStatus = visibility === 'private' ? 'draft' : 'pending';
+
+  const created = await db.transaction(async (tx) => {
+    const audienceIds = Array.from(new Set(data.audienceBandIds));
+    if (audienceIds.length > 0) {
+      const validBands = await tx.select({ id: audienceBands.id }).from(audienceBands).where(and(
+        inArray(audienceBands.id, audienceIds),
+        eq(audienceBands.isActive, true),
+      ));
+      if (validBands.length !== audienceIds.length) {
+        throw new CourseInputError('One or more selected audience bands are unavailable. Refresh and try again.');
+      }
+    }
+
+    const [inserted] = await tx.insert(courses).values({
       title: data.title,
       description: data.description,
       slug,
@@ -117,14 +167,59 @@ router.post('/creator/courses', authenticateToken, requireCreator, async (req: C
       duration: data.duration,
       passingScore: data.passingScore,
       price: String(data.price),
+      productType: data.productType,
+      contentPrice: data.productType === 'assessment' ? null : String(data.contentPrice ?? 0),
       level: data.level,
-      visibility: data.visibility,
-      ownerType: 'creator',
-      ownerId: req.creator!.id,
-      isActive: false, // requires admin approval before going live
-    } as any).returning();
+      visibility,
+      language: data.language,
+      certificationMode,
+      reviewStatus,
+      defaultReviewPolicy: data.defaultReviewPolicy,
+      subscriptionEligible: false,
+      resellerEligible: false,
+      thumbnailUrl: data.thumbnailUrl ?? null,
+      ownerType,
+      ownerId,
+      isActive: false,
+    }).returning();
+
+    if (audienceIds.length > 0) {
+      await tx.insert(courseAudienceBands).values(audienceIds.map((audienceBandId) => ({
+        courseId: inserted.id,
+        audienceBandId,
+      })));
+    }
+    return inserted;
+  });
+  return {
+    ...created,
+    reviewState: visibility === 'private' ? 'draft' : 'submitted',
+    submissionBlockedReason: !ownerApproved
+      ? `${ownerType === 'creator' ? 'Creator' : 'Institute'} approval is required before submission`
+      : certificationMode.startsWith('octamy_')
+        ? 'Octamy certification is requested, not granted. The locked assessment and evidence policy require platform review before approval.'
+        : null,
+  };
+}
+
+router.post('/creator/courses', authenticateToken, requireCreator, async (req: CreatorRequest, res: Response) => {
+  try {
+    const parsed = courseCreateSchema.safeParse(req.body);
+    if (!parsed.success) return res.status(400).json(validationResponse(parsed.error));
+    const [category] = await db.select({ id: categories.id }).from(categories).where(and(
+      eq(categories.id, parsed.data.categoryId),
+      eq(categories.isActive, true),
+    ));
+    if (!category) return res.status(400).json({ message: 'The selected category no longer exists. Refresh and choose another category.' });
+    const created = await insertOwnedCourse(
+      parsed.data,
+      'creator',
+      req.creator!.id,
+      req.creator!.status === 'approved',
+    );
     res.status(201).json(created);
   } catch (err: any) {
+    if (err instanceof CourseInputError) return res.status(400).json({ message: err.message });
     console.error('POST /creator/courses', err);
     res.status(500).json({ message: 'Failed to create course' });
   }
@@ -133,16 +228,55 @@ router.post('/creator/courses', authenticateToken, requireCreator, async (req: C
 router.patch('/creator/courses/:id', authenticateToken, requireCreator, async (req: CreatorRequest, res: Response) => {
   try {
     const id = Number(req.params.id);
+    if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ message: 'Invalid course id' });
     const [existing] = await db.select().from(courses).where(eq(courses.id, id));
     if (!existing || existing.ownerType !== 'creator' || existing.ownerId !== req.creator!.id) {
       return res.status(404).json({ message: 'Course not found' });
     }
-    const updates: any = {};
-    const allowed = ['title', 'description', 'duration', 'passingScore', 'price', 'level', 'visibility', 'metaTitle', 'metaDescription'];
-    for (const k of allowed) if (req.body[k] !== undefined) updates[k] = req.body[k];
-    const [updated] = await db.update(courses).set(updates).where(eq(courses.id, id)).returning();
+    const parsed = courseUpdateSchema.safeParse(req.body);
+    if (!parsed.success) return res.status(400).json(validationResponse(parsed.error));
+    if (parsed.data.categoryId) {
+      const [category] = await db.select({ id: categories.id }).from(categories).where(and(
+        eq(categories.id, parsed.data.categoryId),
+        eq(categories.isActive, true),
+      ));
+      if (!category) return res.status(400).json({ message: 'The selected category no longer exists. Refresh and choose another category.' });
+    }
+    if (parsed.data.certificationMode && !['creator', 'octamy_creator'].includes(parsed.data.certificationMode)) {
+      return res.status(400).json({ message: 'Choose creator-issued or request Octamy + creator certification.' });
+    }
+    const { audienceBandIds, ...courseUpdates } = parsed.data;
+    const updates: any = { ...courseUpdates };
+    if (updates.price !== undefined) updates.price = String(updates.price);
+    if (updates.contentPrice !== undefined) updates.contentPrice = updates.contentPrice == null ? null : String(updates.contentPrice);
+    if (updates.productType === 'assessment') updates.contentPrice = null;
+    // Pending creators can edit drafts, but cannot submit them for listing.
+    if (req.creator!.status !== 'approved') updates.visibility = 'private';
+    updates.reviewStatus = updates.visibility === 'private' || (updates.visibility === undefined && existing.visibility === 'private')
+      ? 'draft'
+      : 'pending';
+    updates.isActive = false;
+    const updated = await db.transaction(async (tx) => {
+      if (audienceBandIds !== undefined) {
+        const audienceIds = Array.from(new Set(audienceBandIds));
+        if (audienceIds.length > 0) {
+          const validBands = await tx.select({ id: audienceBands.id }).from(audienceBands).where(and(
+            inArray(audienceBands.id, audienceIds),
+            eq(audienceBands.isActive, true),
+          ));
+          if (validBands.length !== audienceIds.length) throw new CourseInputError('One or more selected audience bands are unavailable.');
+        }
+        await tx.delete(courseAudienceBands).where(eq(courseAudienceBands.courseId, id));
+        if (audienceIds.length > 0) {
+          await tx.insert(courseAudienceBands).values(audienceIds.map((audienceBandId) => ({ courseId: id, audienceBandId })));
+        }
+      }
+      const [row] = await tx.update(courses).set(updates).where(eq(courses.id, id)).returning();
+      return row;
+    });
     res.json(updated);
   } catch (err: any) {
+    if (err instanceof CourseInputError) return res.status(400).json({ message: err.message });
     console.error('PATCH /creator/courses/:id', err);
     res.status(500).json({ message: 'Failed to update course' });
   }
@@ -161,6 +295,183 @@ router.delete('/creator/courses/:id', authenticateToken, requireCreator, async (
   } catch (err: any) {
     console.error('DELETE /creator/courses/:id', err);
     res.status(500).json({ message: 'Failed to delete course' });
+  }
+});
+
+// =================================================================
+// INSTITUTE — owned course drafts
+// =================================================================
+
+router.get('/institute/courses', authenticateToken, requireInstituteRole('teacher'), async (req: InstituteRequest, res: Response) => {
+  try {
+    const rows = await db.select().from(courses)
+      .where(and(eq(courses.ownerType, 'institute'), eq(courses.ownerId, req.institute!.id)))
+      .orderBy(desc(courses.createdAt));
+    res.json(rows);
+  } catch (err) {
+    console.error('GET /institute/courses', err);
+    res.status(500).json({ message: 'Failed to load institute courses' });
+  }
+});
+
+router.post('/institute/courses', authenticateToken, requireInstituteRole('teacher'), async (req: InstituteRequest, res: Response) => {
+  try {
+    const parsed = courseCreateSchema.safeParse(req.body);
+    if (!parsed.success) return res.status(400).json(validationResponse(parsed.error));
+    const [category] = await db.select({ id: categories.id }).from(categories).where(and(
+      eq(categories.id, parsed.data.categoryId),
+      eq(categories.isActive, true),
+    ));
+    if (!category) return res.status(400).json({ message: 'The selected category no longer exists. Refresh and choose another category.' });
+    const [institute] = await db.select({ status: institutes.status }).from(institutes)
+      .where(eq(institutes.id, req.institute!.id));
+    if (!institute) return res.status(404).json({ message: 'Institute workspace not found' });
+    const created = await insertOwnedCourse(
+      parsed.data,
+      'institute',
+      req.institute!.id,
+      institute.status === 'verified',
+    );
+    res.status(201).json(created);
+  } catch (err) {
+    if (err instanceof CourseInputError) return res.status(400).json({ message: err.message });
+    console.error('POST /institute/courses', err);
+    res.status(500).json({ message: 'Failed to create institute course' });
+  }
+});
+
+router.patch('/institute/courses/:id', authenticateToken, requireInstituteRole('teacher'), async (req: InstituteRequest, res: Response) => {
+  try {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ message: 'Invalid course id' });
+    const [existing] = await db.select().from(courses).where(and(
+      eq(courses.id, id),
+      eq(courses.ownerType, 'institute'),
+      eq(courses.ownerId, req.institute!.id),
+    ));
+    if (!existing) return res.status(404).json({ message: 'Course not found in this institute workspace' });
+    const parsed = courseUpdateSchema.safeParse(req.body);
+    if (!parsed.success) return res.status(400).json(validationResponse(parsed.error));
+    if (parsed.data.categoryId) {
+      const [category] = await db.select({ id: categories.id }).from(categories).where(and(
+        eq(categories.id, parsed.data.categoryId),
+        eq(categories.isActive, true),
+      ));
+      if (!category) return res.status(400).json({ message: 'The selected category no longer exists. Refresh and choose another category.' });
+    }
+    const [institute] = await db.select({ status: institutes.status }).from(institutes)
+      .where(eq(institutes.id, req.institute!.id));
+    if (parsed.data.certificationMode && !['institute', 'octamy_institute'].includes(parsed.data.certificationMode)) {
+      return res.status(400).json({ message: 'Choose institute-issued or request Octamy + institute certification.' });
+    }
+    const { audienceBandIds, ...courseUpdates } = parsed.data;
+    const updates: any = { ...courseUpdates };
+    if (updates.price !== undefined) updates.price = String(updates.price);
+    if (updates.contentPrice !== undefined) updates.contentPrice = updates.contentPrice == null ? null : String(updates.contentPrice);
+    if (updates.productType === 'assessment') updates.contentPrice = null;
+    if (institute?.status !== 'verified') updates.visibility = 'private';
+    updates.reviewStatus = updates.visibility === 'private' || (updates.visibility === undefined && existing.visibility === 'private')
+      ? 'draft'
+      : 'pending';
+    updates.isActive = false;
+    const updated = await db.transaction(async (tx) => {
+      if (audienceBandIds !== undefined) {
+        const audienceIds = Array.from(new Set(audienceBandIds));
+        if (audienceIds.length > 0) {
+          const validBands = await tx.select({ id: audienceBands.id }).from(audienceBands).where(and(
+            inArray(audienceBands.id, audienceIds),
+            eq(audienceBands.isActive, true),
+          ));
+          if (validBands.length !== audienceIds.length) throw new CourseInputError('One or more selected audience bands are unavailable.');
+        }
+        await tx.delete(courseAudienceBands).where(eq(courseAudienceBands.courseId, id));
+        if (audienceIds.length > 0) {
+          await tx.insert(courseAudienceBands).values(audienceIds.map((audienceBandId) => ({ courseId: id, audienceBandId })));
+        }
+      }
+      const [row] = await tx.update(courses).set(updates).where(and(
+        eq(courses.id, id),
+        eq(courses.ownerType, 'institute'),
+        eq(courses.ownerId, req.institute!.id),
+      )).returning();
+      return row;
+    });
+    res.json(updated);
+  } catch (err) {
+    if (err instanceof CourseInputError) return res.status(400).json({ message: err.message });
+    console.error('PATCH /institute/courses/:id', err);
+    res.status(500).json({ message: 'Failed to update institute course' });
+  }
+});
+
+router.delete('/institute/courses/:id', authenticateToken, requireInstituteRole('teacher'), async (req: InstituteRequest, res: Response) => {
+  try {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ message: 'Invalid course id' });
+    const [existing] = await db.select().from(courses).where(and(
+      eq(courses.id, id),
+      eq(courses.ownerType, 'institute'),
+      eq(courses.ownerId, req.institute!.id),
+    ));
+    if (!existing) return res.status(404).json({ message: 'Course not found in this institute workspace' });
+    await db.update(courses).set({ isActive: false, visibility: 'private' }).where(and(
+      eq(courses.id, id),
+      eq(courses.ownerType, 'institute'),
+      eq(courses.ownerId, req.institute!.id),
+    ));
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('DELETE /institute/courses/:id', err);
+    res.status(500).json({ message: 'Failed to archive institute course' });
+  }
+});
+
+const instituteBrandingSchema = z.object({
+  name: z.string().trim().min(2).max(160),
+  legalName: z.string().trim().max(200).nullable().optional(),
+  websiteUrl: z.preprocess(
+    (value) => typeof value === 'string' && value.trim() === '' ? null : value,
+    z.string().trim().url().max(500).refine((value) => /^https:\/\//i.test(value), 'Website must use HTTPS').nullable().optional(),
+  ),
+  contactEmail: z.preprocess(
+    (value) => typeof value === 'string' && value.trim() === '' ? null : value,
+    z.string().trim().email().max(320).nullable().optional(),
+  ),
+  logoUrl: z.preprocess(
+    (value) => typeof value === 'string' && value.trim() === '' ? null : value,
+    z.string().trim().max(2000).nullable().optional(),
+  ),
+});
+
+router.patch('/institute/profile', authenticateToken, requireInstituteRole('admin'), async (req: InstituteRequest, res: Response) => {
+  try {
+    const parsed = instituteBrandingSchema.safeParse(req.body);
+    if (!parsed.success) return res.status(400).json(validationResponse(parsed.error));
+
+    if (parsed.data.logoUrl) {
+      // Co-issuer logos are rendered into public credentials. Only an image
+      // uploaded by the acting user may be attached; arbitrary remote URLs are
+      // deliberately rejected to prevent spoofing and server-side fetches.
+      const [ownedLogo] = await db.select({ id: mediaAssets.id }).from(mediaAssets).where(and(
+        eq(mediaAssets.userId, req.user!.userId),
+        eq(mediaAssets.kind, 'image'),
+        eq(mediaAssets.url, parsed.data.logoUrl),
+      ));
+      if (!ownedLogo) {
+        return res.status(400).json({ message: 'Choose an image from your Octamy media library for the institute logo.' });
+      }
+    }
+
+    const [updated] = await db.update(institutes).set({
+      ...parsed.data,
+      updatedAt: new Date(),
+    }).where(eq(institutes.id, req.institute!.id)).returning();
+    if (!updated) return res.status(404).json({ message: 'Institute workspace not found' });
+    audit({ action: 'institute.profile.updated', userId: req.user!.userId, actorRole: req.institute!.memberRole, resourceType: 'institute', resourceId: updated.id, req });
+    res.json(updated);
+  } catch (err) {
+    console.error('PATCH /institute/profile', err);
+    res.status(500).json({ message: 'Institute profile could not be saved' });
   }
 });
 
@@ -285,14 +596,114 @@ router.post('/institute/cohorts', authenticateToken, requireInstituteRole('admin
 router.get('/institute/students', authenticateToken, requireInstituteRole('teacher'), async (req: InstituteRequest, res: Response) => {
   try {
     const cohortId = req.query.cohortId ? Number(req.query.cohortId) : undefined;
-    const where = cohortId
-      ? and(eq(cohortStudents.instituteId, req.institute!.id), eq(cohortStudents.cohortId, cohortId))
-      : eq(cohortStudents.instituteId, req.institute!.id);
-    const rows = await db.select().from(cohortStudents).where(where).orderBy(desc(cohortStudents.createdAt));
+    if (cohortId && !Number.isInteger(cohortId)) return res.status(400).json({ message: 'Invalid cohort id' });
+    const rows = await execRows(sql`
+      SELECT
+        cs.id,
+        cs.cohort_id AS "cohortId",
+        cs.institute_id AS "instituteId",
+        cs.email,
+        cs.name,
+        cs.roll_number AS "rollNumber",
+        cs.user_id AS "userId",
+        cs.status,
+        cs.invited_at AS "invitedAt",
+        cs.joined_at AS "joinedAt",
+        cs.created_at AS "createdAt",
+        COALESCE(u.profile_visibility, false) AS "learnerConsent",
+        (u.id IS NOT NULL) AS "hasOctamyAccount",
+        EXISTS (
+          SELECT 1 FROM certificates cert
+          WHERE cert.user_id = u.id
+            AND cert.is_paid = true
+            AND cert.is_active = true
+            AND cert.expires_at > NOW()
+        ) AS "hasActiveEvidence"
+      FROM cohort_students cs
+      LEFT JOIN users u ON u.id = cs.user_id OR lower(u.email) = lower(cs.email)
+      WHERE cs.institute_id = ${req.institute!.id}
+        AND (${cohortId ?? null}::int IS NULL OR cs.cohort_id = ${cohortId ?? null})
+      ORDER BY cs.created_at DESC
+    `);
     res.json(rows);
   } catch (err: any) {
     console.error('GET /institute/students', err);
     res.status(500).json({ message: 'Failed to load students' });
+  }
+});
+
+router.get('/institute/recruiter-sharing', authenticateToken, requireInstituteRole('teacher'), async (req: InstituteRequest, res: Response) => {
+  try {
+    const [institute] = await db.select({
+      enabled: institutes.recruiterDiscoveryEnabled,
+      status: institutes.status,
+    }).from(institutes).where(eq(institutes.id, req.institute!.id));
+    if (!institute) return res.status(404).json({ message: 'Institute not found' });
+
+    const [summary] = await execRows(sql`
+      SELECT
+        COUNT(*) FILTER (WHERE cs.status = 'active')::int AS "activeAffiliations",
+        COUNT(*) FILTER (
+          WHERE cs.status = 'active'
+            AND u.profile_visibility = true
+            AND EXISTS (
+              SELECT 1 FROM certificates cert
+              WHERE cert.user_id = u.id
+                AND cert.is_paid = true AND cert.is_active = true AND cert.expires_at > NOW()
+            )
+        )::int AS "eligibleLearners"
+      FROM cohort_students cs
+      LEFT JOIN users u ON u.id = cs.user_id OR lower(u.email) = lower(cs.email)
+      WHERE cs.institute_id = ${req.institute!.id}
+    `) as any as Array<{ activeAffiliations: number; eligibleLearners: number }>;
+
+    res.json({
+      enabled: institute.enabled,
+      instituteStatus: institute.status,
+      activeAffiliations: summary?.activeAffiliations ?? 0,
+      eligibleLearners: summary?.eligibleLearners ?? 0,
+      requirements: {
+        instituteOptIn: true,
+        learnerOptIn: true,
+        currentPaidEvidence: true,
+      },
+    });
+  } catch (err: any) {
+    console.error('GET /institute/recruiter-sharing', err);
+    res.status(500).json({ message: 'Failed to load recruiter sharing controls' });
+  }
+});
+
+router.patch('/institute/recruiter-sharing', authenticateToken, requireInstituteRole('admin'), async (req: InstituteRequest, res: Response) => {
+  try {
+    const parsed = z.object({ enabled: z.boolean() }).safeParse(req.body);
+    if (!parsed.success) return res.status(400).json({ message: 'enabled must be true or false' });
+
+    const [updated] = await db.update(institutes)
+      .set({ recruiterDiscoveryEnabled: parsed.data.enabled, updatedAt: new Date() })
+      .where(eq(institutes.id, req.institute!.id))
+      .returning({ enabled: institutes.recruiterDiscoveryEnabled, status: institutes.status });
+    if (!updated) return res.status(404).json({ message: 'Institute not found' });
+
+    void audit({
+      action: 'institute.recruiter_discovery.updated',
+      userId: req.user?.userId,
+      actorRole: 'institute',
+      resourceType: 'institute',
+      resourceId: req.institute!.id,
+      metadata: { enabled: parsed.data.enabled },
+      req,
+    });
+    res.json({
+      enabled: updated.enabled,
+      instituteStatus: updated.status,
+      message: parsed.data.enabled
+        ? 'Institute sharing is enabled. Only learners who independently opt in and hold current paid evidence can appear.'
+        : 'Institute-affiliated learners are excluded from recruiter discovery.',
+    });
+  } catch (err: any) {
+    console.error('PATCH /institute/recruiter-sharing', err);
+    res.status(500).json({ message: 'Failed to update recruiter sharing controls' });
   }
 });
 
@@ -353,7 +764,9 @@ router.post('/institute/students/import', authenticateToken, requireInstituteRol
   }
 });
 
-router.get('/institute/stats', authenticateToken, requireInstituteRole('teacher'), async (req: InstituteRequest, res: Response) => {
+// The overview is the one institute surface available to operational staff.
+// Mutation and drill-down routes below continue to require teacher/admin roles.
+router.get('/institute/stats', authenticateToken, requireInstituteRole('staff'), async (req: InstituteRequest, res: Response) => {
   try {
     const [cohortRow] = await execRows(sql`SELECT COUNT(*)::int AS c FROM cohorts WHERE institute_id = ${req.institute!.id}`);
     const [studentRow] = await execRows(sql`SELECT COUNT(*)::int AS c FROM cohort_students WHERE institute_id = ${req.institute!.id}`);
@@ -450,19 +863,22 @@ router.get('/institute/reports', authenticateToken, requireInstituteRole('teache
     const [students] = await execRows(sql`SELECT COUNT(*)::int AS c FROM cohort_students WHERE institute_id = ${id}`);
     const [attempts] = await execRows(sql`
       SELECT COUNT(*)::int AS total,
-             COUNT(*) FILTER (WHERE a.passed = true)::int AS passed,
-             COUNT(*) FILTER (WHERE a.status = 'submitted')::int AS submitted
+             COUNT(*) FILTER (WHERE a.submitted_at IS NOT NULL AND a.passed = true)::int AS passed,
+             COUNT(*) FILTER (WHERE a.submitted_at IS NOT NULL)::int AS submitted
       FROM exam_instance_attempts a
       JOIN exam_instances i ON i.id = a.instance_id
       WHERE i.owner_type='institute' AND i.owner_id = ${id}
     `);
     const recent = await execRows(sql`
-      SELECT a.id, a.email, a.score, a.passed, a.submitted_at, i.title AS exam_title
+      SELECT a.id, a.instance_id, a.email, u.name, a.score, a.total_questions,
+             CASE WHEN a.total_questions > 0 THEN ROUND((a.score::numeric / a.total_questions::numeric) * 100, 1) ELSE 0 END AS score_pct,
+             a.passed, a.status, a.proctor_mode, a.started_at, a.submitted_at, i.title AS exam_title
       FROM exam_instance_attempts a
       JOIN exam_instances i ON i.id = a.instance_id
+      LEFT JOIN users u ON u.id = a.user_id
       WHERE i.owner_type='institute' AND i.owner_id = ${id}
       ORDER BY a.id DESC LIMIT 25
-    `) as any as Array<{ id: number; email: string | null; score: number | null; passed: boolean | null; submitted_at: string | null; exam_title: string }>;
+    `) as any as Array<{ id: number; instance_id: number; email: string | null; name: string | null; score: number | null; total_questions: number | null; score_pct: number; passed: boolean | null; status: string; proctor_mode: string; started_at: string; submitted_at: string | null; exam_title: string }>;
     res.json({
       cohorts: (cohorts as any)?.c ?? 0,
       students: (students as any)?.c ?? 0,
@@ -572,6 +988,9 @@ router.get('/user/exam-history', authenticateToken, async (req: any, res: Respon
 // =================================================================
 
 const SUB_PLANS: Record<string, Record<string, { amount: number; cycle: 'monthly' | 'yearly' }>> = {
+  learner: {
+    all_access: { amount: 1999, cycle: 'monthly' },
+  },
   creator: {
     free:    { amount: 0,    cycle: 'monthly' },
     pro:     { amount: 499,  cycle: 'monthly' },
@@ -593,7 +1012,9 @@ router.post('/subscriptions/checkout', authenticateToken, async (req: any, res: 
     const chargeAmount = cycle === 'yearly' ? planRow.amount * 10 : planRow.amount;
 
     let ownerId: number | null = null;
-    if (ownerType === 'creator') {
+    if (ownerType === 'learner') {
+      ownerId = req.user.userId;
+    } else if (ownerType === 'creator') {
       const c = await storage.getCreatorByUserId(req.user.userId);
       if (!c) return res.status(403).json({ message: 'Creator profile required' });
       ownerId = c.id;
@@ -662,7 +1083,7 @@ router.post('/subscriptions/checkout', authenticateToken, async (req: any, res: 
 
 // Used by the Cashfree webhook (server/routes.ts) to flip plan + renewal date.
 export async function activatePlan(
-  ownerType: 'creator' | 'institute' | 'recruiter',
+  ownerType: 'learner' | 'creator' | 'institute' | 'recruiter',
   ownerId: number,
   plan: string,
   cashfreeOrderId: string | null,
@@ -677,7 +1098,10 @@ export async function activatePlan(
   }
   const durationDays = cycle === 'yearly' ? 365 : 30;
   const renewsAt = new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000);
-  if (ownerType === 'creator') {
+  if (ownerType === 'learner') {
+    // Learner plan state lives in the immutable subscription row; unlike
+    // workspace plans it never mutates a user role/profile record.
+  } else if (ownerType === 'creator') {
     await db.update(creators).set({ plan, planRenewsAt: renewsAt }).where(eq(creators.id, ownerId));
   } else if (ownerType === 'institute') {
     await db.update(institutes).set({ plan, planRenewsAt: renewsAt }).where(eq(institutes.id, ownerId));
@@ -698,7 +1122,14 @@ router.get('/me/subscription', authenticateToken, async (req: any, res: Response
     const [creatorRow] = await db.select().from(creators).where(eq(creators.userId, req.user.userId));
     const inst = await (storage as any).getInstituteByUserId(req.user.userId);
     const rec = await resolveRecruiterByUser(req.user.email);
+    const [learner] = await db.select().from(subscriptions).where(and(
+      eq(subscriptions.ownerType, 'learner'),
+      eq(subscriptions.ownerId, req.user.userId),
+      eq(subscriptions.status, 'active'),
+      sql`(${subscriptions.renewsAt} IS NULL OR ${subscriptions.renewsAt} > NOW())`,
+    )).orderBy(desc(subscriptions.createdAt)).limit(1);
     res.json({
+      learner: learner ? { plan: learner.plan, renewsAt: learner.renewsAt, status: learner.status } : null,
       creator: creatorRow ? { plan: creatorRow.plan, renewsAt: creatorRow.planRenewsAt } : null,
       institute: inst ? { plan: inst.plan, renewsAt: inst.planRenewsAt, memberRole: inst.memberRole } : null,
       recruiter: rec ? { plan: rec.plan, renewsAt: rec.planRenewsAt, credits: rec.creditsBalance } : null,

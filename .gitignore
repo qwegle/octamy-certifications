@@ -11,3 +11,5 @@ cookies.txt
 test-certificate*.pdf
 __pycache__/
 *.pyc
+.playwright-cli/
+uploads/

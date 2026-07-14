@@ -92,9 +92,8 @@ export default function TermsOfService() {
                 For virtual internship certificates:
               </p>
               <ul className="list-disc pl-6 mb-4 space-y-2">
-                <li>You can customize duration and dates during the application process</li>
                 <li>Information provided must be accurate and truthful</li>
-                <li>Certificates represent completion of assessment, not actual work experience</li>
+                <li>Records represent completion of an assessment-based skill program, not employment or supervised work experience</li>
                 <li>Employers may verify the nature of the program through our platform</li>
               </ul>
             </section>
@@ -111,9 +110,9 @@ export default function TermsOfService() {
               
               <h3 className="text-lg font-semibold mb-2">6.2 Refunds</h3>
               <ul className="list-disc pl-6 mb-4 space-y-2">
-                <li>30-day money-back guarantee from certificate issuance date</li>
-                <li>Refunds require written request with valid reason</li>
-                <li>Processing time: 5-10 business days</li>
+                <li>Eligibility is governed by the published Refund &amp; Cancellation Policy</li>
+                <li>Requests for eligible technical or duplicate-payment issues must be made within 7 days</li>
+                <li>Processing time for approved refunds: 7–10 business days</li>
                 <li>Refunded certificates become invalid</li>
               </ul>
             </section>

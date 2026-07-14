@@ -1,6 +1,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Download, Printer, Share2, Loader2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface CertificateActionsProps {
   certificateId: string;
@@ -17,13 +18,14 @@ export function CertificateActions({
   isDownloading = false,
   onDownload 
 }: CertificateActionsProps) {
+  const { toast } = useToast();
   const handleDownload = () => {
     if (onDownload) {
       onDownload();
     } else {
       // Default download behavior
       const link = document.createElement('a');
-      link.href = `/api/certificates/${certificateId}/download`;
+      link.href = `/api/certificates/${encodeURIComponent(certificateId)}/download?format=pdf`;
       link.download = `certificate-${certificateId}.pdf`;
       document.body.appendChild(link);
       link.click();
@@ -35,28 +37,33 @@ export function CertificateActions({
     window.print();
   };
 
-  const handleShare = () => {
-    const shareUrl = `${window.location.origin}/certificate/${certificateId}`;
-    
+  const copyShareUrl = async (shareUrl: string) => {
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      toast({ title: 'Verification link copied', description: 'Anyone with the link can inspect the credential’s live status.' });
+    } catch (error) {
+      console.error('Credential link copy failed:', error);
+      toast({ title: 'Link could not be copied', description: 'Open the credential record and copy the address from your browser.', variant: 'destructive' });
+    }
+  };
+
+  const handleShare = async () => {
+    const shareUrl = `${window.location.origin}/verify/${encodeURIComponent(certificateId)}`;
+
     if (navigator.share) {
-      navigator.share({
-        title: `Professional Certificate - ${userName}`,
-        text: `Certificate of completion for ${courseTitle}`,
-        url: shareUrl
-      }).catch(console.error);
+      try {
+        await navigator.share({
+          title: `${courseTitle} assessment credential`,
+          text: `Inspect ${userName}'s recorded assessment result and the credential's current status.`,
+          url: shareUrl,
+        });
+      } catch (error) {
+        if (error instanceof Error && error.name === 'AbortError') return;
+        console.error('Credential share failed:', error);
+        await copyShareUrl(shareUrl);
+      }
     } else {
-      navigator.clipboard.writeText(shareUrl).then(() => {
-        alert('Shareable link copied to clipboard!');
-      }).catch(() => {
-        // Fallback if clipboard access fails
-        const textArea = document.createElement('textarea');
-        textArea.value = shareUrl;
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textArea);
-        alert('Shareable link copied to clipboard!');
-      });
+      await copyShareUrl(shareUrl);
     }
   };
 
@@ -95,7 +102,7 @@ export function CertificateActions({
         className="border-octamy-gray-300 text-octamy-gray-700 hover:bg-octamy-gray-200"
       >
         <Share2 className="w-4 h-4 mr-2" />
-        Share Certificate
+        Share verification
       </Button>
     </div>
   );

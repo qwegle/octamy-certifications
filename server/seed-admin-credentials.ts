@@ -10,8 +10,7 @@ export async function seedAdminCredentials() {
       email: "admin@octamy.com",
       password: adminPasswordHash,
       name: "Admin User",
-      isAdmin: true,
-      isActive: true
+      isAdmin: true
     }).onConflictDoNothing();
 
     // Create partner/seller account

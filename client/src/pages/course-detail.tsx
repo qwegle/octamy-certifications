@@ -330,12 +330,12 @@ export default function CourseDetail() {
                     <li className="flex items-start space-x-2">
                       <ChevronRight className="h-4 w-4 mt-0.5 text-blue-600" />
                       <span>
-                        Master the fundamentals of {course.title.toLowerCase()}
+                        Measure your current knowledge of {course.title.toLowerCase()}
                       </span>
                     </li>
                     <li className="flex items-start space-x-2">
                       <ChevronRight className="h-4 w-4 mt-0.5 text-blue-600" />
-                      <span>Gain industry-recognized certification</span>
+                      <span>Optionally activate an assessment-backed credential</span>
                     </li>
                     <li className="flex items-start space-x-2">
                       <ChevronRight className="h-4 w-4 mt-0.5 text-blue-600" />
@@ -443,7 +443,7 @@ export default function CourseDetail() {
 
                 <div className="text-center">
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    30-day money-back guarantee
+                    Refund eligibility follows the published Refund Policy
                   </p>
                 </div>
 

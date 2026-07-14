@@ -1,6 +1,7 @@
 import { db } from './db.ts';
 import { courses, questions, categories } from '../shared/schema.ts';
 import { eq } from 'drizzle-orm';
+import { fileURLToPath } from 'node:url';
 
 export async function createDemoTestCourse() {
   try {
@@ -80,7 +81,7 @@ export async function createDemoTestCourse() {
 }
 
 // Run if called directly
-if (import.meta.main) {
+if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   createDemoTestCourse()
     .then(() => {
       console.log('Demo test course creation completed');

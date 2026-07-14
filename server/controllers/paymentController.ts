@@ -54,6 +54,7 @@ export class PaymentController {
         certificateId: certificateId || null,
         courseId: courseId || null,
         amount: amount.toString(),
+        certificateAmount: amount.toString(),
         status: 'pending',
         paymentMethod: 'payumoney'
       });

@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Link } from "wouter";
+import { useLocation } from "wouter";
 import { Search, Filter, Clock, Users, Star, TrendingUp, Award, Grid, List, SortAsc, SortDesc } from "lucide-react";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
@@ -39,11 +39,13 @@ const priceRanges = [
 ];
 
 export default function CoursesPage() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [selectedDifficulty, setSelectedDifficulty] = useState<string>("all");
-  const [selectedPriceRange, setSelectedPriceRange] = useState<string>("all");
-  const [sortBy, setSortBy] = useState("newest");
+  const [location] = useLocation();
+  const initialParams = useMemo(() => new URLSearchParams(typeof window === "undefined" ? "" : window.location.search), []);
+  const [searchQuery, setSearchQuery] = useState(() => initialParams.get("q") || "");
+  const [selectedCategory, setSelectedCategory] = useState<string>(() => initialParams.get("category") || "all");
+  const [selectedDifficulty, setSelectedDifficulty] = useState<string>(() => initialParams.get("level") || "all");
+  const [selectedPriceRange, setSelectedPriceRange] = useState<string>(() => initialParams.get("price") || "all");
+  const [sortBy, setSortBy] = useState(() => initialParams.get("sort") || "newest");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [showFilters, setShowFilters] = useState(false);
   const [visible, setVisible] = useState(12);
@@ -66,7 +68,8 @@ export default function CoursesPage() {
                            categoryName.toLowerCase().includes(searchQuery.toLowerCase());
 
       // Category filter
-      const matchesCategory = selectedCategory === "all" || categoryName === selectedCategory;
+      const categorySlug = course.category?.slug || '';
+      const matchesCategory = selectedCategory === "all" || categorySlug === selectedCategory || categoryName === selectedCategory;
 
       // Difficulty filter
       const matchesDifficulty = selectedDifficulty === "all" || (course.level || '').toLowerCase() === selectedDifficulty;
@@ -107,6 +110,29 @@ export default function CoursesPage() {
     return filtered;
   }, [courses, searchQuery, selectedCategory, selectedDifficulty, selectedPriceRange, sortBy]);
 
+  // Apply header/category deep links even when the catalog component is already
+  // mounted, and keep active filters shareable without adding history entries
+  // on every keystroke.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setSearchQuery(params.get("q") || "");
+    setSelectedCategory(params.get("category") || "all");
+    setSelectedDifficulty(params.get("level") || "all");
+    setSelectedPriceRange(params.get("price") || "all");
+    setSortBy(params.get("sort") || "newest");
+  }, [location]);
+
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (searchQuery.trim()) params.set("q", searchQuery.trim());
+    if (selectedCategory !== "all") params.set("category", selectedCategory);
+    if (selectedDifficulty !== "all") params.set("level", selectedDifficulty);
+    if (selectedPriceRange !== "all") params.set("price", selectedPriceRange);
+    if (sortBy !== "newest") params.set("sort", sortBy);
+    const query = params.toString();
+    window.history.replaceState({}, "", `${window.location.pathname}${query ? `?${query}` : ""}`);
+  }, [searchQuery, selectedCategory, selectedDifficulty, selectedPriceRange, sortBy]);
+
   // Reset pagination when filters change
   useEffect(() => {
     setVisible(12);
@@ -118,6 +144,7 @@ export default function CoursesPage() {
     setSelectedDifficulty("all");
     setSelectedPriceRange("all");
     setSortBy("newest");
+    window.history.replaceState({}, "", window.location.pathname);
   };
 
   const hasActiveFilters = searchQuery || selectedCategory !== "all" || selectedDifficulty !== "all" || selectedPriceRange !== "all";
@@ -125,12 +152,12 @@ export default function CoursesPage() {
   return (
     <div className="min-h-screen bg-cream-soft">
       <SEO
-        title="Professional Certifications & Skill Verification Courses"
-        description="Browse industry-recognized professional certifications across AI, Development, Cloud, Cybersecurity, Business and more. Free assessments, optional verified certificate."
-        path="/courses"
+        title="Skill Assessments & Assessment-backed Credentials"
+        description="Browse scored assessments across AI, Development, Cloud, Cybersecurity and Business. Assess free and optionally activate a publicly checkable credential after passing."
+        path="/exams"
       />
       <Header />
-      
+      <main id="main-content" tabIndex={-1}>
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-slate-950 text-white">
         <div aria-hidden className="pointer-events-none absolute inset-0 bg-grid-slate opacity-20 [mask-image:radial-gradient(ellipse_at_top,black_30%,transparent_70%)]" />
@@ -142,14 +169,14 @@ export default function CoursesPage() {
               <Award className="h-3.5 w-3.5" /> Skill verification catalog
             </p>
             <h1 className="mt-6 text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight">
-              <span className="block">Verified skills.</span>
+              <span className="block">Assess what you know.</span>
               <span className="mt-1 block bg-gradient-to-r from-sky-300 via-indigo-300 to-fuchsia-300 bg-clip-text text-transparent">
-                Real career outcomes.
+                Carry the result forward.
               </span>
             </h1>
             <p className="mt-5 text-lg text-slate-300 max-w-3xl mx-auto leading-relaxed">
-              Master industry-relevant skills with our comprehensive assessments.
-              Free to attempt — pay only when you pass.
+              These assessments measure knowledge; they do not teach it or guarantee a job.
+              Free to attempt — pay only after passing if you want the credential.
             </p>
             <div className="mt-7 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-sm text-slate-300">
               <div className="flex items-center gap-2">
@@ -177,10 +204,12 @@ export default function CoursesPage() {
           <div className="relative mb-6">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
             <Input
-              placeholder="Search courses, skills, or topics..."
+              id="catalog-search"
+              aria-label="Search assessments, skills, or topics"
+              placeholder="Search assessments, skills, or topics..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 h-12 text-lg border-2 focus:border-black"
+              className="pl-10 h-12 text-base border-slate-300 focus:border-slate-600"
             />
           </div>
 
@@ -194,8 +223,8 @@ export default function CoursesPage() {
               <Filter className="h-4 w-4" />
               Filters
               {hasActiveFilters && (
-                <Badge variant="destructive" className="ml-2 h-5 w-5 p-0 text-xs">
-                  !
+                <Badge variant="secondary" className="ml-2 px-2 text-xs">
+                  Active
                 </Badge>
               )}
             </Button>
@@ -220,11 +249,11 @@ export default function CoursesPage() {
             </Select>
 
             <div className="flex items-center gap-2 ml-auto">
-              <span className="text-sm text-gray-600">{filteredAndSortedCourses.length} courses</span>
+              <span className="text-sm text-gray-600">{filteredAndSortedCourses.length} assessments</span>
               <Separator orientation="vertical" className="h-6" />
               <Button
                 variant={viewMode === "grid" ? "default" : "outline"}
-                size="sm"
+                size="icon"
                 onClick={() => setViewMode("grid")}
                 aria-label="Grid view"
                 aria-pressed={viewMode === "grid"}
@@ -233,7 +262,7 @@ export default function CoursesPage() {
               </Button>
               <Button
                 variant={viewMode === "list" ? "default" : "outline"}
-                size="sm"
+                size="icon"
                 onClick={() => setViewMode("list")}
                 aria-label="List view"
                 aria-pressed={viewMode === "list"}
@@ -248,7 +277,7 @@ export default function CoursesPage() {
             <Card className="mb-6">
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
-                  Filter Courses
+                  Filter assessments
                   {hasActiveFilters && (
                     <Button variant="outline" size="sm" onClick={clearFilters}>
                       Clear All
@@ -268,7 +297,7 @@ export default function CoursesPage() {
                       <SelectContent>
                         <SelectItem value="all">All Categories</SelectItem>
                         {categories.map((category) => (
-                          <SelectItem key={category.id} value={category.name}>
+                          <SelectItem key={category.id} value={category.slug}>
                             {category.name}
                           </SelectItem>
                         ))}
@@ -371,7 +400,7 @@ export default function CoursesPage() {
           )}
         </div>
       </section>
-
+      </main>
       <Footer />
     </div>
   );

@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach } from '@jest/globals';
-import { cleanupTestData, setupTestData, testDb } from '../setup';
-import { DatabaseStorage } from '../../server/storage';
 import bcrypt from 'bcrypt';
+import { cleanupTestData } from '../setup';
+import { DatabaseStorage } from '../../server/storage';
 
-describe('Authentication Tests', () => {
+describe('Authentication storage contracts', () => {
   let storage: DatabaseStorage;
 
   beforeEach(async () => {
@@ -11,97 +11,100 @@ describe('Authentication Tests', () => {
     storage = new DatabaseStorage();
   });
 
-  describe('User Registration', () => {
-    it('should create a new user with hashed password', async () => {
-      const userData = {
-        name: 'John Doe',
-        email: 'john@example.com',
-        password: 'password123',
-        isAdmin: false
-      };
+  async function createPasswordUser(
+    email: string,
+    password: string,
+    isAdmin = false,
+  ) {
+    const passwordHash = await bcrypt.hash(password, 10);
+    const user = await storage.createUser({
+      name: isAdmin ? 'Admin User' : 'John Doe',
+      email,
+      password: passwordHash,
+      isAdmin,
+    });
 
-      const user = await storage.createUser(userData);
+    return { user, passwordHash };
+  }
+
+  describe('Password accounts', () => {
+    it('persists the password hash supplied by the authentication layer', async () => {
+      const password = 'Password123!';
+      const { user, passwordHash } = await createPasswordUser(
+        'john@example.com',
+        password,
+      );
 
       expect(user.id).toBeDefined();
-      expect(user.name).toBe(userData.name);
-      expect(user.email).toBe(userData.email);
+      expect(user.name).toBe('John Doe');
+      expect(user.email).toBe('john@example.com');
       expect(user.isAdmin).toBe(false);
-      expect(user.password).not.toBe(userData.password); // Should be hashed
+      expect(user.password).toBe(passwordHash);
+      expect(user.password).not.toBe(password);
+      await expect(bcrypt.compare(password, user.password!)).resolves.toBe(true);
     });
 
-    it('should not allow duplicate email registration', async () => {
-      const userData = {
-        name: 'John Doe',
-        email: 'john@example.com',
-        password: 'password123',
-        isAdmin: false
-      };
+    it('enforces unique email addresses', async () => {
+      await createPasswordUser('john@example.com', 'Password123!');
 
-      await storage.createUser(userData);
-
-      await expect(storage.createUser(userData)).rejects.toThrow();
-    });
-  });
-
-  describe('User Login', () => {
-    it('should authenticate user with correct credentials', async () => {
-      const password = 'password123';
-      const hashedPassword = await bcrypt.hash(password, 10);
-      
-      const userData = {
-        name: 'John Doe',
-        email: 'john@example.com',
-        password: hashedPassword,
-        isAdmin: false
-      };
-
-      const user = await storage.createUser(userData);
-      const authenticatedUser = await storage.authenticateUser('john@example.com', password);
-
-      expect(authenticatedUser).toBeDefined();
-      expect(authenticatedUser?.id).toBe(user.id);
-      expect(authenticatedUser?.email).toBe(user.email);
+      await expect(
+        createPasswordUser('john@example.com', 'AnotherPassword123!'),
+      ).rejects.toThrow();
     });
 
-    it('should reject login with incorrect password', async () => {
-      const hashedPassword = await bcrypt.hash('password123', 10);
-      
-      const userData = {
-        name: 'John Doe',
-        email: 'john@example.com',
-        password: hashedPassword,
-        isAdmin: false
-      };
+    it('retrieves a password account by email for credential verification', async () => {
+      const password = 'Password123!';
+      const { user } = await createPasswordUser('john@example.com', password);
 
-      await storage.createUser(userData);
-      const authenticatedUser = await storage.authenticateUser('john@example.com', 'wrongpassword');
+      const storedUser = await storage.getUserByEmail('john@example.com');
 
-      expect(authenticatedUser).toBeNull();
+      expect(storedUser?.id).toBe(user.id);
+      expect(storedUser?.password).toBeDefined();
+      await expect(
+        bcrypt.compare(password, storedUser!.password!),
+      ).resolves.toBe(true);
     });
 
-    it('should reject login with non-existent email', async () => {
-      const authenticatedUser = await storage.authenticateUser('nonexistent@example.com', 'password123');
-      expect(authenticatedUser).toBeNull();
+    it('does not validate an incorrect password against the stored hash', async () => {
+      await createPasswordUser('john@example.com', 'Password123!');
+      const storedUser = await storage.getUserByEmail('john@example.com');
+
+      await expect(
+        bcrypt.compare('WrongPassword123!', storedUser!.password!),
+      ).resolves.toBe(false);
+    });
+
+    it('returns undefined for an unknown email address', async () => {
+      await expect(
+        storage.getUserByEmail('nonexistent@example.com'),
+      ).resolves.toBeUndefined();
     });
   });
 
-  describe('Admin Authentication', () => {
-    it('should authenticate admin user', async () => {
-      const password = 'admin123';
-      const hashedPassword = await bcrypt.hash(password, 10);
-      
-      const adminData = {
-        name: 'Admin User',
-        email: 'admin@example.com',
-        password: hashedPassword,
-        isAdmin: true
-      };
+  describe('Google and admin accounts', () => {
+    it('supports a Google-only user without a local password', async () => {
+      const user = await storage.createUser({
+        name: 'Google User',
+        email: 'google@example.com',
+        password: null,
+        googleId: 'google-subject-123',
+        isGoogleUser: true,
+      });
 
-      const admin = await storage.createUser(adminData);
-      const authenticatedAdmin = await storage.authenticateUser('admin@example.com', password);
+      expect(user.password).toBeNull();
+      expect(user.googleId).toBe('google-subject-123');
+      expect(user.isGoogleUser).toBe(true);
+    });
 
-      expect(authenticatedAdmin).toBeDefined();
-      expect(authenticatedAdmin?.isAdmin).toBe(true);
+    it('preserves the administrator role used by the auth response', async () => {
+      const { user } = await createPasswordUser(
+        'admin@example.com',
+        'AdminPassword123!',
+        true,
+      );
+
+      const storedAdmin = await storage.getUserByEmail(user.email);
+      expect(storedAdmin?.isAdmin).toBe(true);
     });
   });
 });

@@ -1001,11 +1001,20 @@ interface AdminCourse {
   duration: number;
   passingScore: number;
   price: string;
+  productType: "assessment" | "video_course" | "ebook" | "bundle";
+  contentPrice?: string | null;
   originalPrice?: string | null;
   isOnSale: boolean;
   level: string;
   isActive: boolean;
   isInternship: boolean;
+  ownerType: "admin" | "creator" | "institute";
+  ownerId?: number | null;
+  visibility: "public" | "unlisted" | "private";
+  certificationMode: string;
+  reviewStatus: "draft" | "pending" | "approved" | "rejected";
+  subscriptionEligible: boolean;
+  resellerEligible: boolean;
   enrollmentCount: number;
   revenue: number;
   createdAt: string;
@@ -1061,6 +1070,12 @@ interface Category {
   id: number;
   name: string;
   description: string;
+  parentId: number | null;
+  kind: "collection" | "audience" | "subject" | "exam_family" | "skill";
+  isActive: boolean;
+  sortOrder: number;
+  metaTitle: string | null;
+  metaDescription: string | null;
   courseCount?: number;
   createdAt: string;
 }
@@ -1073,19 +1088,30 @@ const courseSchema = z.object({
   duration: z.number().min(1, "Duration must be at least 1 minute"),
   passingScore: z.number().min(1).max(100, "Passing score must be between 1-100"),
   price: z.string().min(1, "Price is required"),
+  productType: z.enum(["assessment", "video_course", "ebook", "bundle"]),
+  contentPrice: z.string().optional(),
   originalPrice: z.string().optional(),
   isOnSale: z.boolean().default(false),
-  level: z.enum(["Beginner", "Intermediate", "Advanced"]),
-  isActive: z.boolean().default(true),
-  isInternship: z.boolean().default(false)
+  level: z.enum(["novice", "intermediate", "advanced", "expert"]),
+  visibility: z.enum(["public", "unlisted", "private"]),
+  isActive: z.boolean().default(false),
+  isInternship: z.boolean().default(false),
+  subscriptionEligible: z.boolean().default(false),
+  resellerEligible: z.boolean().default(false),
 });
 
 type CourseFormData = z.infer<typeof courseSchema>;
 
 // Category form schema
 const categorySchema = z.object({
-  name: z.string().min(1, "Category name is required"),
-  description: z.string().min(1, "Description is required")
+  name: z.string().trim().min(2, "Category name is required").max(120),
+  description: z.string().trim().min(5, "Add a useful description").max(1000),
+  parentId: z.number().int().positive().nullable(),
+  kind: z.enum(["collection", "audience", "subject", "exam_family", "skill"]),
+  isActive: z.boolean(),
+  sortOrder: z.coerce.number().int().min(0).max(100000),
+  metaTitle: z.string().trim().max(180).nullable(),
+  metaDescription: z.string().trim().max(500).nullable(),
 });
 
 type CategoryFormData = z.infer<typeof categorySchema>;
@@ -1094,6 +1120,7 @@ type CategoryFormData = z.infer<typeof categorySchema>;
 function CourseForm({ course, onCancel, onSuccess }: { course?: any; onCancel: () => void; onSuccess: () => void }) {
   const { toast } = useToast();
   const isEditing = !!course;
+  const isThirdParty = Boolean(course && course.ownerType !== "admin");
 
   const form = useForm<CourseFormData>({
     resolver: zodResolver(courseSchema),
@@ -1105,11 +1132,16 @@ function CourseForm({ course, onCancel, onSuccess }: { course?: any; onCancel: (
       duration: course?.duration || 30,
       passingScore: course?.passingScore || 60,
       price: course?.price || "99",
+      productType: course?.productType || "assessment",
+      contentPrice: course?.contentPrice || "",
       originalPrice: course?.originalPrice || "",
       isOnSale: course?.isOnSale || false,
-      level: course?.level || "Beginner",
-      isActive: course?.isActive !== false,
-      isInternship: course?.isInternship || false
+      level: ["novice", "intermediate", "advanced", "expert"].includes(course?.level) ? course.level : "novice",
+      visibility: course?.visibility || "public",
+      isActive: course?.isActive === true,
+      isInternship: course?.isInternship || false,
+      subscriptionEligible: course?.subscriptionEligible === true,
+      resellerEligible: course?.resellerEligible === true,
     }
   });
 
@@ -1124,11 +1156,16 @@ function CourseForm({ course, onCancel, onSuccess }: { course?: any; onCancel: (
         duration: course.duration || 30,
         passingScore: course.passingScore || 60,
         price: course.price || "99",
+        productType: course.productType || "assessment",
+        contentPrice: course.contentPrice || "",
         originalPrice: course.originalPrice || "",
         isOnSale: course.isOnSale || false,
-        level: course.level || "Beginner",
-        isActive: course.isActive !== false,
-        isInternship: course.isInternship || false
+        level: ["novice", "intermediate", "advanced", "expert"].includes(course.level) ? course.level : "novice",
+        visibility: course.visibility || "public",
+        isActive: course.isActive === true,
+        isInternship: course.isInternship || false,
+        subscriptionEligible: course.subscriptionEligible === true,
+        resellerEligible: course.resellerEligible === true,
       });
     }
   }, [course, form]);
@@ -1201,6 +1238,12 @@ function CourseForm({ course, onCancel, onSuccess }: { course?: any; onCancel: (
     <div className="w-full max-w-4xl mx-auto">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          {isThirdParty && (
+            <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
+              <p className="font-semibold">Editing a {course.ownerType} submission</p>
+              <p className="mt-1 leading-5">Saving content changes unpublishes the item and returns it to review. Ownership, issuer, approval, All Access, and reseller access cannot be changed in this form.</p>
+            </div>
+          )}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <FormField
               control={form.control}
@@ -1262,6 +1305,47 @@ function CourseForm({ course, onCancel, onSuccess }: { course?: any; onCancel: (
 
             <FormField
               control={form.control}
+              name="productType"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Product type</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                    <SelectContent>
+                      <SelectItem value="assessment">Assessment</SelectItem>
+                      <SelectItem value="video_course">Video course</SelectItem>
+                      <SelectItem value="ebook">Protected ebook</SelectItem>
+                      <SelectItem value="bundle">Bundle</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>Only Octamy assessments can be included in Learner All Access.</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="visibility"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Visibility</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                    <SelectContent>
+                      <SelectItem value="public">Public catalogue</SelectItem>
+                      <SelectItem value="unlisted">Unlisted link</SelectItem>
+                      <SelectItem value="private">Private draft</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>Entitlement programmes require public Octamy inventory.</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
               name="level"
               render={({ field }) => (
                 <FormItem>
@@ -1273,9 +1357,10 @@ function CourseForm({ course, onCancel, onSuccess }: { course?: any; onCancel: (
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="Beginner">Beginner</SelectItem>
-                      <SelectItem value="Intermediate">Intermediate</SelectItem>
-                      <SelectItem value="Advanced">Advanced</SelectItem>
+                      <SelectItem value="novice">Novice</SelectItem>
+                      <SelectItem value="intermediate">Intermediate</SelectItem>
+                      <SelectItem value="advanced">Advanced</SelectItem>
+                      <SelectItem value="expert">Expert</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -1337,6 +1422,23 @@ function CourseForm({ course, onCancel, onSuccess }: { course?: any; onCancel: (
               )}
             />
 
+            {form.watch("productType") !== "assessment" && (
+              <FormField
+                control={form.control}
+                name="contentPrice"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Content access price (₹)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="499" {...field} />
+                    </FormControl>
+                    <FormDescription>The course, ebook, or bundle access fee. Credential pricing remains separate.</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
             <FormField
               control={form.control}
               name="originalPrice"
@@ -1394,11 +1496,11 @@ function CourseForm({ course, onCancel, onSuccess }: { course?: any; onCancel: (
               render={({ field }) => (
                 <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                   <div className="space-y-0.5">
-                    <FormLabel className="text-base">Active</FormLabel>
-                    <FormDescription>Make course available to users</FormDescription>
+                    <FormLabel className="text-base">Published</FormLabel>
+                    <FormDescription>{isThirdParty ? "Use the explicit review action" : "Publish as reviewed Octamy inventory"}</FormDescription>
                   </div>
                   <FormControl>
-                    <Switch checked={field.value} onCheckedChange={field.onChange} />
+                    <Switch checked={field.value} onCheckedChange={field.onChange} disabled={isThirdParty} />
                   </FormControl>
                 </FormItem>
               )}
@@ -1419,11 +1521,51 @@ function CourseForm({ course, onCancel, onSuccess }: { course?: any; onCancel: (
                 </FormItem>
               )}
             />
+
+            <FormField
+              control={form.control}
+              name="subscriptionEligible"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                  <div className="space-y-0.5 pr-3">
+                    <FormLabel className="text-base">Learner All Access</FormLabel>
+                    <FormDescription>Include this public Octamy assessment in the ₹1,999 plan</FormDescription>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      disabled={isThirdParty || form.watch("productType") !== "assessment" || form.watch("visibility") !== "public"}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="resellerEligible"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                  <div className="space-y-0.5 pr-3">
+                    <FormLabel className="text-base">Reseller inventory</FormLabel>
+                    <FormDescription>Explicitly allow approved resellers to offer this public Octamy item</FormDescription>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      disabled={isThirdParty || form.watch("visibility") !== "public"}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
           </div>
 
           <div className="flex gap-4 pt-4">
             <Button type="submit" disabled={courseMutation.isPending}>
-              {courseMutation.isPending ? "Saving..." : (isEditing ? "Update Course" : "Create Course")}
+              {courseMutation.isPending ? "Saving..." : isThirdParty ? "Save and return to review" : (isEditing ? "Update course" : "Create Octamy course")}
             </Button>
             <Button type="button" variant="outline" onClick={onCancel}>
               Cancel
@@ -1439,12 +1581,21 @@ function CourseForm({ course, onCancel, onSuccess }: { course?: any; onCancel: (
 function CategoryForm({ category, onCancel, onSuccess }: { category?: any; onCancel: () => void; onSuccess: () => void }) {
   const { toast } = useToast();
   const isEditing = !!category;
+  const { data: categoryOptions = [] } = useQuery<Category[]>({
+    queryKey: ["/api/admin/categories"],
+  });
 
   const form = useForm<CategoryFormData>({
     resolver: zodResolver(categorySchema),
     defaultValues: {
       name: category?.name || "",
-      description: category?.description || ""
+      description: category?.description || "",
+      parentId: category?.parentId ?? null,
+      kind: category?.kind || "collection",
+      isActive: category?.isActive ?? true,
+      sortOrder: category?.sortOrder ?? 0,
+      metaTitle: category?.metaTitle ?? null,
+      metaDescription: category?.metaDescription ?? null,
     }
   });
 
@@ -1457,6 +1608,7 @@ function CategoryForm({ category, onCancel, onSuccess }: { category?: any; onCan
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/categories"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/categories"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/courses"] });
       toast({
         title: "Success",
@@ -1490,6 +1642,100 @@ function CategoryForm({ category, onCancel, onSuccess }: { category?: any; onCan
                 <FormControl>
                   <Input placeholder="e.g., Artificial Intelligence" {...field} />
                 </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <FormField
+              control={form.control}
+              name="parentId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Parent category</FormLabel>
+                  <Select
+                    value={field.value?.toString() || "root"}
+                    onValueChange={(value) => field.onChange(value === "root" ? null : Number(value))}
+                  >
+                    <FormControl><SelectTrigger><SelectValue placeholder="Root category" /></SelectTrigger></FormControl>
+                    <SelectContent>
+                      <SelectItem value="root">No parent · root</SelectItem>
+                      {categoryOptions.filter((option) => option.id !== category?.id).map((option) => (
+                        <SelectItem key={option.id} value={String(option.id)}>{option.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>Use a root collection for School, Competitive exams, or Professional skills.</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="kind"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Taxonomy type</FormLabel>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                    <SelectContent>
+                      <SelectItem value="collection">Collection</SelectItem>
+                      <SelectItem value="subject">Subject</SelectItem>
+                      <SelectItem value="exam_family">Exam family</SelectItem>
+                      <SelectItem value="skill">Skill</SelectItem>
+                      <SelectItem value="audience">Audience</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <FormField
+              control={form.control}
+              name="sortOrder"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Sort order</FormLabel>
+                  <FormControl><Input type="number" min={0} max={100000} {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="isActive"
+              render={({ field }) => (
+                <FormItem className="flex min-h-20 items-center justify-between rounded-xl border border-slate-200 px-4 py-3">
+                  <div><FormLabel>Available in filters</FormLabel><FormDescription>Inactive categories remain attached to existing records but disappear from public discovery.</FormDescription></div>
+                  <FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl>
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <FormField
+            control={form.control}
+            name="metaTitle"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Search title (optional)</FormLabel>
+                <FormControl><Input placeholder="Concise category title" {...field} value={field.value || ""} onChange={(event) => field.onChange(event.target.value || null)} /></FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="metaDescription"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Search description (optional)</FormLabel>
+                <FormControl><Textarea rows={3} placeholder="What learners will find in this category" {...field} value={field.value || ""} onChange={(event) => field.onChange(event.target.value || null)} /></FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -1582,6 +1828,8 @@ export default function AdminDashboard() {
   const [showCourseForm, setShowCourseForm] = useState(false);
   const [editingCourse, setEditingCourse] = useState<AdminCourse | null>(null);
   const [isEditingCourse, setIsEditingCourse] = useState(false);
+  const [courseToReject, setCourseToReject] = useState<AdminCourse | null>(null);
+  const [courseReviewReason, setCourseReviewReason] = useState("");
   
   // Pagination states
   const [customersPage, setCustomersPage] = useState(1);
@@ -1610,7 +1858,7 @@ export default function AdminDashboard() {
 
   // Fetch categories data
   const { data: categories = [], isLoading: categoriesLoading } = useQuery<Category[]>({
-    queryKey: ["/api/categories"],
+    queryKey: ["/api/admin/categories"],
   });
 
   // Fetch customers data
@@ -1747,6 +1995,28 @@ export default function AdminDashboard() {
     },
   });
 
+  const reviewCourse = useMutation({
+    mutationFn: async ({ courseId, status, reason }: { courseId: number; status: "approved" | "rejected" | "pending"; reason?: string }) => {
+      const response = await apiRequest("PATCH", `/api/admin/courses/${courseId}/review`, { status, reason });
+      return response.json();
+    },
+    onSuccess: (_course, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/courses"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/courses"] });
+      setCourseToReject(null);
+      setCourseReviewReason("");
+      toast({
+        title: variables.status === "approved" ? "Submission approved" : variables.status === "rejected" ? "Submission returned" : "Submission unpublished",
+        description: variables.status === "approved"
+          ? "The reviewed item is now active under its verified issuer policy."
+          : "The item is unavailable to learners until it is reviewed again.",
+      });
+    },
+    onError: (error: any) => {
+      toast({ title: "Review could not be saved", description: error.message || "Try again", variant: "destructive" });
+    },
+  });
+
   // Category deletion mutation
   const deleteCategory = useMutation({
     mutationFn: async (categoryId: number) => {
@@ -1755,6 +2025,7 @@ export default function AdminDashboard() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/categories"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/categories"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/courses"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/analytics"] });
       toast({
@@ -2029,7 +2300,8 @@ export default function AdminDashboard() {
                     <TableHeader>
                       <TableRow>
                         <TableHead>Name</TableHead>
-                        <TableHead>Description</TableHead>
+                        <TableHead>Structure</TableHead>
+                        <TableHead>Status</TableHead>
                         <TableHead>Courses</TableHead>
                         <TableHead>Created</TableHead>
                         <TableHead>Actions</TableHead>
@@ -2040,16 +2312,25 @@ export default function AdminDashboard() {
                         <TableRow key={category.id}>
                           <TableCell>
                             <div className="font-medium">{category.name}</div>
+                            <div className="mt-1 max-w-md line-clamp-2 text-xs text-muted-foreground">{category.description}</div>
                           </TableCell>
                           <TableCell>
-                            <div className="text-sm text-muted-foreground">{category.description}</div>
+                            <div className="text-sm font-medium capitalize">{category.kind?.replace(/_/g, " ") || "Collection"}</div>
+                            <div className="text-xs text-muted-foreground">
+                              {category.parentId ? `Child of ${categories.find((item) => item.id === category.parentId)?.name || "category"}` : "Root category"} · order {category.sortOrder ?? 0}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className={category.isActive ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-slate-200 bg-slate-50 text-slate-600"}>
+                              {category.isActive ? "Active" : "Hidden"}
+                            </Badge>
                           </TableCell>
                           <TableCell>
                             <Badge variant="secondary">{category.courseCount || 0} courses</Badge>
                           </TableCell>
                           <TableCell>
                             <div className="text-sm text-muted-foreground">
-                              {new Date(category.createdAt).toLocaleDateString()}
+                              {category.createdAt ? new Date(category.createdAt).toLocaleDateString() : "—"}
                             </div>
                           </TableCell>
                           <TableCell>
@@ -2144,6 +2425,7 @@ export default function AdminDashboard() {
                         <TableHeader>
                           <TableRow>
                             <TableHead>Course</TableHead>
+                            <TableHead>Origin</TableHead>
                             <TableHead>Category</TableHead>
                             <TableHead>Price</TableHead>
                             <TableHead>Enrollments</TableHead>
@@ -2164,6 +2446,12 @@ export default function AdminDashboard() {
                                   <div className="text-sm text-muted-foreground">{course.duration} min • {course.passingScore}% pass</div>
                                 </div>
                               </TableCell>
+                              <TableCell>
+                                <div className="space-y-1">
+                                  <Badge variant="outline" className="capitalize">{course.ownerType || "admin"}</Badge>
+                                  <div className="text-xs text-muted-foreground">{course.certificationMode === "octamy" ? "Octamy-issued" : course.certificationMode?.replace("_", " + ")}</div>
+                                </div>
+                              </TableCell>
                               <TableCell>{course.categoryName || 'Unknown'}</TableCell>
                               <TableCell>
                                 <div>
@@ -2180,17 +2468,44 @@ export default function AdminDashboard() {
                               <TableCell>{course.certificateCount}</TableCell>
                               <TableCell>₹{course.revenue}</TableCell>
                               <TableCell>
-                                <div className="flex gap-1">
-                                  <Badge variant={course.isActive ? "default" : "secondary"}>
-                                    {course.isActive ? "Active" : "Inactive"}
+                                <div className="flex max-w-[220px] flex-wrap gap-1">
+                                  <Badge variant={course.reviewStatus === "approved" ? "default" : "secondary"} className="capitalize">
+                                    {course.reviewStatus || "draft"}
                                   </Badge>
+                                  <Badge variant={course.isActive ? "outline" : "secondary"}>{course.isActive ? "Published" : "Unavailable"}</Badge>
+                                  {course.subscriptionEligible && <Badge className="bg-emerald-100 text-emerald-900 hover:bg-emerald-100">All Access</Badge>}
+                                  {course.resellerEligible && <Badge variant="outline">Reseller</Badge>}
                                   {course.isInternship && (
                                     <Badge variant="outline">Internship</Badge>
                                   )}
                                 </div>
                               </TableCell>
                               <TableCell>
-                                <div className="flex gap-2">
+                                <div className="flex flex-wrap gap-2">
+                                  {course.ownerType !== "admin" && course.reviewStatus !== "approved" && course.visibility !== "private" && (
+                                    <Button
+                                      size="sm"
+                                      onClick={() => reviewCourse.mutate({ courseId: course.id, status: "approved" })}
+                                      disabled={reviewCourse.isPending}
+                                    >
+                                      <Check className="mr-1 h-4 w-4" /> Approve
+                                    </Button>
+                                  )}
+                                  {course.ownerType !== "admin" && course.reviewStatus === "approved" && (
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => reviewCourse.mutate({ courseId: course.id, status: "pending" })}
+                                      disabled={reviewCourse.isPending}
+                                    >
+                                      Unpublish
+                                    </Button>
+                                  )}
+                                  {course.ownerType !== "admin" && course.reviewStatus !== "rejected" && (
+                                    <Button size="sm" variant="outline" onClick={() => setCourseToReject(course)}>
+                                      <X className="mr-1 h-4 w-4" /> Return
+                                    </Button>
+                                  )}
                                   <Button 
                                     size="sm" 
                                     variant="outline"
@@ -2289,6 +2604,42 @@ export default function AdminDashboard() {
                 </>
               )}
             </TabsContent>
+
+            <Dialog open={Boolean(courseToReject)} onOpenChange={(open) => {
+              if (!open) {
+                setCourseToReject(null);
+                setCourseReviewReason("");
+              }
+            }}>
+              <DialogContent className="max-w-lg">
+                <DialogHeader>
+                  <DialogTitle>Return submission to its owner</DialogTitle>
+                </DialogHeader>
+                <p className="text-sm leading-6 text-muted-foreground">
+                  {courseToReject?.title} will be unavailable to learners. Give the creator or institute a specific, actionable reason.
+                </p>
+                <Textarea
+                  value={courseReviewReason}
+                  onChange={(event) => setCourseReviewReason(event.target.value)}
+                  placeholder="Example: Add answer explanations and complete the assessment blueprint before resubmitting."
+                  className="min-h-28"
+                />
+                <div className="flex justify-end gap-2">
+                  <Button variant="outline" onClick={() => setCourseToReject(null)}>Cancel</Button>
+                  <Button
+                    variant="destructive"
+                    disabled={!courseToReject || courseReviewReason.trim().length === 0 || reviewCourse.isPending}
+                    onClick={() => courseToReject && reviewCourse.mutate({
+                      courseId: courseToReject.id,
+                      status: "rejected",
+                      reason: courseReviewReason.trim(),
+                    })}
+                  >
+                    Return with feedback
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
 
             <TabsContent value="exams" className="space-y-4">
               {examAttemptsLoading ? (

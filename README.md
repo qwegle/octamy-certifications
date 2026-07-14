@@ -2,7 +2,7 @@
 
 ## Overview
 
-Octamy is a comprehensive professional certification platform built as a full-stack web application. It enables users to take online assessments across various domains (AI, Development, Business, Internships) and obtain verified certificates upon successful completion.
+Octamy is a multi-tenant EdTech SaaS platform for the complete digital journey **Learn → Validate → Certify → Get recruited**. Learners build a consent-controlled Skill Evidence Passport; creators and institutes publish courses and proctored assessments; verified recruiters discover candidates against inspectable skill evidence rather than self-reported claims.
 
 ## Architecture
 
@@ -50,30 +50,48 @@ server/
 - **TypeScript** with ES modules
 - **PostgreSQL** with Drizzle ORM
 - **JWT** authentication with bcrypt password hashing
-- **PayUMoney** payment gateway integration
+- **Cashfree and PayU** payment integrations with server-side confirmation
 
 ## Setup Instructions
 
 ### Prerequisites
-- Node.js 18+ 
+- Node.js 20+
 - PostgreSQL database
-- PayUMoney merchant account (for payments)
+- A disposable PostgreSQL database for tests
+- Cashfree or PayU credentials only when testing paid flows
 
 ### Environment Variables
-Create a `.env` file in the root directory:
+Copy `.env.example` to `.env`, then replace every placeholder. At minimum for local development configure:
 
 ```env
 # Database
 DATABASE_URL=postgresql://username:password@localhost:5432/octamy
 
 # JWT Secret
-JWT_SECRET=your-jwt-secret-key
+JWT_SECRET=use-a-long-random-development-secret
+SESSION_SECRET=use-a-different-long-random-development-secret
 
-# PayUMoney Configuration
-PAYUMONEY_MERCHANT_ID=your-merchant-id
-PAYUMONEY_MERCHANT_KEY=your-merchant-key
-PAYUMONEY_SALT=your-salt-key
+# Public origin; Google callback URLs must use this exact origin
+PORT=8080
+APP_URL=http://localhost:8080
 ```
+
+Google sign-in additionally requires `GOOGLE_CLIENT_ID` and
+`GOOGLE_CLIENT_SECRET`. Register both callback URLs documented in
+`.env.example`. Keep real credentials only in `.env`; it is ignored by Git.
+
+AI-assisted course drafting is optional. Configure a server-side OpenAI key to
+enable it for authenticated creator and institute workspaces:
+
+```env
+OPENAI_API_KEY=your-real-server-side-key
+OPENAI_MODEL=gpt-5-mini
+```
+
+Never expose the key through a `VITE_` variable or commit it. With no usable
+key, the copilot reports that it is unavailable and manual course creation
+continues to work. Generated blueprints require human review and do not save,
+publish, set pricing, or change visibility automatically.
 
 ### Installation
 
@@ -83,18 +101,16 @@ git clone <repository-url>
 cd octamy-platform
 ```
 
-2. **Install dependencies**
+2. **Configure the environment**
 ```bash
-npm install
+cp .env.example .env
+# Edit .env and create the PostgreSQL database/user referenced by DATABASE_URL.
 ```
 
-3. **Setup database**
+3. **Install locked dependencies and apply migrations**
 ```bash
-# Push database schema
-npm run db:push
-
-# Seed initial data
-npm run seed
+npm ci
+npm run db:migrate
 ```
 
 4. **Start development server**
@@ -102,21 +118,28 @@ npm run seed
 npm run dev
 ```
 
-The application will be available at `http://localhost:5000`
+The application is available at the `APP_URL` in `.env` (for the current local
+configuration, `http://localhost:8080`). Development startup seeds only the
+safe baseline catalog when it is absent.
 
 ## Development
 
 ### Database Operations
 ```bash
-# Push schema changes
-npm run db:push
-
-# Generate migration files
+# Generate a reviewed migration after changing shared/schema.ts
 npm run db:generate
 
-# View database in browser
-npm run db:studio
+# Apply committed migrations
+npm run db:migrate
+
+# Validate TypeScript and the production bundle
+npm run check
+npm run build
 ```
+
+Tests intentionally refuse to use `DATABASE_URL` because they truncate data.
+Point `TEST_DATABASE_URL` at a separate disposable database before running
+`npm test`.
 
 ### API Endpoints
 
@@ -147,24 +170,26 @@ npm run db:studio
 ## Features
 
 ### Core Features
-- **Multi-domain Assessments**: AI, Development, Business, and Internship certifications
-- **Timed Examinations**: Countdown timers with automatic submission
-- **Certificate Generation**: Professional PDF certificates with verification codes
-- **Payment Integration**: Secure PayUMoney payment processing
-- **Admin Panel**: Course and question management
+- **Multi-workspace SaaS**: learner, creator, institute, recruiter, partner, and platform-admin workspaces with role-aware access
+- **Courses and assessments**: video/PDF/text curricula, reusable media, question banks, timed exams, and network-safe attempt recovery
+- **Proctored validation**: consented integrity-event collection, auditable evidence, institute result workspaces, and explicit proctoring limitations
+- **Dual-branded credentials**: Octamy verification plus institute branding, QR verification, and evidence-backed certificate tiers
+- **Recruiter discovery**: verified-company search, explicit learner/institute sharing consent, auditable profile unlocks, and transactional credits
 
 ### Advanced Features
-- **Seller/Partner System**: 10% commission tracking with withdrawal management
-- **Smart Notifications**: Personalized course recommendations
-- **Progress Tracking**: Interactive course progress visualization
-- **Achievement System**: Performance-based badges and leaderboards
-- **Certificate Verification**: Public verification system
+- **Skill Evidence Passport (USP)**: portable proof connecting identity, scored attempts, credentials, integrity evidence, and consent state
+- **Review-first AI course copilot**: structured course details, learning outcomes, modules, lessons, and assessment ideas for creator and institute workspaces without automatic publishing
+- **Creator/institute commerce**: separate content-access and credential prices, attributable seller codes, earnings, payouts, and configurable platform splits
+- **WordPress-style media library**: upload once, inspect metadata/link details, reuse, and delete owned assets
+- **Digital-only operations**: course delivery, assessments, results, credential issuance, sharing, and verification remain online and traceable
 
 ### Security Features
 - **JWT Authentication**: Secure token-based authentication
 - **Password Hashing**: bcrypt password encryption
-- **SSL Enforcement**: HTTPS redirection for payment security
-- **Anti-fraud Measures**: Payment verification and validation
+- **OAuth integrity**: short-lived, HttpOnly, same-site state cookies and fragment-based token handoff
+- **Tenant authorization**: owner/admin/teacher/staff permissions enforced by backend ownership checks
+- **Payment integrity**: server-side gateway confirmation, idempotent fulfillment, and credit ledgers
+- **Operational safeguards**: rate limits, CSP/security headers, audit events, health probes, backup-before-migrate deployment, and PM2 readiness verification
 
 ## Deployment
 
@@ -177,13 +202,87 @@ npm run build
 npm start
 ```
 
+### One-command PM2 deployment
+
+The deployment target is a Linux server running Node.js 20+, Git, PM2, `curl`,
+`flock`, and PostgreSQL client tools (`pg_dump` plus `gzip`). Run deployments as
+a dedicated, non-root application user that owns the checkout and PM2 process.
+The user must also be able to create files in the configured backup directory.
+
+Keep the checkout on `main` with no tracked or untracked working-tree changes.
+Store a trusted, shell-compatible production `.env` in the application
+directory, set its mode to `600`, and at minimum configure `NODE_ENV=production`,
+`DATABASE_URL`, `JWT_SECRET`, and `SESSION_SECRET`. Review `.env.example` for the
+remaining OAuth, payment, media-storage, mail, CORS, and public URL settings.
+
+From the checkout, run:
+
+```bash
+cd /var/www/html/octamy-certifications
+APP_DIR="$PWD" ./scripts/deploy-production.sh
+```
+
+The script acquires a per-checkout lock and refuses a dirty tree, the wrong
+branch, a non-fast-forward Git update, or missing production secrets. It then:
+
+1. fetches the selected remote branch with an explicit ref and fast-forwards;
+2. installs the exact lockfile including build tools, type-checks, and builds;
+3. creates and verifies an atomic, timestamped Postgres dump;
+4. applies all pending Drizzle migrations and prunes development dependencies;
+5. reloads (or creates) the PM2 process with the new environment; and
+6. accepts the release only when `/readyz` reports a working database and the
+   exact Git commit just deployed, then saves the PM2 process list.
+
+Useful overrides are `BRANCH`, `REMOTE`, `PM2_APP`, `ENV_FILE`, `BACKUP_DIR`,
+`HEALTHCHECK_URL`, and `HEALTH_RETRIES`. `SKIP_BACKUP=1` is an explicit emergency
+escape hatch; use it only when a verified provider snapshot already exists. On
+first server setup, configure PM2 startup persistence separately using the
+command printed by `pm2 startup`, then run one successful deployment.
+
+Older Octamy databases created before the Drizzle migration journal may contain
+application tables but no migration history. The deploy script deliberately
+stops in that situation. After verifying the pre-migration backup and confirming
+that the database is the existing Octamy schema, run the deployment once with
+`ADOPT_EXISTING_SCHEMA=1`. A conservative preflight checks every baseline table
+and critical column before recording only migration `0000`; migrations `0001`
+onward then execute normally. Never use this flag for an unrelated or partially
+restored database.
+
+The first production installation used one known hand-authored `baseline`
+checkpoint after applying both `0000` and `0001`. The preflight recognizes only
+that exact marker and normalizes it to canonical Drizzle hashes and timestamps
+after rechecking the baseline schema and every `0001` index. Any other
+noncanonical migration history is rejected by the verified migration runner.
+
+### Backup and rollback policy
+
+`scripts/pg-backup.sh` keeps 14 days of uniquely named gzip SQL dumps by default.
+Override this with `RETENTION_DAYS` and copy backups to encrypted off-host
+storage; same-server files are not disaster recovery. Schedule the script with
+cron if provider-managed backups are not already enabled, and regularly prove
+that a dump restores into a separate recovery database.
+
+Deployments intentionally do not auto-roll back database migrations. If a
+readiness check fails, inspect `pm2 logs octamy`, preserve the failed release
+and pre-migration dump, and prefer a forward fix. The checkout and build files
+may already contain the new release even if PM2 was not reloaded, so do not
+blindly restart the process after an earlier deployment step fails.
+
+For an application rollback, revert the release commit in the upstream Git
+branch and rerun this script only after confirming that the migrated schema is
+backward-compatible. If the schema must be restored, enter a maintenance window,
+stop all writes, take an additional incident snapshot, validate the pre-migration
+dump in a recovery database, and restore it together with a compatible
+application revision. Database restoration is a deliberate operator action,
+not part of this deploy command.
+
 ### Environment Configuration
 Ensure all environment variables are set in production:
 - Database connection string
 - JWT secret key
 - Canonical `APP_URL` (for example `https://octamy.com`)
 - Google OAuth web client ID and secret, with the user and seller callback URLs from `.env.example`
-- PayUMoney credentials
+- Cashfree or PayU credentials for the gateway enabled in production
 - SSL certificates for HTTPS
 
 ### Product differentiation
@@ -199,17 +298,14 @@ inspectable proof that institutions and hiring teams can trust.
 
 1. **Import.meta.url Error**
 ```bash
-# If you encounter import.meta.url issues, ensure Node.js 18+ is installed
+# If you encounter import.meta.url issues, ensure Node.js 20+ is installed
 node --version
 ```
 
 2. **Database Connection Issues**
 ```bash
-# Verify PostgreSQL is running
-sudo service postgresql status
-
-# Check database connection
-npm run db:studio
+# Check that the configured role can reach the configured database
+psql "$DATABASE_URL" -c 'select current_user, current_database();'
 ```
 
 3. **Environment Variables Not Loading**
@@ -220,8 +316,8 @@ npm run db:studio
 
 4. **Port Conflicts**
 ```bash
-# Change port in package.json dev script if needed
-"dev": "NODE_ENV=development tsx server/index.ts --port=3000"
+# APP_URL must change with PORT, especially for Google OAuth.
+PORT=8081 APP_URL=http://localhost:8081 npm run dev
 ```
 
 ## API Documentation

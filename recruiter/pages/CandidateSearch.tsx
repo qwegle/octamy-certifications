@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import RecruiterLayout from '../components/RecruiterLayout';
 import { useRecruiterAuth } from '../auth/RecruiterAuthProvider';
+import { downloadCandidateCv } from '../utils/downloadCandidateCv';
 import {
   Search,
   Filter,
@@ -23,13 +24,18 @@ import {
   FileText,
   RefreshCw,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  ShieldCheck,
+  CreditCard,
+  Check,
+  LockKeyhole,
+  AlertCircle,
 } from 'lucide-react';
 
 interface SearchFilters {
   technology: string[];
   location: string;
-  experience: { min: number; max: number };
+  experience: { min: number | ''; max: number | '' };
   noticePeriod: string;
   workType: string[];
   availability: string;
@@ -43,7 +49,6 @@ interface SearchFilters {
 interface Candidate {
   id: number;
   name: string;
-  email: string;
   location: string;
   experience: number;
   currentRole: string;
@@ -54,15 +59,13 @@ interface Candidate {
     score: number;
     badge: string;
   }>;
-  interviews: Array<{
-    id: number;
-    technology: string;
-    score: number;
-    grade: string;
-  }>;
-  profileViews: number;
+  interviewCount: number;
+  hasResume: boolean;
+  access: { profile: boolean; cv: boolean; interview: boolean };
   lastActive: string;
 }
+
+type CreditCosts = { profile_view: number; cv_download: number; interview_access: number };
 
 const TECHNOLOGIES = [
   'JavaScript', 'Python', 'React', 'Node.js', 'Java', 'C++', 'Angular',
@@ -75,12 +78,15 @@ const CATEGORIES = ['AI', 'Development', 'Business', 'Data Science', 'DevOps'];
 
 export default function CandidateSearch() {
   const { toast } = useToast();
-  const { updateRecruiter } = useRecruiterAuth();
+  const { recruiter, updateRecruiter } = useRecruiterAuth();
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [loading, setLoading] = useState(false);
   const [showFilters, setShowFilters] = useState(true);
   const [totalResults, setTotalResults] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
+  const [creditCosts, setCreditCosts] = useState<CreditCosts>({ profile_view: 1, cv_download: 1, interview_access: 2 });
+  const [searchError, setSearchError] = useState<string | null>(null);
+  const [unlocking, setUnlocking] = useState<string | null>(null);
 
   const [filters, setFilters] = useState<SearchFilters>(() => {
     const params = new URLSearchParams(window.location.search);
@@ -89,7 +95,7 @@ export default function CandidateSearch() {
     return {
       technology: [],
       location: '',
-      experience: { min: 0, max: 20 },
+      experience: { min: '', max: '' },
       noticePeriod: '',
       workType: [],
       availability: '',
@@ -103,6 +109,7 @@ export default function CandidateSearch() {
 
   const searchCandidates = async (page = 1) => {
     setLoading(true);
+    setSearchError(null);
     try {
       const response = await fetch('/api/recruiter/search', {
         method: 'POST',
@@ -123,25 +130,13 @@ export default function CandidateSearch() {
         setCandidates(searchData.candidates || []);
         setTotalResults(searchData.total || searchData.candidates?.length || 0);
         setCurrentPage(page);
-        
-        if ((searchData.candidates || []).length === 0) {
-          toast({
-            title: 'No Results',
-            description: 'No candidates match your search criteria. Try adjusting the filters.',
-            variant: 'default',
-          });
-        }
+        if (searchData.creditCosts) setCreditCosts(searchData.creditCosts);
         return;
       } else {
         const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
         console.error('Search API error:', errorData);
         
-        toast({
-          title: 'Search Failed',
-          description: errorData.message || 'Failed to search candidates. Please try again.',
-          variant: 'destructive',
-        });
-        
+        setSearchError(errorData.message || 'Candidate search is temporarily unavailable.');
         setCandidates([]);
         setTotalResults(0);
         setCurrentPage(1);
@@ -153,17 +148,15 @@ export default function CandidateSearch() {
       setCandidates([]);
       setTotalResults(0);
       
-      toast({
-        title: 'Search Error',
-        description: 'An error occurred while searching. Please try again.',
-        variant: 'destructive',
-      });
+      setSearchError('We could not reach candidate search. Check your connection and retry.');
     } finally {
       setLoading(false);
     }
   };
 
   const handleAccessProfile = async (candidateId: number, accessType: 'view' | 'cv' | 'interview') => {
+    const unlockKey = `${candidateId}:${accessType}`;
+    setUnlocking(unlockKey);
     try {
       const response = await apiRequest('POST', '/api/recruiter/access-profile', {
         candidateId,
@@ -173,10 +166,19 @@ export default function CandidateSearch() {
       if (response.ok) {
         const data = await response.json();
         toast({
-          title: 'Access Granted',
-          description: `${data.creditsUsed} credits used. Remaining balance: ${data.remainingCredits}`,
+          title: data.alreadyUnlocked ? 'Already unlocked' : 'Workspace access unlocked',
+          description: data.message || `${data.creditsUsed} credits used. Balance: ${data.remainingCredits}`,
         });
         updateRecruiter({ creditsBalance: data.remainingCredits });
+        setCandidates((current) => current.map((candidate) => candidate.id === candidateId
+          ? {
+              ...candidate,
+              access: {
+                ...candidate.access,
+                [accessType === 'view' ? 'profile' : accessType]: true,
+              },
+            }
+          : candidate));
         
         // Handle the accessed data based on type
         if (accessType === 'view') {
@@ -184,10 +186,9 @@ export default function CandidateSearch() {
         } else if (accessType === 'cv') {
           // Download CV
           if (!data.cvUrl) throw new Error('Candidate CV is not available');
-          window.open(data.cvUrl, '_blank', 'noopener,noreferrer');
+          await downloadCandidateCv(data.cvUrl, candidateId);
         } else if (accessType === 'interview') {
-          // Show interview data in modal or redirect
-          console.log('Interview data:', data.interviewData);
+          window.location.href = `/recruiter/profile/${candidateId}`;
         }
       } else {
         const errorData = await response.json();
@@ -195,10 +196,11 @@ export default function CandidateSearch() {
       }
     } catch (error) {
       toast({
-        title: 'Access Error',
+        title: 'Unlock not completed',
         description: error instanceof Error ? error.message : 'Failed to access profile',
-        variant: 'destructive',
       });
+    } finally {
+      setUnlocking(null);
     }
   };
 
@@ -227,11 +229,12 @@ export default function CandidateSearch() {
   return (
     <RecruiterLayout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Search Candidates</h1>
-            <p className="text-gray-600 mt-2">
-              Find the perfect candidates using advanced filters
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-sky-700">Consent-gated talent evidence</p>
+            <h1 className="mt-2 text-3xl font-bold text-gray-900">Search candidates</h1>
+            <p className="text-gray-600 mt-2 max-w-2xl">
+              Every result has learner consent and at least one paid, active, unexpired Octamy credential.
             </p>
           </div>
           <Button
@@ -244,6 +247,40 @@ export default function CandidateSearch() {
             {showFilters ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </Button>
         </div>
+
+        <Card className="overflow-hidden border-slate-200 shadow-sm">
+          <CardContent className="grid gap-4 p-0 md:grid-cols-[1fr_auto] md:items-stretch">
+            <div className="flex gap-3 p-5">
+              <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-emerald-50 text-emerald-700">
+                <ShieldCheck className="h-5 w-5" />
+              </div>
+              <div>
+                <h2 className="font-semibold text-slate-950">Search is free. Candidate data uses one-time unlocks.</h2>
+                <p className="mt-1 text-sm leading-6 text-slate-600">
+                  Profile {creditCosts.profile_view} credit · CV {creditCosts.cv_download} credit · Interview evidence {creditCosts.interview_access} credits. Reopening the same item costs 0 credits. If a learner withdraws consent, access stops immediately.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center justify-between gap-4 border-t border-slate-200 bg-slate-50 px-5 py-4 md:min-w-52 md:border-l md:border-t-0">
+              <div>
+                <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Wallet balance</p>
+                <p className="mt-1 text-2xl font-bold text-slate-950">{Number(recruiter?.creditsBalance || 0).toLocaleString()} <span className="text-sm font-medium text-slate-500">credits</span></p>
+              </div>
+              <Button variant="outline" size="sm" onClick={() => { window.location.href = '/recruiter/wallet'; }}>
+                <CreditCard className="mr-2 h-4 w-4" /> Add
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {searchError ? (
+          <Card className="border-amber-200 bg-amber-50/70">
+            <CardContent className="flex flex-col gap-3 p-4 text-sm text-amber-950 sm:flex-row sm:items-center sm:justify-between">
+              <span className="flex items-center gap-2"><AlertCircle className="h-4 w-4" />{searchError}</span>
+              <Button size="sm" variant="outline" onClick={() => searchCandidates(currentPage)}>Retry search</Button>
+            </CardContent>
+          </Card>
+        ) : null}
 
         {/* Advanced Filters */}
         {showFilters && (
@@ -304,7 +341,7 @@ export default function CandidateSearch() {
                       value={filters.experience.min}
                       onChange={(e) => updateFilter('experience', {
                         ...filters.experience,
-                        min: parseInt(e.target.value) || 0
+                        min: e.target.value === '' ? '' : Math.max(0, Number(e.target.value))
                       })}
                     />
                   </div>
@@ -316,7 +353,7 @@ export default function CandidateSearch() {
                       value={filters.experience.max}
                       onChange={(e) => updateFilter('experience', {
                         ...filters.experience,
-                        max: parseInt(e.target.value) || 20
+                        max: e.target.value === '' ? '' : Math.max(0, Number(e.target.value))
                       })}
                     />
                   </div>
@@ -407,14 +444,9 @@ export default function CandidateSearch() {
               </div>
 
               {/* Additional Filters */}
-              <div className="flex space-x-6">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="hasCertificates"
-                    checked={filters.hasCertificates}
-                    onCheckedChange={(checked) => updateFilter('hasCertificates', checked)}
-                  />
-                  <Label htmlFor="hasCertificates">Has Certificates</Label>
+              <div className="flex flex-wrap items-center gap-6">
+                <div className="flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-800">
+                  <Check className="h-4 w-4" /> Current paid evidence required
                 </div>
                 <div className="flex items-center space-x-2">
                   <Checkbox
@@ -437,7 +469,7 @@ export default function CandidateSearch() {
                     setFilters({
                       technology: [],
                       location: '',
-                      experience: { min: 0, max: 20 },
+                      experience: { min: '', max: '' },
                       noticePeriod: '',
                       workType: [],
                       availability: '',
@@ -470,11 +502,11 @@ export default function CandidateSearch() {
               <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full" />
             </div>
           ) : candidates.length === 0 ? (
-            <div className="text-center py-12">
+            <div className="rounded-2xl border border-dashed border-slate-300 bg-white text-center py-12">
               <div className="text-gray-500 mb-4">
                 <Search className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                <h3 className="text-lg font-medium">No candidates found</h3>
-                <p className="text-sm">Try adjusting your search filters or search criteria.</p>
+                <h3 className="text-lg font-medium text-slate-900">No eligible candidates match</h3>
+                <p className="mx-auto mt-1 max-w-lg text-sm">Try broader filters. Profiles remain absent until the learner opts in and has current paid evidence; active institute affiliations also require institute opt-in.</p>
               </div>
               <Button 
                 onClick={() => searchCandidates(1)} 
@@ -487,27 +519,28 @@ export default function CandidateSearch() {
           ) : (
             <div className="grid gap-6">
               {candidates.map((candidate) => (
-                <Card key={candidate.id} className="hover:shadow-lg transition-shadow">
+                <Card key={candidate.id} className="overflow-hidden border-slate-200 transition-shadow hover:shadow-lg">
                   <CardContent className="p-6">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-3 mb-3">
+                    <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+                      <div className="min-w-0 flex-1">
+                        <div className="mb-3 flex flex-wrap items-center gap-3">
                           <h3 className="text-xl font-semibold text-gray-900">{candidate.name}</h3>
-                          <Badge variant="outline">{candidate.experience} years exp</Badge>
+                          <Badge variant="outline">{candidate.experience || 0} years exp</Badge>
+                          <Badge className="border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-50"><ShieldCheck className="mr-1 h-3 w-3" />Consent + evidence eligible</Badge>
                         </div>
                         
                         <div className="space-y-2 mb-4">
                           <div className="flex items-center space-x-2 text-gray-600">
                             <Briefcase className="h-4 w-4" />
-                            <span>{candidate.currentRole}</span>
+                            <span>{candidate.currentRole || 'Role not provided'}</span>
                           </div>
                           <div className="flex items-center space-x-2 text-gray-600">
                             <MapPin className="h-4 w-4" />
-                            <span>{candidate.location}</span>
+                            <span>{candidate.location || 'Location not provided'}</span>
                           </div>
                           <div className="flex items-center space-x-2 text-gray-600">
                             <Calendar className="h-4 w-4" />
-                            <span>Last active: {new Date(candidate.lastActive).toLocaleDateString()}</span>
+                            <span>Last active: {candidate.lastActive ? new Date(candidate.lastActive).toLocaleDateString() : 'Not available'}</span>
                           </div>
                         </div>
 
@@ -529,62 +562,58 @@ export default function CandidateSearch() {
                         </div>
 
                         {/* Certificates and Interviews */}
-                        <div className="grid grid-cols-2 gap-4 mb-4">
-                          <div>
+                        <div className="mb-4 grid gap-4 sm:grid-cols-2">
+                          <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3">
                             <Label className="text-sm font-medium flex items-center space-x-1">
                               <Award className="h-4 w-4" />
-                              <span>Certificates ({candidate.certificates.length})</span>
+                              <span>Current credential evidence</span>
                             </Label>
                             {candidate.certificates.slice(0, 2).map((cert) => (
                               <div key={cert.id} className="text-sm text-gray-600 mt-1">
-                                {cert.courseTitle} - {cert.score}% ({cert.badge})
+                                {cert.courseTitle} · {cert.score}% · {cert.badge}
                               </div>
                             ))}
                           </div>
-                          <div>
+                          <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3">
                             <Label className="text-sm font-medium flex items-center space-x-1">
                               <Star className="h-4 w-4" />
-                              <span>Interviews ({candidate.interviews.length})</span>
+                              <span>Interview evidence</span>
                             </Label>
-                            {candidate.interviews.slice(0, 2).map((interview) => (
-                              <div key={interview.id} className="text-sm text-gray-600 mt-1">
-                                {interview.technology} - {interview.score}% ({interview.grade})
-                              </div>
-                            ))}
+                            <p className="mt-1 text-sm text-slate-600">{candidate.interviewCount || 0} completed record{candidate.interviewCount === 1 ? '' : 's'}{candidate.access.interview ? ' · unlocked' : ''}</p>
                           </div>
                         </div>
                       </div>
 
                       {/* Action Buttons */}
-                      <div className="flex flex-col space-y-2 ml-6">
+                      <div className="grid shrink-0 gap-2 sm:grid-cols-3 lg:w-52 lg:grid-cols-1">
                         <Button
                           size="sm"
-                          className="bg-black text-white hover:bg-gray-800 flex items-center space-x-1"
+                          className="bg-slate-950 text-white hover:bg-slate-800"
                           onClick={() => handleAccessProfile(candidate.id, 'view')}
+                          disabled={unlocking === `${candidate.id}:view`}
                         >
-                          <Eye className="h-4 w-4" />
-                          <span>View Profile</span>
-                          <Badge variant="secondary" className="ml-2 text-xs">1</Badge>
+                          {candidate.access.profile ? <Eye className="mr-2 h-4 w-4" /> : <LockKeyhole className="mr-2 h-4 w-4" />}
+                          <span>{candidate.access.profile ? 'Open profile' : `Unlock profile · ${creditCosts.profile_view}`}</span>
                         </Button>
                         <Button
                           size="sm"
                           variant="outline"
-                          className="border-black text-black hover:bg-black hover:text-white flex items-center space-x-1"
+                          className="border-slate-300 text-slate-800"
                           onClick={() => handleAccessProfile(candidate.id, 'cv')}
+                          disabled={!candidate.hasResume || unlocking === `${candidate.id}:cv`}
                         >
-                          <Download className="h-4 w-4" />
-                          <span>Download CV</span>
-                          <Badge variant="secondary" className="ml-2 text-xs">1</Badge>
+                          <Download className="mr-2 h-4 w-4" />
+                          <span>{!candidate.hasResume ? 'CV not shared' : candidate.access.cv ? 'Download CV' : `Unlock CV · ${creditCosts.cv_download}`}</span>
                         </Button>
                         <Button
                           size="sm"
                           variant="outline"
-                          className="border-gray-600 text-gray-600 hover:bg-gray-600 hover:text-white flex items-center space-x-1"
+                          className="border-slate-300 text-slate-800"
                           onClick={() => handleAccessProfile(candidate.id, 'interview')}
+                          disabled={!candidate.interviewCount || unlocking === `${candidate.id}:interview`}
                         >
-                          <FileText className="h-4 w-4" />
-                          <span>AI Interviews</span>
-                          <Badge variant="secondary" className="ml-2 text-xs">2</Badge>
+                          <FileText className="mr-2 h-4 w-4" />
+                          <span>{!candidate.interviewCount ? 'No interview evidence' : candidate.access.interview ? 'Open interviews' : `Unlock interviews · ${creditCosts.interview_access}`}</span>
                         </Button>
                       </div>
                     </div>

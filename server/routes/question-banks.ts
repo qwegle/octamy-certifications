@@ -6,19 +6,40 @@ import * as XLSX from "exceljs";
 import { z } from "zod";
 import { storage } from "../storage";
 import { db } from "../db";
-import { creators, questionBanks, questions } from "@shared/schema";
-import { eq, count } from "drizzle-orm";
+import { creators, questionBanks, questions, questionTopics } from "@shared/schema";
+import { eq, and, count, sql } from "drizzle-orm";
+import { audit } from "../lib/audit";
 import {
   canCreateBankFor,
   canEditBank,
+  canListBank,
   canViewBank,
   loadUserContext,
   getCreatorLimits,
 } from "../lib/qb-permissions";
+import {
+  governanceAfterQuestionEdit,
+  governanceForHumanQuestion,
+  governanceForImportedQuestion,
+  governanceForQuestionReview,
+  parseImportGenerationSource,
+  type QuestionGenerationSource,
+  type QuestionReviewStatus,
+} from "../lib/question-review-policy";
+import { neutralizeSpreadsheetCell } from "../lib/csv-safety";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
+export const MAX_IMPORT_ROWS = 5_000;
+
+class QuestionPlanLimitError extends Error {
+  code = "PLAN_LIMIT_QUESTIONS" as const;
+
+  constructor(readonly limit: number) {
+    super(`Question-bank plan limit is ${limit}`);
+  }
+}
 
 interface AuthedRequest extends Request {
   user?: { userId: number; email: string; isAdmin?: boolean };
@@ -54,7 +75,7 @@ router.get("/", requireAuth, withCtx, async (req: AuthedRequest, res) => {
 
     // Aggregate accessible banks: own + public
     const all = await storage.listQuestionBanks({ search, ownerType });
-    const accessible = all.filter((b) => canViewBank(ctx, b));
+    const accessible = all.filter((b) => canListBank(ctx, b));
     res.json(accessible);
   } catch (e: any) {
     console.error("list banks error:", e);
@@ -63,18 +84,111 @@ router.get("/", requireAuth, withCtx, async (req: AuthedRequest, res) => {
 });
 
 const createBankSchema = z.object({
-  name: z.string().min(1),
-  slug: z.string().optional(),
-  description: z.string().optional().nullable(),
+  name: z.string().trim().min(2, "Name must be at least 2 characters").max(160),
+  slug: z.string().trim().max(180).optional(),
+  description: z.string().trim().max(2_000).optional().nullable(),
   visibility: z.enum(["private", "unlisted", "public"]).default("private"),
   ownerType: z.enum(["admin", "creator", "institute"]).optional(),
   ownerId: z.number().nullable().optional(),
-  language: z.string().optional(),
-  tags: z.array(z.string()).optional(),
+  language: z.string().trim().min(2).max(12).optional(),
+  tags: z.array(z.string().trim().min(1).max(50)).max(30).optional(),
 });
+
+const updateBankSchema = createBankSchema.omit({ ownerType: true, ownerId: true }).partial().refine(
+  (value) => Object.keys(value).length > 0,
+  { message: "Provide at least one bank field to update" },
+);
 
 function slugify(s: string): string {
   return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || `bank-${Date.now()}`;
+}
+
+function positiveId(value: string): number | null {
+  const id = Number(value);
+  return Number.isInteger(id) && id > 0 ? id : null;
+}
+
+async function topicBelongsToBank(topicId: number, bankId: number) {
+  const [topic] = await db.select({ id: questionTopics.id }).from(questionTopics).where(and(
+    eq(questionTopics.id, topicId),
+    eq(questionTopics.bankId, bankId),
+  ));
+  return !!topic;
+}
+
+async function questionBelongsToBank(questionId: number, bankId: number) {
+  const [question] = await db.select({ id: questions.id }).from(questions).where(and(
+    eq(questions.id, questionId),
+    eq(questions.bankId, bankId),
+  ));
+  return !!question;
+}
+
+function questionInsertValues(
+  data: Record<string, any>,
+  bankId: number,
+  createdBy: number,
+  topicId: number | null = data.topicId ?? null,
+) {
+  return {
+    courseId: null,
+    bankId,
+    topicId,
+    question: data.question,
+    options: data.options ?? [],
+    correctAnswer: data.correctAnswer ?? 0,
+    questionType: data.questionType ?? "multiple_choice",
+    questionFormat: data.questionFormat ?? "mcq_single",
+    difficulty: data.difficulty ?? "medium",
+    maxPoints: data.maxPoints ?? 1,
+    negativeMarks: data.negativeMarks ?? 0,
+    timeLimitSec: data.timeLimitSec ?? null,
+    imageUrl: data.imageUrl ?? null,
+    codeLanguage: data.codeLanguage ?? null,
+    expectedAnswer: data.expectedAnswer ?? null,
+    tags: data.tags ?? [],
+    explanation: data.explanation ?? null,
+    reviewStatus: data.reviewStatus ?? "draft",
+    generationSource: data.generationSource ?? "human",
+    reviewedBy: data.reviewedBy ?? null,
+    reviewedAt: data.reviewedAt ?? null,
+    version: 1,
+    createdBy,
+    isActive: data.isActive ?? false,
+  };
+}
+
+async function insertQuestionsWithBankLock<T>(
+  bankId: number,
+  incomingCount: number,
+  maxQuestions: number,
+  insert: (tx: any) => Promise<T>,
+): Promise<T> {
+  return db.transaction(async (tx) => {
+    // Both an advisory lock and row lock make the check+insert+counter update
+    // serial across PM2 workers and every authoring path using this helper.
+    await tx.execute(sql`SELECT pg_advisory_xact_lock(7302, ${bankId})`);
+    const [lockedBank] = await tx.select({ id: questionBanks.id })
+      .from(questionBanks)
+      .where(eq(questionBanks.id, bankId))
+      .for("update");
+    if (!lockedBank) throw new Error("Question bank no longer exists");
+
+    const [{ currentCount }] = await tx.select({
+      currentCount: count(),
+    }).from(questions).where(eq(questions.bankId, bankId));
+    const actualCount = Number(currentCount);
+    if (maxQuestions !== -1 && actualCount + incomingCount > maxQuestions) {
+      throw new QuestionPlanLimitError(maxQuestions);
+    }
+
+    const result = await insert(tx);
+    await tx.update(questionBanks).set({
+      questionCount: actualCount + incomingCount,
+      updatedAt: new Date(),
+    }).where(eq(questionBanks.id, bankId));
+    return result;
+  });
 }
 
 router.post("/", requireAuth, withCtx, async (req: AuthedRequest, res) => {
@@ -89,14 +203,24 @@ router.post("/", requireAuth, withCtx, async (req: AuthedRequest, res) => {
       if (ctx.user.isAdmin) {
         ownerType = "admin";
         ownerId = null;
-      } else if (ctx.creatorId) {
-        ownerType = "creator";
-        ownerId = ctx.creatorId;
-      } else if (ctx.instituteRoles.size > 0) {
-        ownerType = "institute";
-        ownerId = Array.from(ctx.instituteRoles.keys())[0];
       } else {
-        return res.status(403).json({ message: "No creator/institute identity. Onboard first." });
+        const identities = [
+          ...(ctx.creatorId ? [{ type: "creator" as const, id: ctx.creatorId }] : []),
+          ...Array.from(ctx.instituteRoles.entries())
+            .filter(([, role]) => role !== "staff")
+            .map(([id]) => ({ type: "institute" as const, id })),
+        ];
+        if (identities.length === 0) {
+          return res.status(403).json({ message: "No creator or institute workspace is available. Complete onboarding first." });
+        }
+        if (identities.length > 1) {
+          return res.status(400).json({
+            message: "Choose which workspace owns this question bank.",
+            code: "OWNER_REQUIRED",
+          });
+        }
+        ownerType = identities[0].type;
+        ownerId = identities[0].id;
       }
     }
     if (ownerType === "admin") ownerId = null;
@@ -119,7 +243,11 @@ router.post("/", requireAuth, withCtx, async (req: AuthedRequest, res) => {
       }
     }
 
-    const slug = body.slug ? slugify(body.slug) : slugify(body.name);
+    const baseSlug = body.slug ? slugify(body.slug) : slugify(body.name);
+    let slug = baseSlug;
+    for (let suffix = 2; await storage.getQuestionBankBySlug(ownerType, ownerId ?? null, slug); suffix++) {
+      slug = `${baseSlug}-${suffix}`;
+    }
     const bank = await storage.createQuestionBank({
       name: body.name,
       slug,
@@ -134,7 +262,12 @@ router.post("/", requireAuth, withCtx, async (req: AuthedRequest, res) => {
     res.status(201).json(bank);
   } catch (e: any) {
     console.error("create bank error:", e);
-    res.status(400).json({ message: e.message });
+    if (e instanceof z.ZodError) {
+      const errors = e.flatten();
+      const first = Object.values(errors.fieldErrors).flat().find(Boolean);
+      return res.status(400).json({ message: first || errors.formErrors[0] || "Check the bank details", errors });
+    }
+    res.status(500).json({ message: "Failed to create question bank" });
   }
 });
 
@@ -150,10 +283,19 @@ router.get("/:id", requireAuth, withCtx, async (req: AuthedRequest, res) => {
 
 router.patch("/:id", requireAuth, withCtx, async (req: AuthedRequest, res) => {
   const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ message: "Invalid bank id" });
   const bank = await storage.getQuestionBank(id);
   if (!bank) return res.status(404).json({ message: "Bank not found" });
   if (!canEditBank(req.ctx!, bank)) return res.status(403).json({ message: "Forbidden" });
-  const updated = await storage.updateQuestionBank(id, req.body);
+  const parsed = updateBankSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ message: "Check the bank details", errors: parsed.error.flatten() });
+  const data = { ...parsed.data };
+  if (data.slug) data.slug = slugify(data.slug);
+  if (data.slug && data.slug !== bank.slug) {
+    const collision = await storage.getQuestionBankBySlug(bank.ownerType, bank.ownerId, data.slug);
+    if (collision && collision.id !== bank.id) return res.status(409).json({ message: "A bank with this slug already exists in the workspace" });
+  }
+  const updated = await storage.updateQuestionBank(id, data);
   res.json(updated);
 });
 
@@ -181,9 +323,20 @@ router.post("/:id/topics", requireAuth, withCtx, async (req: AuthedRequest, res)
   const bank = await storage.getQuestionBank(id);
   if (!bank) return res.status(404).json({ message: "Bank not found" });
   if (!canEditBank(req.ctx!, bank)) return res.status(403).json({ message: "Forbidden" });
-  const { name, parentId, sortOrder } = req.body || {};
-  if (!name) return res.status(400).json({ message: "name required" });
-  const slug = slugify(String(name));
+  const parsed = z.object({
+    name: z.string().trim().min(2).max(120),
+    parentId: z.coerce.number().int().positive().nullable().optional(),
+    sortOrder: z.coerce.number().int().min(0).max(10_000).default(0),
+  }).safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ message: "Check the topic details", errors: parsed.error.flatten() });
+  const { name, parentId, sortOrder } = parsed.data;
+  if (parentId && !(await topicBelongsToBank(parentId, id))) {
+    return res.status(400).json({ message: "Parent topic does not belong to this bank" });
+  }
+  let slug = slugify(name);
+  const existingSlugs = new Set((await storage.listQuestionTopics(id)).map((topic) => topic.slug));
+  const baseSlug = slug;
+  for (let suffix = 2; existingSlugs.has(slug); suffix++) slug = `${baseSlug}-${suffix}`;
   const topic = await storage.createQuestionTopic({
     bankId: id,
     name,
@@ -195,22 +348,108 @@ router.post("/:id/topics", requireAuth, withCtx, async (req: AuthedRequest, res)
 });
 
 router.patch("/:id/topics/:topicId", requireAuth, withCtx, async (req: AuthedRequest, res) => {
-  const bank = await storage.getQuestionBank(Number(req.params.id));
+  const bankId = positiveId(req.params.id);
+  const topicId = positiveId(req.params.topicId);
+  if (!bankId || !topicId) return res.status(400).json({ message: "Invalid bank or topic id" });
+  const bank = await storage.getQuestionBank(bankId);
   if (!bank) return res.status(404).json({ message: "Bank not found" });
   if (!canEditBank(req.ctx!, bank)) return res.status(403).json({ message: "Forbidden" });
-  const updated = await storage.updateQuestionTopic(Number(req.params.topicId), req.body);
+  if (!(await topicBelongsToBank(topicId, bankId))) return res.status(404).json({ message: "Topic not found in this bank" });
+  const parsed = z.object({
+    name: z.string().trim().min(2).max(120).optional(),
+    parentId: z.coerce.number().int().positive().nullable().optional(),
+    sortOrder: z.coerce.number().int().min(0).max(10_000).optional(),
+  }).refine((value) => Object.keys(value).length > 0).safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ message: "Check the topic details", errors: parsed.error.flatten() });
+  if (parsed.data.parentId === topicId) return res.status(400).json({ message: "A topic cannot be its own parent" });
+  if (parsed.data.parentId && !(await topicBelongsToBank(parsed.data.parentId, bankId))) {
+    return res.status(400).json({ message: "Parent topic does not belong to this bank" });
+  }
+  const updated = await storage.updateQuestionTopic(topicId, {
+    ...parsed.data,
+    ...(parsed.data.name ? { slug: slugify(parsed.data.name) } : {}),
+  });
   res.json(updated);
 });
 
 router.delete("/:id/topics/:topicId", requireAuth, withCtx, async (req: AuthedRequest, res) => {
-  const bank = await storage.getQuestionBank(Number(req.params.id));
+  const bankId = positiveId(req.params.id);
+  const topicId = positiveId(req.params.topicId);
+  if (!bankId || !topicId) return res.status(400).json({ message: "Invalid bank or topic id" });
+  const bank = await storage.getQuestionBank(bankId);
   if (!bank) return res.status(404).json({ message: "Bank not found" });
   if (!canEditBank(req.ctx!, bank)) return res.status(403).json({ message: "Forbidden" });
-  await storage.deleteQuestionTopic(Number(req.params.topicId));
+  if (!(await topicBelongsToBank(topicId, bankId))) return res.status(404).json({ message: "Topic not found in this bank" });
+  await storage.deleteQuestionTopic(topicId);
   res.status(204).end();
 });
 
 // ── Questions ──────────────────────────────────────────────────────────────
+
+const questionFields = {
+  topicId: z.coerce.number().int().positive().nullable().optional(),
+  question: z.string().trim().min(2, "Question text is required").max(10_000),
+  options: z.array(z.string().trim().max(2_000)).max(20).default([]),
+  correctAnswer: z.coerce.number().int().min(0).default(0),
+  questionType: z.enum(["multiple_choice", "ai_interactive"]).default("multiple_choice"),
+  questionFormat: z.enum(["mcq_single", "mcq_multi", "true_false", "fill_blank", "short", "long", "code", "numeric", "match"]).default("mcq_single"),
+  difficulty: z.enum(["easy", "medium", "hard"]).default("medium"),
+  maxPoints: z.coerce.number().int().min(1).max(1_000).default(1),
+  negativeMarks: z.coerce.number().int().min(0).max(1_000).default(0),
+  timeLimitSec: z.coerce.number().int().min(5).max(86_400).nullable().optional(),
+  imageUrl: z.string().trim().url().nullable().optional().or(z.literal("").transform(() => null)),
+  codeLanguage: z.string().trim().max(60).nullable().optional(),
+  expectedAnswer: z.string().max(20_000).nullable().optional(),
+  tags: z.array(z.string().trim().min(1).max(60)).max(50).default([]),
+  explanation: z.string().max(20_000).nullable().optional(),
+};
+
+const questionCreateSchema = z.object(questionFields).superRefine((data, ctx) => {
+  if (data.questionFormat === "mcq_single") {
+    const usable = data.options.filter(Boolean);
+    if (usable.length < 2) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["options"], message: "Add at least two answer options" });
+    if (!data.options[data.correctAnswer]?.trim()) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["correctAnswer"], message: "Choose a valid correct option" });
+  }
+  if (data.questionFormat === "mcq_multi") {
+    const indices = (data.expectedAnswer || "").split(",").map(Number).filter(Number.isInteger);
+    if (indices.length === 0 || indices.some((index) => !data.options[index]?.trim())) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["expectedAnswer"], message: "Choose one or more valid correct options" });
+    }
+  }
+  if (!["mcq_single", "mcq_multi", "true_false"].includes(data.questionFormat) && !data.expectedAnswer?.trim()) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["expectedAnswer"], message: "Expected answer is required for this format" });
+  }
+  if (data.negativeMarks > data.maxPoints) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["negativeMarks"], message: "Negative marks cannot exceed the question marks" });
+  }
+});
+
+const questionPatchSchema = z.object(questionFields).partial().refine(
+  (value) => Object.keys(value).length > 0,
+  { message: "Provide at least one question field to update" },
+);
+
+const questionReviewSchema = z.object({
+  status: z.enum(["approved", "rejected"]),
+  expectedVersion: z.number().int().positive(),
+  note: z.string().trim().max(500).optional(),
+}).strict().superRefine((value, ctx) => {
+  if (value.status === "rejected" && (!value.note || value.note.length < 3)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["note"],
+      message: "Add a short rejection reason",
+    });
+  }
+});
+
+function normalizeQuestion(data: z.infer<typeof questionCreateSchema>) {
+  if (data.questionFormat === "true_false") {
+    const isTrue = data.expectedAnswer !== "false";
+    return { ...data, options: ["False", "True"], expectedAnswer: isTrue ? "true" : "false", correctAnswer: isTrue ? 1 : 0 };
+  }
+  return data;
+}
 
 router.get("/:id/questions", requireAuth, withCtx, async (req: AuthedRequest, res) => {
   const id = Number(req.params.id);
@@ -233,45 +472,177 @@ router.post("/:id/questions", requireAuth, withCtx, async (req: AuthedRequest, r
   if (!bank) return res.status(404).json({ message: "Bank not found" });
   if (!canEditBank(req.ctx!, bank)) return res.status(403).json({ message: "Forbidden" });
 
-  // Plan limit on questions per bank
+  const parsed = questionCreateSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ message: "Check the question details", errors: parsed.error.flatten() });
+  if (parsed.data.topicId && !(await topicBelongsToBank(parsed.data.topicId, id))) {
+    return res.status(400).json({ message: "Topic does not belong to this bank" });
+  }
+
+  let maxQuestions = -1;
   if (bank.ownerType === "creator" && bank.ownerId) {
     const [creatorRow] = await db.select().from(creators).where(eq(creators.id, bank.ownerId));
-    const limits = getCreatorLimits(creatorRow?.plan);
-    if (limits.maxQuestionsPerBank !== -1 && bank.questionCount >= limits.maxQuestionsPerBank) {
+    maxQuestions = getCreatorLimits(creatorRow?.plan).maxQuestionsPerBank;
+  }
+
+  const values = {
+    ...normalizeQuestion(parsed.data),
+    ...governanceForHumanQuestion(req.ctx!.user.id, new Date()),
+  };
+  try {
+    const [question] = await insertQuestionsWithBankLock<Array<typeof questions.$inferSelect>>(id, 1, maxQuestions, (tx) => (
+      tx.insert(questions).values(questionInsertValues(
+        values,
+        id,
+        req.ctx!.user.id,
+      )).returning()
+    ));
+    res.status(201).json(question);
+  } catch (error) {
+    if (error instanceof QuestionPlanLimitError) {
       return res.status(402).json({
-        message: `Plan limit reached: ${limits.maxQuestionsPerBank} questions/bank on ${creatorRow?.plan ?? "free"}.`,
-        code: "PLAN_LIMIT_QUESTIONS",
+        message: `Plan limit reached: ${error.limit} questions per bank.`,
+        code: error.code,
+      });
+    }
+    console.error("create question error:", error);
+    return res.status(500).json({ message: "Failed to create question" });
+  }
+});
+
+router.patch("/:id/questions/:qid", requireAuth, withCtx, async (req: AuthedRequest, res) => {
+  const bankId = positiveId(req.params.id);
+  const questionId = positiveId(req.params.qid);
+  if (!bankId || !questionId) return res.status(400).json({ message: "Invalid bank or question id" });
+  const bank = await storage.getQuestionBank(bankId);
+  if (!bank) return res.status(404).json({ message: "Bank not found" });
+  if (!canEditBank(req.ctx!, bank)) return res.status(403).json({ message: "Forbidden" });
+  if (!(await questionBelongsToBank(questionId, bankId))) return res.status(404).json({ message: "Question not found in this bank" });
+  const { changeNote, version: expectedVersionValue, ...rest } = req.body || {};
+  const parsedChangeNote = z.string().trim().max(500).optional().safeParse(changeNote);
+  if (!parsedChangeNote.success) {
+    return res.status(400).json({ message: "Change note must be 500 characters or fewer" });
+  }
+  const parsedExpectedVersion = z.coerce.number().int().positive().optional().safeParse(expectedVersionValue);
+  if (!parsedExpectedVersion.success) {
+    return res.status(400).json({ message: "Question version must be a positive integer" });
+  }
+  const patch = questionPatchSchema.safeParse(rest);
+  if (!patch.success) return res.status(400).json({ message: "Check the question details", errors: patch.error.flatten() });
+  const [existing] = await db.select().from(questions).where(and(eq(questions.id, questionId), eq(questions.bankId, bankId)));
+  const merged = questionCreateSchema.safeParse({ ...existing, ...patch.data });
+  if (!merged.success) return res.status(400).json({ message: "Check the question details", errors: merged.error.flatten() });
+  if (merged.data.topicId && !(await topicBelongsToBank(merged.data.topicId, bankId))) {
+    return res.status(400).json({ message: "Topic does not belong to this bank" });
+  }
+  const normalized = normalizeQuestion(merged.data);
+  const allowedUpdate = Object.fromEntries(Object.keys(patch.data).map((key) => [key, (normalized as any)[key]]));
+  if (normalized.questionFormat === "true_false") {
+    allowedUpdate.options = normalized.options;
+    allowedUpdate.expectedAnswer = normalized.expectedAnswer;
+    allowedUpdate.correctAnswer = normalized.correctAnswer;
+  }
+  Object.assign(allowedUpdate, governanceAfterQuestionEdit());
+  const updated = await storage.updateQuestionWithVersioning(
+    questionId,
+    allowedUpdate,
+    req.ctx!.user.id,
+    parsedChangeNote.data,
+    parsedExpectedVersion.data,
+  );
+  if (!updated && parsedExpectedVersion.data !== undefined) {
+    return res.status(409).json({
+      message: "This question changed after you opened it. Reload before saving your edits.",
+      code: "QUESTION_VERSION_CONFLICT",
+    });
+  }
+  res.json(updated);
+});
+
+router.post("/:id/questions/:qid/review", requireAuth, withCtx, async (req: AuthedRequest, res) => {
+  const bankId = positiveId(req.params.id);
+  const questionId = positiveId(req.params.qid);
+  if (!bankId || !questionId) return res.status(400).json({ message: "Invalid bank or question id" });
+
+  const bank = await storage.getQuestionBank(bankId);
+  if (!bank) return res.status(404).json({ message: "Bank not found" });
+  if (!canEditBank(req.ctx!, bank)) return res.status(403).json({ message: "Forbidden" });
+
+  const parsedReview = questionReviewSchema.safeParse(req.body);
+  if (!parsedReview.success) {
+    return res.status(400).json({
+      message: "Check the review decision",
+      errors: parsedReview.error.flatten(),
+    });
+  }
+
+  const [existing] = await db.select().from(questions).where(and(
+    eq(questions.id, questionId),
+    eq(questions.bankId, bankId),
+  ));
+  if (!existing) return res.status(404).json({ message: "Question not found in this bank" });
+  if (existing.version !== parsedReview.data.expectedVersion) {
+    return res.status(409).json({
+      message: "This question changed after you opened it. Reload the latest version before reviewing.",
+      code: "QUESTION_VERSION_CONFLICT",
+      currentVersion: existing.version,
+    });
+  }
+
+  if (parsedReview.data.status === "approved") {
+    const reviewable = questionCreateSchema.safeParse(existing);
+    if (!reviewable.success) {
+      return res.status(409).json({
+        message: "Complete the question and answer key before approving it.",
+        code: "QUESTION_NOT_REVIEWABLE",
+        errors: reviewable.error.flatten(),
       });
     }
   }
 
-  const q = await storage.createQuestionInBank({
-    ...req.body,
-    bankId: id,
-    createdBy: req.ctx!.user.id,
-  });
-  res.status(201).json(q);
-});
-
-router.patch("/:id/questions/:qid", requireAuth, withCtx, async (req: AuthedRequest, res) => {
-  const bank = await storage.getQuestionBank(Number(req.params.id));
-  if (!bank) return res.status(404).json({ message: "Bank not found" });
-  if (!canEditBank(req.ctx!, bank)) return res.status(403).json({ message: "Forbidden" });
-  const { changeNote, ...rest } = req.body || {};
+  const reviewerId = req.ctx!.user.id;
   const updated = await storage.updateQuestionWithVersioning(
-    Number(req.params.qid),
-    rest,
-    req.ctx!.user.id,
-    changeNote,
+    questionId,
+    { ...governanceForQuestionReview(parsedReview.data.status, reviewerId, new Date()) },
+    reviewerId,
+    parsedReview.data.note
+      ? `Review ${parsedReview.data.status}: ${parsedReview.data.note}`
+      : `Review ${parsedReview.data.status}`,
+    parsedReview.data.expectedVersion,
   );
+  if (!updated) {
+    return res.status(409).json({
+      message: "This question changed while the review was being saved. Reload and review the latest version.",
+      code: "QUESTION_VERSION_CONFLICT",
+    });
+  }
+
+  await audit({
+    action: "question.review",
+    userId: reviewerId,
+    actorRole: req.ctx!.user.isAdmin ? "admin" : bank.ownerType,
+    resourceType: "question",
+    resourceId: questionId,
+    metadata: {
+      bankId,
+      decision: parsedReview.data.status,
+      generationSource: existing.generationSource,
+      version: updated?.version,
+    },
+    req,
+  });
+
   res.json(updated);
 });
 
 router.delete("/:id/questions/:qid", requireAuth, withCtx, async (req: AuthedRequest, res) => {
-  const bank = await storage.getQuestionBank(Number(req.params.id));
+  const bankId = positiveId(req.params.id);
+  const questionId = positiveId(req.params.qid);
+  if (!bankId || !questionId) return res.status(400).json({ message: "Invalid bank or question id" });
+  const bank = await storage.getQuestionBank(bankId);
   if (!bank) return res.status(404).json({ message: "Bank not found" });
   if (!canEditBank(req.ctx!, bank)) return res.status(403).json({ message: "Forbidden" });
-  await storage.deleteBankQuestion(Number(req.params.qid));
+  if (!(await questionBelongsToBank(questionId, bankId))) return res.status(404).json({ message: "Question not found in this bank" });
+  await storage.deleteBankQuestion(questionId);
   res.status(204).end();
 });
 
@@ -291,9 +662,14 @@ interface ParsedRow {
   difficulty: string;
   tags: string[];
   explanation: string | null;
+  generationSource: Exclude<QuestionGenerationSource, "human">;
+  reviewStatus: QuestionReviewStatus;
+  isActive: boolean;
+  reviewedBy: null;
+  reviewedAt: null;
 }
 
-function normalizeRow(raw: Record<string, any>, idx: number): { ok: true; row: ParsedRow } | { ok: false; error: string } {
+export function normalizeRow(raw: Record<string, any>): { ok: true; row: ParsedRow } | { ok: false; error: string } {
   const question = (raw.question ?? "").toString().trim();
   if (!question) return { ok: false, error: "Missing question text" };
   const format = (raw.format ?? "mcq_single").toString().trim();
@@ -323,29 +699,55 @@ function normalizeRow(raw: Record<string, any>, idx: number): { ok: true; row: P
     if (v !== "true" && v !== "false") return { ok: false, error: "true_false correctAnswer must be 'true' or 'false'" };
     expectedAnswer = v;
     correctAnswer = v === "true" ? 1 : 0;
+    opts.splice(0, opts.length, "False", "True");
   } else {
     if (!correctRaw) return { ok: false, error: "correctAnswer required" };
     expectedAnswer = correctRaw;
   }
 
+  const topic = (raw.topic ?? "").toString().trim();
+  if (topic.length > 120) return { ok: false, error: "Topic must be 120 characters or fewer" };
   const tags = (raw.tags ?? "").toString().split(",").map((s: string) => s.trim()).filter(Boolean);
+  const generationSource = parseImportGenerationSource(raw.generationSource);
+  if (!generationSource) {
+    return { ok: false, error: "generationSource must be 'ai_draft', 'imported', or blank" };
+  }
+
+  const candidate = questionCreateSchema.safeParse({
+    question,
+    options: opts,
+    correctAnswer,
+    questionFormat: format,
+    maxPoints: raw.marks == null || String(raw.marks).trim() === "" ? 1 : Number(raw.marks),
+    negativeMarks: raw.negativeMarks == null || String(raw.negativeMarks).trim() === "" ? 0 : Number(raw.negativeMarks),
+    timeLimitSec: raw.timeLimitSec == null || String(raw.timeLimitSec).trim() === "" ? null : Number(raw.timeLimitSec),
+    difficulty: (raw.difficulty ?? "medium").toString().trim() || "medium",
+    expectedAnswer,
+    tags,
+    explanation: (raw.explanation ?? "").toString().trim() || null,
+  });
+  if (!candidate.success) {
+    return { ok: false, error: candidate.error.issues[0]?.message ?? "Invalid question fields" };
+  }
+  const normalized = normalizeQuestion(candidate.data);
 
   return {
     ok: true,
     row: {
-      topic: (raw.topic ?? "").toString().trim() || undefined,
-      question,
+      topic: topic || undefined,
+      question: normalized.question,
       format,
-      options: opts,
-      correctAnswer,
-      expectedAnswer,
+      options: normalized.options,
+      correctAnswer: normalized.correctAnswer,
+      expectedAnswer: normalized.expectedAnswer ?? null,
       questionFormat: format,
-      maxPoints: Number(raw.marks ?? 1) || 1,
-      negativeMarks: Number(raw.negativeMarks ?? 0) || 0,
-      timeLimitSec: raw.timeLimitSec ? Number(raw.timeLimitSec) : null,
-      difficulty: (raw.difficulty ?? "medium").toString().trim() || "medium",
-      tags,
-      explanation: (raw.explanation ?? "").toString().trim() || null,
+      maxPoints: normalized.maxPoints,
+      negativeMarks: normalized.negativeMarks,
+      timeLimitSec: normalized.timeLimitSec ?? null,
+      difficulty: normalized.difficulty,
+      tags: normalized.tags,
+      explanation: normalized.explanation ?? null,
+      ...governanceForImportedQuestion(generationSource),
     },
   };
 }
@@ -364,7 +766,14 @@ router.post("/:id/questions/import", requireAuth, withCtx, upload.single("file")
 
     if (filename.endsWith(".csv")) {
       const text = req.file.buffer.toString("utf-8");
-      const parsed = Papa.parse<Record<string, any>>(text, { header: true, skipEmptyLines: true });
+      const parsed = Papa.parse<Record<string, any>>(text, {
+        header: true,
+        skipEmptyLines: true,
+        preview: MAX_IMPORT_ROWS + 1,
+      });
+      if (parsed.errors.length > 0) {
+        return res.status(400).json({ message: "The CSV file could not be parsed. Check its header and quoting." });
+      }
       raw = parsed.data;
     } else if (filename.endsWith(".xlsx") || filename.endsWith(".xls")) {
       const wb = new XLSX.Workbook();
@@ -373,14 +782,20 @@ router.post("/:id/questions/import", requireAuth, withCtx, upload.single("file")
       if (!sheet) {
         return res.status(400).json({ message: "Workbook has no sheets" });
       }
+      if (sheet.actualRowCount - 1 > MAX_IMPORT_ROWS) {
+        return res.status(413).json({
+          message: `Import files are limited to ${MAX_IMPORT_ROWS.toLocaleString("en-IN")} question rows.`,
+          code: "QUESTION_IMPORT_ROW_LIMIT",
+        });
+      }
       const headerRow = sheet.getRow(1);
       const headers: string[] = [];
       headerRow.eachCell((cell, colIdx) => {
         headers[colIdx - 1] = String(cell.value ?? '').trim();
       });
       raw = [];
-      sheet.eachRow((row, rowIdx) => {
-        if (rowIdx === 1) return; // skip header
+      for (let rowIdx = 2; rowIdx <= Math.min(sheet.rowCount, MAX_IMPORT_ROWS + 1); rowIdx += 1) {
+        const row = sheet.getRow(rowIdx);
         const obj: Record<string, any> = {};
         let hasAny = false;
         row.eachCell((cell, colIdx) => {
@@ -393,49 +808,100 @@ router.post("/:id/questions/import", requireAuth, withCtx, upload.single("file")
           obj[key] = v;
         });
         if (hasAny) raw.push(obj);
-      });
+      }
     } else {
       return res.status(400).json({ message: "Only .csv, .xlsx, .xls supported" });
+    }
+
+    if (raw.length > MAX_IMPORT_ROWS) {
+      return res.status(413).json({
+        message: `Import files are limited to ${MAX_IMPORT_ROWS.toLocaleString("en-IN")} question rows.`,
+        code: "QUESTION_IMPORT_ROW_LIMIT",
+      });
     }
 
     const valid: ParsedRow[] = [];
     const errors: Array<{ row: number; message: string }> = [];
     raw.forEach((r, i) => {
-      const result = normalizeRow(r, i);
+      const result = normalizeRow(r);
       if (result.ok) valid.push(result.row);
       else errors.push({ row: i + 1, message: result.error });
     });
 
     const preview = valid.slice(0, 5);
     if (dryRun) {
-      return res.json({ totalRows: raw.length, valid: valid.length, errors, preview, created: 0 });
+      return res.json({
+        totalRows: raw.length,
+        valid: valid.length,
+        errors,
+        preview,
+        created: 0,
+        pendingReview: valid.length,
+        reviewRequired: true,
+      });
     }
 
-    // Plan limit check
+    let maxQuestions = -1;
     if (bank.ownerType === "creator" && bank.ownerId) {
       const [creatorRow] = await db.select().from(creators).where(eq(creators.id, bank.ownerId));
-      const limits = getCreatorLimits(creatorRow?.plan);
-      if (limits.maxQuestionsPerBank !== -1) {
-        const projected = bank.questionCount + valid.length;
-        if (projected > limits.maxQuestionsPerBank) {
-          return res.status(402).json({
-            message: `Import would exceed plan limit (${limits.maxQuestionsPerBank} questions/bank).`,
-            code: "PLAN_LIMIT_QUESTIONS",
-          });
-        }
-      }
+      maxQuestions = getCreatorLimits(creatorRow?.plan).maxQuestionsPerBank;
     }
 
-    const result = await storage.bulkCreateQuestions(id, valid as any[], req.ctx!.user.id);
+    const created = await insertQuestionsWithBankLock(id, valid.length, maxQuestions, async (tx) => {
+      const existingTopics = await tx.select().from(questionTopics)
+        .where(eq(questionTopics.bankId, id));
+      const topicCache = new Map<string, number>(
+        existingTopics.map((topic: typeof questionTopics.$inferSelect) => [topic.name.toLocaleLowerCase("en"), topic.id]),
+      );
+      const usedSlugs = new Set(existingTopics.map((topic: typeof questionTopics.$inferSelect) => topic.slug));
+      const values: ReturnType<typeof questionInsertValues>[] = [];
+
+      for (const row of valid) {
+        let topicId: number | null = null;
+        if (row.topic) {
+          const topicKey = row.topic.toLocaleLowerCase("en");
+          topicId = topicCache.get(topicKey) ?? null;
+          if (!topicId) {
+            const baseSlug = slugify(row.topic);
+            let topicSlug = baseSlug;
+            for (let suffix = 2; usedSlugs.has(topicSlug); suffix += 1) topicSlug = `${baseSlug}-${suffix}`;
+            const [createdTopic] = await tx.insert(questionTopics).values({
+              bankId: id,
+              name: row.topic,
+              slug: topicSlug,
+              sortOrder: 0,
+              parentId: null,
+            }).returning({ id: questionTopics.id });
+            const createdTopicId = Number(createdTopic.id);
+            topicId = createdTopicId;
+            topicCache.set(topicKey, createdTopicId);
+            usedSlugs.add(topicSlug);
+          }
+        }
+        values.push(questionInsertValues(row, id, req.ctx!.user.id, topicId));
+      }
+
+      if (values.length === 0) return 0;
+      const inserted = await tx.insert(questions).values(values).returning({ id: questions.id });
+      return inserted.length;
+    });
     res.json({
       totalRows: raw.length,
-      created: result.created,
-      errors: [...errors, ...result.errors],
+      created,
+      pendingReview: created,
+      reviewRequired: true,
+      errors,
       preview,
     });
   } catch (e: any) {
     console.error("import error:", e);
-    res.status(500).json({ message: e.message });
+    if (e instanceof QuestionPlanLimitError) {
+      return res.status(402).json({
+        message: `Import would exceed the plan limit of ${e.limit} questions per bank.`,
+        code: e.code,
+      });
+    }
+    res.status(500).json({ message: "Question import failed. No questions were added." });
   }
 });
 
@@ -473,7 +939,9 @@ router.get("/:id/questions/export", requireAuth, withCtx, async (req: AuthedRequ
       explanation: q.explanation ?? "",
     };
   });
-  const csv = Papa.unparse(rows);
+  const csv = Papa.unparse(rows.map((row) => Object.fromEntries(
+    Object.entries(row).map(([key, value]) => [key, neutralizeSpreadsheetCell(value)]),
+  )));
   res.setHeader("Content-Type", "text/csv");
   res.setHeader("Content-Disposition", `attachment; filename="bank-${id}-questions.csv"`);
   res.send(csv);
@@ -481,10 +949,14 @@ router.get("/:id/questions/export", requireAuth, withCtx, async (req: AuthedRequ
 
 // ── Question versions ──────────────────────────────────────────────────────
 router.get("/:id/questions/:qid/versions", requireAuth, withCtx, async (req: AuthedRequest, res) => {
-  const bank = await storage.getQuestionBank(Number(req.params.id));
+  const bankId = positiveId(req.params.id);
+  const questionId = positiveId(req.params.qid);
+  if (!bankId || !questionId) return res.status(400).json({ message: "Invalid bank or question id" });
+  const bank = await storage.getQuestionBank(bankId);
   if (!bank) return res.status(404).json({ message: "Bank not found" });
   if (!canViewBank(req.ctx!, bank)) return res.status(403).json({ message: "Forbidden" });
-  res.json(await storage.getQuestionVersions(Number(req.params.qid)));
+  if (!(await questionBelongsToBank(questionId, bankId))) return res.status(404).json({ message: "Question not found in this bank" });
+  res.json(await storage.getQuestionVersions(questionId));
 });
 
 export default router;
@@ -493,7 +965,19 @@ export default router;
 export const courseBlueprintRouter = Router();
 
 courseBlueprintRouter.get("/:courseId/blueprint", requireAuth, withCtx, async (req: AuthedRequest, res) => {
-  const items = await storage.getCourseBlueprint(Number(req.params.courseId));
+  const ctx = req.ctx!;
+  const courseId = Number(req.params.courseId);
+  if (!Number.isInteger(courseId) || courseId <= 0) return res.status(400).json({ message: "Invalid course id" });
+  const course = await storage.getCourse(courseId);
+  if (!course) return res.status(404).json({ message: "Course not found" });
+  let allowed = !!ctx.user.isAdmin;
+  if (!allowed && course.ownerType === "creator" && course.ownerId === ctx.creatorId) allowed = true;
+  if (!allowed && course.ownerType === "institute" && course.ownerId != null) {
+    const role = ctx.instituteRoles.get(course.ownerId);
+    if (role && role !== "staff") allowed = true;
+  }
+  if (!allowed) return res.status(403).json({ message: "Forbidden" });
+  const items = await storage.getCourseBlueprint(courseId);
   res.json(items);
 });
 

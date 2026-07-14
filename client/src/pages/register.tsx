@@ -8,14 +8,14 @@ import { useAuth } from '@/lib/auth.tsx';
 import { GoogleAuthButton } from '@/components/google-auth-button';
 import { useGoogleAuthHandler } from '@/utils/google-auth-handler';
 import { SEO } from '@/components/seo';
-import { apiRequest } from '@/lib/queryClient';
+import { apiRequest, queryClient } from '@/lib/queryClient';
 import { AuthShell } from '@/components/auth-shell';
 import { ArrowRight, Building2, Briefcase, GraduationCap, ShieldCheck, Sparkles } from 'lucide-react';
 
 type Role = 'learner' | 'creator' | 'institute' | 'recruiter';
 
 const ROLES: { id: Role; title: string; desc: string; plan: string; icon: React.ComponentType<{ className?: string }> }[] = [
-  { id: 'learner', title: 'Learner', desc: 'Take exams. Earn verified certificates.', plan: 'Free forever', icon: GraduationCap },
+  { id: 'learner', title: 'Learner', desc: 'Take exams. Activate assessment credentials.', plan: 'Free forever', icon: GraduationCap },
   { id: 'creator', title: 'Creator', desc: 'Publish learning and assessments.', plan: 'Start free', icon: Sparkles },
   { id: 'institute', title: 'Institute', desc: 'Verify student skills at scale.', plan: 'Team workspace', icon: Building2 },
   { id: 'recruiter', title: 'Recruiter', desc: 'Hire candidates verified by skill.', plan: 'Verified company signup', icon: Briefcase },
@@ -31,20 +31,29 @@ function detectRoleFromPath(pathname: string): Role | null {
 
 export default function Register() {
   const [location, setLocation] = useLocation();
-  const { register } = useAuth();
+  const { register, user, token } = useAuth();
   const { toast } = useToast();
   useGoogleAuthHandler();
 
-  const queryRole = useMemo(() => {
+  const query = useMemo(() => {
     if (typeof window === 'undefined') return null;
-    const r = new URLSearchParams(window.location.search).get('role');
+    return new URLSearchParams(window.location.search);
+  }, [location]);
+  const queryRole = useMemo(() => {
+    const r = query?.get('role');
     return (['learner', 'creator', 'institute', 'recruiter'] as const).includes(r as Role) ? (r as Role) : null;
-  }, []);
+  }, [query]);
+  const selectedPlan = useMemo(() => {
+    const plan = query?.get('plan')?.trim().toLowerCase();
+    return plan && /^[a-z0-9-]{2,24}$/.test(plan) ? plan : null;
+  }, [query]);
+  const setupMode = query?.get('mode');
 
   // Default unspecified registrations to learner — most users coming to /register want to take an exam.
   // For business roles we use /register?role=creator|institute|recruiter or /creators, /institutes, /recruiters/register.
   const initialRole: Role = (detectRoleFromPath(location) || queryRole || 'learner') as Role;
   const [role, setRole] = useState<Role>(initialRole);
+  const isWorkspaceSetup = !!user && !!token && (setupMode === 'add' || setupMode === 'complete-google') && role !== 'learner';
 
   // Generic
   const [name, setName] = useState('');
@@ -72,7 +81,14 @@ export default function Register() {
   useEffect(() => {
     const fromPath = detectRoleFromPath(location);
     if (fromPath) setRole(fromPath);
-  }, [location]);
+    else if (queryRole) setRole(queryRole);
+  }, [location, queryRole]);
+
+  useEffect(() => {
+    if (!isWorkspaceSetup || !user) return;
+    if (!name) setName(user.name || '');
+    if (role === 'creator' && !displayName) setDisplayName(user.name || '');
+  }, [displayName, isWorkspaceSetup, name, role, user]);
 
   useEffect(() => {
     if (role === 'recruiter' && location !== '/recruiter/register') {
@@ -81,10 +97,12 @@ export default function Register() {
   }, [location, role, setLocation]);
 
   const validate = (): string | null => {
-    if (!name) return 'Please enter your name.';
-    if (!email) return 'Please enter your email.';
-    if (!password || password.length < 8 || !/[A-Za-z]/.test(password) || !/[\d\W_]/.test(password)) return 'Use at least 8 characters with letters and a number or symbol.';
-    if (password !== confirm) return 'Passwords do not match.';
+    if (!isWorkspaceSetup) {
+      if (!name) return 'Please enter your name.';
+      if (!email) return 'Please enter your email.';
+      if (!password || password.length < 8 || !/[A-Za-z]/.test(password) || !/[\d\W_]/.test(password)) return 'Use at least 8 characters with letters and a number or symbol.';
+      if (password !== confirm) return 'Passwords do not match.';
+    }
     if (role === 'creator' && !agreed) return 'Please accept the creator terms.';
     if (role === 'creator' && !displayName) return 'Please enter your creator display name.';
     if (role === 'institute' && !instituteName) return 'Please enter the institute name.';
@@ -101,19 +119,21 @@ export default function Register() {
     }
     setIsLoading(true);
     try {
-      await register(email, password, name);
+      if (!isWorkspaceSetup) await register(email, password, name);
 
       // Stash role-specific signup intent (legacy callers may still read this)
       try {
-        const intent: Record<string, unknown> = { role, phone };
+        const intent: Record<string, unknown> = { role, phone, plan: selectedPlan };
         if (role === 'creator') Object.assign(intent, { displayName, creatorType, wantsCreator: true });
         if (role === 'institute') Object.assign(intent, { instituteName, instituteType, gstin, wantsInstitute: true });
         if (role === 'recruiter') Object.assign(intent, { companyName, companySize, wantsRecruiter: true });
         localStorage.setItem('octamy.signupIntent', JSON.stringify(intent));
       } catch {}
 
-      // Provision role-specific server-side profile.
+      // Provision the role-specific server-side workspace before we advertise
+      // success or send a paid-plan selection to checkout.
       let dest = '/dashboard';
+      let workspaceProvisioned = true;
       try {
         if (role === 'creator') {
           await apiRequest('POST', '/api/onboarding/creator', {
@@ -124,7 +144,8 @@ export default function Register() {
         } else if (role === 'institute') {
           await apiRequest('POST', '/api/onboarding/institute', {
             name: instituteName,
-            contactEmail: email,
+            contactEmail: user?.email || email,
+            contactPhone: phone || undefined,
             sizeRange: ['1-10', '11-50', '51-200', '201-1000', '1000+'].includes(instituteType)
               ? instituteType
               : '11-50',
@@ -140,21 +161,45 @@ export default function Register() {
           dest = '/recruiter/onboarding';
         }
       } catch (provisionError) {
+        workspaceProvisioned = false;
         console.error('Onboarding provisioning failed:', provisionError);
         toast({
-          title: 'Account created, finishing setup later',
+          title: isWorkspaceSetup ? 'Workspace setup needs attention' : 'Your account is secure — finish workspace setup',
           description:
             provisionError instanceof Error
               ? provisionError.message
-              : 'You can complete your profile from the dashboard.',
+              : 'Please retry the workspace details. Your Octamy identity has already been saved.',
         });
+      }
+
+      if (!workspaceProvisioned) {
+        await queryClient.invalidateQueries({ queryKey: ['/api/me/roles'] });
+        if (!isWorkspaceSetup) {
+          const plan = selectedPlan ? `&plan=${encodeURIComponent(selectedPlan)}` : '';
+          setLocation(`/register?role=${role}&mode=add${plan}`);
+        }
+        return;
       }
 
       try {
         localStorage.removeItem('octamy.signupIntent');
       } catch {}
 
-      toast({ title: 'Account created', description: 'Welcome to Octamy.' });
+      const hasPaidPlan =
+        (role === 'creator' && ['pro', 'premium'].includes(selectedPlan || '')) ||
+        (role === 'institute' && ['starter', 'growth'].includes(selectedPlan || ''));
+      if (hasPaidPlan && selectedPlan) {
+        try {
+          localStorage.setItem('octamy.pendingPlan', JSON.stringify({ role, plan: selectedPlan, at: Date.now() }));
+        } catch {}
+        dest = `/pricing?role=${role}&selected=${encodeURIComponent(selectedPlan)}&welcome=1`;
+      }
+
+      await queryClient.invalidateQueries({ queryKey: ['/api/me/roles'] });
+      toast({
+        title: isWorkspaceSetup ? 'Workspace ready' : 'Account created',
+        description: hasPaidPlan ? 'Review and continue with your selected plan.' : 'Welcome to Octamy.',
+      });
       setTimeout(() => setLocation(dest), 600);
     } catch (e2) {
       toast({
@@ -170,15 +215,15 @@ export default function Register() {
   return (
     <>
       <SEO
-        title="Create account"
+        title={isWorkspaceSetup ? `Set up ${role} workspace` : 'Create account'}
         description="Create your Octamy account — choose Learner, Creator, Institute or Recruiter."
         path="/register"
       />
       <AuthShell
         wide
-        eyebrow="Create your Octamy identity"
-        title="Build a skill record that compounds with every achievement."
-        description="Start in the workspace that fits today. Your credentials, assessment evidence and opportunities remain connected as you grow."
+        eyebrow={isWorkspaceSetup ? 'One identity, another workspace' : 'Create your Octamy identity'}
+        title={isWorkspaceSetup ? `Finish your ${role} workspace.` : 'Build a skill record that compounds with every achievement.'}
+        description={isWorkspaceSetup ? 'Keep your existing Octamy identity and add only the business details this workspace needs.' : 'Start in the workspace that fits today. Your credentials, assessment evidence and opportunities remain connected as you grow.'}
         highlights={[
           'Start without a credit card',
           'Add another role later without a second account',
@@ -186,12 +231,12 @@ export default function Register() {
         ]}
       >
         <div className="mb-6">
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-fuchsia-700">Get started — free</p>
-          <h1 className="mt-3 text-4xl font-extrabold tracking-[-0.04em] text-slate-950 sm:text-5xl">Create your account</h1>
-          <p className="mt-3 text-sm leading-6 text-slate-600">Start as a learner, creator or institute. Recruiters use a verified company workspace.</p>
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-fuchsia-700">{isWorkspaceSetup ? 'Complete setup' : 'Get started — free'}</p>
+          <h1 className="mt-3 text-4xl font-extrabold tracking-[-0.04em] text-slate-950 sm:text-5xl">{isWorkspaceSetup ? `Add your ${role} workspace` : 'Create your account'}</h1>
+          <p className="mt-3 text-sm leading-6 text-slate-600">{isWorkspaceSetup ? `Signed in as ${user?.email}. Your learning history stays connected.` : 'Start as a learner, creator or institute. Recruiters use a verified company workspace.'}</p>
         </div>
 
-        <div className="mb-5 grid grid-cols-3 gap-2 rounded-2xl border border-slate-200 bg-white p-2 shadow-sm" aria-label="Choose account type">
+        {!isWorkspaceSetup && <div className="mb-5 grid grid-cols-3 gap-2 rounded-2xl border border-slate-200 bg-white p-2 shadow-sm" aria-label="Choose account type">
           {ROLES.filter((item) => item.id !== 'recruiter').map((item) => {
             const Icon = item.icon;
             const selected = role === item.id;
@@ -199,7 +244,13 @@ export default function Register() {
               <button
                 key={item.id}
                 type="button"
-                onClick={() => setRole(item.id)}
+                onClick={() => {
+                  setRole(item.id);
+                  const params = new URLSearchParams(window.location.search);
+                  params.set('role', item.id);
+                  params.delete('plan');
+                  setLocation(`/register?${params.toString()}`);
+                }}
                 className={`flex min-h-14 items-center justify-center gap-2 rounded-xl px-2 text-xs font-bold transition sm:text-sm ${selected ? 'bg-slate-950 text-white shadow-md' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-950'}`}
                 aria-pressed={selected}
               >
@@ -207,25 +258,25 @@ export default function Register() {
               </button>
             );
           })}
-        </div>
+        </div>}
 
-        <section className="rounded-[1.5rem] border-2 border-slate-900 bg-white p-5 shadow-[7px_7px_0_0_rgba(15,23,42,0.92)] sm:p-7" aria-label="Create account form">
+        <section className="rounded-[1.5rem] border border-slate-300 bg-white p-5 shadow-[0_18px_50px_-28px_rgba(15,23,42,0.45)] sm:p-7" aria-label={isWorkspaceSetup ? 'Workspace setup form' : 'Create account form'}>
           <div className="mb-5 flex items-center justify-between gap-4 border-b border-slate-200 pb-4">
             <div>
               <p className="font-bold text-slate-950">Signing up as {labelFor(role)}</p>
               <p className="mt-0.5 text-xs text-slate-500">{ROLES.find((item) => item.id === role)?.desc}</p>
             </div>
-            <span className="shrink-0 rounded-full bg-emerald-50 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-emerald-700">{ROLES.find((item) => item.id === role)?.plan}</span>
+            <span className="shrink-0 rounded-full bg-emerald-50 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-emerald-700">{selectedPlan ? `${selectedPlan} selected` : ROLES.find((item) => item.id === role)?.plan}</span>
           </div>
 
-          <GoogleAuthButton type="user" isLoading={isLoading} hideWhenUnavailable className="mb-5" />
+          {!isWorkspaceSetup && <GoogleAuthButton type="user" isLoading={isLoading} hideWhenUnavailable className="mb-5" intent={{ mode: 'register', role: role === 'recruiter' ? 'learner' : role, plan: selectedPlan }} />}
 
           <form onSubmit={handleSubmit} className="grid gap-4 sm:grid-cols-2">
             {role === 'institute' && (
-              <Field label="Institute name" value={instituteName} onChange={setInstituteName} placeholder="e.g. Acme Public School" />
+              <Field id="institute-name" label="Institute name" value={instituteName} onChange={setInstituteName} placeholder="e.g. Acme Public School" required />
             )}
             {role === 'institute' && (
-              <SelectField label="Institute type" value={instituteType} onChange={setInstituteType} options={[
+              <SelectField id="institute-type" label="Institute type" value={instituteType} onChange={setInstituteType} options={[
                 { value: 'school', label: 'School' },
                 { value: 'college', label: 'College / University' },
                 { value: 'coaching', label: 'Coaching / Test prep' },
@@ -233,14 +284,14 @@ export default function Register() {
               ]} />
             )}
 
-            <Field label={role === 'institute' ? 'Admin contact name' : 'Full name'} value={name} onChange={setName} placeholder="Your name" autoComplete="name" />
-            <Field label="Email" value={email} onChange={setEmail} type="email" placeholder="you@company.com" autoComplete="email" />
-            <Field label={role === 'learner' ? 'Phone (optional)' : 'Phone'} value={phone} onChange={setPhone} placeholder="+91…" autoComplete="tel" />
+            {!isWorkspaceSetup && <Field id="full-name" label={role === 'institute' ? 'Admin contact name' : 'Full name'} value={name} onChange={setName} placeholder="Your name" autoComplete="name" required />}
+            {!isWorkspaceSetup && <Field id="email" label="Email" value={email} onChange={setEmail} type="email" placeholder="you@company.com" autoComplete="email" required />}
+            <Field id="phone" label="Phone (optional)" value={phone} onChange={setPhone} placeholder="+91…" autoComplete="tel" />
 
             {role === 'creator' && (
               <>
-                <Field label="Creator display name" value={displayName} onChange={setDisplayName} placeholder="How learners see you" />
-                <SelectField label="What best describes you?" value={creatorType} onChange={setCreatorType} options={[
+                <Field id="creator-display-name" label="Creator display name" value={displayName} onChange={setDisplayName} placeholder="How learners see you" required />
+                <SelectField id="creator-type" label="What best describes you?" value={creatorType} onChange={setCreatorType} options={[
                   { value: 'educator', label: 'Educator' },
                   { value: 'coach', label: 'Coach' },
                   { value: 'freelancer', label: 'Freelancer' },
@@ -251,11 +302,11 @@ export default function Register() {
             )}
 
             {role === 'institute' && (
-              <Field label="GSTIN (optional)" value={gstin} onChange={setGstin} placeholder="22AAAAA0000A1Z5" />
+              <Field id="gstin" label="GSTIN (optional)" value={gstin} onChange={setGstin} placeholder="22AAAAA0000A1Z5" />
             )}
 
-            <Field label="Password" value={password} onChange={setPassword} type="password" placeholder="8+ characters, letters and a number" autoComplete="new-password" />
-            <Field label="Confirm password" value={confirm} onChange={setConfirm} type="password" placeholder="Repeat your password" autoComplete="new-password" />
+            {!isWorkspaceSetup && <Field id="password" label="Password" value={password} onChange={setPassword} type="password" placeholder="8+ characters, letters and a number" autoComplete="new-password" required />}
+            {!isWorkspaceSetup && <Field id="confirm-password" label="Confirm password" value={confirm} onChange={setConfirm} type="password" placeholder="Repeat your password" autoComplete="new-password" required />}
 
             {role === 'creator' && (
               <label className="flex items-start gap-2 text-xs leading-5 text-slate-600 sm:col-span-2">
@@ -264,8 +315,8 @@ export default function Register() {
               </label>
             )}
 
-            <Button type="submit" disabled={isLoading} className="h-12 rounded-xl bg-slate-950 text-white shadow-[3px_3px_0_0_rgba(217,70,239,0.35)] hover:bg-black sm:col-span-2">
-              {isLoading ? 'Creating account…' : <>Create my account <ArrowRight className="ml-2 h-4 w-4" /></>}
+            <Button type="submit" disabled={isLoading} className="h-12 rounded-xl bg-slate-950 text-white hover:bg-black sm:col-span-2">
+              {isLoading ? 'Saving…' : <>{isWorkspaceSetup ? `Create ${role} workspace` : 'Create my account'} <ArrowRight className="ml-2 h-4 w-4" /></>}
             </Button>
           </form>
 
@@ -274,14 +325,14 @@ export default function Register() {
           </div>
         </section>
 
-        <div className="mt-7 space-y-3 text-center text-sm text-slate-600">
+        {!isWorkspaceSetup && <div className="mt-7 space-y-3 text-center text-sm text-slate-600">
           <p>
             Already on Octamy? <Link href="/login" className="font-bold text-slate-950 hover:underline">Sign in</Link>
           </p>
           <p className="text-xs text-slate-500">
             Recruiting? <Link href="/recruiter/register" className="font-semibold text-slate-700 hover:underline">Create a verified company workspace</Link>
           </p>
-        </div>
+        </div>}
       </AuthShell>
     </>
   );
@@ -292,13 +343,16 @@ function labelFor(r: Role) {
 }
 
 function Field({
-  label, value, onChange, type = 'text', placeholder, autoComplete,
-}: { label: string; value: string; onChange: (v: string) => void; type?: string; placeholder?: string; autoComplete?: string }) {
+  id, label, value, onChange, type = 'text', placeholder, autoComplete, required = false,
+}: { id: string; label: string; value: string; onChange: (v: string) => void; type?: string; placeholder?: string; autoComplete?: string; required?: boolean }) {
   return (
     <div>
-      <Label className="text-slate-700">{label}</Label>
+      <Label htmlFor={id} className="text-slate-700">{label}</Label>
       <Input
+        id={id}
         type={type}
+        required={required}
+        aria-required={required || undefined}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
@@ -310,12 +364,13 @@ function Field({
 }
 
 function SelectField({
-  label, value, onChange, options,
-}: { label: string; value: string; onChange: (v: string) => void; options: { value: string; label: string }[] }) {
+  id, label, value, onChange, options,
+}: { id: string; label: string; value: string; onChange: (v: string) => void; options: { value: string; label: string }[] }) {
   return (
     <div>
-      <Label className="text-slate-700">{label}</Label>
+      <Label htmlFor={id} className="text-slate-700">{label}</Label>
       <select
+        id={id}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         className="mt-1.5 h-11 w-full rounded-xl border border-slate-300 bg-slate-50 px-3 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-900"

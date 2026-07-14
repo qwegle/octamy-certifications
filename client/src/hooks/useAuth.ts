@@ -1,23 +1,15 @@
-import { useQuery } from "@tanstack/react-query";
-
-interface User {
-  id: number;
-  email: string;
-  name: string;
-  phone?: string;
-  isAdmin?: boolean;
-}
+import { useAuth as useAuthContext } from "@/lib/auth";
 
 export function useAuth() {
-  const { data: user, isLoading, error } = useQuery({
-    queryKey: ['/api/user'],
-    retry: false,
-  });
+  // Compatibility wrapper for older pages. Authentication is owned by the
+  // central provider, which validates a stored bearer token only when one is
+  // present. Public pages therefore no longer issue a noisy, expected 401.
+  const { user, isLoading } = useAuthContext();
 
   return {
-    user: user as User | undefined,
+    user: user ?? undefined,
     isLoading,
-    isAuthenticated: !!user && !error,
-    error
+    isAuthenticated: Boolean(user),
+    error: null,
   };
 }

@@ -186,7 +186,7 @@ export default function BusinessCertificates() {
                       <Award className="w-12 h-12 text-black mx-auto mb-4" />
                       <h3 className="font-bold text-lg mb-2">Professional Team Certification</h3>
                       <p className="text-sm text-gray-600 mb-4">
-                        Elevate your team's skills with industry-recognized certifications
+                        Measure your team's skills and issue status-aware assessment records
                       </p>
                       <Button 
                         onClick={() => setStep(2)}

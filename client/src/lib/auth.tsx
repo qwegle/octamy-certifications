@@ -49,20 +49,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         if (!payload.exp || payload.exp < currentTime) throw new Error('Expired token');
 
-        const response = await fetch('/api/auth/me', {
-          headers: { Authorization: `Bearer ${storedToken}` },
-          cache: 'no-store',
-        });
-        if (!response.ok) throw new Error('Session rejected');
-
-        const verifiedUser = (await response.json()) as User;
-        if (!verifiedUser?.id || (payload.userId && payload.userId !== verifiedUser.id)) {
-          throw new Error('Session user mismatch');
+        const cachedUser = JSON.parse(storedUser) as User;
+        if (!cachedUser?.id || (payload.userId && payload.userId !== cachedUser.id)) {
+          throw new Error('Cached session user mismatch');
         }
 
-        setToken(storedToken);
-        setUser(verifiedUser);
-        localStorage.setItem('user', JSON.stringify(verifiedUser));
+        try {
+          const response = await fetch('/api/auth/me', {
+            headers: { Authorization: `Bearer ${storedToken}` },
+            cache: 'no-store',
+          });
+          if (response.status === 401 || response.status === 403) {
+            throw new Error('SESSION_REJECTED');
+          }
+          if (!response.ok) {
+            // A temporary service failure must not turn into a client-side
+            // logout. Protected API calls remain server-authorized.
+            setToken(storedToken);
+            setUser(cachedUser);
+          } else {
+            const verifiedUser = (await response.json()) as User;
+            if (!verifiedUser?.id || (payload.userId && payload.userId !== verifiedUser.id)) {
+              throw new Error('SESSION_REJECTED');
+            }
+            setToken(storedToken);
+            setUser(verifiedUser);
+            localStorage.setItem('user', JSON.stringify(verifiedUser));
+          }
+        } catch (error) {
+          if (error instanceof Error && error.message === 'SESSION_REJECTED') throw error;
+          // Offline or transient DNS/network failure: retain the last
+          // server-validated cache so an exam autosave cannot log out another
+          // open workspace tab. Data APIs still enforce the bearer token.
+          setToken(storedToken);
+          setUser(cachedUser);
+        }
       } catch {
         clearAuth();
       }
@@ -78,8 +99,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Listen for storage changes and custom auth events (for Google OAuth)
   useEffect(() => {
-    const handleStorageChange = () => {
-      void checkAndSetAuth();
+    let storageTimer: number | undefined;
+    const handleStorageChange = (event: StorageEvent) => {
+      // Exam recovery, preferences, and media state also use localStorage.
+      // They must never cause a cross-tab authentication revalidation.
+      if (event.key === 'token' || event.key === null) {
+        // Login writes token + user as two synchronous operations. Debouncing
+        // prevents another tab from observing the brief state between them and
+        // deleting an otherwise valid new session.
+        window.clearTimeout(storageTimer);
+        storageTimer = window.setTimeout(() => void checkAndSetAuth(), 50);
+      }
     };
     
     const handleAuthUpdate = () => {
@@ -90,6 +120,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     window.addEventListener('authTokenUpdated', handleAuthUpdate);
     
     return () => {
+      window.clearTimeout(storageTimer);
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('authTokenUpdated', handleAuthUpdate);
     };

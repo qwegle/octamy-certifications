@@ -145,47 +145,47 @@ export default function HelpCenter() {
     {
       question: "What happens if I don't pass the assessment?",
       answer:
-        "You can retake the assessment after 24 hours. There's no limit to the number of attempts, and you only pay once you pass and want to receive your certificate.",
+        "You are not charged for a failed attempt. Retake limits and availability depend on the assessment; check the instructions shown before starting. A credential is available only after a passing result and optional activation.",
     },
     {
       question: "How long are the certificates valid?",
       answer:
-        "Our certificates have lifetime validity. Once issued, they remain valid indefinitely and can be verified through our verification system.",
+        "Each credential has an expiry date shown on both the record and verification page. The live check distinguishes active, expired, revoked and unactivated records.",
     },
     {
       question: "Can I get a refund if I'm not satisfied?",
       answer:
-        "Yes, we offer a 30-day money-back guarantee. If you're not satisfied with your certificate, contact us within 30 days for a full refund.",
+        "Because assessments are free and payment occurs only after passing, activated credentials are generally final. Genuine duplicate-payment or technical-delivery issues can be reported within 7 days and are reviewed under the Refund Policy.",
     },
     {
       question: "What is a virtual internship certificate?",
       answer:
-        "Virtual internship certificates are professional credentials that show you've completed an internship program. You can customize the duration and dates according to your needs.",
+        "Octamy's current virtual internship listings are assessment-based skill programs. They are not employment, payroll engagement, supervised work experience or a placement guarantee.",
     },
     {
       question: "How do I verify a certificate?",
       answer:
-        "Use our certificate verification system by entering the certificate ID. You can also scan the QR code on any certificate to verify its authenticity.",
+        "Open the verification page and enter the credential ID exactly as issued. The result shows the assessment score, issuer and current activation, expiry or revocation status.",
     },
     {
       question: "Are the certificates recognized by employers?",
       answer:
-        "Yes, our certificates are industry-recognized and accepted by employers worldwide. They demonstrate your skills and knowledge in specific domains.",
+        "Octamy does not claim universal employer acceptance or accreditation. The credential is an independent, assessment-backed signal that lets an employer inspect the recorded score and status alongside other hiring evidence.",
     },
     {
       question: "How long does it take to receive my certificate?",
       answer:
-        "Digital certificates are issued instantly upon successful payment. You'll receive an email with your certificate and can download it immediately from your dashboard.",
+        "After a successful payment is confirmed, the activated credential should appear in your dashboard. If it does not, contact support with the payment reference.",
     },
     {
       question: "Can I update my certificate details after purchase?",
       answer:
-        "For virtual internship certificates, you can customize the details (name, dates, duration) during the application process after payment. Regular certificates cannot be modified after issuance.",
+        "Issued assessment details cannot be edited. Correct your account name before starting or contact support if a genuine account-data correction is needed.",
     },
     {
       question: "What payment methods do you accept?",
       answer:
-        "We accept all major credit/debit cards, net banking, UPI, and digital wallets through our secure payment partner Razorpay.",
+        "Available methods and the payment processor are displayed at checkout and may vary by product. Never pay using details sent outside the official Octamy checkout.",
     },
   ];
 

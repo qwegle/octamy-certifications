@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import RecruiterLayout from '../components/RecruiterLayout';
 import { useRecruiterAuth } from '../auth/RecruiterAuthProvider';
+import { downloadCandidateCv } from '../utils/downloadCandidateCv';
 import {
   User,
   MapPin,
@@ -48,8 +49,8 @@ interface Certificate {
 interface Interview {
   id: number;
   technology: string;
-  score: number;
-  grade: string;
+  score?: number;
+  grade?: string;
   duration?: number;
   completedAt: string;
   videoUrl?: string;
@@ -76,6 +77,10 @@ interface CandidateProfile {
   availability?: string;
   noticePeriod?: string;
   expectedSalary?: string;
+  hasResume: boolean;
+  cvAccessUnlocked: boolean;
+  interviewAccessUnlocked: boolean;
+  creditCosts: { profile_view: number; cv_download: number; interview_access: number };
 }
 
 export default function CandidateProfile() {
@@ -83,6 +88,7 @@ export default function CandidateProfile() {
   const [candidate, setCandidate] = useState<CandidateProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [watchingVideo, setWatchingVideo] = useState<{interview: Interview, videoUrl: string} | null>(null);
+  const [unlockingInterviews, setUnlockingInterviews] = useState(false);
   const { toast } = useToast();
   const { updateRecruiter } = useRecruiterAuth();
 
@@ -128,9 +134,8 @@ export default function CandidateProfile() {
     } catch (error) {
       console.error('Error fetching candidate profile:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to load candidate profile',
-        variant: 'destructive',
+        title: 'Profile unavailable',
+        description: error instanceof Error ? error.message : 'Failed to load candidate profile',
       });
     } finally {
       setLoading(false);
@@ -210,7 +215,7 @@ export default function CandidateProfile() {
     return strengths.slice(0, 3);
   };
 
-  const getScoreColor = (score: number) => {
+  const getScoreColor = (score = 0) => {
     if (score >= 90) return 'text-green-600';
     if (score >= 80) return 'text-blue-600';
     if (score >= 70) return 'text-yellow-600';
@@ -229,6 +234,7 @@ export default function CandidateProfile() {
   };
 
   const handleWatchInterview = async (interview: Interview) => {
+    setUnlockingInterviews(true);
     try {
       const response = await fetch('/api/recruiter/access-interview-video', {
         method: 'POST',
@@ -245,9 +251,8 @@ export default function CandidateProfile() {
       if (!response.ok) {
         const error = await response.json();
         toast({
-          title: "Access Failed",
+          title: "Interview access unchanged",
           description: error.message || "Failed to access interview video",
-          variant: "destructive",
         });
         return;
       }
@@ -255,12 +260,17 @@ export default function CandidateProfile() {
       const data = await response.json();
       updateRecruiter({ creditsBalance: data.creditsRemaining });
       setWatchingVideo({ interview, videoUrl: data.videoUrl });
+      if (!data.alreadyUnlocked) {
+        toast({ title: 'Interview evidence unlocked', description: data.message });
+        await fetchCandidateProfile(String(candidate?.id || candidateId));
+      }
     } catch (error) {
       toast({
-        title: "Error",
+        title: "Interview unavailable",
         description: "An error occurred while accessing the video",
-        variant: "destructive",
       });
+    } finally {
+      setUnlockingInterviews(false);
     }
   };
 
@@ -271,9 +281,9 @@ export default function CandidateProfile() {
       const data = await response.json();
       if (!data.cvUrl) throw new Error('Candidate CV is not available');
       updateRecruiter({ creditsBalance: data.remainingCredits });
-      window.open(data.cvUrl, '_blank', 'noopener,noreferrer');
+      await downloadCandidateCv(data.cvUrl, candidate.id);
     } catch (error) {
-      toast({ title: 'CV unavailable', description: error instanceof Error ? error.message : 'Could not download this CV', variant: 'destructive' });
+      toast({ title: 'CV unavailable', description: error instanceof Error ? error.message : 'Could not download this CV' });
     }
   };
 
@@ -328,9 +338,13 @@ export default function CandidateProfile() {
               </div>
             </div>
             <div>
-              <Button variant="outline" size="sm" onClick={handleDownloadCv}>
+              <Button variant="outline" size="sm" onClick={handleDownloadCv} disabled={!candidate.hasResume}>
                 <Download className="h-4 w-4 mr-2" />
-                Download CV · 1 credit
+                {!candidate.hasResume
+                  ? 'CV not shared'
+                  : candidate.cvAccessUnlocked
+                    ? 'Download CV · unlocked'
+                    : `Unlock CV · ${candidate.creditCosts.cv_download} credit`}
               </Button>
             </div>
           </div>
@@ -447,17 +461,30 @@ export default function CandidateProfile() {
                       </div>
                     ) : (
                       <div className="space-y-4">
+                        {!candidate.interviewAccessUnlocked ? (
+                          <div className="flex flex-col gap-4 rounded-xl border border-sky-200 bg-sky-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                              <p className="font-semibold text-sky-950">Interview scores and recordings are protected</p>
+                              <p className="mt-1 text-sm text-sky-800">One unlock covers this candidate's available interview evidence in your workspace. Reopening costs 0 credits.</p>
+                            </div>
+                            <span className="shrink-0 rounded-lg bg-white px-3 py-2 text-sm font-semibold text-sky-900 shadow-sm">{candidate.creditCosts.interview_access} credits</span>
+                          </div>
+                        ) : null}
                         {candidate.interviews.map((interview, index) => (
                           <div key={index} className="border rounded-lg p-4">
                             <div className="flex items-center justify-between">
                               <div>
                                 <h4 className="font-medium">{interview.technology} Interview</h4>
                                 <div className="flex items-center mt-1 space-x-4 text-sm">
-                                  <span className={`font-semibold ${getScoreColor(interview.score)}`}>
-                                    Score: {interview.score}% ({interview.grade})
-                                  </span>
+                                  {candidate.interviewAccessUnlocked ? (
+                                    <span className={`font-semibold ${getScoreColor(interview.score)}`}>
+                                      Score: {interview.score}% ({interview.grade || 'No grade'})
+                                    </span>
+                                  ) : (
+                                    <span className="font-medium text-slate-500">Score hidden until unlocked</span>
+                                  )}
                                   <span className="text-gray-500">
-                                    {new Date(interview.completedAt).toLocaleDateString()}
+                                    {interview.completedAt ? new Date(interview.completedAt).toLocaleDateString() : 'Date unavailable'}
                                   </span>
                                 </div>
                               </div>
@@ -465,9 +492,10 @@ export default function CandidateProfile() {
                                 variant="outline" 
                                 size="sm"
                                 onClick={() => handleWatchInterview(interview)}
+                                disabled={unlockingInterviews}
                               >
                                 <Play className="h-4 w-4 mr-2" />
-                                Watch (2 credits)
+                                {candidate.interviewAccessUnlocked ? 'Watch · unlocked' : `Unlock & watch · ${candidate.creditCosts.interview_access}`}
                               </Button>
                             </div>
                           </div>
@@ -510,7 +538,7 @@ export default function CandidateProfile() {
                 </div>
                 <div>
                   <label className="text-sm text-gray-500">Last Active</label>
-                  <p className="font-medium">{candidate.lastActive}</p>
+                  <p className="font-medium">{candidate.lastActive ? new Date(candidate.lastActive).toLocaleString() : 'Not available'}</p>
                 </div>
               </CardContent>
             </Card>
@@ -540,9 +568,13 @@ export default function CandidateProfile() {
                 <CardTitle>Quick Actions</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Button className="w-full" onClick={handleDownloadCv}>
+                <Button className="w-full" onClick={handleDownloadCv} disabled={!candidate.hasResume}>
                   <Download className="h-4 w-4 mr-2" />
-                  Download CV · 1 credit
+                  {!candidate.hasResume
+                    ? 'CV not shared'
+                    : candidate.cvAccessUnlocked
+                      ? 'Download CV · unlocked'
+                      : `Unlock CV · ${candidate.creditCosts.cv_download} credit`}
                 </Button>
                 <Button variant="outline" className="w-full" asChild>
                   <a href={`mailto:${candidate.email}?subject=${encodeURIComponent('Opportunity from Octamy Recruiter')}`}>
@@ -600,9 +632,8 @@ export default function CandidateProfile() {
                 className="w-full h-96 bg-black rounded-lg"
                 onError={() => {
                   toast({
-                    title: "Video Error",
-                    description: "Unable to load video",
-                    variant: "destructive",
+                    title: "Video unavailable",
+                    description: "The recording could not be loaded. No additional credits were charged.",
                   });
                 }}
               >
@@ -612,12 +643,12 @@ export default function CandidateProfile() {
             
             <div className="flex items-center justify-between text-sm text-gray-600">
               <div>
-                Score: <span className={`font-semibold ${getScoreColor(watchingVideo.interview.score)}`}>
-                  {watchingVideo.interview.score}% ({watchingVideo.interview.grade})
-                </span>
+                {watchingVideo.interview.score == null ? 'Interview evidence unlocked' : <>Score: <span className={`font-semibold ${getScoreColor(watchingVideo.interview.score)}`}>
+                  {watchingVideo.interview.score}% ({watchingVideo.interview.grade || 'No grade'})
+                </span></>}
               </div>
               <div>
-                Date: {new Date(watchingVideo.interview.completedAt).toLocaleDateString()}
+                Date: {watchingVideo.interview.completedAt ? new Date(watchingVideo.interview.completedAt).toLocaleDateString() : 'Not available'}
               </div>
             </div>
             

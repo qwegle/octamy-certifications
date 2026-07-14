@@ -22,21 +22,27 @@ interface Notification {
   };
 }
 
-interface CourseRecommendation {
-  id: number;
-  courseId: number;
-  reason: string;
-  score: string;
-  course: {
-    id: number;
-    title: string;
-    description: string;
-    price: string;
-    level: string;
-    category: {
-      name: string;
-    };
-  };
+interface RecommendedCourse {
+  id?: number;
+  slug?: string;
+  title?: string;
+  description?: string;
+  price?: string | number;
+  level?: string;
+  category?: {
+    name?: string;
+  } | null;
+}
+
+interface RecommendationDetails {
+  id?: number;
+  reason?: string;
+  score?: string | number;
+  course?: RecommendedCourse | null;
+}
+
+interface CourseRecommendation extends RecommendedCourse, RecommendationDetails {
+  course_recommendations?: RecommendationDetails | null;
 }
 
 export function SmartNotifications() {
@@ -45,13 +51,13 @@ export function SmartNotifications() {
   const queryClient = useQueryClient();
 
   // Fetch notifications
-  const { data: notifications = [], isLoading: notificationsLoading } = useQuery({
+  const { data: notifications = [], isLoading: notificationsLoading } = useQuery<Notification[]>({
     queryKey: ["/api/notifications"],
     retry: false,
   });
 
   // Fetch recommendations
-  const { data: recommendations = [], isLoading: recommendationsLoading } = useQuery({
+  const { data: recommendations = [], isLoading: recommendationsLoading } = useQuery<CourseRecommendation[]>({
     queryKey: ["/api/recommendations"],
     retry: false,
   });
@@ -94,7 +100,7 @@ export function SmartNotifications() {
     },
   });
 
-  const unreadCount = notifications.filter((n: Notification) => !n.isRead).length;
+  const unreadCount = notifications.filter((notification) => !notification.isRead).length;
 
   const getReasonIcon = (reason: string) => {
     switch (reason) {
@@ -176,7 +182,7 @@ export function SmartNotifications() {
                 No notifications yet
               </div>
             ) : (
-              notifications.map((notification: Notification) => (
+              notifications.map((notification) => (
                 <div
                   key={notification.id}
                   className={`p-4 border-b border-gray-100 dark:border-gray-800 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 ${
@@ -251,10 +257,12 @@ export function SmartNotifications() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {recommendations.map((rec: any) => {
+                {recommendations.map((rec) => {
                   // Handle different API response structures
                   const course = rec.course || rec.course_recommendations?.course || rec;
                   const recommendation = rec.course_recommendations || rec;
+                  const reason = recommendation.reason ?? rec.reason ?? "recommended";
+                  const recommendationScore = Number(recommendation.score ?? rec.score ?? 0.5);
                   
                   if (!course || !course.title) {
                     return null; // Skip invalid entries
@@ -265,13 +273,13 @@ export function SmartNotifications() {
                       <CardContent className="p-4">
                         <div className="flex items-start justify-between mb-2">
                           <Badge variant="secondary" className="flex items-center gap-1">
-                            {getReasonIcon(recommendation.reason || rec.reason)}
-                            {getReasonText(recommendation.reason || rec.reason)}
+                            {getReasonIcon(reason)}
+                            {getReasonText(reason)}
                           </Badge>
                           <div className="flex items-center gap-1">
                             <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
                             <span className="text-xs font-medium">
-                              {(parseFloat(recommendation.score || rec.score || '0.5') * 100).toFixed(0)}%
+                              {(recommendationScore * 100).toFixed(0)}%
                             </span>
                           </div>
                         </div>

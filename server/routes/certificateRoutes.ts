@@ -12,6 +12,7 @@ router.post('/create', allowAnonymous, CertificateController.createCertificate a
 // Specific collection/action routes must precede the generic /:id matcher.
 router.get('/user/certificates', requireUser, CertificateController.getUserCertificates as RequestHandler);
 router.get('/verify/:id', CertificateController.verifyCertificate as RequestHandler);
+router.get('/:id/activation', requireUser, CertificateController.getActivationCheckout as RequestHandler);
 router.get('/:id/download', CertificateController.downloadCertificate as RequestHandler);
 router.get('/:id', CertificateController.getCertificate as RequestHandler);
 

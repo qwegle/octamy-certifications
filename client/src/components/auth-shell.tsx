@@ -20,7 +20,7 @@ export function AuthShell({ eyebrow, title, description, highlights, children, w
         <div aria-hidden className="absolute -right-24 bottom-16 h-80 w-80 rounded-full bg-sky-400/20 blur-3xl" />
         <div aria-hidden className="absolute inset-0 opacity-[0.08] [background-image:linear-gradient(rgba(255,255,255,.5)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.5)_1px,transparent_1px)] [background-size:40px_40px]" />
 
-        <Link href="/" className="relative inline-flex w-fit items-center rounded-full bg-white px-4 py-2.5 shadow-lg">
+        <Link href="/" aria-label="Octamy home" className="relative inline-flex w-fit items-center rounded-full bg-white px-4 py-2.5 shadow-lg">
           <img src={octamyLogoDark} alt="Octamy" className="h-6 w-auto" />
         </Link>
 
@@ -52,7 +52,7 @@ export function AuthShell({ eyebrow, title, description, highlights, children, w
       <main id="main-content" className="relative flex min-h-screen items-center justify-center px-4 py-8 sm:px-8 lg:px-12 lg:py-12">
         <div className={`w-full ${wide ? 'max-w-2xl' : 'max-w-lg'}`}>
           <div className="mb-8 flex items-center justify-between lg:hidden">
-            <Link href="/" className="inline-flex items-center rounded-full bg-white px-3 py-2 shadow-sm ring-1 ring-slate-200">
+            <Link href="/" aria-label="Octamy home" className="inline-flex items-center rounded-full bg-white px-3 py-2 shadow-sm ring-1 ring-slate-200">
               <img src={octamyLogoDark} alt="Octamy" className="h-6 w-auto" />
             </Link>
             <Link href="/" className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-600 hover:text-slate-950">

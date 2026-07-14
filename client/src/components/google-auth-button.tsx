@@ -1,14 +1,21 @@
 import { Button } from '@/components/ui/button';
 import { useQuery } from '@tanstack/react-query';
+import { safeInternalReturnTo } from '@/lib/navigation-safety';
 
 interface GoogleAuthButtonProps {
   type: 'user' | 'seller';
   isLoading?: boolean;
   className?: string;
   hideWhenUnavailable?: boolean;
+  intent?: {
+    mode?: 'login' | 'register';
+    role?: 'learner' | 'creator' | 'institute';
+    plan?: string | null;
+    returnTo?: string | null;
+  };
 }
 
-export function GoogleAuthButton({ type, isLoading = false, className = "", hideWhenUnavailable = false }: GoogleAuthButtonProps) {
+export function GoogleAuthButton({ type, isLoading = false, className = "", hideWhenUnavailable = false, intent }: GoogleAuthButtonProps) {
   const { data, isLoading: isChecking } = useQuery<{ enabled: boolean }>({
     queryKey: ['/api/auth/google/status'],
     staleTime: 5 * 60 * 1000,
@@ -19,6 +26,24 @@ export function GoogleAuthButton({ type, isLoading = false, className = "", hide
 
   const handleGoogleAuth = () => {
     if (isLoading || !enabled) return;
+
+    if (type === 'user') {
+      try {
+        const returnTo = safeInternalReturnTo(
+          intent?.returnTo ?? `${window.location.pathname}${window.location.search}`,
+        );
+        localStorage.setItem('octamy.oauthIntent', JSON.stringify({
+          mode: intent?.mode || 'login',
+          role: intent?.role || 'learner',
+          plan: intent?.plan || null,
+          returnTo,
+          createdAt: Date.now(),
+        }));
+      } catch {
+        // OAuth still works if browser storage is unavailable; it will use the
+        // learner dashboard as the safe destination.
+      }
+    }
     
     const authUrl = type === 'user' 
       ? '/api/auth/google/user'

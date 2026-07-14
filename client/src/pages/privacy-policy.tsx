@@ -43,6 +43,15 @@ export default function PrivacyPolicy() {
                 <li>Apply for virtual internship programs</li>
               </ul>
               <p>This information may include your name, email address, payment information, assessment responses, and any other information you choose to provide.</p>
+              <div className="mt-4 rounded-xl border border-indigo-200 bg-indigo-50 p-4 text-sm text-indigo-950">
+                <p className="font-semibold">Scheduled exam evidence</p>
+                <p className="mt-2">
+                  All scheduled exams record consent, answer autosaves, heartbeats and connection interruptions for recovery. If an exam owner enables Browser Evidence, Octamy also records timestamped tab visibility, window focus, fullscreen and paste-occurrence events. Paste contents, clipboard contents, keystrokes, camera, microphone and screen contents are not collected.
+                </p>
+                <p className="mt-2">
+                  The authorised exam owner can review this evidence with the assessment result. These signals do not change a score automatically and are not an automated finding of misconduct.
+                </p>
+              </div>
             </section>
 
             <section className="mb-8">

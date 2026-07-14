@@ -7,7 +7,7 @@ import { apiRequest } from '@/lib/queryClient';
 import { useAuth } from '@/lib/auth.tsx';
 import { SEO } from '@/components/seo';
 
-type OwnerType = 'creator' | 'institute' | 'recruiter';
+type OwnerType = 'learner' | 'creator' | 'institute' | 'recruiter';
 
 export default function BillingReturn() {
   const [, setLocation] = useLocation();
@@ -17,7 +17,9 @@ export default function BillingReturn() {
   const expectedPlan = query.get('plan');
   const [state, setState] = useState<'checking' | 'active' | 'pending' | 'error'>('checking');
 
-  const dashboard = ownerType === 'creator'
+  const dashboard = ownerType === 'learner'
+    ? '/dashboard'
+    : ownerType === 'creator'
     ? '/creator/dashboard'
     : ownerType === 'institute'
       ? '/institute/dashboard'

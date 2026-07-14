@@ -1,4 +1,4 @@
-import { motion, useInView, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { motion, useInView, useMotionValue, useReducedMotion, useSpring, useTransform } from "framer-motion";
 import { useEffect, useRef, type ReactNode } from "react";
 
 interface RevealProps {
@@ -20,13 +20,14 @@ export function Reveal({
 }: RevealProps) {
   const ref = useRef<HTMLElement>(null);
   const inView = useInView(ref, { once, margin: "-60px" });
+  const reduceMotion = useReducedMotion();
   const Comp = motion[as] as any;
   return (
     <Comp
       ref={ref as any}
-      initial={{ opacity: 0, y }}
-      animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y }}
-      transition={{ duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] }}
+      initial={reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y }}
+      animate={reduceMotion || inView ? { opacity: 1, y: 0 } : { opacity: 0, y }}
+      transition={reduceMotion ? { duration: 0 } : { duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] }}
       className={className}
     >
       {children}
@@ -45,11 +46,12 @@ export function Stagger({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-60px" });
+  const reduceMotion = useReducedMotion();
   return (
     <motion.div
       ref={ref}
-      initial="hidden"
-      animate={inView ? "show" : "hidden"}
+      initial={reduceMotion ? "show" : "hidden"}
+      animate={reduceMotion || inView ? "show" : "hidden"}
       variants={{
         hidden: {},
         show: { transition: { staggerChildren: step, delayChildren: 0.05 } },
@@ -70,11 +72,12 @@ export function StaggerItem({
   className?: string;
   y?: number;
 }) {
+  const reduceMotion = useReducedMotion();
   return (
     <motion.div
       variants={{
-        hidden: { opacity: 0, y },
-        show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] } },
+        hidden: reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y },
+        show: { opacity: 1, y: 0, transition: reduceMotion ? { duration: 0 } : { duration: 0.55, ease: [0.22, 1, 0.36, 1] } },
       }}
       className={className}
     >
@@ -91,6 +94,7 @@ export function MagneticCard({
   className?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  const reduceMotion = useReducedMotion();
   const x = useMotionValue(0);
   const y = useMotionValue(0);
   const sx = useSpring(x, { stiffness: 220, damping: 18, mass: 0.4 });
@@ -99,6 +103,7 @@ export function MagneticCard({
   const rotateY = useTransform(sx, [-40, 40], [-6, 6]);
 
   function onMouseMove(e: React.MouseEvent<HTMLDivElement>) {
+    if (reduceMotion) return;
     const el = ref.current;
     if (!el) return;
     const rect = el.getBoundingClientRect();
@@ -118,9 +123,9 @@ export function MagneticCard({
       ref={ref}
       onMouseMove={onMouseMove}
       onMouseLeave={onLeave}
-      style={{ rotateX, rotateY, transformPerspective: 800 }}
-      whileHover={{ y: -4 }}
-      transition={{ type: "spring", stiffness: 220, damping: 18 }}
+      style={reduceMotion ? undefined : { rotateX, rotateY, transformPerspective: 800 }}
+      whileHover={reduceMotion ? undefined : { y: -4 }}
+      transition={reduceMotion ? { duration: 0 } : { type: "spring", stiffness: 220, damping: 18 }}
       className={className}
     >
       {children}
@@ -139,12 +144,15 @@ export function CountUp({
 }) {
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true, margin: "-40px" });
+  const reduceMotion = useReducedMotion();
   const mv = useMotionValue(0);
   const sp = useSpring(mv, { stiffness: 60, damping: 18, duration });
 
   useEffect(() => {
-    if (inView) mv.set(to);
-  }, [inView, to, mv]);
+    if (!inView) return;
+    if (reduceMotion && ref.current) ref.current.textContent = `${Math.round(to).toLocaleString()}${suffix}`;
+    else mv.set(to);
+  }, [inView, mv, reduceMotion, suffix, to]);
 
   useEffect(() => {
     return sp.on("change", (v: number) => {

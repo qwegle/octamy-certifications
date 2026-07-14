@@ -29,11 +29,14 @@ interface Transaction {
 interface WalletData {
   balance: string;
   transactions: Transaction[];
+  costs: { profile_view: number; cv_download: number; interview_access: number };
+  chargingModel: 'one_time_unlock';
+  rules: string[];
 }
 
 export default function RecruiterWallet() {
   const { toast } = useToast();
-  const { recruiter } = useRecruiterAuth();
+  const { updateRecruiter } = useRecruiterAuth();
   const [walletData, setWalletData] = useState<WalletData | null>(null);
   const [loading, setLoading] = useState(true);
   const [purchasingCredits, setPurchasingCredits] = useState<number | null>(null);
@@ -48,12 +51,12 @@ export default function RecruiterWallet() {
       if (response.ok) {
         const data = await response.json();
         setWalletData(data);
+        updateRecruiter({ creditsBalance: data.balance });
       }
     } catch (error) {
       toast({
-        title: 'Error',
-        description: 'Failed to fetch wallet data',
-        variant: 'destructive',
+        title: 'Wallet temporarily unavailable',
+        description: 'We could not refresh your balance. No wallet action was taken.',
       });
     } finally {
       setLoading(false);
@@ -95,9 +98,8 @@ export default function RecruiterWallet() {
     } catch (error) {
       console.error('Payment error:', error);
       toast({
-        title: 'Payment Error',
+        title: 'Checkout not started',
         description: error instanceof Error ? error.message : 'Failed to initiate payment. Please try again.',
-        variant: 'destructive',
       });
     } finally {
       setPurchasingCredits(null);
@@ -109,7 +111,7 @@ export default function RecruiterWallet() {
       case 'purchase':
         return <TrendingUp className="h-4 w-4 text-green-600" />;
       case 'spend':
-        return <TrendingDown className="h-4 w-4 text-red-600" />;
+        return <TrendingDown className="h-4 w-4 text-amber-600" />;
       case 'refund':
         return <TrendingUp className="h-4 w-4 text-blue-600" />;
       default:
@@ -140,14 +142,14 @@ export default function RecruiterWallet() {
         <div>
           <h1 className="text-3xl font-bold text-gray-900">My Wallet</h1>
           <p className="text-gray-600 mt-2">
-            Manage your credits and view transaction history
+            One balance, transparent one-time unlock costs, and a complete transaction trail.
           </p>
         </div>
 
         {/* Current Balance */}
         <Card className="bg-gradient-to-r from-black to-gray-800 text-white shadow-2xl">
           <CardContent className="p-8">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <div className="flex items-center space-x-3 mb-4">
                   <div className="bg-cream-soft bg-opacity-20 p-2 rounded-full">
@@ -158,15 +160,25 @@ export default function RecruiterWallet() {
                 <p className="text-4xl font-bold mb-2">{walletData?.balance || '0'}</p>
                 <p className="text-lg text-gray-300">Available Credits</p>
               </div>
-              <div className="text-right bg-cream-soft bg-opacity-10 p-4 rounded-lg">
-                <p className="text-sm font-semibold mb-3">Credit Pricing</p>
-                <div className="space-y-1 text-xs">
-                  <p className="flex justify-between"><span>Profile View:</span><span>1 credit</span></p>
-                  <p className="flex justify-between"><span>CV Download:</span><span>1 credit</span></p>
-                  <p className="flex justify-between"><span>Interview Data:</span><span>2 credits</span></p>
+              <div className="w-full rounded-xl bg-white/10 p-4 sm:w-72">
+                <p className="text-sm font-semibold mb-3">One-time unlock pricing</p>
+                <div className="space-y-2 text-xs text-slate-200">
+                  <p className="flex justify-between gap-6"><span>Candidate profile</span><span className="font-semibold text-white">{walletData?.costs?.profile_view ?? 1} credit</span></p>
+                  <p className="flex justify-between gap-6"><span>Shared CV</span><span className="font-semibold text-white">{walletData?.costs?.cv_download ?? 1} credit</span></p>
+                  <p className="flex justify-between gap-6"><span>Interview evidence</span><span className="font-semibold text-white">{walletData?.costs?.interview_access ?? 2} credits</span></p>
                 </div>
+                <p className="mt-3 border-t border-white/10 pt-3 text-xs text-slate-300">Reopen an unlocked item anytime for 0 credits.</p>
               </div>
             </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-sky-200 bg-sky-50/60">
+          <CardHeader className="pb-2"><CardTitle className="text-base text-sky-950">How credits are protected</CardTitle></CardHeader>
+          <CardContent>
+            <ul className="grid gap-2 text-sm text-sky-900 md:grid-cols-3">
+              {(walletData?.rules || []).map((rule) => <li key={rule} className="rounded-lg border border-sky-100 bg-white/80 p-3">{rule}</li>)}
+            </ul>
           </CardContent>
         </Card>
 
@@ -258,7 +270,7 @@ export default function RecruiterWallet() {
                           transaction.type === 'purchase'
                             ? 'text-green-600'
                             : transaction.type === 'spend'
-                            ? 'text-red-600'
+                            ? 'text-amber-700'
                             : 'text-blue-600'
                         }`}
                       >

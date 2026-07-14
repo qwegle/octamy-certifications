@@ -1,7 +1,6 @@
 import { Router, type Request, type Response } from 'express';
 import { execRows } from '../lib/db-exec';
 import { z } from 'zod';
-import { execRows } from '../lib/db-exec';
 import jwt from 'jsonwebtoken';
 import { db } from '../db';
 import { creators, institutes, recruiters, users } from '@shared/schema';

@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle, XCircle, Award, Clock, Target, TrendingUp } from "lucide-react";
+import { CheckCircle, XCircle, Award, Clock, Target, Loader2, ShieldCheck } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { useAuth } from "@/lib/auth.tsx";
 
 interface TempExamResults {
   tempExamId: string;
@@ -22,6 +23,9 @@ interface TempExamResults {
     price: string;
     originalPrice?: string;
     isOnSale?: boolean;
+    ownerType?: string;
+    subscriptionEligible?: boolean;
+    certificationMode?: string;
   };
   timeTaken: number;
   mastered: boolean;
@@ -38,6 +42,9 @@ export default function TempExamResults() {
   const [location, navigate] = useLocation();
   const [results, setResults] = useState<TempExamResults | null>(null);
   const [loading, setLoading] = useState(true);
+  const [learnerPlanActive, setLearnerPlanActive] = useState(false);
+  const [redeeming, setRedeeming] = useState(false);
+  const { user, token } = useAuth();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -47,17 +54,18 @@ export default function TempExamResults() {
     }
 
     fetchTempResults();
-  }, [tempExamId]);
+  }, [tempExamId, token]);
 
   const fetchTempResults = async () => {
     try {
-      const response = await fetch(`/api/exam-results-temp/${tempExamId}`);
-      if (!response.ok) {
-        throw new Error("Failed to fetch exam results");
-      }
-      
+      const response = await apiRequest("GET", `/api/exam-results-temp/${tempExamId}`);
       const data = await response.json();
       setResults(data);
+      if (token) {
+        const subscriptionResponse = await apiRequest("GET", "/api/me/subscription");
+        const subscriptionData = await subscriptionResponse.json();
+        setLearnerPlanActive(subscriptionData?.learner?.plan === "all_access" && subscriptionData?.learner?.status === "active");
+      }
     } catch (error) {
       console.error("Error fetching temp results:", error);
       toast({
@@ -77,6 +85,29 @@ export default function TempExamResults() {
     // Navigate to payment with temporary exam data
     const paymentUrl = `/payment?tempExamId=${tempExamId}&courseId=${results.course.id}`;
     navigate(paymentUrl);
+  };
+
+  const redeemSubscriptionCredential = async () => {
+    if (!results || !tempExamId) return;
+    if (!user || !token) {
+      navigate(`/login?next=${encodeURIComponent(`/exam-results-temp/${tempExamId}`)}`);
+      return;
+    }
+    setRedeeming(true);
+    try {
+      const response = await apiRequest("POST", "/api/subscriptions/learner/redeem", { tempExamId });
+      const data = await response.json();
+      toast({ title: "Credential issued", description: "Your All Access benefit was applied securely." });
+      navigate(data.redirectTo || `/certificate/${data.certificateId}`);
+    } catch (error) {
+      toast({
+        title: "Credential not issued",
+        description: error instanceof Error ? error.message : "Please retry from your results page.",
+        variant: "destructive",
+      });
+    } finally {
+      setRedeeming(false);
+    }
   };
 
   const formatTime = (seconds: number) => {
@@ -209,7 +240,23 @@ export default function TempExamResults() {
           </div>
 
           {/* Action Card */}
-          {results.passed && results.needsPayment && (
+          {results.passed && results.course.subscriptionEligible && learnerPlanActive && (
+            <Card className="mt-6 border-emerald-200 bg-emerald-50/70">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-emerald-950"><ShieldCheck className="h-5 w-5" />Included with Learner All Access</CardTitle>
+                <CardDescription>Your passing Octamy in-house assessment includes digital credential activation. No student checkout is required.</CardDescription>
+              </CardHeader>
+              <CardContent><Button onClick={redeemSubscriptionCredential} disabled={redeeming} size="lg" className="bg-emerald-800 text-white hover:bg-emerald-900">{redeeming && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Issue my included credential</Button></CardContent>
+            </Card>
+          )}
+
+          {results.passed && results.course.subscriptionEligible && !learnerPlanActive && (
+            <Card className="mt-6 border-violet-200 bg-violet-50/60">
+              <CardContent className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between"><div><p className="font-bold text-slate-950">This Octamy assessment is included in All Access</p><p className="mt-1 text-sm text-slate-600">₹1,999/month covers eligible in-house assessment credentials. Creator products are not included.</p></div><Button variant="outline" onClick={() => navigate("/pricing")}>View All Access</Button></CardContent>
+            </Card>
+          )}
+
+          {results.passed && results.needsPayment && !(results.course.subscriptionEligible && learnerPlanActive) && (
             <Card className="mt-6">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">

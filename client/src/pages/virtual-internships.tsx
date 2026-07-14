@@ -187,7 +187,7 @@ export default function VirtualInternshipsPage() {
     <div className="min-h-screen bg-cream-soft">
       <SEO
         title="Virtual Internships — Skill Verification Internship Program"
-        description="Assessment-based virtual internships in Data Analytics, AI, Cloud, Cybersecurity & more. Take a project assessment, earn a verified certificate. Not employment — pure skill verification."
+        description="Assessment-based skill programs in Data Analytics, AI, Cloud, Cybersecurity and more. Take a scored assessment and optionally activate a credential after passing. Not employment or supervised work experience."
         path="/virtual-internships"
       />
       <Header />
@@ -203,7 +203,7 @@ export default function VirtualInternshipsPage() {
               SKILL VERIFICATION INTERNSHIP PROGRAMS
             </h1>
             <p className="text-xl text-gray-300 mb-4 max-w-3xl mx-auto">
-              Take a free industry-aligned assessment, get evaluated, and — only if you pass — choose to receive a verified digital certificate. Build a credible portfolio without paying upfront.
+              Take a free role-relevant assessment and — only if you pass — choose whether to activate a digital credential whose score and current status can be inspected.
             </p>
             <p className="text-sm text-gray-400 max-w-3xl mx-auto mb-8">
               This program is an assessment and skill-certification initiative and does <strong>not</strong> constitute employment, a paid internship, or any guarantee of placement.

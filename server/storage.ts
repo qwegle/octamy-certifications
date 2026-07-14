@@ -105,7 +105,27 @@ import {
   type RatingAggregate,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, count, sql, or, asc, ilike, gte, lte } from "drizzle-orm";
+import { eq, and, desc, count, sql, or, asc, ilike, gte, gt, lte, isNull } from "drizzle-orm";
+
+export const RECRUITER_ACCESS_COSTS = {
+  profile_view: 1,
+  cv_download: 1,
+  interview_access: 2,
+} as const;
+
+export type RecruiterAccessType = keyof typeof RECRUITER_ACCESS_COSTS;
+
+export class RecruiterAccessError extends Error {
+  constructor(
+    message: string,
+    public readonly statusCode: number,
+    public readonly code: string,
+    public readonly details?: Record<string, unknown>,
+  ) {
+    super(message);
+    this.name = 'RecruiterAccessError';
+  }
+}
 
 export interface IStorage {
   // User operations
@@ -159,7 +179,7 @@ export interface IStorage {
   createCertificate(certificate: InsertCertificate): Promise<Certificate>;
   getCertificate(id: number): Promise<Certificate | undefined>;
   getCertificateByCertificateId(certificateId: string): Promise<Certificate | undefined>;
-  getUserCertificates(userId: number): Promise<Certificate[]>;
+  getUserCertificates(userId: number, userEmail?: string): Promise<Certificate[]>;
   updateCertificatePayment(id: number, updates: { isPaid: boolean; paymentId: string }): Promise<void>;
 
   // Payment operations
@@ -280,6 +300,7 @@ export interface IStorage {
     isRecruiter: boolean;
     isSeller: boolean;
     isAdmin: boolean;
+    instituteRole: "owner" | "admin" | "teacher" | "staff" | null;
   }>;
 
   // ===== P1 Question Bank Pro =====
@@ -305,7 +326,7 @@ export interface IStorage {
     imageUrl?: string | null;
     codeLanguage?: string | null;
   }): Promise<Question>;
-  updateQuestionWithVersioning(id: number, data: Record<string, unknown>, changedBy?: number, changeNote?: string): Promise<Question | undefined>;
+  updateQuestionWithVersioning(id: number, data: Record<string, unknown>, changedBy?: number, changeNote?: string, expectedVersion?: number): Promise<Question | undefined>;
   deleteBankQuestion(id: number): Promise<void>;
   bulkCreateQuestions(bankId: number, rows: Array<Record<string, unknown>>, createdBy?: number): Promise<{ created: number; errors: Array<{ row: number; message: string }> }>;
   listQuestionsByBank(bankId: number, opts: { topicId?: number; format?: string; search?: string; page?: number; perPage?: number }): Promise<{ items: Question[]; total: number; page: number; perPage: number }>;
@@ -411,7 +432,9 @@ export class DatabaseStorage implements IStorage {
 
   // Category operations
   async getCategories(): Promise<Category[]> {
-    return await db.select().from(categories);
+    return await db.select().from(categories)
+      .where(eq(categories.isActive, true))
+      .orderBy(asc(categories.sortOrder), asc(categories.name));
   }
 
   async createCategory(insertCategory: InsertCategory): Promise<Category> {
@@ -430,11 +453,19 @@ export class DatabaseStorage implements IStorage {
         description: categories.description,
         slug: categories.slug,
         icon: categories.icon,
+        parentId: categories.parentId,
+        kind: categories.kind,
+        isActive: categories.isActive,
+        sortOrder: categories.sortOrder,
+        metaTitle: categories.metaTitle,
+        metaDescription: categories.metaDescription,
+        createdAt: categories.createdAt,
+        updatedAt: categories.updatedAt,
         courseCount: sql<number>`count(${courses.id})::int`
       })
       .from(categories)
       .leftJoin(courses, eq(categories.id, courses.categoryId))
-      .groupBy(categories.id, categories.name, categories.description, categories.slug, categories.icon)
+      .groupBy(categories.id)
       .orderBy(categories.name);
     
     return categoriesWithCounts;
@@ -468,6 +499,8 @@ export class DatabaseStorage implements IStorage {
         duration: courses.duration,
         passingScore: courses.passingScore,
         price: courses.price,
+        productType: courses.productType,
+        contentPrice: courses.contentPrice,
         originalPrice: courses.originalPrice,
         isOnSale: courses.isOnSale,
         saleEndDate: courses.saleEndDate,
@@ -476,9 +509,17 @@ export class DatabaseStorage implements IStorage {
         isInternship: courses.isInternship,
         metaTitle: courses.metaTitle,
         metaDescription: courses.metaDescription,
+        thumbnailUrl: courses.thumbnailUrl,
         ownerType: courses.ownerType,
         ownerId: courses.ownerId,
         visibility: courses.visibility,
+        language: courses.language,
+        certificationMode: courses.certificationMode,
+        reviewStatus: courses.reviewStatus,
+        defaultReviewPolicy: courses.defaultReviewPolicy,
+        subscriptionEligible: courses.subscriptionEligible,
+        resellerEligible: courses.resellerEligible,
+        featuredAt: courses.featuredAt,
         useBlueprintEngine: courses.useBlueprintEngine,
         createdAt: courses.createdAt,
         category: {
@@ -487,6 +528,14 @@ export class DatabaseStorage implements IStorage {
           description: categories.description,
           icon: categories.icon,
           slug: categories.slug,
+          parentId: categories.parentId,
+          kind: categories.kind,
+          isActive: categories.isActive,
+          sortOrder: categories.sortOrder,
+          metaTitle: categories.metaTitle,
+          metaDescription: categories.metaDescription,
+          createdAt: categories.createdAt,
+          updatedAt: categories.updatedAt,
         }
       })
       .from(courses)
@@ -494,6 +543,9 @@ export class DatabaseStorage implements IStorage {
       .where(and(
         eq(courses.isActive, true),
         eq(courses.visibility, "public"),
+        eq(courses.reviewStatus, "approved"),
+        sql`${courses.ownerType} <> 'institute'`,
+        eq(categories.isActive, true),
         categoryId ? eq(courses.categoryId, categoryId) : undefined,
       ));
 
@@ -524,6 +576,8 @@ export class DatabaseStorage implements IStorage {
         duration: courses.duration,
         passingScore: courses.passingScore,
         price: courses.price,
+        productType: courses.productType,
+        contentPrice: courses.contentPrice,
         originalPrice: courses.originalPrice,
         isOnSale: courses.isOnSale,
         saleEndDate: courses.saleEndDate,
@@ -532,9 +586,17 @@ export class DatabaseStorage implements IStorage {
         isInternship: courses.isInternship,
         metaTitle: courses.metaTitle,
         metaDescription: courses.metaDescription,
+        thumbnailUrl: courses.thumbnailUrl,
         ownerType: courses.ownerType,
         ownerId: courses.ownerId,
         visibility: courses.visibility,
+        language: courses.language,
+        certificationMode: courses.certificationMode,
+        reviewStatus: courses.reviewStatus,
+        defaultReviewPolicy: courses.defaultReviewPolicy,
+        subscriptionEligible: courses.subscriptionEligible,
+        resellerEligible: courses.resellerEligible,
+        featuredAt: courses.featuredAt,
         useBlueprintEngine: courses.useBlueprintEngine,
         createdAt: courses.createdAt,
         category: {
@@ -543,6 +605,14 @@ export class DatabaseStorage implements IStorage {
           description: categories.description,
           icon: categories.icon,
           slug: categories.slug,
+          parentId: categories.parentId,
+          kind: categories.kind,
+          isActive: categories.isActive,
+          sortOrder: categories.sortOrder,
+          metaTitle: categories.metaTitle,
+          metaDescription: categories.metaDescription,
+          createdAt: categories.createdAt,
+          updatedAt: categories.updatedAt,
         }
       })
       .from(courses)
@@ -551,6 +621,9 @@ export class DatabaseStorage implements IStorage {
         eq(courses.slug, slug),
         eq(courses.isActive, true),
         eq(courses.visibility, "public"),
+        eq(courses.reviewStatus, "approved"),
+        sql`${courses.ownerType} <> 'institute'`,
+        eq(categories.isActive, true),
       ));
 
     const [result] = await query;
@@ -564,7 +637,11 @@ export class DatabaseStorage implements IStorage {
     return await db
       .select()
       .from(questions)
-      .where(and(eq(questions.courseId, courseId), eq(questions.isActive, true)));
+      .where(and(
+        eq(questions.courseId, courseId),
+        eq(questions.isActive, true),
+        eq(questions.reviewStatus, "approved"),
+      ));
   }
 
 
@@ -668,11 +745,21 @@ export class DatabaseStorage implements IStorage {
     return certificate || undefined;
   }
 
-  async getUserCertificates(userId: number): Promise<Certificate[]> {
+  async getUserCertificates(userId: number, userEmail?: string): Promise<Certificate[]> {
     return await db
       .select()
       .from(certificates)
-      .where(eq(certificates.userId, userId))
+      .where(
+        userEmail
+          ? or(
+              eq(certificates.userId, userId),
+              and(
+                isNull(certificates.userId),
+                sql`lower(${certificates.userEmail}) = lower(${userEmail})`,
+              ),
+            )
+          : eq(certificates.userId, userId),
+      )
       .orderBy(desc(certificates.issuedAt));
   }
 
@@ -1138,7 +1225,6 @@ export class DatabaseStorage implements IStorage {
   async getRecentCertificates(limit: number = 10): Promise<any[]> {
     const recentCerts = await db
       .select({
-        userName: certificates.userName,
         courseTitle: certificates.courseTitle,
         badge: certificates.badge,
         issuedAt: certificates.issuedAt,
@@ -1150,7 +1236,7 @@ export class DatabaseStorage implements IStorage {
       .limit(limit);
 
     return recentCerts.map(cert => ({
-      name: cert.userName,
+      name: "Octamy learner",
       course: cert.courseTitle,
       badge: cert.badge,
       company: "Professional", // Generic company name for privacy
@@ -1176,20 +1262,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getContactSubmissions(search?: string): Promise<ContactSubmission[]> {
-    let query = db.select().from(contactSubmissions);
-    
-    if (search) {
-      query = query.where(
-        or(
-          ilike(contactSubmissions.name, `%${search}%`),
-          ilike(contactSubmissions.email, `%${search}%`),
-          ilike(contactSubmissions.subject, `%${search}%`),
-          ilike(contactSubmissions.message, `%${search}%`)
-        )
-      );
-    }
-    
-    return await query.orderBy(desc(contactSubmissions.submittedAt));
+    return await db
+      .select()
+      .from(contactSubmissions)
+      .where(search
+        ? or(
+            ilike(contactSubmissions.name, `%${search}%`),
+            ilike(contactSubmissions.email, `%${search}%`),
+            ilike(contactSubmissions.subject, `%${search}%`),
+            ilike(contactSubmissions.message, `%${search}%`)
+          )
+        : undefined)
+      .orderBy(desc(contactSubmissions.submittedAt));
   }
 
   async updateContactSubmissionStatus(id: number, status: string, adminNotes?: string): Promise<ContactSubmission> {
@@ -1209,48 +1293,29 @@ export class DatabaseStorage implements IStorage {
   async getQuestionsForAdmin(courseId?: number, search?: string): Promise<any[]> {
     try {
       console.log('getQuestionsForAdmin called with:', { courseId, search });
-      
-      // Build SQL query dynamically - this approach works for filtered queries
-      let baseQuery = `
-        SELECT 
-          q.id, 
-          q.question, 
-          q.course_id as "courseId", 
-          q.options, 
-          q.correct_answer as "correctAnswer",
-          q.difficulty,
-          q.is_active as "isActive",
-          json_build_object('title', c.title) as course
-        FROM questions q 
-        LEFT JOIN courses c ON q.course_id = c.id
-      `;
-      
-      const whereConditions = [];
-      const queryParams = [];
-      
-      if (courseId) {
-        whereConditions.push(`q.course_id = $${queryParams.length + 1}`);
-        queryParams.push(courseId);
-      }
-      
-      if (search) {
-        whereConditions.push(`q.question ILIKE $${queryParams.length + 1}`);
-        queryParams.push(`%${search}%`);
-      }
-      
-      if (whereConditions.length > 0) {
-        baseQuery += ` WHERE ${whereConditions.join(' AND ')}`;
-      }
-      
-      baseQuery += ` ORDER BY q.id DESC LIMIT 50`;
-      
-      console.log('Executing SQL:', baseQuery);
-      console.log('With parameters:', queryParams);
-      
-      const result = await db.execute(sql.raw(baseQuery, queryParams));
-      console.log('SQL result rows:', result.rows.length);
-      
-      return result.rows;
+
+      const result = await db
+        .select({
+          id: questions.id,
+          question: questions.question,
+          courseId: questions.courseId,
+          options: questions.options,
+          correctAnswer: questions.correctAnswer,
+          difficulty: questions.difficulty,
+          isActive: questions.isActive,
+          course: sql<{ title: string | null }>`json_build_object('title', ${courses.title})`,
+        })
+        .from(questions)
+        .leftJoin(courses, eq(questions.courseId, courses.id))
+        .where(and(
+          courseId ? eq(questions.courseId, courseId) : undefined,
+          search ? ilike(questions.question, `%${search}%`) : undefined,
+        ))
+        .orderBy(desc(questions.id))
+        .limit(50);
+
+      console.log('SQL result rows:', result.length);
+      return result;
     } catch (error) {
       console.error('Error in getQuestionsForAdmin:', error);
       throw error;
@@ -1259,23 +1324,20 @@ export class DatabaseStorage implements IStorage {
 
   // Interview question management for admin
   async getInterviewQuestionsForAdmin(technology?: string, search?: string): Promise<any[]> {
-    let query = db.select().from(interviewQuestions);
-
-    if (technology) {
-      query = query.where(eq(interviewQuestions.technology, technology));
-    }
-
-    if (search) {
-      query = query.where(
-        or(
-          ilike(interviewQuestions.title, `%${search}%`),
-          ilike(interviewQuestions.question, `%${search}%`),
-          ilike(interviewQuestions.technology, `%${search}%`)
-        )
-      );
-    }
-
-    return await query.orderBy(desc(interviewQuestions.createdAt));
+    return await db
+      .select()
+      .from(interviewQuestions)
+      .where(and(
+        technology ? eq(interviewQuestions.technology, technology) : undefined,
+        search
+          ? or(
+              ilike(interviewQuestions.title, `%${search}%`),
+              ilike(interviewQuestions.question, `%${search}%`),
+              ilike(interviewQuestions.technology, `%${search}%`)
+            )
+          : undefined,
+      ))
+      .orderBy(desc(interviewQuestions.createdAt));
   }
 
   async createInterviewQuestion(questionData: any): Promise<any> {
@@ -1307,7 +1369,7 @@ export class DatabaseStorage implements IStorage {
     const result = await db
       .delete(interviewQuestions)
       .where(eq(interviewQuestions.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount ?? 0) > 0;
   }
 
   async updateSellerApproval(sellerId: number, approved: boolean): Promise<void> {
@@ -1326,8 +1388,7 @@ export class DatabaseStorage implements IStorage {
       .update(payments)
       .set({
         status,
-        paymentResponse: JSON.stringify(paymentResponse),
-        updatedAt: new Date()
+        gatewayStatusRaw: paymentResponse,
       })
       .where(eq(payments.transactionId, transactionId));
   }
@@ -1340,8 +1401,10 @@ export class DatabaseStorage implements IStorage {
       status: data.status || 'available',
       paymentId: data.paymentId,
       title: data.title,
-      isPaid: data.isPaid || false,
-      amount: data.amount || 0,
+      totalQuestions: data.totalQuestions ?? 0,
+      completedQuestions: data.completedQuestions ?? 0,
+      paymentStatus: data.paymentStatus ?? (data.isPaid ? 'paid' : 'pending'),
+      paymentAmount: String(data.paymentAmount ?? data.amount ?? 0),
       createdAt: new Date(),
     }).returning();
     
@@ -1397,7 +1460,7 @@ export class DatabaseStorage implements IStorage {
   async createUserPreferences(preferences: InsertUserPreferences): Promise<UserPreferences> {
     const [prefs] = await db
       .insert(userPreferences)
-      .values(preferences)
+      .values(preferences as typeof userPreferences.$inferInsert)
       .returning();
     return prefs;
   }
@@ -1405,7 +1468,10 @@ export class DatabaseStorage implements IStorage {
   async updateUserPreferences(userId: number, preferences: Partial<InsertUserPreferences>): Promise<UserPreferences> {
     const [prefs] = await db
       .update(userPreferences)
-      .set({ ...preferences, updatedAt: new Date() })
+      .set({
+        ...(preferences as Partial<typeof userPreferences.$inferInsert>),
+        updatedAt: new Date(),
+      })
       .where(eq(userPreferences.userId, userId))
       .returning();
     return prefs;
@@ -1424,7 +1490,7 @@ export class DatabaseStorage implements IStorage {
   async createNotification(notification: InsertNotification): Promise<Notification> {
     const [notif] = await db
       .insert(notifications)
-      .values(notification)
+      .values(notification as typeof notifications.$inferInsert)
       .returning();
     return notif;
   }
@@ -1461,7 +1527,7 @@ export class DatabaseStorage implements IStorage {
   async createCourseRecommendation(recommendation: InsertCourseRecommendation): Promise<CourseRecommendation> {
     const [rec] = await db
       .insert(courseRecommendations)
-      .values(recommendation)
+      .values(recommendation as typeof courseRecommendations.$inferInsert)
       .returning();
     return rec;
   }
@@ -1484,40 +1550,32 @@ export class DatabaseStorage implements IStorage {
   async recordUserActivity(activity: InsertUserActivity): Promise<UserActivity> {
     const [act] = await db
       .insert(userActivity)
-      .values(activity)
+      .values(activity as typeof userActivity.$inferInsert)
       .returning();
     return act;
   }
 
   async getUserActivity(userId: number, activityType?: string): Promise<UserActivity[]> {
-    const query = db
+    return await db
       .select()
       .from(userActivity)
-      .where(eq(userActivity.userId, userId))
-      .orderBy(desc(userActivity.createdAt));
-
-    if (activityType) {
-      return await query.where(and(
+      .where(and(
         eq(userActivity.userId, userId),
-        eq(userActivity.activityType, activityType)
-      ));
-    }
-
-    return await query;
+        activityType ? eq(userActivity.activityType, activityType) : undefined,
+      ))
+      .orderBy(desc(userActivity.createdAt));
   }
 
   // Course progress operations
   async getUserCourseProgress(userId: number, courseId?: number): Promise<UserCourseProgress[]> {
-    let query = db.select().from(userCourseProgress).where(eq(userCourseProgress.userId, userId));
-    
-    if (courseId) {
-      query = query.where(and(
+    return await db
+      .select()
+      .from(userCourseProgress)
+      .where(and(
         eq(userCourseProgress.userId, userId),
-        eq(userCourseProgress.courseId, courseId)
-      ));
-    }
-    
-    return await query.orderBy(desc(userCourseProgress.updatedAt));
+        courseId ? eq(userCourseProgress.courseId, courseId) : undefined,
+      ))
+      .orderBy(desc(userCourseProgress.updatedAt));
   }
 
   async upsertUserCourseProgress(progress: InsertUserCourseProgress): Promise<UserCourseProgress> {
@@ -1555,16 +1613,14 @@ export class DatabaseStorage implements IStorage {
 
   // Achievement operations
   async getAchievements(category?: string): Promise<Achievement[]> {
-    let query = db.select().from(achievements).where(eq(achievements.isActive, true));
-    
-    if (category) {
-      query = query.where(and(
+    return await db
+      .select()
+      .from(achievements)
+      .where(and(
         eq(achievements.isActive, true),
-        eq(achievements.category, category)
-      ));
-    }
-    
-    return await query.orderBy(achievements.tier, achievements.points);
+        category ? eq(achievements.category, category) : undefined,
+      ))
+      .orderBy(achievements.tier, achievements.points);
   }
 
   async createAchievement(achievement: InsertAchievement): Promise<Achievement> {
@@ -1589,7 +1645,7 @@ export class DatabaseStorage implements IStorage {
           achievement: achievements
         })
         .from(userAchievements)
-        .leftJoin(achievements, eq(userAchievements.achievementId, achievements.id))
+        .innerJoin(achievements, eq(userAchievements.achievementId, achievements.id))
         .where(eq(userAchievements.userId, userId))
         .orderBy(desc(userAchievements.unlockedAt));
     }
@@ -1789,22 +1845,20 @@ export class DatabaseStorage implements IStorage {
   async createSkillAssessment(assessment: InsertSkillAssessment): Promise<SkillAssessment> {
     const [result] = await db
       .insert(skillAssessments)
-      .values(assessment)
+      .values(assessment as typeof skillAssessments.$inferInsert)
       .returning();
     return result;
   }
 
   async getUserSkillAssessments(userId: number, categoryId?: number): Promise<SkillAssessment[]> {
-    let query = db
+    return await db
       .select()
       .from(skillAssessments)
-      .where(eq(skillAssessments.userId, userId));
-
-    if (categoryId) {
-      query = query.where(eq(skillAssessments.categoryId, categoryId));
-    }
-
-    return await query.orderBy(desc(skillAssessments.createdAt));
+      .where(and(
+        eq(skillAssessments.userId, userId),
+        categoryId ? eq(skillAssessments.categoryId, categoryId) : undefined,
+      ))
+      .orderBy(desc(skillAssessments.createdAt));
   }
 
   async getValidSkillAssessment(userId: number, categoryId: number): Promise<SkillAssessment | undefined> {
@@ -1913,11 +1967,25 @@ export class DatabaseStorage implements IStorage {
       duration: courses.duration,
       passingScore: courses.passingScore,
       price: courses.price,
+      productType: courses.productType,
+      contentPrice: courses.contentPrice,
       originalPrice: courses.originalPrice,
       isOnSale: courses.isOnSale,
       level: courses.level,
       isActive: courses.isActive,
       isInternship: courses.isInternship,
+      ownerType: courses.ownerType,
+      ownerId: courses.ownerId,
+      visibility: courses.visibility,
+      language: courses.language,
+      certificationMode: courses.certificationMode,
+      reviewStatus: courses.reviewStatus,
+      defaultReviewPolicy: courses.defaultReviewPolicy,
+      subscriptionEligible: courses.subscriptionEligible,
+      resellerEligible: courses.resellerEligible,
+      featuredAt: courses.featuredAt,
+      thumbnailUrl: courses.thumbnailUrl,
+      useBlueprintEngine: courses.useBlueprintEngine,
       createdAt: courses.createdAt,
       enrollmentCount: sql`(SELECT COUNT(*) FROM exam_attempts WHERE course_id = ${courses.id})::int`.as('enrollmentCount'),
       revenue: sql`COALESCE((SELECT SUM(CAST(certificate_amount AS DECIMAL)) FROM payments p JOIN certificates c ON p.certificate_id = c.id WHERE c.course_id = ${courses.id} AND p.status = 'completed'), 0)::int`.as('revenue'),
@@ -2029,7 +2097,9 @@ export class DatabaseStorage implements IStorage {
       clickCount: Number(seller.clickCount) || 0,
       conversionCount: Number(seller.conversionCount) || 0,
       totalEarnings: Number(seller.totalEarnings) || 0,
-      conversionRate: seller.clickCount > 0 ? ((Number(seller.conversionCount) / Number(seller.clickCount)) * 100).toFixed(2) : '0.00'
+      conversionRate: Number(seller.clickCount) > 0
+        ? ((Number(seller.conversionCount) / Number(seller.clickCount)) * 100).toFixed(2)
+        : '0.00'
     }));
   }
 
@@ -2048,7 +2118,7 @@ export class DatabaseStorage implements IStorage {
     })
     .from(withdrawalRequests)
     .leftJoin(sellers, eq(withdrawalRequests.sellerId, sellers.id))
-    .orderBy(desc(withdrawalRequests.requestedAt));
+    .orderBy(desc(withdrawalRequests.createdAt));
   }
 
   // Get recent transactions
@@ -2138,16 +2208,13 @@ export class DatabaseStorage implements IStorage {
     return course;
   }
 
-  async deleteCourse(courseId: number) {
+  async deleteCourse(courseId: number): Promise<void> {
     // First delete related data
     await db.delete(questions).where(eq(questions.courseId, courseId));
     await db.delete(examAttempts).where(eq(examAttempts.courseId, courseId));
     
     // Then delete the course
-    const [course] = await db.delete(courses)
-      .where(eq(courses.id, courseId))
-      .returning();
-    return course;
+    await db.delete(courses).where(eq(courses.id, courseId));
   }
 
   async getCourseQuestions(courseId: number) {
@@ -2156,14 +2223,30 @@ export class DatabaseStorage implements IStorage {
 
   async createQuestion(questionData: any) {
     try {
-      console.log('Creating question with data:', questionData);
       const [question] = await db.insert(questions).values(questionData).returning();
-      console.log('Question created:', question);
       return question;
     } catch (error) {
       console.error('Error creating question:', error);
       throw error;
     }
+  }
+
+  async updateQuestion(id: number, questionData: Partial<InsertQuestion>): Promise<Question> {
+    const [question] = await db
+      .update(questions)
+      .set(questionData as Partial<typeof questions.$inferInsert>)
+      .where(eq(questions.id, id))
+      .returning();
+
+    if (!question) {
+      throw new Error('Question not found');
+    }
+
+    return question;
+  }
+
+  async deleteQuestion(id: number): Promise<void> {
+    await db.delete(questions).where(eq(questions.id, id));
   }
 
   // Admin course management with comprehensive data
@@ -2199,7 +2282,8 @@ export class DatabaseStorage implements IStorage {
       )`.as('revenue')
     })
     .from(courses)
-    .leftJoin(categories, eq(courses.categoryId, categories.id));
+    .leftJoin(categories, eq(courses.categoryId, categories.id))
+    .$dynamic();
 
     if (search) {
       query = query.where(
@@ -2248,7 +2332,8 @@ export class DatabaseStorage implements IStorage {
       userEmail: sql`COALESCE((SELECT email FROM users WHERE id = ${payments.userId}), 'No Email')`.as('userEmail'),
       certificateId: payments.certificateId
     })
-    .from(payments);
+    .from(payments)
+    .$dynamic();
 
     if (search) {
       query = query.where(
@@ -2340,7 +2425,7 @@ export class DatabaseStorage implements IStorage {
       address,
       paymentGateway: 'PayUMoney',
       paymentMethod: transaction.paymentMethod,
-      gatewayTransactionId: transaction.payumoney_txnid || transaction.razorpayPaymentId,
+      gatewayTransactionId: transaction.transactionId,
       completedAt: transaction.createdAt
     };
   }
@@ -2366,7 +2451,8 @@ export class DatabaseStorage implements IStorage {
         SELECT COUNT(*) FROM sales WHERE seller_id = ${sellers.id}
       )`.as('conversionCount')
     })
-    .from(sellers);
+    .from(sellers)
+    .$dynamic();
 
     if (search) {
       query = query.where(
@@ -2399,7 +2485,8 @@ export class DatabaseStorage implements IStorage {
       courseTitle: sql`(SELECT title FROM courses WHERE id = ${examAttempts.courseId})`.as('courseTitle'),
       passed: sql`CASE WHEN ${examAttempts.score} >= (SELECT passing_score FROM courses WHERE id = ${examAttempts.courseId}) THEN true ELSE false END`.as('passed')
     })
-    .from(examAttempts);
+    .from(examAttempts)
+    .$dynamic();
 
     if (search) {
       query = query.where(
@@ -2444,14 +2531,17 @@ export class DatabaseStorage implements IStorage {
 
   // Create question (admin)
   async createQuestionAdmin(questionData: InsertQuestion) {
-    const [question] = await db.insert(questions).values(questionData).returning();
+    const [question] = await db
+      .insert(questions)
+      .values(questionData as typeof questions.$inferInsert)
+      .returning();
     return question;
   }
 
   // Update question (admin)
   async updateQuestionAdmin(id: number, updates: Partial<InsertQuestion>) {
     const [question] = await db.update(questions)
-      .set(updates)
+      .set(updates as Partial<typeof questions.$inferInsert>)
       .where(eq(questions.id, id))
       .returning();
     return question;
@@ -2605,7 +2695,7 @@ export class DatabaseStorage implements IStorage {
   async updateRecruiterCredits(recruiterId: number, newCredits: number) {
     await db.update(recruiters)
       .set({
-        credits: newCredits,
+        creditsBalance: newCredits.toFixed(2),
         updatedAt: new Date()
       })
       .where(eq(recruiters.id, recruiterId));
@@ -2654,221 +2744,420 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
-  async searchCandidates(filters: any = {}, page: number = 1, limit: number = 10) {
-    try {
-      const safePage = Math.max(1, Number(page) || 1);
-      const safeLimit = Math.min(50, Math.max(1, Number(limit) || 10));
-      const offset = (safePage - 1) * safeLimit;
-      const conditions: any[] = [eq(users.profileVisibility, true), eq(users.isAdmin, false)];
+  async searchCandidates(recruiterId: number, filters: any = {}, page: number = 1, limit: number = 10) {
+    const safeFilters = filters && typeof filters === 'object' ? filters : {};
+    const safePage = Math.max(1, Number(page) || 1);
+    const safeLimit = Math.min(50, Math.max(1, Number(limit) || 10));
+    const offset = (safePage - 1) * safeLimit;
 
-      if (typeof filters.location === 'string' && filters.location.trim()) {
-        conditions.push(ilike(users.location, `%${filters.location.trim()}%`));
-      }
-      const minExperience = Number(filters.experience?.min);
-      const maxExperience = Number(filters.experience?.max);
-      if (Number.isFinite(minExperience)) conditions.push(gte(users.experience, Math.max(0, minExperience)));
-      if (Number.isFinite(maxExperience)) conditions.push(lte(users.experience, Math.max(0, maxExperience)));
-      if (typeof filters.availability === 'string' && filters.availability) conditions.push(eq(users.availability, filters.availability));
-      if (typeof filters.noticePeriod === 'string' && filters.noticePeriod) conditions.push(eq(users.noticePeriod, filters.noticePeriod));
+    // Discovery is always learner-controlled and evidence-backed. An active
+    // institute affiliation adds a second gate: at least one affiliated,
+    // verified institute must explicitly enable recruiter discovery.
+    const hasCurrentEvidence = sql`EXISTS (
+      SELECT 1 FROM certificates c
+      WHERE c.user_id = ${users.id}
+        AND c.is_active = true
+        AND c.is_paid = true
+        AND c.expires_at > NOW()
+    )`;
+    const institutePolicyAllowsDiscovery = sql`(
+      NOT EXISTS (
+        SELECT 1 FROM cohort_students cs
+        WHERE cs.status = 'active'
+          AND (cs.user_id = ${users.id} OR lower(cs.email) = lower(${users.email}))
+      )
+      OR EXISTS (
+        SELECT 1
+        FROM cohort_students cs
+        JOIN institutes i ON i.id = cs.institute_id
+        WHERE cs.status = 'active'
+          AND (cs.user_id = ${users.id} OR lower(cs.email) = lower(${users.email}))
+          AND i.status = 'verified'
+          AND i.recruiter_discovery_enabled = true
+      )
+    )`;
+    const conditions: any[] = [
+      eq(users.profileVisibility, true),
+      eq(users.isAdmin, false),
+      hasCurrentEvidence,
+      institutePolicyAllowsDiscovery,
+    ];
 
-      const requestedSkills = [...(Array.isArray(filters.skills) ? filters.skills : []), ...(Array.isArray(filters.technology) ? filters.technology : [])]
-        .map((value: unknown) => String(value).trim())
-        .filter(Boolean);
-      if (requestedSkills.length) conditions.push(sql`${users.skills} && ${requestedSkills}::text[]`);
-      if (Array.isArray(filters.workType) && filters.workType.length) conditions.push(sql`${users.workType} && ${filters.workType}::text[]`);
-      if (Array.isArray(filters.category) && filters.category.length) conditions.push(sql`${users.category} && ${filters.category}::text[]`);
-      if (filters.hasCertificates) conditions.push(sql`EXISTS (SELECT 1 FROM certificates c WHERE c.user_id = ${users.id} AND c.is_active = true AND c.is_paid = true)`);
-      if (filters.hasInterviews) conditions.push(sql`EXISTS (SELECT 1 FROM interviews i WHERE i.user_id = ${users.id})`);
-      const minScore = Number(filters.minScore);
-      if (Number.isFinite(minScore) && minScore > 0) {
-        conditions.push(sql`EXISTS (SELECT 1 FROM certificates c WHERE c.user_id = ${users.id} AND c.is_active = true AND c.is_paid = true AND c.score >= ${Math.min(100, minScore)})`);
-      }
-
-      const whereClause = and(...conditions);
-      const allCandidates = await db.select({
-        id: users.id,
-        name: users.name,
-        location: users.location,
-        experience: users.experience,
-        currentRole: users.currentRole,
-        skills: users.skills,
-        availability: users.availability,
-        noticePeriod: users.noticePeriod,
-        workType: users.workType,
-        category: users.category,
-        profileCompleteness: users.profileCompleteness,
-        lastActive: users.lastActive,
-      }).from(users)
-        .where(whereClause)
-        .orderBy(desc(users.lastActive))
-        .limit(safeLimit)
-        .offset(offset);
-
-      // Get additional details for each candidate
-      const candidatesWithDetails = await Promise.all(
-        allCandidates.map(async (candidate) => {
-          // Get certificates
-          const certs = await db.select({
-            id: certificates.id,
-            courseTitle: certificates.courseTitle,
-            score: certificates.score,
-            badge: certificates.badge
-          })
-          .from(certificates)
-          .where(eq(certificates.userId, candidate.id))
-          .limit(3);
-
-          // Get interviews
-          const userInterviews = await db.select({
-            id: interviews.id,
-            technology: interviews.technology,
-            score: interviews.score,
-            grade: interviews.grade
-          })
-          .from(interviews)
-          .where(eq(interviews.userId, candidate.id))
-          .limit(3);
-
-          return {
-            ...candidate,
-            certificates: certs,
-            interviews: userInterviews,
-            profileViews: 0
-          };
-        })
-      );
-
-      // Get total count
-      const totalResult = await db.select({ count: sql`count(*)` }).from(users).where(whereClause);
-      const total = Number(totalResult[0]?.count) || 0;
-
-      return {
-        candidates: candidatesWithDetails,
-        total,
-        page: safePage,
-        totalPages: Math.ceil(total / safeLimit)
-      };
-    } catch (error) {
-      console.error('Search error:', error);
-      return {
-        candidates: [],
-        total: 0,
-        page,
-        totalPages: 0
-      };
+    if (typeof safeFilters.location === 'string' && safeFilters.location.trim()) {
+      conditions.push(ilike(users.location, `%${safeFilters.location.trim()}%`));
     }
-  }
+    const rawMinExperience = safeFilters.experience?.min;
+    const rawMaxExperience = safeFilters.experience?.max;
+    const minExperience = rawMinExperience === '' || rawMinExperience == null ? Number.NaN : Number(rawMinExperience);
+    const maxExperience = rawMaxExperience === '' || rawMaxExperience == null ? Number.NaN : Number(rawMaxExperience);
+    if (Number.isFinite(minExperience)) conditions.push(gte(users.experience, Math.max(0, minExperience)));
+    if (Number.isFinite(maxExperience)) conditions.push(lte(users.experience, Math.max(0, maxExperience)));
+    if (typeof safeFilters.availability === 'string' && safeFilters.availability) conditions.push(eq(users.availability, safeFilters.availability));
+    if (typeof safeFilters.noticePeriod === 'string' && safeFilters.noticePeriod) conditions.push(eq(users.noticePeriod, safeFilters.noticePeriod));
 
-  async getCandidateProfile(candidateId: number) {
-    try {
-      console.log('Getting candidate profile for ID:', candidateId);
-      
-      const candidate = await db.select({
-        id: users.id,
-        email: users.email,
-        name: users.name,
-        location: users.location,
-        experience: users.experience,
-        currentRole: users.currentRole,
-        skills: users.skills,
-        availability: users.availability,
-        noticePeriod: users.noticePeriod,
-        expectedSalary: users.expectedSalary,
-        workType: users.workType,
-        category: users.category,
-        linkedinProfile: users.linkedinProfile,
-        portfolioUrl: users.portfolioUrl,
-        bio: users.bio,
-        careerGoals: users.careerGoals,
-        lastActive: users.lastActive,
-        profileCompleteness: users.profileCompleteness,
-      }).from(users).where(and(eq(users.id, candidateId), eq(users.profileVisibility, true), eq(users.isAdmin, false)));
+    const requestedSkills = [
+      ...(Array.isArray(safeFilters.skills) ? safeFilters.skills : []),
+      ...(Array.isArray(safeFilters.technology) ? safeFilters.technology : []),
+    ].map((value: unknown) => String(value).trim()).filter(Boolean);
+    if (requestedSkills.length) conditions.push(sql`${users.skills} && ${requestedSkills}::text[]`);
+    if (Array.isArray(safeFilters.workType) && safeFilters.workType.length) conditions.push(sql`${users.workType} && ${safeFilters.workType}::text[]`);
+    if (Array.isArray(safeFilters.category) && safeFilters.category.length) conditions.push(sql`${users.category} && ${safeFilters.category}::text[]`);
+    if (safeFilters.hasInterviews) {
+      conditions.push(sql`EXISTS (SELECT 1 FROM interviews i WHERE i.user_id = ${users.id} AND i.status = 'completed')`);
+    }
+    const minScore = Number(safeFilters.minScore);
+    if (Number.isFinite(minScore) && minScore > 0) {
+      conditions.push(sql`EXISTS (
+        SELECT 1 FROM certificates c
+        WHERE c.user_id = ${users.id}
+          AND c.is_active = true AND c.is_paid = true AND c.expires_at > NOW()
+          AND c.score >= ${Math.min(100, minScore)}
+      )`);
+    }
 
-      if (!candidate || candidate.length === 0) {
-        console.log('Candidate not found');
-        return null;
-      }
+    const whereClause = and(...conditions);
+    const allCandidates = await db.select({
+      id: users.id,
+      name: users.name,
+      location: users.location,
+      experience: users.experience,
+      currentRole: users.currentRole,
+      skills: users.skills,
+      availability: users.availability,
+      noticePeriod: users.noticePeriod,
+      workType: users.workType,
+      category: users.category,
+      profileCompleteness: users.profileCompleteness,
+      lastActive: users.lastActive,
+      hasResume: sql<boolean>`${users.resume} IS NOT NULL AND btrim(${users.resume}) <> ''`.as('has_resume'),
+      interviewCount: sql<number>`(
+        SELECT COUNT(*)::int FROM interviews i
+        WHERE i.user_id = ${users.id} AND i.status = 'completed'
+      )`.as('interview_count'),
+      profileUnlocked: sql<boolean>`EXISTS (
+        SELECT 1 FROM profile_access_logs pal
+        WHERE pal.recruiter_id = ${recruiterId}
+          AND pal.user_id = ${users.id}
+          AND pal.access_type = 'profile_view'
+      )`.as('profile_unlocked'),
+      cvUnlocked: sql<boolean>`EXISTS (
+        SELECT 1 FROM profile_access_logs pal
+        WHERE pal.recruiter_id = ${recruiterId}
+          AND pal.user_id = ${users.id}
+          AND pal.access_type = 'cv_download'
+      )`.as('cv_unlocked'),
+      interviewUnlocked: sql<boolean>`EXISTS (
+        SELECT 1 FROM profile_access_logs pal
+        WHERE pal.recruiter_id = ${recruiterId}
+          AND pal.user_id = ${users.id}
+          AND pal.access_type = 'interview_access'
+      )`.as('interview_unlocked'),
+    }).from(users)
+      .where(whereClause)
+      .orderBy(desc(users.lastActive))
+      .limit(safeLimit)
+      .offset(offset);
 
-      const candidateData = candidate[0];
+    const candidatesWithDetails = await Promise.all(allCandidates.map(async (candidate) => {
       const certs = await db.select({
         id: certificates.id,
+        certificateId: certificates.certificateId,
         courseTitle: certificates.courseTitle,
         score: certificates.score,
         badge: certificates.badge,
-        issuedAt: certificates.issuedAt,
         expiresAt: certificates.expiresAt,
-        certificateId: certificates.certificateId,
       }).from(certificates)
-        .where(and(eq(certificates.userId, candidateId), eq(certificates.isActive, true), eq(certificates.isPaid, true)));
-
-      const userInterviews = await db.select({
-        id: interviews.id,
-        technology: interviews.technology,
-        status: interviews.status,
-        score: interviews.score,
-        grade: interviews.grade,
-        completedAt: interviews.completedAt,
-      }).from(interviews)
-        .where(and(eq(interviews.userId, candidateId), eq(interviews.status, 'completed')));
+        .where(and(
+          eq(certificates.userId, candidate.id),
+          eq(certificates.isActive, true),
+          eq(certificates.isPaid, true),
+          gt(certificates.expiresAt, new Date()),
+        ))
+        .orderBy(desc(certificates.issuedAt))
+        .limit(3);
 
       return {
-        ...candidateData,
+        ...candidate,
         certificates: certs,
-        interviews: userInterviews,
-        profileViews: 0
+        access: {
+          profile: candidate.profileUnlocked,
+          cv: candidate.cvUnlocked,
+          interview: candidate.interviewUnlocked,
+        },
       };
-    } catch (error) {
-      console.error('Candidate profile error:', error);
-      return null;
-    }
+    }));
+
+    const totalResult = await db.select({ count: sql`count(*)` }).from(users).where(whereClause);
+    const total = Number(totalResult[0]?.count) || 0;
+
+    return {
+      candidates: candidatesWithDetails,
+      total,
+      page: safePage,
+      totalPages: Math.ceil(total / safeLimit),
+      creditCosts: RECRUITER_ACCESS_COSTS,
+      eligibility: {
+        learnerConsentRequired: true,
+        activePaidEvidenceRequired: true,
+        institutePolicyRequiredForActiveAffiliations: true,
+      },
+    };
   }
 
-  async processProfileAccess(recruiterId: number, candidateId: number, accessType: string, creditsRequired: number) {
-    const recruiter = await this.getRecruiterById(recruiterId);
-    if (!recruiter) throw new Error('Recruiter not found');
+  async getCandidateProfile(candidateId: number, recruiterId: number) {
+    const candidate = await db.select({
+      id: users.id,
+      email: users.email,
+      name: users.name,
+      location: users.location,
+      experience: users.experience,
+      currentRole: users.currentRole,
+      skills: users.skills,
+      availability: users.availability,
+      noticePeriod: users.noticePeriod,
+      expectedSalary: users.expectedSalary,
+      workType: users.workType,
+      category: users.category,
+      linkedinProfile: users.linkedinProfile,
+      portfolioUrl: users.portfolioUrl,
+      bio: users.bio,
+      careerGoals: users.careerGoals,
+      lastActive: users.lastActive,
+      profileCompleteness: users.profileCompleteness,
+      hasResume: sql<boolean>`${users.resume} IS NOT NULL AND btrim(${users.resume}) <> ''`.as('has_resume'),
+    }).from(users).where(and(
+      eq(users.id, candidateId),
+      eq(users.profileVisibility, true),
+      eq(users.isAdmin, false),
+      sql`EXISTS (
+        SELECT 1 FROM certificates c
+        WHERE c.user_id = ${users.id}
+          AND c.is_active = true AND c.is_paid = true AND c.expires_at > NOW()
+      )`,
+      sql`(
+        NOT EXISTS (
+          SELECT 1 FROM cohort_students cs
+          WHERE cs.status = 'active'
+            AND (cs.user_id = ${users.id} OR lower(cs.email) = lower(${users.email}))
+        )
+        OR EXISTS (
+          SELECT 1 FROM cohort_students cs
+          JOIN institutes i ON i.id = cs.institute_id
+          WHERE cs.status = 'active'
+            AND (cs.user_id = ${users.id} OR lower(cs.email) = lower(${users.email}))
+            AND i.status = 'verified'
+            AND i.recruiter_discovery_enabled = true
+        )
+      )`,
+    ));
 
-    const currentBalance = Number(recruiter.creditsBalance || 0);
-    const newBalance = currentBalance - creditsRequired;
+    if (candidate.length === 0) return null;
 
-    await db.update(recruiters)
-      .set({ 
-        creditsBalance: newBalance.toFixed(2),
-        updatedAt: new Date()
-      })
-      .where(eq(recruiters.id, recruiterId));
+    const certs = await db.select({
+      id: certificates.id,
+      courseTitle: certificates.courseTitle,
+      score: certificates.score,
+      badge: certificates.badge,
+      issuedAt: certificates.issuedAt,
+      expiresAt: certificates.expiresAt,
+      certificateId: certificates.certificateId,
+    }).from(certificates)
+      .where(and(
+        eq(certificates.userId, candidateId),
+        eq(certificates.isActive, true),
+        eq(certificates.isPaid, true),
+        gt(certificates.expiresAt, new Date()),
+      ))
+      .orderBy(desc(certificates.issuedAt));
 
-    await db.insert(creditTransactions).values({
-      recruiterId,
-      type: 'spend',
-      amount: creditsRequired.toString(),
-      description: `${accessType} access for candidate`,
-      relatedUserId: candidateId,
-      relatedAction: accessType,
-      balanceAfter: newBalance.toFixed(2)
-    });
+    const [interviewAccess] = await db.select({ id: profileAccessLogs.id })
+      .from(profileAccessLogs)
+      .where(and(
+        eq(profileAccessLogs.recruiterId, recruiterId),
+        eq(profileAccessLogs.userId, candidateId),
+        eq(profileAccessLogs.accessType, 'interview_access'),
+      ))
+      .limit(1);
+    const [cvAccess] = await db.select({ id: profileAccessLogs.id })
+      .from(profileAccessLogs)
+      .where(and(
+        eq(profileAccessLogs.recruiterId, recruiterId),
+        eq(profileAccessLogs.userId, candidateId),
+        eq(profileAccessLogs.accessType, 'cv_download'),
+      ))
+      .limit(1);
 
-    await db.insert(profileAccessLogs).values({
-      recruiterId,
-      userId: candidateId,
-      accessType,
-      creditsUsed: creditsRequired.toString()
-    });
+    const userInterviews = interviewAccess
+      ? await db.select({
+          id: interviews.id,
+          technology: interviews.technology,
+          status: interviews.status,
+          score: interviews.score,
+          grade: interviews.grade,
+          completedAt: interviews.completedAt,
+        }).from(interviews)
+          .where(and(eq(interviews.userId, candidateId), eq(interviews.status, 'completed')))
+      : await db.select({
+          id: interviews.id,
+          technology: interviews.technology,
+          status: interviews.status,
+          completedAt: interviews.completedAt,
+        }).from(interviews)
+          .where(and(eq(interviews.userId, candidateId), eq(interviews.status, 'completed')));
 
-    let responseData: any = {
-      creditsUsed: creditsRequired,
-      remainingCredits: newBalance.toFixed(2)
+    return {
+      ...candidate[0],
+      certificates: certs,
+      interviews: userInterviews,
+      cvAccessUnlocked: Boolean(cvAccess),
+      interviewAccessUnlocked: Boolean(interviewAccess),
+      creditCosts: RECRUITER_ACCESS_COSTS,
+      profileViews: 0,
     };
+  }
 
-    if (accessType === 'cv_download') {
-      responseData.cvUrl = `/api/recruiter/download-cv/${candidateId}`;
-    } else if (accessType === 'interview_access') {
-      const interviewData = await db.select()
-        .from(interviews)
-        .where(eq(interviews.userId, candidateId));
-      responseData.interviewData = interviewData;
+  async processProfileAccess(recruiterId: number, candidateId: number, accessType: RecruiterAccessType) {
+    const creditsRequired = RECRUITER_ACCESS_COSTS[accessType];
+    if (!creditsRequired) {
+      throw new RecruiterAccessError('Unknown recruiter access action', 400, 'INVALID_ACCESS_TYPE');
     }
 
-    return responseData;
+    return db.transaction(async (tx) => {
+      // Serialise all unlock actions for this recruiter/candidate pair. This
+      // prevents duplicate charges across retries and horizontally scaled app
+      // instances, while the unique idempotency key is a final DB safeguard.
+      await tx.execute(sql`SELECT pg_advisory_xact_lock(${recruiterId}, ${candidateId})`);
+
+      const recruiterResult: any = await tx.execute(sql`
+        SELECT id, is_active, kyc_status, credits_balance
+        FROM recruiters
+        WHERE id = ${recruiterId}
+        FOR UPDATE
+      `);
+      const recruiter = (recruiterResult?.rows ?? recruiterResult ?? [])[0];
+      if (!recruiter || recruiter.is_active !== true) {
+        throw new RecruiterAccessError('Recruiter account is not active', 403, 'RECRUITER_INACTIVE');
+      }
+      if (recruiter.kyc_status !== 'approved') {
+        throw new RecruiterAccessError('Company verification is required before unlocking candidate data', 403, 'KYC_REQUIRED');
+      }
+
+      const candidateResult: any = await tx.execute(sql`
+        SELECT
+          u.id,
+          u.resume_url,
+          EXISTS (
+            SELECT 1 FROM interviews iv
+            WHERE iv.user_id = u.id AND iv.status = 'completed'
+          ) AS has_completed_interview
+        FROM users u
+        WHERE u.id = ${candidateId}
+          AND u.is_admin = false
+          AND u.profile_visibility = true
+          AND EXISTS (
+            SELECT 1 FROM certificates c
+            WHERE c.user_id = u.id
+              AND c.is_active = true
+              AND c.is_paid = true
+              AND c.expires_at > NOW()
+          )
+          AND (
+            NOT EXISTS (
+              SELECT 1 FROM cohort_students cs
+              WHERE cs.status = 'active'
+                AND (cs.user_id = u.id OR lower(cs.email) = lower(u.email))
+            )
+            OR EXISTS (
+              SELECT 1 FROM cohort_students cs
+              JOIN institutes i ON i.id = cs.institute_id
+              WHERE cs.status = 'active'
+                AND (cs.user_id = u.id OR lower(cs.email) = lower(u.email))
+                AND i.status = 'verified'
+                AND i.recruiter_discovery_enabled = true
+            )
+          )
+      `);
+      const candidate = (candidateResult?.rows ?? candidateResult ?? [])[0];
+      if (!candidate) {
+        throw new RecruiterAccessError(
+          'This candidate is no longer available for recruiter discovery',
+          404,
+          'CANDIDATE_NOT_DISCOVERABLE',
+        );
+      }
+      if (accessType === 'cv_download' && !String(candidate.resume_url || '').trim()) {
+        throw new RecruiterAccessError('This candidate has not shared a CV', 404, 'CV_NOT_AVAILABLE');
+      }
+      if (accessType === 'interview_access' && candidate.has_completed_interview !== true) {
+        throw new RecruiterAccessError('This candidate has no completed interview evidence', 404, 'INTERVIEW_NOT_AVAILABLE');
+      }
+
+      const idempotencyKey = `${recruiterId}:${candidateId}:${accessType}`;
+      const existingResult: any = await tx.execute(sql`
+        SELECT id FROM profile_access_logs
+        WHERE recruiter_id = ${recruiterId}
+          AND user_id = ${candidateId}
+          AND access_type = ${accessType}
+        LIMIT 1
+      `);
+      const alreadyUnlocked = (existingResult?.rows ?? existingResult ?? []).length > 0;
+      if (alreadyUnlocked) {
+        const responseData: any = {
+          creditsUsed: 0,
+          remainingCredits: Number(recruiter.credits_balance || 0).toFixed(2),
+          alreadyUnlocked: true,
+          message: 'Already unlocked while candidate consent remains active — no credits were charged.',
+        };
+        if (accessType === 'cv_download') responseData.cvUrl = `/api/recruiter/download-cv/${candidateId}`;
+        return responseData;
+      }
+
+      const balanceResult: any = await tx.execute(sql`
+        UPDATE recruiters
+        SET credits_balance = credits_balance - ${creditsRequired}, updated_at = NOW()
+        WHERE id = ${recruiterId}
+          AND is_active = true
+          AND credits_balance >= ${creditsRequired}
+        RETURNING credits_balance
+      `);
+      const balanceRow = (balanceResult?.rows ?? balanceResult ?? [])[0];
+      if (!balanceRow) {
+        throw new RecruiterAccessError(
+          `You need ${creditsRequired} ${creditsRequired === 1 ? 'credit' : 'credits'} for this unlock`,
+          402,
+          'INSUFFICIENT_CREDITS',
+          { required: creditsRequired, available: Number(recruiter.credits_balance || 0) },
+        );
+      }
+      const remainingCredits = Number(balanceRow.credits_balance).toFixed(2);
+
+      await tx.insert(creditTransactions).values({
+        recruiterId,
+        type: 'spend',
+        amount: creditsRequired.toFixed(2),
+        description: `${accessType} unlock for candidate ${candidateId}`,
+        relatedUserId: candidateId,
+        relatedAction: accessType,
+        balanceAfter: remainingCredits,
+      });
+
+      await tx.insert(profileAccessLogs).values({
+        recruiterId,
+        userId: candidateId,
+        accessType,
+        creditsUsed: creditsRequired.toFixed(2),
+        idempotencyKey,
+      });
+
+      const responseData: any = {
+        creditsUsed: creditsRequired,
+        remainingCredits,
+        alreadyUnlocked: false,
+        message: `${creditsRequired} ${creditsRequired === 1 ? 'credit' : 'credits'} charged once for this workspace unlock while candidate consent remains active.`,
+      };
+      if (accessType === 'cv_download') responseData.cvUrl = `/api/recruiter/download-cv/${candidateId}`;
+      return responseData;
+    });
   }
 
   async getRecruiterWallet(recruiterId: number) {
@@ -2883,37 +3172,68 @@ export class DatabaseStorage implements IStorage {
 
     return {
       balance: recruiter.creditsBalance,
-      transactions
+      transactions,
+      costs: RECRUITER_ACCESS_COSTS,
+      chargingModel: 'one_time_unlock',
+      rules: [
+        'Search is free and only shows learner-consented profiles with current paid evidence.',
+        'Each profile, CV, or interview-evidence unlock is charged once per candidate workspace while consent remains active.',
+        'Opening an already unlocked item again costs 0 credits.',
+      ],
     };
   }
 
   async purchaseCredits(recruiterId: number, amount: number, paymentId: string) {
-    const recruiter = await this.getRecruiterById(recruiterId);
-    if (!recruiter) throw new Error('Recruiter not found');
+    if (!Number.isInteger(amount) || amount <= 0 || !paymentId.trim()) {
+      throw new Error('Invalid credit purchase');
+    }
 
-    const currentBalance = Number(recruiter.creditsBalance || 0);
-    const newBalance = currentBalance + amount;
+    return db.transaction(async (tx) => {
+      await tx.execute(sql`SELECT pg_advisory_xact_lock(${recruiterId}, 0)`);
 
-    await db.update(recruiters)
-      .set({ 
-        creditsBalance: newBalance.toFixed(2),
-        updatedAt: new Date()
-      })
-      .where(eq(recruiters.id, recruiterId));
+      const existingResult: any = await tx.execute(sql`
+        SELECT balance_after
+        FROM credit_transactions
+        WHERE external_reference = ${paymentId}
+           OR description = ${`Credit purchase - Payment ID: ${paymentId}`}
+        LIMIT 1
+      `);
+      const existing = (existingResult?.rows ?? existingResult ?? [])[0];
+      if (existing) {
+        return {
+          success: true,
+          alreadyCredited: true,
+          newBalance: Number(existing.balance_after).toFixed(2),
+          creditsAdded: 0,
+        };
+      }
 
-    await db.insert(creditTransactions).values({
-      recruiterId,
-      type: 'purchase',
-      amount: amount.toString(),
-      description: `Credit purchase - Payment ID: ${paymentId}`,
-      balanceAfter: newBalance.toFixed(2)
+      const balanceResult: any = await tx.execute(sql`
+        UPDATE recruiters
+        SET credits_balance = credits_balance + ${amount}, updated_at = NOW()
+        WHERE id = ${recruiterId} AND is_active = true
+        RETURNING credits_balance
+      `);
+      const balance = (balanceResult?.rows ?? balanceResult ?? [])[0];
+      if (!balance) throw new Error('Recruiter account is not active');
+      const newBalance = Number(balance.credits_balance).toFixed(2);
+
+      await tx.insert(creditTransactions).values({
+        recruiterId,
+        type: 'purchase',
+        amount: amount.toFixed(2),
+        description: `Credit purchase - Payment ID: ${paymentId}`,
+        externalReference: paymentId,
+        balanceAfter: newBalance,
+      });
+
+      return {
+        success: true,
+        alreadyCredited: false,
+        newBalance,
+        creditsAdded: amount,
+      };
     });
-
-    return {
-      success: true,
-      newBalance: newBalance.toFixed(2),
-      creditsAdded: amount
-    };
   }
 
   // Rating operations
@@ -3131,7 +3451,10 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(instituteMembers)
       .innerJoin(institutes, eq(instituteMembers.instituteId, institutes.id))
-      .where(eq(instituteMembers.userId, userId));
+      .where(and(
+        eq(instituteMembers.userId, userId),
+        eq(instituteMembers.status, "active"),
+      ));
     return rows.map((r: any) => ({ ...r.institute_members, institute: r.institutes }));
   }
 
@@ -3157,7 +3480,17 @@ export class DatabaseStorage implements IStorage {
     const memberships = await db
       .select()
       .from(instituteMembers)
-      .where(eq(instituteMembers.userId, userId));
+      .where(and(
+        eq(instituteMembers.userId, userId),
+        eq(instituteMembers.status, "active"),
+      ));
+
+    const instituteRole = memberships
+      .map((membership) => membership.role)
+      .filter((role): role is "owner" | "admin" | "teacher" | "staff" =>
+        ["owner", "admin", "teacher", "staff"].includes(role),
+      )
+      .sort((a, b) => ({ owner: 0, admin: 1, teacher: 2, staff: 3 }[a] - { owner: 0, admin: 1, teacher: 2, staff: 3 }[b]))[0] ?? null;
 
     let isRecruiter = false;
     let isSeller = false;
@@ -3175,12 +3508,16 @@ export class DatabaseStorage implements IStorage {
       isRecruiter,
       isSeller,
       isAdmin,
+      instituteRole,
     };
   }
 
   // ===== P1 Question Bank Pro =====
   async createQuestionBank(data: InsertQuestionBank): Promise<QuestionBank> {
-    const [row] = await db.insert(questionBanks).values(data).returning();
+    const [row] = await db
+      .insert(questionBanks)
+      .values(data as typeof questionBanks.$inferInsert)
+      .returning();
     return row;
   }
 
@@ -3214,7 +3551,14 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateQuestionBank(id: number, data: Partial<InsertQuestionBank>): Promise<QuestionBank | undefined> {
-    const [row] = await db.update(questionBanks).set({ ...data, updatedAt: new Date() }).where(eq(questionBanks.id, id)).returning();
+    const [row] = await db
+      .update(questionBanks)
+      .set({
+        ...(data as Partial<typeof questionBanks.$inferInsert>),
+        updatedAt: new Date(),
+      })
+      .where(eq(questionBanks.id, id))
+      .returning();
     return row || undefined;
   }
 
@@ -3274,9 +3618,13 @@ export class DatabaseStorage implements IStorage {
       expectedAnswer: data.expectedAnswer ?? null,
       tags: data.tags ?? [],
       explanation: data.explanation ?? null,
+      reviewStatus: data.reviewStatus ?? "draft",
+      generationSource: data.generationSource ?? "human",
+      reviewedBy: data.reviewedBy ?? null,
+      reviewedAt: data.reviewedAt ?? null,
       version: 1,
       createdBy: data.createdBy ?? null,
-      isActive: true,
+      isActive: data.isActive ?? false,
     };
     const [row] = await db.insert(questions).values(insertVals).returning();
     await db.update(questionBanks)
@@ -3285,22 +3633,28 @@ export class DatabaseStorage implements IStorage {
     return row;
   }
 
-  async updateQuestionWithVersioning(id: number, data: Record<string, unknown>, changedBy?: number, changeNote?: string): Promise<Question | undefined> {
-    const [existing] = await db.select().from(questions).where(eq(questions.id, id));
-    if (!existing) return undefined;
-    await db.insert(questionVersions).values({
-      questionId: id,
-      version: existing.version ?? 1,
-      snapshot: existing as unknown as Record<string, unknown>,
-      changeNote: changeNote ?? null,
-      changedBy: changedBy ?? null,
+  async updateQuestionWithVersioning(id: number, data: Record<string, unknown>, changedBy?: number, changeNote?: string, expectedVersion?: number): Promise<Question | undefined> {
+    return db.transaction(async (tx) => {
+      const [existing] = await tx.select().from(questions)
+        .where(eq(questions.id, id))
+        .for("update");
+      if (!existing) return undefined;
+      if (expectedVersion !== undefined && existing.version !== expectedVersion) return undefined;
+
+      await tx.insert(questionVersions).values({
+        questionId: id,
+        version: existing.version ?? 1,
+        snapshot: existing as unknown as Record<string, unknown>,
+        changeNote: changeNote ?? null,
+        changedBy: changedBy ?? null,
+      });
+      const nextVersion = (existing.version ?? 1) + 1;
+      const [row] = await tx.update(questions)
+        .set({ ...data, version: nextVersion, updatedAt: new Date() } as any)
+        .where(eq(questions.id, id))
+        .returning();
+      return row || undefined;
     });
-    const nextVersion = (existing.version ?? 1) + 1;
-    const [row] = await db.update(questions)
-      .set({ ...data, version: nextVersion, updatedAt: new Date() } as any)
-      .where(eq(questions.id, id))
-      .returning();
-    return row || undefined;
   }
 
   async deleteBankQuestion(id: number): Promise<void> {
@@ -3337,10 +3691,10 @@ export class DatabaseStorage implements IStorage {
           topicId = topicCache.get(key)!;
         }
         await this.createQuestionInBank({
+          ...r,
           bankId,
           topicId,
           createdBy: createdBy ?? null,
-          ...r,
         });
         created++;
       } catch (e: any) {
@@ -3384,7 +3738,11 @@ export class DatabaseStorage implements IStorage {
     if (!items.length) throw new Error("Course has no blueprint configured");
     const result: Question[] = [];
     for (const item of items) {
-      const where: any[] = [eq(questions.topicId, item.topicId), eq(questions.isActive, true)];
+      const where: any[] = [
+        eq(questions.topicId, item.topicId),
+        eq(questions.isActive, true),
+        eq(questions.reviewStatus, "approved"),
+      ];
       if (item.difficulty && item.difficulty !== "mixed") {
         where.push(eq(questions.difficulty, item.difficulty));
       }

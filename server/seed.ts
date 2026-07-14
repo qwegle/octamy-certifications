@@ -154,25 +154,33 @@ export async function seedDatabase() {
       // Internship Courses
       {
         title: "Virtual Software Development Internship",
-        description: "Complete software development internship with real projects, code reviews, and industry mentorship.",
+        description: "Assessment-based software development skill program covering full-stack concepts, code review practices, and agile delivery. Not employment or supervised work experience.",
         categoryId: insertedCategories[3].id,
         duration: 20,
         passingScore: 50,
         price: "199.00",
+        isInternship: true,
         isActive: true
       },
       {
         title: "Data Science Internship Program",
-        description: "Hands-on data science experience with real datasets, analysis projects, and professional guidance.",
+        description: "Assessment-based data science skill program covering data analysis, machine learning concepts, and reporting. Not employment or supervised work experience.",
         categoryId: insertedCategories[3].id,
         duration: 18,
         passingScore: 50,
         price: "199.00",
+        isInternship: true,
         isActive: true
       }
     ];
 
-    const insertedCourses = await db.insert(courses).values(courseData).returning();
+    const insertedCourses = await db
+      .insert(courses)
+      .values(courseData.map((course) => ({
+        ...course,
+        slug: course.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""),
+      })))
+      .returning();
     console.log("Courses seeded:", insertedCourses.length);
 
     // Insert sample questions for Machine Learning Fundamentals course
@@ -465,7 +473,7 @@ export async function seedDatabase() {
     }
 
     console.log("Database seeding completed successfully!");
-    console.log("Admin login: admin@octamy.com / admin123");
+    console.log(`Admin account ready: ${adminEmail} (password supplied through ADMIN_PASSWORD)`);
 
   } catch (error) {
     console.error("Error seeding database:", error);

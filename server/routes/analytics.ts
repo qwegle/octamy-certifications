@@ -1,13 +1,13 @@
 import { Router } from 'express';
 import { eq, desc, and, gte, sql } from 'drizzle-orm';
-import { db } from '../db.js';
+import { db } from '../db';
 import { 
   users, 
   certificates, 
-  examAttempts, 
+  examAttempts as examAttemptsTable,
   courses, 
   interviews 
-} from '../../shared/schema.js';
+} from '../../shared/schema';
 import jwt from 'jsonwebtoken';
 
 const JWT_SECRET = process.env.JWT_SECRET!;
@@ -50,30 +50,30 @@ router.get('/user/analytics', requireAuth, async (req: any, res: any) => {
       .where(eq(certificates.userId, userId));
 
     // Get exam attempts for course completion tracking
-    const examAttempts = await db
+    const userExamAttempts = await db
       .select({
-        courseId: examAttempts.courseId,
-        score: examAttempts.score,
-        completedAt: examAttempts.completedAt,
+        courseId: examAttemptsTable.courseId,
+        score: examAttemptsTable.score,
+        completedAt: examAttemptsTable.createdAt,
       })
-      .from(examAttempts)
-      .where(eq(examAttempts.userId, userId))
-      .orderBy(desc(examAttempts.completedAt));
+      .from(examAttemptsTable)
+      .where(eq(examAttemptsTable.userId, userId))
+      .orderBy(desc(examAttemptsTable.createdAt));
 
     // Get unique courses attempted
-    const uniqueCourses = [...new Set(examAttempts.map(e => e.courseId))];
+    const uniqueCourses = Array.from(new Set(userExamAttempts.map((attempt) => attempt.courseId)));
     const completedCourses = userCertificates.length;
 
     // Calculate average score
-    const averageScore = examAttempts.length > 0 
-      ? Math.round(examAttempts.reduce((acc, e) => acc + e.score, 0) / examAttempts.length)
+    const averageScore = userExamAttempts.length > 0
+      ? Math.round(userExamAttempts.reduce((total, attempt) => total + attempt.score, 0) / userExamAttempts.length)
       : 0;
 
     // Calculate study streak (mock data for now)
     const studyStreak = 5; // This would need actual learning activity tracking
 
     // Calculate total study time (mock for now)
-    const totalStudyTime = examAttempts.length * 30; // 30 minutes per attempt
+    const totalStudyTime = userExamAttempts.length * 30; // 30 minutes per attempt
 
     // Monthly progress (last 6 months)
     const monthlyProgress = [];
@@ -82,8 +82,8 @@ router.get('/user/analytics', requireAuth, async (req: any, res: any) => {
       const monthDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const monthName = monthDate.toLocaleDateString('en-US', { month: 'short' });
       
-      const monthAttempts = examAttempts.filter(e => {
-        const attemptDate = new Date(e.completedAt);
+      const monthAttempts = userExamAttempts.filter((attempt) => {
+        const attemptDate = new Date(attempt.completedAt);
         return attemptDate.getMonth() === monthDate.getMonth() && 
                attemptDate.getFullYear() === monthDate.getFullYear();
       });
@@ -92,7 +92,7 @@ router.get('/user/analytics', requireAuth, async (req: any, res: any) => {
         month: monthName,
         completed: monthAttempts.length,
         score: monthAttempts.length > 0 
-          ? Math.round(monthAttempts.reduce((acc, e) => acc + e.score, 0) / monthAttempts.length)
+          ? Math.round(monthAttempts.reduce((total, attempt) => total + attempt.score, 0) / monthAttempts.length)
           : 0
       });
     }

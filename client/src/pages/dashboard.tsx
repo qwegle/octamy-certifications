@@ -1,440 +1,869 @@
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { useAuth } from "@/lib/auth.tsx";
 import { Link, useLocation } from "wouter";
-import Header from "@/components/header";
-import Footer from "@/components/footer";
-import DashboardLayout from "@/components/dashboard-layout";
 import {
-  Download,
-  Eye,
-  Calendar,
-  Trophy,
-  Award,
   AlertCircle,
-  TrendingUp,
-  DollarSign,
-  Edit,
+  ArrowRight,
+  Award,
+  BookOpen,
+  Check,
+  Clock3,
+  Download,
+  Edit3,
+  ExternalLink,
+  Eye,
+  FileCheck2,
+  LockKeyhole,
+  RotateCcw,
+  Share2,
   ShieldCheck,
+  Sparkles,
+  TrendingUp,
+  UserRoundCheck,
+  XCircle,
+  type LucideIcon,
 } from "lucide-react";
 import type { Certificate } from "@shared/schema";
-import DashboardAnalytics from "@/components/dashboard-analytics";
-import { useEffect } from "react";
+import DashboardLayout from "@/components/dashboard-layout";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/lib/auth.tsx";
+import { cn } from "@/lib/utils";
+
+type CredentialStatus = "active" | "pending" | "expired" | "revoked";
+
+type ProfileSummary = {
+  profileCompleteness?: number;
+};
+
+type EvidenceLink = {
+  path: string;
+  isPublic: boolean;
+};
+
+type NextAction = {
+  eyebrow: string;
+  title: string;
+  description: string;
+  href: string;
+  label: string;
+};
+
+const credentialStatusMeta: Record<CredentialStatus, {
+  label: string;
+  icon: LucideIcon;
+  badgeClassName: string;
+  iconClassName: string;
+}> = {
+  active: {
+    label: "Verified",
+    icon: ShieldCheck,
+    badgeClassName: "border-emerald-200 bg-emerald-50 text-emerald-700",
+    iconClassName: "bg-emerald-50 text-emerald-700 ring-emerald-100",
+  },
+  pending: {
+    label: "Ready to activate",
+    icon: Clock3,
+    badgeClassName: "border-amber-200 bg-amber-50 text-amber-800",
+    iconClassName: "bg-amber-50 text-amber-700 ring-amber-100",
+  },
+  expired: {
+    label: "Expired",
+    icon: RotateCcw,
+    badgeClassName: "border-slate-200 bg-slate-100 text-slate-700",
+    iconClassName: "bg-slate-100 text-slate-600 ring-slate-200",
+  },
+  revoked: {
+    label: "Revoked",
+    icon: XCircle,
+    badgeClassName: "border-rose-200 bg-rose-50 text-rose-700",
+    iconClassName: "bg-rose-50 text-rose-700 ring-rose-100",
+  },
+};
+
+function getCredentialStatus(certificate: Certificate): CredentialStatus {
+  if (!certificate.isActive) return "revoked";
+  if (!certificate.isPaid) return "pending";
+  return new Date(certificate.expiresAt).getTime() <= Date.now() ? "expired" : "active";
+}
+
+function formatDate(value: Date | string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Not available";
+  return new Intl.DateTimeFormat(undefined, {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  }).format(date);
+}
+
+function MetricCard({
+  icon: Icon,
+  label,
+  value,
+  helper,
+  loading = false,
+}: {
+  icon: LucideIcon;
+  label: string;
+  value: string | number;
+  helper: string;
+  loading?: boolean;
+}) {
+  return (
+    <Card className="overflow-hidden border-slate-200 bg-white shadow-sm">
+      <CardContent className="p-4 sm:p-5">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-sm font-medium text-slate-600">{label}</p>
+            {loading ? (
+              <div className="mt-2 h-8 w-16 animate-pulse rounded-lg bg-slate-200" aria-hidden="true" />
+            ) : (
+              <p className="mt-1 text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">{value}</p>
+            )}
+          </div>
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-slate-100 text-slate-700 ring-1 ring-slate-200">
+            <Icon className="h-5 w-5" aria-hidden="true" />
+          </span>
+        </div>
+        <p className="mt-3 text-xs leading-5 text-slate-500">{helper}</p>
+      </CardContent>
+    </Card>
+  );
+}
+
+function CredentialCard({
+  certificate,
+  onDownload,
+  onShare,
+}: {
+  certificate: Certificate;
+  onDownload: (certificate: Certificate) => void;
+  onShare: (certificate: Certificate) => void;
+}) {
+  const status = getCredentialStatus(certificate);
+  const meta = credentialStatusMeta[status];
+  const StatusIcon = meta.icon;
+
+  return (
+    <Card className="flex h-full flex-col overflow-hidden border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md">
+      <CardContent className="flex h-full flex-col p-5">
+        <div className="flex items-start justify-between gap-3">
+          <Badge variant="outline" className={cn("rounded-full px-2.5 py-1 text-xs font-semibold", meta.badgeClassName)}>
+            {meta.label}
+          </Badge>
+          <span className={cn("grid h-9 w-9 shrink-0 place-items-center rounded-xl ring-1", meta.iconClassName)}>
+            <StatusIcon className="h-4 w-4" aria-hidden="true" />
+          </span>
+        </div>
+
+        <div className="mt-4 min-w-0">
+          <h4 className="line-clamp-2 text-base font-semibold leading-6 text-slate-950">
+            {certificate.courseTitle}
+          </h4>
+          <p className="mt-1 truncate text-xs text-slate-500" title={certificate.certificateNumber}>
+            Credential {certificate.certificateNumber}
+          </p>
+        </div>
+
+        <dl className="mt-5 grid grid-cols-2 gap-3 border-y border-slate-100 py-4">
+          <div>
+            <dt className="text-xs font-medium text-slate-500">Assessment score</dt>
+            <dd className="mt-1 flex items-center gap-1.5 text-sm font-semibold text-slate-900">
+              {certificate.score}%
+              {certificate.mastered && (
+                <span className="rounded-full bg-violet-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-violet-700">
+                  Mastery
+                </span>
+              )}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-xs font-medium text-slate-500">
+              {status === "expired"
+                ? "Expired on"
+                : status === "pending"
+                  ? "Passed on"
+                  : status === "revoked"
+                    ? "Original expiry"
+                    : "Valid until"}
+            </dt>
+            <dd className="mt-1 text-sm font-semibold text-slate-900">
+              {status === "pending" ? formatDate(certificate.issuedAt) : formatDate(certificate.expiresAt)}
+            </dd>
+          </div>
+        </dl>
+
+        <div className="mt-auto grid grid-cols-2 gap-2 pt-4">
+          <Button asChild variant="outline" className="min-h-11 px-3">
+            <a
+              href={`/certificate/${encodeURIComponent(certificate.certificateId)}`}
+              target="_blank"
+              rel="noreferrer"
+              aria-label={`View ${certificate.courseTitle} credential in a new tab`}
+            >
+              <Eye className="h-4 w-4" aria-hidden="true" />
+              View
+            </a>
+          </Button>
+
+          {status === "active" && (
+            <Button
+              type="button"
+              className="min-h-11 px-3"
+              onClick={() => onDownload(certificate)}
+              aria-label={`Download ${certificate.courseTitle} credential`}
+            >
+              <Download className="h-4 w-4" aria-hidden="true" />
+              Download
+            </Button>
+          )}
+
+          {status === "pending" && (
+            <Button asChild className="min-h-11 px-3">
+              <Link
+                href={`/payment/${encodeURIComponent(certificate.certificateId)}`}
+                aria-label={`Activate ${certificate.courseTitle} credential`}
+              >
+                Activate
+                <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              </Link>
+            </Button>
+          )}
+
+          {(status === "expired" || status === "revoked") && (
+            <Button asChild className="min-h-11 px-3">
+              <Link href="/exams" aria-label={`Browse assessments to refresh ${certificate.courseTitle}`}>
+                <RotateCcw className="h-4 w-4" aria-hidden="true" />
+                Retake
+              </Link>
+            </Button>
+          )}
+
+          {status === "active" && (
+            <Button
+              type="button"
+              variant="outline"
+              className="col-span-2 min-h-11 px-3"
+              onClick={() => onShare(certificate)}
+              aria-label={`Share ${certificate.courseTitle} credential`}
+            >
+              <Share2 className="h-4 w-4" aria-hidden="true" />
+              Share verified credential
+            </Button>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function CredentialSection({
+  id,
+  title,
+  description,
+  certificates,
+  onDownload,
+  onShare,
+}: {
+  id: string;
+  title: string;
+  description: string;
+  certificates: Certificate[];
+  onDownload: (certificate: Certificate) => void;
+  onShare: (certificate: Certificate) => void;
+}) {
+  if (certificates.length === 0) return null;
+
+  return (
+    <section aria-labelledby={id}>
+      <div className="mb-4 flex flex-wrap items-end justify-between gap-2">
+        <div>
+          <div className="flex items-center gap-2">
+            <h3 id={id} className="text-lg font-semibold text-slate-950">{title}</h3>
+            <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
+              {certificates.length}
+            </span>
+          </div>
+          <p className="mt-1 text-sm leading-6 text-slate-600">{description}</p>
+        </div>
+      </div>
+      <div className="grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
+        {certificates.map((certificate) => (
+          <CredentialCard
+            key={certificate.id}
+            certificate={certificate}
+            onDownload={onDownload}
+            onShare={onShare}
+          />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function DashboardSkeleton() {
+  return (
+    <div className="space-y-6" role="status" aria-label="Loading learner dashboard">
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1.7fr)_minmax(320px,1fr)]">
+        <div className="h-64 animate-pulse rounded-2xl bg-slate-200" />
+        <div className="h-64 animate-pulse rounded-2xl bg-slate-200" />
+      </div>
+      <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+        {[1, 2, 3, 4].map((item) => (
+          <div key={item} className="h-36 animate-pulse rounded-2xl bg-slate-200" />
+        ))}
+      </div>
+      <span className="sr-only">Loading your credentials and profile progress.</span>
+    </div>
+  );
+}
 
 export default function Dashboard() {
   const { user, token, isLoading } = useAuth();
   const [, setLocation] = useLocation();
+  const { toast } = useToast();
+  const [passportCopied, setPassportCopied] = useState(false);
 
   useEffect(() => {
-    if (!isLoading && !user) {
-      setLocation("/login");
-    }
+    if (!isLoading && !user) setLocation("/login");
   }, [isLoading, user, setLocation]);
 
-  // Redirect to login if not authenticated
-  // if (!isLoading && !user) {
-  //   setLocation('/login');
-  //   return null;
-  // }
-
-  const {
-    data: certificates = [],
-    isLoading: certificatesLoading,
-    error: certificatesError,
-  } = useQuery<Certificate[]>({
+  const certificatesQuery = useQuery<Certificate[]>({
     queryKey: ["/api/user/certificates"],
-    enabled: !!user && !!token,
+    enabled: Boolean(user && token),
   });
 
-  // Fetch user's profile to get completeness
-  const { data: userProfile } = useQuery<{ profileCompleteness?: number }>({
+  const profileQuery = useQuery<ProfileSummary>({
     queryKey: ["/api/user/profile"],
-    enabled: !!user && !!token,
+    enabled: Boolean(user && token),
   });
 
-  const handleDownload = async (certificateId: string) => {
+  const evidenceQuery = useQuery<EvidenceLink>({
+    queryKey: ["/api/user/evidence-passport-link"],
+    enabled: Boolean(user && token),
+  });
+
+  const certificates = certificatesQuery.data ?? [];
+  const profileCompleteness = Math.max(0, Math.min(100, profileQuery.data?.profileCompleteness ?? 0));
+
+  const groupedCredentials = useMemo(() => {
+    const active: Certificate[] = [];
+    const pending: Certificate[] = [];
+    const historical: Certificate[] = [];
+
+    for (const certificate of certificates) {
+      const status = getCredentialStatus(certificate);
+      if (status === "active") active.push(certificate);
+      else if (status === "pending") pending.push(certificate);
+      else historical.push(certificate);
+    }
+
+    return { active, pending, historical };
+  }, [certificates]);
+
+  const averageScore = certificates.length > 0
+    ? Math.round(certificates.reduce((total, certificate) => total + certificate.score, 0) / certificates.length)
+    : 0;
+
+  const passportSteps = [
+    {
+      label: "Build your profile",
+      helper: profileCompleteness >= 70 ? "Core career details are ready" : "Reach 70% profile strength",
+      complete: profileCompleteness >= 70,
+      unavailable: Boolean(profileQuery.error),
+    },
+    {
+      label: "Validate a skill",
+      helper: certificates.length > 0 ? "Assessment evidence recorded" : "Complete your first assessment",
+      complete: certificates.length > 0,
+      unavailable: Boolean(certificatesQuery.error),
+    },
+    {
+      label: "Activate a credential",
+      helper: groupedCredentials.active.length > 0 ? "Verified credential available" : "Add verified proof to your passport",
+      complete: groupedCredentials.active.length > 0,
+      unavailable: Boolean(certificatesQuery.error),
+    },
+    {
+      label: "Enable secure sharing",
+      helper: evidenceQuery.data?.isPublic ? "Recruiter-ready link enabled" : "You control when your passport is visible",
+      complete: evidenceQuery.data?.isPublic === true,
+      unavailable: Boolean(evidenceQuery.error),
+    },
+  ];
+  const completedPassportSteps = passportSteps.filter((step) => step.complete).length;
+  const passportReadiness = Math.round((completedPassportSteps / passportSteps.length) * 100);
+  const passportLoading = certificatesQuery.isLoading || profileQuery.isLoading || evidenceQuery.isLoading;
+  const passportHasError = passportSteps.some((step) => step.unavailable);
+
+  const nextAction = useMemo<NextAction>(() => {
+    const pendingCredential = groupedCredentials.pending[0];
+    if (pendingCredential) {
+      return {
+        eyebrow: "Credential ready",
+        title: `Activate ${pendingCredential.courseTitle}`,
+        description: `You passed with ${pendingCredential.score}%. Activate the credential to add verified proof to your Evidence Passport.`,
+        href: `/payment/${encodeURIComponent(pendingCredential.certificateId)}`,
+        label: "Activate credential",
+      };
+    }
+
+    if (!certificatesQuery.isLoading && !certificatesQuery.error && certificates.length === 0) {
+      return {
+        eyebrow: "Start your evidence journey",
+        title: "Validate your first skill",
+        description: "Choose an assessment, demonstrate what you know, and create evidence employers can independently verify.",
+        href: "/exams",
+        label: "Explore assessments",
+      };
+    }
+
+    if (!profileQuery.isLoading && !profileQuery.error && profileCompleteness < 100) {
+      return {
+        eyebrow: "Strengthen your profile",
+        title: "Give your skills the right context",
+        description: `Your profile is ${profileCompleteness}% complete. Add career details so employers understand where your verified skills fit.`,
+        href: "/profile-edit",
+        label: "Complete profile",
+      };
+    }
+
+    if (!evidenceQuery.isLoading && !evidenceQuery.error && !evidenceQuery.data?.isPublic) {
+      return {
+        eyebrow: "You stay in control",
+        title: "Make your Evidence Passport shareable",
+        description: "Enable your secure public link when you are ready to share verified skills with recruiters and employers.",
+        href: "/profile-edit",
+        label: "Review sharing settings",
+      };
+    }
+
+    if (groupedCredentials.historical.length > 0) {
+      return {
+        eyebrow: "Keep evidence current",
+        title: "Refresh a historical skill credential",
+        description: "Retake an assessment to replace expired or revoked evidence with a current, independently verifiable result.",
+        href: "/exams",
+        label: "Find an assessment",
+      };
+    }
+
+    return {
+      eyebrow: "Continue building",
+      title: "Add another verified skill",
+      description: "Broaden your Evidence Passport with an assessment that supports your next role or learning goal.",
+      href: "/exams",
+      label: "Browse assessments",
+    };
+  }, [
+    certificates,
+    certificatesQuery.error,
+    certificatesQuery.isLoading,
+    evidenceQuery.data?.isPublic,
+    evidenceQuery.error,
+    evidenceQuery.isLoading,
+    groupedCredentials.historical,
+    groupedCredentials.pending,
+    profileCompleteness,
+    profileQuery.error,
+    profileQuery.isLoading,
+  ]);
+
+  const copyPassportLink = async () => {
+    const evidenceLink = evidenceQuery.data;
+    if (!evidenceLink?.path || !evidenceLink.isPublic) return;
+
     try {
-      // Open certificate in new tab for printing/saving as PDF
-      const downloadUrl = `/api/certificates/${certificateId}/download`;
-      window.open(downloadUrl, "_blank");
+      await navigator.clipboard.writeText(`${window.location.origin}${evidenceLink.path}`);
+      setPassportCopied(true);
+      toast({ title: "Passport link copied", description: "Your secure Evidence Passport link is ready to share." });
+      window.setTimeout(() => setPassportCopied(false), 1800);
+    } catch {
+      toast({
+        title: "Link was not copied",
+        description: "Your browser blocked clipboard access. Open the passport and copy its address instead.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDownload = (certificate: Certificate) => {
+    const opened = window.open(
+      `/api/certificates/${encodeURIComponent(certificate.certificateId)}/download?format=pdf`,
+      "_blank",
+    );
+
+    if (opened) {
+      opened.opener = null;
+    } else {
+      toast({
+        title: "Download window was blocked",
+        description: "Allow pop-ups for Octamy, then try the download again.",
+      });
+    }
+  };
+
+  const handleShare = async (certificate: Certificate) => {
+    const shareUrl = `${window.location.origin}/certificate/${encodeURIComponent(certificate.certificateId)}`;
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: `${certificate.courseTitle} — verified credential`,
+          text: `View my verified ${certificate.courseTitle} credential on Octamy.`,
+          url: shareUrl,
+        });
+        return;
+      }
+
+      await navigator.clipboard.writeText(shareUrl);
+      toast({ title: "Credential link copied", description: "The verification link is ready to share." });
     } catch (error) {
-      console.error("Download error:", error);
-      alert("Failed to download certificate. Please try again.");
+      if (error instanceof DOMException && error.name === "AbortError") return;
+      toast({
+        title: "Credential was not shared",
+        description: "Open the credential and copy its address to share it manually.",
+        variant: "destructive",
+      });
     }
   };
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+      <div className="grid min-h-screen place-items-center bg-slate-50 px-6" role="status">
+        <div className="text-center">
+          <span className="mx-auto block h-9 w-9 animate-spin rounded-full border-2 border-slate-300 border-t-slate-900" aria-hidden="true" />
+          <p className="mt-4 text-sm font-medium text-slate-600">Opening your learner workspace…</p>
+        </div>
       </div>
     );
   }
 
   if (!user) {
     return (
-      <DashboardLayout role="learner" title="Login required">
-        <Card>
-          <CardContent className="text-center py-12">
-            <AlertCircle className="w-16 h-16 text-octamy-gray-400 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-octamy-black mb-2">
-              Login Required
-            </h2>
-            <p className="text-octamy-gray-600 mb-6">
-              Please log in to view your certificate dashboard.
+      <main className="grid min-h-screen place-items-center bg-slate-50 px-4 py-10">
+        <Card className="mx-auto max-w-xl border-slate-200 bg-white shadow-sm">
+          <CardContent className="px-6 py-12 text-center sm:px-10">
+            <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-slate-100 text-slate-700 ring-1 ring-slate-200">
+              <LockKeyhole className="h-6 w-6" aria-hidden="true" />
+            </span>
+            <h1 className="mt-5 text-xl font-semibold text-slate-950">Your credentials are waiting</h1>
+            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-600">
+              Sign in to view your assessments, credentials, profile progress, and Evidence Passport.
             </p>
-            <Link href="/login">
-              <Button className="bg-octamy-black text-white hover:bg-octamy-gray-800">
-                Login
-              </Button>
-            </Link>
+            <Button asChild className="mt-6">
+              <Link href="/login">Sign in securely</Link>
+            </Button>
           </CardContent>
         </Card>
-      </DashboardLayout>
+      </main>
     );
   }
 
-  // CERTIFICATE DISPLAY LOGIC FOR DEVELOPERS:
-  // Dashboard shows certificates in three categories based on status and payment
-
-  // 1. Active Certificates: Paid certificates that haven't expired yet
-  // These are the user's valid, downloadable certificates
-  const activeCertificates = certificates.filter(
-    (cert) =>
-      cert.isActive && cert.isPaid && new Date(cert.expiresAt) > new Date()
-  );
-
-  // 2. Expired Certificates: Paid certificates that have passed their expiry date
-  // These were valid certificates but are no longer current
-  const expiredCertificates = certificates.filter(
-    (cert) =>
-      cert.isActive && cert.isPaid && new Date(cert.expiresAt) <= new Date()
-  );
-
-  // 3. Unpaid Certificates: Certificates created after passing exams but not yet purchased
-  // Users need to complete payment to activate these certificates
-  const unpaidCertificates = certificates.filter((cert) => !cert.isPaid);
-
-  // Money saved: compute from real list price vs amount paid (fallback 0).
-  const moneySaved = certificates.reduce((total, cert: any) => {
-    if (!cert.isPaid) return total;
-    const list = Number(cert.listPrice ?? cert.coursePrice ?? 0);
-    const paid = Number(cert.amountPaid ?? 0);
-    return total + Math.max(0, list - paid);
-  }, 0);
-
-  // Calculate average score
-  const averageScore =
-    certificates.length > 0
-      ? Math.round(
-          certificates.reduce((acc, cert) => acc + cert.score, 0) /
-            certificates.length
-        )
-      : 0;
+  const firstName = user.name.trim().split(/\s+/)[0] || "there";
+  const pageIsLoading = certificatesQuery.isLoading && !certificatesQuery.data;
 
   return (
-    <DashboardLayout role="learner" title={`Welcome back, ${user.name}!`} description="Manage your certificates and track your progress" actions={(
-      <Link href="/profile-edit">
-        <Button variant="outline" className="border-black text-black hover:bg-black hover:text-white">
-          <Edit className="w-4 h-4 mr-2" />
-          {userProfile?.profileCompleteness === 100 ? "Edit Profile" : "Complete Profile"}
+    <DashboardLayout
+      role="learner"
+      title={`Welcome back, ${firstName}`}
+      description="Turn learning into trusted evidence and keep your next career step visible."
+      actions={(
+        <Button asChild variant="outline">
+          <Link href="/profile-edit">
+            <Edit3 className="h-4 w-4" aria-hidden="true" />
+            {profileCompleteness >= 100 ? "Edit profile" : "Complete profile"}
+          </Link>
         </Button>
-      </Link>
-    )}>
-      {/* Key Performance Cards */}
-        <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-6 mb-8">
-          <Card className="border-2 border-black">
-            <CardContent className="p-4 sm:p-6 text-center bg-gradient-to-br from-gray-50 to-white">
-              <Award className="w-8 h-8 sm:w-10 sm:h-10 text-black mx-auto mb-3" />
-              <div className="text-2xl sm:text-3xl font-bold text-black">
-                {certificates.length}
-              </div>
-              <div className="text-sm text-gray-600 font-medium">
-                Total Certificates
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-2 border-black">
-            <CardContent className="p-4 sm:p-6 text-center bg-gradient-to-br from-gray-50 to-white">
-              <ShieldCheck className="w-8 h-8 sm:w-10 sm:h-10 text-black mx-auto mb-3" />
-              <div className="text-2xl sm:text-3xl font-bold text-black">
-                {activeCertificates.length}
-              </div>
-              <div className="text-sm text-gray-600 font-medium">
-                Verified Credentials
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-2 border-black">
-            <CardContent className="p-4 sm:p-6 text-center bg-gradient-to-br from-gray-50 to-white">
-              <DollarSign className="w-8 h-8 sm:w-10 sm:h-10 text-black mx-auto mb-3" />
-              <div className="text-2xl sm:text-3xl font-bold text-black">₹{moneySaved}</div>
-              <div className="text-sm text-gray-600 font-medium">
-                Money Saved
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-2 border-black">
-            <CardContent className="p-4 sm:p-6 text-center bg-gradient-to-br from-gray-50 to-white">
-              <TrendingUp className="w-8 h-8 sm:w-10 sm:h-10 text-black mx-auto mb-3" />
-              <div className="text-2xl sm:text-3xl font-bold text-black">
-                {averageScore}%
-              </div>
-              <div className="text-sm text-gray-600 font-medium">
-                Average Score
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Certificates Section */}
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold text-black mb-6">
-            Your Certificates
-          </h2>
-
-          {certificatesLoading && (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3" aria-label="Loading certificates">
-              {[1, 2, 3].map((item) => <div key={item} className="h-52 animate-pulse rounded-xl bg-slate-200/70" />)}
-            </div>
-          )}
-
-          {certificatesError && (
-            <Card className="border-rose-200 bg-rose-50"><CardContent className="p-5 text-sm text-rose-800">We couldn't load your credentials. Refresh the page to try again.</CardContent></Card>
-          )}
-
-          {/* Active Certificates */}
-          {activeCertificates.length > 0 && (
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold text-black mb-4">
-                Active Certificates
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {activeCertificates.map((certificate) => (
-                  <Card
-                    key={certificate.id}
-                    className="border-2 border-green-500 hover:shadow-lg transition-shadow"
-                  >
-                    <CardHeader className="pb-3">
-                      <div className="flex items-center justify-between">
-                        <Badge className="bg-green-100 text-green-800 font-medium">
-                          Active
-                        </Badge>
-                        <Trophy className="w-5 h-5 text-green-600" />
-                      </div>
-                      <CardTitle className="text-lg text-black">
-                        {certificate.courseTitle}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Score:</span>
-                        <div className="flex items-center gap-2">
-                          <span className="font-semibold text-black">
-                            {certificate.score}%
-                          </span>
-                          {certificate.mastered && (
-                            <Badge className="text-xs bg-gradient-to-r from-yellow-400 to-orange-500 text-white">
-                              Master
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Expires:</span>
-                        <span className="font-semibold text-black">
-                          {certificate?.courseTitle
-                            ?.toLowerCase()
-                            ?.includes("internship")
-                            ? "Never"
-                            : new Date(
-                                certificate.expiresAt
-                              ).toLocaleDateString()}
-                        </span>
-                      </div>
-                      <div className="flex gap-2 pt-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() =>
-                            window.open(
-                              `/certificate/${certificate.certificateId}`,
-                              "_blank"
-                            )
-                          }
-                          className="flex-1 border-black text-black hover:bg-gray-100"
-                        >
-                          <Eye className="w-4 h-4 mr-1" />
-                          View
-                        </Button>
-                        <Button
-                          size="sm"
-                          onClick={() =>
-                            handleDownload(certificate.certificateId)
-                          }
-                          className="flex-1 bg-black text-white hover:bg-gray-800"
-                        >
-                          <Download className="w-4 h-4 mr-1" />
-                          Download
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            const shareUrl = `${window.location.origin}/certificate/${certificate.certificateId}`;
-                            if (navigator.share) {
-                              navigator.share({
-                                title: `Professional Certificate - ${certificate.userName}`,
-                                text: `Certificate of completion for ${certificate.courseTitle}`,
-                                url: shareUrl,
-                              });
-                            } else {
-                              navigator.clipboard.writeText(shareUrl);
-                              alert("Shareable link copied to clipboard!");
-                            }
-                          }}
-                          className="border-black text-black hover:bg-gray-100"
-                        >
-                          🔗
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {expiredCertificates.length > 0 && (
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold text-black mb-4">Expired credentials</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {expiredCertificates.map((certificate) => (
-                  <Card key={certificate.id} className="border-2 border-slate-300 bg-slate-50">
-                    <CardHeader className="pb-3">
-                      <Badge variant="outline" className="w-fit bg-white text-slate-700">Expired</Badge>
-                      <CardTitle className="text-lg text-black">{certificate.courseTitle}</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <p className="text-sm text-slate-600">Score: <span className="font-semibold text-slate-900">{certificate.score}%</span></p>
-                      <p className="text-sm text-slate-600">Expired {new Date(certificate.expiresAt).toLocaleDateString()}</p>
-                      <div className="flex gap-2">
-                        <Button size="sm" variant="outline" onClick={() => setLocation(`/certificate/${certificate.certificateId}`)}>View record</Button>
-                        <Button size="sm" onClick={() => setLocation('/exams')} className="bg-slate-900 text-white">Retake exam</Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Unpaid Certificates */}
-          {unpaidCertificates.length > 0 && (
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold text-black mb-4">
-                Unpaid Certificates
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {unpaidCertificates.map((certificate) => (
-                  <Card
-                    key={certificate.id}
-                    className="border-2 border-orange-400 hover:shadow-lg transition-shadow"
-                  >
-                    <CardHeader className="pb-3">
-                      <div className="flex items-center justify-between">
-                        <Badge className="bg-orange-100 text-orange-800 font-medium">
-                          Payment Pending
-                        </Badge>
-                        <AlertCircle className="w-5 h-5 text-orange-600" />
-                      </div>
-                      <CardTitle className="text-lg text-black">
-                        {certificate.courseTitle}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-octamy-gray-600">Score:</span>
-                        <span className="font-semibold">
-                          {certificate.score}%
-                        </span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-octamy-gray-600">Status:</span>
-                        <span className="font-semibold text-orange-700">Awaiting activation</span>
-                      </div>
-                      <div className="flex gap-2 pt-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() =>
-                            window.open(
-                              `/certificates/${certificate.certificateId}`,
-                              "_blank"
-                            )
-                          }
-                          className="flex-1"
-                        >
-                          <Eye className="w-4 h-4 mr-1" />
-                          View
-                        </Button>
-                        <Button
-                          size="sm"
-                          className="flex-1 bg-octamy-black text-white hover:bg-octamy-gray-800"
-                          onClick={() => setLocation(`/payment/${certificate.certificateId}`)}
-                        >
-                          Activate
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <Card className="mb-8 border-2 border-slate-900 bg-slate-950 text-white">
-            <CardContent className="p-8 flex flex-col md:flex-row md:items-center gap-6">
-              <ShieldCheck className="w-12 h-12 text-sky-300 flex-shrink-0" />
-              <div className="flex-1">
-                <h2 className="text-2xl font-bold">Your Skill Evidence Passport</h2>
-                <p className="mt-2 text-slate-300">
-                  Every paid credential is backed by a scored assessment and a live verification record you can share with employers.
-                </p>
-              </div>
-              <div className="flex gap-3">
-                <Link href="/exams"><Button className="bg-white text-slate-950 hover:bg-slate-100">Add evidence</Button></Link>
-                <Link href="/verify"><Button variant="outline" className="border-white/30 bg-transparent text-white hover:bg-white hover:text-slate-950">Verify a credential</Button></Link>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Empty State */}
-          {!certificatesLoading && !certificatesError && certificates.length === 0 && (
-            <Card className="border-2 border-black">
-              <CardContent className="text-center py-12">
-                <Award className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                <h2 className="text-2xl font-bold text-black mb-2">
-                  No Certificates Yet
+      )}
+    >
+      {pageIsLoading ? (
+        <DashboardSkeleton />
+      ) : (
+        <div className="space-y-8">
+          <section className="grid gap-4 lg:grid-cols-[minmax(0,1.7fr)_minmax(320px,1fr)]" aria-label="Recommended next action and Evidence Passport progress">
+            <Card className="relative overflow-hidden border-slate-800 bg-slate-950 text-white shadow-lg">
+              <div className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-sky-500/15 blur-3xl" aria-hidden="true" />
+              <div className="pointer-events-none absolute -bottom-32 left-1/3 h-64 w-64 rounded-full bg-violet-500/10 blur-3xl" aria-hidden="true" />
+              <CardContent className="relative flex h-full min-h-[260px] flex-col p-6 sm:p-8">
+                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-sky-300">
+                  <Sparkles className="h-4 w-4" aria-hidden="true" />
+                  {nextAction.eyebrow}
+                </div>
+                <h2 className="mt-5 max-w-2xl text-2xl font-semibold tracking-tight text-white sm:text-3xl">
+                  {nextAction.title}
                 </h2>
-                <p className="text-gray-600 mb-6">
-                  You haven't taken any certification exams yet. Start your
-                  journey today!
+                <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-300 sm:text-base">
+                  {nextAction.description}
                 </p>
-                <Link href="/exams">
-                  <Button className="bg-black text-white hover:bg-gray-800">
-                    Browse Courses
+                <div className="mt-auto flex flex-col gap-2 pt-7 sm:flex-row sm:flex-wrap">
+                  <Button asChild className="border-white bg-white text-slate-950 hover:bg-slate-100">
+                    <Link href={nextAction.href}>
+                      {nextAction.label}
+                      <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                    </Link>
                   </Button>
-                </Link>
+                  {nextAction.href !== "/exams" && (
+                    <Button asChild variant="outline" className="border-slate-700 bg-slate-900 text-white hover:border-slate-600 hover:bg-slate-800 hover:text-white">
+                      <Link href="/exams">
+                        <BookOpen className="h-4 w-4" aria-hidden="true" />
+                        Browse assessments
+                      </Link>
+                    </Button>
+                  )}
+                </div>
               </CardContent>
             </Card>
-          )}
+
+            <Card className="border-slate-200 bg-white shadow-sm">
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Evidence Passport</p>
+                    <h2 className="mt-2 text-xl font-semibold text-slate-950">Recruiter readiness</h2>
+                  </div>
+                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-sky-50 text-sky-700 ring-1 ring-sky-100">
+                    <ShieldCheck className="h-5 w-5" aria-hidden="true" />
+                  </span>
+                </div>
+
+                {passportLoading ? (
+                  <div className="mt-6 space-y-3" role="status" aria-label="Loading Evidence Passport readiness">
+                    <div className="h-2 animate-pulse rounded-full bg-slate-200" />
+                    {[1, 2, 3, 4].map((item) => <div key={item} className="h-9 animate-pulse rounded-lg bg-slate-100" />)}
+                  </div>
+                ) : (
+                  <>
+                    <div className="mt-5">
+                      <div className="flex items-center justify-between gap-3 text-sm">
+                        <span className="font-medium text-slate-600">{completedPassportSteps} of {passportSteps.length} steps complete</span>
+                        <span className="font-semibold text-slate-950">{passportReadiness}%</span>
+                      </div>
+                      <div
+                        className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100"
+                        role="progressbar"
+                        aria-label="Evidence Passport readiness"
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                        aria-valuenow={passportReadiness}
+                      >
+                        <div className="h-full rounded-full bg-sky-600 transition-[width]" style={{ width: `${passportReadiness}%` }} />
+                      </div>
+                    </div>
+
+                    <ul className="mt-5 space-y-3">
+                      {passportSteps.map((step) => (
+                        <li key={step.label} className="flex items-start gap-3">
+                          <span className={cn(
+                            "mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full",
+                            step.complete ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-400",
+                          )}>
+                            {step.complete ? <Check className="h-3 w-3" aria-hidden="true" /> : <span className="h-1.5 w-1.5 rounded-full bg-current" />}
+                          </span>
+                          <span className="min-w-0">
+                            <span className="block text-sm font-medium text-slate-800">{step.label}</span>
+                            <span className="block text-xs leading-5 text-slate-500">
+                              {step.unavailable ? "Status temporarily unavailable" : step.helper}
+                            </span>
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    {passportHasError && (
+                      <button
+                        type="button"
+                        className="mt-4 min-h-11 w-full rounded-xl bg-slate-50 px-3 text-sm font-semibold text-slate-700 outline-none ring-1 ring-slate-200 hover:bg-slate-100 focus-visible:ring-2 focus-visible:ring-slate-900"
+                        onClick={() => void Promise.all([
+                          certificatesQuery.refetch(),
+                          profileQuery.refetch(),
+                          evidenceQuery.refetch(),
+                        ])}
+                      >
+                        Refresh passport status
+                      </button>
+                    )}
+
+                    {!passportHasError && evidenceQuery.data?.isPublic && evidenceQuery.data.path ? (
+                      <div className="mt-5 grid grid-cols-2 gap-2 border-t border-slate-100 pt-5">
+                        <Button asChild variant="outline" className="min-h-11 px-3">
+                          <Link href={evidenceQuery.data.path}>
+                            View
+                            <ExternalLink className="h-4 w-4" aria-hidden="true" />
+                          </Link>
+                        </Button>
+                        <Button type="button" className="min-h-11 px-3" onClick={copyPassportLink}>
+                          <Share2 className="h-4 w-4" aria-hidden="true" />
+                          {passportCopied ? "Copied" : "Copy link"}
+                        </Button>
+                      </div>
+                    ) : !passportHasError ? (
+                      <Button asChild variant="outline" className="mt-5 w-full">
+                        <Link href="/profile-edit">
+                          <LockKeyhole className="h-4 w-4" aria-hidden="true" />
+                          Review sharing settings
+                        </Link>
+                      </Button>
+                    ) : null}
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          </section>
+
+          <section aria-labelledby="progress-summary-title">
+            <div className="mb-4">
+              <h2 id="progress-summary-title" className="text-lg font-semibold text-slate-950">Progress summary</h2>
+              <p className="mt-1 text-sm text-slate-600">A focused view of the signals that make your evidence useful.</p>
+            </div>
+            <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+              <MetricCard
+                icon={ShieldCheck}
+                label="Verified credentials"
+                value={certificatesQuery.error ? "—" : groupedCredentials.active.length}
+                helper={certificatesQuery.error
+                  ? "Credential status is temporarily unavailable"
+                  : groupedCredentials.active.length === 1
+                    ? "Active proof employers can verify"
+                    : "Active proofs employers can verify"}
+                loading={certificatesQuery.isLoading}
+              />
+              <MetricCard
+                icon={TrendingUp}
+                label="Average score"
+                value={!certificatesQuery.error && certificates.length > 0 ? `${averageScore}%` : "—"}
+                helper={certificatesQuery.error
+                  ? "Assessment results are temporarily unavailable"
+                  : certificates.length > 0
+                    ? `Across ${certificates.length} completed assessment${certificates.length === 1 ? "" : "s"}`
+                    : "Complete an assessment to set a baseline"}
+                loading={certificatesQuery.isLoading}
+              />
+              <MetricCard
+                icon={UserRoundCheck}
+                label="Profile strength"
+                value={profileQuery.error ? "—" : `${profileCompleteness}%`}
+                helper={profileCompleteness >= 70 ? "Enough context to support your evidence" : "Add role, skills, and career context"}
+                loading={profileQuery.isLoading}
+              />
+              <MetricCard
+                icon={Clock3}
+                label="Pending activation"
+                value={certificatesQuery.error ? "—" : groupedCredentials.pending.length}
+                helper={certificatesQuery.error
+                  ? "Activation status is temporarily unavailable"
+                  : groupedCredentials.pending.length > 0
+                    ? "Passed credentials ready to activate"
+                    : "No credential actions waiting"}
+                loading={certificatesQuery.isLoading}
+              />
+            </div>
+          </section>
+
+          <section aria-labelledby="credentials-title">
+            <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <h2 id="credentials-title" className="text-xl font-semibold text-slate-950">Your credential portfolio</h2>
+                <p className="mt-1 text-sm leading-6 text-slate-600">View, activate, download, and share your assessment-backed credentials.</p>
+              </div>
+              <Button asChild variant="outline" className="w-full sm:w-auto">
+                <Link href="/exams">
+                  <BookOpen className="h-4 w-4" aria-hidden="true" />
+                  Browse assessments
+                </Link>
+              </Button>
+            </div>
+
+            {certificatesQuery.error ? (
+              <Card className="border-rose-200 bg-white shadow-sm" role="alert">
+                <CardContent className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-start gap-3">
+                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-rose-50 text-rose-700 ring-1 ring-rose-100">
+                      <AlertCircle className="h-5 w-5" aria-hidden="true" />
+                    </span>
+                    <div>
+                      <h3 className="font-semibold text-slate-950">Your credentials could not be loaded</h3>
+                      <p className="mt-1 text-sm leading-6 text-slate-600">Your records are safe. Check your connection and try again.</p>
+                    </div>
+                  </div>
+                  <Button type="button" variant="outline" onClick={() => void certificatesQuery.refetch()}>
+                    Try again
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : certificates.length === 0 ? (
+              <Card className="border-slate-200 bg-white shadow-sm">
+                <CardContent className="px-6 py-12 text-center sm:px-10 sm:py-14">
+                  <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-sky-50 text-sky-700 ring-1 ring-sky-100">
+                    <FileCheck2 className="h-6 w-6" aria-hidden="true" />
+                  </span>
+                  <h3 className="mt-5 text-xl font-semibold text-slate-950">Build your first proof of skill</h3>
+                  <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-slate-600">
+                    Complete an assessment to create a scored evidence record. Activate the credential when you are ready to share it.
+                  </p>
+                  <Button asChild className="mt-6 w-full sm:w-auto">
+                    <Link href="/exams">
+                      Explore assessments
+                      <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-8">
+                <CredentialSection
+                  id="active-credentials-title"
+                  title="Verified and active"
+                  description="Current credentials with live verification records."
+                  certificates={groupedCredentials.active}
+                  onDownload={handleDownload}
+                  onShare={handleShare}
+                />
+                <CredentialSection
+                  id="pending-credentials-title"
+                  title="Ready to activate"
+                  description="You passed these assessments; activation adds them to your verified portfolio."
+                  certificates={groupedCredentials.pending}
+                  onDownload={handleDownload}
+                  onShare={handleShare}
+                />
+                <CredentialSection
+                  id="credential-history-title"
+                  title="Credential history"
+                  description="Expired or revoked records remain visible for transparency."
+                  certificates={groupedCredentials.historical}
+                  onDownload={handleDownload}
+                  onShare={handleShare}
+                />
+              </div>
+            )}
+          </section>
+
+          <Card className="overflow-hidden border-slate-200 bg-sky-50/70 shadow-sm">
+            <CardContent className="flex flex-col gap-5 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-7">
+              <div className="flex min-w-0 items-start gap-4">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-white text-sky-700 ring-1 ring-sky-100">
+                  <Award className="h-5 w-5" aria-hidden="true" />
+                </span>
+                <div>
+                  <h2 className="font-semibold text-slate-950">Learn → Validate → Certify → Get recruited</h2>
+                  <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-600">
+                    Your Evidence Passport keeps the journey digital, verifiable, and under your sharing control.
+                  </p>
+                </div>
+              </div>
+              <Button asChild variant="outline" className="w-full bg-white sm:w-auto">
+                <Link href="/profile-edit">
+                  Manage your profile
+                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
         </div>
+      )}
     </DashboardLayout>
   );
 }

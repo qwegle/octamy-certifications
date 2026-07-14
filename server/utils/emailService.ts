@@ -1,6 +1,4 @@
 import nodemailer from 'nodemailer';
-import path from 'path';
-import fs from 'fs';
 
 interface EmailAttachment {
   filename: string;
@@ -16,26 +14,42 @@ interface EmailOptions {
 }
 
 class EmailService {
-  private transporter: nodemailer.Transporter;
+  private transporter: nodemailer.Transporter | null;
+  private fromAddress: string;
 
   constructor() {
-    // Use provided email credentials
-    const emailUser = 'nikhileshpr@gmail.com';
-    const emailPass = 'rardayxcqvybulfj';
+    const host = process.env.SMTP_HOST?.trim();
+    const user = process.env.SMTP_USER?.trim();
+    const pass = process.env.SMTP_PASS?.trim();
+    const port = Number(process.env.SMTP_PORT || 587);
+    const usable = Boolean(
+      host &&
+      user &&
+      pass &&
+      Number.isInteger(port) &&
+      port > 0 &&
+      !/(your_|change[_-]?me|placeholder|example)/i.test(`${user} ${pass}`),
+    );
 
-    this.transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: emailUser,
-        pass: emailPass,
-      },
-    });
+    this.fromAddress = process.env.SMTP_FROM?.trim() || user || 'support@octamy.com';
+    this.transporter = usable
+      ? nodemailer.createTransport({
+          host,
+          port,
+          secure: port === 465,
+          auth: { user, pass },
+        })
+      : null;
   }
 
   async sendEmail(options: EmailOptions): Promise<boolean> {
+    if (!this.transporter) {
+      console.warn('Email delivery is disabled because SMTP is not configured.');
+      return false;
+    }
     try {
       const mailOptions = {
-        from: `"Octamy Solutions" <nikhileshpr@gmail.com>`,
+        from: `"Octamy Solutions" <${this.fromAddress}>`,
         to: options.to,
         subject: options.subject,
         html: options.html,

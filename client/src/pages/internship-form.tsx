@@ -348,26 +348,26 @@ export default function InternshipFormPage() {
               <Card>
                 <CardHeader>
                   <CardTitle>{course.title}</CardTitle>
-                  <CardDescription>Virtual Internship Program</CardDescription>
+                  <CardDescription>Assessment-based skill program</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     <div className="flex items-center space-x-2">
                       <Award className="w-4 h-4 text-black" />
-                      <span className="text-sm">Certificate upon completion</span>
+                      <span className="text-sm">Credential option after passing</span>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Users className="w-4 h-4 text-black" />
-                      <span className="text-sm">Mentorship included</span>
+                      <span className="text-sm">No mentorship or work placement included</span>
                     </div>
                     <div className="flex items-center space-x-2">
                       <FileText className="w-4 h-4 text-black" />
-                      <span className="text-sm">Real project experience</span>
+                      <span className="text-sm">Scored knowledge assessment</span>
                     </div>
                     
                     <div className="border-t pt-4">
-                      <p className="text-lg font-bold text-black">${course.price}</p>
-                      <p className="text-sm text-gray-600">One-time payment</p>
+                      <p className="text-lg font-bold text-black">₹{course.price}</p>
+                      <p className="text-sm text-gray-600">Credential fee, charged only after a pass</p>
                     </div>
                   </div>
                 </CardContent>
@@ -375,15 +375,14 @@ export default function InternshipFormPage() {
 
               <Card className="mt-6">
                 <CardHeader>
-                  <CardTitle>What You'll Get</CardTitle>
+                  <CardTitle>What this program includes</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-2 text-sm">
-                    <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-green-500" />Professional internship certificate</li>
-                    <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-green-500" />1-on-1 mentorship sessions</li>
-                    <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-green-500" />Real industry projects</li>
-                    <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-green-500" />LinkedIn recommendation</li>
-                    <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-green-500" />Career guidance</li>
+                    <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-green-500" />A scored assessment attempt</li>
+                    <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-green-500" />Optional credential activation after passing</li>
+                    <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-green-500" />A public credential-status check</li>
+                    <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-green-500" />No claim of employment or supervised work experience</li>
                   </ul>
                 </CardContent>
               </Card>
@@ -396,7 +395,7 @@ export default function InternshipFormPage() {
             <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-6" />
             <h2 className="text-3xl font-bold text-black mb-4">Application Submitted!</h2>
             <p className="text-gray-600 mb-8 max-w-2xl mx-auto">
-              Thank you for applying to the {course.title} internship. Our team will review your application and contact you within 48 hours.
+              Your registration for {course.title} was received. This is an assessment-based skill program, not an employment or supervised-internship placement.
             </p>
             <div className="space-x-4">
               <Link href="/">

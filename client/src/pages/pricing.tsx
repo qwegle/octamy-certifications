@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import Header from '@/components/header';
 import Footer from '@/components/footer';
 import { SEO } from '@/components/seo';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Check } from 'lucide-react';
+import { ArrowRight, Check, CheckCircle2, Loader2, ShieldCheck } from 'lucide-react';
 import { useAuth } from '@/lib/auth.tsx';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
@@ -21,29 +21,55 @@ function discounted(monthly: number, cycle: Cycle): string {
 
 export default function Pricing() {
   const [cycle, setCycle] = useState<Cycle>('monthly');
+  const [submitting, setSubmitting] = useState<string | null>(null);
   const { user, token } = useAuth();
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const { toast } = useToast();
 
-  async function subscribe(ownerType: 'creator' | 'institute', plan: string, registerRole: string) {
+  const selected = useMemo(() => {
+    const allowed: Record<'creator' | 'institute', string[]> = {
+      creator: ['free', 'pro', 'premium'],
+      institute: ['starter', 'growth'],
+    };
+    const params = new URLSearchParams(typeof window === 'undefined' ? '' : window.location.search);
+    const role = params.get('role');
+    const plan = params.get('selected');
+    if ((role === 'creator' || role === 'institute') && plan && allowed[role].includes(plan)) {
+      return { role, plan, welcome: params.get('welcome') === '1' } as const;
+    }
+
+    try {
+      const pending = JSON.parse(localStorage.getItem('octamy.pendingPlan') || 'null');
+      const pendingRole = pending?.role as string | undefined;
+      const pendingPlan = pending?.plan as string | undefined;
+      if (
+        (pendingRole === 'creator' || pendingRole === 'institute') &&
+        !!pendingPlan &&
+        allowed[pendingRole].includes(pendingPlan) &&
+        Date.now() - Number(pending?.at || 0) < 24 * 60 * 60 * 1000
+      ) {
+        return { role: pendingRole, plan: pendingPlan, welcome: false } as const;
+      }
+    } catch {
+      localStorage.removeItem('octamy.pendingPlan');
+    }
+    return null;
+  }, [location]);
+
+  async function subscribe(ownerType: 'learner' | 'creator' | 'institute', plan: string, registerRole: string) {
     if (!user || !token) {
       setLocation(`/register?role=${registerRole}&plan=${plan}`);
       return;
     }
+    const requestKey = `${ownerType}:${plan}`;
+    setSubmitting(requestKey);
     try {
       const res = await apiRequest('POST', '/api/subscriptions/checkout', { ownerType, plan, cycle });
       const data = await res.json();
-      if (!res.ok) {
-        if (res.status === 404 && data?.message?.toLowerCase?.().includes('profile')) {
-          toast({ title: 'Set up your profile first', description: `Create your ${ownerType} profile to subscribe.` });
-          setLocation(`/${ownerType}/register?plan=${plan}`);
-          return;
-        }
-        throw new Error(data.message || 'Failed to start checkout');
-      }
       if (data.activated) {
+        localStorage.removeItem('octamy.pendingPlan');
         toast({ title: 'Plan activated', description: `You're on ${plan.toUpperCase()} now.` });
-        setLocation(`/${ownerType}/dashboard`);
+        setLocation(ownerType === 'learner' ? '/dashboard' : `/${ownerType}/dashboard`);
         return;
       }
       if (data.paymentLink) {
@@ -76,7 +102,14 @@ export default function Pricing() {
       }
       toast({ title: 'Checkout started', description: 'Awaiting payment provider response.' });
     } catch (e: any) {
+      if (String(e?.message || '').toLowerCase().includes('profile')) {
+        toast({ title: 'Complete your workspace first', description: `Add the required ${ownerType} details, then your plan selection will continue.` });
+        setLocation(`/register?role=${ownerType}&plan=${plan}&mode=add`);
+        return;
+      }
       toast({ title: 'Could not start checkout', description: e.message, variant: 'destructive' });
+    } finally {
+      setSubmitting(null);
     }
   }
 
@@ -84,11 +117,11 @@ export default function Pricing() {
     <div className="min-h-screen bg-cream-soft flex flex-col">
       <SEO
         title="Pricing"
-        description="Transparent pricing for learners, creators, institutes and recruiters on Octamy. Free for learners. Start from ₹499/mo."
+        description="Transparent pricing for learners, creators, institutes and recruiters on Octamy, including ₹1,999 Learner All Access for eligible Octamy assessments."
         path="/pricing"
       />
       <Header />
-      <main className="flex-1">
+      <main id="main-content" tabIndex={-1} className="flex-1">
         <section className="relative overflow-hidden py-20 px-4 text-center">
           <div aria-hidden className="pointer-events-none absolute inset-0 bg-grid-slate [mask-image:radial-gradient(ellipse_at_top,black_40%,transparent_75%)]" />
           <div aria-hidden className="pointer-events-none absolute -top-32 left-1/2 -translate-x-1/2 h-[420px] w-[720px] rounded-full bg-sky-300/25 blur-3xl animate-blob" />
@@ -100,15 +133,19 @@ export default function Pricing() {
               Simple, transparent <span className="bg-gradient-to-r from-sky-700 to-indigo-700 bg-clip-text text-transparent">pricing</span>
             </h1>
             <p className="mt-4 text-lg text-slate-600">One platform, four roles. Pick what fits.</p>
-            <div className="mt-8 inline-flex items-center bg-cream-soft border border-cream-deep rounded-full p-1 shadow-sm">
+            <div className="mt-8 inline-flex items-center bg-white border border-slate-200 rounded-full p-1 shadow-sm" aria-label="Billing cycle">
               <button
-                className={`px-4 py-1.5 rounded-full text-sm transition-colors ${cycle === 'monthly' ? 'bg-slate-900 text-white' : 'text-slate-700 hover:bg-slate-50'}`}
+                type="button"
+                aria-pressed={cycle === 'monthly'}
+                className={`min-h-11 px-4 py-2 rounded-full text-sm font-semibold transition-colors ${cycle === 'monthly' ? 'bg-slate-900 text-white' : 'text-slate-700 hover:bg-slate-50'}`}
                 onClick={() => setCycle('monthly')}
               >
                 Monthly
               </button>
               <button
-                className={`px-4 py-1.5 rounded-full text-sm transition-colors ${cycle === 'yearly' ? 'bg-slate-900 text-white' : 'text-slate-700 hover:bg-slate-50'}`}
+                type="button"
+                aria-pressed={cycle === 'yearly'}
+                className={`min-h-11 px-4 py-2 rounded-full text-sm font-semibold transition-colors ${cycle === 'yearly' ? 'bg-slate-900 text-white' : 'text-slate-700 hover:bg-slate-50'}`}
                 onClick={() => setCycle('yearly')}
               >
                 Yearly <span className="text-xs opacity-80">· 2 months free</span>
@@ -116,6 +153,34 @@ export default function Pricing() {
             </div>
           </div>
         </section>
+
+        {selected && (
+          <section className="px-4 pb-4" aria-labelledby="selected-plan-title">
+            <div className="mx-auto flex max-w-5xl flex-col gap-5 rounded-3xl border border-emerald-200 bg-emerald-50/80 p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-6">
+              <div className="flex gap-4">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-emerald-700 text-white">
+                  <CheckCircle2 className="h-5 w-5" aria-hidden="true" />
+                </span>
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-[0.16em] text-emerald-800">{selected.welcome ? 'Workspace created' : 'Saved plan selection'}</p>
+                  <h2 id="selected-plan-title" className="mt-1 text-xl font-bold text-slate-950">
+                    {selected.role === 'creator' ? 'Creator' : 'Institute'} {selected.plan.charAt(0).toUpperCase() + selected.plan.slice(1)} is ready to review.
+                  </h2>
+                  <p className="mt-1 text-sm text-slate-600">Confirm the billing cycle, then continue securely. You will see the amount before payment.</p>
+                </div>
+              </div>
+              <Button
+                onClick={() => subscribe(selected.role, selected.plan, selected.role)}
+                disabled={submitting !== null}
+                className="shrink-0"
+              >
+                {submitting === `${selected.role}:${selected.plan}` ? <Loader2 className="animate-spin" /> : null}
+                Continue with {selected.plan.charAt(0).toUpperCase() + selected.plan.slice(1)}
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </section>
+        )}
 
         <section className="py-12 px-4">
           <div className="max-w-7xl mx-auto grid lg:grid-cols-4 gap-6">
@@ -128,9 +193,23 @@ export default function Pricing() {
                   'Take any free assessment',
                   'Buy verified certificates (₹199–₹999)',
                   'Performance-based badges',
-                  'Lifetime certificate access',
+                  'Status-aware credential record',
                 ]}
                 cta={{ label: 'Sign up free', href: '/register?role=learner' }}
+              />
+              <Tier
+                name="All Access"
+                price={discounted(1999, cycle)}
+                meta="Eligible Octamy in-house assessments"
+                highlight
+                busy={submitting === 'learner:all_access'}
+                features={[
+                  'Included credential activation after passing',
+                  'Only explicitly eligible Octamy in-house assessments',
+                  'Creator products remain separately priced',
+                  'Institute exams remain private and institute-funded',
+                ]}
+                cta={{ label: 'Choose All Access', onClick: () => subscribe('learner', 'all_access', 'learner') }}
               />
             </Column>
 
@@ -139,23 +218,29 @@ export default function Pricing() {
               <Tier
                 name="Starter"
                 price="Free"
-                meta="1 active course · 30% platform fee"
-                features={['Basic analytics', 'Octamy-branded checkout']}
+                meta="1 active course"
+                features={['Basic analytics', 'Octamy-branded assessment pages']}
+                selected={selected?.role === 'creator' && selected.plan === 'free'}
+                busy={submitting === 'creator:free'}
                 cta={{ label: 'Start free', onClick: () => subscribe('creator', 'free', 'creator') }}
               />
               <Tier
                 name="Pro"
                 price={discounted(499, cycle)}
-                meta="10 active courses · 20% platform fee"
+                meta="10 active courses"
                 highlight
-                features={['Curriculum builder', 'Course reporting', 'Payout requests', 'Priority review']}
+                selected={selected?.role === 'creator' && selected.plan === 'pro'}
+                busy={submitting === 'creator:pro'}
+                features={['Curriculum builder', 'Attempt reporting', 'Question-bank workflow', 'Priority review']}
                 cta={{ label: 'Choose Pro', onClick: () => subscribe('creator', 'pro', 'creator') }}
               />
               <Tier
                 name="Premium"
                 price={discounted(1999, cycle)}
-                meta="Unlimited courses · 10% platform fee"
-                features={['Lowest platform fee', 'Question-bank workflow', 'Earnings history', 'Priority support']}
+                meta="Unlimited courses"
+                selected={selected?.role === 'creator' && selected.plan === 'premium'}
+                busy={submitting === 'creator:premium'}
+                features={['Expanded catalog', 'Question-bank workflow', 'Reporting history', 'Priority support']}
                 cta={{ label: 'Choose Premium', onClick: () => subscribe('creator', 'premium', 'creator') }}
               />
             </Column>
@@ -166,6 +251,8 @@ export default function Pricing() {
                 name="Starter"
                 price={discounted(2999, cycle)}
                 meta="Core institute workspace"
+                selected={selected?.role === 'institute' && selected.plan === 'starter'}
+                busy={submitting === 'institute:starter'}
                 features={['Bulk CSV enrolment', 'Private question banks', 'Results export', 'Team roles']}
                 cta={{ label: 'Choose Starter', onClick: () => subscribe('institute', 'starter', 'institute') }}
               />
@@ -174,6 +261,8 @@ export default function Pricing() {
                 price={discounted(9999, cycle)}
                 meta="Expanded institute workspace"
                 highlight
+                selected={selected?.role === 'institute' && selected.plan === 'growth'}
+                busy={submitting === 'institute:growth'}
                 features={['Scheduled exam windows', 'Advanced reports', 'Team access', 'Priority support']}
                 cta={{ label: 'Choose Growth', onClick: () => subscribe('institute', 'growth', 'institute') }}
               />
@@ -200,7 +289,7 @@ export default function Pricing() {
                 price="₹4,500"
                 meta="500 credits · save 10%"
                 highlight
-                features={['Protected profile access', 'CV downloads', 'Interview evidence']}
+                features={['Protected profile access', 'CV downloads', 'Assessment records']}
                 cta={{ label: 'Start recruiting', href: '/recruiter/register' }}
               />
               <Tier
@@ -215,7 +304,7 @@ export default function Pricing() {
         </section>
 
         <section className="py-12 px-4 text-center text-sm text-slate-500">
-          Prices in INR. GST extra where applicable. Creator and institute yearly billing saves 2 months; recruiter packs do not expire with a monthly cycle.
+          <p className="inline-flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-emerald-700" /> Prices in INR. GST extra where applicable. All Access covers eligible Octamy in-house assessments only; creator products and private institute exams are outside the plan.</p>
         </section>
       </main>
       <Footer />
@@ -236,27 +325,31 @@ function Column({ title, subtitle, children }: { title: string; subtitle: string
 }
 
 function Tier({
-  name, price, meta, features, highlight, cta,
+  name, price, meta, features, highlight, selected, busy, cta,
 }: {
-  name: string; price: string; meta?: string; features: string[]; highlight?: boolean;
+  name: string; price: string; meta?: string; features: string[]; highlight?: boolean; selected?: boolean; busy?: boolean;
   cta: { label: string; href?: string; onClick?: () => void };
 }) {
   const button = (
     <Button
       onClick={cta.onClick}
+      disabled={busy}
+      aria-busy={busy || undefined}
       className={`w-full mt-5 ${highlight ? 'bg-slate-900 hover:bg-black text-white' : ''}`}
       variant={highlight ? 'default' : 'outline'}
-      size="sm"
     >
-      {cta.label}
+      {busy && <Loader2 className="animate-spin" />}
+      {selected ? `Continue with ${name}` : cta.label}
     </Button>
   );
   return (
-    <Card className={`border ${highlight ? 'border-slate-900 shadow-md' : 'border-slate-200'}`}>
+    <Card className={`relative border ${selected ? 'border-emerald-600 ring-2 ring-emerald-600/15' : highlight ? 'border-slate-900 shadow-md' : 'border-slate-200'}`}>
       <CardContent className="pt-6">
         <div className="flex items-baseline justify-between">
           <div className="font-semibold text-slate-900">{name}</div>
-          {highlight && <span className="text-[10px] uppercase tracking-wide bg-slate-900 text-white px-2 py-0.5 rounded-full">Popular</span>}
+          {selected
+            ? <span className="text-[10px] uppercase tracking-wide bg-emerald-700 text-white px-2 py-1 rounded-full">Selected</span>
+            : highlight && <span className="text-[10px] uppercase tracking-wide bg-slate-900 text-white px-2 py-1 rounded-full">Popular</span>}
         </div>
         <div className="text-2xl font-semibold text-slate-900 mt-2">{price}</div>
         {meta && <div className="text-xs text-slate-500 mt-1">{meta}</div>}
@@ -265,7 +358,11 @@ function Tier({
             <li key={f} className="flex gap-2"><Check className="w-4 h-4 text-slate-700 shrink-0 mt-0.5" />{f}</li>
           ))}
         </ul>
-        {cta.href ? <Link href={cta.href}>{button}</Link> : button}
+        {cta.href ? (
+          <Button asChild className={`w-full mt-5 ${highlight ? 'bg-slate-900 hover:bg-black text-white' : ''}`} variant={highlight ? 'default' : 'outline'}>
+            <Link href={cta.href}>{cta.label}</Link>
+          </Button>
+        ) : button}
       </CardContent>
     </Card>
   );

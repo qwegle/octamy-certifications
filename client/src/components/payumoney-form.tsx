@@ -1,34 +1,25 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
-import { Loader2, CreditCard, Shield } from 'lucide-react';
+import { Loader2, LockKeyhole, ShieldCheck } from 'lucide-react';
 
 interface PayUMoneyFormProps {
   certificateId: string;
-  courseId: number;
   amount: string;
-  userEmail: string;
-  userName: string;
   courseTitle: string;
   includesPhysicalCopy?: boolean;
   selectedAddressId?: number | null;
   sellerCode?: string | null;
-  onSuccess: () => void;
 }
 
 export default function PayUMoneyForm({
   certificateId,
-  courseId,
   amount,
-  userEmail,
-  userName,
   courseTitle,
   includesPhysicalCopy = false,
   selectedAddressId = null,
   sellerCode = null,
-  onSuccess
 }: PayUMoneyFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -54,17 +45,10 @@ export default function PayUMoneyForm({
       setIsLoading(true);
 
       const response = await apiRequest('POST', '/api/payment/initiate', {
-        tempExamId: certificateId,
-        courseId,
-        userEmail,
-        userName,
-        productInfo: `Certificate for ${courseTitle}`,
-        successUrl: `${window.location.origin}/payment/success`,
-        failureUrl: `${window.location.origin}/payment/failure`,
+        certificateId,
         includesPhysicalCopy,
         selectedAddressId,
-        amount,
-        sellerCode // Pass seller code for partner commission tracking
+        sellerCode: sellerCode || undefined,
       });
 
       const data = await response.json();
@@ -111,8 +95,11 @@ export default function PayUMoneyForm({
     } catch (error) {
       console.error('Payment error:', error);
       toast({
-        title: "Payment Error",
-        description: "Failed to initiate payment. Please try again.",
+        title: "Checkout could not start",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Secure checkout is temporarily unavailable. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -121,58 +108,34 @@ export default function PayUMoneyForm({
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <CreditCard className="h-5 w-5" />
-          Secure Payment
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <h3 className="font-semibold mb-2">Payment Details</h3>
-          <div className="space-y-1 text-sm">
-            <div className="flex justify-between">
-              <span>Certificate for:</span>
-              <span className="font-medium">{courseTitle}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Amount:</span>
-              <span className="font-bold text-lg">₹{amount}</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2 text-sm text-gray-600">
-          <Shield className="h-4 w-4" />
-          <span>
-            {defaultGateway === "cashfree"
-              ? "Secure checkout powered by Cashfree"
-              : "Secured by PayUMoney with 256-bit SSL encryption"}
-          </span>
-        </div>
-
-        <Button
-          onClick={handlePayment}
-          disabled={isLoading}
-          className="w-full bg-black text-white hover:bg-gray-800"
-          size="lg"
-        >
-          {isLoading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Processing...
-            </>
-          ) : (
-            `Pay ₹${amount} Now`
-          )}
-        </Button>
-
-        <p className="text-center text-xs text-gray-500">
-          By proceeding, you agree to our terms and conditions. 
-          Your certificate will be available for download immediately after successful payment.
-        </p>
-      </CardContent>
-    </Card>
+    <div className="space-y-4">
+      <Button
+        onClick={handlePayment}
+        disabled={isLoading || (includesPhysicalCopy && !selectedAddressId)}
+        className="min-h-12 w-full bg-slate-950 text-white hover:bg-slate-800"
+        size="lg"
+        aria-label={`Pay ₹${amount} to activate the ${courseTitle} credential`}
+      >
+        {isLoading ? (
+          <>
+            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+            Opening secure checkout…
+          </>
+        ) : (
+          <>
+            <LockKeyhole className="h-4 w-4" aria-hidden="true" />
+            Activate securely · ₹{amount}
+          </>
+        )}
+      </Button>
+      <div className="flex items-start justify-center gap-2 text-center text-xs leading-5 text-slate-500">
+        <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-700" aria-hidden="true" />
+        <span>
+          {defaultGateway === "cashfree"
+            ? "Secure checkout powered by Cashfree. Octamy never receives your card or UPI credentials."
+            : "Secure checkout powered by PayU. Octamy never receives your card or UPI credentials."}
+        </span>
+      </div>
+    </div>
   );
 }

@@ -309,11 +309,11 @@ export default function PaymentTemp() {
                     </div>
                     <div>
                       <span className="text-muted-foreground">Validity:</span>
-                      <div className="font-medium">Lifetime</div>
+                      <div className="font-medium">Shown on issued record</div>
                     </div>
                     <div>
                       <span className="text-muted-foreground">Verification:</span>
-                      <div className="font-medium">QR Code + URL</div>
+                      <div className="font-medium">Credential ID + live URL</div>
                     </div>
                     <div>
                       <span className="text-muted-foreground">Format:</span>

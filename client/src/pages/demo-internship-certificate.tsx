@@ -1,274 +1,196 @@
 import { Link } from "wouter";
-import { Button } from "@/components/ui/button";
+import {
+  ArrowLeft,
+  ArrowRight,
+  BarChart3,
+  CheckCircle2,
+  CircleAlert,
+  Clock3,
+  FileSearch,
+  Fingerprint,
+  ListChecks,
+  LockKeyhole,
+  ShieldCheck,
+} from "lucide-react";
 import Header from "@/components/header";
-import { Card, CardContent } from "@/components/ui/card";
+import Footer from "@/components/footer";
+import { SEO } from "@/components/seo";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Award, Calendar, Shield, Download, Share2, Users, Briefcase } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+
+const evidence = [
+  { label: "Assessment score", value: "86%", icon: BarChart3 },
+  { label: "Passing threshold", value: "50%", icon: CheckCircle2 },
+  { label: "Questions scored", value: "40", icon: ListChecks },
+  { label: "Recorded duration", value: "52 min", icon: Clock3 },
+];
+
+const boundaries = [
+  "This record represents a scored online assessment, not employment or an internship placement.",
+  "It does not claim supervised work experience, mentor validation, accreditation, or identity verification.",
+  "A live record shows its current activation, expiry, and revocation status at verification time.",
+];
 
 export default function DemoInternshipCertificate() {
   return (
-    <div className="min-h-screen bg-cream-deep">
-      {/* Navigation */}
+    <div className="min-h-screen bg-[#f5f2ea] text-slate-950">
+      <SEO
+        title="Assessment Program Record Preview"
+        description="See exactly what an Octamy assessment record proves—and what it does not."
+        path="/demo-internship-certificate"
+        noIndex
+      />
       <Header />
 
-      <div className="max-w-6xl mx-auto px-6 py-12">
-        <div className="mb-8">
-          <Link href="/">
-            <Button variant="outline" className="border-black text-black hover:bg-black hover:text-white mb-4">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Home
-            </Button>
-          </Link>
-          <h1 className="text-4xl font-bold text-black mb-2">Internship Certificate</h1>
-          <p className="text-gray-600">Professional virtual internship completion certificate with mentorship validation.</p>
-        </div>
+      <main>
+        <section className="relative overflow-hidden border-b border-slate-900/10 bg-slate-950 text-white">
+          <div className="absolute inset-0 opacity-40 [background-image:radial-gradient(circle_at_20%_20%,rgba(56,189,248,.28),transparent_35%),radial-gradient(circle_at_80%_0%,rgba(167,139,250,.24),transparent_32%)]" />
+          <div className="relative mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-20 lg:px-8">
+            <Link href="/virtual-internships">
+              <Button
+                variant="ghost"
+                className="mb-8 -ml-3 text-slate-300 hover:bg-white/10 hover:text-white"
+              >
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Assessment programs
+              </Button>
+            </Link>
+            <div className="max-w-3xl">
+              <Badge className="mb-5 border border-sky-300/30 bg-sky-300/10 text-sky-100 hover:bg-sky-300/10">
+                Illustrative preview · not a live credential
+              </Badge>
+              <h1 className="text-4xl font-black tracking-tight sm:text-6xl">
+                Evidence that says exactly what happened.
+              </h1>
+              <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300 sm:text-xl">
+                Octamy records a learner&apos;s assessment result, status, and evidence boundaries. It never turns an online test into a claim of employment or work experience.
+              </p>
+            </div>
+          </div>
+        </section>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Certificate Display */}
-          <div className="lg:col-span-2">
-            <Card className="bg-cream-soft shadow-2xl border-4 border-blue-200 overflow-hidden">
-              <div className="bg-gradient-to-r from-blue-900 via-blue-800 to-blue-900 p-8 text-white">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center space-x-3">
-                    <Briefcase className="w-8 h-8" />
-                    <div>
-                      <span className="font-bold text-lg">VIRTUAL INTERNSHIP CERTIFICATE</span>
-                      <p className="text-sm opacity-90">Professional Experience Program</p>
-                    </div>
+        <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-16 lg:px-8">
+          <div className="grid gap-8 xl:grid-cols-[minmax(0,1.55fr)_minmax(320px,.65fr)]">
+            <article className="overflow-hidden rounded-[2rem] border border-slate-900/10 bg-white shadow-[0_30px_80px_-36px_rgba(15,23,42,.4)]">
+              <div className="flex flex-col gap-5 border-b border-white/10 bg-slate-950 px-6 py-7 text-white sm:flex-row sm:items-start sm:justify-between sm:px-10">
+                <div className="flex items-center gap-4">
+                  <div className="grid h-12 w-12 place-items-center rounded-2xl bg-white text-lg font-black text-slate-950">
+                    O
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm opacity-90">Certificate No.</p>
-                    <p className="font-mono font-bold text-lg">VIN-20250616-DS9X4K</p>
+                  <div>
+                    <p className="font-bold tracking-wide">OCTAMY</p>
+                    <p className="text-sm text-slate-400">Assessment program record</p>
                   </div>
                 </div>
-                <div className="border-t border-blue-600 pt-4">
-                  <h2 className="text-3xl font-bold mb-2">OCTAMY SOLUTIONS PRIVATE LIMITED</h2>
-                  <p className="text-sm opacity-90 mb-2">ISO 9001:2015 Certified Virtual Internship Provider</p>
-                  <div className="flex items-center space-x-4">
-                    <Shield className="w-5 h-5" />
-                    <span className="text-sm">Authorized Virtual Training Platform</span>
-                  </div>
+                <div className="sm:text-right">
+                  <p className="text-xs font-semibold uppercase tracking-[.2em] text-slate-400">Preview reference</p>
+                  <p className="mt-1 font-mono text-sm">SAMPLE-DS-2026</p>
                 </div>
               </div>
 
-              <CardContent className="p-16 bg-gradient-to-br from-blue-50 to-white">
-                <div className="text-center mb-10">
-                  <div className="mb-8">
-                    <div className="w-32 h-32 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                      <Users className="w-16 h-16 text-white" />
-                    </div>
-                    <h3 className="text-4xl font-bold text-black mb-4">INTERNSHIP CERTIFICATE</h3>
-                    <div className="w-32 h-2 bg-blue-600 mx-auto mb-8"></div>
+              <div className="px-6 py-10 sm:px-10 sm:py-14">
+                <div className="flex flex-col gap-8 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <p className="text-sm font-bold uppercase tracking-[.2em] text-violet-700">Assessment passed</p>
+                    <h2 className="mt-3 text-3xl font-black tracking-tight sm:text-5xl">Data Science Skills</h2>
+                    <p className="mt-5 text-slate-600">Illustrative learner: <span className="font-bold text-slate-900">Aarav Mehta</span></p>
                   </div>
-                  
-                  <p className="text-xl text-gray-700 mb-6">This is to certify that</p>
-                  
-                  <h1 className="text-5xl font-bold text-black mb-6">RAHUL KUMAR</h1>
-                  
-                  <p className="text-xl text-gray-700 mb-4">has successfully completed the virtual internship program</p>
-                  
-                  <h2 className="text-3xl font-bold text-blue-600 mb-8">DATA SCIENCE VIRTUAL INTERNSHIP</h2>
-                  
-                  <div className="bg-blue-600 text-white p-6 rounded-lg mb-8">
-                    <div className="grid grid-cols-2 gap-6">
-                      <div>
-                        <p className="text-lg font-bold">Duration</p>
-                        <p className="text-2xl">12 Weeks</p>
-                      </div>
-                      <div>
-                        <p className="text-lg font-bold">Performance</p>
-                        <p className="text-2xl">Excellent</p>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex justify-center mb-8">
-                    <Badge className="bg-green-600 text-white text-xl px-8 py-3 font-bold">
-                      🎓 INTERNSHIP COMPLETED
-                    </Badge>
-                  </div>
-                  
-                  <div className="bg-gray-100 p-6 rounded-lg mb-8">
-                    <p className="text-lg text-gray-700 mb-2">Projects Completed: <span className="font-bold text-black">5 Real-World Projects</span></p>
-                    <p className="text-gray-600">Mentorship hours: 40+ | Skills demonstrated: Python, ML, Data Visualization</p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-3 gap-8 items-end">
-                  <div className="text-center">
-                    <div className="w-40 h-1 bg-blue-600 mb-3"></div>
-                    <p className="text-sm font-bold">MENTOR SIGNATURE</p>
-                    <p className="text-xs text-gray-600">Senior Data Scientist</p>
-                  </div>
-                  
-                  <div className="text-center">
-                    <div className="w-24 h-24 bg-blue-600 rounded-full flex items-center justify-center mb-3 mx-auto">
-                      <Briefcase className="w-14 h-14 text-white" />
-                    </div>
-                    <p className="text-xs text-gray-600 font-bold">INTERNSHIP SEAL</p>
-                  </div>
-                  
-                  <div className="text-center">
-                    <div className="w-40 h-1 bg-blue-600 mb-3"></div>
-                    <p className="text-sm font-bold">COMPLETION DATE</p>
-                    <p className="text-xs text-gray-600">June 16, 2025</p>
-                  </div>
-                </div>
-
-                <div className="mt-12 pt-8 border-t-2 border-blue-200">
-                  <div className="grid grid-cols-2 gap-8 text-xs text-gray-500">
+                  <div className="grid h-28 w-28 shrink-0 place-items-center rounded-full border-[10px] border-emerald-100 bg-emerald-600 text-center text-white shadow-inner">
                     <div>
-                      <p className="font-bold mb-2">Internship Program Includes:</p>
-                      <ul className="space-y-1">
-                        <li>• 1-on-1 mentorship sessions</li>
-                        <li>• Real industry project experience</li>
-                        <li>• LinkedIn recommendation letter</li>
-                        <li>• Portfolio development guidance</li>
-                      </ul>
-                    </div>
-                    <div className="text-right">
-                      <p><span className="font-bold">Program Duration:</span> 12 weeks</p>
-                      <p><span className="font-bold">Verify at:</span> octamy.com/verify/VIN-20250616-DS9X4K</p>
-                      <p><span className="font-bold">Mentor:</span> Dr. Sarah Johnson, PhD</p>
-                      <p><span className="font-bold">Industry Partner:</span> TechCorp Analytics</p>
+                      <span className="block text-3xl font-black">86</span>
+                      <span className="text-xs font-bold uppercase tracking-wider">percent</span>
                     </div>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
 
-          {/* Certificate Information */}
-          <div className="space-y-6">
-            <Card>
-              <CardContent className="p-6">
-                <h3 className="font-bold text-lg mb-4 flex items-center">
-                  <Briefcase className="w-5 h-5 mr-2" />
-                  Internship Certificate Details
-                </h3>
-                <div className="space-y-3 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Intern:</span>
-                    <span className="font-medium">Rahul Kumar</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Program:</span>
-                    <span className="font-medium">Data Science Internship</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Duration:</span>
-                    <span className="font-medium">12 Weeks</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Performance:</span>
-                    <span className="font-medium">Excellent</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Projects:</span>
-                    <span className="font-medium">5 Completed</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Mentor:</span>
-                    <span className="font-medium">Dr. Sarah Johnson</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Completed:</span>
-                    <span className="font-medium">June 16, 2025</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Industry Partner:</span>
-                    <span className="font-medium">TechCorp Analytics</span>
-                  </div>
+                <div className="mt-10 grid grid-cols-2 gap-3 lg:grid-cols-4">
+                  {evidence.map(({ label, value, icon: Icon }) => (
+                    <div key={label} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                      <Icon className="h-5 w-5 text-violet-700" />
+                      <p className="mt-5 text-2xl font-black">{value}</p>
+                      <p className="mt-1 text-xs leading-5 text-slate-500">{label}</p>
+                    </div>
+                  ))}
                 </div>
-              </CardContent>
-            </Card>
 
-            <Card>
-              <CardContent className="p-6">
-                <h3 className="font-bold text-lg mb-4">Internship Features</h3>
-                <div className="space-y-3 text-sm">
-                  <div className="flex items-center space-x-3 p-3 bg-blue-50 rounded-lg">
-                    <Users className="w-5 h-5 text-blue-600" />
+                <div className="mt-10 rounded-2xl border border-slate-200 bg-white p-5 sm:p-6">
+                  <div className="flex items-start gap-4">
+                    <Fingerprint className="mt-0.5 h-6 w-6 shrink-0 text-violet-700" />
                     <div>
-                      <p className="font-medium">1-on-1 Mentorship</p>
-                      <p className="text-gray-600">Weekly sessions with experts</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg">
-                    <Briefcase className="w-5 h-5 text-green-600" />
-                    <div>
-                      <p className="font-medium">Real Projects</p>
-                      <p className="text-gray-600">Industry-relevant experience</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-3 p-3 bg-purple-50 rounded-lg">
-                    <Award className="w-5 h-5 text-purple-600" />
-                    <div>
-                      <p className="font-medium">Career Support</p>
-                      <p className="text-gray-600">LinkedIn recommendations</p>
+                      <h3 className="font-bold">Recorded evidence</h3>
+                      <p className="mt-2 text-sm leading-6 text-slate-600">
+                        Score, passing threshold, assessment title, attempt timestamp, and current credential status. A public verifier sees only the fields approved for sharing.
+                      </p>
                     </div>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
 
-            <Card>
-              <CardContent className="p-6">
-                <h3 className="font-bold text-lg mb-4">Start Your Internship</h3>
-                <p className="text-sm text-gray-600 mb-4">
-                  Ready to gain real-world experience with our virtual internship program? Apply now and start your professional journey.
-                </p>
-                <div className="space-y-2">
-                  <Link href="/">
-                    <Button className="w-full bg-black text-white hover:bg-gray-800">
-                      View Internship Programs
+                <div className="mt-8 flex flex-col gap-4 border-t border-slate-200 pt-7 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="h-5 w-5 text-emerald-600" />
+                    <span>Illustrative status: activated and valid</span>
+                  </div>
+                  <span>Example completion: 14 July 2026</span>
+                </div>
+              </div>
+            </article>
+
+            <aside className="space-y-5">
+              <Card className="rounded-[1.75rem] border-amber-300/60 bg-amber-50 shadow-none">
+                <CardContent className="p-6 sm:p-7">
+                  <div className="flex items-center gap-3">
+                    <CircleAlert className="h-6 w-6 text-amber-700" />
+                    <h2 className="text-lg font-black">Evidence boundaries</h2>
+                  </div>
+                  <ul className="mt-5 space-y-4">
+                    {boundaries.map((item) => (
+                      <li key={item} className="flex gap-3 text-sm leading-6 text-amber-950/80">
+                        <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-600" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+
+              <Card className="rounded-[1.75rem] border-slate-200 shadow-none">
+                <CardContent className="p-6 sm:p-7">
+                  <FileSearch className="h-7 w-7 text-violet-700" />
+                  <h2 className="mt-5 text-xl font-black">Verification is live, not decorative</h2>
+                  <p className="mt-3 text-sm leading-6 text-slate-600">
+                    A real verification page distinguishes an activated record from one that is pending payment, expired, revoked, or unknown.
+                  </p>
+                  <Link href="/verify">
+                    <Button variant="outline" className="mt-6 w-full rounded-xl border-slate-300">
+                      Open verifier
+                      <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   </Link>
-                  <Link href="/business-certificates">
-                    <Button variant="outline" className="w-full border-black text-black hover:bg-black hover:text-white">
-                      Business Internships
+                </CardContent>
+              </Card>
+
+              <Card className="rounded-[1.75rem] border-0 bg-violet-700 text-white shadow-xl shadow-violet-900/15">
+                <CardContent className="p-6 sm:p-7">
+                  <LockKeyhole className="h-7 w-7 text-violet-200" />
+                  <h2 className="mt-5 text-xl font-black">Prove first. Decide later.</h2>
+                  <p className="mt-3 text-sm leading-6 text-violet-100">
+                    Take an assessment without buying a credential. If you pass, choose whether to activate and share the evidence.
+                  </p>
+                  <Link href="/exams">
+                    <Button className="mt-6 w-full rounded-xl bg-white text-violet-800 hover:bg-violet-50">
+                      Browse assessments
+                      <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   </Link>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </aside>
           </div>
-        </div>
-      </div>
+        </section>
+      </main>
 
-      {/* Footer */}
-      <footer className="bg-black text-white py-12 mt-16">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <h3 className="text-2xl font-bold mb-4">OCTAMY</h3>
-              <p className="text-gray-400">Professional certification platform for the modern workforce.</p>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Programs</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li><Link href="/" className="hover:text-white">Virtual Internships</Link></li>
-                <li><Link href="/business-certificates" className="hover:text-white">Business Certificates</Link></li>
-                <li><Link href="/partners" className="hover:text-white">Partner Program</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Support</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li><Link href="/help-center" className="hover:text-white">Help Center</Link></li>
-                <li><Link href="/contact" className="hover:text-white">Contact Us</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Connect</h4>
-              <p className="text-gray-400 mb-4">ISO Certified by Octamy Solutions Private Limited</p>
-            </div>
-          </div>
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2025 Octamy Solutions Private Limited. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

@@ -22,7 +22,12 @@ export async function createComprehensiveSeed() {
   console.log(`Inserted ${insertedCategories.length} categories`);
 
   // Define course templates for each category with different levels
-  const courseTemplates = {
+  type CourseTemplate = {
+    title: string;
+    description: string;
+    level: "novice" | "intermediate" | "advanced" | "expert";
+  };
+  const courseTemplates: Record<string, CourseTemplate[]> = {
     "AI": [
       { title: "Machine Learning Fundamentals", description: "Core ML algorithms, supervised and unsupervised learning, model evaluation techniques", level: "novice" },
       { title: "Deep Learning & Neural Networks", description: "Advanced neural network architectures, CNNs, RNNs, and transformer models", level: "intermediate" },
@@ -87,7 +92,7 @@ export async function createComprehensiveSeed() {
       { title: "Digital Transformation", description: "Change management, technology adoption, process digitization, and transformation leadership", level: "intermediate" },
     ],
     "Internships": [
-      { title: "Software Engineering Internship", description: "Full-stack development, code reviews, agile methodologies, and real-world project experience", level: "intermediate" },
+      { title: "Software Engineering Assessment Program", description: "Full-stack concepts, code-review practices, and agile methodologies assessed through scored questions", level: "intermediate" },
       { title: "Data Science Internship", description: "Hands-on data analysis, machine learning projects, and business intelligence reporting", level: "intermediate" },
       { title: "Marketing Internship", description: "Campaign management, content creation, analytics, and digital marketing execution", level: "novice" },
       { title: "Business Analyst Internship", description: "Process improvement, requirements gathering, stakeholder management, and solution design", level: "intermediate" },
@@ -112,7 +117,7 @@ export async function createComprehensiveSeed() {
         level: template.level,
         isInternship: category.name === "Internships",
         metaTitle: `${template.title} Certification - ${category.name} | Octamy`,
-        metaDescription: `Get certified in ${template.title}. ${template.description}. Industry-recognized certification.`,
+        metaDescription: `Take a scored assessment in ${template.title}. ${template.description}. Optional credential activation after passing.`,
       };
       allCourses.push(course);
     }

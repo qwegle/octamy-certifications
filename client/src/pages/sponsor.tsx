@@ -70,58 +70,56 @@ const FUTURE_ROADMAP = [
     description:
       "Personalized learning journeys adapted to individual skill levels and career goals",
     icon: <Brain className="w-6 h-6" />,
-    timeline: "Q2 2025",
+    timeline: "Planned",
   },
   {
     title: "AI-Powered Skill Assessment",
     description:
       "Intelligent evaluation system that identifies strengths and improvement areas",
     icon: <Target className="w-6 h-6" />,
-    timeline: "Q3 2025",
+    timeline: "Research",
   },
   {
     title: "AI Career Guidance",
     description:
-      "Smart recommendations for career advancement based on industry trends",
+      "Explainable recommendations based on assessment evidence and stated goals",
     icon: <TrendingUp className="w-6 h-6" />,
-    timeline: "Q4 2025",
+    timeline: "Planned",
   },
   {
     title: "Advanced Analytics Dashboard",
     description: "Comprehensive learning analytics with predictive insights",
     icon: <Zap className="w-6 h-6" />,
-    timeline: "Q1 2026",
+    timeline: "In progress",
   },
 ];
 
 const CURRENT_FEATURES = [
-  "Professional Certification Exams",
-  "Virtual Internship Programs",
-  "Business Skill Assessments",
-  "Premium Certificate Generation",
-  "Partner Commission System",
-  "Smart Learning Recommendations",
-  "Interactive Progress Tracking",
-  "Physical Certificate Shipping",
-  "Leaderboards & Achievements",
+  "Free scored skill assessments",
+  "Optional credential activation after passing",
+  "Live credential status checks",
+  "Learner-controlled evidence sharing",
+  "Creator and institute workspaces",
+  "Cohorts, question banks and scheduled exams",
+  "Recruiter search for opted-in profiles",
 ];
 
 const USPS = [
   {
-    title: "Industry-Recognized Certificates",
-    description: "Certificates validated by leading industry professionals",
+    title: "Proof Before Payment",
+    description: "Learners see their score before deciding whether to buy a credential",
   },
   {
-    title: "Affordable Learning",
-    description: "High-quality education at fraction of traditional costs",
+    title: "Inspectable Evidence",
+    description: "Live records expose the score, issuer, dates and current status",
   },
   {
-    title: "Practical Skills Focus",
-    description: "Real-world skills that employers actually value",
+    title: "Learner-Controlled Sharing",
+    description: "Public evidence passports remain private until the learner opts in",
   },
   {
-    title: "24/7 Learning Access",
-    description: "Learn at your own pace, anytime, anywhere",
+    title: "Honest Evidence Boundaries",
+    description: "Octamy distinguishes assessment results from identity, accreditation and job performance",
   },
 ];
 

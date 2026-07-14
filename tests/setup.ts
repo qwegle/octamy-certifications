@@ -1,10 +1,30 @@
-import { expect, beforeAll, afterAll, beforeEach } from '@jest/globals';
+import { beforeAll, afterAll } from '@jest/globals';
 import { Pool } from 'pg';
 import { drizzle } from 'drizzle-orm/node-postgres';
+import bcrypt from 'bcrypt';
 import * as schema from '../shared/schema';
+
+// Some local `.env` files explicitly set development. Test setup must override
+// that before any route module starts seed jobs or background timers.
+process.env.NODE_ENV = 'test';
 
 // Test database setup
 const testDbUrl = process.env.TEST_DATABASE_URL;
+
+// DatabaseStorage imports the application database singleton, which reads
+// DATABASE_URL. In tests, force that singleton onto the explicitly supplied
+// disposable database so storage calls can never drift onto another database.
+if (testDbUrl) {
+  process.env.DATABASE_URL = testDbUrl;
+} else {
+  // Pure unit tests import route modules whose production dependencies create
+  // a lazy pg Pool at module load. Give that pool an intentionally unreachable
+  // address so those modules can be type/contract tested without ever falling
+  // back to a developer database. Database-backed suites still fail fast via
+  // requireTestDatabase() unless TEST_DATABASE_URL is explicitly supplied.
+  process.env.DATABASE_URL = 'postgresql://octamy_unit_tests:disabled@127.0.0.1:1/octamy_unit_tests';
+}
+
 export const testPool = testDbUrl
   ? new Pool({ connectionString: testDbUrl })
   : null as unknown as Pool;
@@ -18,24 +38,39 @@ function requireTestDatabase() {
   }
 }
 
+let passwordHashes: Promise<[string, string]> | undefined;
+
+function getPasswordHashes() {
+  passwordHashes ??= Promise.all([
+    bcrypt.hash('password123', 10),
+    bcrypt.hash('admin123', 10),
+  ]);
+  return passwordHashes;
+}
+
 // Test data cleanup
 export async function cleanupTestData() {
   requireTestDatabase();
-  // Clean in reverse order to respect foreign key constraints
-  await testDb.delete(schema.certificates);
-  await testDb.delete(schema.examAttempts);
-  await testDb.delete(schema.interviews);
-  await testDb.delete(schema.questions);
-  await testDb.delete(schema.courses);
-  await testDb.delete(schema.categories);
-  await testDb.delete(schema.users);
-  await testDb.delete(schema.recruiters);
-  await testDb.delete(schema.sellers);
+  // This database is explicitly disposable. Truncate every public table so a
+  // newly added relation cannot leave foreign-key data behind and make an
+  // unrelated suite order-dependent. Do not RESTART IDENTITY: CI may grant a
+  // test role table privileges without transferring sequence ownership.
+  const tableRows = await testPool.query<{ table_name: string }>(`
+    SELECT format('%I.%I', schemaname, tablename) AS table_name
+      FROM pg_tables
+     WHERE schemaname = 'public'
+     ORDER BY tablename
+  `);
+  if (tableRows.rows.length > 0) {
+    await testPool.query(`TRUNCATE TABLE ${tableRows.rows.map((row) => row.table_name).join(', ')} CASCADE`);
+  }
 }
 
 // Setup test users and data
 export async function setupTestData() {
   requireTestDatabase();
+  const [userPassword, adminPassword] = await getPasswordHashes();
+
   // Create test category
   const [testCategory] = await testDb.insert(schema.categories).values({
     name: 'Test Category',
@@ -48,7 +83,7 @@ export async function setupTestData() {
   const [testUser] = await testDb.insert(schema.users).values({
     name: 'Test User',
     email: 'test@example.com',
-    password: 'hashed_password',
+    password: userPassword,
     isAdmin: false
   }).returning();
 
@@ -56,7 +91,7 @@ export async function setupTestData() {
   const [adminUser] = await testDb.insert(schema.users).values({
     name: 'Admin User',
     email: 'admin@example.com',
-    password: 'hashed_admin_password',
+    password: adminPassword,
     isAdmin: true
   }).returning();
 
@@ -110,10 +145,10 @@ beforeAll(async () => {
 afterAll(async () => {
   if (testDbUrl) {
     await cleanupTestData();
+    // DatabaseStorage owns a second pool through server/db. Close both pools so
+    // Jest does not hang after database-backed suites finish.
+    const { pool: applicationPool } = await import('../server/db');
+    await applicationPool.end();
     await testPool.end();
   }
-});
-
-beforeEach(async () => {
-  if (testDbUrl) await cleanupTestData();
 });

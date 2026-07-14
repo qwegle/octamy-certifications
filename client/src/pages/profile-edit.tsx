@@ -36,6 +36,7 @@ interface UserProfile {
   portfolioUrl?: string;
   careerGoals?: string;
   profileVisibility?: boolean;
+  evidencePassportPublic?: boolean;
   resume?: string;
 }
 
@@ -85,7 +86,8 @@ export default function ProfileEdit() {
     linkedinProfile: '',
     portfolioUrl: '',
     careerGoals: '',
-    profileVisibility: true,
+    profileVisibility: false,
+    evidencePassportPublic: false,
     resume: '',
   });
 
@@ -134,7 +136,8 @@ export default function ProfileEdit() {
             linkedinProfile: '',
             portfolioUrl: '',
             careerGoals: '',
-            profileVisibility: true,
+            profileVisibility: false,
+            evidencePassportPublic: false,
           };
         }
         const data = await response.json();
@@ -160,7 +163,8 @@ export default function ProfileEdit() {
           linkedinProfile: data.linkedinProfile || '',
           portfolioUrl: data.portfolioUrl || '',
           careerGoals: data.careerGoals || '',
-          profileVisibility: data.profileVisibility ?? true,
+          profileVisibility: data.profileVisibility ?? false,
+          evidencePassportPublic: data.evidencePassportPublic ?? false,
           resume: data.resume || '',
         });
         setUploadedCvUrl(data.resume || '');
@@ -677,13 +681,26 @@ export default function ProfileEdit() {
                   <input
                     type="checkbox"
                     id="profileVisibility"
-                    checked={formData.profileVisibility ?? true}
+                    checked={formData.profileVisibility ?? false}
                     onChange={(e) => handleInputChange('profileVisibility', e.target.checked)}
                     className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   />
                   <Label htmlFor="profileVisibility">
                     Make my profile visible to recruiters
                   </Label>
+                </div>
+                <div className="flex items-start space-x-2 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                  <input
+                    type="checkbox"
+                    id="evidencePassportPublic"
+                    checked={formData.evidencePassportPublic ?? false}
+                    onChange={(e) => handleInputChange('evidencePassportPublic', e.target.checked)}
+                    className="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <div>
+                    <Label htmlFor="evidencePassportPublic">Enable my shareable Skill Evidence Passport</Label>
+                    <p className="mt-1 text-xs leading-5 text-slate-500">Anyone with your private share link can see your name, profile summary, self-reported skills and activated assessment evidence. Your email, phone and CV stay hidden.</p>
+                  </div>
                 </div>
               </CardContent>
             </Card>

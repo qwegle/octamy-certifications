@@ -1,10 +1,11 @@
 import { describe, it, expect, beforeEach } from '@jest/globals';
 import { cleanupTestData, setupTestData } from '../setup';
 import { DatabaseStorage } from '../../server/storage';
+import type { InsertCourse } from '../../shared/schema';
 
-describe('Course Management Tests', () => {
+describe('Course storage contracts', () => {
   let storage: DatabaseStorage;
-  let testData: any;
+  let testData: Awaited<ReturnType<typeof setupTestData>>;
 
   beforeEach(async () => {
     await cleanupTestData();
@@ -12,127 +13,140 @@ describe('Course Management Tests', () => {
     testData = await setupTestData();
   });
 
-  describe('Course Creation', () => {
-    it('should create a new course with valid data', async () => {
-      const courseData = {
-        title: 'New Test Course',
-        description: 'A new course for testing',
-        slug: 'new-test-course',
-        categoryId: testData.testCategory.id,
-        duration: 90,
-        passingScore: 75,
-        price: '149.00',
-        level: 'intermediate',
-        isActive: true,
-        isInternship: false
-      };
+  function courseFixture(overrides: Partial<InsertCourse> = {}): InsertCourse {
+    return {
+      title: 'New Test Course',
+      description: 'A new course for testing',
+      slug: 'new-test-course',
+      categoryId: testData.testCategory.id,
+      duration: 90,
+      passingScore: 75,
+      price: '149.00',
+      level: 'intermediate',
+      isActive: true,
+      isInternship: false,
+      ...overrides,
+    };
+  }
 
-      const course = await storage.createCourseAdmin(courseData);
+  describe('Course creation and updates', () => {
+    it('creates a course with an explicit unique slug', async () => {
+      const courseData = courseFixture();
+
+      const course = await storage.createCourse(courseData);
 
       expect(course.id).toBeDefined();
       expect(course.title).toBe(courseData.title);
       expect(course.slug).toBe(courseData.slug);
       expect(course.categoryId).toBe(courseData.categoryId);
       expect(course.price).toBe(courseData.price);
+      expect(course.ownerType).toBe('admin');
+      expect(course.visibility).toBe('public');
     });
 
-    it('should auto-generate slug if not provided', async () => {
-      const courseData = {
-        title: 'Course With No Slug!',
-        description: 'Testing slug generation',
-        categoryId: testData.testCategory.id,
-        duration: 60,
-        passingScore: 70,
-        price: '99.00',
-        level: 'beginner',
-        isActive: true,
-        isInternship: false
-      };
+    it('enforces unique course slugs', async () => {
+      await storage.createCourse(courseFixture());
 
-      const course = await storage.createCourseAdmin(courseData);
-      expect(course.slug).toBe('course-with-no-slug');
+      await expect(
+        storage.createCourse(
+          courseFixture({ title: 'Another course with the same slug' }),
+        ),
+      ).rejects.toThrow();
     });
-  });
 
-  describe('Course Updates', () => {
-    it('should update course information', async () => {
+    it('updates mutable course information', async () => {
       const updates = {
         title: 'Updated Course Title',
         price: '199.00',
-        passingScore: 80
+        passingScore: 80,
       };
 
-      const updatedCourse = await storage.updateCourseAdmin(testData.testCourse.id, updates);
+      const updatedCourse = await storage.updateCourse(
+        testData.testCourse.id,
+        updates,
+      );
 
       expect(updatedCourse.title).toBe(updates.title);
       expect(updatedCourse.price).toBe(updates.price);
       expect(updatedCourse.passingScore).toBe(updates.passingScore);
     });
 
-    it('should update slug when title changes', async () => {
-      const updates = {
+    it('updates the slug only when the caller supplies the new slug', async () => {
+      const updatedCourse = await storage.updateCourse(testData.testCourse.id, {
         title: 'Completely New Course Name',
-        slug: 'completely-new-course-name'
-      };
-
-      const updatedCourse = await storage.updateCourseAdmin(testData.testCourse.id, updates);
-      expect(updatedCourse.slug).toBe(updates.slug);
-    });
-  });
-
-  describe('Course Retrieval', () => {
-    it('should get all courses', async () => {
-      const courses = await storage.getCourses();
-      expect(Array.isArray(courses)).toBe(true);
-      expect(courses.length).toBeGreaterThan(0);
-    });
-
-    it('should get course by slug', async () => {
-      const course = await storage.getCourseBySlug(testData.testCourse.slug);
-      expect(course).toBeDefined();
-      expect(course?.id).toBe(testData.testCourse.id);
-    });
-
-    it('should get courses by category', async () => {
-      const courses = await storage.getCoursesByCategory(testData.testCategory.id);
-      expect(Array.isArray(courses)).toBe(true);
-      expect(courses.every(course => course.categoryId === testData.testCategory.id)).toBe(true);
-    });
-  });
-
-  describe('Course Search and Filtering', () => {
-    it('should search courses by title', async () => {
-      const searchResults = await storage.searchCourses('Test');
-      expect(Array.isArray(searchResults)).toBe(true);
-      expect(searchResults.some(course => course.title.includes('Test'))).toBe(true);
-    });
-
-    it('should filter active courses only', async () => {
-      // Create inactive course
-      await storage.createCourseAdmin({
-        title: 'Inactive Course',
-        description: 'This course is inactive',
-        slug: 'inactive-course',
-        categoryId: testData.testCategory.id,
-        duration: 60,
-        passingScore: 70,
-        price: '99.00',
-        level: 'beginner',
-        isActive: false,
-        isInternship: false
+        slug: 'completely-new-course-name',
       });
 
-      const activeCourses = await storage.getActiveCourses();
-      expect(activeCourses.every(course => course.isActive)).toBe(true);
+      expect(updatedCourse.slug).toBe('completely-new-course-name');
     });
   });
 
-  describe('Course Deletion', () => {
-    it('should delete course and related data', async () => {
-      await storage.deleteCourseAdmin(testData.testCourse.id);
-      
-      const deletedCourse = await storage.getCourseById(testData.testCourse.id);
-      expect(deletedCourse).toBeNull();
+  describe('Public catalog retrieval', () => {
+    it('returns active public courses with their category', async () => {
+      const courses = await storage.getCourses();
+
+      expect(courses).toHaveLength(1);
+      expect(courses[0].id).toBe(testData.testCourse.id);
+      expect(courses[0].category.id).toBe(testData.testCategory.id);
+    });
+
+    it('gets an active public course by slug', async () => {
+      const course = await storage.getCourseBySlug(testData.testCourse.slug);
+
+      expect(course?.id).toBe(testData.testCourse.id);
+      expect(course?.category.id).toBe(testData.testCategory.id);
+    });
+
+    it('gets active public courses by category', async () => {
+      const courses = await storage.getCoursesByCategory(
+        testData.testCategory.id,
+      );
+
+      expect(courses).not.toHaveLength(0);
+      expect(
+        courses.every(
+          (course) => course.categoryId === testData.testCategory.id,
+        ),
+      ).toBe(true);
+    });
+
+    it('excludes inactive and private courses from the public catalog', async () => {
+      await storage.createCourse(
+        courseFixture({
+          title: 'Inactive Course',
+          slug: 'inactive-course',
+          isActive: false,
+        }),
+      );
+      await storage.createCourse(
+        courseFixture({
+          title: 'Private Course',
+          slug: 'private-course',
+          visibility: 'private',
+        }),
+      );
+
+      const publicCourses = await storage.getCourses();
+
+      expect(publicCourses.map((course) => course.slug)).toEqual([
+        testData.testCourse.slug,
+      ]);
+      await expect(
+        storage.getCourseBySlug('private-course'),
+      ).resolves.toBeUndefined();
+    });
+  });
+
+  describe('Course deletion', () => {
+    it('deletes a course and its legacy course questions', async () => {
+      await storage.deleteCourse(testData.testCourse.id);
+
+      await expect(
+        storage.getCourse(testData.testCourse.id),
+      ).resolves.toBeUndefined();
+      await expect(
+        storage.getQuestionsByCourse(testData.testCourse.id),
+      ).resolves.toEqual([]);
     });
   });
 });

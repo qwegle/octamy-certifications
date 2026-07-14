@@ -56,9 +56,9 @@ export function recordSuccess(id: string): void {
 // Periodic cleanup so the map doesn't grow unbounded.
 setInterval(() => {
   const now = Date.now();
-  for (const [k, e] of map.entries()) {
+  map.forEach((e, k) => {
     if (e.lockedUntil < now && now - e.firstAt > WINDOW_MS) {
       map.delete(k);
     }
-  }
+  });
 }, 5 * 60 * 1000).unref();

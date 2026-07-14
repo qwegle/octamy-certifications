@@ -1,88 +1,61 @@
 import { useState } from 'react';
-import { useLocation } from 'wouter';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Link, useLocation } from 'wouter';
+import { ArrowRight, Building2, Eye, EyeOff, Loader2, Lock, Mail, ShieldCheck } from 'lucide-react';
+import { AuthShell } from '@/components/auth-shell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { SEO } from '@/components/seo';
 import { useToast } from '@/hooks/use-toast';
 import { useRecruiterAuth } from '../auth/RecruiterAuthProvider';
-import { Eye, EyeOff, Mail, Lock, Building2, BadgeCheck, Target, Zap, Shield, FileCheck2, UserCheck } from 'lucide-react';
 
 export default function RecruiterAuth() {
   const [location, setLocation] = useLocation();
   const { login, register } = useRecruiterAuth();
   const { toast } = useToast();
-  
   const [isLogin, setIsLogin] = useState(location !== '/recruiter/register');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    confirmPassword: ''
-  });
+  const [formData, setFormData] = useState({ email: '', password: '', confirmPassword: '' });
 
   const validateForm = () => {
     if (!formData.email || !formData.password) {
-      toast({
-        title: "Validation Error",
-        description: "Email and password are required.",
-        variant: "destructive",
-      });
+      toast({ title: 'Check the form', description: 'Business email and password are required.', variant: 'destructive' });
       return false;
     }
-
-    if (!isLogin) {
-      if (formData.password !== formData.confirmPassword) {
-        toast({
-          title: "Validation Error",
-          description: "Passwords do not match.",
-          variant: "destructive",
-        });
-        return false;
-      }
-
-      if (formData.password.length < 8 || !/[A-Za-z]/.test(formData.password) || !/[\d\W_]/.test(formData.password)) {
-        toast({
-          title: "Validation Error",
-          description: "Use at least 8 characters with letters and a number or symbol.",
-          variant: "destructive",
-        });
-        return false;
-      }
+    if (!isLogin && formData.password !== formData.confirmPassword) {
+      toast({ title: 'Passwords do not match', description: 'Enter the same password in both fields.', variant: 'destructive' });
+      return false;
     }
-
+    if (!isLogin && (formData.password.length < 8 || !/[A-Za-z]/.test(formData.password) || !/[\d\W_]/.test(formData.password))) {
+      toast({ title: 'Use a stronger password', description: 'Use at least 8 characters with letters and a number or symbol.', variant: 'destructive' });
+      return false;
+    }
     return true;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
     if (!validateForm()) return;
-
     setIsLoading(true);
-
     try {
       if (isLogin) {
         await login(formData.email, formData.password);
-        toast({
-          title: "Login Successful",
-          description: "Welcome to Octamy Recruiter Portal!",
-        });
+        toast({ title: 'Welcome back', description: 'Opening your recruiter workspace…' });
         setLocation('/recruiter/dashboard');
       } else {
         await register(formData.email, formData.password);
         toast({
-          title: "Registration Successful",
-          description: "Account created! Please complete your profile.",
+          title: 'Recruiter identity created',
+          description: 'Complete company verification to begin protected candidate discovery.',
         });
         setLocation('/recruiter/onboarding');
       }
     } catch (error) {
       toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Authentication failed. Please try again.",
-        variant: "destructive",
+        title: isLogin ? 'Sign in failed' : 'Could not create the account',
+        description: error instanceof Error ? error.message : 'Authentication failed. Please try again.',
+        variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
@@ -90,123 +63,85 @@ export default function RecruiterAuth() {
   };
 
   const toggleMode = () => {
-    setIsLogin(!isLogin);
+    const nextIsLogin = !isLogin;
+    setIsLogin(nextIsLogin);
     setFormData({ email: '', password: '', confirmPassword: '' });
+    setLocation(nextIsLogin ? '/recruiter/login' : '/recruiter/register');
   };
 
   return (
-    <div className="min-h-screen bg-black text-white flex" style={{ fontFamily: 'Poppins, sans-serif' }}>
-      {/* Left Side - Quote/Image Section */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-gray-900 to-black relative overflow-hidden">
-        <div className="absolute inset-0 bg-black bg-opacity-40" />
-        <div className="relative z-10 flex flex-col justify-center items-center p-12 text-center">
-          <div className="mb-8">
-            <Building2 className="h-16 w-16 text-white mx-auto mb-4" />
-            <h1 className="text-4xl font-bold mb-2">Octamy Recruiter</h1>
-            <p className="text-xl text-gray-300">Evidence-led talent discovery</p>
-          </div>
-          
-          <div className="max-w-md space-y-8">
-            <blockquote className="text-2xl font-light italic text-gray-200">
-              “Hire from verified evidence, not profile claims.”
-            </blockquote>
-            
-            <div className="grid grid-cols-2 gap-6 text-center">
-              <div className="space-y-2">
-                <BadgeCheck className="h-8 w-8 text-white mx-auto" />
-                <p className="text-sm text-gray-300">Verified credentials</p>
-              </div>
-              <div className="space-y-2">
-                <Target className="h-8 w-8 text-white mx-auto" />
-                <p className="text-sm text-gray-300">Evidence filters</p>
-              </div>
-              <div className="space-y-2">
-                <Zap className="h-8 w-8 text-white mx-auto" />
-                <p className="text-sm text-gray-300">Saved searches</p>
-              </div>
-              <div className="space-y-2">
-                <Shield className="h-8 w-8 text-white mx-auto" />
-                <p className="text-sm text-gray-300">Consent-based access</p>
-              </div>
-            </div>
-
-            <div className="border-t border-gray-700 pt-6">
-              <div className="flex items-center justify-center space-x-6 text-sm text-gray-400">
-                <div className="flex items-center space-x-2">
-                  <FileCheck2 className="h-4 w-4" />
-                  <span>Assessment evidence</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <UserCheck className="h-4 w-4" />
-                  <span>Privacy-aware profiles</span>
-                </div>
-              </div>
-            </div>
-          </div>
+    <>
+      <SEO
+        title={isLogin ? 'Recruiter sign in' : 'Create recruiter workspace'}
+        description="Access Octamy's verified, consent-aware candidate evidence workspace."
+        path={isLogin ? '/recruiter/login' : '/recruiter/register'}
+      />
+      <AuthShell
+        eyebrow="Evidence-led hiring"
+        title="Move from candidate claims to inspectable skill evidence."
+        description="Search opted-in candidates, inspect assessment and credential history, and use credits only for protected access actions."
+        highlights={[
+          'Consent-aware candidate discovery',
+          'Live credential and assessment evidence',
+          'Company verification before protected access',
+        ]}
+      >
+        <div className="mb-7">
+          <p className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-fuchsia-700">
+            <Building2 className="h-4 w-4" /> Recruiter workspace
+          </p>
+          <h1 className="mt-3 text-4xl font-extrabold tracking-[-0.04em] text-slate-950 sm:text-5xl">
+            {isLogin ? 'Welcome back' : 'Create your company access'}
+          </h1>
+          <p className="mt-3 text-base leading-7 text-slate-600">
+            {isLogin
+              ? 'Continue to candidate discovery, saved searches and your credit wallet.'
+              : 'Start with your business email. Company details and verification follow next.'}
+          </p>
         </div>
-        
-        {/* Decorative Elements */}
-        <div className="absolute top-0 right-0 w-32 h-32 bg-cream-soft bg-opacity-5 rounded-full transform translate-x-16 -translate-y-16" />
-        <div className="absolute bottom-0 left-0 w-48 h-48 bg-cream-soft bg-opacity-3 rounded-full transform -translate-x-24 translate-y-24" />
-      </div>
 
-      {/* Right Side - Form Section */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-cream-soft text-black">
-        <div className="w-full max-w-md">
-          <div className="mb-8">
-            <div className="flex items-center lg:hidden mb-6">
-              <Building2 className="h-8 w-8 text-black mr-2" />
-              <span className="text-xl font-bold">Octamy Recruiter</span>
-            </div>
-            <h2 className="text-3xl font-bold text-black mb-2">
-              {isLogin ? 'Welcome back' : 'Create a recruiter workspace'}
-            </h2>
-            <p className="text-gray-600">
-              {isLogin 
-                ? 'Access your hiring workspace and saved searches'
-                : 'Search verified learning and assessment evidence'
-              }
-            </p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-6">
+        <section
+          className="rounded-[1.5rem] border border-slate-300 bg-white p-5 shadow-[0_18px_50px_-28px_rgba(15,23,42,0.45)] sm:p-7"
+          aria-label={isLogin ? 'Recruiter sign in form' : 'Recruiter registration form'}
+        >
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium text-gray-900">
-                Business Email
-              </Label>
+              <Label htmlFor="recruiter-email" className="text-sm font-semibold text-slate-800">Business email</Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Mail className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden="true" />
                 <Input
-                  id="email"
+                  id="recruiter-email"
                   type="email"
                   placeholder="recruiter@company.com"
                   value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="pl-10 h-12 border-gray-300 focus:border-black focus:ring-black"
+                  onChange={(event) => setFormData({ ...formData, email: event.target.value })}
+                  className="h-12 rounded-xl border-slate-300 bg-slate-50 pl-10 focus:bg-white"
+                  autoComplete="email"
+                  autoFocus
                   required
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm font-medium text-gray-900">
-                Password
-              </Label>
+              <Label htmlFor="recruiter-password" className="text-sm font-semibold text-slate-800">Password</Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Lock className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden="true" />
                 <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Create a secure password"
+                  id="recruiter-password"
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder={isLogin ? 'Enter your password' : '8+ characters, letters and a number'}
                   value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="pl-10 pr-10 h-12 border-gray-300 focus:border-black focus:ring-black"
+                  onChange={(event) => setFormData({ ...formData, password: event.target.value })}
+                  className="h-12 rounded-xl border-slate-300 bg-slate-50 pl-10 pr-12 focus:bg-white"
+                  autoComplete={isLogin ? 'current-password' : 'new-password'}
                   required
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  onClick={() => setShowPassword((value) => !value)}
+                  className="absolute right-1.5 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-xl text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -215,68 +150,51 @@ export default function RecruiterAuth() {
 
             {!isLogin && (
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword" className="text-sm font-medium text-gray-900">
-                  Confirm Password
-                </Label>
+                <Label htmlFor="recruiter-confirm-password" className="text-sm font-semibold text-slate-800">Confirm password</Label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Lock className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden="true" />
                   <Input
-                    id="confirmPassword"
-                    type={showPassword ? "text" : "password"}
+                    id="recruiter-confirm-password"
+                    type={showPassword ? 'text' : 'password'}
                     placeholder="Confirm your password"
                     value={formData.confirmPassword}
-                    onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                    className="pl-10 h-12 border-gray-300 focus:border-black focus:ring-black"
+                    onChange={(event) => setFormData({ ...formData, confirmPassword: event.target.value })}
+                    className="h-12 rounded-xl border-slate-300 bg-slate-50 pl-10 focus:bg-white"
+                    autoComplete="new-password"
                     required
                   />
                 </div>
               </div>
             )}
 
-            <Button
-              type="submit"
-              className="w-full bg-black hover:bg-gray-800 text-white h-12 text-base font-medium"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <div className="flex items-center space-x-2">
-                  <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
-                  <span>{isLogin ? 'Signing In...' : 'Creating Account...'}</span>
-                </div>
-              ) : (
-                isLogin ? 'Sign in to dashboard' : 'Create recruiter account'
-              )}
+            <Button type="submit" className="h-12 w-full rounded-xl bg-slate-950 text-base text-white hover:bg-black" disabled={isLoading}>
+              {isLoading && <Loader2 className="animate-spin" />}
+              {isLoading ? (isLogin ? 'Signing in…' : 'Creating account…') : (isLogin ? 'Sign in to dashboard' : 'Continue to company setup')}
+              {!isLoading && <ArrowRight className="h-4 w-4" />}
             </Button>
 
             {!isLogin && (
-              <p className="text-xs text-gray-500 text-center">
-                By creating an account, you agree to our <a className="underline" href="/terms-of-service">Terms of Service</a> and <a className="underline" href="/privacy-policy">Privacy Policy</a>.
+              <p className="text-center text-xs leading-5 text-slate-500">
+                By creating an account, you agree to our <Link className="font-semibold underline" href="/terms-of-service">Terms of Service</Link> and <Link className="font-semibold underline" href="/privacy-policy">Privacy Policy</Link>.
               </p>
             )}
           </form>
 
-          <div className="mt-8 text-center">
-            <button
-              onClick={toggleMode}
-              className="text-black hover:text-gray-700 font-medium"
-            >
-              {isLogin
-                ? "New to Octamy? Create your account"
-                : "Already have an account? Sign in"
-              }
-            </button>
+          <div className="mt-5 flex items-center justify-center gap-2 rounded-xl bg-emerald-50 px-3 py-2.5 text-center text-xs font-medium text-emerald-800">
+            <ShieldCheck className="h-4 w-4 shrink-0" /> Candidate contact details remain protected until eligibility and credit checks pass.
           </div>
+        </section>
 
-          <div className="mt-6 text-center">
-            <a
-              href="/"
-              className="text-gray-500 hover:text-gray-700 text-sm flex items-center justify-center space-x-1"
-            >
-              <span>← Back to Octamy Platform</span>
-            </a>
-          </div>
+        <div className="mt-7 text-center">
+          <button
+            type="button"
+            onClick={toggleMode}
+            className="min-h-11 rounded-xl px-3 text-sm font-bold text-slate-800 hover:bg-white hover:text-slate-950"
+          >
+            {isLogin ? 'New to Octamy? Create a recruiter workspace' : 'Already have an account? Sign in'}
+          </button>
         </div>
-      </div>
-    </div>
+      </AuthShell>
+    </>
   );
 }

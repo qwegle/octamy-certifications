@@ -62,10 +62,10 @@ export default function PortalLandingHero(props: PortalLandingHeroProps) {
           </h1>
           <p className="mt-5 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg">{props.description}</p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <Button asChild size="lg" className="rounded-full bg-slate-950 px-7 text-white shadow-[4px_4px_0_0_rgba(15,23,42,0.22)] hover:bg-black">
+            <Button asChild size="lg" className="rounded-full bg-slate-950 px-7 text-white shadow-lg shadow-slate-950/10 hover:bg-black">
               <Link href={props.primary.href}>{props.primary.label}<ArrowRight className="ml-2 h-4 w-4" /></Link>
             </Button>
-            <Button asChild size="lg" variant="outline" className="rounded-full border-2 border-slate-900 bg-white/70 px-7 backdrop-blur">
+            <Button asChild size="lg" variant="outline" className="rounded-full border-slate-300 bg-white/70 px-7 backdrop-blur">
               <Link href={props.secondary.href}>{props.secondary.label}</Link>
             </Button>
           </div>
@@ -75,10 +75,10 @@ export default function PortalLandingHero(props: PortalLandingHeroProps) {
           </div>
         </motion.div>
 
-        <motion.div initial={{ opacity: 0, y: 24, rotate: 0.7 }} animate={{ opacity: 1, y: 0, rotate: 0 }} transition={{ duration: 0.7, delay: 0.12 }} className="relative">
+        <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.12 }} className="relative">
           <div aria-hidden className="absolute -inset-5 rounded-[2.2rem] bg-white/35 blur-2xl" />
-          <div className="relative overflow-hidden rounded-[1.6rem] border-2 border-slate-900 bg-slate-50 shadow-[10px_10px_0_0_rgba(15,23,42,0.9)]">
-            <div className="flex items-center justify-between border-b-2 border-slate-900 bg-slate-950 px-5 py-4 text-white">
+          <div className="relative overflow-hidden rounded-[1.6rem] border border-slate-200 bg-slate-50 shadow-[0_24px_70px_-34px_rgba(15,23,42,0.55)]">
+            <div className="flex items-center justify-between border-b border-slate-800 bg-slate-950 px-5 py-4 text-white">
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/50">Illustrative preview · {props.preview.label}</p>
                 <p className="mt-0.5 text-sm font-semibold">{props.preview.title}</p>

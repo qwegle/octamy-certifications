@@ -13,6 +13,14 @@ import progressRoutes from './progressRoutes';
 import learningPathRoutes from './learningPathRoutes';
 import uploadRoutes from './upload';
 import preferenceRoutes from './preferenceRoutes';
+import evidencePassportRoutes from './evidencePassportRoutes';
+import mediaRoutes from './mediaRoutes';
+import aiCourseRoutes from './aiCourseRoutes';
+import curriculumImportRoutes from './curriculumImportRoutes';
+import aiQuestionDraftRoutes from './aiQuestionDraftRoutes';
+import taxonomyRoutes from './taxonomyRoutes';
+import catalogRoutes from './catalogRoutes';
+import learnerSubscriptionRoutes from './learnerSubscriptionRoutes';
 // Remove sellerRoutes import to prevent conflicts - seller routes are handled directly in main routes.ts
 
 const router = Router();
@@ -32,6 +40,14 @@ router.use('/', progressRoutes); // Learner progress and achievements
 router.use('/', learningPathRoutes); // Learning paths and personalized recommendations
 router.use('/', uploadRoutes); // Authenticated résumé uploads
 router.use('/', preferenceRoutes); // Learner preferences
+router.use('/', evidencePassportRoutes); // Learner-owned, privacy-aware evidence sharing
+router.use('/', mediaRoutes); // Reusable per-user media library
+router.use('/', aiCourseRoutes); // AI-assisted creator/institute course drafting
+router.use('/', curriculumImportRoutes); // Atomic, idempotent AI curriculum application
+router.use('/', aiQuestionDraftRoutes); // Review-first AI question-bank drafting (never auto-persists)
+router.use('/', taxonomyRoutes); // Admin taxonomy CRUD + public audience bands
+router.use('/', catalogRoutes); // Split Octamy/creator assessment discovery with server filters
+router.use('/', learnerSubscriptionRoutes); // In-house-only learner subscription benefits
 // Remove seller routes mounting - handled directly in main routes.ts
 
 // Register recruiter routes

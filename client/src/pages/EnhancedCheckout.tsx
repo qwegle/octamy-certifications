@@ -705,7 +705,7 @@ export default function EnhancedCheckout() {
                 <CardContent className="pt-6">
                   <div className="space-y-2 text-sm text-gray-400">
                     <p>✓ Instant digital certificate download</p>
-                    <p>✓ Lifetime validity with verification</p>
+                    <p>✓ Live verification through the stated expiry date</p>
                     <p>✓ LinkedIn integration ready</p>
                     {includesPhysicalCopy && (
                       <p>✓ Premium certificate paper delivered in 7-10 days</p>

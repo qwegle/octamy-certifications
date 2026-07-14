@@ -26,8 +26,12 @@ import {
   contactSubmissions,
   recruiters as recruitersTable,
   subscriptions,
+  splitPayouts,
+  courseEntitlements,
+  categories as categoriesTable,
+  courses as coursesTable,
 } from "@shared/schema";
-import { desc, and, eq, not } from "drizzle-orm";
+import { desc, and, eq, not, sql } from "drizzle-orm";
 import { db, pool } from "./db";
 import { audit } from "./lib/audit";
 import { LearningPathController } from "./controllers/learningPathController";
@@ -51,9 +55,9 @@ import apiRoutes from "./routes/index";
 import certificateRoutes from "./routes/certificateRoutes";
 import questionBanksRouter, { courseBlueprintRouter } from "./routes/question-banks";
 import { emailService } from "./utils/emailService";
-import { generateCertificateHTML } from "./utils/certificateGenerator";
+import { generateCertificateHTML } from "./utils/newCertificateGenerator";
 import { Readable } from "stream";
-import { evaluateAnswersWithAI } from "./utils/openai.js";
+import { evaluateAnswersWithAI } from "./utils/openai";
 import {
   saveQuestionMapping,
   loadQuestionMapping,
@@ -64,6 +68,34 @@ import {
   startExamStateCron,
 } from "./utils/examState";
 import { normalizeExamAnswers, scoreExam } from "./utils/examScoring";
+import { isResellerCourseEligible } from "./lib/reseller-inventory";
+import {
+  CREDENTIAL_ACTIVATION_KIND,
+  CredentialActivationError,
+  activationMetadata,
+  amountsMatch,
+  finalizeCredentialActivation,
+  getCredentialActivationContext,
+  isCredentialActivationPayment,
+  reserveCredentialActivationPayment,
+} from "./lib/credential-activation";
+import {
+  AdminCourseGovernanceError,
+  adminCourseCreateSchema,
+  adminCourseReviewSchema,
+  adminCourseUpdateSchema,
+  buildAdminOwnedCourseCreate,
+  buildGovernedAdminCourseUpdate,
+  buildThirdPartyCourseReview,
+  slugifyCourseTitle,
+} from "./lib/admin-course-governance";
+import {
+  PendingExamAccessError,
+  assertPendingExamAccess,
+  canAccessPendingExam,
+  parseGuestExamIdentity,
+  publicPendingCourseSnapshot,
+} from "./lib/pending-exam-access";
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -80,6 +112,120 @@ interface SellerAuthenticatedRequest extends Request {
 }
 
 const JWT_SECRET = process.env.JWT_SECRET!;
+
+function boundedPercent(value: string | null | undefined, fallback: number) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed >= 0 && parsed <= 100 ? parsed : fallback;
+}
+
+async function uniqueAdminCourseSlug(value: string, excludeCourseId?: number) {
+  const base = slugifyCourseTitle(value);
+  for (let suffix = 0; suffix < 500; suffix += 1) {
+    const candidate = suffix === 0 ? base : `${base.slice(0, 210)}-${suffix + 1}`;
+    const [existing] = await db.select({ id: coursesTable.id }).from(coursesTable).where(
+      excludeCourseId
+        ? and(eq(coursesTable.slug, candidate), not(eq(coursesTable.id, excludeCourseId)))
+        : eq(coursesTable.slug, candidate),
+    ).limit(1);
+    if (!existing) return candidate;
+  }
+  throw new AdminCourseGovernanceError("Could not generate a unique course URL. Choose a more specific slug.");
+}
+
+async function isActiveAdminCategory(categoryId: number) {
+  const [category] = await db.select({ id: categoriesTable.id }).from(categoriesTable).where(and(
+    eq(categoriesTable.id, categoryId),
+    eq(categoriesTable.isActive, true),
+  )).limit(1);
+  return Boolean(category);
+}
+
+/**
+ * Create the immutable revenue-allocation ledger once a gateway confirms a
+ * paid credential or course-content purchase. Shipping is excluded.
+ * Creator/institute and affiliate shares come out of the paid digital-product
+ * amount; the platform receives only the
+ * remainder, so the ledger can never allocate more than the customer paid.
+ */
+async function ensureRevenueSplits(input: {
+  paymentId: number;
+  courseId: number;
+  certificateAmount: string | number;
+  gatewayOrderId?: string | null;
+  sellerCode?: string | null;
+}) {
+  await db.transaction(async (tx) => {
+    await tx.execute(sql`SELECT pg_advisory_xact_lock(${input.paymentId})`);
+    const [existing] = await tx.select({ id: splitPayouts.id }).from(splitPayouts)
+      .where(eq(splitPayouts.paymentId, input.paymentId)).limit(1);
+    if (existing) return;
+
+    const course = await storage.getCourse(input.courseId);
+    if (!course) throw new Error(`Cannot allocate payment ${input.paymentId}: course not found`);
+    const baseAmount = Math.max(0, Number(input.certificateAmount));
+    if (!Number.isFinite(baseAmount) || baseAmount <= 0) return;
+
+    const ownerType = course.ownerType === 'creator' || course.ownerType === 'institute'
+      ? course.ownerType
+      : null;
+    const ownerPercent = ownerType === 'creator'
+      ? boundedPercent(process.env.CREATOR_REVENUE_SHARE_PERCENT, 80)
+      : ownerType === 'institute'
+        ? boundedPercent(process.env.INSTITUTE_REVENUE_SHARE_PERCENT, 80)
+        : 0;
+    const ownerAmount = ownerType && course.ownerId
+      ? Math.round(baseAmount * ownerPercent) / 100
+      : 0;
+
+    let sellerId: number | null = null;
+    let sellerAmount = 0;
+    if (input.sellerCode) {
+      const seller = await storage.getSellerByReferralCode(input.sellerCode);
+      if (seller?.isApproved) {
+        sellerId = seller.id;
+        sellerAmount = Math.round(baseAmount * boundedPercent(seller.commissionRate, 10)) / 100;
+      }
+    }
+
+    // Misconfigured percentages can never make the platform allocation
+    // negative or cause the ledger total to exceed the paid product amount.
+    const cappedOwner = Math.min(ownerAmount, baseAmount);
+    const cappedSeller = Math.min(sellerAmount, Math.max(0, baseAmount - cappedOwner));
+    const platformAmount = Math.max(0, Math.round((baseAmount - cappedOwner - cappedSeller) * 100) / 100);
+    const values: Array<typeof splitPayouts.$inferInsert> = [];
+    if (ownerType && course.ownerId && cappedOwner > 0) {
+      values.push({
+        paymentId: input.paymentId,
+        cashfreeOrderId: input.gatewayOrderId ?? null,
+        beneficiaryType: ownerType,
+        beneficiaryId: course.ownerId,
+        amount: cappedOwner.toFixed(2),
+        status: 'settled',
+      });
+    }
+    if (sellerId && cappedSeller > 0) {
+      values.push({
+        paymentId: input.paymentId,
+        cashfreeOrderId: input.gatewayOrderId ?? null,
+        beneficiaryType: 'seller',
+        beneficiaryId: sellerId,
+        amount: cappedSeller.toFixed(2),
+        status: 'settled',
+      });
+    }
+    if (platformAmount > 0) {
+      values.push({
+        paymentId: input.paymentId,
+        cashfreeOrderId: input.gatewayOrderId ?? null,
+        beneficiaryType: 'platform',
+        beneficiaryId: null,
+        amount: platformAmount.toFixed(2),
+        status: 'settled',
+      });
+    }
+    if (values.length) await tx.insert(splitPayouts).values(values);
+  });
+}
 
 // Middleware to verify JWT token
 const authenticateAdminToken = (
@@ -157,7 +303,7 @@ const optionalAuth = (
 };
 
 // Seller authentication middleware
-const authenticateSellerToken = (
+const authenticateSellerToken = async (
   req: SellerAuthenticatedRequest,
   res: Response,
   next: NextFunction
@@ -171,7 +317,14 @@ const authenticateSellerToken = (
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET) as any;
-    req.seller = decoded;
+    const sellerId = Number(decoded?.sellerId);
+    const seller = Number.isInteger(sellerId) && sellerId > 0
+      ? await storage.getSeller(sellerId)
+      : null;
+    if (!seller?.isActive) {
+      return res.status(401).json({ message: "Seller account is inactive or unavailable" });
+    }
+    req.seller = { sellerId: seller.id, email: seller.email };
     next();
   } catch (err) {
     return res.status(403).json({ message: "Invalid token" });
@@ -236,10 +389,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Background cleanup of expired exam_sessions / pending_exams rows
-  startExamStateCron();
+  if (process.env.NODE_ENV !== "test") {
+    startExamStateCron();
+  }
   
   // Initialize database if in development
-  if (process.env.NODE_ENV === "development") {
+  // Express defaults to development when NODE_ENV is unset. `npm run dev`
+  // does not set NODE_ENV itself, so checking the raw environment variable
+  // left a fresh local database empty and made the landing page look broken.
+  if (app.get("env") === "development") {
     await seedDatabase();
   }
 
@@ -307,7 +465,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = await storage.getUserByEmail(email);
       if (!user || !user.isAdmin) {
         recordFailure('admin:' + email);
-        audit({ action: 'admin.login', status: 'failure', actorEmail: email, req, metadata: { reason: 'no_admin' } });
+        await audit({ action: 'admin.login', status: 'failure', actorEmail: email, req, metadata: { reason: 'no_admin' } });
         return res.status(401).json({ message: "Invalid admin credentials" });
       }
 
@@ -318,7 +476,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       if (!isValidPassword) {
         recordFailure('admin:' + email);
-        audit({ action: 'admin.login', status: 'failure', userId: user.id, actorEmail: email, req, metadata: { reason: 'bad_password' } });
+        await audit({ action: 'admin.login', status: 'failure', userId: user.id, actorEmail: email, req, metadata: { reason: 'bad_password' } });
         return res.status(401).json({ message: "Invalid admin credentials" });
       }
 
@@ -335,6 +493,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         { expiresIn: "7d" }
       );
 
+      await audit({ action: 'admin.login', userId: user.id, actorEmail: user.email, actorRole: 'admin', req });
       res.json({
         message: "Admin login successful",
         token,
@@ -345,7 +504,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           isAdmin: user.isAdmin,
         },
       });
-      audit({ action: 'admin.login', userId: user.id, actorEmail: user.email, actorRole: 'admin', req });
     } catch (error) {
       console.error("Admin login error:", error);
       res.status(500).json({ message: "Login failed" });
@@ -600,117 +758,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
-  // API routes moved to proper location with /api prefix to prevent conflicts
-
-  // Register recruiter routes
-  // Recruiter login endpoint
-  app.post("/api/recruiter/login", async (req: Request, res: Response) => {
-    try {
-      const password = req.body?.password;
-      const email = String(req.body?.email || '').trim().toLowerCase();
-
-      // Find recruiter by email
-      const recruiter = await storage.getRecruiterByEmail(email);
-      if (!recruiter) {
-        return res.status(401).json({ message: "Invalid credentials" });
-      }
-
-      // Check password
-      const isPasswordValid = await bcrypt.compare(
-        password,
-        recruiter.password
-      );
-      if (!isPasswordValid) {
-        return res.status(401).json({ message: "Invalid credentials" });
-      }
-
-      // Update last login
-      await storage.updateRecruiterLastLogin(recruiter.id);
-
-      // Generate JWT token
-      const token = jwt.sign(
-        { recruiterId: recruiter.id, email: recruiter.email },
-        process.env.JWT_SECRET!,
-        { expiresIn: "7d" }
-      );
-
-      res.json({
-        message: "Login successful",
-        token,
-        recruiter: {
-          id: recruiter.id,
-          email: recruiter.email,
-          firstName: recruiter.firstName,
-          lastName: recruiter.lastName,
-          companyName: recruiter.companyName,
-          kycStatus: recruiter.kycStatus,
-          creditsBalance: recruiter.creditsBalance,
-          registrationStep: recruiter.registrationStep,
-        },
-      });
-    } catch (error: any) {
-      console.error("Login error:", error);
-      res.status(500).json({ message: "Login failed" });
-    }
-  });
-
-  // Recruiter registration endpoint
-  app.post("/api/recruiter/register", async (req: Request, res: Response) => {
-    try {
-      const password = req.body?.password;
-      const email = String(req.body?.email || '').trim().toLowerCase();
-
-      // Check if recruiter already exists
-      const existingRecruiter = await storage.getRecruiterByEmail(email);
-      if (existingRecruiter) {
-        return res.status(400).json({ message: "Email already registered" });
-      }
-
-      try { assertStrongPassword(password); } catch (e: any) { return res.status(400).json({ message: e.message }); }
-      // Hash password
-      const hashedPassword = await bcrypt.hash(password, Number(process.env.BCRYPT_ROUNDS) || 12);
-
-      // Create recruiter
-      const recruiter = await storage.createRecruiter({
-        email,
-        password: hashedPassword,
-        registrationStep: 1,
-        firstName: "",
-        lastName: "",
-        phone: "",
-        designation: "",
-        companyName: "",
-        companySize: "1-10",
-        industry: "",
-        companyAddress: "",
-        companyCity: "",
-        companyState: "",
-        companyCountry: "India",
-        kycStatus: "pending",
-        creditsBalance: "0.00",
-      });
-
-      // Generate JWT token
-      const token = jwt.sign(
-        { recruiterId: recruiter.id, email: recruiter.email },
-        process.env.JWT_SECRET!,
-        { expiresIn: "7d" }
-      );
-
-      res.status(201).json({
-        message: "Registration successful",
-        token,
-        recruiter: {
-          id: recruiter.id,
-          email: recruiter.email,
-          registrationStep: recruiter.registrationStep,
-        },
-      });
-    } catch (error: any) {
-      console.error("Registration error:", error);
-      res.status(500).json({ message: "Registration failed" });
-    }
-  });
+  // Recruiter endpoints are owned by routes/recruiterRoutes.ts and mounted once
+  // through /api below. Keeping a second auth implementation here caused this
+  // earlier handler to shadow validation and account-state checks in that router.
 
   // Rating endpoints
   app.post(
@@ -829,11 +879,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(401).json({ message: "Unauthorized" });
         }
 
-        // Get all courses that can be shared
+        const seller = await storage.getSeller(sellerId);
+        if (!seller?.isActive || !seller.isApproved) {
+          return res.status(403).json({
+            message: "An approved, active reseller account is required to access inventory.",
+          });
+        }
+
+        // Resellers may distribute Octamy in-house inventory only.
         const courses = await storage.getAllCourses();
+        const eligibleCourses = courses.filter(isResellerCourseEligible);
 
         const shareableItems = {
-          courses: courses.map((course) => ({
+          courses: eligibleCourses.map((course) => ({
             id: course.id,
             title: course.title,
             description: course.description,
@@ -869,11 +927,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (!seller) {
           return res.status(404).json({ message: "Seller not found" });
         }
+        if (!seller.isActive || !seller.isApproved) {
+          return res.status(403).json({
+            message: "Your reseller account must be approved and active before sharing inventory.",
+          });
+        }
 
         // Get course details to use slug instead of ID
-        const course = await storage.getCourse(targetCourseId);
-        if (!course) {
-          return res.status(404).json({ message: "Course not found" });
+        const parsedCourseId = Number(targetCourseId);
+        if (!Number.isInteger(parsedCourseId) || parsedCourseId <= 0) {
+          return res.status(400).json({ message: "Use a valid course identifier" });
+        }
+        const course = await storage.getCourse(parsedCourseId);
+        if (!course || !isResellerCourseEligible(course)) {
+          return res.status(404).json({ message: "Eligible Octamy course not found" });
         }
 
         // Generate referral URL using slug
@@ -927,6 +994,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         { expiresIn: "24h" }
       );
 
+      await audit({ action: 'auth.register', userId: user.id, actorEmail: user.email, actorRole: 'user', req });
       res.status(201).json({
         token,
         user: {
@@ -936,10 +1004,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           isAdmin: user.isAdmin || false,
         },
       });
-      audit({ action: 'auth.register', userId: user.id, actorEmail: user.email, actorRole: 'user', req });
     } catch (error) {
       console.error("Registration error:", error);
-      audit({ action: 'auth.register', status: 'failure', actorEmail: req.body?.email, req, metadata: { error: String(error) } });
+      await audit({ action: 'auth.register', status: 'failure', actorEmail: req.body?.email, req, metadata: { error: String(error) } });
       res.status(500).json({ message: "Registration failed" });
     }
   };
@@ -952,7 +1019,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const password = req.body?.password;
       const email = String(req.body?.email || '').trim().toLowerCase();
-      if (!email || typeof email !== 'string') {
+      if (!email || typeof password !== 'string' || password.length === 0) {
         return res.status(400).json({ message: "Email and password are required" });
       }
 
@@ -964,19 +1031,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = await storage.getUserByEmail(email);
       if (!user) {
         recordFailure(email);
-        audit({ action: 'auth.login', status: 'failure', actorEmail: email, req, metadata: { reason: 'no_user' } });
+        await audit({ action: 'auth.login', status: 'failure', actorEmail: email, req, metadata: { reason: 'no_user' } });
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
       if (!user.password) {
         recordFailure(email);
-        audit({ action: 'auth.login', status: 'failure', userId: user.id, actorEmail: email, req, metadata: { reason: 'no_password' } });
+        await audit({ action: 'auth.login', status: 'failure', userId: user.id, actorEmail: email, req, metadata: { reason: 'no_password' } });
         return res.status(401).json({ message: "Invalid credentials" });
       }
       const validPassword = await bcrypt.compare(password, user.password);
       if (!validPassword) {
         recordFailure(email);
-        audit({ action: 'auth.login', status: 'failure', userId: user.id, actorEmail: email, req, metadata: { reason: 'bad_password' } });
+        await audit({ action: 'auth.login', status: 'failure', userId: user.id, actorEmail: email, req, metadata: { reason: 'bad_password' } });
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
@@ -991,6 +1058,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         { expiresIn: "24h" }
       );
 
+      await audit({ action: 'auth.login', userId: user.id, actorEmail: user.email, actorRole: user.isAdmin ? 'admin' : 'user', req });
       res.json({
         token,
         user: {
@@ -1000,7 +1068,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           isAdmin: user.isAdmin || false,
         },
       });
-      audit({ action: 'auth.login', userId: user.id, actorEmail: user.email, actorRole: user.isAdmin ? 'admin' : 'user', req });
     } catch (error) {
       console.error("Login error:", error);
       res.status(500).json({ message: "Login failed" });
@@ -1039,7 +1106,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Import and mount user profile routes
   try {
     const { default: userProfileRoutes } = await import(
-      "./routes/userProfileRoutes.js"
+      "./routes/userProfileRoutes"
     );
     app.use("/api/user", userProfileRoutes);
     console.log("User profile routes mounted successfully");
@@ -1144,7 +1211,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const course = isNumeric
         ? await storage.getCourse(parseInt(idParam, 10))
         : await storage.getCourseBySlug(idParam);
-      if (!course || !course.isActive || course.visibility !== "public") {
+      if (!course || !course.isActive || course.visibility !== "public" || course.reviewStatus !== "approved" || course.ownerType === "institute") {
         return res.status(404).json({ message: "Course not found" });
       }
       res.json(course);
@@ -1161,7 +1228,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if slug is actually a numeric ID (common mistake)
       if (/^\d+$/.test(slug)) {
         const course = await storage.getCourse(parseInt(slug));
-        if (!course || !course.isActive || course.visibility !== "public") {
+        if (!course || !course.isActive || course.visibility !== "public" || course.reviewStatus !== "approved" || course.ownerType === "institute") {
           return res.status(404).json({ message: "Course not found" });
         }
         // Get full course with category for consistency
@@ -1188,7 +1255,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid course ID" });
       }
       const course = await storage.getCourse(courseId);
-      if (!course || !course.isActive || course.visibility !== "public") {
+      if (!course || !course.isActive || course.visibility !== "public" || course.reviewStatus !== "approved" || course.ownerType === "institute") {
         return res.status(404).json({ message: "Course not found" });
       }
       const questions = await storage.getQuestionsByCourse(courseId);
@@ -1297,6 +1364,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(400).json({ message: "Invalid exam duration" });
         }
 
+        let effectiveUserEmail: string;
+        let effectiveUserName: string;
+        if (req.user?.userId) {
+          const authenticatedUser = await storage.getUser(req.user.userId);
+          if (!authenticatedUser) {
+            return res.status(401).json({ message: "Your account could not be verified" });
+          }
+          effectiveUserEmail = authenticatedUser.email;
+          effectiveUserName = authenticatedUser.name || authenticatedUser.email.split("@")[0];
+        } else {
+          const guestIdentity = parseGuestExamIdentity({ userEmail, userName });
+          if (!guestIdentity.success) {
+            return res.status(400).json({
+              message: "Enter a valid learner name and email before submitting",
+              errors: guestIdentity.error.flatten().fieldErrors,
+            });
+          }
+          effectiveUserEmail = guestIdentity.data.userEmail;
+          effectiveUserName = guestIdentity.data.userName;
+        }
+
         // Get correct answers from persisted session mapping
         const correctAnswersMapping = (await loadQuestionMapping(sessionId, numericCourseId)) || {};
 
@@ -1370,8 +1458,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await savePendingExam(tempExamId, {
           userId: req.user?.userId || null,
           courseId: numericCourseId,
-          userEmail,
-          userName,
+          userEmail: effectiveUserEmail,
+          userName: effectiveUserName,
           score,
           totalQuestions,
           answers: answersRecord,
@@ -1381,10 +1469,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           sessionId,
           ipAddress: req.ip || req.connection?.remoteAddress,
           userAgent: req.get("User-Agent"),
-          tabSwitches: req.body.tabSwitches || 0,
+          tabSwitches: Number.isInteger(tabSwitches) && tabSwitches >= 0 ? tabSwitches : 0,
           isRetake,
           previousBestScore,
-          course,
+          course: publicPendingCourseSnapshot(course),
           createdAt: new Date(),
         });
 
@@ -1414,7 +1502,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Temporary exam results endpoint - shows results without saving to database
   app.get(
     "/api/exam-results-temp/:tempExamId",
-    async (req: Request, res: Response) => {
+    optionalAuth,
+    async (req: AuthenticatedRequest, res: Response) => {
       try {
         const { tempExamId } = req.params;
 
@@ -1427,6 +1516,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
             .json({ message: "Exam results not found or expired" });
         }
 
+        if (!canAccessPendingExam(examData, req.user?.userId)) {
+          return res.status(403).json({ message: "This assessment result belongs to another account" });
+        }
+
         // Return exam results for display without database persistence
         res.json({
           tempExamId,
@@ -1436,13 +1529,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             (examData.score / 100) * examData.totalQuestions
           ),
           totalQuestions: examData.totalQuestions,
-          course: examData.course,
+          course: publicPendingCourseSnapshot(examData.course),
           timeTaken: examData.timeTaken,
           mastered: examData.mastered,
           isRetake: examData.isRetake,
           previousBestScore: examData.previousBestScore,
-          userEmail: examData.userEmail,
-          userName: examData.userName,
           message: examData.passed
             ? `Congratulations! You passed with ${examData.score}%`
             : `You scored ${examData.score}%. You need at least ${examData.course.passingScore}% to pass.`,
@@ -1455,8 +1546,220 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
+  const credentialActivationRequestSchema = z.object({
+    certificateId: z.string().trim().min(6).max(180),
+    userPhone: z.string().trim().max(30).optional(),
+    sellerCode: z.string().trim().max(80).optional().default(""),
+    includesPhysicalCopy: z.boolean().optional().default(false),
+    selectedAddressId: z.number().int().positive().nullable().optional().default(null),
+  });
+
+  const initiateCredentialActivation = async (
+    req: AuthenticatedRequest,
+    res: Response,
+  ) => {
+    let reservedPaymentId: number | null = null;
+    try {
+      if (!req.user?.userId) {
+        return res.status(401).json({
+          message: "Sign in to activate a credential",
+          code: "AUTH_REQUIRED",
+        });
+      }
+      const parsed = credentialActivationRequestSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({
+          message: "Credential activation request is invalid",
+          code: "INVALID_ACTIVATION_REQUEST",
+        });
+      }
+
+      const payload = parsed.data;
+      const context = await getCredentialActivationContext(
+        payload.certificateId,
+        req.user.userId,
+      );
+      if (context.certificate.isPaid) {
+        return res.status(409).json({
+          message: "This credential is already activated",
+          code: "ALREADY_ACTIVATED",
+        });
+      }
+      if (!context.certificate.isActive) {
+        return res.status(409).json({
+          message: "A revoked credential cannot be activated",
+          code: "CREDENTIAL_REVOKED",
+        });
+      }
+
+      let selectedAddress = null;
+      if (payload.includesPhysicalCopy) {
+        if (!payload.selectedAddressId) {
+          return res.status(400).json({
+            message: "Choose a shipping address for the physical certificate",
+            code: "SHIPPING_ADDRESS_REQUIRED",
+          });
+        }
+        const addresses = await storage.getUserAddresses(context.user.id);
+        selectedAddress = addresses.find(
+          (address) => address.id === payload.selectedAddressId,
+        ) || null;
+        if (!selectedAddress) {
+          return res.status(404).json({
+            message: "Shipping address was not found in your account",
+            code: "SHIPPING_ADDRESS_NOT_FOUND",
+          });
+        }
+      }
+
+      const customerPhone =
+        context.user.phone ||
+        selectedAddress?.phoneNumber ||
+        payload.userPhone ||
+        "9999999999";
+      const baseUrl = `${req.protocol}://${req.get("host")}`;
+      const defaultGateway = getDefaultPaymentGateway();
+
+      if (defaultGateway === "cashfree") {
+        const orderId = `CF_ACT_${Date.now()}_${crypto.randomBytes(4).toString("hex")}`;
+        const payment = await reserveCredentialActivationPayment({
+          context,
+          transactionId: orderId,
+          gateway: "cashfree",
+          includesPhysicalCopy: payload.includesPhysicalCopy,
+          selectedAddressId: payload.selectedAddressId,
+          sellerCode: payload.sellerCode,
+        });
+        reservedPaymentId = payment.id;
+
+        try {
+          const order = await createCashfreeOrder({
+            orderId,
+            amount: payment.amount,
+            customerId: `oct_user_${context.user.id}`,
+            customerName: context.user.name,
+            customerEmail: context.user.email,
+            customerPhone,
+            returnUrl: `${baseUrl}/payment-success?order_id=${encodeURIComponent(orderId)}`,
+            notifyUrl: `${baseUrl}/api/webhooks/cashfree`,
+            notes: {
+              kind: CREDENTIAL_ACTIVATION_KIND,
+              paymentDbId: String(payment.id),
+              certificateId: context.certificate.certificateId,
+              courseId: String(context.course.id),
+              userId: String(context.user.id),
+            },
+          });
+          const metadata = activationMetadata(payment.gatewayStatusRaw);
+          await storage.updatePayment(payment.id, {
+            cashfreeOrderId: order.orderId,
+            gatewayStatusRaw: {
+              ...metadata,
+              providerOrder: order.raw,
+            },
+          } as any);
+          await audit({
+            action: "credential.activation.checkout_started",
+            userId: context.user.id,
+            resourceType: "certificate",
+            resourceId: context.certificate.id,
+            req,
+            metadata: { gateway: "cashfree", paymentId: payment.id },
+          });
+          return res.json({
+            success: true,
+            gateway: "cashfree",
+            orderId: order.orderId,
+            transactionId: order.orderId,
+            amount: payment.amount,
+            currency: payment.currency,
+            paymentSessionId: order.paymentSessionId,
+            paymentLink: order.paymentLink,
+          });
+        } catch (cashfreeError) {
+          const metadata = activationMetadata(payment.gatewayStatusRaw);
+          await storage.updatePayment(payment.id, {
+            status: "failed",
+            gatewayStatusRaw: {
+              ...metadata,
+              reason: "provider_order_creation_failed",
+            },
+          } as any);
+          reservedPaymentId = null;
+          console.error("Cashfree credential activation init failed; trying PayU", cashfreeError);
+        }
+      }
+
+      const transactionId = payuMoneyService.generateTransactionId();
+      const payment = await reserveCredentialActivationPayment({
+        context,
+        transactionId,
+        gateway: "payumoney",
+        includesPhysicalCopy: payload.includesPhysicalCopy,
+        selectedAddressId: payload.selectedAddressId,
+        sellerCode: payload.sellerCode,
+      });
+      reservedPaymentId = payment.id;
+      const paymentForm = payuMoneyService.generatePaymentForm({
+        txnid: transactionId,
+        amount: payment.amount,
+        productinfo: payload.includesPhysicalCopy
+          ? `${context.course.title} - Credential activation (Digital + Physical)`
+          : `${context.course.title} - Credential activation`,
+        firstname: context.user.name,
+        email: context.user.email,
+        phone: customerPhone,
+        surl: `${baseUrl}/api/payment/success`,
+        furl: `${baseUrl}/api/payment/failure`,
+        udf1: String(context.course.id),
+        udf2: String(payment.id),
+        udf3: payload.sellerCode,
+        udf4: String(context.user.id),
+        udf5: `credential:${context.certificate.certificateId}`,
+      });
+      await audit({
+        action: "credential.activation.checkout_started",
+        userId: context.user.id,
+        resourceType: "certificate",
+        resourceId: context.certificate.id,
+        req,
+        metadata: { gateway: "payumoney", paymentId: payment.id },
+      });
+      return res.json({
+        success: true,
+        gateway: "payumoney",
+        paymentForm,
+        transactionId,
+        amount: payment.amount,
+        currency: payment.currency,
+      });
+    } catch (error) {
+      if (reservedPaymentId) {
+        const payment = await storage.getPayment(reservedPaymentId).catch(() => undefined);
+        if (payment?.status === "pending") {
+          const metadata = activationMetadata(payment.gatewayStatusRaw);
+          await storage.updatePayment(reservedPaymentId, {
+            status: "failed",
+            gatewayStatusRaw: { ...metadata, reason: "checkout_initialization_failed" },
+          } as any).catch(() => undefined);
+        }
+      }
+      if (error instanceof CredentialActivationError) {
+        return res.status(error.statusCode).json({
+          message: error.message,
+          code: error.code,
+        });
+      }
+      console.error("Credential activation checkout failed", error);
+      return res.status(503).json({
+        message: "Secure checkout is temporarily unavailable. Please try again shortly.",
+        code: "CHECKOUT_UNAVAILABLE",
+      });
+    }
+  };
+
   const createCashfreeCertificateOrder = async (
-    req: Request,
+    req: AuthenticatedRequest,
     payload: {
       tempExamId: string;
       userPhone?: string;
@@ -1469,6 +1772,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!examData) {
       throw new Error("Exam data not found or expired. Please retake the assessment.");
     }
+    assertPendingExamAccess(examData, req.user?.userId);
     if (!examData.passed) {
       throw new Error("Exam not passed");
     }
@@ -1542,6 +1846,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     "/api/payment/initiate",
     optionalAuth,
     async (req: AuthenticatedRequest, res: Response) => {
+      if (req.body?.certificateId) {
+        return initiateCredentialActivation(req, res);
+      }
       try {
         const defaultGateway = getDefaultPaymentGateway();
         if (defaultGateway === "cashfree") {
@@ -1576,6 +1883,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
               paymentLink: order.paymentLink,
             });
           } catch (cashfreeError) {
+            if (cashfreeError instanceof PendingExamAccessError) {
+              return res.status(cashfreeError.statusCode).json({ message: cashfreeError.message });
+            }
             console.error("Cashfree init failed, falling back to PayU:", cashfreeError);
           }
         }
@@ -1608,6 +1918,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res
             .status(404)
             .json({ message: "Exam data not found or expired. Please retake the assessment." });
+        }
+
+
+        try {
+          assertPendingExamAccess(examData, req.user?.userId);
+        } catch (error) {
+          if (error instanceof PendingExamAccessError) {
+            return res.status(error.statusCode).json({ message: error.message });
+          }
+          throw error;
         }
 
         if (!examData.passed) {
@@ -1728,6 +2048,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           currency: "INR",
         });
       } catch (error: any) {
+        if (error instanceof PendingExamAccessError) {
+          return res.status(error.statusCode).json({ message: error.message });
+        }
         console.error("Error creating Cashfree order:", error);
         res.status(500).json({ message: error.message || "Failed to create Cashfree order" });
       }
@@ -1796,7 +2119,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           if (status === 'success') {
             const { activatePlan } = await import('./routes/dashboardRoutes');
             await activatePlan(
-              subscription.ownerType as 'creator' | 'institute' | 'recruiter',
+              subscription.ownerType as 'learner' | 'creator' | 'institute' | 'recruiter',
               subscription.ownerId,
               subscription.plan,
               orderId,
@@ -1828,11 +2151,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(200).json({ ok: true, ignored: "unknown_order" });
       }
 
+      const meta = activationMetadata(payment.gatewayStatusRaw) as Record<string, any>;
+      const rawOrderNote = payload?.data?.order?.order_note || payload?.data?.order_note || {};
+      let orderNote: Record<string, any> = {};
+      if (typeof rawOrderNote === "string") {
+        try {
+          orderNote = JSON.parse(rawOrderNote);
+        } catch {
+          orderNote = {};
+        }
+      } else if (rawOrderNote && typeof rawOrderNote === "object") {
+        orderNote = rawOrderNote;
+      }
+
       if (status === "failed") {
         await storage.updatePayment(payment.id, {
           status: "failed",
           cashfreePaymentId: cashfreePaymentId || payment.cashfreePaymentId,
-          gatewayStatusRaw: payload,
+          gatewayStatusRaw: { ...meta, providerWebhook: payload },
         } as any);
         return res.status(200).json({ ok: true, status: "failed" });
       }
@@ -1840,21 +2176,157 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (status !== "success") {
         await storage.updatePayment(payment.id, {
           status: "pending",
-          gatewayStatusRaw: payload,
+          gatewayStatusRaw: { ...meta, providerWebhook: payload },
         } as any);
         return res.status(200).json({ ok: true, status: "pending" });
       }
 
       // Idempotency for duplicate success webhooks.
       if (payment.status === "completed" && payment.certificateId) {
+        if (isCredentialActivationPayment(payment) && payment.courseId) {
+          await ensureRevenueSplits({
+            paymentId: payment.id,
+            courseId: payment.courseId,
+            certificateAmount: payment.certificateAmount,
+            gatewayOrderId: orderId,
+            sellerCode: String(meta.sellerCode || ""),
+          });
+        }
         return res.status(200).json({ ok: true, status: "already_completed" });
       }
 
-      const meta = (payment.gatewayStatusRaw || {}) as Record<string, any>;
-      const tempExamId = String(payload?.data?.order?.order_note?.tempExamId || meta.tempExamId || "");
-      const sellerCode = String(payload?.data?.order?.order_note?.sellerCode || meta.sellerCode || "");
+      const tempExamId = String(orderNote?.tempExamId || meta.tempExamId || "");
+      const sellerCode = String(orderNote?.sellerCode || meta.sellerCode || "");
       const userId = payment.userId || null;
       const courseId = payment.courseId || 0;
+
+      if (isCredentialActivationPayment(payment) || orderNote?.kind === CREDENTIAL_ACTIVATION_KIND) {
+        const providerAmount =
+          payload?.data?.order?.order_amount ??
+          payload?.data?.order?.orderAmount ??
+          payload?.data?.payment?.payment_amount ??
+          payload?.data?.payment?.paymentAmount;
+        if (providerAmount == null || !amountsMatch(payment.amount, providerAmount)) {
+          await storage.updatePayment(payment.id, {
+            status: "failed",
+            gatewayStatusRaw: {
+              ...meta,
+              providerWebhook: payload,
+              reason: "verified_gateway_amount_mismatch",
+            },
+          } as any);
+          await audit({
+            action: "credential.activation.amount_mismatch",
+            status: "failure",
+            actorRole: "system",
+            userId: userId || undefined,
+            resourceType: "payment",
+            resourceId: payment.id,
+            req,
+            metadata: { expected: payment.amount, received: providerAmount ?? null, orderId },
+          });
+          return res.status(200).json({ ok: true, status: "failed_amount_verification" });
+        }
+
+        const activation = await finalizeCredentialActivation({
+          paymentId: payment.id,
+          providerPaymentId: cashfreePaymentId || orderId,
+          gateway: "cashfree",
+          cashfreeOrderId: orderId,
+          gatewayStatusRaw: { ...meta, providerWebhook: payload },
+        });
+        if (activation.status === "activated") {
+          await ensureRevenueSplits({
+            paymentId: payment.id,
+            courseId,
+            certificateAmount: payment.certificateAmount,
+            gatewayOrderId: orderId,
+            sellerCode,
+          });
+          if (sellerCode) {
+            const seller = await storage.getSellerByReferralCode(sellerCode);
+            if (seller?.isApproved) {
+              const actualPaymentAmount = Number(payment.certificateAmount);
+              const commissionAmount =
+                (actualPaymentAmount * Number(seller.commissionRate)) / 100;
+              await storage.createSale({
+                sellerId: seller.id,
+                courseId,
+                certificateId: activation.certificate.id,
+                amount: actualPaymentAmount.toFixed(2),
+                commission: commissionAmount.toFixed(2),
+                referralCode: sellerCode,
+                status: "completed",
+              });
+              if (userId) {
+                await storage.updateReferralConversion(sellerCode, courseId, userId);
+              }
+              await storage.incrementSellerEarnings(seller.id, commissionAmount);
+            }
+          }
+          if (userId) {
+            await storage.createNotification({
+              userId,
+              title: "Credential activated",
+              type: "payment_success",
+              message: `Your ${activation.certificate.courseTitle} credential is active and ready to share.`,
+              data: {
+                certificateId: activation.certificate.certificateId,
+                actionUrl: `/certificate/${activation.certificate.certificateId}`,
+                priority: "high",
+              },
+            });
+          }
+        }
+        await audit({
+          action:
+            activation.status === "duplicate_payment"
+              ? "credential.activation.duplicate_payment"
+              : "credential.activation.completed",
+          status: activation.status === "duplicate_payment" ? "failure" : "success",
+          actorRole: "system",
+          userId: userId || undefined,
+          resourceType: "certificate",
+          resourceId: activation.certificate.id,
+          req,
+          metadata: { paymentId: payment.id, orderId, outcome: activation.status },
+        });
+        return res.status(200).json({ ok: true, status: activation.status });
+      }
+
+      if (orderNote?.kind === 'course_access' || meta.kind === 'course_access') {
+        if (!userId || !courseId) {
+          await storage.updatePayment(payment.id, { status: 'failed', gatewayStatusRaw: { ...payload, reason: 'course_access_identity_missing' } } as any);
+          return res.status(200).json({ ok: true, status: 'failed_identity_missing' });
+        }
+        await db.insert(courseEntitlements).values({
+          userId,
+          courseId,
+          paymentId: payment.id,
+          source: 'purchase',
+          status: 'active',
+        }).onConflictDoUpdate({
+          target: [courseEntitlements.userId, courseEntitlements.courseId],
+          set: { paymentId: payment.id, source: 'purchase', status: 'active', expiresAt: null },
+        });
+        await storage.updatePayment(payment.id, {
+          status: 'completed',
+          paymentMethod: 'cashfree',
+          gateway: 'cashfree',
+          cashfreeOrderId: orderId,
+          cashfreePaymentId: cashfreePaymentId || null,
+          gatewayStatusRaw: payload,
+        } as any);
+        await ensureRevenueSplits({
+          paymentId: payment.id,
+          courseId,
+          certificateAmount: payment.amount,
+          gatewayOrderId: orderId,
+          sellerCode,
+        });
+        audit({ action: 'course.access.activated', actorRole: 'system', userId, resourceType: 'course', resourceId: courseId, req, metadata: { paymentId: payment.id, orderId } });
+        return res.status(200).json({ ok: true, status: payment.status === 'completed' ? 'already_completed' : 'course_access_activated' });
+      }
 
       const examData = await loadPendingExam<any>(tempExamId);
       if (!examData) {
@@ -1914,12 +2386,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         gatewayStatusRaw: payload,
       } as any);
 
+      await ensureRevenueSplits({
+        paymentId: payment.id,
+        courseId,
+        certificateAmount: payment.certificateAmount,
+        gatewayOrderId: orderId,
+        sellerCode,
+      });
+
       await deletePendingExam(tempExamId).catch(() => {});
 
       if (sellerCode) {
         const seller = await storage.getSellerByReferralCode(sellerCode);
         if (seller && seller.isApproved) {
-          const actualPaymentAmount = parseFloat(payment.amount);
+          const actualPaymentAmount = parseFloat(payment.certificateAmount);
           const commissionAmount = (actualPaymentAmount * parseFloat(seller.commissionRate)) / 100;
           await storage.createSale({
             sellerId: seller.id,
@@ -2004,12 +2484,146 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (payment.status === "completed" && payment.certificateId) {
           const existingCert = await storage.getCertificate(payment.certificateId);
           if (existingCert) {
+            if (isCredentialActivationPayment(payment) && payment.courseId) {
+              const metadata = activationMetadata(payment.gatewayStatusRaw);
+              await ensureRevenueSplits({
+                paymentId: payment.id,
+                courseId: payment.courseId,
+                certificateAmount: payment.certificateAmount,
+                gatewayOrderId: responseData.txnid,
+                sellerCode: String(metadata.sellerCode || ""),
+              });
+            }
             return res.redirect(
               `${req.protocol}://${req.get(
                 "host"
               )}/payment-success?certificateId=${existingCert.certificateId}`
             );
           }
+        }
+
+        if (isCredentialActivationPayment(payment)) {
+          const metadata = activationMetadata(payment.gatewayStatusRaw);
+          const localCourseId = payment.courseId || 0;
+          const localUserId = payment.userId || null;
+          const callbackMatchesReservation =
+            responseData.txnid === payment.transactionId &&
+            courseId === localCourseId &&
+            userId === localUserId &&
+            amountsMatch(payment.amount, responseData.amount);
+          if (!callbackMatchesReservation) {
+            await storage.updatePayment(payment.id, {
+              status: "failed",
+              gatewayStatusRaw: {
+                ...metadata,
+                reason: "verified_callback_did_not_match_payment_reservation",
+                providerStatus: responseData.status,
+                providerTransactionId: responseData.txnid,
+              },
+            } as any);
+            await audit({
+              action: "credential.activation.callback_mismatch",
+              status: "failure",
+              actorRole: "system",
+              userId: localUserId || undefined,
+              resourceType: "payment",
+              resourceId: payment.id,
+              req,
+              metadata: {
+                expectedTransactionId: payment.transactionId,
+                receivedTransactionId: responseData.txnid,
+              },
+            });
+            return res.redirect(
+              `${req.protocol}://${req.get("host")}/payment-failed?error=payment_verification_failed`,
+            );
+          }
+
+          const activation = await finalizeCredentialActivation({
+            paymentId: payment.id,
+            providerPaymentId: String(responseData.mihpayid || responseData.txnid),
+            gateway: "payumoney",
+            gatewayStatusRaw: {
+              ...metadata,
+              providerStatus: responseData.status,
+              providerUnmappedStatus: responseData.unmappedstatus,
+              providerTransactionId: responseData.txnid,
+              providerPaymentId: responseData.mihpayid,
+            },
+          });
+          const activationSellerCode = String(metadata.sellerCode || "");
+          if (activation.status === "activated") {
+            await ensureRevenueSplits({
+              paymentId: payment.id,
+              courseId: localCourseId,
+              certificateAmount: payment.certificateAmount,
+              gatewayOrderId: responseData.txnid,
+              sellerCode: activationSellerCode,
+            });
+            if (activationSellerCode) {
+              const seller = await storage.getSellerByReferralCode(activationSellerCode);
+              if (seller?.isApproved) {
+                const actualPaymentAmount = Number(payment.certificateAmount);
+                const commissionAmount =
+                  (actualPaymentAmount * Number(seller.commissionRate)) / 100;
+                await storage.createSale({
+                  sellerId: seller.id,
+                  courseId: localCourseId,
+                  certificateId: activation.certificate.id,
+                  amount: actualPaymentAmount.toFixed(2),
+                  commission: commissionAmount.toFixed(2),
+                  referralCode: activationSellerCode,
+                  status: "completed",
+                });
+                if (localUserId) {
+                  await storage.updateReferralConversion(
+                    activationSellerCode,
+                    localCourseId,
+                    localUserId,
+                  );
+                }
+                await storage.incrementSellerEarnings(seller.id, commissionAmount);
+              }
+            }
+            if (localUserId) {
+              await storage.createNotification({
+                userId: localUserId,
+                title: "Credential activated",
+                type: "payment_success",
+                message: `Your ${activation.certificate.courseTitle} credential is active and ready to share.`,
+                data: {
+                  certificateId: activation.certificate.certificateId,
+                  actionUrl: `/certificate/${activation.certificate.certificateId}`,
+                  priority: "high",
+                },
+              });
+            }
+          }
+          await audit({
+            action:
+              activation.status === "duplicate_payment"
+                ? "credential.activation.duplicate_payment"
+                : "credential.activation.completed",
+            status: activation.status === "duplicate_payment" ? "failure" : "success",
+            actorRole: "system",
+            userId: localUserId || undefined,
+            resourceType: "certificate",
+            resourceId: activation.certificate.id,
+            req,
+            metadata: {
+              paymentId: payment.id,
+              transactionId: responseData.txnid,
+              outcome: activation.status,
+            },
+          });
+          const duplicateParam = activation.status === "duplicate_payment" ? "&duplicatePayment=1" : "";
+          return res.redirect(
+            `${req.protocol}://${req.get("host")}/payment-success?txnid=${encodeURIComponent(
+              responseData.txnid,
+            )}&certificateId=${encodeURIComponent(
+              activation.certificate.certificateId,
+            )}${duplicateParam}`,
+          );
         }
 
         // Get persisted exam data
@@ -2077,6 +2691,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           razorpayOrderId: responseData.txnid,
         });
 
+        await ensureRevenueSplits({
+          paymentId: payment.id,
+          courseId,
+          certificateAmount: payment.certificateAmount,
+          gatewayOrderId: responseData.txnid,
+          sellerCode,
+        });
+
         // 4. Clean up persisted exam data
         await deletePendingExam(tempExamId).catch(() => {});
 
@@ -2095,7 +2717,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const course = await storage.getCourse(courseId);
             if (course) {
               // Use actual payment amount (not course price) for commission calculation
-              const actualPaymentAmount = parseFloat(responseData.amount);
+              const actualPaymentAmount = parseFloat(payment.certificateAmount);
               const commissionAmount =
                 (actualPaymentAmount * parseFloat(seller.commissionRate)) / 100;
               console.log(
@@ -2177,8 +2799,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         // Get payment record to find certificate ID if it exists
         const payment = await storage.getPayment(paymentDbId);
-        const certificateParam = payment?.certificateId
-          ? `&certificateId=${payment.certificateId}`
+        const failedCertificate = payment?.certificateId
+          ? await storage.getCertificate(payment.certificateId)
+          : null;
+        const certificateParam = failedCertificate
+          ? `&certificateId=${encodeURIComponent(failedCertificate.certificateId)}`
           : "";
 
         res.redirect(
@@ -2203,6 +2828,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/payment/failure", async (req: Request, res: Response) => {
     try {
       const responseData = req.body;
+      if (!payuMoneyService.verifyHash(responseData)) {
+        return res.redirect(
+          `${req.protocol}://${req.get("host")}/payment-failed?error=hash_verification_failed`,
+        );
+      }
       const courseId = parseInt(responseData.udf1);
       const paymentDbId = parseInt(responseData.udf2);
 
@@ -2211,7 +2841,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         const payment = await storage.getPayment(paymentDbId);
         if (payment?.certificateId) {
-          certificateParam = `&certificateId=${payment.certificateId}`;
+          const certificate = await storage.getCertificate(payment.certificateId);
+          if (certificate) {
+            certificateParam = `&certificateId=${encodeURIComponent(certificate.certificateId)}`;
+          }
+        }
+        if (
+          payment &&
+          isCredentialActivationPayment(payment) &&
+          payment.status === "pending" &&
+          payment.transactionId === responseData.txnid &&
+          payment.courseId === courseId &&
+          payment.userId === (responseData.udf4 ? parseInt(responseData.udf4) : null) &&
+          amountsMatch(payment.amount, responseData.amount)
+        ) {
+          const metadata = activationMetadata(payment.gatewayStatusRaw);
+          await storage.updatePayment(payment.id, {
+            status: "failed",
+            gatewayStatusRaw: {
+              ...metadata,
+              providerStatus: responseData.status,
+              providerTransactionId: responseData.txnid,
+            },
+          } as any);
         }
       } catch (err) {
         console.log("Could not fetch payment record for failure redirect");
@@ -2509,27 +3161,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     authenticateAdminToken,
     async (req: AuthenticatedRequest, res: Response) => {
       try {
-        const courseData = req.body;
-
-        // Validate required fields
-        if (!courseData.title || !courseData.categoryId || !courseData.price) {
+        const parsed = adminCourseCreateSchema.safeParse(req.body);
+        if (!parsed.success) {
           return res.status(400).json({
-            message: "Missing required fields: title, categoryId, price",
+            message: "Check the course details and try again",
+            errors: parsed.error.flatten(),
           });
         }
-
-        // Generate slug if not provided
-        if (!courseData.slug) {
-          courseData.slug = courseData.title
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, "-")
-            .replace(/^-+|-+$/g, "");
+        if (!await isActiveAdminCategory(parsed.data.categoryId)) {
+          return res.status(400).json({ message: "Select an active category" });
         }
 
-        const course = await storage.createCourseAdmin(courseData);
+        const slug = await uniqueAdminCourseSlug(parsed.data.slug || parsed.data.title);
+        const governed = buildAdminOwnedCourseCreate(parsed.data, slug);
+        const course = await storage.createCourseAdmin(governed);
+        await audit({
+          action: "admin.course.created",
+          userId: req.user?.userId,
+          actorEmail: req.user?.email,
+          actorRole: "admin",
+          resourceType: "course",
+          resourceId: course.id,
+          metadata: {
+            reviewStatus: course.reviewStatus,
+            isActive: course.isActive,
+            subscriptionEligible: course.subscriptionEligible,
+            resellerEligible: course.resellerEligible,
+          },
+          req,
+        });
         res.status(201).json(course);
       } catch (error) {
         console.error("Error creating course:", error);
+        if (error instanceof AdminCourseGovernanceError) {
+          return res.status(409).json({ message: error.message });
+        }
         res.status(500).json({ message: "Failed to create course" });
       }
     }
@@ -2545,29 +3211,105 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (isNaN(courseId)) {
           return res.status(400).json({ message: "Invalid course ID" });
         }
-
-        const courseData = req.body;
-
-        // Generate slug if title is being updated but slug is not provided
-        if (courseData.title && !courseData.slug) {
-          courseData.slug = courseData.title
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, "-")
-            .replace(/^-+|-+$/g, "");
-        }
-
-        const course = await storage.updateCourseAdmin(courseId, courseData);
-
-        if (!course) {
+        const existing = await storage.getCourse(courseId);
+        if (!existing) {
           return res.status(404).json({ message: "Course not found" });
         }
+
+        const parsed = adminCourseUpdateSchema.safeParse(req.body);
+        if (!parsed.success) {
+          return res.status(400).json({
+            message: "Check the course details and try again",
+            errors: parsed.error.flatten(),
+          });
+        }
+        if (parsed.data.categoryId && !await isActiveAdminCategory(parsed.data.categoryId)) {
+          return res.status(400).json({ message: "Select an active category" });
+        }
+
+        const governed = buildGovernedAdminCourseUpdate(existing, parsed.data);
+        if (parsed.data.title && !parsed.data.slug) {
+          governed.slug = await uniqueAdminCourseSlug(parsed.data.title, courseId);
+        }
+        const course = await storage.updateCourseAdmin(courseId, governed);
+        if (!course) return res.status(404).json({ message: "Course not found" });
+
+        await audit({
+          action: "admin.course.updated",
+          userId: req.user?.userId,
+          actorEmail: req.user?.email,
+          actorRole: "admin",
+          resourceType: "course",
+          resourceId: course.id,
+          metadata: {
+            ownerType: course.ownerType,
+            reviewStatus: course.reviewStatus,
+            isActive: course.isActive,
+            thirdPartyReturnedToReview: existing.ownerType !== "admin",
+          },
+          req,
+        });
 
         res.json(course);
       } catch (error) {
         console.error("Error updating course:", error);
+        if (error instanceof AdminCourseGovernanceError) {
+          return res.status(409).json({ message: error.message });
+        }
         res.status(500).json({ message: "Failed to update course" });
       }
     }
+  );
+
+  // Review is deliberately separate from generic editing. This makes approval
+  // explicit and auditable; creator/institute update routes can never set it.
+  app.patch(
+    "/api/admin/courses/:id/review",
+    authenticateAdminToken,
+    async (req: AuthenticatedRequest, res: Response) => {
+      try {
+        const courseId = Number(req.params.id);
+        if (!Number.isInteger(courseId) || courseId <= 0) {
+          return res.status(400).json({ message: "Invalid course ID" });
+        }
+        const parsed = adminCourseReviewSchema.safeParse(req.body);
+        if (!parsed.success) {
+          return res.status(400).json({
+            message: "Check the review decision and try again",
+            errors: parsed.error.flatten(),
+          });
+        }
+        const existing = await storage.getCourse(courseId);
+        if (!existing) return res.status(404).json({ message: "Course not found" });
+
+        const governed = buildThirdPartyCourseReview(existing, parsed.data);
+        const course = await storage.updateCourseAdmin(courseId, governed);
+        if (!course) return res.status(404).json({ message: "Course not found" });
+
+        await audit({
+          action: "admin.course.reviewed",
+          userId: req.user?.userId,
+          actorEmail: req.user?.email,
+          actorRole: "admin",
+          resourceType: "course",
+          resourceId: course.id,
+          metadata: {
+            decision: parsed.data.status,
+            reason: parsed.data.reason,
+            ownerType: course.ownerType,
+            certificationMode: course.certificationMode,
+          },
+          req,
+        });
+        res.json(course);
+      } catch (error) {
+        console.error("Error reviewing course:", error);
+        if (error instanceof AdminCourseGovernanceError) {
+          return res.status(409).json({ message: error.message });
+        }
+        res.status(500).json({ message: "Failed to review course" });
+      }
+    },
   );
 
   // Admin course deletion
@@ -2730,7 +3472,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
 
         console.log("Fetching certificates for user ID:", userId);
-        const certificates = await storage.getUserCertificates(userId);
+        const account = await storage.getUser(userId);
+        if (!account) {
+          return res.status(401).json({ message: "Account not found" });
+        }
+        const certificates = await storage.getUserCertificates(userId, account.email);
         console.log("Found certificates:", certificates.length);
         res.json(certificates);
       } catch (error) {
@@ -3529,21 +4275,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           `Found ${questions.length} questions for ${interview.technology}`
         );
 
-        // Add one hands-on question for the specific technology
-        const handsOnQuestion = {
-          id: 999,
-          title: `${interview.technology} Hands-on Challenge`,
-          question: getHandsOnQuestion(interview.technology),
-          technology: interview.technology,
-          difficulty: "practical",
-          timeLimit: 1800, // 30 minutes for hands-on
-          isHandsOn: true,
-        };
-
-        questions.push(handsOnQuestion);
-
         // Helper function to get hands-on questions by technology
-        function getHandsOnQuestion(technology: string): string {
+        const getHandsOnQuestion = (technology: string): string => {
           const handsOnQuestions: Record<string, string> = {
             "Data Science":
               "Create a Python script to analyze a CSV dataset. Load the data, perform basic statistics, create visualizations, and identify key insights. You may use pandas, matplotlib, seaborn, or any libraries you prefer.",
@@ -3569,11 +4302,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
           };
 
           return handsOnQuestions[technology] || handsOnQuestions["Default"];
-        }
+        };
+
+        const questionsWithHandsOn = [
+          ...questions,
+          {
+            id: 999,
+            title: `${interview.technology} Hands-on Challenge`,
+            question: getHandsOnQuestion(interview.technology),
+            technology: interview.technology,
+            difficulty: "practical",
+            timeLimit: 1800,
+            isHandsOn: true,
+          },
+        ];
 
         res.json({
           ...interview,
-          questions,
+          questions: questionsWithHandsOn,
         });
       } catch (error) {
         console.error("Error fetching interview:", error);
@@ -3612,8 +4358,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     ]),
     async (req: AuthenticatedRequest, res: Response) => {
       try {
-        const screenBuffer = req.files.screen[0].buffer;
-        const videoBuffer = req.files.video[0].buffer;
+        const uploadedFiles = req.files;
+        if (!uploadedFiles || Array.isArray(uploadedFiles)) {
+          return res.status(400).json({ error: "Screen and video files are required" });
+        }
+        const screenFile = uploadedFiles.screen?.[0];
+        const videoFile = uploadedFiles.video?.[0];
+        if (!screenFile || !videoFile) {
+          return res.status(400).json({ error: "Screen and video files are required" });
+        }
+        const screenBuffer = screenFile.buffer;
+        const videoBuffer = videoFile.buffer;
         const screenUrl = await uploadToCloud(
           screenBuffer,
           "interviews/screen",
@@ -3972,7 +4727,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(400).json({ message: "Missing required fields" });
         }
 
-        const question = await storage.createQuestion(questionData);
+        const reviewerId = Number(req.user?.userId);
+        const question = await storage.createQuestion({
+          ...questionData,
+          generationSource: "human",
+          reviewStatus: "approved",
+          isActive: true,
+          reviewedBy: Number.isInteger(reviewerId) && reviewerId > 0 ? reviewerId : null,
+          reviewedAt: new Date(),
+          createdBy: Number.isInteger(reviewerId) && reviewerId > 0 ? reviewerId : null,
+        });
         res.status(201).json(question);
       } catch (error) {
         console.error("Error creating question:", error);
@@ -3991,7 +4755,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(400).json({ message: "Invalid question ID" });
         }
 
-        const updates = req.body;
+        const reviewerId = Number(req.user?.userId);
+        const {
+          generationSource: _generationSource,
+          reviewStatus: _reviewStatus,
+          reviewedBy: _reviewedBy,
+          reviewedAt: _reviewedAt,
+          ...questionUpdates
+        } = req.body || {};
+        const updates = {
+          ...questionUpdates,
+          reviewStatus: "approved",
+          isActive: true,
+          reviewedBy: Number.isInteger(reviewerId) && reviewerId > 0 ? reviewerId : null,
+          reviewedAt: new Date(),
+        };
         const question = await storage.updateQuestionAdmin(questionId, updates);
         if (!question) {
           return res.status(404).json({ message: "Question not found" });
@@ -4197,7 +4975,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   try {
     // AI Interview routes removed.
-    const { default: analyticsRoutes } = await import("./routes/analytics.js");
+    const { default: analyticsRoutes } = await import("./routes/analytics");
     app.use("/api", analyticsRoutes);
   } catch (error) {
     console.log("Additional routes loading...");
@@ -4218,14 +4996,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .json({ message: "Valid courseId and rating (1-5) required" });
       }
 
+      const userId = req.user.id ?? req.user.userId;
+
       // Check if user already rated this course
-      const existingRating = await storage.getUserRating(req.user.id, courseId);
+      const existingRating = await storage.getUserRating(userId, courseId);
 
       let result;
       if (existingRating) {
         // Update existing rating
         result = await storage.updateRating(
-          req.user.id,
+          userId,
           courseId,
           rating,
           reviewText
@@ -4233,7 +5013,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         // Create new rating
         result = await storage.createRating({
-          userId: req.user.id,
+          userId,
           courseId,
           rating,
           reviewText,
@@ -4281,7 +5061,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     try {
       const courseId = parseInt(req.params.courseId);
-      const userRating = await storage.getUserRating(req.user.id, courseId);
+      const userId = req.user.id ?? req.user.userId;
+      const userRating = await storage.getUserRating(userId, courseId);
 
       res.json(userRating || null);
     } catch (error: any) {

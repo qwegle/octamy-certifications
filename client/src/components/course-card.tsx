@@ -18,13 +18,13 @@ import leadershipImage from "@/assets/course-images/leadership-management.jpg";
 import digitalMarketingImage from "@/assets/course-images/digital-marketing-fundamentals.jpg";
 import businesAnalyticsInternship from "@/assets/course-images/business-analytics-internship.jpg";
 import digitalMarketingInternship from "@/assets/course-images/digital-marketing-internship.jpg";
-import softwareDevelopmentInternship from "@/assets/course-images/software-development-internship.png";
+import softwareDevelopmentInternship from "@/assets/course-images/software-development-internship.webp";
 import cybersecurityInternship from "@/assets/course-images/cybersecurity-internship.jpg";
 import dataScienceInternship from "@/assets/course-images/data-science.jpg";
 import devOpsAutomationEngineer from "@/assets/course-images/DevOps-Automation-Engineer.jpg";
 import CloudSecurityArchitect from "@/assets/course-images/CloudSecurityArchitect.jpg";
 import SiteReliabilityEngineerPro from "@/assets/course-images/site-reliability-engineer-pro.jpg";
-import AWSCloudArchitectProfessional from "@/assets/course-images/AWS.png";
+import AWSCloudArchitectProfessional from "@/assets/course-images/AWS.webp";
 import reactImage from "@/assets/course-images/react-development-mastery.jpg";
 import nodejsImage from "@/assets/course-images/nodejs-backend-development.jpg";
 import mlImage from "@/assets/course-images/machine-learning-fundamentals.jpg";
@@ -106,14 +106,14 @@ export default function CourseCard({
   };
   return (
     <Card
-      className={`group hover:shadow-lg transition-all duration-300 border-2 hover:border-black relative ${
+      className={`group relative overflow-hidden border border-slate-200 transition-all duration-300 hover:border-slate-300 hover:shadow-lg ${
         viewMode === "list" ? "flex flex-col sm:flex-row" : ""
       }`}
     >
       <div className={`${viewMode === "list" ? "w-full sm:w-64 flex-shrink-0" : ""}`}>
         <div className="aspect-video bg-gradient-to-br from-gray-900 to-black rounded-t-lg relative overflow-hidden">
           <img 
-            src={getCourseImage(courseSlug, course.category.name)} 
+            src={course.thumbnailUrl || getCourseImage(courseSlug, course.category.name)}
             alt={`${course.title} assessment`}
             className="absolute inset-0 w-full h-full object-cover"
           />
@@ -181,7 +181,14 @@ export default function CourseCard({
 
             <div className="flex items-center justify-between">
               <div className="space-y-1">
-                {course.isOnSale && course.originalPrice ? (
+                {course.productType !== "assessment" ? (
+                  <div>
+                    <div className="text-2xl font-bold text-black">
+                      {Number(course.contentPrice || 0) === 0 ? "Free" : `₹${course.contentPrice}`}
+                    </div>
+                    <div className="text-xs font-medium text-slate-500">course access</div>
+                  </div>
+                ) : course.isOnSale && course.originalPrice ? (
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
                       <span className="text-2xl font-bold text-red-600">
@@ -216,12 +223,12 @@ export default function CourseCard({
                   </div>
                 )}
               </div>
-              <Link href={`/exam/${courseSlug}`}>
-                <Button className="bg-black hover:bg-gray-800 text-white group">
-                  View assessment
+              <Button asChild className="bg-slate-950 text-white hover:bg-slate-800">
+                <Link href={course.productType === "assessment" ? `/exam/${courseSlug}` : `/learn/${courseSlug}`}>
+                  {course.productType === "assessment" ? "View assessment" : "View course"}
                   <ChevronRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             </div>
           </div>
         </CardContent>

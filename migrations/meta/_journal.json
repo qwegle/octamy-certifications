@@ -8,6 +8,97 @@
       "when": 1778587941403,
       "tag": "0000_baseline",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1778588000000,
+      "tag": "0001_perf_indexes",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1783920000000,
+      "tag": "0002_evidence_passport_privacy",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1784016000000,
+      "tag": "0003_truthful_catalog_copy",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1784016001000,
+      "tag": "0004_recruiter_discovery_wallet_safety",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1784016002000,
+      "tag": "0005_institute_assessment_workspaces",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1784016003000,
+      "tag": "0006_proctoring_evidence",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1784016004000,
+      "tag": "0007_media_library",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1784016005000,
+      "tag": "0008_course_content_commerce",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1784016006000,
+      "tag": "0009_exam_attempt_session_integrity",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1784016007000,
+      "tag": "0010_ai_curriculum_imports",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1784016008000,
+      "tag": "0011_assessment_attempt_integrity",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1784016009000,
+      "tag": "0012_assessment_governance",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1784016010000,
+      "tag": "0013_institute_exam_delivery",
+      "breakpoints": true
     }
   ]
 }

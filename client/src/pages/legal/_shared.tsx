@@ -12,13 +12,9 @@ export const COMPANY = {
     import.meta.env.VITE_COMPANY_ADDRESS ||
     "Registered office details available on request — write to legal@octamy.com",
   iso: {
-    certificateNumber:
-      import.meta.env.VITE_COMPANY_ISO_NUMBER ||
-      "Pending publication — write to legal@octamy.com",
-    standard: "ISO 9001 / ISO 27001",
-    scope:
-      import.meta.env.VITE_COMPANY_ISO_SCOPE ||
-      "Online skill-verification and certification services",
+    certificateNumber: import.meta.env.VITE_COMPANY_ISO_NUMBER || "",
+    standard: import.meta.env.VITE_COMPANY_ISO_STANDARD || "",
+    scope: import.meta.env.VITE_COMPANY_ISO_SCOPE || "",
   },
   grievanceOfficer: {
     name: import.meta.env.VITE_COMPANY_GRIEVANCE_OFFICER || "Grievance Officer, Octamy",

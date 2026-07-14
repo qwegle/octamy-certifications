@@ -12,7 +12,7 @@ export default function About() {
         <title>About Octamy — Skill Verification & Certification Platform</title>
         <meta
           name="description"
-          content="Octamy is an Indian skill-verification and certification platform. Take assessments for free, pay only when you pass. Trusted by candidates and recruiters across India."
+          content="Octamy is an Indian assessment-first credential platform. Take assessments free, pay only after passing, and share an inspectable evidence record when you choose."
         />
         <link rel="canonical" href="https://octamy.com/about" />
       </Helmet>
@@ -26,9 +26,9 @@ export default function About() {
             </h1>
             <p className="mt-5 text-lg text-slate-700 max-w-3xl">
               Octamy is an Indian skill-assessment and certification platform built around a simple
-              principle: candidates take assessments for free and only pay if they want a verified
-              credential after passing. We help individuals prove what they actually know, and we
-              help recruiters hire from a pool of verified talent.
+              principle: candidates take assessments for free and only pay if they want an activated
+              credential after passing. We record assessment evidence that individuals can share,
+              while recruiters can inspect the score and current credential status.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link href="/courses">

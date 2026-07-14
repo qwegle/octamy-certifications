@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Link, useLocation } from 'wouter';
+import { Link, useLocation, useSearch } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,6 +11,7 @@ import { SEO } from '@/components/seo';
 import { apiRequest } from '@/lib/queryClient';
 import { AuthShell } from '@/components/auth-shell';
 import { ArrowRight, Eye, EyeOff, Mail, Lock, ShieldCheck } from 'lucide-react';
+import { safeInternalReturnTo } from '@/lib/navigation-safety';
 
 type Variant = 'default' | 'partners' | 'recruiter' | 'creator' | 'institute';
 
@@ -32,6 +33,7 @@ function detectVariant(pathname: string): Variant {
 
 export default function Login() {
   const [location, setLocation] = useLocation();
+  const locationSearch = useSearch();
   const { login } = useAuth();
   const { toast } = useToast();
   useGoogleAuthHandler();
@@ -45,9 +47,8 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
 
   const next = useMemo(() => {
-    if (typeof window === 'undefined') return null;
-    return new URLSearchParams(window.location.search).get('next');
-  }, []);
+    return safeInternalReturnTo(new URLSearchParams(locationSearch).get('next'));
+  }, [locationSearch]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -159,8 +160,18 @@ export default function Login() {
           <p className="mt-3 text-base leading-7 text-slate-600">{v.sub}</p>
         </div>
 
-        <section className="rounded-[1.5rem] border-2 border-slate-900 bg-white p-5 shadow-[7px_7px_0_0_rgba(15,23,42,0.92)] sm:p-7" aria-label="Sign in form">
-          <GoogleAuthButton type="user" isLoading={isLoading} hideWhenUnavailable className="mb-5" />
+        <section className="rounded-[1.5rem] border border-slate-300 bg-white p-5 shadow-[0_18px_50px_-28px_rgba(15,23,42,0.45)] sm:p-7" aria-label="Sign in form">
+          <GoogleAuthButton
+            type="user"
+            isLoading={isLoading}
+            hideWhenUnavailable
+            className="mb-5"
+            intent={{
+              mode: 'login',
+              role: variant === 'creator' || variant === 'institute' ? variant : 'learner',
+              returnTo: next,
+            }}
+          />
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
@@ -201,7 +212,7 @@ export default function Login() {
                 <button
                   type="button"
                   onClick={() => setShowPassword((s) => !s)}
-                  className="absolute right-3 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                  className="absolute right-1.5 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-xl text-slate-400 hover:bg-slate-100 hover:text-slate-700"
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -209,7 +220,7 @@ export default function Login() {
               </div>
             </div>
 
-            <Button type="submit" disabled={isLoading} className="h-12 w-full rounded-xl bg-slate-950 text-white shadow-[3px_3px_0_0_rgba(217,70,239,0.35)] hover:bg-black">
+            <Button type="submit" disabled={isLoading} className="h-12 w-full rounded-xl bg-slate-950 text-white hover:bg-black">
               {isLoading ? 'Signing in…' : <>Sign in securely <ArrowRight className="ml-2 h-4 w-4" /></>}
             </Button>
           </form>

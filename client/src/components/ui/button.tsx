@@ -5,26 +5,26 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-semibold ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-semibold ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground border-2 border-slate-900 shadow-[3px_3px_0_0_rgba(15,23,42,0.9)] hover:shadow-[5px_5px_0_0_rgba(15,23,42,0.9)] hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-[1px_1px_0_0_rgba(15,23,42,0.9)]",
+        default: "border border-slate-950 bg-slate-950 text-white shadow-sm hover:bg-slate-800",
         destructive:
-          "bg-destructive text-destructive-foreground border-2 border-slate-900 shadow-[3px_3px_0_0_rgba(15,23,42,0.9)] hover:shadow-[5px_5px_0_0_rgba(15,23,42,0.9)] hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-[1px_1px_0_0_rgba(15,23,42,0.9)]",
+          "border border-rose-700 bg-rose-700 text-white shadow-sm hover:bg-rose-800",
         outline:
-          "border-2 border-slate-900 bg-card/85 backdrop-blur-md shadow-[2px_2px_0_0_rgba(15,23,42,0.9)] hover:bg-accent hover:shadow-[4px_4px_0_0_rgba(15,23,42,0.9)] hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-[0_0_0_0_rgba(15,23,42,0.9)]",
+          "border border-slate-300 bg-white text-slate-800 shadow-sm hover:border-slate-400 hover:bg-slate-50",
         secondary:
-          "bg-secondary text-secondary-foreground border-2 border-slate-900 shadow-[2px_2px_0_0_rgba(15,23,42,0.9)] hover:bg-secondary/80",
+          "border border-slate-200 bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground rounded-xl",
         link: "text-primary underline-offset-4 hover:underline",
         neo: "bg-card text-foreground border-2 border-foreground shadow-[4px_4px_0_0_hsl(0,0%,6%)] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0_0_hsl(0,0%,6%)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[0_0_0_0_hsl(0,0%,6%)] rounded-2xl",
       },
       size: {
-        default: "h-10 px-5 py-2",
-        sm: "h-9 px-4",
+        default: "h-11 px-5 py-2",
+        sm: "h-10 px-4",
         lg: "h-12 px-8 text-base",
-        icon: "h-10 w-10",
+        icon: "h-11 w-11",
       },
     },
     defaultVariants: {

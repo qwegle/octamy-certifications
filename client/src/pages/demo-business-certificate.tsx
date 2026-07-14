@@ -43,7 +43,7 @@ export default function DemoBusinessCertificate() {
                 </div>
                 <div className="border-t border-gray-600 pt-4">
                   <h2 className="text-3xl font-bold mb-2">OCTAMY SOLUTIONS PRIVATE LIMITED</h2>
-                  <p className="text-sm opacity-90 mb-2">ISO 9001:2015 Certified Training Provider</p>
+                  <p className="text-sm opacity-90 mb-2">Assessment-backed credential preview</p>
                   <div className="flex items-center space-x-4">
                     <Shield className="w-5 h-5" />
                     <span className="text-sm">Authorized Business Training Partner</span>

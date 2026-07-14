@@ -18,6 +18,7 @@ type PayoutsData = {
   lifetimePayoutsINR: number;
   requests: Array<{ id: number; amount: string; status: string; createdAt: string; upi: string | null }>;
   recentSplits: Array<{ id: number; amount: string; status: string; createdAt: string }>;
+  policy: { ownerSharePercent: number; basis: string; settlement: string };
 };
 
 type FormVals = { amount: number; upi?: string; bankAccount?: string; ifsc?: string };
@@ -41,7 +42,7 @@ export default function CreatorPayouts() {
   const requestPayout = useMutation({
     mutationFn: async (vals: FormVals) => (await apiRequest('POST', '/api/creator/payouts/request', vals)).json(),
     onSuccess: () => {
-      toast({ title: 'Payout requested', description: 'Our team will process within 5 business days.' });
+      toast({ title: 'Payout requested', description: 'The request is now pending manual review.' });
       reset();
       queryClient.invalidateQueries({ queryKey: ['/api/creator/payouts'] });
     },
@@ -54,7 +55,7 @@ export default function CreatorPayouts() {
               <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Earnings & Payouts</h1>
-            <p className="text-zinc-500 mt-1">Withdraw what you've earned. Min ₹500. Settled via UPI or NEFT.</p>
+            <p className="text-zinc-500 mt-1">Request withdrawal from settled creator-share entries. Gross course sales are not a payout balance.</p>
           </div>
           <Link href="/creator/dashboard"><Button variant="outline">Back to dashboard</Button></Link>
         </div>
@@ -74,6 +75,16 @@ export default function CreatorPayouts() {
           </Card>
         </div>
 
+        <Card className="mb-8 border-violet-200 bg-violet-50/70">
+          <CardContent className="p-5">
+            <p className="font-semibold text-violet-950">How the split works</p>
+            <p className="mt-1 text-sm leading-6 text-violet-900/75">
+              Your current creator share is {data?.policy.ownerSharePercent ?? 80}% of the certificate activation fee. Shipping is excluded. An affiliate commission, when present, comes from the remaining platform share—not from your creator share.
+            </p>
+            <p className="mt-2 text-xs text-violet-900/60">{data?.policy.settlement || 'Confirmed payments create an auditable split entry before funds become withdrawable.'}</p>
+          </CardContent>
+        </Card>
+
         <div className="grid md:grid-cols-2 gap-6">
           <Card>
             <CardHeader><CardTitle>Request payout</CardTitle></CardHeader>
@@ -81,7 +92,7 @@ export default function CreatorPayouts() {
               <form onSubmit={handleSubmit((v) => requestPayout.mutate(v))} className="space-y-4">
                 <div>
                   <label className="text-sm font-medium">Amount (₹)</label>
-                  <Input type="number" min={500} step={1} {...register('amount', { required: true, valueAsNumber: true, min: 500 })} />
+                  <Input type="number" min={500} max={data?.availableINR || undefined} step={1} {...register('amount', { required: true, valueAsNumber: true, min: 500, max: data?.availableINR })} />
                   {errors.amount && <p className="text-xs text-red-500 mt-1">Min ₹500</p>}
                 </div>
                 <div>
@@ -99,9 +110,12 @@ export default function CreatorPayouts() {
                     <Input placeholder="HDFC0000123" {...register('ifsc')} />
                   </div>
                 </div>
-                <Button type="submit" disabled={requestPayout.isPending} className="w-full">
+                <Button type="submit" disabled={requestPayout.isPending || (data?.availableINR ?? 0) < 500} className="w-full">
                   {requestPayout.isPending ? 'Submitting…' : 'Request payout'}
                 </Button>
+                {(data?.availableINR ?? 0) < 500 && (
+                  <p className="text-xs leading-5 text-zinc-500">No request can be made until at least ₹500 appears as a settled creator-share entry.</p>
+                )}
               </form>
             </CardContent>
           </Card>

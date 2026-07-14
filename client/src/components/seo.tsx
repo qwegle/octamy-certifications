@@ -10,7 +10,7 @@ interface SEOProps {
 }
 
 const DEFAULT_DESC =
-  "Free skill-verification assessments. Pay only for verified certificates. Trusted by recruiters across India.";
+  "Take a scored skill assessment free. If you pass, choose whether to activate a status-aware credential and share the recorded evidence.";
 const DEFAULT_IMAGE = "https://octamy.com/og-image.png";
 const SITE = "https://octamy.com";
 

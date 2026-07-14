@@ -18,10 +18,15 @@ type Instance = {
   durationMin: number;
   passingScore: number;
   maxAttempts: number;
+  questionCount: number;
+  retakeCooldownMin: number;
+  reviewPolicy: "immediate" | "after_final_attempt" | "after_window" | "score_only";
+  reviewReleaseAt: string | null;
   startsAt: string | null;
   endsAt: string | null;
   status: string;
   bankId: number | null;
+  proctorMode: "standard" | "browser_evidence";
 };
 type Bank = { id: number; name: string; questionCount: number };
 
@@ -45,6 +50,11 @@ export default function InstituteExamEdit() {
   const [durationMin, setDurationMin] = useState(30);
   const [passingScore, setPassingScore] = useState(50);
   const [maxAttempts, setMaxAttempts] = useState(1);
+  const [questionCount, setQuestionCount] = useState(20);
+  const [retakeCooldownMin, setRetakeCooldownMin] = useState(0);
+  const [reviewPolicy, setReviewPolicy] = useState<Instance["reviewPolicy"]>("after_window");
+  const [reviewReleaseAt, setReviewReleaseAt] = useState("");
+  const [proctorMode, setProctorMode] = useState<"standard" | "browser_evidence">("standard");
   const [startsAt, setStartsAt] = useState("");
   const [endsAt, setEndsAt] = useState("");
   const [password, setPassword] = useState("");
@@ -84,6 +94,11 @@ export default function InstituteExamEdit() {
     setDurationMin(instance.durationMin);
     setPassingScore(instance.passingScore);
     setMaxAttempts(instance.maxAttempts);
+    setQuestionCount(instance.questionCount || 1);
+    setRetakeCooldownMin(instance.retakeCooldownMin || 0);
+    setReviewPolicy(instance.reviewPolicy || "score_only");
+    setReviewReleaseAt(toLocalInputValue(instance.reviewReleaseAt));
+    setProctorMode(instance.proctorMode || "standard");
     setStartsAt(toLocalInputValue(instance.startsAt));
     setEndsAt(toLocalInputValue(instance.endsAt));
     setStatus((instance.status as any) || "live");
@@ -97,10 +112,15 @@ export default function InstituteExamEdit() {
         durationMin: Number(durationMin),
         passingScore: Number(passingScore),
         maxAttempts: Number(maxAttempts),
+        questionCount: Number(questionCount),
+        retakeCooldownMin: Number(retakeCooldownMin),
+        reviewPolicy,
+        proctorMode,
         status,
       };
       body.startsAt = startsAt ? new Date(startsAt).toISOString() : null;
       body.endsAt = endsAt ? new Date(endsAt).toISOString() : null;
+      body.reviewReleaseAt = reviewReleaseAt ? new Date(reviewReleaseAt).toISOString() : null;
       if (password) body.password = password;
       const r = await apiRequest("PATCH", `/api/exam-instances/${examId}`, body);
       if (!r.ok) throw new Error((await r.json()).message || "Failed");
@@ -149,7 +169,7 @@ export default function InstituteExamEdit() {
               >
                 <option value="">— None —</option>
                 {(banks ?? []).filter((b) => (b.questionCount ?? 0) > 0).map((b) => (
-                  <option key={b.id} value={b.id}>{b.name} ({b.questionCount} questions)</option>
+                  <option key={b.id} value={b.id}>{b.name} ({b.questionCount} {b.questionCount === 1 ? "question" : "questions"})</option>
                 ))}
               </select>
               {!bankId && <p className="text-xs text-amber-600 mt-1">Without a bank, this exam will not be runnable.</p>}
@@ -167,7 +187,7 @@ export default function InstituteExamEdit() {
                 <option value="closed">Closed</option>
               </select>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
               <div>
                 <Label htmlFor="dur">Duration (min)</Label>
                 <Input id="dur" type="number" min={5} max={360} value={durationMin} onChange={(e) => setDurationMin(Number(e.target.value))} />
@@ -180,6 +200,56 @@ export default function InstituteExamEdit() {
                 <Label htmlFor="att">Max attempts</Label>
                 <Input id="att" type="number" min={1} max={10} value={maxAttempts} onChange={(e) => setMaxAttempts(Number(e.target.value))} />
               </div>
+              <div>
+                <Label htmlFor="question-count">Questions</Label>
+                <Input id="question-count" type="number" min={1} max={500} value={questionCount} onChange={(e) => setQuestionCount(Number(e.target.value))} />
+              </div>
+            </div>
+            <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4 space-y-3">
+              <div>
+                <Label htmlFor="review-policy">Answer review</Label>
+                <select
+                  id="review-policy"
+                  value={reviewPolicy}
+                  onChange={(e) => {
+                    const next = e.target.value as Instance["reviewPolicy"];
+                    setReviewPolicy(next);
+                    if (next !== "after_window") setReviewReleaseAt("");
+                  }}
+                  className="w-full h-10 rounded-md border border-input bg-white px-3 py-2 text-sm"
+                >
+                  <option value="after_window">After the exam window closes · recommended</option>
+                  <option value="after_final_attempt">After the learner's final permitted attempt</option>
+                  <option value="immediate">Immediately after every submission</option>
+                  <option value="score_only">Score only · never show answer keys</option>
+                </select>
+              </div>
+              {reviewPolicy === "after_window" && (
+                <div>
+                  <Label htmlFor="review-release">Review release (optional)</Label>
+                  <Input id="review-release" type="datetime-local" value={reviewReleaseAt} onChange={(e) => setReviewReleaseAt(e.target.value)} />
+                  <p className="mt-1 text-xs text-slate-600">Leave blank to release when the exam ends.</p>
+                </div>
+              )}
+              <div>
+                <Label htmlFor="retake-cooldown">Retake cooldown (minutes)</Label>
+                <Input id="retake-cooldown" type="number" min={0} max={43200} value={retakeCooldownMin} onChange={(e) => setRetakeCooldownMin(Number(e.target.value))} />
+              </div>
+            </div>
+            <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4 space-y-2">
+              <Label htmlFor="proctor-mode">Exam evidence mode</Label>
+              <select
+                id="proctor-mode"
+                value={proctorMode}
+                onChange={(e) => setProctorMode(e.target.value as "standard" | "browser_evidence")}
+                className="w-full h-10 rounded-md border border-input bg-white px-3 py-2 text-sm"
+              >
+                <option value="standard">Standard assessment · autosave and connection recovery</option>
+                <option value="browser_evidence">Browser evidence · tab, focus, fullscreen and paste events</option>
+              </select>
+              <p className="text-xs leading-5 text-slate-600">
+                Browser evidence is disclosed to candidates and supports human review only. It does not use webcam, microphone, screen recording or AI misconduct scoring. Each attempt retains the mode active when it started.
+              </p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
@@ -196,7 +266,7 @@ export default function InstituteExamEdit() {
               <Input id="pwd" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Leave blank to keep current" />
             </div>
             <div className="flex gap-2 pt-2">
-              <Button onClick={() => save.mutate()} disabled={!title || save.isPending} className="bg-slate-900 text-white">
+              <Button onClick={() => save.mutate()} disabled={!title || questionCount < 1 || (reviewPolicy === "after_window" && !endsAt && !reviewReleaseAt) || save.isPending} className="bg-slate-900 text-white">
                 {save.isPending ? "Saving…" : "Save changes"}
               </Button>
               <Button variant="outline" onClick={() => setLocation("/institute/exams")}>Cancel</Button>

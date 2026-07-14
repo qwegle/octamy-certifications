@@ -16,7 +16,7 @@ const tiers = [
 ];
 
 const faqs = [
-  { q: 'Can students retake exams?', a: 'Yes — configure attempt limits and cool-down windows per cohort.' },
+  { q: 'Can I bulk add students?', a: 'Yes. Institute admins can import student records by CSV and organise them into cohorts.' },
   { q: 'Do you support our own question bank?', a: 'Yes. Institute members can maintain private question banks and reuse them across assessments.' },
   { q: 'What can institute administrators report on?', a: 'The workspace includes student activity, recent attempts, pass rates and result exports.' },
   { q: 'Do you have an integration API?', a: 'Self-serve API access is not currently public. Contact sales to scope an SIS or LMS integration.' },
@@ -27,11 +27,11 @@ export default function InstituteLanding() {
     <div className="min-h-screen bg-cream-soft flex flex-col">
       <SEO
         title="Skill verification for institutes"
-        description="Verify your students' skills with industry-grade exams. Bulk CSV enroll, private question banks, white-label certificates."
+        description="Run cohort-based assessments with CSV enrolment, private question banks, scheduled windows and results reporting."
         path="/institute"
       />
       <Header />
-      <main className="flex-1">
+      <main id="main-content" tabIndex={-1} className="flex-1">
         <PortalLandingHero
           accent="emerald"
           eyebrow="For institutes & L&D teams"
@@ -41,7 +41,7 @@ export default function InstituteLanding() {
           primary={{ label: 'Create institute account', href: '/register?role=institute' }}
           secondary={{ label: 'Talk to sales', href: '/contact' }}
           preview={{
-            label: 'Institute workspace', title: 'Cohort overview', status: 'Verified',
+            label: 'Institute workspace', title: 'Cohort overview', status: 'Workspace preview',
             metrics: [
               { label: 'Students', value: '248' }, { label: 'Cohorts', value: '06' }, { label: 'Active exams', value: '04' },
             ],
@@ -83,7 +83,7 @@ export default function InstituteLanding() {
         <section className="py-16 px-4 bg-cream-deep">
           <div className="max-w-4xl mx-auto">
             <h2 className="text-2xl md:text-3xl font-semibold text-slate-900 text-center">Features that matter</h2>
-            <ul className="mt-10 grid grid-cols-2 gap-3">
+            <ul className="mt-10 grid grid-cols-1 gap-3 sm:grid-cols-2">
               {[
                 'Cohort management with multiple programmes',
                 'Bulk student enrolment via CSV',
@@ -118,11 +118,11 @@ export default function InstituteLanding() {
                         <li key={f} className="flex gap-2"><Check className="w-4 h-4 text-slate-700 shrink-0 mt-0.5" />{f}</li>
                       ))}
                     </ul>
-                    <Link href={t.name === 'Enterprise' ? '/contact' : `/register?role=institute&plan=${t.name.toLowerCase()}`}>
-                      <Button className={`w-full mt-6 ${t.highlight ? 'bg-slate-900 hover:bg-black text-white' : ''}`} variant={t.highlight ? 'default' : 'outline'}>
+                    <Button asChild className={`w-full mt-6 ${t.highlight ? 'bg-slate-900 hover:bg-black text-white' : ''}`} variant={t.highlight ? 'default' : 'outline'}>
+                      <Link href={t.name === 'Enterprise' ? '/contact' : `/register?role=institute&plan=${t.name.toLowerCase()}`}>
                         {t.name === 'Enterprise' ? 'Talk to sales' : `Choose ${t.name}`}
-                      </Button>
-                    </Link>
+                      </Link>
+                    </Button>
                   </CardContent>
                 </Card>
               ))}

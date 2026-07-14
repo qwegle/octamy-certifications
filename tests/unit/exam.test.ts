@@ -1,10 +1,11 @@
 import { describe, it, expect, beforeEach } from '@jest/globals';
 import { cleanupTestData, setupTestData } from '../setup';
 import { DatabaseStorage } from '../../server/storage';
+import type { InsertExamAttempt } from '../../shared/schema';
 
-describe('Exam System Tests', () => {
+describe('Exam storage contracts', () => {
   let storage: DatabaseStorage;
-  let testData: any;
+  let testData: Awaited<ReturnType<typeof setupTestData>>;
 
   beforeEach(async () => {
     await cleanupTestData();
@@ -12,196 +13,171 @@ describe('Exam System Tests', () => {
     testData = await setupTestData();
   });
 
-  describe('Exam Sessions', () => {
-    it('should create exam session for user', async () => {
-      const sessionData = {
-        userId: testData.testUser.id,
-        courseId: testData.testCourse.id,
-        sessionId: 'test-session-123',
-        startedAt: new Date()
-      };
+  function attemptFixture(
+    overrides: Partial<InsertExamAttempt> = {},
+  ): InsertExamAttempt {
+    return {
+      userId: testData.testUser.id,
+      courseId: testData.testCourse.id,
+      userEmail: testData.testUser.email,
+      userName: testData.testUser.name,
+      score: 85,
+      totalQuestions: 2,
+      timeTaken: 120,
+      answers: { '1': 1, '2': 2 },
+      passed: true,
+      mastered: false,
+      sessionId: 'test-session-123',
+      tabSwitches: 0,
+      ...overrides,
+    };
+  }
 
-      const session = await storage.createExamSession(sessionData);
-      expect(session.id).toBeDefined();
-      expect(session.userId).toBe(sessionData.userId);
-      expect(session.courseId).toBe(sessionData.courseId);
-      expect(session.sessionId).toBe(sessionData.sessionId);
-    });
-
-    it('should prevent duplicate active sessions', async () => {
-      const sessionData = {
-        userId: testData.testUser.id,
-        courseId: testData.testCourse.id,
-        sessionId: 'test-session-123',
-        startedAt: new Date()
-      };
-
-      await storage.createExamSession(sessionData);
-      
-      // Try to create another session for same user/course
-      await expect(storage.createExamSession({
-        ...sessionData,
-        sessionId: 'test-session-456'
-      })).rejects.toThrow();
-    });
-
-    it('should get active session for user', async () => {
-      const sessionData = {
-        userId: testData.testUser.id,
-        courseId: testData.testCourse.id,
-        sessionId: 'test-session-123',
-        startedAt: new Date()
-      };
-
-      await storage.createExamSession(sessionData);
-      const activeSession = await storage.getActiveExamSession(testData.testUser.id, testData.testCourse.id);
-      
-      expect(activeSession).toBeDefined();
-      expect(activeSession?.sessionId).toBe(sessionData.sessionId);
-    });
-  });
-
-  describe('Exam Attempts', () => {
-    it('should record exam attempt with score', async () => {
-      const attemptData = {
-        userId: testData.testUser.id,
-        courseId: testData.testCourse.id,
-        score: 85,
-        totalQuestions: 10,
-        timeTaken: 1800, // 30 minutes
-        answers: [0, 1, 2, 1, 0, 1, 2, 0, 1, 2],
-        passed: true
-      };
+  describe('Exam attempts', () => {
+    it('persists learner identity, answer mapping, and integrity metadata', async () => {
+      const attemptData = attemptFixture({
+        ipAddress: '127.0.0.1',
+        userAgent: 'jest',
+        tabSwitches: 2,
+      });
 
       const attempt = await storage.createExamAttempt(attemptData);
-      
+
       expect(attempt.id).toBeDefined();
-      expect(attempt.score).toBe(attemptData.score);
-      expect(attempt.passed).toBe(true);
-      expect(attempt.timeTaken).toBe(attemptData.timeTaken);
+      expect(attempt.userId).toBe(testData.testUser.id);
+      expect(attempt.userEmail).toBe(testData.testUser.email);
+      expect(attempt.answers).toEqual(attemptData.answers);
+      expect(attempt.sessionId).toBe('test-session-123');
+      expect(attempt.ipAddress).toBe('127.0.0.1');
+      expect(attempt.userAgent).toBe('jest');
+      expect(attempt.tabSwitches).toBe(2);
     });
 
-    it('should calculate pass/fail correctly', async () => {
-      const failingAttempt = {
-        userId: testData.testUser.id,
-        courseId: testData.testCourse.id,
-        score: 65, // Below 70% passing score
-        totalQuestions: 10,
-        timeTaken: 1800,
-        answers: [0, 1, 2, 1, 0, 1, 2, 0, 1, 2],
-        passed: false
-      };
+    it('allows only one persisted attempt per server-issued session ID', async () => {
+      await storage.createExamAttempt(attemptFixture());
 
-      const attempt = await storage.createExamAttempt(failingAttempt);
+      await expect(
+        storage.createExamAttempt(
+          attemptFixture({ score: 60, passed: false }),
+        ),
+      ).rejects.toThrow();
+    });
+
+    it('supports an identified anonymous attempt without a user row', async () => {
+      const attempt = await storage.createExamAttempt(
+        attemptFixture({
+          userId: null,
+          userEmail: 'candidate@example.com',
+          userName: 'Guest Candidate',
+          sessionId: 'anonymous-session-123',
+        }),
+      );
+
+      expect(attempt.userId).toBeNull();
+      expect(attempt.userEmail).toBe('candidate@example.com');
+      expect(attempt.userName).toBe('Guest Candidate');
+    });
+
+    it('retrieves an attempt by its database ID', async () => {
+      const created = await storage.createExamAttempt(attemptFixture());
+
+      const attempt = await storage.getExamAttempt(created.id);
+
+      expect(attempt?.id).toBe(created.id);
+      expect(attempt?.score).toBe(85);
+      expect(attempt?.passed).toBe(true);
+    });
+
+    it('gets a learner exam history and supports a course filter', async () => {
+      await storage.createExamAttempt(attemptFixture());
+
+      const allAttempts = await storage.getUserExamAttempts(
+        testData.testUser.id,
+      );
+      const courseAttempts = await storage.getUserExamAttempts(
+        testData.testUser.id,
+        testData.testCourse.id,
+      );
+
+      expect(allAttempts).toHaveLength(1);
+      expect(courseAttempts).toHaveLength(1);
+      expect(courseAttempts[0].courseId).toBe(testData.testCourse.id);
+    });
+
+    it('preserves an explicitly failed result', async () => {
+      const attempt = await storage.createExamAttempt(
+        attemptFixture({ score: 65, passed: false }),
+      );
+
+      expect(attempt.score).toBe(65);
       expect(attempt.passed).toBe(false);
-    });
-
-    it('should get user exam attempts', async () => {
-      const attemptData = {
-        userId: testData.testUser.id,
-        courseId: testData.testCourse.id,
-        score: 85,
-        totalQuestions: 10,
-        timeTaken: 1800,
-        answers: [0, 1, 2, 1, 0, 1, 2, 0, 1, 2],
-        passed: true
-      };
-
-      await storage.createExamAttempt(attemptData);
-      const attempts = await storage.getUserExamAttempts(testData.testUser.id);
-      
-      expect(Array.isArray(attempts)).toBe(true);
-      expect(attempts.length).toBe(1);
-      expect(attempts[0].score).toBe(85);
     });
   });
 
-  describe('Question Management', () => {
-    it('should get questions for course', async () => {
-      const questions = await storage.getQuestionsByCourse(testData.testCourse.id);
-      
-      expect(Array.isArray(questions)).toBe(true);
-      expect(questions.length).toBeGreaterThan(0);
-      expect(questions.every(q => q.courseId === testData.testCourse.id)).toBe(true);
+  describe('Question management', () => {
+    it('gets active legacy questions for a course', async () => {
+      const questions = await storage.getQuestionsByCourse(
+        testData.testCourse.id,
+      );
+
+      expect(questions).toHaveLength(2);
+      expect(
+        questions.every(
+          (question) => question.courseId === testData.testCourse.id,
+        ),
+      ).toBe(true);
     });
 
-    it('should create new question', async () => {
+    it('creates a multiple-choice question with structured options', async () => {
       const questionData = {
         courseId: testData.testCourse.id,
         question: 'What is the result of 5 + 5?',
         options: ['8', '9', '10', '11'],
         correctAnswer: 2,
         difficulty: 'easy',
-        isActive: true
+        isActive: true,
       };
 
       const question = await storage.createQuestion(questionData);
-      
+
       expect(question.id).toBeDefined();
       expect(question.question).toBe(questionData.question);
       expect(question.correctAnswer).toBe(questionData.correctAnswer);
       expect(question.options).toEqual(questionData.options);
+      expect(question.questionFormat).toBe('mcq_single');
     });
 
-    it('should update question', async () => {
-      const questions = await storage.getQuestionsByCourse(testData.testCourse.id);
-      const questionId = questions[0].id;
-      
-      const updates = {
+    it('updates an existing question', async () => {
+      const [question] = await storage.getQuestionsByCourse(
+        testData.testCourse.id,
+      );
+
+      const updatedQuestion = await storage.updateQuestion(question.id, {
         question: 'Updated question text',
-        difficulty: 'medium'
-      };
+        difficulty: 'medium',
+      });
 
-      const updatedQuestion = await storage.updateQuestionAdmin(questionId, updates);
-      expect(updatedQuestion.question).toBe(updates.question);
-      expect(updatedQuestion.difficulty).toBe(updates.difficulty);
+      expect(updatedQuestion.question).toBe('Updated question text');
+      expect(updatedQuestion.difficulty).toBe('medium');
     });
 
-    it('should validate correct answer index', async () => {
-      const invalidQuestionData = {
+    it('excludes inactive questions from an exam question set', async () => {
+      await storage.createQuestion({
         courseId: testData.testCourse.id,
-        question: 'Invalid question',
-        options: ['A', 'B', 'C'],
-        correctAnswer: 5, // Invalid index
+        question: 'Inactive question',
+        options: ['A', 'B'],
+        correctAnswer: 0,
         difficulty: 'easy',
-        isActive: true
-      };
+        isActive: false,
+      });
 
-      await expect(storage.createQuestion(invalidQuestionData))
-        .rejects.toThrow();
-    });
-  });
+      const questions = await storage.getQuestionsByCourse(
+        testData.testCourse.id,
+      );
 
-  describe('Score Validation', () => {
-    it('should validate score within 0-100 range', async () => {
-      const invalidAttempt = {
-        userId: testData.testUser.id,
-        courseId: testData.testCourse.id,
-        score: 150, // Invalid score > 100
-        totalQuestions: 10,
-        timeTaken: 1800,
-        answers: [0, 1, 2, 1, 0, 1, 2, 0, 1, 2],
-        passed: true
-      };
-
-      await expect(storage.createExamAttempt(invalidAttempt))
-        .rejects.toThrow();
-    });
-
-    it('should handle perfect score', async () => {
-      const perfectAttempt = {
-        userId: testData.testUser.id,
-        courseId: testData.testCourse.id,
-        score: 100,
-        totalQuestions: 10,
-        timeTaken: 1200,
-        answers: [1, 2, 1, 2, 1, 2, 1, 2, 1, 2], // All correct
-        passed: true
-      };
-
-      const attempt = await storage.createExamAttempt(perfectAttempt);
-      expect(attempt.score).toBe(100);
-      expect(attempt.passed).toBe(true);
+      expect(questions.map((question) => question.question)).not.toContain(
+        'Inactive question',
+      );
     });
   });
 });

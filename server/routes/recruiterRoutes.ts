@@ -5,9 +5,20 @@ import { assertStrongPassword } from '../lib/bcrypt-helper';
 import crypto from 'crypto';
 import multer from 'multer';
 import { v2 as cloudinary } from 'cloudinary';
-import { storage } from '../storage';
+import {
+  storage,
+  RecruiterAccessError,
+  type RecruiterAccessType,
+} from '../storage';
+import { execRows } from '../lib/db-exec';
+import { z } from 'zod';
 
 const JWT_SECRET = process.env.JWT_SECRET!;
+
+const recruiterCredentialsSchema = z.object({
+  email: z.string().trim().toLowerCase().email().max(254),
+  password: z.string().min(1).max(200),
+});
 
 const recruiterKycUpload = multer({
   storage: multer.memoryStorage(),
@@ -26,6 +37,18 @@ export interface AuthenticatedRecruiterRequest extends Request {
   };
 }
 
+function sendRecruiterAccessError(res: Response, error: unknown, fallback: string) {
+  if (error instanceof RecruiterAccessError) {
+    return res.status(error.statusCode).json({
+      message: error.message,
+      code: error.code,
+      ...error.details,
+    });
+  }
+  const message = error instanceof Error ? error.message : fallback;
+  return res.status(500).json({ message: fallback, error: message });
+}
+
 // Middleware to authenticate recruiter token
 export const authenticateRecruiterToken = (req: AuthenticatedRecruiterRequest, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
@@ -37,10 +60,14 @@ export const authenticateRecruiterToken = (req: AuthenticatedRecruiterRequest, r
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET) as any;
+    if (!Number.isInteger(decoded?.recruiterId) || decoded.recruiterId <= 0 || typeof decoded?.email !== 'string') {
+      return res.status(401).json({ message: "Invalid token", code: "INVALID_TOKEN" });
+    }
     req.recruiter = decoded;
     next();
   } catch (err) {
-    return res.status(403).json({ message: "Invalid token" });
+    const code = err instanceof jwt.TokenExpiredError ? 'TOKEN_EXPIRED' : 'INVALID_TOKEN';
+    return res.status(401).json({ message: code === 'TOKEN_EXPIRED' ? "Token expired" : "Invalid token", code });
   }
 };
 
@@ -48,11 +75,11 @@ export function registerRecruiterRoutes(app: any) {
   // Recruiter Registration
   app.post('/recruiter/register', async (req: Request, res: Response) => {
     try {
-      const { email, password } = req.body;
-      
-      if (!email || !password) {
-        return res.status(400).json({ message: "Email and password are required" });
+      const parsedCredentials = recruiterCredentialsSchema.safeParse(req.body);
+      if (!parsedCredentials.success) {
+        return res.status(400).json({ message: "Enter a valid business email and password" });
       }
+      const { email, password } = parsedCredentials.data;
       
       // Check if recruiter already exists
       const existingRecruiter = await storage.getRecruiterByEmail(email);
@@ -120,7 +147,11 @@ export function registerRecruiterRoutes(app: any) {
   // Recruiter Login
   app.post('/recruiter/login', async (req: Request, res: Response) => {
     try {
-      const { email, password } = req.body;
+      const parsedCredentials = recruiterCredentialsSchema.safeParse(req.body);
+      if (!parsedCredentials.success) {
+        return res.status(400).json({ message: "Enter a valid business email and password" });
+      }
+      const { email, password } = parsedCredentials.data;
       
       const recruiter = await storage.getRecruiterByEmail(email);
       if (!recruiter) {
@@ -130,6 +161,9 @@ export function registerRecruiterRoutes(app: any) {
       const validPassword = await bcrypt.compare(password, recruiter.password);
       if (!validPassword) {
         return res.status(401).json({ message: "Invalid credentials" });
+      }
+      if (!recruiter.isActive) {
+        return res.status(403).json({ message: "This recruiter workspace is inactive. Contact support to restore access." });
       }
 
       // Update last login
@@ -321,17 +355,20 @@ export function registerRecruiterRoutes(app: any) {
         return res.status(401).json({ message: "Unauthorized" });
       }
 
-      const { filters, page = 1, limit = 10 } = req.body;
+      const filters = req.body?.filters && typeof req.body.filters === 'object' ? req.body.filters : {};
+      const page = Math.max(1, Number(req.body?.page) || 1);
+      const limit = Math.min(50, Math.max(1, Number(req.body?.limit) || 10));
       
       // Check if recruiter is KYC approved
       const recruiter = await storage.getRecruiterById(recruiterId);
-      if (!recruiter || recruiter.kycStatus !== 'approved') {
+      if (!recruiter || !recruiter.isActive) {
+        return res.status(403).json({ message: "Recruiter workspace is inactive" });
+      }
+      if (recruiter.kycStatus !== 'approved') {
         return res.status(403).json({ message: "KYC verification required to search candidates" });
       }
 
-      console.log('About to call storage.searchCandidates with:', { filters, page, limit });
-      const searchResults = await storage.searchCandidates(filters, page, limit);
-      console.log('Search results from storage:', searchResults);
+      const searchResults = await storage.searchCandidates(recruiterId, filters, page, limit);
       
       res.json(searchResults);
     } catch (error: any) {
@@ -348,44 +385,33 @@ export function registerRecruiterRoutes(app: any) {
         return res.status(401).json({ message: "Unauthorized" });
       }
 
-      const { candidateId, accessType } = req.body;
+      const candidateId = Number(req.body?.candidateId);
+      const accessTypeMap: Record<string, RecruiterAccessType> = {
+        view: 'profile_view',
+        cv: 'cv_download',
+        interview: 'interview_access',
+      };
+      const normalizedAccessType = accessTypeMap[String(req.body?.accessType || '')];
       
       // Check if recruiter is KYC approved
       const recruiter = await storage.getRecruiterById(recruiterId);
-      if (!recruiter || recruiter.kycStatus !== 'approved') {
+      if (!recruiter || !recruiter.isActive) {
+        return res.status(403).json({ message: "Recruiter workspace is inactive" });
+      }
+      if (recruiter.kycStatus !== 'approved') {
         return res.status(403).json({ message: "KYC verification required to access profiles" });
       }
 
-      // Define credit costs
-      const creditCosts = {
-        view: 1,
-        cv: 1,
-        interview: 2
-      };
-
-      const creditsRequired = creditCosts[accessType as keyof typeof creditCosts];
-      if (!creditsRequired || !Number.isInteger(Number(candidateId))) {
+      if (!normalizedAccessType || !Number.isInteger(candidateId) || candidateId <= 0) {
         return res.status(400).json({ message: 'Invalid profile access request' });
       }
-      
-      // Check if recruiter has enough credits
-      const currentBalance = Number(recruiter.creditsBalance || 0);
-      if (currentBalance < creditsRequired) {
-        return res.status(400).json({ message: "Insufficient credits" });
-      }
 
-      // Process the access request
-      const normalizedAccessType = accessType === 'view'
-        ? 'profile_view'
-        : accessType === 'cv'
-          ? 'cv_download'
-          : 'interview_access';
-      const accessResult = await storage.processProfileAccess(recruiterId, Number(candidateId), normalizedAccessType, creditsRequired);
+      const accessResult = await storage.processProfileAccess(recruiterId, candidateId, normalizedAccessType);
       
       res.json(accessResult);
     } catch (error: any) {
-      console.error("Profile access error:", error);
-      res.status(500).json({ message: "Failed to access profile", error: error.message });
+      if (!(error instanceof RecruiterAccessError)) console.error("Profile access error:", error);
+      return sendRecruiterAccessError(res, error, 'Failed to unlock candidate data');
     }
   });
 
@@ -422,7 +448,7 @@ export function registerRecruiterRoutes(app: any) {
 
       const orderId = `RC_${recruiterId}_${credits}_${crypto.randomBytes(8).toString('hex')}`;
       const baseUrl = (process.env.APP_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
-      const { createCashfreeOrder } = await import('../lib/cashfree.js');
+      const { createCashfreeOrder } = await import('../lib/cashfree');
       const order = await createCashfreeOrder({
         orderId,
         amount: amount.toFixed(2),
@@ -467,17 +493,8 @@ export function registerRecruiterRoutes(app: any) {
       const credits = Number(orderMatch[2]);
       const packagePrices: Record<number, number> = { 100: 1000, 500: 4500, 1000: 8000 };
 
-      // Idempotency: reject duplicate orderId.
-      const { db } = await import('../db');
-      const { creditTransactions } = await import('@shared/schema');
-      const { sql } = await import('drizzle-orm');
-      const existing = await db.execute(sql`SELECT id FROM credit_transactions WHERE description LIKE ${'%' + orderId + '%'} LIMIT 1`);
-      if ((existing as any).rows?.length) {
-        return res.status(409).json({ message: 'Order already credited' });
-      }
-
       // Verify with Cashfree.
-      const { fetchCashfreeOrderStatus } = await import('../lib/cashfree.js');
+      const { fetchCashfreeOrderStatus } = await import('../lib/cashfree');
       let payments: any;
       try {
         payments = await fetchCashfreeOrderStatus(orderId);
@@ -518,7 +535,10 @@ export function registerRecruiterRoutes(app: any) {
 
       // Check if recruiter is KYC approved
       const recruiter = await storage.getRecruiterById(recruiterId);
-      if (!recruiter || recruiter.kycStatus !== 'approved') {
+      if (!recruiter || !recruiter.isActive) {
+        return res.status(403).json({ message: "Recruiter workspace is inactive" });
+      }
+      if (recruiter.kycStatus !== 'approved') {
         return res.status(403).json({ message: "KYC verification required to view candidate profiles" });
       }
 
@@ -531,7 +551,7 @@ export function registerRecruiterRoutes(app: any) {
       if (!profileAccess) return res.status(402).json({ message: 'Unlock this profile from candidate search first' });
 
       // Get candidate profile data
-      const candidateProfile = await storage.getCandidateProfile(candidateId);
+      const candidateProfile = await storage.getCandidateProfile(candidateId, recruiterId);
       if (!candidateProfile) {
         return res.status(404).json({ message: "The candidate profile you're looking for doesn't exist." });
       }
@@ -550,7 +570,8 @@ export function registerRecruiterRoutes(app: any) {
       if (!recruiterId || !Number.isInteger(candidateId)) return res.status(400).json({ message: 'Invalid request' });
 
       const recruiter = await storage.getRecruiterById(recruiterId);
-      if (!recruiter || recruiter.kycStatus !== 'approved') return res.status(403).json({ message: 'KYC approval required' });
+      if (!recruiter || !recruiter.isActive) return res.status(403).json({ message: 'Recruiter workspace is inactive' });
+      if (recruiter.kycStatus !== 'approved') return res.status(403).json({ message: 'KYC approval required' });
 
       const { db } = await import('../db');
       const { users, profileAccessLogs } = await import('@shared/schema');
@@ -560,12 +581,16 @@ export function registerRecruiterRoutes(app: any) {
         .orderBy(desc(profileAccessLogs.createdAt)).limit(1);
       if (!access) return res.status(403).json({ message: 'Purchase CV access first' });
 
-      const [candidate] = await db.select({ resume: users.resume, visible: users.profileVisibility }).from(users).where(eq(users.id, candidateId));
-      if (!candidate?.visible || !candidate.resume) return res.status(404).json({ message: 'Candidate CV is not available' });
+      // Consent/evidence/institute policy are re-checked on every download, so
+      // withdrawing consent immediately revokes recruiter access to the file.
+      const candidateProfile = await storage.getCandidateProfile(candidateId, recruiterId);
+      if (!candidateProfile) return res.status(404).json({ message: 'Candidate CV is not available' });
+      const [candidate] = await db.select({ resume: users.resume }).from(users).where(eq(users.id, candidateId));
+      if (!candidate?.resume) return res.status(404).json({ message: 'Candidate CV is not available' });
 
       if (/^https:\/\//i.test(candidate.resume)) return res.redirect(candidate.resume);
       const localMatch = /^\/api\/uploads\/resumes\/([^/]+)$/.exec(candidate.resume);
-      if (!localMatch || !localMatch[1].startsWith(`${candidateId}-`)) return res.status(404).json({ message: 'Candidate CV is not available' });
+      if (!localMatch || !localMatch[1].startsWith(`resume-${candidateId}-`)) return res.status(404).json({ message: 'Candidate CV is not available' });
 
       const path = await import('node:path');
       return res.sendFile(path.join(process.cwd(), 'uploads', 'resumes', path.basename(localMatch[1])));
@@ -759,17 +784,15 @@ export function registerRecruiterRoutes(app: any) {
         return res.status(401).json({ message: "Unauthorized" });
       }
 
-      // Check recruiter's credit balance
       const recruiter = await storage.getRecruiterById(recruiterId);
       if (!recruiter) {
         return res.status(404).json({ message: "Recruiter not found" });
       }
+      if (!recruiter.isActive) {
+        return res.status(403).json({ message: 'Recruiter workspace is inactive' });
+      }
       if (recruiter.kycStatus !== 'approved') {
         return res.status(403).json({ message: 'KYC verification required' });
-      }
-
-      if (Number(recruiter.creditsBalance || 0) < 2) {
-        return res.status(400).json({ message: "Insufficient credits. Interview videos require 2 credits." });
       }
 
       // Get interview details
@@ -785,18 +808,19 @@ export function registerRecruiterRoutes(app: any) {
         return res.status(404).json({ message: "Video not available for this interview" });
       }
 
-      // Process credit transaction and access logging
-      await storage.processProfileAccess(recruiterId, parseInt(candidateId), 'interview_access', 2);
+      const access = await storage.processProfileAccess(recruiterId, Number(candidateId), 'interview_access');
 
       res.json({ 
         videoUrl: interview.videoUrl,
-        creditsRemaining: (Number(recruiter.creditsBalance || 0) - 2).toFixed(2),
-        message: "Video access granted. 2 credits deducted."
+        creditsRemaining: access.remainingCredits,
+        creditsUsed: access.creditsUsed,
+        alreadyUnlocked: access.alreadyUnlocked,
+        message: access.message,
       });
 
     } catch (error: any) {
-      console.error("Interview video access error:", error);
-      res.status(500).json({ message: "Failed to access interview video", error: error.message });
+      if (!(error instanceof RecruiterAccessError)) console.error("Interview video access error:", error);
+      return sendRecruiterAccessError(res, error, 'Failed to access interview video');
     }
   });
 
@@ -805,41 +829,40 @@ export function registerRecruiterRoutes(app: any) {
     try {
       const recruiterId = req.recruiter?.recruiterId;
       if (!recruiterId) return res.status(401).json({ message: 'Unauthorized' });
-      const { db: drizzleDb } = await import('../db');
       const { sql } = await import('drizzle-orm');
 
-      const totals = await drizzleDb.execute(sql`
+      const totals = await execRows(sql`
         SELECT
           COUNT(*) FILTER (WHERE access_type='profile_view')::int AS profile_views,
           COUNT(*) FILTER (WHERE access_type='cv_download')::int AS cv_downloads,
           COUNT(*) FILTER (WHERE access_type='interview_access')::int AS interview_access,
           COALESCE(SUM(credits_used::numeric), 0)::float AS credits_used
         FROM profile_access_logs WHERE recruiter_id = ${recruiterId}
-      `) as any as Array<{ profile_views: number; cv_downloads: number; interview_access: number; credits_used: number }>;
+      `) as Array<{ profile_views: number; cv_downloads: number; interview_access: number; credits_used: number }>;
 
-      const last30 = await drizzleDb.execute(sql`
+      const last30 = await execRows(sql`
         SELECT date_trunc('day', created_at)::date AS day,
                COUNT(*)::int AS accesses,
                COALESCE(SUM(credits_used::numeric),0)::float AS credits
         FROM profile_access_logs
         WHERE recruiter_id = ${recruiterId} AND created_at > NOW() - INTERVAL '30 days'
         GROUP BY 1 ORDER BY 1 ASC
-      `) as any as Array<{ day: string; accesses: number; credits: number }>;
+      `) as Array<{ day: string; accesses: number; credits: number }>;
 
-      const recentAccess = await drizzleDb.execute(sql`
+      const recentAccess = await execRows(sql`
         SELECT pal.id, pal.access_type, pal.credits_used, pal.created_at, u.name AS user_name
         FROM profile_access_logs pal
         LEFT JOIN users u ON u.id = pal.user_id
         WHERE pal.recruiter_id = ${recruiterId}
         ORDER BY pal.id DESC LIMIT 25
-      `) as any as Array<{ id: number; access_type: string; credits_used: string; created_at: string; user_name: string | null }>;
+      `) as Array<{ id: number; access_type: string; credits_used: string; created_at: string; user_name: string | null }>;
 
-      const recentTransactions = await drizzleDb.execute(sql`
+      const recentTransactions = await execRows(sql`
         SELECT id, type, amount, description, balance_after, created_at
         FROM credit_transactions
         WHERE recruiter_id = ${recruiterId}
         ORDER BY id DESC LIMIT 25
-      `) as any as Array<{ id: number; type: string; amount: string; description: string; balance_after: string; created_at: string }>;
+      `) as Array<{ id: number; type: string; amount: string; description: string; balance_after: string; created_at: string }>;
 
       res.json({
         totals: {

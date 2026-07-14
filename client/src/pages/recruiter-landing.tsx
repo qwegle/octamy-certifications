@@ -11,13 +11,13 @@ import PortalLandingHero from '@/components/portal-landing-hero';
 
 const tiers = [
   { name: 'Explore', price: '₹1,000', views: '100 credits', searches: 'Pay as you use', features: ['Candidate filters', 'Saved searches', 'Credential evidence'] },
-  { name: 'Hiring', price: '₹4,500', views: '500 credits', searches: '10% pack saving', highlight: true, features: ['Profile access', 'Protected CV access', 'Interview evidence'] },
+  { name: 'Hiring', price: '₹4,500', views: '500 credits', searches: '10% pack saving', highlight: true, features: ['Profile access', 'Protected CV access', 'Assessment records'] },
   { name: 'Scale', price: '₹8,000', views: '1,000 credits', searches: '20% pack saving', features: ['Full search workspace', 'Activity analytics', 'Transaction history'] },
 ];
 
 const faqs = [
   { q: 'How is candidate evidence verified?', a: 'Octamy links a completed, scored assessment to a credential ID and public verification record. Candidates cannot edit issued results.' },
-  { q: 'What does a credit unlock?', a: 'Credits unlock protected actions such as profile views, CV downloads and interview evidence. The exact cost is shown before access.' },
+  { q: 'What does a credit unlock?', a: 'Credits unlock protected actions such as profile views and CV downloads. The exact cost is shown before access.' },
   { q: 'Can anyone browse private candidate data?', a: 'No. Recruiters complete company verification before search access, and protected actions are logged.' },
   { q: 'How is pricing calculated?', a: 'There is no recurring commitment for recruiter access. Purchase a credit pack and use credits only for protected actions.' },
 ];
@@ -37,7 +37,7 @@ export default function RecruiterLanding() {
           eyebrow="For recruiters & hiring teams"
           eyebrowIcon={<ShieldCheck className="h-3.5 w-3.5" />}
           title={<>Move from profile claims to <span className="bg-gradient-to-r from-indigo-700 via-blue-600 to-cyan-600 bg-clip-text text-transparent">verified skill evidence</span></>}
-          description="Search candidates by skills, experience and completed evidence. Save useful searches and unlock protected profiles, CVs or interview evidence only when relevant."
+          description="Search opted-in candidates by profile details and active assessment credentials. Save searches and unlock protected profiles or CVs only when relevant."
           primary={{ label: 'Start hiring', href: '/recruiter/register' }}
           secondary={{ label: 'See credit packs', href: '/pricing' }}
           preview={{

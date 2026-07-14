@@ -17,11 +17,9 @@ import {
   Crown,
   Sparkles,
   ShieldCheck,
-  Lock,
   FileCheck2,
   Building2,
   BadgeCheck,
-  Receipt,
   UserPlus,
   ClipboardCheck,
   CheckCircle2,
@@ -88,7 +86,7 @@ function CertificateSlider() {
           <p className="text-slate-600 mt-3">
             {showLive
               ? "Real candidates earning verified credentials."
-              : "Every passed exam mints a verifiable, recruiter-checkable certificate. Yours can be next."}
+              : "A passed assessment can become an activated, publicly checkable credential when the learner chooses."}
           </p>
         </Reveal>
 
@@ -125,7 +123,7 @@ function CertificateSlider() {
                   </div>
                   <div className="mt-3 flex items-center gap-2 text-[11px] text-slate-500">
                     <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
-                    QR-verifiable · {cert.company || "Octamy.com"}
+                    Publicly checkable · {cert.company || "Octamy.com"}
                   </div>
                 </div>
               </motion.div>
@@ -138,11 +136,11 @@ function CertificateSlider() {
             <p className="text-xs text-slate-500 italic">
               Sample preview · Live certificates appear here once candidates pass their first exam.
             </p>
-            <Link href="/exams">
-              <Button className="mt-4 bg-slate-900 hover:bg-black text-white rounded-full px-6">
+            <Button asChild className="mt-4 bg-slate-900 hover:bg-black text-white rounded-full px-6">
+              <Link href="/exams">
                 Take a free assessment <ArrowRight className="ml-2 w-4 h-4" />
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </Reveal>
         )}
       </div>
@@ -225,7 +223,7 @@ function iconForCategory(slug: string | null | undefined) {
 const FAQS: { q: string; a: string }[] = [
   {
     q: "Is the certificate recognized by employers?",
-    a: "Octamy certificates are skill-verification credentials that record your assessment score and badge tier. Recruiters can verify any certificate at octamy.com/verify. They are an independent signal of competence — not a degree or government qualification.",
+    a: "Octamy credentials record an assessment score and badge tier that an employer can inspect. They are an independent signal of assessment performance — not employer accreditation, a degree, government-ID verification or a guarantee of job performance.",
   },
   {
     q: "What happens if I fail an assessment?",
@@ -237,11 +235,11 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "How is verification done?",
-    a: "Each certificate has a unique ID and QR code. Anyone — employers, agencies, institutions — can paste the ID at octamy.com/verify to confirm the holder, score, badge tier and issue date in real time.",
+    a: "Each activated credential has a unique ID. Anyone with that ID can check its recorded holder name, score, badge tier, issue date and current active, expired or revoked status at octamy.com/verify.",
   },
   {
     q: "Can institutes / companies bulk-certify their teams?",
-    a: "Yes. Partner organisations can co-brand certificates and bulk-enrol candidates. Reach out via the Partners page for volume pricing and an analytics dashboard.",
+    a: "Institute workspaces support cohorts, bulk student enrolment, private question banks, assessment windows and results reporting. Contact us to discuss an institute rollout.",
   },
   {
     q: "Is there a refund policy?",
@@ -249,7 +247,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "What ID / proof is needed?",
-    a: "You register with a verified email and the name you want printed on the certificate. For premium tracks we may ask for a government-issued ID at the verification step.",
+    a: "Your credential uses the name on your Octamy account. Octamy does not currently perform government-ID verification, so the live record verifies the account's assessment result—not civil identity.",
   },
   {
     q: "Are the assessments timed?",
@@ -281,18 +279,19 @@ export default function Landing() {
     return matchesSearch && matchesCategory;
   });
 
-  // Trust strip items (no vendor logos — lucide only)
+  // Product safeguards only. Corporate certifications are shown elsewhere only
+  // when a publishable identifier has been configured.
   const trustItems = [
-    { icon: BadgeCheck, label: "ISO 9001:2015" },
-    { icon: Lock, label: "PayU Secure" },
-    { icon: Receipt, label: "GST Registered" },
-    { icon: ShieldCheck, label: "256-bit SSL" },
-    { icon: FileCheck2, label: "DPDP Aligned" },
-    { icon: Building2, label: "MSME Registered" },
+    { icon: ClipboardCheck, label: "Free to assess" },
+    { icon: Wallet, label: "Pay only after passing" },
+    { icon: FileCheck2, label: "Server-scored result" },
+    { icon: ShieldCheck, label: "Live status verification" },
+    { icon: Users, label: "Sharing is opt-in" },
+    { icon: BadgeCheck, label: "Clear expiry status" },
   ];
   const heroBanners = [
-    { icon: Sparkles, title: "New", text: "AI & Cloud assessment tracks updated weekly" },
-    { icon: ShieldCheck, title: "Trusted", text: "Recruiter-verifiable credentials with QR validation" },
+    { icon: Sparkles, title: "Assess", text: "Start without paying for a credential upfront" },
+    { icon: ShieldCheck, title: "Inspect", text: "Live credential status and recorded assessment score" },
     { icon: Trophy, title: "Performance", text: "Bronze to Platinum badge tiers on every pass" },
     { icon: Users, title: "Enterprise", text: "Bulk assessment and verification support for teams" },
   ];
@@ -331,11 +330,12 @@ export default function Landing() {
     <div className="min-h-screen bg-cream-soft">
       <SEO
         title="Octamy — Evidence-backed Skill Verification"
-        description="Build a portable Skill Evidence Passport with scored assessments and QR-verifiable credentials. Free to assess; pay only when you pass and choose to certify."
+        description="Take a scored skill assessment free. Pay only after passing if you want an activated credential, then share the evidence and its live status."
         path="/"
         jsonLd={[websiteJsonLd, faqJsonLd]}
       />
       <Header />
+      <main id="main-content" tabIndex={-1}>
 
       {/* 1. HERO — reflective black left rail · clean white right ---------- */}
       <section className="relative overflow-hidden bg-cream-soft">
@@ -344,7 +344,7 @@ export default function Landing() {
 
             {/* LEFT — glossy black hero panel */}
             <div className="lg:col-span-8">
-              <div className="glossy-black relative overflow-hidden rounded-3xl px-6 sm:px-10 py-12 sm:py-16 min-h-[480px] flex flex-col justify-between">
+              <div className="glossy-black relative flex min-h-[430px] flex-col justify-between overflow-hidden rounded-3xl px-6 py-10 sm:min-h-[460px] sm:px-10 sm:py-14">
                 {/* subtle ambient highlights inside the black panel */}
                 <div aria-hidden className="pointer-events-none absolute inset-0 bg-grid-white [mask-image:radial-gradient(ellipse_at_top_right,black_30%,transparent_70%)] opacity-60" />
                 <div aria-hidden className="pointer-events-none absolute -top-24 -right-24 h-[360px] w-[360px] rounded-full bg-cream-soft/[0.06] blur-3xl animate-blob-slow" />
@@ -361,7 +361,7 @@ export default function Landing() {
                       <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cream-soft/60 opacity-75" />
                       <span className="relative inline-flex h-2 w-2 rounded-full bg-cream-soft" />
                     </span>
-                    Your portable Skill Evidence Passport
+                    Proof before payment
                   </motion.p>
 
                   <motion.h1
@@ -370,9 +370,9 @@ export default function Landing() {
                     transition={{ duration: 0.7, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
                     className="mt-6 text-4xl sm:text-5xl md:text-[56px] leading-[1.05] font-extrabold tracking-tight text-white"
                   >
-                    Prove the skill.
+                    Prove first.
                     <br />
-                    <span className="text-chrome">Carry the evidence.</span>
+                    <span className="text-chrome">Pay only when you pass.</span>
                   </motion.h1>
 
                   <motion.p
@@ -381,7 +381,7 @@ export default function Landing() {
                     transition={{ duration: 0.6, delay: 0.25 }}
                     className="mt-5 max-w-xl text-base sm:text-lg text-white/70 leading-relaxed"
                   >
-                    One trusted record that connects a scored assessment, credential ID and instant verification—built for learners, institutes and hiring teams.
+                    Take a scored assessment free. If you pass, choose whether to activate a credential and carry the inspectable result into hiring.
                   </motion.p>
 
                   <motion.div
@@ -390,17 +390,17 @@ export default function Landing() {
                     transition={{ duration: 0.6, delay: 0.35 }}
                     className="mt-8 flex flex-col sm:flex-row gap-3"
                   >
-                    <Link href="/exams">
-                      <Button size="lg" className="bg-cream-soft text-slate-900 hover:bg-slate-100 rounded-full px-6 py-6 text-base font-semibold shadow-xl shadow-black/30">
-                        Browse live exams
+                    <Button asChild size="lg" className="rounded-full border-white bg-white px-6 py-6 text-base font-semibold text-slate-950 shadow-xl shadow-black/30 hover:bg-slate-100">
+                      <Link href="/exams">
+                        Take a free assessment
                         <ArrowRight className="ml-2 w-4 h-4" />
-                      </Button>
-                    </Link>
-                    <a href="#how">
-                      <Button size="lg" variant="outline" className="rounded-full px-6 py-6 text-base border-white/20 bg-cream-soft/[0.04] text-white hover:bg-cream-soft/[0.1] backdrop-blur">
+                      </Link>
+                    </Button>
+                    <Button asChild size="lg" variant="outline" className="rounded-full border-white/20 bg-white/[0.04] px-6 py-6 text-base text-white shadow-none hover:bg-white/[0.1] hover:text-white">
+                      <a href="#how">
                         How it works
-                      </Button>
-                    </a>
+                      </a>
+                    </Button>
                   </motion.div>
                 </div>
 
@@ -409,18 +409,18 @@ export default function Landing() {
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.5 }}
-                  className="relative z-10 mt-10 grid grid-cols-3 gap-3 max-w-xl"
+                  className="relative z-10 mt-8 flex max-w-xl flex-wrap gap-x-6 gap-y-2 border-t border-white/10 pt-5"
                 >
                   {[
                     { v: courses.length, s: "", l: "Live exams" },
                     { v: categories.length, s: "", l: "Skill tracks" },
                     { v: 1, s: "", l: "Portable passport" },
                   ].map((s) => (
-                    <div key={s.l} className="rounded-xl border border-white/10 bg-cream-soft/[0.04] backdrop-blur px-4 py-3">
-                      <p className="text-2xl font-bold text-white tabular-nums">
+                    <div key={s.l} className="flex items-baseline gap-1.5">
+                      <p className="text-lg font-bold text-white tabular-nums">
                         <CountUp to={s.v} suffix={s.s} />
                       </p>
-                      <p className="text-[10px] uppercase tracking-wider text-white/50 mt-1">{s.l}</p>
+                      <p className="text-[11px] text-white/55">{s.l}</p>
                     </div>
                   ))}
                 </motion.div>
@@ -437,7 +437,7 @@ export default function Landing() {
                 transition={{ duration: 0.7, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
                 className="h-full relative"
               >
-                <div className="h-full rounded-3xl border-2 border-slate-900/90 bg-white/40 backdrop-blur-2xl p-6 sm:p-7 shadow-[6px_6px_0_0_rgba(15,23,42,0.9)] flex flex-col">
+                <div className="flex h-full flex-col rounded-3xl border border-slate-300 bg-white/80 p-6 shadow-xl shadow-slate-900/10 backdrop-blur-2xl sm:p-7">
                   <div className="flex items-center gap-2">
                     <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-900 text-white">
                       <Sparkles className="h-3.5 w-3.5" />
@@ -468,22 +468,22 @@ export default function Landing() {
 
                   <div className="mt-4 space-y-3">
                     <GoogleAuthButton type="user" hideWhenUnavailable />
-                    <Link href="/register">
-                      <Button className="w-full bg-slate-900 hover:bg-black text-white rounded-xl h-11 border-2 border-slate-900 shadow-[3px_3px_0_0_rgba(15,23,42,0.9)] hover:shadow-[5px_5px_0_0_rgba(15,23,42,0.9)] hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all">
+                    <Button asChild className="w-full rounded-xl">
+                      <Link href="/register">
                         Create account with email
-                      </Button>
-                    </Link>
+                      </Link>
+                    </Button>
                   </div>
                   <div className="my-4 flex items-center gap-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
                     <span className="h-px flex-1 bg-slate-200" />
                     Already have an account?
                     <span className="h-px flex-1 bg-slate-200" />
                   </div>
-                  <Link href="/login">
-                    <Button variant="outline" className="w-full rounded-xl h-10 border-slate-300 bg-white/70 font-semibold">
+                  <Button asChild variant="outline" className="w-full rounded-xl bg-white/70 font-semibold">
+                    <Link href="/login">
                       Sign in to Octamy
-                    </Button>
-                  </Link>
+                    </Link>
+                  </Button>
 
                   <div className="mt-auto pt-4">
                     <Link href="/recruiter/login" className="flex items-center justify-between rounded-xl bg-slate-100 px-3 py-2.5 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-200 hover:text-slate-950">
@@ -500,57 +500,10 @@ export default function Landing() {
             </div>
           </div>
 
-          {/* Category chip rail — Udemy-style "popular topics" */}
-          {categories.length > 0 && (
-            <Reveal as="div" delay={0.05} className="mt-10">
-              <div className="flex items-center justify-between mb-3 px-1">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Popular categories</p>
-                <Link href="/exams" className="text-xs font-semibold text-slate-700 hover:text-slate-900 inline-flex items-center gap-1">
-                  See all <ArrowRight className="h-3 w-3" />
-                </Link>
-              </div>
-              <div className="chip-rail flex gap-2 overflow-x-auto pb-1">
-                {categories.slice(0, 14).map((c) => (
-                  <Link key={c.id} href={`/exams?category=${c.slug}`}>
-                    <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-cream-deep bg-cream-soft px-4 py-2 text-sm font-medium text-slate-700 hover:border-slate-900 hover:text-slate-900 transition-colors">
-                      {c.name}
-                    </span>
-                  </Link>
-                ))}
-              </div>
-            </Reveal>
-          )}
-
-          {/* Onboarding strip — explicit CTAs for every persona */}
-          <Reveal as="div" delay={0.1} className="mt-8 grid grid-cols-2 lg:grid-cols-4 gap-3">
-            {[
-              { href: "/exams", title: "I want to get certified", sub: "Take a free assessment", icon: GraduationCap },
-              { href: "/creator", title: "Teach on Octamy", sub: "Sell courses & exams", icon: Sparkles },
-              { href: "/institute", title: "For institutes", sub: "Run cohorts & banks", icon: Building2 },
-              { href: "/for-recruiters", title: "For recruiters", sub: "Hire verified talent", icon: Users },
-            ].map((cta) => (
-              <Link key={cta.href} href={cta.href}>
-                <motion.div
-                  whileHover={{ y: -3 }}
-                  className="group h-full rounded-2xl border border-cream-deep bg-cream-soft px-3 py-3 sm:px-5 sm:py-4 hover:border-slate-900 hover:shadow-lg transition-all flex items-start gap-2 sm:gap-3"
-                >
-                  <span className="inline-flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-white">
-                    <cta.icon className="h-5 w-5" />
-                  </span>
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-slate-900">{cta.title}</p>
-                    <p className="text-xs text-slate-500 mt-0.5">{cta.sub}</p>
-                  </div>
-                  <ArrowRight className="ml-auto h-4 w-4 text-slate-400 group-hover:text-slate-900 group-hover:translate-x-0.5 transition-all" />
-                </motion.div>
-              </Link>
-            ))}
-          </Reveal>
-
           {/* Trusted-at strip — compressed */}
-          <Reveal as="div" delay={0.15} className="mt-8 rounded-2xl border border-cream-deep bg-cream-deep px-4 py-4 sm:px-6">
+          <Reveal as="div" delay={0.15} className="mt-8 rounded-2xl border border-slate-200 bg-white px-4 py-4 sm:px-6">
             <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400 mr-2">Trusted at</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400 mr-2">How trust works</p>
               {trustItems.map(({ icon: Icon, label }) => (
                 <span key={label} className="inline-flex items-center gap-1.5 text-slate-500 text-xs sm:text-sm font-medium">
                   <Icon className="w-3.5 h-3.5 text-slate-400" />
@@ -568,24 +521,25 @@ export default function Landing() {
           <div className="grid lg:grid-cols-12 gap-10 lg:gap-16 items-center">
             <Reveal as="div" className="lg:col-span-5">
               <p className="text-xs font-semibold uppercase tracking-[0.22em] text-sky-300">The Octamy difference</p>
-              <h2 className="mt-4 text-3xl sm:text-5xl font-bold tracking-tight">A Skill Evidence Passport, not another completion badge.</h2>
+              <h2 className="mt-4 text-3xl sm:text-5xl font-bold tracking-tight">One evidence trail from assessment to hiring.</h2>
               <p className="mt-5 text-slate-300 leading-relaxed">
-                Learning records usually stop at “completed.” Octamy connects identity, assessment performance and a live verification record so every credential carries inspectable evidence.
+                Course platforms often prove completion. Credential tools verify issuance. Hiring tests often keep results inside one employer workflow. Octamy connects a scored attempt, learner-controlled share link, credential status and recruiter inspection in one record.
               </p>
+              <p className="mt-3 text-xs leading-5 text-slate-500">Today this is assessment-backed account evidence—not government-ID verification, accreditation or proof that someone can perform every part of a job.</p>
               <div className="mt-8 flex flex-col sm:flex-row gap-3">
-                <Link href="/exams">
-                  <Button className="rounded-full bg-white text-slate-950 hover:bg-slate-100 px-6">Build my passport <ArrowRight className="ml-2 h-4 w-4" /></Button>
-                </Link>
-                <Link href="/institute">
-                  <Button variant="outline" className="rounded-full border-white/25 bg-transparent text-white hover:bg-white hover:text-slate-950 px-6">For institutions</Button>
-                </Link>
+                <Button asChild className="rounded-full bg-white text-slate-950 hover:bg-slate-100 px-6">
+                  <Link href="/exams">Build my passport <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                </Button>
+                <Button asChild variant="outline" className="rounded-full border-white/25 bg-transparent text-white hover:bg-white hover:text-slate-950 px-6">
+                  <Link href="/institute">For institutions</Link>
+                </Button>
               </div>
             </Reveal>
             <Stagger className="lg:col-span-7 grid sm:grid-cols-3 gap-4">
               {[
                 { Icon: ClipboardCheck, step: "01", title: "Measured", body: "A scored, timed assessment creates evidence beyond attendance." },
-                { Icon: FileCheck2, step: "02", title: "Portable", body: "One credential ID and QR can travel from classroom to hiring desk." },
-                { Icon: ShieldCheck, step: "03", title: "Verifiable", body: "The live record confirms holder, skill, score tier and issue date." },
+                { Icon: FileCheck2, step: "02", title: "Learner-controlled", body: "A private share link consolidates activated evidence when the learner opts in." },
+                { Icon: ShieldCheck, step: "03", title: "Status-aware", body: "The live record shows score, issuer, issue date, expiry and revocation status." },
               ].map((item) => (
                 <StaggerItem key={item.title}>
                   <div className="h-full rounded-2xl border border-white/10 bg-white/[0.05] p-6 backdrop-blur">
@@ -643,7 +597,7 @@ export default function Landing() {
               {
                 n: "04",
                 title: "Buy your certificate",
-                desc: "Optional: claim a verified certificate with QR-based check.",
+                desc: "Optional: activate a credential with a public status check.",
                 Icon: FileBadge,
               },
             ].map((step) => (
@@ -680,7 +634,7 @@ export default function Landing() {
       </section>
 
       {/* 3. REAL STATS ---------------------------------------------------- */}
-      <section className="py-12 sm:py-20 bg-cream-soft">
+      <section className="hidden py-12 sm:py-20 bg-cream-soft" aria-hidden="true">
         <div className="max-w-5xl mx-auto px-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div className="rounded-xl border border-cream-deep bg-cream-soft p-8 text-center">
@@ -710,7 +664,7 @@ export default function Landing() {
       </section>
 
       {/* 4. FEATURED TRACKS GRID ------------------------------------------ */}
-      <section className="py-12 sm:py-24 bg-cream-deep border-y border-cream-deep">
+      <section className="hidden py-12 sm:py-24 bg-cream-deep border-y border-cream-deep" aria-hidden="true">
         <div className="max-w-7xl mx-auto px-6">
           <Reveal as="div" className="text-center max-w-2xl mx-auto mb-14">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-700">
@@ -784,22 +738,23 @@ export default function Landing() {
 
           {categories.length > 8 && (
             <Reveal as="div" className="mt-10 text-center">
-              <Link href="/exams">
-                <Button
+              <Button
+                asChild
                   variant="outline"
                   className="border-slate-300 text-slate-700 rounded-full"
                 >
+                <Link href="/exams">
                   View all {categories.length} tracks
                   <ArrowRight className="ml-2 w-4 h-4" />
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             </Reveal>
           )}
         </div>
       </section>
 
       {/* 5. WHY OCTAMY / 3 PILLARS --------------------------------------- */}
-      <section className="py-16 sm:py-24 bg-cream-soft">
+      <section className="hidden py-16 sm:py-24 bg-cream-soft" aria-hidden="true">
         <div className="max-w-7xl mx-auto px-6">
           <Reveal as="div" className="text-center max-w-2xl mx-auto mb-14">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-700">
@@ -814,8 +769,8 @@ export default function Landing() {
             {[
               {
                 Icon: ShieldCheck,
-                title: "Verified",
-                body: "Every certificate carries a unique ID and QR. Recruiters check it instantly at octamy.com/verify — no email back-and-forth.",
+                title: "Inspectable",
+                body: "Every activated credential carries a unique ID. Recruiters can inspect the score and current status without emailing the issuer.",
               },
               {
                 Icon: Wallet,
@@ -856,7 +811,8 @@ export default function Landing() {
       {/* 7. PERFORMANCE BADGES ------------------------------------------- */}
       <section
         id="badges"
-        className="py-16 sm:py-24 bg-cream-soft border-t border-cream-deep"
+        className="hidden py-16 sm:py-24 bg-cream-soft border-t border-cream-deep"
+        aria-hidden="true"
       >
         <div className="max-w-6xl mx-auto px-6">
           <Reveal as="div" className="text-center max-w-2xl mx-auto mb-14">
@@ -937,9 +893,11 @@ export default function Landing() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredCourses.slice(0, 12).map((course) => (
-              <CourseCard key={course.id} course={course} />
+          <div className="flex snap-x snap-mandatory gap-5 overflow-x-auto pb-4 md:grid md:grid-cols-2 md:overflow-visible lg:grid-cols-3">
+            {filteredCourses.slice(0, 6).map((course) => (
+              <div key={course.id} className="min-w-[86%] snap-start sm:min-w-[46%] md:min-w-0">
+                <CourseCard course={course} />
+              </div>
             ))}
           </div>
 
@@ -955,26 +913,27 @@ export default function Landing() {
           ) : (
             <div className="mt-12 flex flex-col items-center gap-3">
               <p className="text-sm text-slate-500">
-                Showing {Math.min(12, filteredCourses.length)} of{" "}
+                Showing {Math.min(6, filteredCourses.length)} of{" "}
                 {filteredCourses.length}
                 {filteredCourses.length === 1 ? " exam" : " exams"}
               </p>
-              <Link href={isAuthenticated ? "/exams" : "/exams"}>
-                <Button
+              <Button
+                asChild
                   size="lg"
                   className="bg-slate-900 hover:bg-black text-white rounded-full px-8"
                 >
+                <Link href="/exams">
                   Browse all {filteredCourses.length} exams
                   <ArrowRight className="ml-2 w-4 h-4" />
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             </div>
           )}
         </div>
       </section>
 
       {/* 9. RECRUITERS / SELLERS SPLIT CTA ------------------------------- */}
-      <section className="relative overflow-hidden py-16 sm:py-24 bg-slate-900">
+      <section className="hidden relative overflow-hidden py-16 sm:py-24 bg-slate-900" aria-hidden="true">
         <div aria-hidden className="pointer-events-none absolute inset-0 bg-grid-slate opacity-20 [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_75%)]" />
         <div aria-hidden className="pointer-events-none absolute -top-20 left-10 h-[300px] w-[300px] rounded-full bg-sky-500/20 blur-3xl animate-blob" />
         <div aria-hidden className="pointer-events-none absolute bottom-0 right-10 h-[260px] w-[260px] rounded-full bg-indigo-500/20 blur-3xl animate-blob-slow" />
@@ -996,15 +955,16 @@ export default function Landing() {
                   Verify candidate skills in seconds. Check certificates by ID and
                   shortlist with confidence.
                 </p>
-                <Link href="/recruiter/login">
-                  <Button
+                <Button
+                  asChild
                     variant="outline"
                     className="mt-6 border-white/30 bg-transparent text-white hover:bg-cream-soft hover:text-slate-900 rounded-full"
                   >
+                  <Link href="/recruiter/login">
                     Hiring? Verify candidates
                     <ArrowRight className="ml-2 w-4 h-4" />
-                  </Button>
-                </Link>
+                  </Link>
+                </Button>
               </motion.div>
             </StaggerItem>
             <StaggerItem>
@@ -1023,15 +983,16 @@ export default function Landing() {
                   Publish your own assessments on Octamy and earn a commission
                   each time a candidate buys a certificate.
                 </p>
-                <Link href="/partners">
-                  <Button
+                <Button
+                  asChild
                     variant="outline"
                     className="mt-6 border-white/30 bg-transparent text-white hover:bg-cream-soft hover:text-slate-900 rounded-full"
                   >
+                  <Link href="/partners">
                     Sell assessments? Earn commission
                     <ArrowRight className="ml-2 w-4 h-4" />
-                  </Button>
-                </Link>
+                  </Link>
+                </Button>
               </motion.div>
             </StaggerItem>
           </Stagger>
@@ -1084,17 +1045,18 @@ export default function Landing() {
             verifiable credential. No subscription, no card required to start.
           </Reveal>
           <Reveal as="div" delay={0.2} className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <Link href="/exams">
-              <motion.span whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} className="inline-block">
+            <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} className="inline-block">
                 <Button
+                  asChild
                   size="lg"
                   className="bg-cream-soft text-slate-900 hover:bg-slate-100 rounded-full px-8 py-6 text-base font-semibold shadow-2xl shadow-sky-500/20"
                 >
+                  <Link href="/exams">
                   Browse exams
                   <ArrowRight className="ml-2 w-4 h-4" />
+                  </Link>
                 </Button>
-              </motion.span>
-            </Link>
+            </motion.div>
             <a
               href="#how"
               className="text-sm font-medium text-slate-300 hover:text-white"
@@ -1105,6 +1067,7 @@ export default function Landing() {
         </div>
       </section>
 
+      </main>
       <Footer />
     </div>
   );

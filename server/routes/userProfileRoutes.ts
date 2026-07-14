@@ -5,6 +5,10 @@ import { authenticateToken } from '../middleware/auth';
 
 const router = Router();
 const requireUser = authenticateToken as any;
+const publicWebUrl = z.string().trim().url().refine(
+  (value) => /^https?:\/\//i.test(value),
+  'URL must start with http:// or https://',
+);
 
 // Schema for profile updates
 const updateProfileSchema = z.object({
@@ -21,11 +25,12 @@ const updateProfileSchema = z.object({
   expectedSalary: z.string().optional(),
   workType: z.array(z.string()).optional(),
   category: z.array(z.string()).optional(),
-  linkedinProfile: z.string().url().optional().or(z.literal('')),
-  portfolioUrl: z.string().url().optional().or(z.literal('')),
+  linkedinProfile: publicWebUrl.optional().or(z.literal('')),
+  portfolioUrl: publicWebUrl.optional().or(z.literal('')),
   bio: z.string().optional(),
   careerGoals: z.string().optional(),
   profileVisibility: z.boolean().optional(),
+  evidencePassportPublic: z.boolean().optional(),
   resume: z.string().max(500).optional(),
 });
 
@@ -61,7 +66,8 @@ router.get('/profile', requireUser, async (req: any, res) => {
       portfolioUrl: user.portfolioUrl,
       bio: user.bio,
       careerGoals: user.careerGoals,
-      profileVisibility: user.profileVisibility ?? true,
+      profileVisibility: user.profileVisibility ?? false,
+      evidencePassportPublic: user.evidencePassportPublic ?? false,
       profileCompleteness: user.profileCompleteness || 0,
       resume: user.resume,
     };

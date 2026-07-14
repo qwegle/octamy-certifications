@@ -79,7 +79,7 @@ export default function CreatorDashboard() {
 
           <div className="grid sm:grid-cols-3 gap-4">
             <StatCard icon={<BookOpen className="w-5 h-5" />} label="My courses" value={String(stats?.coursesCount ?? 0)} cta="Manage courses →" onClick={() => setLocation('/creator/courses')} />
-            <StatCard icon={<Wallet className="w-5 h-5" />} label="Earnings" value={`₹${(stats?.revenueINR ?? 0).toLocaleString('en-IN')}`} sub={`${stats?.attempts ?? 0} attempts · ${stats?.certificates ?? 0} certificates`} cta="View earnings →" onClick={() => setLocation('/creator/earnings')} />
+            <StatCard icon={<Wallet className="w-5 h-5" />} label="Gross course sales" value={`₹${(stats?.revenueINR ?? 0).toLocaleString('en-IN')}`} sub={`${stats?.attempts ?? 0} attempts · ${stats?.certificates ?? 0} certificates`} cta="View sales →" onClick={() => setLocation('/creator/earnings')} />
             <StatCard icon={<Sparkles className="w-5 h-5" />} label="Plan" value={(creator?.plan || 'free').toUpperCase()} cta="Upgrade plan →" onClick={() => setLocation('/pricing')} />
           </div>
 
@@ -93,7 +93,7 @@ export default function CreatorDashboard() {
               <Card className="border-cream-deep mt-4">
                 <CardContent className="py-10 text-center">
                   <h3 className="text-lg font-medium text-slate-900">Build, list, and track your courses</h3>
-                  <p className="text-sm text-slate-600 mt-2 max-w-md mx-auto">Submit a course for review. Once approved, learners can enroll, take the exam, and earn a verified certificate.</p>
+                  <p className="text-sm text-slate-600 mt-2 max-w-md mx-auto">Submit a course for review. Once approved, learners can enroll, take the assessment, and optionally activate a status-aware credential after passing.</p>
                   <div className="flex items-center justify-center gap-2 mt-5">
                     <Button onClick={() => setLocation('/creator/courses')} variant="outline">View all</Button>
                     <Button onClick={() => setLocation('/creator/courses/new')} className="bg-slate-900 text-white">Create new</Button>
@@ -104,8 +104,8 @@ export default function CreatorDashboard() {
             <TabsContent value="earnings">
               <Card className="border-cream-deep mt-4">
                 <CardContent className="py-10 text-center">
-                  <h3 className="text-lg font-medium text-slate-900">Lifetime earnings: ₹{(stats?.revenueINR ?? 0).toLocaleString('en-IN')}</h3>
-                  <p className="text-sm text-slate-600 mt-2">See payment-by-payment breakdown, attempts and CSV export.</p>
+                  <h3 className="text-lg font-medium text-slate-900">Gross course sales: ₹{(stats?.revenueINR ?? 0).toLocaleString('en-IN')}</h3>
+                  <p className="text-sm text-slate-600 mt-2">This is gross customer revenue, not your withdrawable balance. See payment-by-payment details and payout entries.</p>
                   <div className="flex items-center justify-center gap-2 mt-4">
                     <Button onClick={() => setLocation('/creator/earnings')} className="bg-slate-900 text-white">View full report</Button>
                     <Button onClick={() => setLocation('/creator/payouts')} variant="outline">Payouts</Button>

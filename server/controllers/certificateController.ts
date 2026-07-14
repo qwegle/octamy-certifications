@@ -1,12 +1,35 @@
 import { Request, Response } from 'express';
 import { storage } from '../storage';
 import { generateCertificateHTML, generateCertificatePDF } from '../utils/newCertificateGenerator';
+import { db } from '../db';
+import { institutes } from '@shared/schema';
+import { eq } from 'drizzle-orm';
+import {
+  CredentialActivationError,
+  getCredentialActivationContext,
+} from '../lib/credential-activation';
 
 interface AuthenticatedRequest extends Request {
   user?: {
     userId: number;
     email: string;
   };
+}
+
+async function getVerifiedInstituteIssuer(course: { ownerType?: string | null; ownerId?: number | null }) {
+  if (course.ownerType !== 'institute' || !course.ownerId) return null;
+  const [institute] = await db.select({
+    name: institutes.name,
+    logoUrl: institutes.logoUrl,
+    status: institutes.status,
+  }).from(institutes).where(eq(institutes.id, course.ownerId));
+  return institute?.status === 'verified' ? institute : null;
+}
+
+function absoluteAssetUrl(req: Request, value?: string | null) {
+  if (!value || /^https?:\/\//i.test(value)) return value ?? null;
+  if (!value.startsWith('/')) return null;
+  return `${req.protocol}://${req.get('host')}${value}`;
 }
 
 export class CertificateController {
@@ -46,6 +69,7 @@ export class CertificateController {
       const certificateId = `CERT-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
       
       const certificate = await storage.createCertificate({
+        userId,
         courseId: course.id,
         certificateId,
         examAttemptId,
@@ -77,12 +101,83 @@ export class CertificateController {
       if (!certificate) {
         return res.status(404).json({ message: "Certificate not found" });
       }
+      const publicCourse = await storage.getCourse(certificate.courseId);
+      const publicCoIssuer = publicCourse ? await getVerifiedInstituteIssuer(publicCourse) : null;
 
-      // Always return JSON for API requests - React Query sends proper headers
-      res.json(certificate);
+      // Public certificate pages receive only display-safe fields. Never expose
+      // recipient email, payment references or internal database identifiers.
+      res.json({
+        certificateId: certificate.certificateId,
+        certificateNumber: certificate.certificateNumber,
+        userName: certificate.userName,
+        courseTitle: certificate.courseTitle,
+        score: certificate.score,
+        badge: certificate.badge,
+        mastered: certificate.mastered,
+        issuedAt: certificate.issuedAt,
+        expiresAt: certificate.expiresAt,
+        issuedBy: certificate.issuedBy,
+        issuer: {
+          platform: 'Octamy Solutions Private Limited',
+          coIssuer: publicCoIssuer ? { name: publicCoIssuer.name, logoUrl: publicCoIssuer.logoUrl } : null,
+        },
+        isPaid: certificate.isPaid,
+        isActive: certificate.isActive,
+      });
     } catch (error) {
       console.error("Get certificate error:", error);
       res.status(500).json({ message: "Internal server error" });
+    }
+  }
+
+  static async getActivationCheckout(req: AuthenticatedRequest, res: Response) {
+    try {
+      const userId = req.user?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: 'Access token required' });
+      }
+
+      const context = await getCredentialActivationContext(req.params.id, userId);
+      const { certificate, course } = context;
+      const status = certificate.isPaid
+        ? 'activated'
+        : !certificate.isActive
+          ? 'revoked'
+          : 'ready';
+
+      res.setHeader('Cache-Control', 'private, no-store');
+      return res.json({
+        certificateId: certificate.certificateId,
+        certificateNumber: certificate.certificateNumber,
+        userName: certificate.userName,
+        courseTitle: certificate.courseTitle,
+        score: certificate.score,
+        badge: certificate.badge,
+        issuedAt: certificate.issuedAt,
+        expiresAt: certificate.expiresAt,
+        status,
+        isPaid: certificate.isPaid,
+        isActive: certificate.isActive,
+        pricing: {
+          currency: 'INR',
+          digital: context.amount,
+          physicalShipping: '50.00',
+          originalDigital:
+            course.isOnSale && course.originalPrice
+              ? Number(course.originalPrice).toFixed(2)
+              : null,
+          isOnSale: course.isOnSale,
+        },
+      });
+    } catch (error) {
+      if (error instanceof CredentialActivationError) {
+        return res.status(error.statusCode).json({
+          message: error.message,
+          code: error.code,
+        });
+      }
+      console.error('Get credential activation checkout error:', error);
+      return res.status(500).json({ message: 'Credential activation could not be loaded' });
     }
   }
 
@@ -99,6 +194,12 @@ export class CertificateController {
       if (!certificate.isPaid) {
         return res.status(403).json({ message: "Certificate access denied. Payment required." });
       }
+      if (!certificate.isActive) {
+        return res.status(410).json({ message: "Certificate access denied. This credential has been revoked." });
+      }
+      if (certificate.expiresAt <= new Date()) {
+        return res.status(410).json({ message: "Certificate access denied. This credential has expired." });
+      }
 
       // Get course details for the certificate
       const course = await storage.getCourse(certificate.courseId);
@@ -111,6 +212,8 @@ export class CertificateController {
       if (certificate.examAttemptId) {
         examAttempt = await storage.getExamAttempt(certificate.examAttemptId);
       }
+      const coIssuer = await getVerifiedInstituteIssuer(course);
+      const publicBase = `${req.protocol}://${req.get('host')}`;
 
       // Prepare certificate data for the new professional design
       const certificateData = {
@@ -121,7 +224,11 @@ export class CertificateController {
         completionDate: examAttempt?.createdAt || certificate.issuedAt || new Date(),
         passingScore: course.passingScore || 50,
         userScore: certificate.score || 0,
-        courseLevel: course.level || 'Beginner'
+        courseLevel: course.level || 'Beginner',
+        expiryDate: certificate.expiresAt,
+        verificationUrl: `${publicBase}/verify/${encodeURIComponent(certificate.certificateId)}`,
+        coIssuerName: coIssuer?.name ?? null,
+        coIssuerLogoUrl: absoluteAssetUrl(req, coIssuer?.logoUrl),
       };
 
       // Check if PDF download is requested
@@ -157,9 +264,27 @@ export class CertificateController {
         return res.status(404).json({ message: "Certificate not found" });
       }
 
-      // Return verification data
+      const now = new Date();
+      const status = !certificate.isPaid
+        ? 'pending_activation'
+        : !certificate.isActive
+          ? 'revoked'
+          : certificate.expiresAt <= now
+            ? 'expired'
+            : 'active';
+      const examAttempt = certificate.examAttemptId
+        ? await storage.getExamAttempt(certificate.examAttemptId)
+        : null;
+      const course = await storage.getCourse(certificate.courseId);
+      const coIssuer = course ? await getVerifiedInstituteIssuer(course) : null;
+
+      // Authenticity and current validity are deliberately separate. An
+      // existing database record is not a currently valid credential when it
+      // is unpaid, expired or revoked.
       res.json({
-        valid: true,
+        authentic: true,
+        valid: status === 'active',
+        status,
         certificateId: certificate.certificateId,
         userName: certificate.userName,
         courseTitle: certificate.courseTitle,
@@ -167,7 +292,18 @@ export class CertificateController {
         issuedAt: certificate.issuedAt,
         expiresAt: certificate.expiresAt,
         badge: certificate.badge,
-        isActive: certificate.isActive
+        issuedBy: certificate.issuedBy,
+        issuer: {
+          platform: 'Octamy Solutions Private Limited',
+          coIssuer: coIssuer ? { name: coIssuer.name, logoUrl: coIssuer.logoUrl } : null,
+        },
+        assessment: {
+          passingScore: course?.passingScore ?? null,
+          questionCount: examAttempt?.totalQuestions ?? null,
+          durationSeconds: examAttempt?.timeTaken ?? null,
+          completedAt: examAttempt?.createdAt ?? null,
+          level: course?.level ?? null,
+        },
       });
     } catch (error) {
       console.error("Verify certificate error:", error);
@@ -183,7 +319,7 @@ export class CertificateController {
         return res.status(401).json({ message: "Unauthorized" });
       }
 
-      const certificates = await storage.getUserCertificates(userId);
+      const certificates = await storage.getUserCertificates(userId, req.user?.email);
       res.json(certificates);
     } catch (error) {
       console.error("Get user certificates error:", error);

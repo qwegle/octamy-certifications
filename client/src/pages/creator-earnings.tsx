@@ -52,8 +52,8 @@ export default function CreatorEarnings() {
       <SEO title="Earnings · Creator" description="Track your course revenue, attempts and certificates." path="/creator/earnings" />
               <div className="flex items-end justify-between gap-4 mb-6">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-semibold text-slate-900">Earnings</h1>
-            <p className="text-sm text-slate-600 mt-1">Live revenue, attempts and certificate sales across your courses.</p>
+            <h1 className="text-2xl sm:text-3xl font-semibold text-slate-900">Course sales</h1>
+            <p className="text-sm text-slate-600 mt-1">Gross customer payments, attempts and certificate sales across your courses. Withdrawable creator shares are shown separately under Payouts.</p>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" onClick={exportCsv} disabled={!data}>
@@ -64,7 +64,7 @@ export default function CreatorEarnings() {
         </div>
 
         <div className="grid sm:grid-cols-3 gap-4 mb-6">
-          <Stat icon={<Wallet className="w-5 h-5" />} label="Lifetime revenue" value={`₹${(data?.totals.revenueINR ?? 0).toLocaleString("en-IN")}`} />
+          <Stat icon={<Wallet className="w-5 h-5" />} label="Gross sales recorded" value={`₹${(data?.totals.revenueINR ?? 0).toLocaleString("en-IN")}`} />
           <Stat icon={<ClipboardList className="w-5 h-5" />} label="Attempts" value={data?.totals.attempts ?? 0} />
           <Stat icon={<Award className="w-5 h-5" />} label="Certificates sold" value={data?.totals.certificates ?? 0} />
         </div>

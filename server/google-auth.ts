@@ -13,17 +13,28 @@ const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "";
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || "";
 const APP_URL = (process.env.APP_URL || "").replace(/\/$/, "");
 
+function isUsableOAuthCredential(value: string) {
+  const normalized = value.trim().toLowerCase();
+  return Boolean(
+    normalized &&
+    !normalized.startsWith("your_") &&
+    !normalized.startsWith("change_me") &&
+    !normalized.includes("placeholder") &&
+    !normalized.includes("example"),
+  );
+}
+
 export const isGoogleAuthConfigured = Boolean(
-  GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET
+  isUsableOAuthCredential(GOOGLE_CLIENT_ID) && isUsableOAuthCredential(GOOGLE_CLIENT_SECRET)
 );
 
 function callbackUrl(path: string) {
   return APP_URL ? `${APP_URL}${path}` : path;
 }
 
-if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
+if (!isGoogleAuthConfigured) {
   console.warn(
-    "[google-auth] GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET not configured — Google sign-in is disabled."
+    "[google-auth] usable GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET not configured — Google sign-in is disabled."
   );
 }
 
@@ -46,8 +57,8 @@ export function setupGoogleAuth() {
       const email = googleEmail?.value?.trim().toLowerCase();
       const name = profile.displayName;
       
-      if (!email) {
-        return done(new Error('No email found in Google profile'), false);
+      if (!email || googleEmail?.verified !== true) {
+        return done(new Error('Google did not provide a verified email address'), false);
       }
 
       // Check if user exists
@@ -76,7 +87,10 @@ export function setupGoogleAuth() {
         });
       }
 
-      return done(null, user);
+      if (!user) {
+        return done(new Error("Unable to create or update the Google user"), false);
+      }
+      return done(null, { ...user, userId: user.id });
     } catch (error) {
       return done(error, false);
     }
@@ -91,11 +105,12 @@ export function setupGoogleAuth() {
   },
   async (accessToken, refreshToken, profile, done) => {
     try {
-      const email = profile.emails?.[0]?.value?.trim().toLowerCase();
+      const googleEmail = profile.emails?.[0];
+      const email = googleEmail?.value?.trim().toLowerCase();
       const name = profile.displayName;
       
-      if (!email) {
-        return done(new Error('No email found in Google profile'), false);
+      if (!email || googleEmail?.verified !== true) {
+        return done(new Error('Google did not provide a verified email address'), false);
       }
 
       // Check if seller exists
@@ -128,7 +143,7 @@ export function setupGoogleAuth() {
         });
       }
 
-      return done(null, seller);
+      return done(null, { ...seller, userId: seller.id });
     } catch (error) {
       return done(error, false);
     }

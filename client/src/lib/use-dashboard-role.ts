@@ -3,6 +3,33 @@ import { useAuth } from "./auth.tsx";
 import { apiRequest } from "./queryClient";
 import type { DashboardRole } from "@/components/dashboard-layout";
 
+export type DashboardRoleFlags = {
+  isLearner: boolean;
+  isCreator: boolean;
+  isInstituteMember: boolean;
+  isRecruiter: boolean;
+  isSeller: boolean;
+  isAdmin: boolean;
+  instituteRole: "owner" | "admin" | "teacher" | "staff" | null;
+};
+
+/**
+ * Shared role query for workspace navigation. Keeping this query in one hook
+ * means the shell, guards, and cross-workspace pages all reuse the same React
+ * Query cache entry instead of issuing role probes independently.
+ */
+export function useDashboardRoles() {
+  const { user, token } = useAuth();
+
+  return useQuery<DashboardRoleFlags>({
+    queryKey: ["/api/me/roles"],
+    enabled: !!user && !!token,
+    queryFn: async () => (await apiRequest("GET", "/api/me/roles")).json(),
+    staleTime: 60_000,
+    retry: 1,
+  });
+}
+
 /**
  * useDashboardRole — best-effort detection of the current workspace role for
  * pages that can be reached from multiple dashboards (e.g. /question-banks).
@@ -13,36 +40,15 @@ import type { DashboardRole } from "@/components/dashboard-layout";
  * 3. Else if user has a creator profile → "creator"
  * 4. Else fall back to "learner"
  *
- * Reads from /api/me/institute and /api/me/creator (both already cached by
- * other dashboard pages, so usually no extra fetches).
+ * Reads one aggregate role endpoint. This avoids probing a workspace endpoint
+ * that legitimately returns 404 for users who only hold the other role.
  */
 export function useDashboardRole(): DashboardRole {
-  const { user, token } = useAuth();
+  const { user } = useAuth();
+  const { data: roles } = useDashboardRoles();
 
-  const { data: institute } = useQuery<{ id: number } | null>({
-    queryKey: ["/api/me/institute"],
-    enabled: !!user && !!token,
-    queryFn: async () => {
-      const r = await apiRequest("GET", "/api/me/institute");
-      if (!r.ok) return null;
-      return r.json();
-    },
-    retry: false,
-  });
-
-  const { data: creator } = useQuery<{ id: number } | null>({
-    queryKey: ["/api/me/creator"],
-    enabled: !!user && !!token,
-    queryFn: async () => {
-      const r = await apiRequest("GET", "/api/me/creator");
-      if (!r.ok) return null;
-      return r.json();
-    },
-    retry: false,
-  });
-
-  if (user?.isAdmin) return "admin";
-  if (institute?.id) return "institute";
-  if (creator?.id) return "creator";
+  if (user?.isAdmin || roles?.isAdmin) return "admin";
+  if (roles?.isInstituteMember) return "institute";
+  if (roles?.isCreator) return "creator";
   return "learner";
 }

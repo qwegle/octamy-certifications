@@ -4,6 +4,7 @@ import { assertStrongPassword } from '../lib/bcrypt-helper';
 import jwt from 'jsonwebtoken';
 import { storage } from '../storage';
 import { insertSellerSchema, insertWithdrawalRequestSchema } from '@shared/schema';
+import { isResellerCourseEligible } from '../lib/reseller-inventory';
 
 interface SellerAuthenticatedRequest extends Request {
   seller?: {
@@ -19,6 +20,10 @@ export class SellerController {
     try {
       const { email, password, name, phone } = insertSellerSchema.parse(req.body);
       const { agreementAccepted } = req.body as { agreementAccepted?: boolean };
+
+      if (!password) {
+        return res.status(400).json({ message: "Password is required" });
+      }
       
       if (!agreementAccepted) {
         return res.status(400).json({
@@ -81,7 +86,7 @@ export class SellerController {
 
       // Find seller
       const seller = await storage.getSellerByEmail(email);
-      if (!seller) {
+      if (!seller || !seller.password) {
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
@@ -196,11 +201,20 @@ export class SellerController {
         return res.status(401).json({ message: "Unauthorized" });
       }
 
-      // Get all courses that can be shared
+      const seller = await storage.getSeller(sellerId);
+      if (!seller?.isActive || !seller.isApproved) {
+        return res.status(403).json({
+          message: "An approved, active reseller account is required to access inventory.",
+        });
+      }
+
+      // Resellers may distribute Octamy in-house inventory only. Creator and
+      // institute products have separate commercial rights and payout rules.
       const courses = await storage.getAllCourses();
+      const eligibleCourses = courses.filter(isResellerCourseEligible);
       
       const shareableItems = {
-        courses: courses.map(course => ({
+        courses: eligibleCourses.map(course => ({
           id: course.id,
           title: course.title,
           description: course.description,
@@ -232,11 +246,20 @@ export class SellerController {
       if (!seller) {
         return res.status(404).json({ message: "Seller not found" });
       }
+      if (!seller.isActive || !seller.isApproved) {
+        return res.status(403).json({
+          message: "Your reseller account must be approved and active before sharing inventory.",
+        });
+      }
 
       // Get course details to use slug instead of ID
-      const course = await storage.getCourse(targetCourseId);
-      if (!course) {
-        return res.status(404).json({ message: "Course not found" });
+      const parsedCourseId = Number(targetCourseId);
+      if (!Number.isInteger(parsedCourseId) || parsedCourseId <= 0) {
+        return res.status(400).json({ message: "Use a valid course identifier" });
+      }
+      const course = await storage.getCourse(parsedCourseId);
+      if (!course || !isResellerCourseEligible(course)) {
+        return res.status(404).json({ message: "Eligible Octamy course not found" });
       }
 
       // Generate referral URL using slug

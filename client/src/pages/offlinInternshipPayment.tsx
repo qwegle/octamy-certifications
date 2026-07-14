@@ -82,7 +82,7 @@ const FUTURE_ROADMAP = [
   {
     title: "AI Career Guidance",
     description:
-      "Smart recommendations for career advancement based on industry trends",
+      "Recommendations based on recorded assessment evidence and stated goals",
     icon: <TrendingUp className="w-6 h-6" />,
     timeline: "Q4 2025",
   },

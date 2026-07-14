@@ -11,6 +11,7 @@ import { logger } from "./lib/logger";
 import path from "path";
 import { generateCertificateHTML } from "./utils/newCertificateGenerator";
 import { fileURLToPath } from "url";
+import { isGoogleAuthConfigured } from "./google-auth";
 
 const app = express();
 
@@ -50,7 +51,7 @@ app.use((req, res, next) => {
   res.setHeader('X-XSS-Protection', '1; mode=block');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=(self "https://secure.payu.in" "https://api.cashfree.com" "https://sandbox.cashfree.com")');
-  res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' https://secure.payu.in https://test.payu.in https://accounts.google.com https://sdk.cashfree.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; frame-src 'self' https://secure.payu.in https://test.payu.in https://accounts.google.com https://api.cashfree.com https://sandbox.cashfree.com; connect-src 'self' https://secure.payu.in https://test.payu.in https://accounts.google.com https://api.cashfree.com https://sandbox.cashfree.com;");
+  res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' https://secure.payu.in https://test.payu.in https://accounts.google.com https://sdk.cashfree.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' blob: https:; frame-src 'self' https://secure.payu.in https://test.payu.in https://accounts.google.com https://api.cashfree.com https://sandbox.cashfree.com; connect-src 'self' https://secure.payu.in https://test.payu.in https://accounts.google.com https://api.cashfree.com https://sandbox.cashfree.com;");
 
   next();
 });
@@ -125,9 +126,7 @@ app.get("/readyz", async (_req, res) => {
     checks.db = { ok: false, error: err?.message };
   }
   checks.sentry = process.env.SENTRY_DSN ? "configured" : "not_configured";
-  checks.googleOAuth = process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
-    ? "configured"
-    : "not_configured";
+  checks.googleOAuth = isGoogleAuthConfigured ? "configured" : "not_configured";
   checks.paymentGateway = process.env.CASHFREE_APP_ID && process.env.CASHFREE_SECRET_KEY
     ? "cashfree"
     : process.env.PAYUMONEY_MERCHANT_KEY && process.env.PAYUMONEY_SALT

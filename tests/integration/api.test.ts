@@ -1,18 +1,40 @@
-import { describe, it, expect, beforeEach, beforeAll, afterAll } from '@jest/globals';
+import { describe, it, expect, beforeEach, beforeAll } from '@jest/globals';
 import request from 'supertest';
-import express from 'express';
-import { cleanupTestData, setupTestData, testPool } from '../setup';
-import { registerRoutes } from '../../server/routes';
+import express, { type Express } from 'express';
+import { cleanupTestData, setupTestData } from '../setup';
 import jwt from 'jsonwebtoken';
+import crypto from 'node:crypto';
 
 describe('API Integration Tests', () => {
-  let app: express.Application;
+  let app: Express;
   let testData: any;
   let userToken: string;
   let adminToken: string;
+  let storage: any;
 
   beforeAll(async () => {
+    if (!process.env.TEST_DATABASE_URL) {
+      throw new Error(
+        'TEST_DATABASE_URL is required for API integration tests. It must point to a disposable database.',
+      );
+    }
+
+    // The application reads DATABASE_URL at module load. Keep integration tests
+    // isolated by explicitly wiring it to the disposable test database before
+    // importing any server modules.
+    process.env.DATABASE_URL = process.env.TEST_DATABASE_URL;
+    process.env.JWT_SECRET ||= 'test-secret';
+    process.env.PAYMENT_DEFAULT_GATEWAY = 'payu';
+    process.env.PAYUMONEY_MERCHANT_ID = 'test-merchant';
+    process.env.PAYUMONEY_MERCHANT_KEY = 'test-key';
+    process.env.PAYUMONEY_SALT = 'test-salt';
+
+    const { registerRoutes } = await import('../../server/routes');
+    const { DatabaseStorage } = await import('../../server/storage');
+    storage = new DatabaseStorage();
     app = express();
+    app.use(express.json({ limit: '1mb' }));
+    app.use(express.urlencoded({ extended: false, limit: '1mb' }));
     await registerRoutes(app);
   });
 
@@ -34,16 +56,12 @@ describe('API Integration Tests', () => {
     );
   });
 
-  afterAll(async () => {
-    await testPool.end();
-  });
-
   describe('Authentication Endpoints', () => {
     it('POST /api/register should create new user', async () => {
       const userData = {
         name: 'New User',
         email: 'newuser@example.com',
-        password: 'password123'
+        password: 'Password123!'
       };
 
       const response = await request(app)
@@ -69,6 +87,15 @@ describe('API Integration Tests', () => {
       expect(response.body.user.email).toBe(testData.testUser.email);
     });
 
+    it('POST /api/login should reject a missing password without a server error', async () => {
+      const response = await request(app)
+        .post('/api/login')
+        .send({ email: testData.testUser.email })
+        .expect(400);
+
+      expect(response.body.message).toBe('Email and password are required');
+    });
+
     it('POST /api/admin/login should authenticate admin', async () => {
       const response = await request(app)
         .post('/api/admin/login')
@@ -92,9 +119,9 @@ describe('API Integration Tests', () => {
       expect(response.body.length).toBeGreaterThan(0);
     });
 
-    it('GET /api/courses/:slug should return specific course', async () => {
+    it('GET /api/courses/slug/:slug should return specific course', async () => {
       const response = await request(app)
-        .get(`/api/courses/${testData.testCourse.slug}`)
+        .get(`/api/courses/slug/${testData.testCourse.slug}`)
         .expect(200);
 
       expect(response.body.id).toBe(testData.testCourse.id);
@@ -112,11 +139,9 @@ describe('API Integration Tests', () => {
   });
 
   describe('Exam Endpoints', () => {
-    it('POST /api/exam/start should create exam session', async () => {
+    it('POST /api/courses/:id/questions should create exam session', async () => {
       const response = await request(app)
-        .post('/api/exam/start')
-        .set('Authorization', `Bearer ${userToken}`)
-        .send({ courseId: testData.testCourse.id })
+        .post(`/api/courses/${testData.testCourse.id}/questions`)
         .expect(200);
 
       expect(response.body.sessionId).toBeDefined();
@@ -127,23 +152,28 @@ describe('API Integration Tests', () => {
     it('POST /api/exam/submit should submit exam answers', async () => {
       // First start exam
       const startResponse = await request(app)
-        .post('/api/exam/start')
-        .set('Authorization', `Bearer ${userToken}`)
-        .send({ courseId: testData.testCourse.id });
+        .post(`/api/courses/${testData.testCourse.id}/questions`)
+        .expect(200);
 
-      const { sessionId } = startResponse.body;
+      const { sessionId, questions } = startResponse.body;
+      const answers = Object.fromEntries(
+        questions.map((question: { id: number }) => [String(question.id), 0]),
+      );
 
       const submitResponse = await request(app)
         .post('/api/exam/submit')
         .set('Authorization', `Bearer ${userToken}`)
         .send({
           courseId: testData.testCourse.id,
-          sessionId: sessionId,
-          answers: [1, 2], // Answers for the test questions
-          timeTaken: 1800
+          sessionId,
+          answers,
+          timeTaken: Math.max(questions.length, 1),
+          userEmail: testData.testUser.email,
+          userName: testData.testUser.name,
         })
         .expect(200);
 
+      expect(submitResponse.body.tempExamId).toBeDefined();
       expect(submitResponse.body.score).toBeDefined();
       expect(submitResponse.body.passed).toBeDefined();
     });
@@ -155,7 +185,7 @@ describe('API Integration Tests', () => {
         .send({
           courseId: testData.testCourse.id,
           sessionId: 'invalid-session',
-          answers: [1, 2],
+          answers: {},
           timeTaken: 1800
         })
         .expect(400);
@@ -220,37 +250,194 @@ describe('API Integration Tests', () => {
   });
 
   describe('Certificate Endpoints', () => {
-    it('GET /api/certificates should return user certificates', async () => {
-      // First create a certificate by passing an exam
-      const startResponse = await request(app)
-        .post('/api/exam/start')
-        .set('Authorization', `Bearer ${userToken}`)
-        .send({ courseId: testData.testCourse.id });
+    async function createPendingCredential(overrides: Record<string, unknown> = {}) {
+      const attempt = await storage.createExamAttempt({
+        userId: testData.testUser.id,
+        courseId: testData.testCourse.id,
+        userEmail: testData.testUser.email,
+        userName: testData.testUser.name,
+        score: 88,
+        totalQuestions: 2,
+        answers: { '1': 1, '2': 2 },
+        timeTaken: 90,
+        passed: true,
+        mastered: false,
+        sessionId: `activation-${Date.now()}-${Math.random()}`,
+      });
+      return storage.createCertificate({
+        userId: testData.testUser.id,
+        courseId: testData.testCourse.id,
+        examAttemptId: attempt.id,
+        certificateId: `OCT-ACT-${Date.now()}-${Math.random()}`,
+        certificateNumber: `OCT-ACT-NUM-${Date.now()}-${Math.random()}`,
+        userEmail: testData.testUser.email,
+        userName: testData.testUser.name,
+        courseTitle: testData.testCourse.title,
+        score: 88,
+        badge: 'gold',
+        expiresAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
+        isPaid: false,
+        isActive: true,
+        ...overrides,
+      });
+    }
 
-      await request(app)
-        .post('/api/exam/submit')
-        .set('Authorization', `Bearer ${userToken}`)
-        .send({
-          courseId: testData.testCourse.id,
-          sessionId: startResponse.body.sessionId,
-          answers: [1, 2], // Correct answers
-          timeTaken: 1800
-        });
-
+    it('GET /api/user/certificates should return user certificates', async () => {
       const certResponse = await request(app)
-        .get('/api/certificates')
+        .get('/api/user/certificates')
         .set('Authorization', `Bearer ${userToken}`)
         .expect(200);
 
       expect(Array.isArray(certResponse.body)).toBe(true);
     });
 
-    it('GET /api/verify/:certificateId should verify certificate', async () => {
+    it('GET /api/certificates/verify/:certificateId should verify certificate', async () => {
       // This test would need a valid certificate ID
       // For now, test with invalid ID
       await request(app)
-        .get('/api/verify/INVALID-CERT-ID')
+        .get('/api/certificates/verify/INVALID-CERT-ID')
         .expect(404);
+    });
+
+    it('loads an owned pending credential through the private activation contract', async () => {
+      const certificate = await createPendingCredential();
+
+      const response = await request(app)
+        .get(`/api/certificates/${encodeURIComponent(certificate.certificateId)}/activation`)
+        .set('Authorization', `Bearer ${userToken}`)
+        .expect(200);
+
+      expect(response.body.status).toBe('ready');
+      expect(response.body.pricing.digital).toBe(testData.testCourse.price);
+      expect(response.body.pricing.physicalShipping).toBe('50.00');
+      expect(response.body).not.toHaveProperty('userEmail');
+      expect(response.body).not.toHaveProperty('courseId');
+    });
+
+    it('recovers an unclaimed legacy pending credential by the account email', async () => {
+      const certificate = await createPendingCredential({ userId: null });
+
+      const dashboard = await request(app)
+        .get('/api/user/certificates')
+        .set('Authorization', `Bearer ${userToken}`)
+        .expect(200);
+      expect(dashboard.body.some((item: any) => item.certificateId === certificate.certificateId)).toBe(true);
+
+      const activation = await request(app)
+        .get(`/api/certificates/${encodeURIComponent(certificate.certificateId)}/activation`)
+        .set('Authorization', `Bearer ${userToken}`)
+        .expect(200);
+      expect(activation.body.status).toBe('ready');
+    });
+
+    it('does not disclose another learner credential through activation checkout', async () => {
+      const certificate = await createPendingCredential();
+
+      const response = await request(app)
+        .get(`/api/certificates/${encodeURIComponent(certificate.certificateId)}/activation`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(404);
+
+      expect(response.body.code).toBe('CREDENTIAL_NOT_FOUND');
+    });
+
+    it('uses server-owned identity and price when initiating legacy credential activation', async () => {
+      const certificate = await createPendingCredential();
+
+      const response = await request(app)
+        .post('/api/payment/initiate')
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({
+          certificateId: certificate.certificateId,
+          amount: '0.01',
+          courseId: testData.testCourse.id + 999,
+          userEmail: 'attacker@example.com',
+          userName: 'Attacker',
+        })
+        .expect(200);
+
+      expect(response.body.gateway).toBe('payumoney');
+      expect(response.body.amount).toBe(testData.testCourse.price);
+      expect(response.body.paymentForm.fields.amount).toBe(testData.testCourse.price);
+      expect(response.body.paymentForm.fields.email).toBe(testData.testUser.email);
+      expect(response.body.paymentForm.fields.firstname).toBe(testData.testUser.name);
+      expect(response.body.paymentForm.fields.udf1).toBe(String(testData.testCourse.id));
+      expect(response.body.paymentForm.fields.udf5).toBe(`credential:${certificate.certificateId}`);
+    });
+
+    it('prevents a second payable checkout while one activation order is open', async () => {
+      const certificate = await createPendingCredential();
+      const body = { certificateId: certificate.certificateId };
+
+      await request(app)
+        .post('/api/payment/initiate')
+        .set('Authorization', `Bearer ${userToken}`)
+        .send(body)
+        .expect(200);
+
+      const duplicate = await request(app)
+        .post('/api/payment/initiate')
+        .set('Authorization', `Bearer ${userToken}`)
+        .send(body)
+        .expect(409);
+
+      expect(duplicate.body.code).toBe('CHECKOUT_ALREADY_OPEN');
+    });
+
+    it('activates the existing legacy credential exactly once after a verified PayU callback', async () => {
+      const certificate = await createPendingCredential();
+      const checkout = await request(app)
+        .post('/api/payment/initiate')
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({ certificateId: certificate.certificateId })
+        .expect(200);
+      const fields = checkout.body.paymentForm.fields;
+      const callback = {
+        ...fields,
+        status: 'success',
+        unmappedstatus: 'captured',
+        mihpayid: 'PAYU-ACTIVATION-001',
+      };
+      const responseHashInput = [
+        process.env.PAYUMONEY_SALT,
+        callback.status,
+        '', '', '', '', '',
+        callback.udf5,
+        callback.udf4,
+        callback.udf3,
+        callback.udf2,
+        callback.udf1,
+        callback.email,
+        callback.firstname,
+        callback.productinfo,
+        callback.amount,
+        callback.txnid,
+        process.env.PAYUMONEY_MERCHANT_KEY,
+      ].join('|');
+      callback.hash = crypto.createHash('sha512').update(responseHashInput).digest('hex');
+
+      const firstCallback = await request(app)
+        .post('/api/payment/success')
+        .type('form')
+        .send(callback)
+        .expect(302);
+      expect(firstCallback.headers.location).toContain(
+        `certificateId=${encodeURIComponent(certificate.certificateId)}`,
+      );
+
+      const activated = await storage.getCertificate(certificate.id);
+      expect(activated.isPaid).toBe(true);
+      expect(activated.paymentId).toBe(callback.mihpayid);
+      expect(new Date(activated.expiresAt).getTime()).toBeGreaterThan(Date.now());
+
+      await request(app)
+        .post('/api/payment/success')
+        .type('form')
+        .send(callback)
+        .expect(302);
+      const payment = await storage.getPaymentByTransactionId(callback.txnid);
+      expect(payment.status).toBe('completed');
+      expect(payment.certificateId).toBe(certificate.id);
     });
   });
 
@@ -263,15 +450,15 @@ describe('API Integration Tests', () => {
 
     it('should return 401 for protected routes without token', async () => {
       await request(app)
-        .post('/api/exam/start')
-        .send({ courseId: testData.testCourse.id })
+        .get('/api/user/certificates')
         .expect(401);
     });
 
     it('should handle malformed JSON gracefully', async () => {
       await request(app)
         .post('/api/register')
-        .send('invalid json')
+        .set('Content-Type', 'application/json')
+        .send('{"name":')
         .expect(400);
     });
   });

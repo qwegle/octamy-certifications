@@ -260,17 +260,13 @@ export default function DemoCertificate() {
                       className="text-lg font-semibold text-gray-700 tracking-wide"
                       style={{ fontFamily: "'Crimson Text', serif", letterSpacing: '1px' }}
                     >
-                      Lifetime
+                      See live record
                     </div>
                   </div>
                 </div>
                 
-                {/* Certification Logos */}
-                <div className="flex justify-center items-center gap-8 mt-10 pt-6 border-t-2 border-yellow-500">
-                  <img src="https://images.seeklogo.com/logo-png/55/2/iso-certified-company-stamp-logo-png_seeklogo-556487.png" alt="ISO Certified" className="h-12 w-auto object-contain" />
-                  <img src="https://static.vecteezy.com/system/resources/previews/019/909/405/non_2x/make-in-india-transparent-make-in-india-free-free-png.png" alt="Make in India" className="h-12 w-auto object-contain" />
-                  <img src="https://sudikshya.com/wp-content/uploads/2024/08/startup-and-odisha-combo.png" alt="Startup Odisha" className="h-12 w-auto object-contain" />
-                  <img src="https://octamy.com/storage/optionbuilder/uploads/554402-14-2025_0143pmoctamy_logo_black.png" alt="Octamy Logo" className="h-12 w-auto object-contain" />
+                <div className="mt-10 border-t-2 border-yellow-500 pt-6 text-center text-xs font-medium text-gray-500">
+                  Illustrative preview · Current status is determined by the live credential record
                 </div>
               </div>
             </div>
@@ -368,24 +364,24 @@ export default function DemoCertificate() {
           <Card className="bg-cream-soft border-2 border-cream-deep">
             <CardContent className="p-8 text-center">
               <Shield className="w-12 h-12 text-green-600 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-black mb-2">Blockchain Verified</h3>
-              <p className="text-gray-600">Every certificate is secured and verified using blockchain technology for authenticity.</p>
+              <h3 className="text-xl font-semibold text-black mb-2">Publicly Verifiable</h3>
+              <p className="text-gray-600">Each activated credential has a unique ID backed by a live Octamy verification record.</p>
             </CardContent>
           </Card>
 
           <Card className="bg-cream-soft border-2 border-cream-deep">
             <CardContent className="p-8 text-center">
               <Award className="w-12 h-12 text-yellow-600 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-black mb-2">Industry Recognized</h3>
-              <p className="text-gray-600">Our certificates are recognized by leading companies and organizations worldwide.</p>
+              <h3 className="text-xl font-semibold text-black mb-2">Assessment Backed</h3>
+              <p className="text-gray-600">The record carries the assessment title, score, badge tier and issue date—not just completion.</p>
             </CardContent>
           </Card>
 
           <Card className="bg-cream-soft border-2 border-cream-deep">
             <CardContent className="p-8 text-center">
               <Download className="w-12 h-12 text-blue-600 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-black mb-2">Lifetime Access</h3>
-              <p className="text-gray-600">Download and share your certificates anytime with permanent verification links.</p>
+              <h3 className="text-xl font-semibold text-black mb-2">Clear Validity</h3>
+              <p className="text-gray-600">Verification clearly shows whether a credential is active, expired, revoked or awaiting activation.</p>
             </CardContent>
           </Card>
         </div>

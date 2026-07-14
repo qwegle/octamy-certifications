@@ -10,7 +10,9 @@
     "check": "tsc",
     "db:push": "drizzle-kit push",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate",
+    "db:migrate": "node scripts/run-migrations.mjs",
+    "db:migrate:drizzle-kit": "drizzle-kit migrate",
+    "db:validate": "node scripts/validate-migrations.mjs",
     "test": "jest --passWithNoTests"
   },
   "dependencies": {
@@ -93,6 +95,7 @@
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "passport-local": "^1.0.0",
+    "pg": "^8.13.1",
     "puppeteer": "^24.10.1",
     "react": "^18.3.1",
     "react-day-picker": "^8.10.1",

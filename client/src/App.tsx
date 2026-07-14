@@ -1,5 +1,6 @@
 import { Switch, Route } from "wouter";
 import { lazy, Suspense } from "react";
+import { MotionConfig } from "framer-motion";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -23,14 +24,20 @@ const CreatorCourseNew = lazy(() => import("@/pages/creator-course-new"));
 const CreatorPayouts = lazy(() => import("@/pages/creator-payouts"));
 const ExamShare = lazy(() => import("@/pages/exam-share"));
 const InstituteDashboard = lazy(() => import("@/pages/institute-dashboard"));
+const InstituteCourses = lazy(() => import("@/pages/institute-courses"));
+const InstituteCourseNew = lazy(() => import("@/pages/institute-course-new"));
 const InstituteStudents = lazy(() => import("@/pages/institute-students"));
 const InstituteExams = lazy(() => import("@/pages/institute-exams"));
 const InstituteExamNew = lazy(() => import("@/pages/institute-exam-new"));
 const InstituteExamEdit = lazy(() => import("@/pages/institute-exam-edit"));
+const InstituteExamResults = lazy(() => import("@/pages/institute-exam-results"));
 const InstituteReports = lazy(() => import("@/pages/institute-reports"));
 const InstituteTeam = lazy(() => import("@/pages/institute-team"));
+const InstitutePayouts = lazy(() => import("@/pages/institute-payouts"));
+const InstituteSettings = lazy(() => import("@/pages/institute-settings"));
 const CreatorCurriculum = lazy(() => import("@/pages/creator-curriculum"));
 const CreatorEarnings = lazy(() => import("@/pages/creator-earnings"));
+const MediaLibraryPage = lazy(() => import("@/pages/media-library"));
 const RecruiterSavedSearches = lazy(() => import("@/pages/recruiter-saved-searches"));
 const ForgotPassword = lazy(() => import("@/pages/forgot-password"));
 const ResetPassword = lazy(() => import("@/pages/reset-password"));
@@ -42,6 +49,7 @@ const BillingReturn = lazy(() => import("@/pages/billing-return"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 const HelpCenter = lazy(() => import("@/pages/help-center"));
 const About = lazy(() => import("@/pages/about"));
+const Vision = lazy(() => import("@/pages/vision"));
 const CategoryPage = lazy(() => import("@/pages/category"));
 const PrivacyPolicy = lazy(() => import("@/pages/privacy-policy"));
 const TermsOfService = lazy(() => import("@/pages/terms-of-service"));
@@ -53,6 +61,8 @@ const DisclaimerPage = lazy(() => import("@/pages/legal/disclaimer"));
 const ResellerAgreement = lazy(() => import("@/pages/legal/reseller-agreement"));
 const AccessibilityPage = lazy(() => import("@/pages/legal/accessibility"));
 import { CookieConsent } from "@/components/cookie-consent";
+import { RouteEffects } from "@/components/route-effects";
+import { WorkspaceAccessGate } from "@/components/workspace-access-gate";
 const InternshipPayment = lazy(() => import("@/pages/internship-payment"));
 const SellerAuth = lazy(() => import("@/pages/seller-auth"));
 const SellerDashboard = lazy(() => import("@/pages/seller-dashboard"));
@@ -65,10 +75,14 @@ const BusinessCertificates = lazy(() => import("@/pages/business-certificates"))
 const InternshipForm = lazy(() => import("@/pages/internship-form"));
 const ProfileEdit = lazy(() => import("@/pages/profile-edit"));
 const Verify = lazy(() => import("@/pages/verify"));
+const EvidencePassport = lazy(() => import("@/pages/evidence-passport"));
 const Preferences = lazy(() => import("@/pages/preferences"));
 const Progress = lazy(() => import("@/pages/progress"));
 const EnhancedCheckout = lazy(() => import("@/pages/EnhancedCheckout"));
 const Courses = lazy(() => import("@/pages/courses"));
+const Assessments = lazy(() => import("@/pages/assessments"));
+const CreatorAssessments = lazy(() => import("@/pages/creator-assessments"));
+const CourseLearning = lazy(() => import("@/pages/course-learning"));
 const VirtualInternships = lazy(() => import("@/pages/virtual-internships"));
 const BusinessCertificationsPage = lazy(() => import("@/pages/business-certifications"));
 const LearningPaths = lazy(() => import("@/pages/learning-paths"));
@@ -131,15 +145,21 @@ function Router() {
 
       {/* Marketing landings */}
       <Route path="/creator" component={CreatorLanding} />
+      <Route path="/creators" component={CreatorLanding} />
+      <Route path="/teach-on-octamy" component={CreatorLanding} />
       <Route path="/institute" component={InstituteLanding} />
+      <Route path="/institutes" component={InstituteLanding} />
       <Route path="/for-recruiters" component={RecruiterLanding} />
 
       {/* Pricing */}
       <Route path="/pricing" component={Pricing} />
       <Route path="/billing/return" component={BillingReturn} />
-      <Route path="/exams" component={Courses} />
+      <Route path="/exams" component={Assessments} />
+      <Route path="/assessments" component={Assessments} />
+      <Route path="/creator-assessments" component={CreatorAssessments} />
       <Route path="/courses" component={Courses} />
-      <Route path="/skill-verification" component={Courses} />
+      <Route path="/learn/:slug" component={CourseLearning} />
+      <Route path="/skill-verification" component={Assessments} />
       <Route path="/virtual-internships" component={VirtualInternships} />
       <Route path="/business-certifications" component={BusinessCertificationsPage} />
       <Route path="/learning-paths" component={LearningPaths} />
@@ -165,16 +185,24 @@ function Router() {
       <Route path="/creator/dashboard" component={CreatorDashboard} />
       <Route path="/creator/courses" component={CreatorCourses} />
       <Route path="/creator/courses/new" component={CreatorCourseNew} />
+      <Route path="/creator/media">{() => <MediaLibraryPage role="creator" />}</Route>
       <Route path="/creator/payouts" component={CreatorPayouts} />
       <Route path="/x/:code" component={ExamShare} />
       <Route path="/institute/dashboard" component={InstituteDashboard} />
+      <Route path="/institute/courses" component={InstituteCourses} />
+      <Route path="/institute/courses/new" component={InstituteCourseNew} />
+      <Route path="/institute/courses/:id/curriculum" component={CreatorCurriculum} />
       <Route path="/institute/students" component={InstituteStudents} />
       <Route path="/institute/cohorts" component={InstituteStudents} />
       <Route path="/institute/exams" component={InstituteExams} />
       <Route path="/institute/exams/new" component={InstituteExamNew} />
       <Route path="/institute/exams/:id/edit" component={InstituteExamEdit} />
+      <Route path="/institute/exams/:id/results" component={InstituteExamResults} />
       <Route path="/institute/reports" component={InstituteReports} />
       <Route path="/institute/team" component={InstituteTeam} />
+      <Route path="/institute/payouts" component={InstitutePayouts} />
+      <Route path="/institute/settings" component={InstituteSettings} />
+      <Route path="/institute/media">{() => <MediaLibraryPage role="institute" />}</Route>
       <Route path="/creator/courses/:id/curriculum" component={CreatorCurriculum} />
       <Route path="/creator/earnings" component={CreatorEarnings} />
       <Route path="/recruiter/saved-searches">
@@ -189,9 +217,11 @@ function Router() {
       <Route path="/qwegle" component={AdminDashboard} />
       <Route path="/verify" component={Verify} />
       <Route path="/verify/:certificateId" component={Verify} />
+      <Route path="/evidence/:token" component={EvidencePassport} />
       <Route path="/certificates/:certificateId" component={Certificate} />
       <Route path="/help-center" component={HelpCenter} />
       <Route path="/about" component={About} />
+      <Route path="/vision" component={Vision} />
       <Route path="/category/:slug" component={CategoryPage} />
       <Route path="/privacy-policy" component={PrivacyPolicy} />
       <Route path="/terms-of-service" component={TermsOfService} />
@@ -282,6 +312,18 @@ function Router() {
       <Route path="/question-banks/:id">
         {() => <Suspense fallback={<QBLoader />}><QuestionBankDetail /></Suspense>}
       </Route>
+      <Route path="/institute/question-banks">
+        {() => <Suspense fallback={<QBLoader />}><QuestionBanksList /></Suspense>}
+      </Route>
+      <Route path="/institute/question-banks/:id">
+        {() => <Suspense fallback={<QBLoader />}><QuestionBankDetail /></Suspense>}
+      </Route>
+      <Route path="/creator/question-banks">
+        {() => <Suspense fallback={<QBLoader />}><QuestionBanksList /></Suspense>}
+      </Route>
+      <Route path="/creator/question-banks/:id">
+        {() => <Suspense fallback={<QBLoader />}><QuestionBankDetail /></Suspense>}
+      </Route>
       <Route path="/admin/courses/:courseId/blueprint">
         {() => <Suspense fallback={<QBLoader />}><BlueprintEditor /></Suspense>}
       </Route>
@@ -294,21 +336,26 @@ function Router() {
 
 function App() {
   return (
-    <HelmetProvider>
-      <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <SellerAuthProvider>
-            <RecruiterAuthProvider>
-              <TooltipProvider>
-                <Toaster />
-                <Router />
-                <CookieConsent />
-              </TooltipProvider>
-            </RecruiterAuthProvider>
-          </SellerAuthProvider>
-        </AuthProvider>
-      </QueryClientProvider>
-    </HelmetProvider>
+    <MotionConfig reducedMotion="user">
+      <HelmetProvider>
+        <QueryClientProvider client={queryClient}>
+          <AuthProvider>
+            <SellerAuthProvider>
+              <RecruiterAuthProvider>
+                <TooltipProvider>
+                  <Toaster />
+                  <RouteEffects />
+                  <WorkspaceAccessGate>
+                    <Router />
+                  </WorkspaceAccessGate>
+                  <CookieConsent />
+                </TooltipProvider>
+              </RecruiterAuthProvider>
+            </SellerAuthProvider>
+          </AuthProvider>
+        </QueryClientProvider>
+      </HelmetProvider>
+    </MotionConfig>
   );
 }
 

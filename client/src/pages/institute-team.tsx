@@ -19,6 +19,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { SEO } from "@/components/seo";
 import { UserPlus, Trash2, Crown } from "lucide-react";
+import { useDashboardRoles } from "@/lib/use-dashboard-role";
 
 type Member = {
   id: number;
@@ -36,6 +37,8 @@ export default function InstituteTeam() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const qc = useQueryClient();
+  const { data: roles } = useDashboardRoles();
+  const canManage = roles?.isAdmin || roles?.instituteRole === "owner" || roles?.instituteRole === "admin";
 
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<"admin" | "teacher" | "staff">("teacher");
@@ -44,7 +47,7 @@ export default function InstituteTeam() {
     if (!authLoading && (!user || !token)) setLocation("/institute/login");
   }, [authLoading, user, token, setLocation]);
 
-  const { data: members = [], isLoading } = useQuery<Member[]>({
+  const { data: members = [], isLoading, isError, refetch } = useQuery<Member[]>({
     queryKey: ["/api/institute/team"],
     enabled: !!user && !!token,
     queryFn: async () => (await apiRequest("GET", "/api/institute/team")).json(),
@@ -61,7 +64,7 @@ export default function InstituteTeam() {
       setEmail("");
       qc.invalidateQueries({ queryKey: ["/api/institute/team"] });
     },
-    onError: (e: any) => toast({ title: "Failed", description: e.message, variant: "destructive" }),
+    onError: (e: any) => toast({ title: "Invite was not sent", description: e.message, variant: "destructive" }),
   });
 
   const remove = useMutation({
@@ -74,7 +77,7 @@ export default function InstituteTeam() {
       toast({ title: "Member removed" });
       qc.invalidateQueries({ queryKey: ["/api/institute/team"] });
     },
-    onError: (e: any) => toast({ title: "Failed", description: e.message, variant: "destructive" }),
+    onError: (e: any) => toast({ title: "Member was not removed", description: e.message, variant: "destructive" }),
   });
 
   if (!user) return null;
@@ -82,20 +85,18 @@ export default function InstituteTeam() {
   return (
     <DashboardLayout role="institute" title="Team" breadcrumbs={[{ label: 'Institute', href: '/institute/dashboard' }, { label: 'Team' }]}>
       <SEO title="Team · Institute" description="Manage teachers and admins for your institute." path="/institute/team" />
-              <h1 className="text-2xl sm:text-3xl font-semibold text-slate-900 mb-6">Team</h1>
-
-        <Card className="border-cream-deep mb-6">
+        {canManage ? <Card className="mb-6 border-slate-200">
           <CardHeader><CardTitle className="text-base">Invite a teammate</CardTitle></CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 sm:grid-cols-[1fr_180px_auto] gap-3">
               <div>
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="teacher@school.edu" />
+                <Label htmlFor="team-email">Email</Label>
+                <Input id="team-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="teacher@school.edu" autoComplete="email" />
               </div>
               <div>
-                <Label htmlFor="role">Role</Label>
+                <Label htmlFor="team-role">Role</Label>
                 <Select value={role} onValueChange={(v) => setRole(v as any)}>
-                  <SelectTrigger id="role"><SelectValue /></SelectTrigger>
+                  <SelectTrigger id="team-role" className="min-h-11"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="admin">Admin</SelectItem>
                     <SelectItem value="teacher">Teacher</SelectItem>
@@ -117,15 +118,24 @@ export default function InstituteTeam() {
               If the user already has an Octamy account they'll appear in the list immediately. Otherwise they'll be linked when they sign up with this email.
             </p>
           </CardContent>
-        </Card>
+        </Card> : (
+          <Card className="mb-6 border-blue-200 bg-blue-50/70">
+            <CardContent className="p-4 text-sm leading-6 text-blue-950">You can view the institute roster. Only owners and admins can invite or remove team members.</CardContent>
+          </Card>
+        )}
 
-        <Card className="border-cream-deep">
+        <Card className="border-slate-200">
           <CardHeader><CardTitle className="text-base">Members</CardTitle></CardHeader>
           <CardContent>
-            {isLoading ? (
-              <div className="text-sm text-slate-500 py-6 text-center">Loading…</div>
+            {isError ? (
+              <div className="rounded-xl border border-amber-200 bg-amber-50 p-5 text-center">
+                <p className="text-sm text-amber-950">The team roster could not be loaded.</p>
+                <Button type="button" variant="outline" className="mt-3" onClick={() => refetch()}>Retry</Button>
+              </div>
+            ) : isLoading ? (
+              <div className="space-y-2" aria-label="Loading team members">{[1, 2, 3].map((item) => <div key={item} className="h-12 animate-pulse rounded-xl bg-slate-100" />)}</div>
             ) : members.length === 0 ? (
-              <div className="text-sm text-slate-500 py-6 text-center">No members yet — invite your first teammate above.</div>
+              <div className="text-sm text-slate-500 py-6 text-center">{canManage ? "No members yet — invite your first teammate above." : "No active members are visible."}</div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
@@ -151,8 +161,8 @@ export default function InstituteTeam() {
                           <Badge variant="outline" className="capitalize">{m.status}</Badge>
                         </td>
                         <td className="py-2 text-right">
-                          {m.role !== "owner" && (
-                            <Button size="sm" variant="ghost" onClick={() => remove.mutate(m.id)} disabled={remove.isPending}>
+                          {canManage && m.role !== "owner" && (
+                            <Button size="icon" variant="ghost" onClick={() => remove.mutate(m.id)} disabled={remove.isPending} aria-label={`Remove ${m.name || m.email || "team member"}`}>
                               <Trash2 className="w-3.5 h-3.5 text-rose-600" />
                             </Button>
                           )}

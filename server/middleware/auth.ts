@@ -2,19 +2,35 @@ import { Request, Response, NextFunction, type RequestHandler } from 'express';
 import jwt from 'jsonwebtoken';
 import { storage } from '../storage';
 
+declare global {
+  namespace Express {
+    /**
+     * Authentication context populated by Octamy's JWT middleware. Passport's
+     * base User type is intentionally empty, which made every typed route
+     * handler narrower than Express.Request and broke router overloads.
+     */
+    interface User {
+      userId: number;
+      email: string;
+      id?: number;
+      isAdmin?: boolean;
+      role?: string;
+    }
+
+    interface Request {
+      seller?: { sellerId: number; email: string };
+      creator?: { id: number; userId: number; plan: string; status: string };
+      institute?: { id: number; plan: string; memberRole: string };
+    }
+  }
+}
+
 export interface AuthenticatedRequest extends Request {
-  user?: {
-    userId: number;
-    email: string;
-    isAdmin?: boolean;
-  };
+  user?: Express.User;
 }
 
 export interface SellerAuthenticatedRequest extends Request {
-  seller?: {
-    sellerId: number;
-    email: string;
-  };
+  seller?: Express.Request['seller'];
 }
 
 export const authenticateToken = (async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
@@ -120,7 +136,7 @@ export const authenticateSellerToken = (async (req: SellerAuthenticatedRequest, 
 // All assume `authenticateToken` ran first.
 
 export interface CreatorRequest extends AuthenticatedRequest {
-  creator?: { id: number; userId: number; plan: string; status: string };
+  creator?: Express.Request['creator'];
 }
 
 export const requireCreator = (async (req: CreatorRequest, res: Response, next: NextFunction) => {
@@ -137,7 +153,7 @@ export const requireCreator = (async (req: CreatorRequest, res: Response, next: 
 }) as RequestHandler;
 
 export interface InstituteRequest extends AuthenticatedRequest {
-  institute?: { id: number; plan: string; memberRole: string };
+  institute?: Express.Request['institute'];
 }
 
 const INSTITUTE_ROLE_RANK: Record<string, number> = { staff: 1, teacher: 2, admin: 3, owner: 4 };

@@ -10,14 +10,14 @@ import { motion } from 'framer-motion';
 import PortalLandingHero from '@/components/portal-landing-hero';
 
 const tiers = [
-  { name: 'Starter', price: 'Free', courses: '1 active course', fee: '30% platform fee', features: ['Basic analytics', 'Octamy-branded checkout'] },
-  { name: 'Pro', price: '₹499/mo', courses: '10 active courses', fee: '20% platform fee', highlight: true, features: ['Curriculum builder', 'Course reporting', 'Payout requests', 'Priority review'] },
-  { name: 'Premium', price: '₹1,999/mo', courses: 'Unlimited', fee: '10% platform fee', features: ['Lowest platform fee', 'Question-bank workflow', 'Earnings history', 'Priority support'] },
+  { name: 'Starter', price: 'Free', courses: '1 active course', fee: 'Publishing workspace', features: ['Basic analytics', 'Octamy-branded assessment pages'] },
+  { name: 'Pro', price: '₹499/mo', courses: '10 active courses', fee: 'Expanded workspace', highlight: true, features: ['Curriculum builder', 'Attempt reporting', 'Priority review', 'Question-bank workflow'] },
+  { name: 'Premium', price: '₹1,999/mo', courses: 'Unlimited', fee: 'Advanced workspace', features: ['Expanded catalog', 'Question-bank workflow', 'Reporting history', 'Priority support'] },
 ];
 
 const faqs = [
-  { q: 'How much do I keep per sale?', a: 'You keep 70% on Starter, 80% on Pro, and 90% on Premium after Octamy platform fees. Payment processing is handled via Cashfree.' },
-  { q: 'How do payouts work?', a: 'Request a payout from your creator workspace and track its status alongside your earnings history.' },
+  { q: 'Can I monetize a course today?', a: 'Approved creators can sell reviewed course access and credential activations through the configured payment gateway. Confirmed payments create auditable revenue-share entries; payout requests are reviewed before transfer.' },
+  { q: 'What evidence can a course create?', a: 'Creators can attach assessments and review attempt activity. Octamy does not yet treat creator-issued assessments as independently validated or identity-verified.' },
   { q: 'Can I bring my existing audience?', a: 'Yes. Share your published course and assessment links directly with your existing learners.' },
   { q: 'Do I need to be approved?', a: 'Yes. Creator profiles and submitted courses are reviewed before they become publicly available.' },
 ];
@@ -27,17 +27,17 @@ export default function CreatorLanding() {
     <div className="min-h-screen bg-cream-soft flex flex-col">
       <SEO
         title="Sell your courses on Octamy"
-        description="Publish assessed courses, keep up to 90% of revenue, and manage content and earnings from one creator workspace."
+        description="Build structured course curricula and assessments, submit content for review, and inspect learner attempt activity from a creator workspace."
         path="/creator"
       />
       <Header />
-      <main className="flex-1">
+      <main id="main-content" tabIndex={-1} className="flex-1">
         <PortalLandingHero
           accent="fuchsia"
           eyebrow="For creators & coaches"
           eyebrowIcon={<Sparkles className="h-3.5 w-3.5" />}
           title={<>Turn expertise into <span className="bg-gradient-to-r from-fuchsia-600 via-violet-600 to-sky-700 bg-clip-text text-transparent">assessed learning</span></>}
-          description="Build courses with structured curriculum and assessments, submit them for review, and manage learner activity, revenue and payouts in one workspace."
+          description="Build video courses and assessments, submit them for review, set access and credential pricing, then track auditable earnings and payout requests in one workspace."
           primary={{ label: 'Become a creator', href: '/register?role=creator' }}
           secondary={{ label: 'See pricing', href: '/pricing' }}
           preview={{
@@ -48,7 +48,7 @@ export default function CreatorLanding() {
             activity: [
               { title: 'Curriculum updated', meta: 'Assessment module · just now' },
               { title: 'Course submitted for review', meta: 'Cloud foundations · today' },
-              { title: 'Earnings report ready', meta: 'Current settlement period' },
+              { title: 'Attempt report ready', meta: 'Current assessment period' },
             ],
           }}
         />
@@ -133,11 +133,11 @@ export default function CreatorLanding() {
                             <li key={f} className="flex gap-2"><Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />{f}</li>
                           ))}
                         </ul>
-                        <Link href={`/register?role=creator&plan=${t.name.toLowerCase()}`}>
-                          <Button className={`w-full mt-6 ${t.highlight ? 'bg-slate-900 hover:bg-black text-white' : ''}`} variant={t.highlight ? 'default' : 'outline'}>
+                        <Button asChild className={`w-full mt-6 ${t.highlight ? 'bg-slate-900 hover:bg-black text-white' : ''}`} variant={t.highlight ? 'default' : 'outline'}>
+                          <Link href={`/register?role=creator&plan=${t.name.toLowerCase()}`}>
                             Choose {t.name}
-                          </Button>
-                        </Link>
+                          </Link>
+                        </Button>
                       </CardContent>
                     </Card>
                   </motion.div>
@@ -161,11 +161,11 @@ export default function CreatorLanding() {
               ))}
             </Reveal>
             <div className="text-center mt-10">
-              <Link href="/register?role=creator">
-                <motion.span whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} className="inline-block">
-                  <Button className="bg-slate-900 hover:bg-black text-white rounded-full px-6">Become a creator</Button>
-                </motion.span>
-              </Link>
+              <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} className="inline-block">
+                <Button asChild className="bg-slate-900 hover:bg-black text-white rounded-full px-6">
+                  <Link href="/register?role=creator">Become a creator</Link>
+                </Button>
+              </motion.div>
             </div>
           </div>
         </section>

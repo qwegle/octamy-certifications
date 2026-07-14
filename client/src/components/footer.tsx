@@ -1,10 +1,7 @@
 import { Link } from "wouter";
 import {
   ShieldCheck,
-  Lock,
   BadgeCheck,
-  CreditCard,
-  FileCheck,
   Mail,
   Phone,
   Linkedin,
@@ -76,36 +73,26 @@ export default function Footer() {
       {/* Trust strip */}
       <div className="border-b border-white/10 bg-slate-900/40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 items-stretch">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 items-stretch">
             <TrustBadge
               icon={<BadgeCheck className="h-5 w-5" />}
-              label="ISO 9001:2015"
-              sub="Certified Operations"
-            />
-            <TrustBadge
-              icon={<CreditCard className="h-5 w-5" />}
-              label="PayU Secure"
-              sub="Encrypted Payments"
+              label="Assessment first"
+              sub="A score before a credential"
             />
             <TrustBadge
               icon={<ShieldCheck className="h-5 w-5" />}
-              label="GST Registered"
-              sub="Compliant Invoicing"
+              label="Live status"
+              sub="Active, expired or revoked"
             />
             <TrustBadge
-              icon={<Lock className="h-5 w-5" />}
-              label="256-bit SSL"
-              sub="HTTPS Everywhere"
-            />
-            <TrustBadge
-              icon={<FileCheck className="h-5 w-5" />}
-              label="DPDP Aligned"
-              sub="Indian Data Law"
+              icon={<ShieldCheck className="h-5 w-5" />}
+              label="Sharing controls"
+              sub="Evidence passport is opt-in"
             />
             <TrustBadge
               icon={<BadgeCheck className="h-5 w-5" />}
-              label="MSME Registered"
-              sub="Govt. of India"
+              label="Evidence boundary"
+              sub="No false accreditation claim"
             />
           </div>
         </div>
@@ -120,9 +107,9 @@ export default function Footer() {
               <img src={octamyLogoLight} alt="Octamy" className="h-9" />
             </Link>
             <p className="mt-5 text-slate-400 max-w-md leading-relaxed">
-              India's assessment-first skill verification platform. Take certifications
-              for free — pay only when you pass. Trusted by candidates, recruiters and
-              partners across India.
+              An assessment-first evidence platform. Take assessments free, pay only
+              after passing if you want the credential, and choose when to share the
+              resulting evidence.
             </p>
 
             <form onSubmit={onSubscribe} className="mt-7">
@@ -200,6 +187,7 @@ export default function Footer() {
           <FooterColumn title="Company" className="md:col-span-2">
             <ul className="space-y-2.5">
               <FooterLink to="/about">About Us</FooterLink>
+              <FooterLink to="/vision">Our Vision</FooterLink>
               <FooterLink to="/partners">Partner Program</FooterLink>
               <FooterLink to="/sponsor">Sponsor a Talent</FooterLink>
               <FooterLink to="/contact">Contact</FooterLink>
@@ -277,7 +265,7 @@ export default function Footer() {
                 {COMPANY_CIN ? `CIN: ${COMPANY_CIN}` : "CIN: Available on request"}
                 {" · "}
                 {COMPANY_GSTIN ? `GSTIN: ${COMPANY_GSTIN}` : "GSTIN: Available on request"}
-                {ISO_NUMBER ? ` · ISO 9001:2015 Cert No. ${ISO_NUMBER}` : " · ISO 9001:2015 — Cert. on request"}
+                {ISO_NUMBER ? ` · Published certification reference: ${ISO_NUMBER}` : ""}
               </p>
               <p>{COMPANY_ADDRESS || "Registered office details available on request."}</p>
               <p className="italic max-w-3xl pt-1">
@@ -288,7 +276,7 @@ export default function Footer() {
             </div>
             <div className="lg:col-span-5 lg:text-right space-y-1.5">
               <p className="text-slate-200">
-                Payments processed securely via PayU. Refunds per{" "}
+                Available payment methods and processor are shown at checkout. Refunds per{" "}
                 <Link href="/refund-policy" className="text-sky-400 hover:text-sky-300 underline">
                   refund policy
                 </Link>

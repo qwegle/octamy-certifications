@@ -1,5 +1,5 @@
-import { pgTable, text, varchar, serial, integer, boolean, timestamp, decimal, json, index, jsonb, unique } from "drizzle-orm/pg-core";
-import { relations, eq, desc, and, asc } from "drizzle-orm";
+import { pgTable, text, varchar, serial, integer, boolean, timestamp, decimal, json, index, jsonb, unique, check, type AnyPgColumn } from "drizzle-orm/pg-core";
+import { relations, eq, desc, and, asc, sql } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -85,7 +85,7 @@ export const recruiters = pgTable('recruiters', {
   // Status and Credits
   isActive: boolean('is_active').default(true),
   kycStatus: text('kyc_status').notNull().default('pending'),
-  creditsBalance: decimal('credits_balance', { precision: 10, scale: 2 }).default('0.00'),
+  creditsBalance: decimal('credits_balance', { precision: 10, scale: 2 }).default('0.00').notNull(),
 
   // Subscription plan
   plan: text('plan').notNull().default('starter'), // starter | growth | enterprise
@@ -106,6 +106,8 @@ export const creditTransactions = pgTable('credit_transactions', {
   description: text('description').notNull(),
   relatedUserId: integer('related_user_id'),
   relatedAction: text('related_action'),
+  // Gateway/order reference used to make wallet credits idempotent.
+  externalReference: text('external_reference'),
   balanceAfter: decimal('balance_after', { precision: 10, scale: 2 }).notNull(),
   createdAt: timestamp('created_at').defaultNow(),
 });
@@ -116,6 +118,8 @@ export const profileAccessLogs = pgTable('profile_access_logs', {
   userId: integer('user_id').notNull(),
   accessType: text('access_type').notNull(),
   creditsUsed: decimal('credits_used', { precision: 10, scale: 2 }).notNull(),
+  // Deterministic recruiter:candidate:access key. Historical rows may be NULL.
+  idempotencyKey: text('idempotency_key'),
   createdAt: timestamp('created_at').defaultNow(),
 });
 
@@ -170,7 +174,9 @@ export const users = pgTable("users", {
   careerGoals: text("career_goals"),
   
   // Profile visibility and metrics
-  profileVisibility: boolean("profile_visibility").default(true),
+  // Both recruiter discovery and public evidence sharing are explicit opt-ins.
+  profileVisibility: boolean("profile_visibility").default(false).notNull(),
+  evidencePassportPublic: boolean("evidence_passport_public").default(false).notNull(),
   lastActive: timestamp("last_active").defaultNow(),
   profileCompleteness: integer("profile_completeness").default(0), // percentage
   
@@ -216,13 +222,52 @@ export const userAddresses = pgTable("user_addresses", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// Reusable user-owned media library. Assets are uploaded once and can be
+// selected across course, lesson, question, profile, and institute workflows.
+// Media URLs are intentionally public-by-link because they may be embedded in
+// public catalog pages; management endpoints remain owner-only.
+export const mediaAssets = pgTable("media_assets", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+  originalName: text("original_name").notNull(),
+  mimeType: text("mime_type").notNull(),
+  kind: text("kind").notNull(), // image | video | document
+  url: text("url").notNull(),
+  storageProvider: text("storage_provider").default("local").notNull(), // local | cloudinary
+  storageKey: text("storage_key").notNull(),
+  sizeBytes: integer("size_bytes").notNull(),
+  width: integer("width"),
+  height: integer("height"),
+  altText: text("alt_text"),
+  caption: text("caption"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (t) => ({
+  byOwnerCreated: index("media_assets_owner_created_idx").on(t.userId, t.createdAt),
+  byOwnerKind: index("media_assets_owner_kind_idx").on(t.userId, t.kind),
+}));
+
+export type MediaAsset = typeof mediaAssets.$inferSelect;
+export type InsertMediaAsset = typeof mediaAssets.$inferInsert;
+
 export const categories = pgTable("categories", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   description: text("description").notNull(),
   icon: text("icon").notNull(),
   slug: text("slug").notNull().unique(),
-});
+  parentId: integer("parent_id").references((): AnyPgColumn => categories.id, { onDelete: "restrict" }),
+  kind: text("kind").default("collection").notNull(), // collection | audience | subject | exam_family | skill
+  isActive: boolean("is_active").default(true).notNull(),
+  sortOrder: integer("sort_order").default(0).notNull(),
+  metaTitle: text("meta_title"),
+  metaDescription: text("meta_description"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (t) => ({
+  byParent: index("categories_parent_idx").on(t.parentId, t.sortOrder),
+  byKind: index("categories_kind_active_idx").on(t.kind, t.isActive),
+}));
 
 export const courses = pgTable("courses", {
   id: serial("id").primaryKey(),
@@ -232,7 +277,10 @@ export const courses = pgTable("courses", {
   categoryId: integer("category_id").references(() => categories.id).notNull(),
   duration: integer("duration").notNull(), // in minutes
   passingScore: integer("passing_score").default(50).notNull(),
+  // `price` remains the optional post-pass credential activation fee.
   price: decimal("price", { precision: 10, scale: 2 }).default("199.00").notNull(),
+  productType: text("product_type").default("assessment").notNull(), // assessment | video_course | ebook | bundle
+  contentPrice: decimal("content_price", { precision: 10, scale: 2 }),
   originalPrice: decimal("original_price", { precision: 10, scale: 2 }),
   isOnSale: boolean("is_on_sale").default(false).notNull(),
   saleEndDate: timestamp("sale_end_date"),
@@ -241,15 +289,62 @@ export const courses = pgTable("courses", {
   isInternship: boolean("is_internship").default(false).notNull(),
   metaTitle: text("meta_title"),
   metaDescription: text("meta_description"),
+  thumbnailUrl: text("thumbnail_url"),
   // Ownership & visibility (P0 multi-tenant identity)
   ownerType: text("owner_type").default("admin").notNull(), // admin | creator | institute
   ownerId: integer("owner_id"),
   visibility: text("visibility").default("public").notNull(), // public | unlisted | private
+  language: text("language").default("en").notNull(),
+  certificationMode: text("certification_mode").default("none").notNull(),
+  reviewStatus: text("review_status").default("draft").notNull(),
+  defaultReviewPolicy: text("default_review_policy").default("after_final_attempt").notNull(),
+  subscriptionEligible: boolean("subscription_eligible").default(false).notNull(),
+  resellerEligible: boolean("reseller_eligible").default(false).notNull(),
+  featuredAt: timestamp("featured_at"),
   // P1: opt-in flag — when true, exam questions are materialized from the
   // course's blueprint + bank rather than the legacy `questions.courseId` rows.
   useBlueprintEngine: boolean("use_blueprint_engine").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => ({
+  byPublicAssessment: index("courses_public_assessment_idx").on(
+    t.ownerType,
+    t.productType,
+    t.reviewStatus,
+    t.isActive,
+  ),
+}));
+
+export const audienceBands = pgTable("audience_bands", {
+  id: serial("id").primaryKey(),
+  code: text("code").notNull().unique(),
+  label: text("label").notNull(),
+  description: text("description"),
+  sortOrder: integer("sort_order").default(0).notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+export const courseAudienceBands = pgTable("course_audience_bands", {
+  courseId: integer("course_id").references(() => courses.id, { onDelete: "cascade" }).notNull(),
+  audienceBandId: integer("audience_band_id").references(() => audienceBands.id, { onDelete: "cascade" }).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => ({
+  uniqueCourseBand: unique("course_audience_bands_unique").on(t.courseId, t.audienceBandId),
+  byAudience: index("course_audience_bands_audience_idx").on(t.audienceBandId, t.courseId),
+}));
+
+// A course keeps its legacy primary category while this join supports the
+// separate subject, exam-family, skill, and merchandising facets required by
+// enterprise catalogue filters.
+export const courseCategories = pgTable("course_categories", {
+  courseId: integer("course_id").references(() => courses.id, { onDelete: "cascade" }).notNull(),
+  categoryId: integer("category_id").references(() => categories.id, { onDelete: "restrict" }).notNull(),
+  relationType: text("relation_type").default("secondary").notNull(), // primary | secondary
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => ({
+  uniqueCourseCategory: unique("course_categories_unique").on(t.courseId, t.categoryId),
+  byCategory: index("course_categories_category_idx").on(t.categoryId, t.courseId),
+}));
 
 // Creators — individuals selling courses on Octamy. 1:1 with users.
 export const creators = pgTable("creators", {
@@ -296,6 +391,9 @@ export const institutes = pgTable("institutes", {
   planRenewsAt: timestamp("plan_renews_at"),
   studentSeatLimit: integer("student_seat_limit").default(500).notNull(),
   cohortLimit: integer("cohort_limit").default(5).notNull(),
+  // This only authorizes institute-affiliation discovery. The learner's own
+  // profileVisibility opt-in remains mandatory and cannot be overridden here.
+  recruiterDiscoveryEnabled: boolean("recruiter_discovery_enabled").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -379,15 +477,15 @@ export const cohortStudents = pgTable("cohort_students", {
   uniqMember: unique().on(t.cohortId, t.email),
 }));
 
-// Subscriptions — recurring plans for creator/institute/recruiter personas.
+// Subscriptions — recurring plans for learner/creator/institute/recruiter personas.
 // Backed by Cashfree one-off orders today (renewal tracked manually);
 // will switch to Cashfree Subscriptions API in a follow-up.
 export const subscriptions = pgTable("subscriptions", {
   id: serial("id").primaryKey(),
-  ownerType: text("owner_type").notNull(), // creator | institute | recruiter
+  ownerType: text("owner_type").notNull(), // learner | creator | institute | recruiter
   ownerId: integer("owner_id").notNull(),
   userId: integer("user_id").references(() => users.id),
-  plan: text("plan").notNull(), // free | pro | premium | starter | growth | enterprise
+  plan: text("plan").notNull(), // all_access | free | pro | premium | starter | growth | enterprise
   status: text("status").default("pending").notNull(), // pending | active | past_due | cancelled
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
   currency: text("currency").default("INR").notNull(),
@@ -463,6 +561,28 @@ export const courseSections = pgTable("course_sections", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Durable request ledger for atomic AI curriculum imports. The unique request
+// identity belongs to a course/workspace, so retries (including concurrent
+// retries after a client timeout) can replay the committed identifiers without
+// creating duplicate sections or lessons. Only a payload hash and the compact
+// import result are retained; the generated outline itself is not duplicated
+// into this operational table.
+export const courseCurriculumImports = pgTable("course_curriculum_imports", {
+  id: serial("id").primaryKey(),
+  courseId: integer("course_id").references(() => courses.id, { onDelete: "cascade" }).notNull(),
+  workspace: text("workspace").notNull(), // creator | institute
+  actorUserId: integer("actor_user_id").references(() => users.id).notNull(),
+  idempotencyKey: text("idempotency_key").notNull(),
+  requestHash: text("request_hash").notNull(),
+  status: text("status").default("processing").notNull(), // processing | completed
+  response: jsonb("response"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  completedAt: timestamp("completed_at"),
+}, (t) => ({
+  uniqueRequest: unique().on(t.courseId, t.workspace, t.idempotencyKey),
+  byActor: index("course_curriculum_imports_actor_idx").on(t.actorUserId, t.createdAt),
+}));
+
 export const lessons = pgTable("lessons", {
   id: serial("id").primaryKey(),
   sectionId: integer("section_id").references(() => courseSections.id).notNull(),
@@ -518,32 +638,137 @@ export const examInstances = pgTable("exam_instances", {
   shareCode: text("share_code").notNull().unique(),
   passwordHash: text("password_hash"),
   cohortId: integer("cohort_id").references(() => cohorts.id),
+  // Cohort assessments use per-recipient bearer invitations. Public links are
+  // retained for Octamy/creator assessments and legacy institute drafts only.
+  accessMode: text("access_mode").default("public_link").notNull(), // public_link | cohort_invite
+  // Institute exams are paid for by the workspace, never by the candidate.
+  // This snapshots the subscription most recently verified when the exam was
+  // published or accessed; runtime checks still require a currently active row.
+  fundingSubscriptionId: integer("funding_subscription_id").references(() => subscriptions.id),
+  fundingVerifiedAt: timestamp("funding_verified_at"),
   startsAt: timestamp("starts_at"),
   endsAt: timestamp("ends_at"),
   durationMin: integer("duration_min").default(30).notNull(),
   passingScore: integer("passing_score").default(50).notNull(),
   maxAttempts: integer("max_attempts").default(1).notNull(),
+  questionCount: integer("question_count").default(50).notNull(),
+  reviewPolicy: text("review_policy").default("after_window").notNull(),
+  reviewReleaseAt: timestamp("review_release_at"),
+  retakeCooldownMin: integer("retake_cooldown_min").default(0).notNull(),
+  // standard: assessment + resilient autosave/connectivity evidence only
+  // browser_evidence: also records proportionate browser focus/fullscreen/paste signals
+  // (never webcam, microphone, screen recording, or automated cheating verdicts)
+  proctorMode: text("proctor_mode").default("standard").notNull(),
   status: text("status").default("draft").notNull(), // draft | live | closed
   createdBy: integer("created_by").references(() => users.id),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// Delivery ledger for private institute cohort exams. Only a SHA-256 digest of
+// the high-entropy bearer token is persisted. The raw token exists solely in
+// the candidate's emailed link and transient request memory.
+export const examInstanceInvitations = pgTable("exam_instance_invitations", {
+  id: serial("id").primaryKey(),
+  examInstanceId: integer("exam_instance_id").references(() => examInstances.id, { onDelete: "cascade" }).notNull(),
+  cohortStudentId: integer("cohort_student_id").references(() => cohortStudents.id, { onDelete: "set null" }),
+  email: text("email").notNull(),
+  recipientName: text("recipient_name"),
+  tokenHash: text("token_hash").notNull().unique(),
+  status: text("status").default("pending").notNull(), // pending | sent | delivery_failed | opened | started | revoked
+  expiresAt: timestamp("expires_at").notNull(),
+  sentAt: timestamp("sent_at"),
+  lastSentAt: timestamp("last_sent_at"),
+  openedAt: timestamp("opened_at"),
+  lastStartedAt: timestamp("last_started_at"),
+  sendCount: integer("send_count").default(0).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (t) => ({
+  uniqExamEmail: unique("exam_instance_invitations_exam_email_unique").on(t.examInstanceId, t.email),
+  byExamStatus: index("exam_instance_invitations_exam_status_idx").on(t.examInstanceId, t.status),
+  byCohortStudent: index("exam_instance_invitations_cohort_student_idx").on(t.cohortStudentId),
+}));
+
 export const examInstanceAttempts = pgTable("exam_instance_attempts", {
   id: serial("id").primaryKey(),
   instanceId: integer("instance_id").references(() => examInstances.id).notNull(),
+  invitationId: integer("invitation_id").references(() => examInstanceInvitations.id, { onDelete: "restrict" }),
   userId: integer("user_id").references(() => users.id),
   email: text("email"),
   startedAt: timestamp("started_at").defaultNow().notNull(),
+  // Authoritative deadline captured from min(startedAt + duration, exam.endsAt).
+  // Nullable during the expand/contract rollout for attempts created by an old process.
+  deadlineAt: timestamp("deadline_at"),
+  passingScoreSnapshot: integer("passing_score_snapshot"),
+  maxAttemptsSnapshot: integer("max_attempts_snapshot"),
+  reviewPolicySnapshot: text("review_policy_snapshot"),
+  reviewReleaseAtSnapshot: timestamp("review_release_at_snapshot"),
+  questionSnapshotSource: text("question_snapshot_source"), // start | legacy_reconstructed
   lastHeartbeatAt: timestamp("last_heartbeat_at").defaultNow().notNull(),
   submittedAt: timestamp("submitted_at"),
   score: integer("score").default(0),
   totalQuestions: integer("total_questions").default(0),
+  // Sum of immutable item maxPoints. Keep separate from the item count so
+  // weighted and negative-mark assessments produce an honest percentage.
+  totalPoints: integer("total_points").default(0).notNull(),
+  // Captured when the attempt starts so later bank edits cannot rewrite the
+  // candidate-facing unsupported-format notice for an existing attempt.
+  excludedQuestionCount: integer("excluded_question_count").default(0).notNull(),
   passed: boolean("passed").default(false),
   answers: jsonb("answers"),
+  // Snapshot the mode so changing an exam later cannot rewrite an attempt's evidence contract.
+  proctorMode: text("proctor_mode").default("standard").notNull(),
+  evidenceConsentAt: timestamp("evidence_consent_at"),
+  evidenceConsentVersion: text("evidence_consent_version"),
+  lastAutosaveAt: timestamp("last_autosave_at"),
   status: text("status").default("in_progress").notNull(), // in_progress | submitted | abandoned
 }, (t) => ({
   byInstance: index("exam_instance_attempts_instance_idx").on(t.instanceId),
+  nonnegativeTotalPoints: check("exam_instance_attempts_total_points_check", sql`${t.totalPoints} >= 0`),
+}));
+
+// Immutable question materialisation for a scheduled exam attempt. questionId
+// is deliberately not a foreign key: deleting source content must not erase or
+// mutate the evidence that was actually shown and graded in an existing run.
+export const examInstanceAttemptItems = pgTable("exam_instance_attempt_items", {
+  id: serial("id").primaryKey(),
+  attemptId: integer("attempt_id").references(() => examInstanceAttempts.id, { onDelete: "cascade" }).notNull(),
+  questionId: integer("question_id").notNull(),
+  position: integer("position").notNull(),
+  questionVersion: integer("question_version").default(1).notNull(),
+  question: text("question").notNull(),
+  options: jsonb("options").$type<string[]>().notNull(),
+  questionType: text("question_type").default("multiple_choice").notNull(),
+  questionFormat: text("question_format").default("mcq_single").notNull(),
+  imageUrl: text("image_url"),
+  codeLanguage: text("code_language"),
+  timeLimitSec: integer("time_limit_sec"),
+  maxPoints: integer("max_points").default(1).notNull(),
+  negativeMarks: integer("negative_marks").default(0).notNull(),
+  correctAnswer: integer("correct_answer").notNull(),
+  expectedAnswer: text("expected_answer"),
+  explanation: text("explanation"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => ({
+  uniqQuestion: unique("exam_instance_attempt_items_attempt_question_unique").on(t.attemptId, t.questionId),
+  uniqPosition: unique("exam_instance_attempt_items_attempt_position_unique").on(t.attemptId, t.position),
+  nonnegativePosition: check("exam_instance_attempt_items_position_check", sql`${t.position} >= 0`),
+}));
+
+// Proportionate, reviewable browser evidence for a scheduled exam attempt.
+// Metadata must never contain answer text, clipboard contents, media, or keystrokes.
+export const examProctorEvents = pgTable("exam_proctor_events", {
+  id: serial("id").primaryKey(),
+  attemptId: integer("attempt_id").references(() => examInstanceAttempts.id, { onDelete: "cascade" }).notNull(),
+  clientEventId: text("client_event_id").notNull(),
+  eventType: text("event_type").notNull(),
+  clientAt: timestamp("client_at"),
+  occurredAt: timestamp("occurred_at").defaultNow().notNull(),
+  metadata: jsonb("metadata"),
+}, (t) => ({
+  uniqClientEvent: unique("exam_proctor_events_attempt_client_event_unique").on(t.attemptId, t.clientEventId),
+  byAttemptTime: index("exam_proctor_events_attempt_time_idx").on(t.attemptId, t.occurredAt),
 }));
 
 // =================================================================
@@ -595,11 +820,16 @@ export const creatorIntegrations = pgTable("creator_integrations", {
 }));
 
 export type CourseSection = typeof courseSections.$inferSelect;
+export type CourseCurriculumImport = typeof courseCurriculumImports.$inferSelect;
+export type InsertCourseCurriculumImport = typeof courseCurriculumImports.$inferInsert;
 export type Lesson = typeof lessons.$inferSelect;
 export type LessonProgress = typeof lessonProgress.$inferSelect;
 export type CourseReview = typeof courseReviews.$inferSelect;
 export type ExamInstance = typeof examInstances.$inferSelect;
+export type ExamInstanceInvitation = typeof examInstanceInvitations.$inferSelect;
 export type ExamInstanceAttempt = typeof examInstanceAttempts.$inferSelect;
+export type ExamInstanceAttemptItem = typeof examInstanceAttemptItems.$inferSelect;
+export type ExamProctorEvent = typeof examProctorEvents.$inferSelect;
 export type SplitPayout = typeof splitPayouts.$inferSelect;
 export type PayoutRequest = typeof payoutRequests.$inferSelect;
 export type CreatorIntegration = typeof creatorIntegrations.$inferSelect;
@@ -642,12 +872,18 @@ export const questions = pgTable("questions", {
   questionFormat: text("question_format").default("mcq_single").notNull(),
   // mcq_single | mcq_multi | true_false | fill_blank | short | long | code | numeric | match
   imageUrl: text("image_url"),
+  imageAltText: text("image_alt_text"),
+  optionMedia: jsonb("option_media").$type<Array<{ url: string; alt: string }> | null>(),
   codeLanguage: text("code_language"),
   expectedAnswer: text("expected_answer"), // for non-mcq formats (free-text)
   negativeMarks: integer("negative_marks").default(0).notNull(),
   timeLimitSec: integer("time_limit_sec"),
   tags: json("tags").$type<string[]>().default([]),
   explanation: text("explanation"),
+  reviewStatus: text("review_status").default("draft").notNull(),
+  generationSource: text("generation_source").default("human").notNull(),
+  reviewedBy: integer("reviewed_by").references(() => users.id),
+  reviewedAt: timestamp("reviewed_at"),
   version: integer("version").default(1).notNull(),
   createdBy: integer("created_by").references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
@@ -756,7 +992,8 @@ export const examAttempts = pgTable("exam_attempts", {
 export const certificates = pgTable("certificates", {
   id: serial("id").primaryKey(),
   certificateId: text("certificate_id").notNull().unique(),
-  examAttemptId: integer("exam_attempt_id").references(() => examAttempts.id).notNull(),
+  examAttemptId: integer("exam_attempt_id").references(() => examAttempts.id),
+  scheduledAttemptId: integer("scheduled_attempt_id").references(() => examInstanceAttempts.id).unique(),
   courseId: integer("course_id").references(() => courses.id).notNull(),
   userId: integer("user_id").references(() => users.id),
   userEmail: text("user_email").notNull(),
@@ -776,6 +1013,10 @@ export const certificates = pgTable("certificates", {
   badge: text("badge").notNull(), // bronze, silver, gold, platinum
   certificateNumber: text("certificate_number").notNull().unique(),
   issuedBy: text("issued_by").default("Octamy Solutions Private Limited").notNull(),
+  certificationMode: text("certification_mode").default("octamy").notNull(),
+  fundingSource: text("funding_source").default("direct_payment").notNull(),
+  issuerSnapshot: jsonb("issuer_snapshot"),
+  coIssuerSnapshot: jsonb("co_issuer_snapshot"),
   retakeCount: integer("retake_count").default(0).notNull(),
   // Physical certificate shipping
   needsPhysicalCopy: boolean("needs_physical_copy").default(false).notNull(),
@@ -785,6 +1026,28 @@ export const certificates = pgTable("certificates", {
   shippedAt: timestamp("shipped_at"),
   deliveredAt: timestamp("delivered_at"),
 });
+
+// Immutable audit of subscription-funded benefits. `externalKey` is the
+// pending/scheduled attempt identity, making redemption idempotent even when a
+// browser retries after a lost response.
+export const subscriptionBenefitUsages = pgTable("subscription_benefit_usages", {
+  id: serial("id").primaryKey(),
+  subscriptionId: integer("subscription_id").references(() => subscriptions.id).notNull(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  courseId: integer("course_id").references(() => courses.id).notNull(),
+  certificateId: integer("certificate_id").references(() => certificates.id),
+  benefitType: text("benefit_type").notNull(), // inhouse_assessment_credential
+  externalKey: text("external_key").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => ({
+  uniqueRedemption: unique("subscription_benefit_usages_redemption_unique").on(
+    t.subscriptionId,
+    t.benefitType,
+    t.externalKey,
+  ),
+  uniqueExternalBenefit: unique("subscription_benefit_usages_external_unique").on(t.benefitType, t.externalKey),
+  byUser: index("subscription_benefit_usages_user_idx").on(t.userId, t.createdAt),
+}));
 
 export const payments = pgTable("payments", {
   id: serial("id").primaryKey(),
@@ -809,6 +1072,25 @@ export const payments = pgTable("payments", {
   includesPhysicalCopy: boolean("includes_physical_copy").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+// Server-enforced access to paid video/PDF/text course content. Preview lessons
+// remain public; non-preview content URLs are redacted without an entitlement.
+export const courseEntitlements = pgTable("course_entitlements", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+  courseId: integer("course_id").references(() => courses.id, { onDelete: "cascade" }).notNull(),
+  paymentId: integer("payment_id").references(() => payments.id),
+  status: text("status").default("active").notNull(), // active | revoked | refunded
+  source: text("source").default("purchase").notNull(), // purchase | free | admin
+  grantedAt: timestamp("granted_at").defaultNow().notNull(),
+  expiresAt: timestamp("expires_at"),
+}, (t) => ({
+  uniqUserCourse: unique("course_entitlements_user_course_uniq").on(t.userId, t.courseId),
+  byUser: index("course_entitlements_user_idx").on(t.userId),
+  byCourse: index("course_entitlements_course_idx").on(t.courseId),
+}));
+
+export type CourseEntitlement = typeof courseEntitlements.$inferSelect;
 
 export const internshipApplications = pgTable("internship_applications", {
   id: serial("id").primaryKey(),
@@ -1202,6 +1484,10 @@ export const certificatesRelations = relations(certificates, ({ one }) => ({
     fields: [certificates.examAttemptId],
     references: [examAttempts.id],
   }),
+  scheduledAttempt: one(examInstanceAttempts, {
+    fields: [certificates.scheduledAttemptId],
+    references: [examInstanceAttempts.id],
+  }),
   payment: one(payments),
 }));
 
@@ -1315,6 +1601,8 @@ export const skillAssessmentsRelations = relations(skillAssessments, ({ one }) =
 
 export const insertCategorySchema = createInsertSchema(categories).omit({
   id: true,
+  createdAt: true,
+  updatedAt: true,
 });
 
 // Rating tables
@@ -1405,6 +1693,10 @@ export type Category = typeof categories.$inferSelect;
 export type InsertCategory = z.infer<typeof insertCategorySchema>;
 export type Course = typeof courses.$inferSelect;
 export type InsertCourse = z.infer<typeof insertCourseSchema>;
+export type AudienceBand = typeof audienceBands.$inferSelect;
+export type CourseAudienceBand = typeof courseAudienceBands.$inferSelect;
+export type CourseCategory = typeof courseCategories.$inferSelect;
+export type SubscriptionBenefitUsage = typeof subscriptionBenefitUsages.$inferSelect;
 export type Rating = typeof ratings.$inferSelect;
 export type InsertRating = z.infer<typeof insertRatingSchema>;
 export type RatingAggregate = typeof ratingAggregates.$inferSelect;
