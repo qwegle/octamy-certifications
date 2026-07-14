@@ -30,6 +30,7 @@ import {
   courseEntitlements,
   categories as categoriesTable,
   courses as coursesTable,
+  questionBanks as questionBanksTable,
 } from "@shared/schema";
 import { desc, and, eq, not, sql, or, ilike, count } from "drizzle-orm";
 import { db, pool } from "./db";
@@ -4790,13 +4791,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
           isActive: coursesTable.isActive, visibility: coursesTable.visibility,
           reviewStatus: coursesTable.reviewStatus, certificationMode: coursesTable.certificationMode,
           category: { id: categoriesTable.id, name: categoriesTable.name, slug: categoriesTable.slug },
-          questionCount: sql<number>`(select count(*) from questions where questions.course_id = ${coursesTable.id})`,
+          questionCount: sql<number>`COALESCE((select sum(question_count) from course_question_blueprint where course_id = ${coursesTable.id}), (select count(*) from questions where questions.course_id = ${coursesTable.id}), 0)`,
         }).from(coursesTable).leftJoin(categoriesTable, eq(categoriesTable.id, coursesTable.categoryId))
           .where(where).orderBy(desc(coursesTable.createdAt)).limit(pageSize).offset((page - 1) * pageSize);
         res.json({ items, pagination: { page, pageSize, total: Number(total), totalPages: Math.max(1, Math.ceil(Number(total) / pageSize)) } });
       } catch (error) {
         console.error("Error fetching admin assessments:", error);
         res.status(500).json({ message: "Failed to fetch assessments" });
+      }
+    },
+  );
+
+  app.get(
+    "/api/admin/question-banks",
+    authenticateAdminToken,
+    async (req: AuthenticatedRequest, res: Response) => {
+      try {
+        const page = Math.max(1, parseInt(String(req.query.page || "1"), 10) || 1);
+        const pageSize = Math.min(100, Math.max(1, parseInt(String(req.query.pageSize || "25"), 10) || 25));
+        const search = String(req.query.search || "").trim();
+        const where = search ? or(ilike(questionBanksTable.name, `%${search}%`), ilike(questionBanksTable.slug, `%${search}%`))! : undefined;
+        const [{ total }] = await db.select({ total: count() }).from(questionBanksTable).where(where);
+        const items = await db.select({
+          id: questionBanksTable.id,
+          name: questionBanksTable.name,
+          slug: questionBanksTable.slug,
+          description: questionBanksTable.description,
+          ownerType: questionBanksTable.ownerType,
+          visibility: questionBanksTable.visibility,
+          questionCount: questionBanksTable.questionCount,
+          topicCount: sql<number>`(select count(*) from question_topics where bank_id = ${questionBanksTable.id})`,
+          updatedAt: questionBanksTable.updatedAt,
+        }).from(questionBanksTable).where(where).orderBy(desc(questionBanksTable.questionCount), desc(questionBanksTable.updatedAt)).limit(pageSize).offset((page - 1) * pageSize);
+        res.json({ items, pagination: { page, pageSize, total: Number(total), totalPages: Math.max(1, Math.ceil(Number(total) / pageSize)) } });
+      } catch (error) {
+        console.error("Error fetching admin question banks:", error);
+        res.status(500).json({ message: "Failed to fetch question banks" });
       }
     },
   );

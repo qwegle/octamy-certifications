@@ -21,6 +21,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { publicProductPath } from "@shared/public-assessment-routes";
 import { AdminAssessmentsManagement } from "@/components/admin-assessments-management";
+import { AdminQuestionBanksManagement } from "@/components/admin-question-banks-management";
 
 import { 
   Shield, 
@@ -322,19 +323,6 @@ function QuestionsManagement() {
       </Dialog>
     </Card>
   );
-}
-
-function AdminQuestionBanksManagement() {
-  const { data: banks = [], isLoading } = useQuery<any[]>({
-    queryKey: ["/api/question-banks", "admin-panel"],
-    queryFn: async () => (await apiRequest("GET", "/api/question-banks")).json(),
-  });
-  return <Card><CardHeader><CardTitle>Question banks</CardTitle><CardDescription>Browse every category bank, topic count, and review status.</CardDescription></CardHeader><CardContent>
-    {isLoading ? <p className="py-8 text-center text-muted-foreground">Loading banks…</p> : <div className="overflow-x-auto"><Table><TableHeader><TableRow><TableHead>Bank</TableHead><TableHead>Owner</TableHead><TableHead>Visibility</TableHead><TableHead>Questions</TableHead><TableHead>State</TableHead></TableRow></TableHeader><TableBody>
-      {banks.map((bank: any) => <TableRow key={bank.id}><TableCell><div className="font-medium">{bank.name}</div><div className="text-xs text-muted-foreground">{bank.slug}</div></TableCell><TableCell className="capitalize">{bank.ownerType}</TableCell><TableCell className="capitalize">{bank.visibility}</TableCell><TableCell>{Number(bank.questionCount || 0).toLocaleString()}</TableCell><TableCell><Badge variant={bank.visibility === "private" ? "secondary" : "default"}>{bank.visibility === "private" ? "Review / private" : "Published"}</Badge></TableCell></TableRow>)}
-      {!banks.length && <TableRow><TableCell colSpan={5} className="py-10 text-center text-muted-foreground">No question banks found.</TableCell></TableRow>}
-    </TableBody></Table></div>}
-  </CardContent></Card>;
 }
 
 // Add Question Form Component
@@ -1065,6 +1053,21 @@ interface ExamAttempt {
   timeTaken: number;
   createdAt: string;
 }
+
+const adminSectionCopy: Record<string, { title: string; description: string }> = {
+  overview: { title: "Platform overview", description: "Health, activity, revenue, and the work that needs attention." },
+  courses: { title: "Learning products", description: "Video courses, PDF/ebooks, modular learning, and bundles." },
+  assessments: { title: "Assessments", description: "In-house exam definitions, categories, slugs, and publication status." },
+  "question-banks": { title: "Question banks", description: "Reusable question pools and topic structures used by assessments." },
+  questions: { title: "Course questions", description: "Questions attached directly to legacy certification courses." },
+  categories: { title: "Taxonomy", description: "Manage the category hierarchy shared by learning products and assessments." },
+  customers: { title: "Learners and customers", description: "Accounts, purchases, certificates, and account status." },
+  exams: { title: "Assessment attempts", description: "Learner submissions, scores, pass status, and completion activity." },
+  "ai-questions": { title: "AI interview questions", description: "Technical interview prompts maintained separately from assessment banks." },
+  contacts: { title: "Support inbox", description: "Contact requests and operational follow-up." },
+  partners: { title: "Partners", description: "Reseller and partner applications, approval, and earnings." },
+  transactions: { title: "Transactions", description: "Payments and transaction records across the platform." },
+};
 
 interface Transaction {
   id: number;
@@ -1863,6 +1866,7 @@ export default function AdminDashboard() {
   
   // Pagination states
   const [customersPage, setCustomersPage] = useState(1);
+  const [categoriesPage, setCategoriesPage] = useState(1);
   const [coursesPage, setCoursesPage] = useState(1);
   const [courseProductFilter, setCourseProductFilter] = useState<"all" | AdminCourse["productType"]>("all");
   const [examsPage, setExamsPage] = useState(1);
@@ -2092,16 +2096,16 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-cream-deep dark:bg-gray-900">
+    <div className="min-h-screen bg-slate-50 text-slate-950">
       {/* Header */}
-      <div className="bg-cream-soft dark:bg-gray-800 shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
+        <div className="mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-3">
               <Shield className="w-8 h-8 text-blue-600" />
               <div>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Admin Dashboard</h1>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Octamy Platform Administration</p>
+                <h1 className="text-xl font-bold text-slate-950">Octamy control center</h1>
+                <p className="text-sm text-slate-500">Content, assessments, users, and operations</p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
@@ -2112,15 +2116,6 @@ export default function AdminDashboard() {
               >
                 <Shield className="h-4 w-4" />
                 Approval queue
-              </Button>
-              <Button
-                onClick={() => setLocation("/enhanced-admin")}
-                variant="outline"
-                size="sm"
-                className="flex items-center gap-2 border-green-600 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20"
-              >
-                <TrendingUp className="h-4 w-4" />
-                Enhanced Version
               </Button>
               <Button variant="outline" size="sm" onClick={() => setLocation("/")}>
                 <Eye className="w-4 h-4 mr-2" />
@@ -2136,23 +2131,32 @@ export default function AdminDashboard() {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="space-y-6">
-          <Tabs defaultValue="overview" className="space-y-4">
-            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-6 lg:grid-cols-11">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="customers">Customers</TabsTrigger>
-              <TabsTrigger value="categories">Categories</TabsTrigger>
-              <TabsTrigger value="courses">Learning products</TabsTrigger>
-              <TabsTrigger value="questions">Questions</TabsTrigger>
-              <TabsTrigger value="question-banks">Question banks</TabsTrigger>
-              <TabsTrigger value="assessments">Assessments</TabsTrigger>
-              <TabsTrigger value="ai-questions">AI Interview</TabsTrigger>
-              <TabsTrigger value="contacts">Contact</TabsTrigger>
-              <TabsTrigger value="exams">Exams</TabsTrigger>
-              <TabsTrigger value="partners">Partners</TabsTrigger>
-              <TabsTrigger value="transactions">Transactions</TabsTrigger>
+      <div className="mx-auto px-4 py-6 sm:px-6 lg:px-8">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="grid items-start gap-6 lg:grid-cols-[240px_minmax(0,1fr)]">
+          <aside className="lg:sticky lg:top-24">
+            <TabsList className="flex h-auto w-full flex-col items-stretch gap-1 rounded-xl border border-slate-200 bg-white p-2 shadow-sm">
+              <p className="px-3 pb-1 pt-2 text-[11px] font-bold uppercase tracking-[0.14em] text-slate-400">Workspace</p>
+              <TabsTrigger value="overview" className="justify-start">Overview</TabsTrigger>
+              <p className="px-3 pb-1 pt-4 text-[11px] font-bold uppercase tracking-[0.14em] text-slate-400">Content</p>
+              <TabsTrigger value="courses" className="justify-start">Learning products</TabsTrigger>
+              <TabsTrigger value="assessments" className="justify-start">Assessments</TabsTrigger>
+              <TabsTrigger value="question-banks" className="justify-start">Question banks</TabsTrigger>
+              <TabsTrigger value="questions" className="justify-start">Course questions</TabsTrigger>
+              <TabsTrigger value="categories" className="justify-start">Taxonomy</TabsTrigger>
+              <TabsTrigger value="ai-questions" className="justify-start">AI interviews</TabsTrigger>
+              <p className="px-3 pb-1 pt-4 text-[11px] font-bold uppercase tracking-[0.14em] text-slate-400">People & operations</p>
+              <TabsTrigger value="customers" className="justify-start">Learners</TabsTrigger>
+              <TabsTrigger value="exams" className="justify-start">Assessment attempts</TabsTrigger>
+              <TabsTrigger value="partners" className="justify-start">Partners</TabsTrigger>
+              <TabsTrigger value="transactions" className="justify-start">Transactions</TabsTrigger>
+              <TabsTrigger value="contacts" className="justify-start">Support inbox</TabsTrigger>
             </TabsList>
+          </aside>
+          <main className="min-w-0 space-y-5">
+            <div className="rounded-xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
+              <h2 className="text-xl font-bold text-slate-950">{adminSectionCopy[activeTab]?.title}</h2>
+              <p className="mt-1 text-sm text-slate-600">{adminSectionCopy[activeTab]?.description}</p>
+            </div>
 
             <TabsContent value="overview" className="space-y-4">
               {/* Quick Stats */}
@@ -2342,7 +2346,7 @@ export default function AdminDashboard() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {categories.map((category: any) => (
+                      {categories.slice((categoriesPage - 1) * itemsPerPage, categoriesPage * itemsPerPage).map((category: any) => (
                         <TableRow key={category.id}>
                           <TableCell>
                             <div className="font-medium">{category.name}</div>
@@ -2421,6 +2425,7 @@ export default function AdminDashboard() {
                       ))}
                     </TableBody>
                   </Table>
+                  {categories.length > itemsPerPage && <div className="flex items-center justify-between border-t pt-4 text-sm text-muted-foreground"><span>{categories.length} categories · Page {categoriesPage} of {Math.ceil(categories.length / itemsPerPage)}</span><div className="flex gap-2"><Button size="sm" variant="outline" disabled={categoriesPage <= 1} onClick={() => setCategoriesPage((page) => page - 1)}>Previous</Button><Button size="sm" variant="outline" disabled={categoriesPage >= Math.ceil(categories.length / itemsPerPage)} onClick={() => setCategoriesPage((page) => page + 1)}>Next</Button></div></div>}
                 </CardContent>
               </Card>
             </TabsContent>
@@ -2611,9 +2616,10 @@ export default function AdminDashboard() {
                               </TableCell>
                             </TableRow>
                           ))}
+                          {!managedCourses.length && <TableRow><TableCell colSpan={9} className="py-12 text-center text-muted-foreground">No learning products match this type.</TableCell></TableRow>}
                         </TableBody>
                       </Table>
-                      {adminCourses.length > itemsPerPage && (
+                      {managedCourses.length > itemsPerPage && (
                         <div className="flex justify-center gap-2 mt-4">
                           <Button
                             variant="outline"
@@ -2624,13 +2630,13 @@ export default function AdminDashboard() {
                             Previous
                           </Button>
                           <span className="flex items-center px-3 text-sm">
-                            Page {coursesPage} of {Math.ceil(adminCourses.length / itemsPerPage)}
+                            Page {coursesPage} of {Math.ceil(managedCourses.length / itemsPerPage)}
                           </span>
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => setCoursesPage(Math.min(Math.ceil(adminCourses.length / itemsPerPage), coursesPage + 1))}
-                            disabled={coursesPage >= Math.ceil(adminCourses.length / itemsPerPage)}
+                            onClick={() => setCoursesPage(Math.min(Math.ceil(managedCourses.length / itemsPerPage), coursesPage + 1))}
+                            disabled={coursesPage >= Math.ceil(managedCourses.length / itemsPerPage)}
                           >
                             Next
                           </Button>
@@ -2981,8 +2987,8 @@ export default function AdminDashboard() {
             <TabsContent value="contacts" className="space-y-4">
               <ContactSubmissionsManagement />
             </TabsContent>
-          </Tabs>
-        </div>
+          </main>
+        </Tabs>
       </div>
     </div>
   );

@@ -90,7 +90,6 @@ const SponsorPage = lazy(() => import("@/pages/sponsor"));
 const AdminLogin = lazy(() => import("@/pages/admin-login"));
 const AdminDashboard = lazy(() => import("@/pages/admin-dashboard"));
 const AdminApprovals = lazy(() => import("@/pages/admin-approvals"));
-const EnhancedAdminDashboard = lazy(() => import("@/pages/enhanced-admin-dashboard"));
 const TempExamResults = lazy(() => import("@/pages/TempExamResults"));
 const PaymentTemp = lazy(() => import("@/pages/PaymentTemp"));
 const Contact = lazy(() => import("@/pages/contact"));
@@ -188,9 +187,10 @@ function Router() {
       <Route path="/admin/login" component={AdminLogin} />
       <Route path="/qwegle/dashboard" component={AdminDashboard} />
       <Route path="/admin/dashboard" component={AdminDashboard} />
+      <Route path="/admin" component={AdminDashboard} />
       <Route path="/admin/approvals" component={AdminApprovals} />
       <Route path="/qwegle/approvals" component={AdminApprovals} />
-      <Route path="/enhanced-admin" component={EnhancedAdminDashboard} />
+      <Route path="/enhanced-admin" component={AdminDashboard} />
       <Route path="/exam/:slug">{() => <LegacyAssessmentRedirect />}</Route>
       <Route path="/exam-results-temp/:tempExamId" component={TempExamResults} />
       <Route path="/payment" component={PaymentTemp} />
