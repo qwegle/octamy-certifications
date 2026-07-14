@@ -29,19 +29,21 @@ interface AdminQuestion {
 export function EnhancedQuestionsManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCourse, setSelectedCourse] = useState<number | undefined>();
+  const [page, setPage] = useState(1);
   const { toast } = useToast();
 
-  const questionsQuery = useQuery<AdminQuestion[]>({
-    queryKey: ["/api/admin/questions", selectedCourse, searchTerm],
+  const questionsQuery = useQuery<{ items: AdminQuestion[]; pagination: any }>({
+    queryKey: ["/api/admin/questions", selectedCourse, searchTerm, page],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (selectedCourse) params.append('courseId', selectedCourse.toString());
       if (searchTerm) params.append('search', searchTerm);
+      params.append('page', String(page)); params.append('pageSize', '50');
       const response = await apiRequest("GET", `/api/admin/questions?${params}`);
       if (!response.ok) {
         throw new Error((await response.json().catch(() => ({}))).message || "Questions could not be loaded");
       }
-      return response.json() as Promise<AdminQuestion[]>;
+      return response.json() as Promise<{ items: AdminQuestion[]; pagination: any }>;
     }
   });
 
@@ -55,7 +57,8 @@ export function EnhancedQuestionsManagement() {
       return response.json() as Promise<AdminCourseSummary[]>;
     },
   });
-  const questions = questionsQuery.data ?? [];
+  const questions = questionsQuery.data?.items ?? [];
+  const pagination = questionsQuery.data?.pagination;
   const courses = coursesQuery.data ?? [];
 
   return (
@@ -73,13 +76,13 @@ export function EnhancedQuestionsManagement() {
               aria-label="Search course questions"
               placeholder="Search questions..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }}
               className="w-full bg-gray-800 pl-9 text-white placeholder:text-gray-400"
             />
           </div>
           <div className="min-w-0">
             <Label htmlFor="admin-question-course" className="sr-only">Filter questions by course</Label>
-            <Select value={selectedCourse?.toString() || "all"} onValueChange={(value) => setSelectedCourse(value === "all" ? undefined : Number(value))} disabled={coursesQuery.isLoading || coursesQuery.isError}>
+            <Select value={selectedCourse?.toString() || "all"} onValueChange={(value) => { setSelectedCourse(value === "all" ? undefined : Number(value)); setPage(1); }} disabled={coursesQuery.isLoading || coursesQuery.isError}>
             <SelectTrigger id="admin-question-course" className="w-full bg-gray-800 border-gray-700 text-white" aria-label="Filter questions by course">
               <SelectValue placeholder="Select course" />
             </SelectTrigger>
@@ -238,6 +241,7 @@ export function EnhancedQuestionsManagement() {
               )}
             </TableBody>
           </Table>
+          {pagination && <div className="flex items-center justify-between border-t border-gray-800 px-3 py-3 text-sm text-gray-300"><span>{pagination.total.toLocaleString()} questions · Page {pagination.page} of {pagination.totalPages}</span><div className="flex gap-2"><Button size="sm" variant="outline" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>Previous</Button><Button size="sm" variant="outline" disabled={page >= pagination.totalPages} onClick={() => setPage((p) => p + 1)}>Next</Button></div></div>}
         </div>
         )}
       </CardContent>

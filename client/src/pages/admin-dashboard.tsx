@@ -53,7 +53,7 @@ function QuestionsManagement() {
   const { toast } = useToast();
 
   const { data: questions = [], isLoading: questionsLoading, refetch: refetchQuestions } = useQuery({
-    queryKey: ["/api/admin/questions", selectedCourse, searchTerm],
+    queryKey: ["/api/admin/questions", selectedCourse, searchTerm, page],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (selectedCourse) params.append('courseId', selectedCourse.toString());
