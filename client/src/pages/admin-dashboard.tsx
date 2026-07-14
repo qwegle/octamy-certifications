@@ -46,6 +46,7 @@ import {
 function QuestionsManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCourse, setSelectedCourse] = useState<number | undefined>();
+  const [page, setPage] = useState(1);
   const [editingQuestion, setEditingQuestion] = useState<any>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const { toast } = useToast();
@@ -56,10 +57,15 @@ function QuestionsManagement() {
       const params = new URLSearchParams();
       if (selectedCourse) params.append('courseId', selectedCourse.toString());
       if (searchTerm) params.append('search', searchTerm);
+      params.append('page', String(page));
+      params.append('pageSize', '50');
       const response = await apiRequest("GET", `/api/admin/questions?${params}`);
       return response.json();
-    }
+    },
   });
+
+  const questionItems = (questions as any)?.items ?? [];
+  const questionPagination = (questions as any)?.pagination;
 
   const { data: courses = [] } = useQuery<any[]>({
     queryKey: ["/api/admin/courses"]
@@ -98,10 +104,10 @@ function QuestionsManagement() {
             <Input
               placeholder="Search questions..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }}
               className="max-w-sm"
             />
-            <Select value={selectedCourse?.toString() || "all"} onValueChange={(value) => setSelectedCourse(value === "all" ? undefined : parseInt(value))}>
+            <Select value={selectedCourse?.toString() || "all"} onValueChange={(value) => { setSelectedCourse(value === "all" ? undefined : parseInt(value)); setPage(1); }}>
               <SelectTrigger className="w-[200px]">
                 <SelectValue placeholder="Filter by course" />
               </SelectTrigger>
@@ -153,7 +159,7 @@ function QuestionsManagement() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {questions.map((question: any) => (
+                  {questionItems.map((question: any) => (
                     <TableRow key={question.id}>
                       <TableCell>
                         <div className="max-w-md">
@@ -217,6 +223,15 @@ function QuestionsManagement() {
                   ))}
                 </TableBody>
               </Table>
+              {questionPagination && (
+                <div className="flex items-center justify-between border-t px-4 py-3 text-sm">
+                  <span className="text-muted-foreground">{questionPagination.total.toLocaleString()} questions · Page {questionPagination.page} of {questionPagination.totalPages}</span>
+                  <div className="flex gap-2">
+                    <Button size="sm" variant="outline" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>Previous</Button>
+                    <Button size="sm" variant="outline" disabled={page >= questionPagination.totalPages} onClick={() => setPage((p) => p + 1)}>Next</Button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -306,6 +321,19 @@ function QuestionsManagement() {
       </Dialog>
     </Card>
   );
+}
+
+function AdminQuestionBanksManagement() {
+  const { data: banks = [], isLoading } = useQuery<any[]>({
+    queryKey: ["/api/question-banks", "admin-panel"],
+    queryFn: async () => (await apiRequest("GET", "/api/question-banks")).json(),
+  });
+  return <Card><CardHeader><CardTitle>Question banks</CardTitle><CardDescription>Browse every category bank, topic count, and review status.</CardDescription></CardHeader><CardContent>
+    {isLoading ? <p className="py-8 text-center text-muted-foreground">Loading banks…</p> : <div className="overflow-x-auto"><Table><TableHeader><TableRow><TableHead>Bank</TableHead><TableHead>Owner</TableHead><TableHead>Visibility</TableHead><TableHead>Questions</TableHead><TableHead>State</TableHead></TableRow></TableHeader><TableBody>
+      {banks.map((bank: any) => <TableRow key={bank.id}><TableCell><div className="font-medium">{bank.name}</div><div className="text-xs text-muted-foreground">{bank.slug}</div></TableCell><TableCell className="capitalize">{bank.ownerType}</TableCell><TableCell className="capitalize">{bank.visibility}</TableCell><TableCell>{Number(bank.questionCount || 0).toLocaleString()}</TableCell><TableCell><Badge variant={bank.visibility === "private" ? "secondary" : "default"}>{bank.visibility === "private" ? "Review / private" : "Published"}</Badge></TableCell></TableRow>)}
+      {!banks.length && <TableRow><TableCell colSpan={5} className="py-10 text-center text-muted-foreground">No question banks found.</TableCell></TableRow>}
+    </TableBody></Table></div>}
+  </CardContent></Card>;
 }
 
 // Add Question Form Component
@@ -2108,12 +2136,13 @@ export default function AdminDashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="space-y-6">
           <Tabs defaultValue="overview" className="space-y-4">
-            <TabsList className="grid w-full grid-cols-10">
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-6 lg:grid-cols-11">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="customers">Customers</TabsTrigger>
               <TabsTrigger value="categories">Categories</TabsTrigger>
               <TabsTrigger value="courses">Courses</TabsTrigger>
               <TabsTrigger value="questions">Questions</TabsTrigger>
+              <TabsTrigger value="question-banks">Question banks</TabsTrigger>
               <TabsTrigger value="ai-questions">AI Interview</TabsTrigger>
               <TabsTrigger value="contacts">Contact</TabsTrigger>
               <TabsTrigger value="exams">Exams</TabsTrigger>
@@ -2930,6 +2959,9 @@ export default function AdminDashboard() {
             {/* Questions Tab */}
             <TabsContent value="questions" className="space-y-4">
               <QuestionsManagement />
+            </TabsContent>
+            <TabsContent value="question-banks" className="space-y-4">
+              <AdminQuestionBanksManagement />
             </TabsContent>
 
             {/* AI Questions Tab */}

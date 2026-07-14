@@ -4779,9 +4779,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     async (req: AuthenticatedRequest, res: Response) => {
       try {
         const { courseId, search } = req.query;
+        const page = Math.max(1, parseInt(String(req.query.page || "1"), 10) || 1);
+        const pageSize = Math.min(100, Math.max(1, parseInt(String(req.query.pageSize || "50"), 10) || 50));
         const questions = await storage.getQuestionsForAdmin(
           courseId ? parseInt(courseId as string) : undefined,
-          search as string
+          search as string,
+          page,
+          pageSize,
         );
         res.json(questions);
       } catch (error) {

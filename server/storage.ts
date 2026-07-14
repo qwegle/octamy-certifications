@@ -1291,10 +1291,17 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Question management for admin
-  async getQuestionsForAdmin(courseId?: number, search?: string): Promise<any[]> {
+  async getQuestionsForAdmin(courseId?: number, search?: string, page = 1, pageSize = 50): Promise<{ items: any[]; pagination: { page: number; pageSize: number; total: number; totalPages: number } }> {
     try {
       console.log('getQuestionsForAdmin called with:', { courseId, search });
 
+      const conditions = and(
+          courseId ? eq(questions.courseId, courseId) : undefined,
+          search ? ilike(questions.question, `%${search}%`) : undefined,
+        );
+      const [{ total }] = await db.select({ total: count() }).from(questions).where(conditions);
+      const safePage = Math.max(1, page);
+      const safePageSize = Math.min(100, Math.max(1, pageSize));
       const result = await db
         .select({
           id: questions.id,
@@ -1308,15 +1315,13 @@ export class DatabaseStorage implements IStorage {
         })
         .from(questions)
         .leftJoin(courses, eq(questions.courseId, courses.id))
-        .where(and(
-          courseId ? eq(questions.courseId, courseId) : undefined,
-          search ? ilike(questions.question, `%${search}%`) : undefined,
-        ))
+        .where(conditions)
         .orderBy(desc(questions.id))
-        .limit(50);
+        .limit(safePageSize)
+        .offset((safePage - 1) * safePageSize);
 
       console.log('SQL result rows:', result.length);
-      return result;
+      return { items: result, pagination: { page: safePage, pageSize: safePageSize, total: Number(total), totalPages: Math.max(1, Math.ceil(Number(total) / safePageSize)) } };
     } catch (error) {
       console.error('Error in getQuestionsForAdmin:', error);
       throw error;
