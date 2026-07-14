@@ -1,0 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+export function AdminQuestionBanksManagement(){const {data=[],isLoading}=useQuery<any[]>({queryKey:["/api/question-banks","admin-shared"],queryFn:async()=>(await apiRequest("GET","/api/question-banks")).json()});return <Card><CardHeader><CardTitle>All question banks ({data.length})</CardTitle></CardHeader><CardContent>{isLoading?<p>Loading…</p>:<div className="grid gap-3 md:grid-cols-2">{data.map((b:any)=><div key={b.id} className="rounded-lg border p-4"><div className="font-medium">{b.name}</div><div className="text-xs text-muted-foreground">{b.slug}</div><div className="mt-2 text-sm">{Number(b.questionCount||0).toLocaleString()} questions · {b.visibility} · {b.ownerType}</div></div>)}</div>}</CardContent></Card>}

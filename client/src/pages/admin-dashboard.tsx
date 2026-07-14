@@ -20,6 +20,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { publicProductPath } from "@shared/public-assessment-routes";
+import { AdminAssessmentsManagement } from "@/components/admin-assessments-management";
 
 import { 
   Shield, 
@@ -2143,6 +2144,7 @@ export default function AdminDashboard() {
               <TabsTrigger value="courses">Courses</TabsTrigger>
               <TabsTrigger value="questions">Questions</TabsTrigger>
               <TabsTrigger value="question-banks">Question banks</TabsTrigger>
+              <TabsTrigger value="assessments">Assessments</TabsTrigger>
               <TabsTrigger value="ai-questions">AI Interview</TabsTrigger>
               <TabsTrigger value="contacts">Contact</TabsTrigger>
               <TabsTrigger value="exams">Exams</TabsTrigger>
@@ -2963,6 +2965,7 @@ export default function AdminDashboard() {
             <TabsContent value="question-banks" className="space-y-4">
               <AdminQuestionBanksManagement />
             </TabsContent>
+            <TabsContent value="assessments" className="space-y-4"><AdminAssessmentsManagement /></TabsContent>
 
             {/* AI Questions Tab */}
             <TabsContent value="ai-questions" className="space-y-4">

@@ -31,7 +31,7 @@ import {
   categories as categoriesTable,
   courses as coursesTable,
 } from "@shared/schema";
-import { desc, and, eq, not, sql } from "drizzle-orm";
+import { desc, and, eq, not, sql, or, ilike, count } from "drizzle-orm";
 import { db, pool } from "./db";
 import { audit } from "./lib/audit";
 import { LearningPathController } from "./controllers/learningPathController";
@@ -4773,6 +4773,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
   );
 
   // Admin Course Questions Management - Secure endpoints
+  app.get(
+    "/api/admin/assessments",
+    authenticateAdminToken,
+    async (req: AuthenticatedRequest, res: Response) => {
+      try {
+        const page = Math.max(1, parseInt(String(req.query.page || "1"), 10) || 1);
+        const pageSize = Math.min(100, Math.max(1, parseInt(String(req.query.pageSize || "50"), 10) || 50));
+        const search = String(req.query.search || "").trim();
+        const conditions = [eq(coursesTable.ownerType, "admin"), eq(coursesTable.productType, "assessment")];
+        if (search) conditions.push(or(ilike(coursesTable.title, `%${search}%`), ilike(coursesTable.slug, `%${search}%`))!);
+        const where = and(...conditions)!;
+        const [{ total }] = await db.select({ total: count() }).from(coursesTable).where(where);
+        const items = await db.select({
+          id: coursesTable.id, title: coursesTable.title, slug: coursesTable.slug,
+          isActive: coursesTable.isActive, visibility: coursesTable.visibility,
+          reviewStatus: coursesTable.reviewStatus, certificationMode: coursesTable.certificationMode,
+          category: { id: categoriesTable.id, name: categoriesTable.name, slug: categoriesTable.slug },
+          questionCount: sql<number>`(select count(*) from questions where questions.course_id = ${coursesTable.id})`,
+        }).from(coursesTable).leftJoin(categoriesTable, eq(categoriesTable.id, coursesTable.categoryId))
+          .where(where).orderBy(desc(coursesTable.createdAt)).limit(pageSize).offset((page - 1) * pageSize);
+        res.json({ items, pagination: { page, pageSize, total: Number(total), totalPages: Math.max(1, Math.ceil(Number(total) / pageSize)) } });
+      } catch (error) {
+        console.error("Error fetching admin assessments:", error);
+        res.status(500).json({ message: "Failed to fetch assessments" });
+      }
+    },
+  );
+
   app.get(
     "/api/admin/questions",
     authenticateAdminToken,
