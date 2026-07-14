@@ -94,8 +94,8 @@ export default function BlueprintEditor() {
   const topicMap = new Map((topicsQuery.data ?? []).map((t) => [t.id, t.name]));
 
   return (
-    <DashboardLayout role="admin" title={`Blueprint — Course #${courseId}`} breadcrumbs={[{ label: "Admin", href: "/qwegle/dashboard" }, { label: `Course #${courseId}` }]} actions={(
-      <Link href="/qwegle/dashboard"><Button size="sm" variant="outline"><ChevronLeft className="w-4 h-4 mr-1" />Back</Button></Link>
+    <DashboardLayout role="admin" title={`Assessment question assignment`} description={`Configure how many questions Assessment #${courseId} draws from each bank topic.`} breadcrumbs={[{ label: "Admin", href: "/admin" }, { label: "Assessments", href: "/admin" }, { label: `Assessment #${courseId}` }]} actions={(
+      <Link href="/admin"><Button size="sm" variant="outline"><ChevronLeft className="w-4 h-4 mr-1" />Back to assessments</Button></Link>
     )}>
         <Card className="mb-4">
           <CardContent className="p-4 space-y-3">

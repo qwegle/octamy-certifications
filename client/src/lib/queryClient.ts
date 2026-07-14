@@ -21,7 +21,8 @@ export async function apiRequest(
   options: { headers?: Record<string, string> } = {},
 ): Promise<Response> {
   // Use appropriate token based on route type
-  const isAdminRoute = url.includes('/admin');
+  const isAdminContext = typeof window !== "undefined" && (window.location.pathname.startsWith('/admin') || window.location.pathname.startsWith('/qwegle') || window.location.pathname.startsWith('/enhanced-admin'));
+  const isAdminRoute = url.includes('/admin') || isAdminContext;
   const isRecruiterRoute = url.includes('/recruiter');
   
   let token: string | null = null;
@@ -88,7 +89,8 @@ export const getQueryFn: <T>(options: {
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
     const url = queryKey[0] as string;
-    const isAdminRoute = url.includes('/admin');
+    const isAdminContext = typeof window !== "undefined" && (window.location.pathname.startsWith('/admin') || window.location.pathname.startsWith('/qwegle') || window.location.pathname.startsWith('/enhanced-admin'));
+    const isAdminRoute = url.includes('/admin') || isAdminContext;
     const isRecruiterRoute = url.includes('/recruiter');
     const token = isAdminRoute
       ? localStorage.getItem('adminToken')
