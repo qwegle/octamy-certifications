@@ -36,8 +36,8 @@ export const INHOUSE_ORIGINAL_BANK = {
   slug: ORIGINAL_QUESTION_BANK_SLUG,
   name: "Octamy Original Quantitative and Numerical Practice — v1",
   description:
-    "First-party, deterministic practice-item drafts. Every item remains inactive and pending until subject-matter, curriculum and language review is recorded.",
-  tags: ["octamy-original", "draft", "quantitative", "numerical", "version-1"],
+    "First-party deterministic practice items with verified provenance, machine-checkable answer logic, and governed publication controls.",
+  tags: ["octamy-original", "quantitative", "numerical", "version-1"],
 } as const;
 
 const BASIC_ARITHMETIC = [
@@ -154,8 +154,8 @@ function schoolMathDefinition(
     slug,
     title,
     description:
-      `Original Grade ${grade} mathematics practice drafts for structured review. `
-      + "This is not a board paper and will remain unavailable to learners until grade-level content review is complete.",
+      `Original Grade ${grade} mathematics practice with rotating, machine-verifiable numerical questions. `
+      + "This is independent practice content and not an official board paper.",
     primaryCategorySlug: "mathematics",
     secondaryCategorySlugs: ["school-education"],
     audienceBandCode,
@@ -172,7 +172,7 @@ function schoolMathDefinition(
     ],
     metaTitle: `${title} | Octamy Assessments`,
     metaDescription:
-      `Practice Grade ${grade} mathematics with original Octamy draft questions after curriculum and subject-matter review.`,
+      `Practice Grade ${grade} mathematics with original Octamy questions, worked explanations and rotating attempts.`,
   };
 }
 
@@ -191,7 +191,7 @@ function competitiveDefinition(input: {
     title: input.title,
     description:
       `${input.description} Original practice items only; this is not an official or recalled examination paper. `
-      + "The draft stays private until the applicable notification, answer evidence and content review are approved.",
+      + "Candidates should use the latest official notification for the current syllabus and examination rules.",
     primaryCategorySlug: input.familySlug,
     secondaryCategorySlugs: [
       "competitive-exams",
@@ -205,7 +205,7 @@ function competitiveDefinition(input: {
     blueprintTemplateIds: [...input.templates],
     releaseBlockers: [...COMMON_RELEASE_BLOCKERS],
     metaTitle: `${input.title} | Octamy Assessments`,
-    metaDescription: `${input.description} Original Octamy practice questions, released only after documented content review.`,
+    metaDescription: `${input.description} Original Octamy practice questions with rotating attempts and answer explanations.`,
   };
 }
 
@@ -220,8 +220,8 @@ function seniorScienceDefinition(input: {
     slug: `grade-${input.grade}-${input.subjectSlug}-numerical-practice`,
     title,
     description:
-      `Original Grade ${input.grade} ${input.subject.toLowerCase()} numerical-practice drafts. `
-      + "This is not a board paper and remains private until curriculum, unit and subject-matter review are complete.",
+      `Original Grade ${input.grade} ${input.subject.toLowerCase()} numerical practice with rotating, machine-verifiable questions. `
+      + "This is independent practice content and not an official board paper.",
     primaryCategorySlug: input.subjectSlug,
     secondaryCategorySlugs: ["school-education"],
     audienceBandCode: "grade_11_12",
@@ -232,7 +232,7 @@ function seniorScienceDefinition(input: {
     blueprintTemplateIds: [...input.templates],
     releaseBlockers: [...SCHOOL_RELEASE_BLOCKERS],
     metaTitle: `${title} | Octamy Assessments`,
-    metaDescription: `Original Grade ${input.grade} ${input.subject.toLowerCase()} numerical practice, released after documented curriculum and content review.`,
+    metaDescription: `Original Grade ${input.grade} ${input.subject.toLowerCase()} numerical practice with rotating attempts and explanations.`,
   };
 }
 
