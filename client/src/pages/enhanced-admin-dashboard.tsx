@@ -299,7 +299,7 @@ function EnhancedAdminDashboard() {
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList className="grid w-full grid-cols-9 bg-gray-900">
             <TabsTrigger value="overview" className="data-[state=active]:bg-cream-soft data-[state=active]:text-black">Overview</TabsTrigger>
-            <TabsTrigger value="courses" className="data-[state=active]:bg-cream-soft data-[state=active]:text-black">Courses</TabsTrigger>
+            <TabsTrigger value="courses" className="data-[state=active]:bg-cream-soft data-[state=active]:text-black">Learning products</TabsTrigger>
             <TabsTrigger value="questions" className="data-[state=active]:bg-cream-soft data-[state=active]:text-black">Questions</TabsTrigger>
             <TabsTrigger value="question-banks" className="data-[state=active]:bg-cream-soft data-[state=active]:text-black">Question banks</TabsTrigger>
             <TabsTrigger value="assessments" className="data-[state=active]:bg-cream-soft data-[state=active]:text-black">Assessments</TabsTrigger>

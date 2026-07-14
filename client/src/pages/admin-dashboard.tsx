@@ -1864,6 +1864,7 @@ export default function AdminDashboard() {
   // Pagination states
   const [customersPage, setCustomersPage] = useState(1);
   const [coursesPage, setCoursesPage] = useState(1);
+  const [courseProductFilter, setCourseProductFilter] = useState<"all" | AdminCourse["productType"]>("all");
   const [examsPage, setExamsPage] = useState(1);
   const [transactionsPage, setTransactionsPage] = useState(1);
   const [partnersPage, setPartnersPage] = useState(1);
@@ -1900,6 +1901,7 @@ export default function AdminDashboard() {
   const { data: adminCourses = [], isLoading: adminCoursesLoading } = useQuery<AdminCourse[]>({
     queryKey: ["/api/admin/courses"],
   });
+  const managedCourses = adminCourses.filter((course) => courseProductFilter === "all" || course.productType === courseProductFilter);
 
   // Fetch exam attempts data
   const { data: examAttempts = [], isLoading: examAttemptsLoading } = useQuery<ExamAttempt[]>({
@@ -2141,7 +2143,7 @@ export default function AdminDashboard() {
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="customers">Customers</TabsTrigger>
               <TabsTrigger value="categories">Categories</TabsTrigger>
-              <TabsTrigger value="courses">Courses</TabsTrigger>
+              <TabsTrigger value="courses">Learning products</TabsTrigger>
               <TabsTrigger value="questions">Questions</TabsTrigger>
               <TabsTrigger value="question-banks">Question banks</TabsTrigger>
               <TabsTrigger value="assessments">Assessments</TabsTrigger>
@@ -2431,8 +2433,8 @@ export default function AdminDashboard() {
                   <Card>
                     <CardHeader className="flex flex-row items-center justify-between">
                       <div>
-                        <CardTitle>Course Management</CardTitle>
-                        <CardDescription>Manage courses, pricing, and content</CardDescription>
+                        <CardTitle>Course library</CardTitle>
+                        <CardDescription>Manage learning products only. Assessments are managed in the Assessments workspace.</CardDescription>
                       </div>
                       <Dialog open={isCreatingCourse} onOpenChange={setIsCreatingCourse}>
                         <DialogTrigger asChild>
@@ -2453,6 +2455,9 @@ export default function AdminDashboard() {
                       </Dialog>
                     </CardHeader>
                     <CardContent>
+                      <div className="mb-4 flex flex-wrap gap-2">
+                        {([['all','All learning products'],['video_course','Video courses'],['ebook','PDF / ebooks'],['bundle','Bundles']] as const).map(([value,label]) => <Button key={value} size="sm" variant={courseProductFilter === value ? "default" : "outline"} onClick={() => { setCourseProductFilter(value); setCoursesPage(1); }}>{label}</Button>)}
+                      </div>
                       <Table>
                         <TableHeader>
                           <TableRow>
@@ -2468,7 +2473,7 @@ export default function AdminDashboard() {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {adminCourses
+                          {managedCourses
                             .slice((coursesPage - 1) * itemsPerPage, coursesPage * itemsPerPage)
                             .map((course: AdminCourse) => (
                             <TableRow key={course.id}>
