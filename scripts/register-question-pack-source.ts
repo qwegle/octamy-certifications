@@ -171,7 +171,7 @@ async function main() {
   process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
 }
 
-if (["register-question-pack-source.ts", "register-question-pack-source.js"].includes(path.basename(process.argv[1] ?? ""))) {
+if (/register-question-pack-source\.(?:c?js|ts)$/.test(path.basename(process.argv[1] ?? ""))) {
   main().catch((error) => {
     process.stderr.write(`${error instanceof Error ? error.message : String(error)}\n`);
     process.exitCode = 1;

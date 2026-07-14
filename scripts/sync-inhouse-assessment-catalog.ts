@@ -385,7 +385,7 @@ async function main() {
   process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (process.argv[1] && (import.meta.url === pathToFileURL(process.argv[1]).href || /sync-inhouse-assessment-catalog\.(?:c?js)$/.test(process.argv[1]))) {
   main().catch((error) => {
     process.stderr.write(`${error instanceof Error ? error.message : String(error)}\n`);
     process.exitCode = 1;

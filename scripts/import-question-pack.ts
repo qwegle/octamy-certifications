@@ -551,7 +551,7 @@ async function main() {
   process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
 }
 
-if (["import-question-pack.ts", "import-question-pack.js"].includes(path.basename(process.argv[1] ?? ""))) {
+if (/import-question-pack\.(?:c?js|ts)$/.test(path.basename(process.argv[1] ?? ""))) {
   main().catch((error) => {
     if (error instanceof QuestionPackValidationError) {
       process.stderr.write(`${error.message}\n${JSON.stringify(error.validationErrors, null, 2)}\n`);
