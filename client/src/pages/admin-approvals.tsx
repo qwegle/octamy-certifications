@@ -10,9 +10,9 @@ import { Badge } from "@/components/ui/badge";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { SEO } from "@/components/seo";
-import { CheckCircle2, XCircle, Clock, GraduationCap, Building2, Briefcase } from "lucide-react";
+import { CheckCircle2, XCircle, Clock, GraduationCap, Building2, Briefcase, ClipboardCheck, BookOpen, ArrowLeft } from "lucide-react";
 
-type Tab = "creators" | "institutes" | "recruiters";
+type Tab = "assessments" | "products" | "creators" | "institutes" | "recruiters";
 
 const ADMIN_TOKEN_KEY = "octamy.admin.token";
 function getAdminToken() {
@@ -32,14 +32,15 @@ async function adminFetch(method: string, url: string, body?: any) {
 export default function AdminApprovals() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const [tab, setTab] = useState<Tab>("creators");
+  const [tab, setTab] = useState<Tab>("assessments");
 
   const { data: summary } = useQuery({
     queryKey: ["/api/admin/approvals/summary"],
     queryFn: async () => (await adminFetch("GET", "/api/admin/approvals/summary")).json(),
   });
 
-  const { data: rows = [], isLoading } = useQuery<any[]>({
+  const contentQuery = useQuery<any[]>({ queryKey: ["/api/admin/courses"], queryFn: async () => (await adminFetch("GET", "/api/admin/courses")).json() });
+  const { data: workspaceRows = [], isLoading: workspacesLoading } = useQuery<any[]>({
     queryKey: [`/api/admin/${tab}`, "pending"],
     queryFn: async () => {
       const path = tab === "recruiters"
@@ -55,18 +56,31 @@ export default function AdminApprovals() {
         return [];
       }
       return r.json();
-    },
+    }, enabled: !["assessments", "products"].includes(tab),
   });
+  const rows = ["assessments", "products"].includes(tab)
+    ? (contentQuery.data || []).filter((item) => tab === "assessments" ? item.productType === "assessment" && (!item.isActive || item.reviewStatus !== "approved") : item.productType !== "assessment" && (!item.isActive || item.reviewStatus !== "approved"))
+    : workspaceRows;
+  const isLoading = ["assessments", "products"].includes(tab) ? contentQuery.isLoading : workspacesLoading;
 
   const update = useMutation({
     mutationFn: async ({ id, status }: { id: number; status: string }) => {
-      const path = tab === "recruiters" ? `/api/admin/recruiters/${id}/kyc-status` : `/api/admin/${tab}/${id}/status`;
-      const r = await adminFetch("PATCH", path, { status });
+      const content = ["assessments", "products"].includes(tab) ? rows.find((item) => item.id === id) : null;
+      let r: Response;
+      if (content) {
+        if (content.ownerType === "admin" && content.productType === "assessment") r = await adminFetch("POST", "/api/admin/assessments/bulk-action", { ids: [id], action: status === "approved" ? "publish" : "unpublish" });
+        else if (content.ownerType === "admin") r = await adminFetch("PUT", `/api/admin/courses/${id}`, status === "approved" ? { isActive: true, visibility: "public" } : { isActive: false, visibility: "private" });
+        else r = await adminFetch("PATCH", `/api/admin/courses/${id}/review`, { status, ...(status === "rejected" ? { reason: "Returned from the admin approval queue for revision." } : {}) });
+      } else {
+        const path = tab === "recruiters" ? `/api/admin/recruiters/${id}/kyc-status` : `/api/admin/${tab}/${id}/status`;
+        r = await adminFetch("PATCH", path, { status });
+      }
       if (!r.ok) throw new Error((await r.json()).message || "Failed");
       return r.json();
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: [`/api/admin/${tab}`] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/admin/courses"] });
       await queryClient.invalidateQueries({ queryKey: ["/api/admin/approvals/summary"] });
       toast({ title: "Updated" });
     },
@@ -74,21 +88,23 @@ export default function AdminApprovals() {
   });
 
   const TABS: { key: Tab; label: string; icon: any; count: number }[] = [
+    { key: "assessments", label: "Assessments", icon: ClipboardCheck, count: (contentQuery.data || []).filter((item) => item.productType === "assessment" && (!item.isActive || item.reviewStatus !== "approved")).length },
+    { key: "products", label: "Learning products", icon: BookOpen, count: (contentQuery.data || []).filter((item) => item.productType !== "assessment" && (!item.isActive || item.reviewStatus !== "approved")).length },
     { key: "creators", label: "Creators", icon: GraduationCap, count: summary?.creators ?? 0 },
     { key: "institutes", label: "Institutes", icon: Building2, count: summary?.institutes ?? 0 },
     { key: "recruiters", label: "Recruiters", icon: Briefcase, count: summary?.recruiters ?? 0 },
   ];
 
   return (
-    <DashboardLayout role="admin" title="Approval queue" description="Review and approve pending creators, institutes, and recruiters." breadcrumbs={[{ label: "Admin", href: "/qwegle/dashboard" }, { label: "Approvals" }]}>
+    <DashboardLayout role="admin" title="Approval queue" description="One place for unpublished content and unverified workspaces." breadcrumbs={[{ label: "Admin", href: "/admin" }, { label: "Approvals" }]}>
       <SEO title="Approval queue · Admin" description="Approve creators, institutes, recruiters" path="/admin/approvals" noIndex />
 
-      <div className="flex gap-2 mb-6 flex-wrap">
+      <div className="mb-6 grid gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:grid-cols-2 lg:grid-cols-5">
           {TABS.map(({ key, label, icon: Icon, count }) => (
             <button
               key={key}
               onClick={() => setTab(key)}
-              className={`pill flex items-center gap-2 transition-all ${tab === key ? "bg-slate-900 text-white border-slate-900" : "hover:bg-cream-deep"}`}
+              className={`flex items-center justify-between gap-2 rounded-lg border px-3 py-3 text-left text-sm font-semibold transition-all ${tab === key ? "border-slate-900 bg-slate-900 text-white" : "border-slate-200 bg-white hover:bg-slate-50"}`}
             >
               <Icon className="w-4 h-4" />
               <span>{label}</span>
@@ -117,15 +133,19 @@ export default function AdminApprovals() {
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <h3 className="font-semibold text-slate-900 truncate">
-                        {tab === "creators" && (r.display_name || r.username || r.email)}
+                      {tab === "assessments" && r.title}
+                      {tab === "products" && r.title}
+                      {tab === "creators" && (r.display_name || r.username || r.email)}
                         {tab === "institutes" && r.name}
                         {tab === "recruiters" && (r.full_name || r.email)}
                       </h3>
                       <Badge variant="outline" className="bg-amber-50 text-amber-900 border-amber-200">
-                        <Clock className="w-3 h-3 mr-1" />{r.status || r.kyc_status}
+                        <Clock className="w-3 h-3 mr-1" />{r.reviewStatus || r.status || r.kyc_status || "pending"}
                       </Badge>
                     </div>
                     <p className="text-xs text-slate-600 mt-1">
+                      {tab === "assessments" && (<>id #{r.id} · /{r.slug} · {r.categoryName || "Uncategorised"} · {r.reviewStatus} · {r.visibility}</>)}
+                      {tab === "products" && (<>id #{r.id} · {r.productType?.replace("_", " ")} · {r.ownerType} · {r.reviewStatus}</>)}
                       {tab === "creators" && (<>id #{r.id} · {r.email} · {r.slug}</>)}
                       {tab === "institutes" && (<>id #{r.id} · {r.contact_email} · {r.industry || "—"} · {r.size_range || "—"}</>)}
                       {tab === "recruiters" && (<>id #{r.id} · {r.email} · {r.company_name || "—"}</>)}

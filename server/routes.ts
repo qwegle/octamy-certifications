@@ -31,6 +31,7 @@ import {
   categories as categoriesTable,
   courses as coursesTable,
   questionBanks as questionBanksTable,
+  questionPackImportRuns,
 } from "@shared/schema";
 import { desc, and, eq, not, sql, or, ilike, count } from "drizzle-orm";
 import { db, pool } from "./db";
@@ -4788,6 +4789,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const [{ total }] = await db.select({ total: count() }).from(coursesTable).where(where);
         const items = await db.select({
           id: coursesTable.id, title: coursesTable.title, slug: coursesTable.slug,
+          description: coursesTable.description, duration: coursesTable.duration,
+          passingScore: coursesTable.passingScore,
           isActive: coursesTable.isActive, visibility: coursesTable.visibility,
           reviewStatus: coursesTable.reviewStatus, certificationMode: coursesTable.certificationMode,
           category: { id: categoriesTable.id, name: categoriesTable.name, slug: categoriesTable.slug },
@@ -4827,6 +4830,138 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } catch (error) {
         console.error("Error fetching admin question banks:", error);
         res.status(500).json({ message: "Failed to fetch question banks" });
+      }
+    },
+  );
+
+  app.post(
+    "/api/admin/assessments/bulk-action",
+    authenticateAdminToken,
+    async (req: AuthenticatedRequest, res: Response) => {
+      try {
+        const parsed = z.object({
+          ids: z.array(z.number().int().positive()).min(1).max(200),
+          action: z.enum(["publish", "unpublish", "delete"]),
+          confirmation: z.string().optional(),
+        }).strict().safeParse(req.body);
+        if (!parsed.success) return res.status(400).json({ message: "Select assessments and a valid action" });
+        const ids = Array.from(new Set(parsed.data.ids));
+        if (parsed.data.action === "delete") {
+          if (parsed.data.confirmation !== "DELETE") return res.status(400).json({ message: "Type DELETE to confirm permanent removal" });
+          for (const id of ids) await storage.deleteCourseAdmin(id);
+          return res.json({ action: "delete", affected: ids.length });
+        }
+        if (parsed.data.action === "publish") {
+          const result = await db.execute(sql`
+            UPDATE courses c SET is_active = true, visibility = 'public', review_status = 'approved',
+              certification_mode = 'octamy', use_blueprint_engine = true, subscription_eligible = true
+            WHERE c.id IN (${sql.join(ids.map((id) => sql`${id}`), sql`,`)})
+              AND c.owner_type = 'admin' AND c.product_type = 'assessment'
+              AND EXISTS (SELECT 1 FROM course_question_blueprint b WHERE b.course_id = c.id)
+              AND NOT EXISTS (
+                SELECT 1 FROM course_question_blueprint b
+                WHERE b.course_id = c.id AND (
+                  SELECT count(*) FROM questions q
+                  WHERE q.topic_id = b.topic_id AND q.is_active = true AND q.review_status = 'approved'
+                    AND (b.difficulty = 'mixed' OR q.difficulty = b.difficulty)
+                ) < b.question_count
+              )
+            RETURNING c.id
+          `);
+          return res.json({ action: "publish", affected: result.rowCount || 0, skipped: ids.length - (result.rowCount || 0) });
+        }
+        const result = await db.execute(sql`
+          UPDATE courses SET is_active = false, visibility = 'private', subscription_eligible = false
+          WHERE id IN (${sql.join(ids.map((id) => sql`${id}`), sql`,`)})
+            AND owner_type = 'admin' AND product_type = 'assessment'
+          RETURNING id
+        `);
+        res.json({ action: "unpublish", affected: result.rowCount || 0 });
+      } catch (error) {
+        console.error("Assessment bulk action failed:", error);
+        res.status(500).json({ message: "Assessment bulk action failed" });
+      }
+    },
+  );
+
+  app.post(
+    "/api/admin/question-banks/:id/bulk-review",
+    authenticateAdminToken,
+    async (req: AuthenticatedRequest, res: Response) => {
+      try {
+        const bankId = Number(req.params.id);
+        const parsed = z.object({ action: z.enum(["approve", "deactivate"]), confirmation: z.string() }).strict().safeParse(req.body);
+        if (!Number.isInteger(bankId) || bankId <= 0 || !parsed.success) return res.status(400).json({ message: "Invalid bulk review request" });
+        if (parsed.data.confirmation !== (parsed.data.action === "approve" ? "APPROVE" : "DEACTIVATE")) return res.status(400).json({ message: `Type ${parsed.data.action === "approve" ? "APPROVE" : "DEACTIVATE"} to confirm` });
+        if (parsed.data.action === "approve") {
+          const sourceCheck = await db.execute(sql`
+            SELECT count(*)::int AS count FROM question_provenance qp
+            INNER JOIN question_pack_sources s ON s.id = qp.source_id
+            WHERE qp.question_id IN (SELECT id FROM questions WHERE bank_id = ${bankId})
+              AND s.rights_review_status = 'verified'
+          `);
+          if (Number(sourceCheck.rows[0]?.count || 0) === 0) return res.status(409).json({ message: "No rights-verified imported questions were found in this bank" });
+          const result = await db.execute(sql`
+            UPDATE questions SET review_status = 'approved', is_active = true,
+              reviewed_by = ${req.user?.userId || null}, reviewed_at = now(), updated_at = now()
+            WHERE bank_id = ${bankId} AND review_status IN ('pending', 'draft')
+          `);
+          return res.json({ action: "approve", affected: result.rowCount || 0 });
+        }
+        const result = await db.execute(sql`
+          UPDATE questions SET is_active = false, updated_at = now()
+          WHERE bank_id = ${bankId} AND is_active = true
+        `);
+        res.json({ action: "deactivate", affected: result.rowCount || 0 });
+      } catch (error) {
+        console.error("Question-bank bulk review failed:", error);
+        res.status(500).json({ message: "Question-bank bulk review failed" });
+      }
+    },
+  );
+
+  app.post(
+    "/api/admin/question-banks",
+    authenticateAdminToken,
+    async (req: AuthenticatedRequest, res: Response) => {
+      try {
+        const parsed = z.object({ name: z.string().trim().min(3).max(160), description: z.string().trim().max(2000).optional(), visibility: z.enum(["private", "unlisted", "public"]).default("private") }).strict().safeParse(req.body);
+        if (!parsed.success) return res.status(400).json({ message: "Check the bank details" });
+        const row = await storage.createQuestionBank({ ...parsed.data, slug: `${slugifyCourseTitle(parsed.data.name)}-${Date.now().toString(36)}`, ownerType: "admin", ownerId: null, createdBy: req.user?.userId || null });
+        res.status(201).json(row);
+      } catch (error) {
+        console.error("Question bank creation failed:", error);
+        res.status(500).json({ message: "Question bank creation failed" });
+      }
+    },
+  );
+
+  app.patch(
+    "/api/admin/question-banks/:id",
+    authenticateAdminToken,
+    async (req: AuthenticatedRequest, res: Response) => {
+      const id = Number(req.params.id);
+      const parsed = z.object({ name: z.string().trim().min(3).max(160).optional(), description: z.string().trim().max(2000).optional(), visibility: z.enum(["private", "unlisted", "public"]).optional() }).strict().safeParse(req.body);
+      if (!Number.isInteger(id) || id <= 0 || !parsed.success) return res.status(400).json({ message: "Invalid bank update" });
+      const row = await storage.updateQuestionBank(id, parsed.data);
+      if (!row) return res.status(404).json({ message: "Question bank not found" });
+      res.json(row);
+    },
+  );
+
+  app.delete(
+    "/api/admin/question-banks/:id",
+    authenticateAdminToken,
+    async (req: AuthenticatedRequest, res: Response) => {
+      try {
+        const id = Number(req.params.id);
+        if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ message: "Invalid bank" });
+        const [history] = await db.select({ total: count() }).from(questionPackImportRuns).where(eq(questionPackImportRuns.bankId, id));
+        if (Number(history?.total || 0) > 0) return res.status(409).json({ message: "Imported banks cannot be deleted because provenance must be retained. Deactivate their questions instead." });
+        await storage.deleteQuestionBank(id);
+        res.json({ deleted: true });
+      } catch (error) {
+        res.status(500).json({ message: "Question bank deletion failed" });
       }
     },
   );
