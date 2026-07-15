@@ -62,6 +62,7 @@ interface Address {
 
 interface Course {
   id: number;
+  slug?: string;
   title: string;
   description: string;
   price: string;
@@ -284,7 +285,7 @@ export default function EnhancedCheckout() {
             description: "You need to take and pass the exam before purchasing a certificate.",
             variant: "destructive",
           });
-          navigate(`/assessments/${course.id}`);
+          navigate(course.slug ? `/get-certified/${course.slug}` : "/get-certified");
         }
       } else {
         // User needs to take exam first
@@ -293,7 +294,7 @@ export default function EnhancedCheckout() {
           description: "You need to take and pass the exam before purchasing a certificate.",
           variant: "destructive",
         });
-        navigate(`/assessments/${course.id}`);
+        navigate(course.slug ? `/get-certified/${course.slug}` : "/get-certified");
       }
     } catch (error) {
       toast({

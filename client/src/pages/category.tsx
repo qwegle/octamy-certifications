@@ -1,19 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useLocation, useParams } from "wouter";
-import { Award, BookOpenCheck, ChevronRight, Clock3, Search, ShieldCheck } from "lucide-react";
+import { BookOpenCheck, ChevronRight, Search } from "lucide-react";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
+import { CertificationCard, type CertificationCardItem } from "@/components/certification-card";
 import { SEO } from "@/components/seo";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { apiRequest } from "@/lib/queryClient";
 import {
   ASSESSMENT_HUB_PATH,
   publicAssessmentCategoryPath,
-  publicAssessmentPath,
 } from "@shared/public-assessment-routes";
 
 type CategoryNode = {
@@ -36,31 +35,9 @@ type CategoryHierarchy = {
   canonicalPath: string;
 };
 
-type AssessmentItem = {
-  id: number;
-  title: string;
-  description: string;
-  slug: string;
-  duration: number;
-  passingScore: number;
-  price: string;
-  level: string;
-  thumbnailUrl: string | null;
-  originLabel: string;
-  certificationLabel: string;
-  category: { name: string; slug: string };
-};
-
 type CatalogResponse = {
-  items: AssessmentItem[];
+  items: CertificationCardItem[];
   pagination: { page: number; pageSize: number; total: number; totalPages: number };
-};
-
-const levelLabels: Record<string, string> = {
-  novice: "Novice",
-  intermediate: "Intermediate",
-  advanced: "Advanced",
-  expert: "Expert",
 };
 
 export default function CategoryPage() {
@@ -96,14 +73,14 @@ export default function CategoryPage() {
   }, [hierarchy?.canonicalPath, setLocation]);
 
   const canonicalPath = hierarchy?.canonicalPath || publicAssessmentCategoryPath(slug);
-  const title = category?.metaTitle || (category ? `${category.name} assessments` : "Assessment category");
-  const description = category?.metaDescription || category?.description || "Browse reviewed Octamy assessments by subject and exam family.";
+  const title = category ? `${category.name} Certification Exams | Octamy` : "Certification path | Octamy";
+  const description = category?.metaDescription || category?.description || "Explore reviewed Octamy certification exams by subject and exam family.";
   const breadcrumbNodes = hierarchy ? [...hierarchy.ancestors, hierarchy.category] : [];
   const jsonLd = useMemo(() => {
     if (!hierarchy) return undefined;
     const itemListElement = [
       { name: "Home", path: "/" },
-      { name: "Assessments", path: ASSESSMENT_HUB_PATH },
+      { name: "Get certified", path: ASSESSMENT_HUB_PATH },
       ...breadcrumbNodes.map((node) => ({ name: node.name, path: publicAssessmentCategoryPath(node.slug) })),
     ].map((item, index) => ({
       "@type": "ListItem",
@@ -146,7 +123,7 @@ export default function CategoryPage() {
             <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-1.5 text-sm text-slate-500">
               <Link href="/" className="hover:text-slate-950">Home</Link>
               <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
-              <Link href={ASSESSMENT_HUB_PATH} className="hover:text-slate-950">Assessments</Link>
+              <Link href={ASSESSMENT_HUB_PATH} className="hover:text-slate-950">Get certified</Link>
               {hierarchy?.ancestors.map((node) => (
                 <span key={node.id} className="contents">
                   <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
@@ -156,9 +133,9 @@ export default function CategoryPage() {
               {category && <><ChevronRight className="h-3.5 w-3.5" aria-hidden="true" /><span className="font-medium text-slate-800" aria-current="page">{category.name}</span></>}
             </nav>
 
-            <Badge className="mt-6 border border-violet-200 bg-violet-50 text-violet-800 hover:bg-violet-50">Octamy in-house taxonomy</Badge>
+            <Badge className="mt-6 border border-violet-200 bg-violet-50 text-violet-800 hover:bg-violet-50">Octamy certification path</Badge>
             <h1 className="mt-4 max-w-4xl text-4xl font-black tracking-tight sm:text-6xl">{category?.name || (hierarchyQuery.isLoading ? "Loading category…" : "Category unavailable")}</h1>
-            <p className="mt-5 max-w-3xl text-base leading-7 text-slate-600 sm:text-lg">{category ? description : "This assessment category could not be found or is no longer public."}</p>
+            <p className="mt-5 max-w-3xl text-base leading-7 text-slate-600 sm:text-lg">{category ? description : "This certification path could not be found or is no longer public."}</p>
 
             {hierarchy?.children.length ? (
               <div className="mt-7 flex flex-wrap gap-2" aria-label="Subcategories">
@@ -174,7 +151,7 @@ export default function CategoryPage() {
               <form className="mt-8 flex max-w-xl gap-2" role="search" onSubmit={(event) => { event.preventDefault(); setSearch(searchInput.trim().slice(0, 120)); }}>
                 <div className="relative flex-1">
                   <Search className="pointer-events-none absolute left-3 top-3.5 h-4 w-4 text-slate-400" />
-                  <Input value={searchInput} onChange={(event) => setSearchInput(event.target.value)} className="h-11 bg-white pl-9" placeholder={`Search ${category.name}`} aria-label={`Search ${category.name} assessments`} />
+                  <Input value={searchInput} onChange={(event) => setSearchInput(event.target.value)} className="h-11 bg-white pl-9" placeholder={`Search ${category.name}`} aria-label={`Search ${category.name} certifications`} />
                 </div>
                 <Button type="submit" className="h-11">Search</Button>
               </form>
@@ -188,39 +165,24 @@ export default function CategoryPage() {
           ) : unavailable || catalogQuery.isError ? (
             <div className="rounded-3xl border border-slate-200 bg-white p-10 text-center">
               <BookOpenCheck className="mx-auto h-10 w-10 text-slate-400" />
-              <h2 className="mt-4 text-xl font-bold">{unavailable ? "Category not found" : "Assessments could not be loaded"}</h2>
-              <p className="mt-2 text-sm text-slate-600">Browse the public assessment catalogue or try this page again.</p>
-              <Button asChild variant="outline" className="mt-5"><Link href={ASSESSMENT_HUB_PATH}>Browse assessments</Link></Button>
+              <h2 className="mt-4 text-xl font-bold">{unavailable ? "Certification path not found" : "Certifications could not be loaded"}</h2>
+              <p className="mt-2 text-sm text-slate-600">Browse all certification paths or try this page again.</p>
+              <Button asChild variant="outline" className="mt-5"><Link href={ASSESSMENT_HUB_PATH}>Browse certifications</Link></Button>
             </div>
           ) : items.length === 0 ? (
             <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-12 text-center">
               <BookOpenCheck className="mx-auto h-10 w-10 text-slate-400" />
-              <h2 className="mt-4 text-xl font-bold">No matching assessments yet</h2>
+              <h2 className="mt-4 text-xl font-bold">No matching certifications yet</h2>
               <p className="mt-2 text-sm text-slate-600">Try a broader search or explore a related subcategory.</p>
             </div>
           ) : (
             <>
               <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
-                <div><h2 id="category-assessments-heading" className="text-2xl font-black">Available assessments</h2><p className="mt-1 text-sm text-slate-600">{total} reviewed Octamy assessment{total === 1 ? "" : "s"} in this taxonomy branch.</p></div>
+                <div><h2 id="category-assessments-heading" className="text-2xl font-black">Available certification exams</h2><p className="mt-1 text-sm text-slate-600">{total} reviewed Octamy certification{total === 1 ? "" : "s"} in this path.</p></div>
                 {total > items.length && <Button asChild variant="outline"><Link href={`${ASSESSMENT_HUB_PATH}?category=${encodeURIComponent(category!.slug)}${search ? `&q=${encodeURIComponent(search)}` : ""}`}>View all results</Link></Button>}
               </div>
               <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-                {items.map((item) => (
-                  <Card key={item.id} className="group overflow-hidden rounded-3xl border-slate-200 shadow-sm transition hover:-translate-y-1 hover:shadow-xl">
-                    <div className="relative aspect-[16/9] overflow-hidden bg-slate-900">
-                      {item.thumbnailUrl ? <img src={item.thumbnailUrl} alt="" className="h-full w-full object-cover transition duration-500 group-hover:scale-105" /> : <div className="grid h-full place-items-center bg-gradient-to-br from-violet-700 via-slate-900 to-sky-800"><Award className="h-14 w-14 text-white/80" /></div>}
-                      <Badge className="absolute left-4 top-4 bg-white text-slate-950 hover:bg-white">{item.originLabel}</Badge>
-                    </div>
-                    <CardContent className="p-5">
-                      <div className="flex flex-wrap gap-2"><Badge variant="outline">{levelLabels[item.level] || item.level}</Badge><Badge variant="outline">{item.category.name}</Badge></div>
-                      <h3 className="mt-4 text-xl font-bold tracking-tight">{item.title}</h3>
-                      <p className="mt-2 line-clamp-3 text-sm leading-6 text-slate-600">{item.description}</p>
-                      <div className="mt-4 grid grid-cols-2 gap-2 rounded-2xl bg-slate-50 p-3 text-xs text-slate-600"><span className="flex items-center gap-1.5"><Clock3 className="h-3.5 w-3.5" />{item.duration} minutes</span><span className="flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5" />Pass {item.passingScore}%</span></div>
-                      <p className="mt-4 text-xs leading-5 text-slate-600">{item.certificationLabel}</p>
-                      <div className="mt-5 flex items-end justify-between gap-3"><div><p className="text-sm font-bold text-emerald-700">Free attempt</p><p className="text-xs text-slate-500">Credential activation ₹{item.price}</p></div><Button asChild><Link href={publicAssessmentPath(item.slug)}>View assessment</Link></Button></div>
-                    </CardContent>
-                  </Card>
-                ))}
+                {items.map((item) => <CertificationCard key={item.id} item={item} />)}
               </div>
             </>
           )}

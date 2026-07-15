@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle, XCircle, Award, Clock, Target, Loader2, ShieldCheck, Mail, UserPlus } from "lucide-react";
+import { CheckCircle, XCircle, Award, Clock, Target, Loader2, ShieldCheck, Mail, TicketCheck, UserPlus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/lib/auth.tsx";
@@ -59,6 +59,8 @@ export default function TempExamResults() {
   const [loading, setLoading] = useState(true);
   const [learnerPlanActive, setLearnerPlanActive] = useState(false);
   const [redeeming, setRedeeming] = useState(false);
+  const [voucherCode, setVoucherCode] = useState("");
+  const [redeemingVoucher, setRedeemingVoucher] = useState(false);
   const { user, token } = useAuth();
   const { toast } = useToast();
 
@@ -121,6 +123,27 @@ export default function TempExamResults() {
       });
     } finally {
       setRedeeming(false);
+    }
+  };
+
+  const redeemInstituteVoucher = async () => {
+    if (!results || !tempExamId || !voucherCode.trim()) return;
+    setRedeemingVoucher(true);
+    try {
+      const response = await apiRequest("POST", "/api/certification-vouchers/redeem", {
+        tempExamId,
+        code: voucherCode.trim(),
+      });
+      const data = await response.json();
+      toast({ title: "Voucher applied", description: "Your institute-sponsored credential has been issued." });
+      navigate(data.redirectTo || `/certificate/${data.certificateId}`);
+    } catch (error) {
+      toast({
+        title: "Voucher was not applied",
+        description: error instanceof Error ? error.message : "Check the code or ask your institute administrator.",
+      });
+    } finally {
+      setRedeemingVoucher(false);
     }
   };
 
@@ -312,6 +335,25 @@ export default function TempExamResults() {
           )}
 
           {results.passed && results.needsPayment && !(results.course.subscriptionEligible && learnerPlanActive) && (
+            <Card className="mt-6 overflow-hidden border-violet-200 bg-white shadow-sm">
+              <CardHeader className="border-b border-violet-100 bg-violet-50/70">
+                <CardTitle className="flex items-center gap-2 text-violet-950"><TicketCheck className="h-5 w-5" />Have an institute certification voucher?</CardTitle>
+                <CardDescription>A valid voucher sponsors the credential after a passing result. It does not change your score or exam evidence.</CardDescription>
+              </CardHeader>
+              <CardContent className="p-6">
+                <div className="flex flex-col gap-3 sm:flex-row">
+                  <label className="sr-only" htmlFor="certification-voucher">Certification voucher code</label>
+                  <input id="certification-voucher" value={voucherCode} onChange={(event) => setVoucherCode(event.target.value.toUpperCase())} autoComplete="off" spellCheck={false} placeholder="OCT-XXXXXXXXXX-XXXXXX" className="h-11 min-w-0 flex-1 rounded-xl border border-slate-300 bg-white px-4 font-mono text-sm uppercase tracking-wide outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-100" />
+                  <Button onClick={redeemInstituteVoucher} disabled={redeemingVoucher || voucherCode.trim().length < 16} className="h-11 rounded-xl px-6">
+                    {redeemingVoucher && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Redeem voucher
+                  </Button>
+                </div>
+                <p className="mt-3 text-xs leading-5 text-slate-500">Assigned vouchers must match the learner email used for this exam. Each code can issue one credential only.</p>
+              </CardContent>
+            </Card>
+          )}
+
+          {results.passed && results.needsPayment && !(results.course.subscriptionEligible && learnerPlanActive) && (
             <Card className="mt-6">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -356,7 +398,7 @@ export default function TempExamResults() {
             </Button>
             <Button
               variant="outline"
-              onClick={() => navigate(results.course.slug ? `/assessments/${results.course.slug}` : "/assessments")}
+              onClick={() => navigate(results.course.slug ? `/get-certified/${results.course.slug}` : "/get-certified")}
             >
               View Exam
             </Button>

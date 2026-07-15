@@ -92,6 +92,10 @@ export function serveStatic(app: Express) {
   const escapeHtml = (s: string) =>
     s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   const withOctamyBrand = (title: string) => /octamy/i.test(title) ? title : `${title} | Octamy`;
+  const certificationTitle = (title: string) => title
+    .replace(/\bPractice\s*\|\s*Octamy Assessments?\b/gi, "Certification Exam | Octamy")
+    .replace(/\bAssessments\b/gi, "Certification Exams")
+    .replace(/\bAssessment\b/gi, "Certification Exam");
 
   const renderMeta = (title: string, description: string, url: string, image: string, noIndex = false) => `
     <title data-react-helmet="true">${escapeHtml(title)}</title>
@@ -119,14 +123,14 @@ export function serveStatic(app: Express) {
       : html.replace(/<!--\s*SEO_HEAD\s*-->/, meta);
   };
 
-  app.get(["/assessments/categories/:slug", "/assessments/:slug"], async (req, res, next) => {
+  app.get(["/get-certified/categories/:slug", "/get-certified/:slug"], async (req, res, next) => {
     try {
       const html = loadIndex();
       const slug = String(req.params.slug || "").toLowerCase();
-      const isExam = !req.path.startsWith("/assessments/categories/");
+      const isExam = !req.path.startsWith("/get-certified/categories/");
       const base = (process.env.APP_URL || "https://octamy.com").replace(/\/+$/, "");
       let title = "Octamy";
-      let description = "Take reviewed skill assessments free and choose whether to activate a verifiable credential after passing.";
+      let description = "Choose a reviewed certification path, take the exam free and activate a verifiable credential after passing.";
       let image = `${base}/og-image.png`;
       let resourceFound = false;
       let indexable = false;
@@ -163,18 +167,18 @@ export function serveStatic(app: Express) {
           if (c) {
             resourceFound = true;
             indexable = true;
-            title = withOctamyBrand(c.metaTitle || `${c.title} assessment`);
+            title = certificationTitle(withOctamyBrand(c.metaTitle || `${c.title} certification exam`));
             description = (c.metaDescription || c.description || description).slice(0, 300);
             image = c.thumbnailUrl || image;
-            canonicalPath = `/assessments/${c.slug}`;
+            canonicalPath = `/get-certified/${c.slug}`;
           }
         } else {
           const [c] = await db.select().from(categories).where(eq(categories.slug, slug)).limit(1);
           if (c?.isActive) {
             resourceFound = true;
-            title = withOctamyBrand(c.metaTitle || `${c.name} assessments`);
-            description = (c.metaDescription || c.description || `Browse reviewed ${c.name.toLowerCase()} assessments on Octamy.`).slice(0, 300);
-            canonicalPath = `/assessments/categories/${c.slug}`;
+            title = withOctamyBrand(`${c.name} certification exams`);
+            description = (c.metaDescription || c.description || `Browse reviewed ${c.name.toLowerCase()} certification exams on Octamy.`).slice(0, 300);
+            canonicalPath = `/get-certified/categories/${c.slug}`;
 
             const [publicAssessment] = await db.select({ id: courses.id }).from(courses)
               .where(and(

@@ -14,6 +14,7 @@ import {
 import { useAuth } from "@/lib/auth.tsx";
 import { apiRequest } from "@/lib/queryClient";
 import octamyLogoDark from "@/assets/image_1750054456482.png";
+import { CertificationMegaMenu, MobileCertificationMenu } from "@/components/certification-mega-menu";
 
 type RoleFlags = {
   isLearner: boolean;
@@ -26,7 +27,6 @@ type RoleFlags = {
 };
 
 const PUBLIC_LINKS = [
-  { href: "/assessments", label: "Assessments" },
   { href: "/creator", label: "For creators" },
   { href: "/institute", label: "For institutes" },
   { href: "/for-recruiters", label: "For recruiters" },
@@ -36,8 +36,8 @@ const PUBLIC_LINKS = [
 const APP_ROUTE_PREFIXES = [
   "/login", "/register", "/forgot-password", "/reset-password", "/dashboard",
   "/progress", "/preferences", "/profile", "/creator/dashboard", "/creator/courses",
-  "/creator/payouts", "/creator/earnings", "/institute/dashboard", "/institute/students",
-  "/institute/cohorts", "/institute/exams", "/institute/reports", "/institute/team",
+  "/creator/payouts", "/creator/earnings", "/institute/dashboard", "/institute/courses", "/institute/students",
+  "/institute/cohorts", "/institute/exams", "/institute/reports", "/institute/team", "/institute/vouchers", "/institute/media", "/institute/settings",
   "/recruiter/dashboard", "/recruiter/analytics", "/recruiter/search", "/recruiter/wallet",
   "/recruiter/profile", "/recruiter/settings", "/recruiter/saved-searches", "/admin",
   "/qwegle", "/enhanced-admin", "/seller-dashboard", "/partner-dashboard", "/question-banks",
@@ -103,7 +103,7 @@ export default function Header() {
     event.preventDefault();
     const query = searchQuery.trim();
     if (!query) return;
-    setLocation(`/assessments?q=${encodeURIComponent(query)}`);
+    setLocation(`/get-certified?q=${encodeURIComponent(query)}`);
     setSearchQuery("");
     setSearchOpen(false);
     setMobileOpen(false);
@@ -121,7 +121,7 @@ export default function Header() {
       </a>
 
       <header className="relative z-50 px-3 pt-3 sm:px-5 sm:pt-4">
-        <div className={`mx-auto max-w-7xl rounded-2xl border px-3 backdrop-blur-xl transition-[background-color,border-color,box-shadow] sm:rounded-full sm:px-5 ${scrolled ? "border-slate-200 bg-white/95 shadow-lg shadow-slate-900/5" : "border-white/80 bg-white/90 shadow-sm shadow-slate-900/5"}`}>
+        <div className={`relative mx-auto max-w-7xl rounded-2xl border px-3 backdrop-blur-xl transition-[background-color,border-color,box-shadow] sm:rounded-full sm:px-5 ${scrolled ? "border-slate-200 bg-white/95 shadow-lg shadow-slate-900/5" : "border-white/80 bg-white/90 shadow-sm shadow-slate-900/5"}`}>
           <div className="flex h-14 min-w-0 items-center justify-between gap-2 sm:h-16 sm:gap-3">
             <Link href="/" aria-label="Octamy home" className="flex min-h-11 shrink-0 items-center rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950">
               <img src={octamyLogoDark} alt="Octamy home" className="h-6 w-auto max-w-[8.5rem] sm:h-7 sm:max-w-none" />
@@ -129,6 +129,7 @@ export default function Header() {
 
             {!isAppRoute && (
               <nav className="hidden items-center gap-1 lg:flex" aria-label="Primary navigation">
+                <CertificationMegaMenu currentPath={location} />
                 {PUBLIC_LINKS.map((item) => (
                   <Link key={item.href} href={item.href} className={`inline-flex min-h-11 items-center rounded-lg px-3 text-sm font-semibold transition-colors ${location === item.href ? "bg-slate-100 text-slate-950" : "text-slate-600 hover:bg-slate-50 hover:text-slate-950"}`}>
                     {item.label}
@@ -137,9 +138,13 @@ export default function Header() {
               </nav>
             )}
 
+            {!isAppRoute && (
+              <SearchForm id="site-certification-search-inline" value={searchQuery} onChange={setSearchQuery} onSubmit={submitSearch} className="hidden min-w-[14rem] max-w-md flex-1 xl:block" />
+            )}
+
             <div className="flex items-center gap-1.5">
               {!isAppRoute && (
-                <button type="button" onClick={() => setSearchOpen((open) => !open)} className="hidden h-11 w-11 items-center justify-center rounded-full text-slate-600 hover:bg-slate-100 hover:text-slate-950 md:inline-flex" aria-label="Search assessments" aria-expanded={searchOpen}>
+                <button type="button" onClick={() => setSearchOpen((open) => !open)} className="hidden h-11 w-11 items-center justify-center rounded-full text-slate-600 hover:bg-slate-100 hover:text-slate-950 md:inline-flex xl:hidden" aria-label="Search certifications" aria-expanded={searchOpen}>
                   <Search className="h-4 w-4" />
                 </button>
               )}
@@ -191,6 +196,7 @@ export default function Header() {
         {mobileOpen && (
           <div id="public-mobile-navigation" className="mx-auto mt-2 max-w-7xl overflow-hidden rounded-2xl border border-slate-200 bg-white p-3 shadow-2xl shadow-slate-900/10 sm:rounded-3xl sm:p-4 lg:hidden">
             {!isAppRoute && <SearchForm id="site-assessment-search-mobile" value={searchQuery} onChange={setSearchQuery} onSubmit={submitSearch} className="mb-3" autoFocus />}
+            {!isAppRoute && <MobileCertificationMenu onNavigate={() => setMobileOpen(false)} />}
             <nav aria-label="Mobile navigation" className="grid gap-1">
               {!isAppRoute && PUBLIC_LINKS.map((item) => (
                 <Link key={item.href} href={item.href} className="flex min-h-11 items-center rounded-xl px-3 text-sm font-semibold text-slate-700 hover:bg-slate-100 hover:text-slate-950">
@@ -227,10 +233,10 @@ export default function Header() {
 function SearchForm({ id, value, onChange, onSubmit, className = "", autoFocus = false }: { id: string; value: string; onChange: (value: string) => void; onSubmit: (event: React.FormEvent) => void; className?: string; autoFocus?: boolean }) {
   return (
     <form onSubmit={onSubmit} role="search" className={className}>
-      <label htmlFor={id} className="sr-only">Search assessments</label>
+      <label htmlFor={id} className="sr-only">Search certifications</label>
       <div className="relative">
         <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden="true" />
-        <input id={id} autoFocus={autoFocus} type="search" value={value} onChange={(event) => onChange(event.target.value)} placeholder="Search assessments or skills" className="h-11 w-full rounded-xl border border-slate-300 bg-slate-50 pl-10 pr-4 text-sm outline-none focus:border-slate-500 focus:bg-white focus:ring-2 focus:ring-slate-200" />
+        <input id={id} autoFocus={autoFocus} type="search" value={value} onChange={(event) => onChange(event.target.value)} placeholder="Search exams, subjects or skills" className="h-11 w-full rounded-xl border border-slate-300 bg-slate-50 pl-10 pr-4 text-sm outline-none focus:border-violet-400 focus:bg-white focus:ring-2 focus:ring-violet-100" />
       </div>
     </form>
   );

@@ -1,5 +1,12 @@
-export const ASSESSMENT_HUB_PATH = "/assessments";
-export const ASSESSMENT_CATEGORY_PREFIX = `${ASSESSMENT_HUB_PATH}/categories`;
+export const CERTIFICATION_HUB_PATH = "/get-certified";
+export const CERTIFICATION_CATEGORY_PREFIX = `${CERTIFICATION_HUB_PATH}/categories`;
+// Kept as aliases because internal authoring and scoring still use the precise
+// domain term "assessment". Public discovery uses outcome-led certification
+// language and URLs.
+export const ASSESSMENT_HUB_PATH = CERTIFICATION_HUB_PATH;
+export const ASSESSMENT_CATEGORY_PREFIX = CERTIFICATION_CATEGORY_PREFIX;
+export const LEGACY_ASSESSMENT_HUB_PATH = "/assessments";
+export const LEGACY_ASSESSMENT_CATEGORY_PREFIX = `${LEGACY_ASSESSMENT_HUB_PATH}/categories`;
 export const OCTAMY_PUBLIC_ORIGIN = "https://octamy.com";
 
 export type PublicProductType = "assessment" | "video_course" | "ebook" | "bundle";
@@ -30,7 +37,7 @@ export function publicLearningPath(slug: unknown): string {
 
 /**
  * Returns the primary public product page. A bundle is primarily a learning
- * product even though its assessment component also has an /assessments URL.
+ * product even though its assessment component also has a certification URL.
  */
 export function publicProductPath(slug: unknown, productType: PublicProductType | string): string {
   return productType === "assessment"

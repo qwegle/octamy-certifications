@@ -40,14 +40,14 @@ describe("assessment catalogue contract", () => {
   });
 
   it("keeps category and assessment slugs on distinct canonical routes", () => {
-    expect(publicAssessmentPath("Data-Literacy")).toBe("/assessments/data-literacy");
-    expect(publicAssessmentCategoryPath("Data-Literacy")).toBe("/assessments/categories/data-literacy");
+    expect(publicAssessmentPath("Data-Literacy")).toBe("/get-certified/data-literacy");
+    expect(publicAssessmentCategoryPath("Data-Literacy")).toBe("/get-certified/categories/data-literacy");
     expect(canonicalPublicSlug("//external.example")).toBeNull();
-    expect(publicAssessmentPath("not/a/slug")).toBe("/assessments");
-    expect(publicProductPath("Number-Sense", "assessment")).toBe("/assessments/number-sense");
+    expect(publicAssessmentPath("not/a/slug")).toBe("/get-certified");
+    expect(publicProductPath("Number-Sense", "assessment")).toBe("/get-certified/number-sense");
     expect(publicProductPath("Number-Sense", "video_course")).toBe("/learn/number-sense");
     expect(publicProductPath("Number-Sense", "bundle")).toBe("/learn/number-sense");
-    expect(canonicalOctamyUrl("/assessments/data-literacy#attempt")).toBe("https://octamy.com/assessments/data-literacy");
+    expect(canonicalOctamyUrl("/get-certified/data-literacy#attempt")).toBe("https://octamy.com/get-certified/data-literacy");
     expect(canonicalOctamyUrl("https://external.example/phish")).toBe("https://octamy.com/");
   });
 
@@ -78,6 +78,6 @@ describe("assessment catalogue contract", () => {
 
     expect(hierarchy?.ancestors.map((item) => item.slug)).toEqual(["school-education"]);
     expect(hierarchy?.children.map((item) => item.slug)).toEqual(["physics", "chemistry"]);
-    expect(hierarchy?.canonicalPath).toBe("/assessments/categories/science");
+    expect(hierarchy?.canonicalPath).toBe("/get-certified/categories/science");
   });
 });

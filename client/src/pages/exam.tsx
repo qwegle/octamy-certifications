@@ -10,11 +10,12 @@ import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { useAuth } from '@/lib/auth.tsx';
 import Header from '@/components/header';
+import { certificationDisplayTitle } from '@/components/certification-card';
 import ExamTimer from '@/components/exam-timer';
 import { ExamStructuredData } from '@/components/seo-structured-data';
 import { SEO } from '@/components/seo';
 import { publicAssessmentCategoryPath, publicAssessmentPath } from '@shared/public-assessment-routes';
-import { AlertTriangle, RotateCcw, Save, WifiOff } from 'lucide-react';
+import { AlertTriangle, Award, CheckCircle2, ChevronRight, Clock3, FileQuestion, RotateCcw, Save, ShieldCheck, TicketCheck, WifiOff } from 'lucide-react';
 
 interface ExamQuestion {
   id: number;
@@ -391,132 +392,81 @@ export default function Exam() {
   if (!course || courseError) {
     return (
       <div className="min-h-screen bg-slate-50">
-        <SEO title="Assessment not found" description="This assessment is unavailable or is no longer public." path={publicAssessmentPath(slug)} noIndex />
+        <SEO title="Certification not found" description="This certification exam is unavailable or is no longer public." path={publicAssessmentPath(slug)} noIndex />
         <Header />
         <main className="mx-auto max-w-xl px-5 py-20 text-center">
-          <h1 className="text-3xl font-black text-slate-950">Assessment unavailable</h1>
-          <p className="mt-3 leading-7 text-slate-600">The link may be incorrect, or this assessment is no longer published.</p>
-          <Button asChild variant="outline" className="mt-6"><Link href="/assessments">Browse public assessments</Link></Button>
+          <h1 className="text-3xl font-black text-slate-950">Certification unavailable</h1>
+          <p className="mt-3 leading-7 text-slate-600">The link may be incorrect, or this certification exam is no longer published.</p>
+          <Button asChild variant="outline" className="mt-6"><Link href="/get-certified">Browse certifications</Link></Button>
         </main>
       </div>
     );
   }
 
   const canonicalPath = course.canonicalPath || publicAssessmentPath(course.slug);
-  const metaDescription = course.metaDescription || `Take the ${course.title} assessment free. Review the published passing threshold before you begin; credential activation is optional after a passing result.`;
+  const displayTitle = certificationDisplayTitle(course.title);
+  const seoTitle = (course.metaTitle || `${displayTitle} | Octamy`)
+    .replace(/\bPractice\s*\|\s*Octamy Assessments?\b/gi, "Certification Exam | Octamy")
+    .replace(/\bAssessments\b/gi, "Certification Exams")
+    .replace(/\bAssessment\b/gi, "Certification Exam");
+  const metaDescription = course.metaDescription || `Take the ${displayTitle} exam free. Review the published passing threshold before you begin; credential activation is optional after a passing result.`;
 
   if (!examStarted) {
     return (
-      <div className="min-h-screen bg-cream-deep">
-        <SEO title={course.metaTitle || `${course.title} assessment`} description={metaDescription} path={canonicalPath} image={course.thumbnailUrl || undefined} />
+      <div className="min-h-screen bg-slate-50">
+        <SEO title={seoTitle} description={metaDescription} path={canonicalPath} image={course.thumbnailUrl || undefined} />
         
         <ExamStructuredData course={course} />
         
         <Header />
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <nav aria-label="Breadcrumb" className="mb-5 flex flex-wrap items-center gap-2 text-sm text-slate-500">
-            <Link href={course.origin === "creator" ? "/creator-assessments" : "/assessments"} className="hover:text-slate-950">{course.origin === "creator" ? "Creator assessments" : "Assessments"}</Link><span aria-hidden="true">/</span><Link href={course.origin === "creator" ? `/creator-assessments?category=${encodeURIComponent(course.category.slug)}` : publicAssessmentCategoryPath(course.category.slug)} className="hover:text-slate-950">{course.category.name}</Link><span aria-hidden="true">/</span><span className="font-medium text-slate-800" aria-current="page">{course.title}</span>
+        <main id="main-content" className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+          <nav aria-label="Breadcrumb" className="mb-7 flex flex-wrap items-center gap-1.5 text-sm text-slate-500">
+            <Link href={course.origin === "creator" ? "/creator-assessments" : "/get-certified"} className="hover:text-slate-950">{course.origin === "creator" ? "Creator certifications" : "Get certified"}</Link><ChevronRight className="h-3.5 w-3.5" aria-hidden="true" /><Link href={course.origin === "creator" ? `/creator-assessments?category=${encodeURIComponent(course.category.slug)}` : publicAssessmentCategoryPath(course.category.slug)} className="hover:text-slate-950">{course.category.name}</Link><ChevronRight className="h-3.5 w-3.5" aria-hidden="true" /><span className="max-w-xs truncate font-medium text-slate-800" aria-current="page">{displayTitle}</span>
           </nav>
-          <Card className="border-cream-deep shadow-sm">
-            <CardHeader>
-              <CardTitle className="text-3xl text-center tracking-tight text-slate-900">
-                {course?.title} Assessment
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="text-center space-y-4">
-                <p className="text-lg text-slate-600">
-                  {course.originLabel} · {course.certificationLabel}
-                </p>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-left">
-                  <div className="rounded-xl border border-cream-deep bg-cream-soft p-4">
-                    <p className="text-xs uppercase tracking-wide text-slate-500">Duration</p>
-                    <p className="mt-1 text-lg font-semibold text-slate-900">{course?.duration} min</p>
-                  </div>
-                  <div className="rounded-xl border border-cream-deep bg-cream-soft p-4">
-                    <p className="text-xs uppercase tracking-wide text-slate-500">Question Type</p>
-                    <p className="mt-1 text-lg font-semibold text-slate-900">MCQ</p>
-                  </div>
-                  <div className="rounded-xl border border-cream-deep bg-cream-soft p-4">
-                    <p className="text-xs uppercase tracking-wide text-slate-500">Pass Score</p>
-                    <p className="mt-1 text-lg font-semibold text-slate-900">{course?.passingScore}%+</p>
-                  </div>
-                  <div className="rounded-xl border border-cream-deep bg-cream-soft p-4">
-                    <p className="text-xs uppercase tracking-wide text-slate-500">Certificate</p>
-                    <p className="mt-1 text-lg font-semibold text-slate-900">Pay after pass</p>
-                  </div>
-                </div>
-                <div className="rounded-xl border border-cream-deep bg-cream-soft p-6">
-                  <h3 className="font-semibold mb-4 text-slate-900">Before you start</h3>
-                  <ul className="text-left space-y-2 text-sm text-slate-600">
-                    <li>• Keep this tab active during the entire assessment.</li>
-                    <li>• You cannot pause or restart once the timer begins.</li>
-                    <li>• Your score is calculated instantly on submission.</li>
-                    <li>• Certificate payment is required only after a passing score.</li>
-                  </ul>
+
+          <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_390px] lg:items-start">
+            <section className="overflow-hidden rounded-[2rem] bg-slate-950 text-white shadow-xl shadow-slate-900/10">
+              <div className="relative overflow-hidden px-6 py-9 sm:px-10 sm:py-12">
+                <div aria-hidden className="absolute -right-24 -top-24 h-72 w-72 rounded-full border-[48px] border-violet-400/10" />
+                <div aria-hidden className="absolute -bottom-24 left-1/3 h-60 w-60 rounded-full bg-sky-500/10 blur-3xl" />
+                <div className="relative">
+                  <div className="flex flex-wrap gap-2"><span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-black uppercase tracking-[0.13em]"><Award className="h-3.5 w-3.5 text-violet-300" />{course.originLabel}</span><span className="rounded-full border border-white/15 px-3 py-1.5 text-xs font-bold text-slate-300">{course.category.name}</span></div>
+                  <h1 className="mt-6 max-w-3xl text-4xl font-black leading-[1.03] tracking-[-0.04em] sm:text-6xl">{displayTitle}</h1>
+                  <p className="mt-5 max-w-2xl text-base leading-7 text-slate-300 sm:text-lg">{course.description}</p>
+                  <p className="mt-5 flex items-start gap-2 text-sm leading-6 text-violet-200"><ShieldCheck className="mt-0.5 h-4 w-4 shrink-0" />{course.certificationLabel}</p>
                 </div>
               </div>
 
-              {!user && (
-                <div className="space-y-4">
-                  <h3 className="font-semibold">Your Information:</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="name">Full Name *</Label>
-                      <input
-                        id="name"
-                        type="text"
-                        value={userInfo.name}
-                        onChange={(e) => setUserInfo(prev => ({ ...prev, name: e.target.value }))}
-                        className="w-full mt-1 px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-slate-900"
-                        placeholder="Enter your full name"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="email">Email Address *</Label>
-                      <input
-                        id="email"
-                        type="email"
-                        value={userInfo.email}
-                        onChange={(e) => setUserInfo(prev => ({ ...prev, email: e.target.value }))}
-                        className="w-full mt-1 px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-slate-900"
-                        placeholder="Enter your email address"
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {savedDraft && (
-                <div className="rounded-2xl border border-sky-200 bg-sky-50 p-5 text-left">
-                  <div className="flex items-start gap-3">
-                    <RotateCcw className="mt-0.5 h-5 w-5 text-sky-700" />
-                    <div className="flex-1">
-                      <h3 className="font-bold text-slate-950">Continue your saved attempt</h3>
-                      <p className="mt-1 text-sm leading-6 text-slate-600">
-                        {Object.keys(savedDraft.answers).length} of {savedDraft.questions.length} answers are saved securely on this device.
-                      </p>
-                      <div className="mt-4 flex flex-wrap gap-2">
-                        <Button onClick={resumeSavedExam}>Resume assessment</Button>
-                        <Button variant="ghost" onClick={discardSavedExam}>Discard saved attempt</Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <div className="text-center">
-                <Button
-                  onClick={startExam}
-                  className="bg-slate-900 text-white px-10 py-3 text-lg hover:bg-black rounded-full shadow-lg shadow-slate-900/20"
-                  disabled={!userInfo.name || !userInfo.email}
-                >
-                  Start Exam
-                </Button>
+              <div className="grid border-t border-white/10 bg-white/[0.04] sm:grid-cols-3">
+                <div className="flex items-center gap-3 border-b border-white/10 p-5 sm:border-b-0 sm:border-r"><Clock3 className="h-5 w-5 text-violet-300" /><div><p className="text-xs uppercase tracking-wider text-slate-400">Duration</p><p className="mt-1 font-bold">{course.duration} minutes</p></div></div>
+                <div className="flex items-center gap-3 border-b border-white/10 p-5 sm:border-b-0 sm:border-r"><FileQuestion className="h-5 w-5 text-sky-300" /><div><p className="text-xs uppercase tracking-wider text-slate-400">Format</p><p className="mt-1 font-bold">Timed MCQ</p></div></div>
+                <div className="flex items-center gap-3 p-5"><ShieldCheck className="h-5 w-5 text-emerald-300" /><div><p className="text-xs uppercase tracking-wider text-slate-400">Pass mark</p><p className="mt-1 font-bold">{course.passingScore}% or higher</p></div></div>
               </div>
-            </CardContent>
-          </Card>
-        </div>
+            </section>
+
+            <aside className="lg:sticky lg:top-28">
+              <Card className="overflow-hidden rounded-[1.75rem] border-slate-200 shadow-xl shadow-slate-900/10">
+                <div className="border-b border-slate-100 bg-gradient-to-br from-violet-50 to-sky-50 p-6">
+                  <p className="text-xs font-black uppercase tracking-[0.14em] text-violet-800">Start when you are ready</p>
+                  <div className="mt-3 flex items-end justify-between gap-4"><div><p className="text-2xl font-black text-slate-950">Free exam attempt</p><p className="mt-1 text-sm text-slate-600">Activate the credential for ₹{course.price} only after passing.</p></div><CheckCircle2 className="h-8 w-8 shrink-0 text-emerald-600" /></div>
+                </div>
+                <CardContent className="space-y-5 p-6">
+                  {!user && <div className="space-y-4"><div><Label htmlFor="name" className="font-bold">Full name</Label><input id="name" type="text" autoComplete="name" value={userInfo.name} onChange={(e) => setUserInfo(prev => ({ ...prev, name: e.target.value }))} className="mt-1.5 h-11 w-full rounded-xl border border-slate-300 px-3 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-100" placeholder="As it should appear on your credential" /></div><div><Label htmlFor="email" className="font-bold">Email address</Label><input id="email" type="email" autoComplete="email" value={userInfo.email} onChange={(e) => setUserInfo(prev => ({ ...prev, email: e.target.value }))} className="mt-1.5 h-11 w-full rounded-xl border border-slate-300 px-3 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-100" placeholder="For result recovery" /></div></div>}
+
+                  {savedDraft && <div className="rounded-2xl border border-sky-200 bg-sky-50 p-4"><div className="flex items-start gap-3"><RotateCcw className="mt-0.5 h-5 w-5 text-sky-700" /><div className="min-w-0 flex-1"><h2 className="font-bold text-slate-950">Saved attempt found</h2><p className="mt-1 text-sm leading-5 text-slate-600">{Object.keys(savedDraft.answers).length} of {savedDraft.questions.length} answers saved on this device.</p><div className="mt-3 flex flex-wrap gap-2"><Button size="sm" onClick={resumeSavedExam}>Resume exam</Button><Button size="sm" variant="ghost" onClick={discardSavedExam}>Discard</Button></div></div></div></div>}
+
+                  {!savedDraft && <Button onClick={startExam} className="h-12 w-full rounded-full text-base font-black" disabled={!userInfo.name || !userInfo.email}>Start certification exam</Button>}
+                  <ul className="space-y-2.5 border-t border-slate-100 pt-5 text-xs leading-5 text-slate-600"><li className="flex gap-2"><CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-600" />Answers autosave on this device during interruptions.</li><li className="flex gap-2"><CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-600" />Your score and answer review appear after submission.</li><li className="flex gap-2"><TicketCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-violet-600" />Institute voucher or All Access can fund activation.</li></ul>
+                </CardContent>
+              </Card>
+            </aside>
+          </div>
+
+          <section className="mt-8 grid gap-4 rounded-[1.75rem] border border-slate-200 bg-white p-6 sm:grid-cols-3 sm:p-8" aria-labelledby="certification-process-title">
+            <div className="sm:col-span-3"><h2 id="certification-process-title" className="text-xl font-black">How this certification works</h2><p className="mt-1 text-sm text-slate-600">A transparent result first. Credential activation is your choice after passing.</p></div>
+            {[{ step: "01", title: "Take the exam", copy: "Stay in this tab and complete the timed questions." }, { step: "02", title: "Review your result", copy: "See the score and the published answer review." }, { step: "03", title: "Activate the credential", copy: "Pay, use All Access or redeem an institute voucher." }].map((item) => <div key={item.step} className="rounded-2xl bg-slate-50 p-5"><span className="text-xs font-black text-violet-700">{item.step}</span><h3 className="mt-2 font-black text-slate-950">{item.title}</h3><p className="mt-1 text-sm leading-6 text-slate-600">{item.copy}</p></div>)}
+          </section>
+        </main>
       </div>
     );
   }

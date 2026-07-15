@@ -136,11 +136,11 @@ export default function CourseDetail() {
     const courseSlug = course?.slug || course?.title?.toLowerCase()
       .replace(/[^a-zA-Z0-9\s]/g, '')
       .replace(/\s+/g, '-');
-    setLocation(`/assessments/${courseSlug}`);
+    setLocation(`/get-certified/${courseSlug}`);
   };
 
   const handleGetCertified = () => {
-    setLocation(`/assessments/${course?.id}`);
+    setLocation(course?.slug ? `/get-certified/${course.slug}` : "/get-certified");
   };
 
   if (isLoading) {
@@ -190,10 +190,10 @@ export default function CourseDetail() {
             name="description"
             content={course.metaDescription || course.description}
           />
-          <link rel="canonical" href={`https://octamy.com/assessments/${course.slug}`} />
+          <link rel="canonical" href={`https://octamy.com/get-certified/${course.slug}`} />
           <meta property="og:title" content={course.title} />
           <meta property="og:description" content={course.metaDescription || course.description} />
-          <meta property="og:url" content={`https://octamy.com/assessments/${course.slug}`} />
+          <meta property="og:url" content={`https://octamy.com/get-certified/${course.slug}`} />
           <meta property="og:type" content="website" />
         </Helmet>
       )}

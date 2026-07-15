@@ -127,6 +127,20 @@
       "when": 1784094104000,
       "tag": "0017_exam_recovery_and_inhouse_pricing",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1784097000000,
+      "tag": "0018_certification_vouchers_and_coupons",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1784125000000,
+      "tag": "0019_voucher_redemption_idempotency",
+      "breakpoints": true
     }
   ]
 }

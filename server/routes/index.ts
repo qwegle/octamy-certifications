@@ -21,6 +21,7 @@ import aiQuestionDraftRoutes from './aiQuestionDraftRoutes';
 import taxonomyRoutes from './taxonomyRoutes';
 import catalogRoutes from './catalogRoutes';
 import learnerSubscriptionRoutes from './learnerSubscriptionRoutes';
+import certificationBenefitRoutes from './certificationBenefitRoutes';
 // Remove sellerRoutes import to prevent conflicts - seller routes are handled directly in main routes.ts
 
 const router = Router();
@@ -48,6 +49,7 @@ router.use('/', aiQuestionDraftRoutes); // Review-first AI question-bank draftin
 router.use('/', taxonomyRoutes); // Admin taxonomy CRUD + public audience bands
 router.use('/', catalogRoutes); // Split Octamy/creator assessment discovery with server filters
 router.use('/', learnerSubscriptionRoutes); // In-house-only learner subscription benefits
+router.use('/', certificationBenefitRoutes); // Institute vouchers + governed coupon pricing
 // Remove seller routes mounting - handled directly in main routes.ts
 
 // Register recruiter routes

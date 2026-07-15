@@ -241,7 +241,7 @@ export default function PaymentTemp() {
               <p className="text-muted-foreground mb-4">
                 You need to pass the exam before purchasing a certificate.
               </p>
-              <Button onClick={() => navigate(`/assessments/${course.slug || courseId}`)} className="w-full">
+              <Button onClick={() => navigate(course.slug ? `/get-certified/${course.slug}` : "/get-certified")} className="w-full">
                 Retake Exam
               </Button>
             </CardContent>

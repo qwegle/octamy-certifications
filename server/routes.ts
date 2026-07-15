@@ -101,6 +101,7 @@ import {
 } from "./lib/pending-exam-access";
 import { buildExamReview } from "./lib/exam-review";
 import {
+  ASSESSMENT_HUB_PATH,
   canonicalPublicSlug,
   PUBLIC_ASSESSMENT_PRODUCT_TYPES,
   publicAssessmentCategoryPath,
@@ -1137,16 +1138,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     console.error("Failed to load user profile routes:", error);
   }
 
-  // Canonical public assessment URLs. Keep legacy links working for existing
-  // bookmarks and search indexes, but consolidate ranking signals on the
-  // descriptive /assessments hierarchy.
+  // Canonical public certification URLs. Keep assessment-era links working
+  // for existing bookmarks and search indexes while consolidating ranking
+  // signals on the outcome-led /get-certified hierarchy.
   const redirectAssessmentPath = (req: Request, res: Response, pathname: string) => {
     const queryIndex = req.originalUrl.indexOf("?");
     const query = queryIndex >= 0 ? req.originalUrl.slice(queryIndex) : "";
     res.redirect(301, `${pathname}${query}`);
   };
-  app.get("/exams", (req, res) => redirectAssessmentPath(req, res, "/assessments"));
-  app.get("/skill-verification", (req, res) => redirectAssessmentPath(req, res, "/assessments"));
+  app.get("/exams", (req, res) => redirectAssessmentPath(req, res, ASSESSMENT_HUB_PATH));
+  app.get("/skill-verification", (req, res) => redirectAssessmentPath(req, res, ASSESSMENT_HUB_PATH));
+  app.get("/assessments", (req, res) => redirectAssessmentPath(req, res, ASSESSMENT_HUB_PATH));
+  app.get("/assessments/categories/:slug", (req, res) => redirectAssessmentPath(
+    req,
+    res,
+    publicAssessmentCategoryPath(req.params.slug),
+  ));
+  app.get("/assessments/:slug", (req, res) => redirectAssessmentPath(
+    req,
+    res,
+    publicAssessmentPath(req.params.slug),
+  ));
   app.get("/exam/:slug", (req, res) => redirectAssessmentPath(
     req,
     res,
@@ -1165,7 +1177,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const today = new Date().toISOString().slice(0, 10);
       const staticUrls: Array<{ path: string; priority: string }> = [
         { path: "", priority: "1.0" },
-        { path: "/assessments", priority: "0.9" },
+        { path: ASSESSMENT_HUB_PATH, priority: "0.9" },
         { path: "/creator-assessments", priority: "0.8" },
         { path: "/courses", priority: "0.9" },
         { path: "/virtual-internships", priority: "0.9" },

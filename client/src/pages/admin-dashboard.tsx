@@ -22,6 +22,7 @@ import { z } from "zod";
 import { publicProductPath } from "@shared/public-assessment-routes";
 import { AdminAssessmentsManagement } from "@/components/admin-assessments-management";
 import { AdminQuestionBanksManagement } from "@/components/admin-question-banks-management";
+import { AdminCertificationBenefits } from "@/components/admin-certification-benefits";
 
 import { 
   Shield, 
@@ -1067,6 +1068,7 @@ const adminSectionCopy: Record<string, { title: string; description: string }> =
   contacts: { title: "Support inbox", description: "Contact requests and operational follow-up." },
   partners: { title: "Partners", description: "Reseller and partner applications, approval, and earnings." },
   transactions: { title: "Transactions", description: "Payments and transaction records across the platform." },
+  benefits: { title: "Vouchers and coupons", description: "Govern institute-sponsored credentials and price promotions without weakening exam evidence." },
 };
 
 interface Transaction {
@@ -2149,6 +2151,7 @@ export default function AdminDashboard() {
               <TabsTrigger value="exams" className="justify-start">Assessment attempts</TabsTrigger>
               <TabsTrigger value="partners" className="justify-start">Partners</TabsTrigger>
               <TabsTrigger value="transactions" className="justify-start">Transactions</TabsTrigger>
+              <TabsTrigger value="benefits" className="justify-start">Vouchers & coupons</TabsTrigger>
               <TabsTrigger value="contacts" className="justify-start">Support inbox</TabsTrigger>
             </TabsList>
           </aside>
@@ -2977,6 +2980,7 @@ export default function AdminDashboard() {
               <AdminQuestionBanksManagement />
             </TabsContent>
             <TabsContent value="assessments" className="space-y-4"><AdminAssessmentsManagement /></TabsContent>
+            <TabsContent value="benefits" className="space-y-4"><AdminCertificationBenefits /></TabsContent>
 
             {/* AI Questions Tab */}
             <TabsContent value="ai-questions" className="space-y-4">

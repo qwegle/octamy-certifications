@@ -35,6 +35,7 @@ const InstituteReports = lazy(() => import("@/pages/institute-reports"));
 const InstituteTeam = lazy(() => import("@/pages/institute-team"));
 const InstitutePayouts = lazy(() => import("@/pages/institute-payouts"));
 const InstituteSettings = lazy(() => import("@/pages/institute-settings"));
+const InstituteVouchers = lazy(() => import("@/pages/institute-vouchers"));
 const CreatorCurriculum = lazy(() => import("@/pages/creator-curriculum"));
 const CreatorEarnings = lazy(() => import("@/pages/creator-earnings"));
 const MediaLibraryPage = lazy(() => import("@/pages/media-library"));
@@ -171,9 +172,12 @@ function Router() {
       <Route path="/pricing" component={Pricing} />
       <Route path="/billing/return" component={BillingReturn} />
       <Route path="/exams" component={LegacyAssessmentHubRedirect} />
-      <Route path="/assessments/categories/:slug" component={CategoryPage} />
-      <Route path="/assessments/:slug" component={Exam} />
-      <Route path="/assessments" component={Assessments} />
+      <Route path="/get-certified/categories/:slug" component={CategoryPage} />
+      <Route path="/get-certified/:slug" component={Exam} />
+      <Route path="/get-certified" component={Assessments} />
+      <Route path="/assessments/categories/:slug">{() => <LegacyAssessmentRedirect category />}</Route>
+      <Route path="/assessments/:slug">{() => <LegacyAssessmentRedirect />}</Route>
+      <Route path="/assessments" component={LegacyAssessmentHubRedirect} />
       <Route path="/creator-assessments" component={CreatorAssessments} />
       <Route path="/courses" component={Courses} />
       <Route path="/learn/:slug" component={CourseLearning} />
@@ -221,6 +225,7 @@ function Router() {
       <Route path="/institute/team" component={InstituteTeam} />
       <Route path="/institute/payouts" component={InstitutePayouts} />
       <Route path="/institute/settings" component={InstituteSettings} />
+      <Route path="/institute/vouchers" component={InstituteVouchers} />
       <Route path="/institute/media">{() => <MediaLibraryPage role="institute" />}</Route>
       <Route path="/creator/courses/:id/curriculum" component={CreatorCurriculum} />
       <Route path="/creator/earnings" component={CreatorEarnings} />

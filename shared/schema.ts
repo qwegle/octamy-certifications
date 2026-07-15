@@ -1236,6 +1236,69 @@ export const subscriptionBenefitUsages = pgTable("subscription_benefit_usages", 
   byUser: index("subscription_benefit_usages_user_idx").on(t.userId, t.createdAt),
 }));
 
+// Institute-sponsored certification vouchers are bearer entitlements with a
+// narrow course/batch scope. Only a SHA-256 digest is persisted; raw codes are
+// returned once at issuance and must be distributed through an approved
+// institute workflow. This prevents a database read from exposing live codes.
+export const certificationVoucherBatches = pgTable("certification_voucher_batches", {
+  id: serial("id").primaryKey(),
+  instituteId: integer("institute_id").references(() => institutes.id, { onDelete: "restrict" }).notNull(),
+  courseId: integer("course_id").references(() => courses.id, { onDelete: "restrict" }),
+  name: text("name").notNull(),
+  quantity: integer("quantity").notNull(),
+  status: text("status").default("active").notNull(), // active | paused | exhausted | revoked
+  expiresAt: timestamp("expires_at").notNull(),
+  createdBy: integer("created_by").references(() => users.id, { onDelete: "restrict" }).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (t) => ({
+  byInstitute: index("certification_voucher_batches_institute_idx").on(t.instituteId, t.createdAt),
+  byCourse: index("certification_voucher_batches_course_idx").on(t.courseId, t.status),
+}));
+
+export const certificationVouchers = pgTable("certification_vouchers", {
+  id: serial("id").primaryKey(),
+  batchId: integer("batch_id").references(() => certificationVoucherBatches.id, { onDelete: "restrict" }).notNull(),
+  codeHash: varchar("code_hash", { length: 64 }).notNull().unique(),
+  codeHint: text("code_hint").notNull(),
+  assignedEmail: text("assigned_email"),
+  assignedUserId: integer("assigned_user_id").references(() => users.id, { onDelete: "set null" }),
+  status: text("status").default("available").notNull(), // available | assigned | redeemed | revoked
+  assignedAt: timestamp("assigned_at"),
+  redeemedBy: integer("redeemed_by").references(() => users.id, { onDelete: "set null" }),
+  certificateId: integer("certificate_id").references(() => certificates.id, { onDelete: "restrict" }).unique(),
+  redemptionKeyHash: varchar("redemption_key_hash", { length: 64 }),
+  redeemedAt: timestamp("redeemed_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => ({
+  byBatchStatus: index("certification_vouchers_batch_status_idx").on(t.batchId, t.status),
+  byAssignedEmail: index("certification_vouchers_assigned_email_idx").on(t.assignedEmail, t.status),
+}));
+
+// Coupons discount an otherwise payable price. They never issue a credential
+// by themselves and are deliberately separate from sponsorship vouchers.
+export const discountCoupons = pgTable("discount_coupons", {
+  id: serial("id").primaryKey(),
+  codeHash: varchar("code_hash", { length: 64 }).notNull().unique(),
+  codeHint: text("code_hint").notNull(),
+  name: text("name").notNull(),
+  courseId: integer("course_id").references(() => courses.id, { onDelete: "restrict" }),
+  discountType: text("discount_type").notNull(), // percent | fixed
+  discountValue: decimal("discount_value", { precision: 10, scale: 2 }).notNull(),
+  status: text("status").default("active").notNull(), // active | paused | expired | revoked
+  validFrom: timestamp("valid_from").defaultNow().notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  maxRedemptions: integer("max_redemptions"),
+  perUserLimit: integer("per_user_limit").default(1).notNull(),
+  redemptionCount: integer("redemption_count").default(0).notNull(),
+  createdBy: integer("created_by").references(() => users.id, { onDelete: "restrict" }).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (t) => ({
+  byCourseStatus: index("discount_coupons_course_status_idx").on(t.courseId, t.status),
+  byValidity: index("discount_coupons_validity_idx").on(t.status, t.validFrom, t.expiresAt),
+}));
+
 export const payments = pgTable("payments", {
   id: serial("id").primaryKey(),
   certificateId: integer("certificate_id").references(() => certificates.id),
@@ -1259,6 +1322,23 @@ export const payments = pgTable("payments", {
   includesPhysicalCopy: boolean("includes_physical_copy").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+export const couponRedemptions = pgTable("coupon_redemptions", {
+  id: serial("id").primaryKey(),
+  couponId: integer("coupon_id").references(() => discountCoupons.id, { onDelete: "restrict" }).notNull(),
+  userId: integer("user_id").references(() => users.id, { onDelete: "set null" }),
+  userEmail: text("user_email").notNull(),
+  courseId: integer("course_id").references(() => courses.id, { onDelete: "restrict" }).notNull(),
+  paymentId: integer("payment_id").references(() => payments.id, { onDelete: "restrict" }),
+  externalKey: text("external_key").notNull().unique(),
+  originalAmount: decimal("original_amount", { precision: 10, scale: 2 }).notNull(),
+  discountAmount: decimal("discount_amount", { precision: 10, scale: 2 }).notNull(),
+  finalAmount: decimal("final_amount", { precision: 10, scale: 2 }).notNull(),
+  redeemedAt: timestamp("redeemed_at").defaultNow().notNull(),
+}, (t) => ({
+  byCoupon: index("coupon_redemptions_coupon_idx").on(t.couponId, t.redeemedAt),
+  byUser: index("coupon_redemptions_user_idx").on(t.userId, t.redeemedAt),
+}));
 
 // Server-enforced access to paid video/PDF/text course content. Preview lessons
 // remain public; non-preview content URLs are redacted without an entitlement.

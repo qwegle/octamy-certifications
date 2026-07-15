@@ -235,7 +235,7 @@ function CredentialCard({
 
           {(status === "expired" || status === "revoked") && (
             <Button asChild className="min-h-11 px-3">
-              <Link href="/assessments" aria-label={`Browse assessments to refresh ${certificate.courseTitle}`}>
+              <Link href="/get-certified" aria-label={`Browse certifications to refresh ${certificate.courseTitle}`}>
                 <RotateCcw className="h-4 w-4" aria-hidden="true" />
                 Retake
               </Link>
@@ -607,7 +607,7 @@ export default function Dashboard() {
                   </Button>
                   {nextAction.href !== "/assessments" && (
                     <Button asChild variant="outline" className="border-slate-700 bg-slate-900 text-white hover:border-slate-600 hover:bg-slate-800 hover:text-white">
-                      <Link href="/assessments">
+                      <Link href="/get-certified">
                         <BookOpen className="h-4 w-4" aria-hidden="true" />
                         Browse assessments
                       </Link>
@@ -769,7 +769,7 @@ export default function Dashboard() {
                 <p className="mt-1 text-sm leading-6 text-slate-600">View, activate, download, and share your assessment-backed credentials.</p>
               </div>
               <Button asChild variant="outline" className="w-full sm:w-auto">
-                <Link href="/assessments">
+                <Link href="/get-certified">
                   <BookOpen className="h-4 w-4" aria-hidden="true" />
                   Browse assessments
                 </Link>
@@ -804,7 +804,7 @@ export default function Dashboard() {
                     Complete an assessment to create a scored evidence record. Activate the credential when you are ready to share it.
                   </p>
                   <Button asChild className="mt-6 w-full sm:w-auto">
-                    <Link href="/assessments">
+                    <Link href="/get-certified">
                       Explore assessments
                       <ArrowRight className="h-4 w-4" aria-hidden="true" />
                     </Link>
