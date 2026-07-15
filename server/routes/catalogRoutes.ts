@@ -277,6 +277,12 @@ router.get("/certification-navigation", async (_req: Request, res: Response) => 
         eq(courses.productType, "assessment"),
         eq(courses.assessmentPurpose, "certification"),
         eq(categories.isActive, true),
+        sql`EXISTS (
+          SELECT 1 FROM course_question_blueprint blueprint
+          INNER JOIN question_banks bank ON bank.id = blueprint.bank_id
+          WHERE blueprint.course_id = ${courses.id}
+            AND bank.exam_family = 'career-certification'
+        )`,
       ))
       .orderBy(asc(categories.sortOrder), asc(courses.title))
       .limit(100);
