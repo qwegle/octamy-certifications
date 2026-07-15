@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 import 'dotenv/config';
 import crypto from 'node:crypto';
-import { Client } from 'pg';
+import pg from 'pg';
+
+const { Client } = pg;
 
 const APPLY = process.argv.includes('--apply');
 const CONFIRM = process.argv.includes('--confirm') && process.argv.includes('CAREER');
