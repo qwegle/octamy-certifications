@@ -127,17 +127,6 @@ export function AdminQuestionBanksManagement() {
     },
     onError: (error: Error) => { if (error.message !== "Cancelled") toast({ title: "Bulk update failed", description: error.message, variant: "destructive" }); },
   });
-  const review = useMutation({
-    mutationFn: async ({ id, action }: { id: number; action: "approve" | "deactivate" }) => {
-      if (!window.confirm(action === "approve" ? "Approve and activate every pending, rights-verified question in this bank?" : "Deactivate all active questions in this bank?")) throw new Error("Cancelled");
-      const response = await apiRequest("POST", `/api/admin/question-banks/${id}/bulk-review`, { action, confirmation: action === "approve" ? "APPROVE" : "DEACTIVATE" });
-      if (!response.ok) throw new Error((await response.json().catch(() => ({}))).message || "Inventory could not be updated");
-      return response.json();
-    },
-    onSuccess: async (result) => { await invalidate(); toast({ title: "Question inventory updated", description: `${Number(result.affected).toLocaleString()} questions changed.` }); },
-    onError: (error: Error) => { if (error.message !== "Cancelled") toast({ title: "Inventory update failed", description: error.message, variant: "destructive" }); },
-  });
-
   const openCreate = () => { setEditing(null); setForm({ ...emptyForm, bankPurpose: purpose }); setDialogOpen(true); };
   const openEdit = (bank: BankItem) => {
     setEditing(bank);
@@ -194,7 +183,7 @@ export function AdminQuestionBanksManagement() {
               <TableCell><div className="font-semibold text-slate-950">{Number(bank.questionCount).toLocaleString()}</div><div className="mt-1 flex flex-wrap gap-1 text-[11px]"><span className="rounded-full bg-emerald-50 px-2 py-0.5 text-emerald-800">E {Number(bank.easyCount).toLocaleString()}</span><span className="rounded-full bg-blue-50 px-2 py-0.5 text-blue-800">M {Number(bank.mediumCount).toLocaleString()}</span><span className="rounded-full bg-violet-50 px-2 py-0.5 text-violet-800">H {Number(bank.hardCount).toLocaleString()}</span></div></TableCell>
               <TableCell><span className="font-semibold">{Number(bank.assessmentCount).toLocaleString()}</span><div className="text-xs text-slate-500">assessments</div><div className="text-xs text-slate-500">{Number(bank.topicCount).toLocaleString()} topics</div></TableCell>
               <TableCell><Badge variant={bank.status === "active" ? "default" : "secondary"} className="capitalize">{bank.status}</Badge><div className="mt-1 text-xs capitalize text-slate-500">{bank.visibility}</div></TableCell>
-              <TableCell><div className="flex justify-end gap-1"><Button asChild size="sm" variant="outline"><Link href={`/admin/question-banks/${bank.id}`}><FolderCog className="mr-1 h-4 w-4" />Manage</Link></Button><Button size="icon" variant="ghost" aria-label={`Edit ${bank.name}`} onClick={() => openEdit(bank)}><Edit className="h-4 w-4" /></Button><Button size="icon" variant="ghost" title="Approve pending questions" disabled={review.isPending} onClick={() => review.mutate({ id: bank.id, action: "approve" })}><CheckCircle2 className="h-4 w-4 text-emerald-700" /></Button></div></TableCell>
+              <TableCell><div className="flex justify-end gap-1"><Button asChild size="sm" variant="outline"><Link href={`/admin/question-banks/${bank.id}`}><FolderCog className="mr-1 h-4 w-4" />Manage and review</Link></Button><Button size="icon" variant="ghost" aria-label={`Edit ${bank.name}`} onClick={() => openEdit(bank)}><Edit className="h-4 w-4" /></Button></div></TableCell>
             </TableRow>)}
             {!items.length && <TableRow><TableCell colSpan={7} className="py-12 text-center text-slate-500">No question banks match these filters.</TableCell></TableRow>}
           </TableBody></Table></div>

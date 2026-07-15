@@ -27,6 +27,7 @@ import {
   type QuestionReviewStatus,
 } from "../lib/question-review-policy";
 import { neutralizeSpreadsheetCell } from "../lib/csv-safety";
+import crypto from "node:crypto";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 const router = Router();
@@ -150,6 +151,7 @@ function questionInsertValues(
     expectedAnswer: data.expectedAnswer ?? null,
     tags: data.tags ?? [],
     explanation: data.explanation ?? null,
+    contentHash: data.contentHash ?? questionContentHash(data),
     reviewStatus: data.reviewStatus ?? "draft",
     generationSource: data.generationSource ?? "human",
     reviewedBy: data.reviewedBy ?? null,
@@ -158,6 +160,15 @@ function questionInsertValues(
     createdBy,
     isActive: data.isActive ?? false,
   };
+}
+
+function questionContentHash(data: { question?: unknown; options?: unknown; expectedAnswer?: unknown }) {
+  const canonical = JSON.stringify({
+    question: String(data.question ?? "").normalize("NFKC").trim().replace(/\s+/g, " ").toLowerCase(),
+    options: Array.isArray(data.options) ? data.options.map((option) => String(option).normalize("NFKC").trim().replace(/\s+/g, " ").toLowerCase()) : [],
+    expectedAnswer: String(data.expectedAnswer ?? "").normalize("NFKC").trim().toLowerCase(),
+  });
+  return crypto.createHash("sha256").update(canonical).digest("hex");
 }
 
 async function insertQuestionsWithBankLock<T>(
@@ -465,7 +476,7 @@ router.delete("/:id/topics/:topicId", requireAuth, withCtx, async (req: AuthedRe
 
 const questionFields = {
   topicId: z.coerce.number().int().positive().nullable().optional(),
-  question: z.string().trim().min(2, "Question text is required").max(10_000),
+  question: z.string().trim().min(10, "Use a complete question of at least 10 characters").max(10_000),
   options: z.array(z.string().trim().max(2_000)).max(20).default([]),
   correctAnswer: z.coerce.number().int().min(0).default(0),
   questionType: z.enum(["multiple_choice", "ai_interactive"]).default("multiple_choice"),
@@ -482,6 +493,10 @@ const questionFields = {
 };
 
 const questionCreateSchema = z.object(questionFields).superRefine((data, ctx) => {
+  const normalizedOptions = data.options.filter(Boolean).map((option) => option.trim().toLocaleLowerCase("en"));
+  if (new Set(normalizedOptions).size !== normalizedOptions.length) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["options"], message: "Answer options must be distinct" });
+  }
   if (data.questionFormat === "mcq_single") {
     const usable = data.options.filter(Boolean);
     if (usable.length < 2) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["options"], message: "Add at least two answer options" });
@@ -492,6 +507,9 @@ const questionCreateSchema = z.object(questionFields).superRefine((data, ctx) =>
     if (indices.length === 0 || indices.some((index) => !data.options[index]?.trim())) {
       ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["expectedAnswer"], message: "Choose one or more valid correct options" });
     }
+  }
+  if (data.questionFormat === "true_false" && !["true", "false"].includes(String(data.expectedAnswer || "").toLowerCase())) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["expectedAnswer"], message: "Choose True or False" });
   }
   if (!["mcq_single", "mcq_multi", "true_false"].includes(data.questionFormat) && !data.expectedAnswer?.trim()) {
     ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["expectedAnswer"], message: "Expected answer is required for this format" });
@@ -563,9 +581,12 @@ router.post("/:id/questions", requireAuth, withCtx, async (req: AuthedRequest, r
     maxQuestions = getCreatorLimits(creatorRow?.plan).maxQuestionsPerBank;
   }
 
+  const needsIndependentReview = bank.ownerType === "admin" && bank.bankPurpose === "certification";
   const values = {
     ...normalizeQuestion(parsed.data),
-    ...governanceForHumanQuestion(req.ctx!.user.id, new Date()),
+    ...(needsIndependentReview
+      ? { generationSource: "human" as const, reviewStatus: "pending" as const, isActive: false, reviewedBy: null, reviewedAt: null }
+      : governanceForHumanQuestion(req.ctx!.user.id, new Date())),
   };
   try {
     const [question] = await insertQuestionsWithBankLock<Array<typeof questions.$inferSelect>>(id, 1, maxQuestions, (tx) => (
@@ -615,6 +636,7 @@ router.patch("/:id/questions/:qid", requireAuth, withCtx, async (req: AuthedRequ
   }
   const normalized = normalizeQuestion(merged.data);
   const allowedUpdate = Object.fromEntries(Object.keys(patch.data).map((key) => [key, (normalized as any)[key]]));
+  allowedUpdate.contentHash = questionContentHash(normalized);
   if (normalized.questionFormat === "true_false") {
     allowedUpdate.options = normalized.options;
     allowedUpdate.expectedAnswer = normalized.expectedAnswer;
@@ -675,6 +697,34 @@ router.post("/:id/questions/:qid/review", requireAuth, withCtx, async (req: Auth
         code: "QUESTION_NOT_REVIEWABLE",
         errors: reviewable.error.flatten(),
       });
+    }
+    if (bank.ownerType === "admin" && bank.bankPurpose === "certification") {
+      if (existing.createdBy === req.ctx!.user.id) {
+        return res.status(409).json({
+          message: "Octamy certification questions require a reviewer other than the author.",
+          code: "INDEPENDENT_REVIEW_REQUIRED",
+        });
+      }
+      if (!existing.topicId || !existing.explanation?.trim() || existing.explanation.trim().length < 10 || !existing.contentHash) {
+        return res.status(409).json({
+          message: "Add a competency topic, explanation, and content identity before approval.",
+          code: "QUESTION_QUALITY_REQUIREMENTS_NOT_MET",
+        });
+      }
+      if (existing.generationSource !== "human") {
+        const provenance = await db.execute(sql`
+          SELECT 1 FROM question_provenance qp
+          INNER JOIN question_pack_sources source ON source.id = qp.source_id
+          WHERE qp.question_id = ${questionId} AND source.rights_review_status = 'verified'
+          LIMIT 1
+        `);
+        if (!provenance.rows.length) {
+          return res.status(409).json({
+            message: "Imported or AI-drafted certification questions require verified provenance before approval.",
+            code: "VERIFIED_PROVENANCE_REQUIRED",
+          });
+        }
+      }
     }
   }
 

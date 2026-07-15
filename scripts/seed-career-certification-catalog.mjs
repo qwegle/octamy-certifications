@@ -23,15 +23,16 @@ const rootCategories = [
   ['software-engineering', 'Software Engineering', 'Programming, APIs, testing and engineering fundamentals.', 'Code2', 10],
   ['cybersecurity', 'Cybersecurity', 'Security fundamentals, cloud security and operational risk awareness.', 'ShieldCheck', 40],
   ['product-business-technology', 'Product and Business Technology', 'Product, business analysis and digital operations skills.', 'BriefcaseBusiness', 50],
+  ['it-operations-support', 'IT Operations and Support', 'Service desk, systems, networking and workplace technology operations.', 'ServerCog', 70],
 ];
 
 const assessments = [
-  ['sap-s4hana-finance-foundations', 'SAP S/4HANA Finance Foundations', 'enterprise-applications', 'ERP finance processes, master data, postings and reporting fundamentals for SAP S/4HANA roles.', 'intermediate', 45, 70, 149],
+  ['sap-s4hana-finance-foundations', 'SAP S/4HANA Finance Skills', 'enterprise-applications', 'Independent Octamy assessment of ERP finance processes, master data, postings and reporting skills used in SAP S/4HANA roles.', 'intermediate', 45, 70, 149],
   ['sap-mm-procurement-foundations', 'SAP MM Procurement Foundations', 'enterprise-applications', 'Procure-to-pay, purchasing documents, inventory movement and vendor process fundamentals.', 'intermediate', 45, 70, 149],
-  ['oracle-erp-cloud-financials-foundations', 'Oracle ERP Cloud Financials Foundations', 'enterprise-applications', 'Oracle Cloud financials, ledgers, payables, receivables and close-process fundamentals.', 'intermediate', 45, 70, 149],
-  ['salesforce-crm-admin-foundations', 'Salesforce CRM Admin Foundations', 'enterprise-applications', 'CRM objects, users, permissions, automation and reporting fundamentals for Salesforce admin roles.', 'novice', 40, 70, 99],
-  ['aws-cloud-practitioner-foundations', 'AWS Cloud Practitioner Foundations', 'cloud-devops', 'AWS core services, billing, security, networking and cloud operating model fundamentals.', 'novice', 40, 70, 99],
-  ['azure-fundamentals-az-900-readiness', 'Microsoft Azure Fundamentals Readiness', 'cloud-devops', 'Azure compute, storage, identity, networking, pricing and governance fundamentals.', 'novice', 40, 70, 99],
+  ['oracle-erp-cloud-financials-foundations', 'Oracle ERP Cloud Financials Skills', 'enterprise-applications', 'Independent Octamy assessment of Oracle Cloud financials, ledgers, payables, receivables and close-process skills.', 'intermediate', 45, 70, 149],
+  ['salesforce-crm-admin-foundations', 'Salesforce CRM Administration Skills', 'enterprise-applications', 'Independent Octamy assessment of CRM objects, users, permissions, automation and reporting skills used in Salesforce administration.', 'novice', 40, 70, 99],
+  ['aws-cloud-practitioner-foundations', 'AWS Cloud Foundations Skills', 'cloud-devops', 'Independent Octamy assessment of AWS core services, billing, security, networking and cloud operating-model skills.', 'novice', 40, 70, 99],
+  ['azure-fundamentals-az-900-readiness', 'Microsoft Azure Foundations Skills', 'cloud-devops', 'Independent Octamy assessment of Azure compute, storage, identity, networking, pricing and governance skills.', 'novice', 40, 70, 99],
   ['devops-ci-cd-foundations', 'DevOps CI/CD Foundations', 'cloud-devops', 'Version control, pipelines, release safety, observability and deployment automation fundamentals.', 'intermediate', 45, 70, 149],
   ['kubernetes-foundations', 'Kubernetes Foundations', 'cloud-devops', 'Pods, deployments, services, configuration, scaling and operational basics for Kubernetes workloads.', 'intermediate', 45, 70, 149],
   ['ai-fundamentals-for-work', 'AI Fundamentals for Work', 'data-ai-analytics', 'Practical AI vocabulary, model limitations, data privacy, prompts and safe workplace AI adoption.', 'novice', 35, 70, 99],
@@ -45,7 +46,52 @@ const assessments = [
   ['cloud-security-foundations', 'Cloud Security Foundations', 'cybersecurity', 'IAM, encryption, network controls, logging and cloud security posture fundamentals.', 'intermediate', 45, 70, 149],
   ['business-analyst-digital-foundations', 'Business Analyst Digital Foundations', 'product-business-technology', 'Requirements, process mapping, stakeholder communication, acceptance criteria and digital delivery basics.', 'novice', 40, 70, 99],
   ['product-management-tech-foundations', 'Product Management Tech Foundations', 'product-business-technology', 'Discovery, prioritisation, metrics, roadmaps, delivery collaboration and product decision-making fundamentals.', 'novice', 40, 70, 99],
+  ['sap-s4hana-sales-distribution-skills', 'SAP S/4HANA Sales and Distribution Skills', 'enterprise-applications', 'Independent assessment of order-to-cash, pricing, delivery, billing and sales master-data skills.', 'intermediate', 50, 70, 149],
+  ['sap-abap-development-skills', 'SAP ABAP Development Skills', 'enterprise-applications', 'Independent assessment of ABAP language, data access, object-oriented design, debugging and clean-core extension skills.', 'intermediate', 60, 70, 199],
+  ['oracle-cloud-supply-chain-foundations', 'Oracle Cloud Supply Chain Skills', 'enterprise-applications', 'Independent assessment of procurement, inventory, order management and supply-chain process skills.', 'intermediate', 50, 70, 149],
+  ['servicenow-administration-foundations', 'ServiceNow Administration Skills', 'enterprise-applications', 'Independent assessment of platform configuration, users, workflows, service catalogues, reporting and operational controls.', 'novice', 45, 70, 149],
+  ['docker-containerization-foundations', 'Docker Containerization Skills', 'cloud-devops', 'Images, containers, networking, storage, Compose, security and production container workflows.', 'novice', 45, 70, 99],
+  ['terraform-infrastructure-as-code-foundations', 'Terraform Infrastructure as Code Skills', 'cloud-devops', 'Providers, state, modules, planning, lifecycle, security and collaborative infrastructure delivery.', 'intermediate', 55, 70, 149],
+  ['aws-solutions-architecture-skills', 'AWS Solutions Architecture Skills', 'cloud-devops', 'Independent assessment of resilient AWS architecture, networking, security, data services and cost trade-offs.', 'advanced', 70, 72, 199],
+  ['azure-administration-skills', 'Microsoft Azure Administration Skills', 'cloud-devops', 'Independent assessment of Azure identity, governance, compute, storage, networking and operational administration.', 'intermediate', 60, 70, 149],
+  ['site-reliability-engineering-foundations', 'Site Reliability Engineering Foundations', 'cloud-devops', 'Service levels, observability, incident response, capacity, toil reduction and resilient operations.', 'intermediate', 55, 70, 149],
+  ['python-data-analysis-skills', 'Python Data Analysis Skills', 'data-ai-analytics', 'Data preparation, pandas, numerical analysis, visualisation, validation and reproducible analytical workflows.', 'intermediate', 55, 70, 149],
+  ['power-bi-data-analyst-skills', 'Power BI Data Analyst Skills', 'data-ai-analytics', 'Independent assessment of data modelling, Power Query, DAX, visual design, governance and insight delivery.', 'intermediate', 55, 70, 149],
+  ['advanced-sql-analytics-skills', 'Advanced SQL Analytics Skills', 'data-ai-analytics', 'Joins, window functions, query design, performance, data quality and analytical problem solving.', 'advanced', 65, 72, 199],
+  ['data-engineering-foundations', 'Data Engineering Foundations', 'data-ai-analytics', 'Batch and streaming pipelines, modelling, orchestration, quality, observability and platform fundamentals.', 'intermediate', 60, 70, 149],
+  ['generative-ai-application-engineering', 'Generative AI Application Engineering', 'data-ai-analytics', 'LLM application design, grounding, tools, evaluation, safety, latency, cost and production operations.', 'advanced', 70, 72, 199],
+  ['llm-rag-evaluation-foundations', 'LLM RAG and Evaluation Skills', 'data-ai-analytics', 'Retrieval, chunking, ranking, grounded generation, evaluation datasets, safety and monitoring.', 'advanced', 70, 72, 199],
+  ['java-spring-boot-backend-skills', 'Java and Spring Boot Backend Skills', 'software-engineering', 'Java, Spring Boot APIs, persistence, testing, security, observability and production design.', 'intermediate', 60, 70, 149],
+  ['csharp-dotnet-backend-skills', 'C# and .NET Backend Skills', 'software-engineering', 'C#, ASP.NET Core APIs, data access, testing, security, dependency injection and production operations.', 'intermediate', 60, 70, 149],
+  ['typescript-application-development-skills', 'TypeScript Application Development Skills', 'software-engineering', 'Type modelling, narrowing, generics, application architecture, testing and reliable JavaScript integration.', 'intermediate', 55, 70, 149],
+  ['react-application-engineering-skills', 'React Application Engineering Skills', 'software-engineering', 'Components, state, data flow, accessibility, performance, testing and frontend architecture.', 'intermediate', 55, 70, 149],
+  ['api-design-microservices-foundations', 'API Design and Microservices Skills', 'software-engineering', 'HTTP contracts, boundaries, reliability, security, observability and distributed-system trade-offs.', 'advanced', 70, 72, 199],
+  ['software-testing-qa-foundations', 'Software Testing and QA Skills', 'software-engineering', 'Test strategy, automation, exploratory testing, API/UI validation, defects and release confidence.', 'novice', 50, 70, 99],
+  ['git-linux-developer-workflows', 'Git and Linux Developer Workflows', 'software-engineering', 'Version control, branching, command-line workflows, permissions, processes and delivery collaboration.', 'novice', 45, 70, 99],
+  ['soc-analyst-foundations', 'SOC Analyst Foundations', 'cybersecurity', 'Alert triage, logs, threat context, investigation, escalation and security-operations workflows.', 'novice', 50, 70, 149],
+  ['application-security-foundations', 'Application Security Skills', 'cybersecurity', 'Threat modelling, secure design, common vulnerabilities, testing, remediation and software-supply-chain controls.', 'intermediate', 60, 72, 199],
+  ['identity-access-management-foundations', 'Identity and Access Management Skills', 'cybersecurity', 'Authentication, authorisation, federation, lifecycle controls, privileged access and auditability.', 'intermediate', 55, 70, 149],
+  ['incident-response-threat-analysis', 'Incident Response and Threat Analysis Skills', 'cybersecurity', 'Preparation, investigation, containment, evidence handling, recovery and post-incident improvement.', 'advanced', 70, 72, 199],
+  ['agile-scrum-delivery-foundations', 'Agile and Scrum Delivery Skills', 'product-business-technology', 'Goals, backlogs, facilitation, flow, feedback, metrics and practical delivery decisions.', 'novice', 45, 70, 99],
+  ['technical-project-management-foundations', 'Technical Project Management Skills', 'product-business-technology', 'Scope, dependencies, risk, delivery planning, stakeholder decisions and technical programme execution.', 'intermediate', 55, 70, 149],
+  ['it-support-service-desk-foundations', 'IT Support and Service Desk Skills', 'it-operations-support', 'Ticket triage, troubleshooting, customer communication, escalation, knowledge and service controls.', 'novice', 45, 70, 99],
+  ['linux-system-administration-foundations', 'Linux System Administration Skills', 'it-operations-support', 'Users, permissions, processes, networking, storage, services, logging and operational troubleshooting.', 'intermediate', 55, 70, 149],
+  ['networking-support-foundations', 'Networking Support Foundations', 'it-operations-support', 'Addressing, switching, routing, DNS, DHCP, wireless, diagnostics and secure network operations.', 'novice', 50, 70, 99],
 ];
+
+const competencyTopics = {
+  'enterprise-applications': ['Platform foundations', 'Master data', 'Business process flows', 'Configuration', 'Integration', 'Security and access', 'Reporting and controls', 'Troubleshooting'],
+  'cloud-devops': ['Architecture foundations', 'Compute and containers', 'Storage and data', 'Networking', 'Identity and security', 'Infrastructure automation', 'Observability', 'Reliability and recovery', 'Cost and governance'],
+  'data-ai-analytics': ['Data foundations', 'Preparation and quality', 'Analysis and modelling', 'Evaluation', 'Visualisation and communication', 'Architecture and pipelines', 'Responsible AI and security', 'Production monitoring'],
+  'software-engineering': ['Language foundations', 'Application design', 'Data and persistence', 'APIs and integration', 'Testing and quality', 'Security', 'Performance', 'Delivery and operations', 'Troubleshooting'],
+  cybersecurity: ['Security foundations', 'Identity and access', 'Network and endpoint defence', 'Application and cloud security', 'Detection and analysis', 'Incident response', 'Risk and governance', 'Operational troubleshooting'],
+  'product-business-technology': ['Discovery and outcomes', 'Requirements and scope', 'Prioritisation', 'Delivery planning', 'Stakeholder communication', 'Metrics and analysis', 'Risk and governance', 'Continuous improvement'],
+  'it-operations-support': ['Service foundations', 'Users and access', 'Devices and operating systems', 'Networking', 'Troubleshooting', 'Security and safety', 'Service communication', 'Monitoring and escalation'],
+};
+
+function topicSlug(value) {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
 
 function questionTemplates(title, slug) {
   const domain = title.replace(/ Foundations| Readiness| for Work/g, '');
@@ -124,9 +170,9 @@ async function main() {
           default_review_policy, subscription_eligible, reseller_eligible, use_blueprint_engine,
           meta_title, meta_description, featured_at
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7::numeric, 'assessment', $8, true, false, 'admin', null,
-          'public', 'en', 'octamy', 'certification', 'approved', 'immediate', false, true, true,
-          $9, $10, now())
+        VALUES ($1, $2, $3, $4, $5, $6, $7::numeric, 'assessment', $8, false, false, 'admin', null,
+          'private', 'en', 'octamy', 'certification', 'pending', 'immediate', false, true, true,
+          $9, $10, null)
         ON CONFLICT (slug) DO UPDATE SET
           title = EXCLUDED.title,
           description = EXCLUDED.description,
@@ -136,20 +182,17 @@ async function main() {
           price = EXCLUDED.price,
           product_type = 'assessment',
           level = EXCLUDED.level,
-          is_active = true,
           owner_type = 'admin',
           owner_id = null,
-          visibility = 'public',
           certification_mode = 'octamy',
           assessment_purpose = 'certification',
-          review_status = 'approved',
           default_review_policy = 'immediate',
           subscription_eligible = false,
           reseller_eligible = true,
           use_blueprint_engine = true,
           meta_title = EXCLUDED.meta_title,
           meta_description = EXCLUDED.meta_description,
-          featured_at = COALESCE(courses.featured_at, now())
+          featured_at = courses.featured_at
         RETURNING id
       `, [title, description, slug, categoryId, duration, passingScore, price.toFixed(2), level, `${title} | Octamy Certification`, description]);
       const courseId = course.rows[0].id;
@@ -170,7 +213,7 @@ async function main() {
         ? await client.query(`
           UPDATE question_banks SET
             name = $2, description = $3, visibility = 'private', bank_purpose = 'certification',
-            bank_kind = 'assessment_pool', status = 'active', subject = $4,
+            bank_kind = 'assessment_pool', status = 'draft', subject = $4,
             exam_family = 'career-certification', syllabus_version = '2026 v1', language = 'en',
             tags = $5::json, updated_at = now()
           WHERE id = $1 RETURNING id
@@ -181,41 +224,68 @@ async function main() {
           status, subject, exam_family, syllabus_version, language, tags, question_count, updated_at
         )
         VALUES ($1, $2, $3, 'admin', null, 'private', 'certification', 'assessment_pool',
-          'active', $4, 'career-certification', '2026 v1', 'en', $5::json, 0, now())
+          'draft', $4, 'career-certification', '2026 v1', 'en', $5::json, 0, now())
         RETURNING id
       `, [bankSlug, `${title} Bank`, `Original Octamy starter bank for ${title}.`, title, JSON.stringify(['career-certification', categorySlug, slug])]);
       const bankId = bank.rows[0].id;
       bankCount += 1;
 
+      const topicIds = [];
+      for (const [topicIndex, topicName] of (competencyTopics[categorySlug] || []).entries()) {
+        const topic = await client.query(`
+          INSERT INTO question_topics (bank_id, name, slug, sort_order, updated_at)
+          VALUES ($1, $2, $3, $4, now())
+          ON CONFLICT (bank_id, slug) DO UPDATE SET name = EXCLUDED.name, sort_order = EXCLUDED.sort_order, updated_at = now()
+          RETURNING id
+        `, [bankId, topicName, topicSlug(topicName), topicIndex + 1]);
+        topicIds.push(topic.rows[0].id);
+      }
+
       const templates = questionTemplates(title, slug);
       for (const item of templates) {
+        const topicId = topicIds[item.index % topicIds.length] || null;
         await client.query(`
           INSERT INTO questions (
-            course_id, bank_id, question, options, correct_answer, is_active, question_type,
+            course_id, bank_id, topic_id, question, options, correct_answer, is_active, question_type,
             max_points, difficulty, question_format, negative_marks, tags, explanation,
-            content_hash, review_status, generation_source, reviewed_at, version
+            content_hash, review_status, generation_source, reviewed_at, answer_metadata, version
           )
-          VALUES (null, $1, $2, $3::json, $4, true, 'multiple_choice',
-            100, $5, 'mcq_single', 0, $6::json, $7, $8, 'approved', 'human', now(), 1)
+          VALUES (null, $1, $2, $3, $4::json, $5, false, 'multiple_choice',
+            100, $6, 'mcq_single', 0, $7::json, $8, $9, 'pending', 'imported', null,
+            '{"source":"career-catalog-starter","reviewRequired":true}'::jsonb, 1)
           ON CONFLICT (bank_id, content_hash) WHERE bank_id IS NOT NULL AND content_hash IS NOT NULL
           DO UPDATE SET
             options = EXCLUDED.options,
             correct_answer = EXCLUDED.correct_answer,
-            is_active = true,
+            topic_id = EXCLUDED.topic_id,
+            is_active = false,
             difficulty = EXCLUDED.difficulty,
             tags = EXCLUDED.tags,
             explanation = EXCLUDED.explanation,
-            review_status = 'approved',
+            review_status = 'pending',
+            generation_source = 'imported',
+            reviewed_by = null,
+            reviewed_at = null,
             updated_at = now()
-        `, [bankId, item.question, JSON.stringify(item.options), item.correctAnswer, item.difficulty, JSON.stringify(item.tags), item.explanation, hashQuestion(bankSlug, item.question)]);
+        `, [bankId, topicId, item.question, JSON.stringify(item.options), item.correctAnswer, item.difficulty, JSON.stringify(item.tags), item.explanation, hashQuestion(bankSlug, item.question)]);
         questionCount += 1;
       }
 
-      await client.query(`UPDATE question_banks SET question_count = (SELECT count(*) FROM questions WHERE bank_id = $1 AND is_active = true AND review_status = 'approved'), updated_at = now() WHERE id = $1`, [bankId]);
-      await client.query(`DELETE FROM course_question_blueprint WHERE course_id = $1`, [courseId]);
+      await client.query(`UPDATE question_banks SET question_count = (SELECT count(*) FROM questions WHERE bank_id = $1), updated_at = now() WHERE id = $1`, [bankId]);
+      const [{ approved_count: approvedCount }] = (await client.query(`
+        SELECT count(*)::int AS approved_count FROM questions
+        WHERE bank_id = $1 AND is_active = true AND review_status = 'approved'
+      `, [bankId])).rows;
+      if (Number(approvedCount) < 80) {
+        await client.query(`
+          UPDATE courses SET is_active = false, visibility = 'private', review_status = 'pending', featured_at = null
+          WHERE id = $1 AND assessment_purpose = 'certification'
+        `, [courseId]);
+      }
       await client.query(`
         INSERT INTO course_question_blueprint (course_id, bank_id, topic_id, question_count, difficulty, marks_per_question, negative_marks, sort_order)
-        VALUES ($1, $2, null, 10, 'mixed', 1, 0, 1)
+        SELECT $1, $2, null, 10, 'mixed', 1, 0, 1
+        WHERE NOT EXISTS (SELECT 1 FROM course_question_blueprint WHERE course_id = $1)
       `, [courseId, bankId]);
     }
 

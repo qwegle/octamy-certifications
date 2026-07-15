@@ -32,9 +32,10 @@ import {
   courses as coursesTable,
   courseQuestionBlueprint,
   questionBanks as questionBanksTable,
+  questions as questionsTable,
   questionPackImportRuns,
 } from "@shared/schema";
-import { desc, and, eq, not, sql, or, ilike, count } from "drizzle-orm";
+import { desc, and, eq, not, sql, or, ilike, count, inArray } from "drizzle-orm";
 import { db, pool } from "./db";
 import { audit } from "./lib/audit";
 import { LearningPathController } from "./controllers/learningPathController";
@@ -106,6 +107,7 @@ import {
   publicPendingCourseSnapshot,
 } from "./lib/pending-exam-access";
 import { buildExamReview } from "./lib/exam-review";
+import { requiredQuestionInventory } from "./lib/assessment-bank-readiness";
 import {
   ASSESSMENT_HUB_PATH,
   canonicalPublicSlug,
@@ -1388,6 +1390,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(402).json({
             message: "Practice exams require Practice Pass at ₹299/month",
             code: "PRACTICE_SUBSCRIPTION_REQUIRED",
+          });
+        }
+      }
+      if (course.useBlueprintEngine) {
+        const purpose = course.assessmentPurpose === "practice" ? "practice" : "certification";
+        const blueprint = await storage.getCourseBlueprint(courseId);
+        if (!blueprint.length) {
+          return res.status(409).json({
+            message: "This assessment is still being prepared.",
+            code: "ASSESSMENT_BANK_NOT_READY",
+          });
+        }
+        for (const rule of blueprint) {
+          const filters = [
+            eq(questionsTable.bankId, rule.bankId),
+            eq(questionsTable.isActive, true),
+            eq(questionsTable.reviewStatus, "approved"),
+          ];
+          if (rule.topicId) filters.push(eq(questionsTable.topicId, rule.topicId));
+          if (rule.difficulty !== "mixed") filters.push(eq(questionsTable.difficulty, rule.difficulty));
+          const [{ available }] = await db.select({ available: count() })
+            .from(questionsTable)
+            .where(and(...filters));
+          const ruleRequired = rule.questionCount * (purpose === "practice" ? 5 : 4);
+          if (Number(available) < ruleRequired) {
+            return res.status(409).json({
+              message: "This assessment is being expanded and reviewed.",
+              code: "ASSESSMENT_BANK_NOT_READY",
+              required: ruleRequired,
+              available: Number(available),
+            });
+          }
+        }
+        const bankIds = Array.from(new Set(blueprint.map((rule) => rule.bankId)));
+        const [{ available: totalAvailable }] = await db.select({ available: count() })
+          .from(questionsTable)
+          .where(and(
+            inArray(questionsTable.bankId, bankIds),
+            eq(questionsTable.isActive, true),
+            eq(questionsTable.reviewStatus, "approved"),
+          ));
+        const required = requiredQuestionInventory(
+          purpose,
+          blueprint.reduce((total, rule) => total + rule.questionCount, 0),
+        );
+        if (Number(totalAvailable) < required) {
+          return res.status(409).json({
+            message: `This assessment is being expanded and reviewed. ${required} approved questions are required before attempts can start.`,
+            code: "ASSESSMENT_BANK_NOT_READY",
+            required,
+            available: Number(totalAvailable),
           });
         }
       }
@@ -5156,10 +5209,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
                     AND (b.topic_id IS NULL OR q.topic_id = b.topic_id)
                     AND q.is_active = true AND q.review_status = 'approved'
                     AND (b.difficulty = 'mixed' OR q.difficulty = b.difficulty)
-                ) < GREATEST(
-                  b.question_count * CASE WHEN c.assessment_purpose = 'practice' THEN 5 ELSE 4 END,
-                  CASE WHEN c.assessment_purpose = 'practice' THEN 200 ELSE 80 END
-                )
+                ) < b.question_count * CASE WHEN c.assessment_purpose = 'practice' THEN 5 ELSE 4 END
+              )
+              AND (
+                SELECT count(DISTINCT q.id)
+                FROM course_question_blueprint b
+                INNER JOIN questions q ON q.bank_id = b.bank_id
+                WHERE b.course_id = c.id
+                  AND q.is_active = true AND q.review_status = 'approved'
+              ) >= GREATEST(
+                CASE WHEN c.assessment_purpose = 'practice' THEN 200 ELSE 80 END,
+                COALESCE((SELECT sum(b.question_count) FROM course_question_blueprint b WHERE b.course_id = c.id), 0)
+                  * CASE WHEN c.assessment_purpose = 'practice' THEN 5 ELSE 4 END
               )
             RETURNING c.id
           `);
@@ -5223,24 +5284,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     async (req: AuthenticatedRequest, res: Response) => {
       try {
         const bankId = Number(req.params.id);
-        const parsed = z.object({ action: z.enum(["approve", "deactivate"]), confirmation: z.string() }).strict().safeParse(req.body);
+        const parsed = z.object({ action: z.literal("deactivate"), confirmation: z.string() }).strict().safeParse(req.body);
         if (!Number.isInteger(bankId) || bankId <= 0 || !parsed.success) return res.status(400).json({ message: "Invalid bulk review request" });
-        if (parsed.data.confirmation !== (parsed.data.action === "approve" ? "APPROVE" : "DEACTIVATE")) return res.status(400).json({ message: `Type ${parsed.data.action === "approve" ? "APPROVE" : "DEACTIVATE"} to confirm` });
-        if (parsed.data.action === "approve") {
-          const sourceCheck = await db.execute(sql`
-            SELECT count(*)::int AS count FROM question_provenance qp
-            INNER JOIN question_pack_sources s ON s.id = qp.source_id
-            WHERE qp.question_id IN (SELECT id FROM questions WHERE bank_id = ${bankId})
-              AND s.rights_review_status = 'verified'
-          `);
-          if (Number(sourceCheck.rows[0]?.count || 0) === 0) return res.status(409).json({ message: "No rights-verified imported questions were found in this bank" });
-          const result = await db.execute(sql`
-            UPDATE questions SET review_status = 'approved', is_active = true,
-              reviewed_by = ${req.user?.userId || null}, reviewed_at = now(), updated_at = now()
-            WHERE bank_id = ${bankId} AND review_status IN ('pending', 'draft')
-          `);
-          return res.json({ action: "approve", affected: result.rowCount || 0 });
-        }
+        if (parsed.data.confirmation !== "DEACTIVATE") return res.status(400).json({ message: "Type DEACTIVATE to confirm" });
         const result = await db.execute(sql`
           UPDATE questions SET is_active = false, updated_at = now()
           WHERE bank_id = ${bankId} AND is_active = true

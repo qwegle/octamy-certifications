@@ -770,7 +770,7 @@ function QuestionEditor({ bankId, topics, question, canEdit, onClose, onSave, sa
             </section>
           ) : (
             <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900">
-              Submitting this manually authored question records you as its human reviewer.
+              Octamy certification questions are saved for independent review; other workspace questions follow the owner’s review policy.
             </div>
           )}
           <div>
