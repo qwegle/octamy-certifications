@@ -346,6 +346,9 @@ function Router() {
       <Route path="/admin/courses/:courseId/blueprint">
         {() => <Suspense fallback={<QBLoader />}><BlueprintEditor /></Suspense>}
       </Route>
+      <Route path="/admin/question-banks/:id">
+        {() => <Suspense fallback={<QBLoader />}><QuestionBankDetail /></Suspense>}
+      </Route>
 
       <Route component={NotFound} />
     </Switch>

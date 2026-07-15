@@ -99,9 +99,11 @@ const APTITUDE_TEMPLATES = [
   "least-common-multiple",
   "simple-probability",
   "arithmetic-sequence",
+  "integer-powers",
 ] as const;
 
 const PHYSICS_TEMPLATES = [
+  "speed-distance",
   "newtons-second-law",
   "uniform-acceleration",
   "mechanical-work",
@@ -429,6 +431,14 @@ export function validateInhouseAssessmentCatalog(): string[] {
   }
   for (const generatedSlug of Array.from(generatedAssessmentSlugs)) {
     if (!slugs.has(generatedSlug)) errors.push(`${generatedSlug}: generator assessment has no catalogue shell`);
+  }
+  for (const template of ORIGINAL_QUESTION_TEMPLATES) {
+    for (const assessmentSlug of template.assessmentSlugs) {
+      const assessment = INHOUSE_ASSESSMENTS.find((item) => item.slug === assessmentSlug);
+      if (assessment && assessment.targetQuestionCount > 0 && !assessment.blueprintTemplateIds.includes(template.id)) {
+        errors.push(`${assessmentSlug}: generator template ${template.id} is eligible but absent from its blueprint`);
+      }
+    }
   }
   return errors;
 }

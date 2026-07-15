@@ -324,11 +324,12 @@ export async function syncInhouseAssessmentCatalog(options: {
         if (!topicId) throw new Error(`Prepared topic is missing: ${item.topicSlug}`);
         await client.query(
           `INSERT INTO course_question_blueprint (
-             course_id, topic_id, question_count, difficulty, marks_per_question,
+             course_id, bank_id, topic_id, question_count, difficulty, marks_per_question,
              negative_marks, sort_order, created_at, updated_at
-           ) VALUES ($1, $2, $3, $4, $5, $6, $7, now(), now())`,
+           ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, now(), now())`,
           [
             courseId,
+            bankId,
             topicId,
             item.questionCount,
             item.difficulty,

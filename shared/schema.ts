@@ -962,6 +962,12 @@ export const questionBanks = pgTable("question_banks", {
   ownerType: text("owner_type").default("admin").notNull(), // admin | creator | institute
   ownerId: integer("owner_id"), // null = admin global
   visibility: text("visibility").default("private").notNull(), // private | unlisted | public
+  bankKind: text("bank_kind").default("custom").notNull(), // assessment_pool | subject_pool | master | custom
+  status: text("status").default("draft").notNull(), // draft | active | archived
+  subject: text("subject"),
+  examFamily: text("exam_family"),
+  gradeBand: text("grade_band"),
+  syllabusVersion: text("syllabus_version"),
   language: text("language").default("en").notNull(),
   tags: json("tags").$type<string[]>().default([]),
   questionCount: integer("question_count").default(0).notNull(),
@@ -1091,7 +1097,10 @@ export const questionVersions = pgTable("question_versions", {
 export const courseQuestionBlueprint = pgTable("course_question_blueprint", {
   id: serial("id").primaryKey(),
   courseId: integer("course_id").references(() => courses.id, { onDelete: "cascade" }).notNull(),
-  topicId: integer("topic_id").references(() => questionTopics.id).notNull(),
+  // Explicit bank assignment keeps the pool visible and governable. A topic
+  // is optional when a rule deliberately draws from the entire bank.
+  bankId: integer("bank_id").references(() => questionBanks.id, { onDelete: "restrict" }).notNull(),
+  topicId: integer("topic_id").references(() => questionTopics.id),
   questionCount: integer("question_count").notNull(),
   difficulty: text("difficulty").default("mixed").notNull(), // easy | medium | hard | mixed
   marksPerQuestion: integer("marks_per_question").default(1).notNull(),
@@ -1099,7 +1108,23 @@ export const courseQuestionBlueprint = pgTable("course_question_blueprint", {
   sortOrder: integer("sort_order").default(0).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+}, (t) => ({
+  byCourse: index("course_question_blueprint_course_idx").on(t.courseId, t.sortOrder),
+  byBank: index("course_question_blueprint_bank_idx").on(t.bankId, t.topicId, t.difficulty),
+}));
+
+export const courseQuestionBlueprintVersions = pgTable("course_question_blueprint_versions", {
+  id: serial("id").primaryKey(),
+  courseId: integer("course_id").references(() => courses.id, { onDelete: "cascade" }).notNull(),
+  revision: integer("revision").notNull(),
+  items: jsonb("items").$type<Array<Record<string, unknown>>>().notNull(),
+  changeNote: text("change_note"),
+  changedBy: integer("changed_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => ({
+  courseRevisionUnique: unique("course_question_blueprint_versions_course_revision_unique").on(t.courseId, t.revision),
+  byCourse: index("course_question_blueprint_versions_course_idx").on(t.courseId, t.revision),
+}));
 
 export const insertQuestionBankSchema = createInsertSchema(questionBanks).omit({
   id: true,
@@ -1128,6 +1153,7 @@ export type QuestionPackImportRun = typeof questionPackImportRuns.$inferSelect;
 export type QuestionProvenance = typeof questionProvenance.$inferSelect;
 export type CourseBlueprintItem = typeof courseQuestionBlueprint.$inferSelect;
 export type InsertCourseBlueprintItem = z.infer<typeof insertCourseBlueprintSchema>;
+export type CourseBlueprintVersion = typeof courseQuestionBlueprintVersions.$inferSelect;
 
 export const examAttempts = pgTable("exam_attempts", {
   id: serial("id").primaryKey(),

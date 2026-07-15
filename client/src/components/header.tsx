@@ -120,11 +120,11 @@ export default function Header() {
         Skip to main content
       </a>
 
-      <header className="sticky top-0 z-50 px-2 sm:px-4">
-        <div className={`mx-auto max-w-7xl rounded-full border px-4 backdrop-blur-xl transition-shadow sm:px-5 ${scrolled ? "border-slate-200 bg-white/95 shadow-lg shadow-slate-900/5" : "border-slate-200/80 bg-white/85 shadow-sm"}`}>
-          <div className="flex h-16 items-center justify-between gap-3">
+      <header className="relative z-50 px-3 pt-3 sm:px-5 sm:pt-4">
+        <div className={`mx-auto max-w-7xl rounded-2xl border px-3 backdrop-blur-xl transition-[background-color,border-color,box-shadow] sm:rounded-full sm:px-5 ${scrolled ? "border-slate-200 bg-white/95 shadow-lg shadow-slate-900/5" : "border-white/80 bg-white/90 shadow-sm shadow-slate-900/5"}`}>
+          <div className="flex h-14 min-w-0 items-center justify-between gap-2 sm:h-16 sm:gap-3">
             <Link href="/" aria-label="Octamy home" className="flex min-h-11 shrink-0 items-center rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950">
-              <img src={octamyLogoDark} alt="Octamy home" className="h-7 w-auto" />
+              <img src={octamyLogoDark} alt="Octamy home" className="h-6 w-auto max-w-[8.5rem] sm:h-7 sm:max-w-none" />
             </Link>
 
             {!isAppRoute && (
@@ -189,7 +189,7 @@ export default function Header() {
         </div>
 
         {mobileOpen && (
-          <div id="public-mobile-navigation" className="mx-auto mt-2 max-w-7xl rounded-3xl border border-slate-200 bg-white p-4 shadow-2xl shadow-slate-900/10 lg:hidden">
+          <div id="public-mobile-navigation" className="mx-auto mt-2 max-w-7xl overflow-hidden rounded-2xl border border-slate-200 bg-white p-3 shadow-2xl shadow-slate-900/10 sm:rounded-3xl sm:p-4 lg:hidden">
             {!isAppRoute && <SearchForm id="site-assessment-search-mobile" value={searchQuery} onChange={setSearchQuery} onSubmit={submitSearch} className="mb-3" autoFocus />}
             <nav aria-label="Mobile navigation" className="grid gap-1">
               {!isAppRoute && PUBLIC_LINKS.map((item) => (

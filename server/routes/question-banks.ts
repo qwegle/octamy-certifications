@@ -6,8 +6,8 @@ import * as XLSX from "exceljs";
 import { z } from "zod";
 import { storage } from "../storage";
 import { db } from "../db";
-import { creators, questionBanks, questionPackImportRuns, questions, questionTopics } from "@shared/schema";
-import { eq, and, count, sql } from "drizzle-orm";
+import { courseQuestionBlueprint, creators, questionBanks, questionPackImportRuns, questions, questionTopics } from "@shared/schema";
+import { eq, and, count, sql, inArray } from "drizzle-orm";
 import { audit } from "../lib/audit";
 import {
   canCreateBankFor,
@@ -271,17 +271,61 @@ router.post("/", requireAuth, withCtx, async (req: AuthedRequest, res) => {
   }
 });
 
+router.get("/blueprint-options", requireAuth, withCtx, async (req: AuthedRequest, res) => {
+  const all = await storage.listQuestionBanks({});
+  const banks = all.filter((bank) => bank.status !== "archived" && canListBank(req.ctx!, bank));
+  if (!banks.length) return res.json([]);
+  const bankIds = banks.map((bank) => bank.id);
+  const topics = await db.select().from(questionTopics).where(inArray(questionTopics.bankId, bankIds));
+  const inventory = await db.select({
+    bankId: questions.bankId,
+    topicId: questions.topicId,
+    difficulty: questions.difficulty,
+    available: count(),
+  }).from(questions).where(and(
+    inArray(questions.bankId, bankIds),
+    eq(questions.isActive, true),
+    eq(questions.reviewStatus, "approved"),
+  )).groupBy(questions.bankId, questions.topicId, questions.difficulty);
+  res.json(banks.map((bank) => ({
+    ...bank,
+    topics: topics.filter((topic) => topic.bankId === bank.id),
+    inventory: inventory
+      .filter((row) => row.bankId === bank.id)
+      .map((row) => ({ topicId: row.topicId, difficulty: row.difficulty, available: Number(row.available) })),
+  })));
+});
+
 router.get("/:id", requireAuth, withCtx, async (req: AuthedRequest, res) => {
   const id = Number(req.params.id);
   const bank = await storage.getQuestionBank(id);
   if (!bank) return res.status(404).json({ message: "Bank not found" });
   if (!canViewBank(req.ctx!, bank)) return res.status(403).json({ message: "Forbidden" });
   const topics = await storage.listQuestionTopics(id);
-  const [{ c }] = await db.select({ c: count() }).from(questions).where(and(
+  const [inventory] = await db.select({
+    questionCount: count(),
+    approvedActive: sql<number>`count(*) filter (where ${questions.reviewStatus} = 'approved' and ${questions.isActive} = true)`,
+    easyCount: sql<number>`count(*) filter (where ${questions.difficulty} = 'easy' and ${questions.reviewStatus} = 'approved' and ${questions.isActive} = true)`,
+    mediumCount: sql<number>`count(*) filter (where ${questions.difficulty} = 'medium' and ${questions.reviewStatus} = 'approved' and ${questions.isActive} = true)`,
+    hardCount: sql<number>`count(*) filter (where ${questions.difficulty} = 'hard' and ${questions.reviewStatus} = 'approved' and ${questions.isActive} = true)`,
+    draftCount: sql<number>`count(*) filter (where ${questions.reviewStatus} in ('draft', 'pending'))`,
+  }).from(questions).where(and(
     eq(questions.bankId, id),
     sql`${questions.reviewStatus} <> 'retired'`,
   ));
-  res.json({ ...bank, topics, questionCount: Number(c), canEdit: canEditBank(req.ctx!, bank) });
+  res.json({
+    ...bank,
+    topics,
+    questionCount: Number(inventory.questionCount),
+    inventory: {
+      approvedActive: Number(inventory.approvedActive),
+      easy: Number(inventory.easyCount),
+      medium: Number(inventory.mediumCount),
+      hard: Number(inventory.hardCount),
+      draft: Number(inventory.draftCount),
+    },
+    canEdit: canEditBank(req.ctx!, bank),
+  });
 });
 
 router.patch("/:id", requireAuth, withCtx, async (req: AuthedRequest, res) => {
@@ -307,6 +351,15 @@ router.delete("/:id", requireAuth, withCtx, async (req: AuthedRequest, res) => {
   const bank = await storage.getQuestionBank(id);
   if (!bank) return res.status(404).json({ message: "Bank not found" });
   if (!canEditBank(req.ctx!, bank)) return res.status(403).json({ message: "Forbidden" });
+  const [{ blueprintUses }] = await db.select({ blueprintUses: count() })
+    .from(courseQuestionBlueprint)
+    .where(eq(courseQuestionBlueprint.bankId, id));
+  if (Number(blueprintUses) > 0) {
+    return res.status(409).json({
+      message: `This bank is assigned to ${Number(blueprintUses)} assessment blueprint rule(s). Archive it after replacing those rules; it cannot be deleted.`,
+      code: "QUESTION_BANK_IN_USE",
+    });
+  }
   const [{ importRunCount }] = await db.select({ importRunCount: count() })
     .from(questionPackImportRuns)
     .where(eq(questionPackImportRuns.bankId, id));
@@ -392,6 +445,15 @@ router.delete("/:id/topics/:topicId", requireAuth, withCtx, async (req: AuthedRe
   if (!bank) return res.status(404).json({ message: "Bank not found" });
   if (!canEditBank(req.ctx!, bank)) return res.status(403).json({ message: "Forbidden" });
   if (!(await topicBelongsToBank(topicId, bankId))) return res.status(404).json({ message: "Topic not found in this bank" });
+  const [{ blueprintUses }] = await db.select({ blueprintUses: count() })
+    .from(courseQuestionBlueprint)
+    .where(eq(courseQuestionBlueprint.topicId, topicId));
+  if (Number(blueprintUses) > 0) {
+    return res.status(409).json({
+      message: `This topic is used by ${Number(blueprintUses)} assessment blueprint rule(s). Remove or replace those rules before deleting it.`,
+      code: "QUESTION_TOPIC_IN_USE",
+    });
+  }
   await storage.deleteQuestionTopic(topicId);
   res.status(204).end();
 });
@@ -471,6 +533,8 @@ router.get("/:id/questions", requireAuth, withCtx, async (req: AuthedRequest, re
   const result = await storage.listQuestionsByBank(id, {
     topicId: req.query.topicId ? Number(req.query.topicId) : undefined,
     format: req.query.format as string | undefined,
+    difficulty: req.query.difficulty as string | undefined,
+    reviewStatus: req.query.reviewStatus as string | undefined,
     search: req.query.search as string | undefined,
     page: req.query.page ? Number(req.query.page) : 1,
     perPage: req.query.perPage ? Number(req.query.perPage) : 25,
@@ -1007,7 +1071,30 @@ courseBlueprintRouter.put("/:courseId/blueprint", requireAuth, withCtx, async (r
   }
   if (!allowed) return res.status(403).json({ message: "Forbidden" });
 
-  const items = Array.isArray(req.body?.items) ? req.body.items : [];
-  const saved = await storage.setCourseBlueprint(courseId, items);
-  res.json(saved);
+  const parsed = z.object({
+    items: z.array(z.object({
+      bankId: z.number().int().positive(),
+      topicId: z.number().int().positive().nullable().optional(),
+      questionCount: z.number().int().min(1).max(500),
+      difficulty: z.enum(["easy", "medium", "hard", "mixed"]),
+      marksPerQuestion: z.number().int().min(1).max(100),
+      negativeMarks: z.number().int().min(0).max(100),
+      sortOrder: z.number().int().min(0).max(500).optional(),
+    }).strict()).max(100),
+    changeNote: z.string().trim().max(500).optional(),
+  }).strict().safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ message: "Check each question-pool rule", issues: parsed.error.flatten() });
+  }
+  try {
+    const saved = await storage.setCourseBlueprint(
+      courseId,
+      parsed.data.items,
+      req.user?.userId,
+      parsed.data.changeNote,
+    );
+    res.json(saved);
+  } catch (error) {
+    res.status(409).json({ message: error instanceof Error ? error.message : "Blueprint could not be saved" });
+  }
 });

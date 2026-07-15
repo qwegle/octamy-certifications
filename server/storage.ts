@@ -24,6 +24,7 @@ import {
   questionProvenance,
   questionVersions,
   courseQuestionBlueprint,
+  courseQuestionBlueprintVersions,
   type Creator,
   type InsertCreator,
   type Institute,
@@ -106,7 +107,7 @@ import {
   type RatingAggregate,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, count, sql, or, asc, ilike, gte, gt, lte, isNull } from "drizzle-orm";
+import { eq, and, desc, count, sql, or, asc, ilike, gte, gt, lte, isNull, notInArray } from "drizzle-orm";
 
 export const RECRUITER_ACCESS_COSTS = {
   profile_view: 1,
@@ -330,11 +331,11 @@ export interface IStorage {
   updateQuestionWithVersioning(id: number, data: Record<string, unknown>, changedBy?: number, changeNote?: string, expectedVersion?: number): Promise<Question | undefined>;
   deleteBankQuestion(id: number, retiredBy?: number): Promise<void>;
   bulkCreateQuestions(bankId: number, rows: Array<Record<string, unknown>>, createdBy?: number): Promise<{ created: number; errors: Array<{ row: number; message: string }> }>;
-  listQuestionsByBank(bankId: number, opts: { topicId?: number; format?: string; search?: string; page?: number; perPage?: number }): Promise<{ items: Question[]; total: number; page: number; perPage: number }>;
+  listQuestionsByBank(bankId: number, opts: { topicId?: number; format?: string; difficulty?: string; reviewStatus?: string; search?: string; page?: number; perPage?: number }): Promise<{ items: Question[]; total: number; page: number; perPage: number }>;
   getQuestionVersions(questionId: number): Promise<QuestionVersion[]>;
 
   getCourseBlueprint(courseId: number): Promise<CourseBlueprintItem[]>;
-  setCourseBlueprint(courseId: number, items: Array<Omit<InsertCourseBlueprintItem, "courseId">>): Promise<CourseBlueprintItem[]>;
+  setCourseBlueprint(courseId: number, items: Array<Omit<InsertCourseBlueprintItem, "courseId">>, changedBy?: number, changeNote?: string): Promise<CourseBlueprintItem[]>;
   materializeBlueprintForAttempt(courseId: number): Promise<Question[]>;
 }
 
@@ -3773,7 +3774,7 @@ export class DatabaseStorage implements IStorage {
     return { created, errors };
   }
 
-  async listQuestionsByBank(bankId: number, opts: { topicId?: number; format?: string; search?: string; page?: number; perPage?: number }): Promise<{ items: Question[]; total: number; page: number; perPage: number }> {
+  async listQuestionsByBank(bankId: number, opts: { topicId?: number; format?: string; difficulty?: string; reviewStatus?: string; search?: string; page?: number; perPage?: number }): Promise<{ items: Question[]; total: number; page: number; perPage: number }> {
     const page = Math.max(1, opts.page ?? 1);
     const perPage = Math.min(200, Math.max(1, opts.perPage ?? 25));
     const where: any[] = [
@@ -3782,6 +3783,8 @@ export class DatabaseStorage implements IStorage {
     ];
     if (opts.topicId) where.push(eq(questions.topicId, opts.topicId));
     if (opts.format) where.push(eq(questions.questionFormat, opts.format));
+    if (opts.difficulty) where.push(eq(questions.difficulty, opts.difficulty));
+    if (opts.reviewStatus) where.push(eq(questions.reviewStatus, opts.reviewStatus));
     if (opts.search) where.push(ilike(questions.question, `%${opts.search}%`));
     const condition = and(...where);
     const items = await db.select().from(questions).where(condition).orderBy(desc(questions.id)).limit(perPage).offset((page - 1) * perPage);
@@ -3797,38 +3800,121 @@ export class DatabaseStorage implements IStorage {
     return db.select().from(courseQuestionBlueprint).where(eq(courseQuestionBlueprint.courseId, courseId)).orderBy(asc(courseQuestionBlueprint.sortOrder), asc(courseQuestionBlueprint.id));
   }
 
-  async setCourseBlueprint(courseId: number, items: Array<Omit<InsertCourseBlueprintItem, "courseId">>): Promise<CourseBlueprintItem[]> {
-    await db.delete(courseQuestionBlueprint).where(eq(courseQuestionBlueprint.courseId, courseId));
-    if (!items.length) return [];
-    const vals = items.map((it, idx) => ({ ...it, courseId, sortOrder: it.sortOrder ?? idx }));
-    const inserted = await db.insert(courseQuestionBlueprint).values(vals as any).returning();
-    return inserted;
+  async setCourseBlueprint(
+    courseId: number,
+    items: Array<Omit<InsertCourseBlueprintItem, "courseId">>,
+    changedBy?: number,
+    changeNote?: string,
+  ): Promise<CourseBlueprintItem[]> {
+    return db.transaction(async (tx) => {
+      await tx.execute(sql`SELECT pg_advisory_xact_lock(7310, ${courseId})`);
+
+      const normalized = items.map((item, index) => ({
+        ...item,
+        topicId: item.topicId ?? null,
+        difficulty: item.difficulty ?? "mixed",
+        marksPerQuestion: item.marksPerQuestion ?? 1,
+        negativeMarks: item.negativeMarks ?? 0,
+        sortOrder: item.sortOrder ?? index,
+      }));
+      const ruleKeys = new Set<string>();
+      const scopes = new Map<string, Set<string>>();
+
+      for (const item of normalized) {
+        const [bank] = await tx.select({ id: questionBanks.id, status: questionBanks.status })
+          .from(questionBanks)
+          .where(eq(questionBanks.id, item.bankId));
+        if (!bank) throw new Error(`Question bank ${item.bankId} does not exist`);
+        if (bank.status === "archived") throw new Error(`Question bank ${item.bankId} is archived and cannot be assigned`);
+
+        if (item.topicId) {
+          const [topic] = await tx.select({ id: questionTopics.id })
+            .from(questionTopics)
+            .where(and(eq(questionTopics.id, item.topicId), eq(questionTopics.bankId, item.bankId)));
+          if (!topic) throw new Error(`Topic ${item.topicId} does not belong to question bank ${item.bankId}`);
+        }
+
+        const scope = `${item.bankId}:${item.topicId ?? "all"}`;
+        const ruleKey = `${scope}:${item.difficulty}`;
+        if (ruleKeys.has(ruleKey)) throw new Error("Combine duplicate bank, topic and difficulty rules into one row");
+        ruleKeys.add(ruleKey);
+        const difficulties = scopes.get(scope) ?? new Set<string>();
+        difficulties.add(item.difficulty);
+        scopes.set(scope, difficulties);
+        if (difficulties.has("mixed") && difficulties.size > 1) {
+          throw new Error("A mixed rule cannot overlap difficulty-specific rules for the same bank and topic");
+        }
+
+        const inventoryFilters = [
+          eq(questions.bankId, item.bankId),
+          eq(questions.isActive, true),
+          eq(questions.reviewStatus, "approved"),
+        ];
+        if (item.topicId) inventoryFilters.push(eq(questions.topicId, item.topicId));
+        if (item.difficulty !== "mixed") inventoryFilters.push(eq(questions.difficulty, item.difficulty));
+        const [{ available }] = await tx.select({ available: count() })
+          .from(questions)
+          .where(and(...inventoryFilters));
+        if (Number(available) < item.questionCount) {
+          throw new Error(
+            `Pool ${item.bankId}${item.topicId ? ` / topic ${item.topicId}` : ""} has ${Number(available)} approved ${item.difficulty} questions; ${item.questionCount} requested`,
+          );
+        }
+      }
+
+      await tx.delete(courseQuestionBlueprint).where(eq(courseQuestionBlueprint.courseId, courseId));
+      const inserted = normalized.length
+        ? await tx.insert(courseQuestionBlueprint)
+          .values(normalized.map((item) => ({ ...item, courseId })) as any)
+          .returning()
+        : [];
+      const [revisionRow] = await tx.select({
+        revision: sql<number>`COALESCE(MAX(${courseQuestionBlueprintVersions.revision}), 0) + 1`,
+      }).from(courseQuestionBlueprintVersions).where(eq(courseQuestionBlueprintVersions.courseId, courseId));
+      await tx.insert(courseQuestionBlueprintVersions).values({
+        courseId,
+        revision: Number(revisionRow?.revision || 1),
+        items: inserted.map((item) => ({
+          bankId: item.bankId,
+          topicId: item.topicId,
+          questionCount: item.questionCount,
+          difficulty: item.difficulty,
+          marksPerQuestion: item.marksPerQuestion,
+          negativeMarks: item.negativeMarks,
+          sortOrder: item.sortOrder,
+        })),
+        changeNote: changeNote?.trim() || null,
+        changedBy: changedBy ?? null,
+      });
+      return inserted;
+    });
   }
 
   async materializeBlueprintForAttempt(courseId: number): Promise<Question[]> {
     const items = await this.getCourseBlueprint(courseId);
     if (!items.length) throw new Error("Course has no blueprint configured");
     const result: Question[] = [];
+    const selectedIds: number[] = [];
     for (const item of items) {
       const where: any[] = [
-        eq(questions.topicId, item.topicId),
+        eq(questions.bankId, item.bankId),
         eq(questions.isActive, true),
         eq(questions.reviewStatus, "approved"),
       ];
+      if (item.topicId) where.push(eq(questions.topicId, item.topicId));
       if (item.difficulty && item.difficulty !== "mixed") {
         where.push(eq(questions.difficulty, item.difficulty));
       }
-      const pool = await db.select().from(questions).where(and(...where));
+      if (selectedIds.length) where.push(notInArray(questions.id, selectedIds));
+      const pool = await db.select().from(questions)
+        .where(and(...where))
+        .orderBy(sql`random()`)
+        .limit(item.questionCount);
       if (pool.length < item.questionCount) {
-        throw new Error(`Topic ${item.topicId} has only ${pool.length} ${item.difficulty} questions, blueprint requires ${item.questionCount}`);
+        throw new Error(`Question pool ${item.bankId}${item.topicId ? ` / topic ${item.topicId}` : ""} has only ${pool.length} unused ${item.difficulty} questions; blueprint requires ${item.questionCount}`);
       }
-      // Fisher-Yates shuffle then slice
-      const shuffled = [...pool];
-      for (let i = shuffled.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-      }
-      result.push(...shuffled.slice(0, item.questionCount));
+      result.push(...pool);
+      selectedIds.push(...pool.map((question) => question.id));
     }
     return result;
   }

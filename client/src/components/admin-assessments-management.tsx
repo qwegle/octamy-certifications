@@ -13,7 +13,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { useToast } from "@/hooks/use-toast";
 import { CheckCircle2, Edit, Link2, Plus, Search, Trash2, EyeOff } from "lucide-react";
 
-type Assessment = { id: number; title: string; slug: string; description?: string; duration?: number; passingScore?: number; isActive: boolean; visibility: string; reviewStatus: string; questionCount: number; category?: { id: number; name: string; slug: string } };
+type Assessment = { id: number; title: string; slug: string; description?: string; duration?: number; passingScore?: number; isActive: boolean; visibility: string; reviewStatus: string; questionCount: number; bankCount: number; bankNames: string[]; difficultyRules: string[]; category?: { id: number; name: string; slug: string } };
 type AssessmentPage = { items: Assessment[]; pagination: { page: number; pageSize: number; total: number; totalPages: number } };
 type Category = { id: number; name: string; isActive?: boolean };
 

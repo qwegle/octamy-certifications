@@ -72,6 +72,7 @@ const FORMATS = [
 
 interface BankResponse extends QuestionBank {
   topics: QuestionTopic[];
+  inventory: { approvedActive: number; easy: number; medium: number; hard: number; draft: number };
   canEdit: boolean;
 }
 
@@ -82,12 +83,16 @@ export default function QuestionBankDetail() {
   const { toast } = useToast();
   const qc = useQueryClient();
   const detectedRole = useDashboardRole();
-  const role = location.startsWith("/institute/")
+  const role = location.startsWith("/admin/")
+    ? "admin"
+    : location.startsWith("/institute/")
     ? "institute"
     : location.startsWith("/creator/")
       ? "creator"
       : detectedRole;
-  const bankBase = role === "institute"
+  const bankBase = role === "admin"
+    ? "/admin"
+    : role === "institute"
     ? "/institute/question-banks"
     : role === "creator"
       ? "/creator/question-banks"
@@ -95,6 +100,8 @@ export default function QuestionBankDetail() {
 
   const [topicFilter, setTopicFilter] = useState<number | null>(null);
   const [formatFilter, setFormatFilter] = useState<string>("");
+  const [difficultyFilter, setDifficultyFilter] = useState<string>("");
+  const [reviewFilter, setReviewFilter] = useState<string>("");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [editing, setEditing] = useState<Question | null>(null);
@@ -114,11 +121,13 @@ export default function QuestionBankDetail() {
   });
 
   const questionsQuery = useQuery<{ items: Question[]; total: number }>({
-    queryKey: [`/api/question-banks/${id}/questions`, { topicFilter, formatFilter, search, page }],
+    queryKey: [`/api/question-banks/${id}/questions`, { topicFilter, formatFilter, difficultyFilter, reviewFilter, search, page }],
     queryFn: async () => {
       const qs = new URLSearchParams();
       if (topicFilter) qs.set("topicId", String(topicFilter));
       if (formatFilter) qs.set("format", formatFilter);
+      if (difficultyFilter) qs.set("difficulty", difficultyFilter);
+      if (reviewFilter) qs.set("reviewStatus", reviewFilter);
       if (search) qs.set("search", search);
       qs.set("page", String(page));
       qs.set("perPage", "25");
@@ -366,6 +375,12 @@ export default function QuestionBankDetail() {
           </div>
         </div>
 
+        <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
+          {[{ label: "Approved", value: bank.inventory.approvedActive }, { label: "Easy", value: bank.inventory.easy }, { label: "Medium", value: bank.inventory.medium }, { label: "Hard", value: bank.inventory.hard }, { label: "Needs review", value: bank.inventory.draft }].map((item) => (
+            <Card key={item.label}><CardContent className="p-3"><p className="text-xs font-semibold uppercase tracking-wider text-slate-500">{item.label}</p><p className="mt-1 text-xl font-black tabular-nums text-slate-950">{Number(item.value).toLocaleString()}</p></CardContent></Card>
+          ))}
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-4">
           {/* Topic tree */}
           <aside className="h-max rounded-xl border border-slate-200 bg-white p-3 lg:sticky lg:top-4" aria-label="Question topics">
@@ -403,7 +418,7 @@ export default function QuestionBankDetail() {
                     disabled={deleteTopicMut.isPending}
                     className="min-h-11 min-w-11 rounded-lg p-2 text-slate-500 hover:bg-rose-50 hover:text-rose-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 disabled:opacity-50 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100"
                     onClick={() => {
-                      if (confirm(`Delete topic '${t.name}'? Questions in it will keep their topic id.`)) {
+                      if (confirm(`Delete topic '${t.name}'? Its questions will become ungrouped. Topics used by an assessment blueprint are protected.`)) {
                         deleteTopicMut.mutate(t.id);
                       }
                     }}
@@ -422,7 +437,7 @@ export default function QuestionBankDetail() {
           <section aria-labelledby="questions-heading" className="min-w-0">
             <h2 id="questions-heading" className="sr-only">Questions</h2>
             <Card className="mb-4">
-              <CardContent className="grid gap-3 p-3 sm:grid-cols-[minmax(0,1fr)_11rem]">
+              <CardContent className="grid gap-3 p-3 sm:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_11rem_10rem_11rem]">
                 <div>
                   <Label htmlFor="question-search" className="sr-only">Search questions</Label>
                   <Input
@@ -445,6 +460,14 @@ export default function QuestionBankDetail() {
                     ))}
                   </SelectContent>
                   </Select>
+                </div>
+                <div>
+                  <Label htmlFor="question-difficulty-filter" className="sr-only">Filter by difficulty</Label>
+                  <Select value={difficultyFilter || "all"} onValueChange={(value) => { setDifficultyFilter(value === "all" ? "" : value); setPage(1); }}><SelectTrigger id="question-difficulty-filter"><SelectValue placeholder="All difficulties" /></SelectTrigger><SelectContent><SelectItem value="all">All difficulties</SelectItem><SelectItem value="easy">Easy</SelectItem><SelectItem value="medium">Medium</SelectItem><SelectItem value="hard">Hard</SelectItem></SelectContent></Select>
+                </div>
+                <div>
+                  <Label htmlFor="question-review-filter" className="sr-only">Filter by review status</Label>
+                  <Select value={reviewFilter || "all"} onValueChange={(value) => { setReviewFilter(value === "all" ? "" : value); setPage(1); }}><SelectTrigger id="question-review-filter"><SelectValue placeholder="All review states" /></SelectTrigger><SelectContent><SelectItem value="all">All review states</SelectItem><SelectItem value="approved">Approved</SelectItem><SelectItem value="pending">Pending</SelectItem><SelectItem value="draft">Draft</SelectItem><SelectItem value="rejected">Rejected</SelectItem></SelectContent></Select>
                 </div>
               </CardContent>
             </Card>
@@ -547,20 +570,20 @@ export default function QuestionBankDetail() {
                 <CardContent className="p-8 text-center sm:p-12">
                   <FileQuestion className="mx-auto mb-3 h-10 w-10 text-slate-300" aria-hidden="true" />
                   <h3 className="font-semibold text-slate-900">
-                    {search || formatFilter || topicFilter ? "No matching questions" : "No questions yet"}
+                    {search || formatFilter || difficultyFilter || reviewFilter || topicFilter ? "No matching questions" : "No questions yet"}
                   </h3>
                   <p className="mx-auto mt-1 max-w-md text-sm text-slate-600">
-                    {search || formatFilter || topicFilter
+                    {search || formatFilter || difficultyFilter || reviewFilter || topicFilter
                       ? "Try changing the search, format, or topic filter."
                       : canEdit
                         ? "Add one question now or import a prepared spreadsheet."
                         : "This bank does not contain any questions yet."}
                   </p>
-                  {(search || formatFilter || topicFilter) ? (
+                  {(search || formatFilter || difficultyFilter || reviewFilter || topicFilter) ? (
                     <Button
                       variant="outline"
                       className="mt-4"
-                      onClick={() => { setSearch(""); setFormatFilter(""); setTopicFilter(null); setPage(1); }}
+                      onClick={() => { setSearch(""); setFormatFilter(""); setDifficultyFilter(""); setReviewFilter(""); setTopicFilter(null); setPage(1); }}
                     >
                       Clear filters
                     </Button>

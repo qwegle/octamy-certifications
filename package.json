@@ -18,6 +18,7 @@
     "questions:import": "tsx scripts/import-question-pack.ts",
     "questions:inventory": "tsx scripts/question-pack-inventory.ts",
     "questions:verify-integration": "tsx scripts/verify-question-pack-integration.ts",
+    "questions:segregate-inhouse": "tsx scripts/run-segregate-inhouse-question-banks.ts",
     "assessments:sync-inhouse": "tsx scripts/sync-inhouse-assessment-catalog.ts",
     "admin:bootstrap-local": "tsx scripts/bootstrap-local-admin.ts",
     "test": "jest --passWithNoTests"

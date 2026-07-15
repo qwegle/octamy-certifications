@@ -30,6 +30,7 @@ import {
   courseEntitlements,
   categories as categoriesTable,
   courses as coursesTable,
+  courseQuestionBlueprint,
   questionBanks as questionBanksTable,
   questionPackImportRuns,
 } from "@shared/schema";
@@ -4795,6 +4796,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           reviewStatus: coursesTable.reviewStatus, certificationMode: coursesTable.certificationMode,
           category: { id: categoriesTable.id, name: categoriesTable.name, slug: categoriesTable.slug },
           questionCount: sql<number>`COALESCE((select sum(question_count) from course_question_blueprint where course_id = ${coursesTable.id}), (select count(*) from questions where questions.course_id = ${coursesTable.id}), 0)`,
+          bankCount: sql<number>`(select count(distinct bank_id) from course_question_blueprint where course_id = ${coursesTable.id})`,
+          bankNames: sql<string[]>`COALESCE((select array_agg(distinct bank.name order by bank.name) from course_question_blueprint blueprint inner join question_banks bank on bank.id = blueprint.bank_id where blueprint.course_id = ${coursesTable.id}), ARRAY[]::text[])`,
+          difficultyRules: sql<string[]>`COALESCE((select array_agg(distinct difficulty order by difficulty) from course_question_blueprint where course_id = ${coursesTable.id}), ARRAY[]::text[])`,
         }).from(coursesTable).leftJoin(categoriesTable, eq(categoriesTable.id, coursesTable.categoryId))
           .where(where).orderBy(desc(coursesTable.createdAt)).limit(pageSize).offset((page - 1) * pageSize);
         res.json({ items, pagination: { page, pageSize, total: Number(total), totalPages: Math.max(1, Math.ceil(Number(total) / pageSize)) } });
@@ -4813,7 +4817,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const page = Math.max(1, parseInt(String(req.query.page || "1"), 10) || 1);
         const pageSize = Math.min(100, Math.max(1, parseInt(String(req.query.pageSize || "25"), 10) || 25));
         const search = String(req.query.search || "").trim();
-        const where = search ? or(ilike(questionBanksTable.name, `%${search}%`), ilike(questionBanksTable.slug, `%${search}%`))! : undefined;
+        const status = String(req.query.status || "current");
+        const filters = [];
+        if (status === "current") filters.push(not(eq(questionBanksTable.status, "archived")));
+        else if (status !== "all") filters.push(eq(questionBanksTable.status, status));
+        if (search) filters.push(or(ilike(questionBanksTable.name, `%${search}%`), ilike(questionBanksTable.slug, `%${search}%`))!);
+        const where = filters.length ? and(...filters)! : undefined;
         const [{ total }] = await db.select({ total: count() }).from(questionBanksTable).where(where);
         const items = await db.select({
           id: questionBanksTable.id,
@@ -4822,8 +4831,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
           description: questionBanksTable.description,
           ownerType: questionBanksTable.ownerType,
           visibility: questionBanksTable.visibility,
+          bankKind: questionBanksTable.bankKind,
+          status: questionBanksTable.status,
+          subject: questionBanksTable.subject,
+          examFamily: questionBanksTable.examFamily,
+          gradeBand: questionBanksTable.gradeBand,
+          syllabusVersion: questionBanksTable.syllabusVersion,
           questionCount: questionBanksTable.questionCount,
           topicCount: sql<number>`(select count(*) from question_topics where bank_id = ${questionBanksTable.id})`,
+          easyCount: sql<number>`(select count(*) from questions where bank_id = ${questionBanksTable.id} and difficulty = 'easy' and review_status = 'approved' and is_active = true)`,
+          mediumCount: sql<number>`(select count(*) from questions where bank_id = ${questionBanksTable.id} and difficulty = 'medium' and review_status = 'approved' and is_active = true)`,
+          hardCount: sql<number>`(select count(*) from questions where bank_id = ${questionBanksTable.id} and difficulty = 'hard' and review_status = 'approved' and is_active = true)`,
+          assessmentCount: sql<number>`(select count(distinct course_id) from course_question_blueprint where bank_id = ${questionBanksTable.id})`,
           updatedAt: questionBanksTable.updatedAt,
         }).from(questionBanksTable).where(where).orderBy(desc(questionBanksTable.questionCount), desc(questionBanksTable.updatedAt)).limit(pageSize).offset((page - 1) * pageSize);
         res.json({ items, pagination: { page, pageSize, total: Number(total), totalPages: Math.max(1, Math.ceil(Number(total) / pageSize)) } });
@@ -4862,7 +4881,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 SELECT 1 FROM course_question_blueprint b
                 WHERE b.course_id = c.id AND (
                   SELECT count(*) FROM questions q
-                  WHERE q.topic_id = b.topic_id AND q.is_active = true AND q.review_status = 'approved'
+                  WHERE q.bank_id = b.bank_id
+                    AND (b.topic_id IS NULL OR q.topic_id = b.topic_id)
+                    AND q.is_active = true AND q.review_status = 'approved'
                     AND (b.difficulty = 'mixed' OR q.difficulty = b.difficulty)
                 ) < b.question_count
               )
@@ -4880,6 +4901,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } catch (error) {
         console.error("Assessment bulk action failed:", error);
         res.status(500).json({ message: "Assessment bulk action failed" });
+      }
+    },
+  );
+
+  app.post(
+    "/api/admin/question-banks/bulk-action",
+    authenticateAdminToken,
+    async (req: AuthenticatedRequest, res: Response) => {
+      try {
+        const parsed = z.object({
+          ids: z.array(z.number().int().positive()).min(1).max(100),
+          action: z.enum(["activate", "draft", "archive"]),
+          confirmation: z.string().optional(),
+        }).strict().safeParse(req.body);
+        if (!parsed.success) return res.status(400).json({ message: "Select question banks and a valid action" });
+        if (parsed.data.action === "archive" && parsed.data.confirmation !== "ARCHIVE") {
+          return res.status(400).json({ message: "Type ARCHIVE to confirm" });
+        }
+        const ids = Array.from(new Set(parsed.data.ids));
+        const status = parsed.data.action === "activate" ? "active" : parsed.data.action;
+        const result = await db.execute(sql`
+          UPDATE question_banks bank SET status = ${status}, updated_at = now()
+          WHERE bank.id IN (${sql.join(ids.map((id) => sql`${id}`), sql`,`)})
+            AND (
+              ${status} <> 'archived'
+              OR NOT EXISTS (
+                SELECT 1 FROM course_question_blueprint blueprint
+                INNER JOIN courses course ON course.id = blueprint.course_id
+                WHERE blueprint.bank_id = bank.id
+                  AND course.is_active = true AND course.visibility = 'public'
+              )
+            )
+          RETURNING bank.id
+        `);
+        res.json({ action: parsed.data.action, affected: result.rowCount || 0, skipped: ids.length - (result.rowCount || 0) });
+      } catch (error) {
+        console.error("Question-bank bulk action failed:", error);
+        res.status(500).json({ message: "Question-bank bulk action failed" });
       }
     },
   );
@@ -4925,7 +4984,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     authenticateAdminToken,
     async (req: AuthenticatedRequest, res: Response) => {
       try {
-        const parsed = z.object({ name: z.string().trim().min(3).max(160), description: z.string().trim().max(2000).optional(), visibility: z.enum(["private", "unlisted", "public"]).default("private") }).strict().safeParse(req.body);
+        const parsed = z.object({
+          name: z.string().trim().min(3).max(160),
+          description: z.string().trim().max(2000).optional(),
+          visibility: z.enum(["private", "unlisted", "public"]).default("private"),
+          bankKind: z.enum(["assessment_pool", "subject_pool", "master", "custom"]).default("custom"),
+          status: z.enum(["draft", "active", "archived"]).default("draft"),
+          subject: z.string().trim().max(120).optional(),
+          examFamily: z.string().trim().max(120).optional(),
+          gradeBand: z.string().trim().max(80).optional(),
+          syllabusVersion: z.string().trim().max(120).optional(),
+        }).strict().safeParse(req.body);
         if (!parsed.success) return res.status(400).json({ message: "Check the bank details" });
         const row = await storage.createQuestionBank({ ...parsed.data, slug: `${slugifyCourseTitle(parsed.data.name)}-${Date.now().toString(36)}`, ownerType: "admin", ownerId: null, createdBy: req.user?.userId || null });
         res.status(201).json(row);
@@ -4941,7 +5010,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     authenticateAdminToken,
     async (req: AuthenticatedRequest, res: Response) => {
       const id = Number(req.params.id);
-      const parsed = z.object({ name: z.string().trim().min(3).max(160).optional(), description: z.string().trim().max(2000).optional(), visibility: z.enum(["private", "unlisted", "public"]).optional() }).strict().safeParse(req.body);
+      const parsed = z.object({
+        name: z.string().trim().min(3).max(160).optional(),
+        description: z.string().trim().max(2000).optional(),
+        visibility: z.enum(["private", "unlisted", "public"]).optional(),
+        bankKind: z.enum(["assessment_pool", "subject_pool", "master", "custom"]).optional(),
+        status: z.enum(["draft", "active", "archived"]).optional(),
+        subject: z.string().trim().max(120).nullable().optional(),
+        examFamily: z.string().trim().max(120).nullable().optional(),
+        gradeBand: z.string().trim().max(80).nullable().optional(),
+        syllabusVersion: z.string().trim().max(120).nullable().optional(),
+      }).strict().safeParse(req.body);
       if (!Number.isInteger(id) || id <= 0 || !parsed.success) return res.status(400).json({ message: "Invalid bank update" });
       const row = await storage.updateQuestionBank(id, parsed.data);
       if (!row) return res.status(404).json({ message: "Question bank not found" });
@@ -4956,6 +5035,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         const id = Number(req.params.id);
         if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ message: "Invalid bank" });
+        const [usage] = await db.select({ total: count() }).from(courseQuestionBlueprint).where(eq(courseQuestionBlueprint.bankId, id));
+        if (Number(usage?.total || 0) > 0) return res.status(409).json({ message: "This bank is assigned to an assessment blueprint and cannot be deleted. Replace those rules or archive the bank." });
         const [history] = await db.select({ total: count() }).from(questionPackImportRuns).where(eq(questionPackImportRuns.bankId, id));
         if (Number(history?.total || 0) > 0) return res.status(409).json({ message: "Imported banks cannot be deleted because provenance must be retained. Deactivate their questions instead." });
         await storage.deleteQuestionBank(id);
