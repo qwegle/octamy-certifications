@@ -230,6 +230,25 @@ async function main() {
       const bankId = bank.rows[0].id;
       bankCount += 1;
 
+      await client.query(`
+        UPDATE questions SET is_active = false, review_status = 'retired', reviewed_by = null,
+          reviewed_at = null, updated_at = now()
+        WHERE bank_id = $1 AND created_by IS NULL AND reviewed_by IS NULL
+          AND generation_source = 'human'
+          AND (
+            question LIKE 'Which outcome best shows practical readiness in %'
+            OR question LIKE 'A team is adopting %. What should be validated first?'
+            OR question LIKE 'Which risk is most common when teams implement % without governance?'
+            OR question LIKE 'What makes an assessment answer job-relevant for %?'
+            OR question LIKE 'When troubleshooting a % workflow, what is the strongest first step?'
+            OR question LIKE 'Which practice improves enterprise adoption of %?'
+            OR question LIKE 'A candidate claims % experience. Which signal is strongest?'
+            OR question LIKE 'Which metric is usually most useful after deploying % changes?'
+            OR question LIKE 'What should be documented before scaling %?'
+            OR question LIKE 'Why should Octamy separate practice exams from % certifications?'
+          )
+      `, [bankId]);
+
       const topicIds = [];
       for (const [topicIndex, topicName] of (competencyTopics[categorySlug] || []).entries()) {
         const topic = await client.query(`

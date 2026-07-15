@@ -274,7 +274,7 @@ router.get("/certification-navigation", async (_req: Request, res: Response) => 
       .innerJoin(categories, eq(categories.id, courses.categoryId))
       .where(and(
         eq(courses.ownerType, "admin"),
-        inArray(courses.productType, [...PUBLIC_ASSESSMENT_PRODUCT_TYPES]),
+        eq(courses.productType, "assessment"),
         eq(courses.assessmentPurpose, "certification"),
         eq(categories.isActive, true),
       ))
