@@ -1,26 +1,42 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Clock } from 'lucide-react';
 
 interface ExamTimerProps {
   duration: number; // in minutes
   onTimeUp: () => void;
+  startedAtMs?: number;
 }
 
-export default function ExamTimer({ duration, onTimeUp }: ExamTimerProps) {
-  const [timeLeft, setTimeLeft] = useState(duration * 60); // convert to seconds
+export default function ExamTimer({ duration, onTimeUp, startedAtMs }: ExamTimerProps) {
+  const calculateTimeLeft = () => Math.max(
+    0,
+    duration * 60 - Math.floor((Date.now() - (startedAtMs || Date.now())) / 1000),
+  );
+  const [timeLeft, setTimeLeft] = useState(calculateTimeLeft);
+  const firedRef = useRef(false);
+  const onTimeUpRef = useRef(onTimeUp);
 
   useEffect(() => {
-    if (timeLeft <= 0) {
-      onTimeUp();
-      return;
-    }
+    onTimeUpRef.current = onTimeUp;
+  }, [onTimeUp]);
 
+  useEffect(() => {
+    firedRef.current = false;
+    const tick = () => {
+      const remaining = calculateTimeLeft();
+      setTimeLeft(remaining);
+      if (remaining <= 0 && !firedRef.current) {
+        firedRef.current = true;
+        onTimeUpRef.current();
+      }
+    };
+    tick();
     const timer = setInterval(() => {
-      setTimeLeft(prev => prev - 1);
+      tick();
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [timeLeft, onTimeUp]);
+  }, [duration, startedAtMs]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);

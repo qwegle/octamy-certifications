@@ -63,7 +63,7 @@ import { Readable } from "stream";
 import { evaluateAnswersWithAI } from "./utils/openai";
 import {
   saveQuestionMapping,
-  loadQuestionMapping,
+  loadExamSession,
   deleteQuestionMapping,
   savePendingExam,
   loadPendingExam,
@@ -99,6 +99,7 @@ import {
   parseGuestExamIdentity,
   publicPendingCourseSnapshot,
 } from "./lib/pending-exam-access";
+import { buildExamReview } from "./lib/exam-review";
 import {
   canonicalPublicSlug,
   PUBLIC_ASSESSMENT_PRODUCT_TYPES,
@@ -1392,7 +1393,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
         {},
       );
-      await saveQuestionMapping(finalSessionId, correctMap, courseId);
+      await saveQuestionMapping(finalSessionId, correctMap, courseId, {
+        questionSnapshot: questionsWithShuffledOptions,
+      });
 
       // Remove correct answers from response
       const questionsWithoutAnswers = questionsWithShuffledOptions.map((q) => ({
@@ -1470,7 +1473,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
 
         // Get correct answers from persisted session mapping
-        const correctAnswersMapping = (await loadQuestionMapping(sessionId, numericCourseId)) || {};
+        const examSession = await loadExamSession(sessionId, numericCourseId);
+        const correctAnswersMapping = examSession?.correctMap || {};
 
         console.log(
           `Exam submission for session ${sessionId} — questions in session: ${Object.keys(correctAnswersMapping).length}`,
@@ -1491,6 +1495,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           correctAnswersMapping,
           answersRecord,
         );
+        const review = buildExamReview(examSession?.questionSnapshot || [], answersRecord);
 
         // Clean up persisted session mapping AFTER score calculation
         await deleteQuestionMapping(sessionId).catch(() => {});
@@ -1538,8 +1543,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         // Persist exam data until payment completion (replaces in-memory global.tempExamData).
         const tempExamId = `temp_${crypto.randomUUID()}`;
+        const resultExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
-        await savePendingExam(tempExamId, {
+        const pendingExamPayload = {
           userId: req.user?.userId || null,
           courseId: numericCourseId,
           userEmail: effectiveUserEmail,
@@ -1557,8 +1563,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
           isRetake,
           previousBestScore,
           course: publicPendingCourseSnapshot(course),
+          review,
+          resultExpiresAt,
+          recoveryEmailSent: false,
           createdAt: new Date(),
-        });
+        };
+        await savePendingExam(tempExamId, pendingExamPayload);
+
+        let recoveryEmailSent = false;
+        if (!req.user?.userId) {
+          const baseUrl = (process.env.APP_URL || `${req.protocol}://${req.get("host")}`).replace(/\/+$/, "");
+          const resultPath = `/exam-results-temp/${tempExamId}`;
+          const resultLink = `${baseUrl}${resultPath}`;
+          const registerLink = `${baseUrl}/register?role=learner&email=${encodeURIComponent(effectiveUserEmail)}&next=${encodeURIComponent(resultPath)}`;
+          recoveryEmailSent = await emailService.sendGuestExamRecoveryEmail({
+            userEmail: effectiveUserEmail,
+            userName: effectiveUserName,
+            courseTitle: course.title,
+            score,
+            resultLink,
+            registerLink,
+          });
+          pendingExamPayload.recoveryEmailSent = recoveryEmailSent;
+          await savePendingExam(tempExamId, pendingExamPayload);
+        }
 
         // Return comprehensive exam result with temporary ID for payment processing
         res.json({
@@ -1571,6 +1599,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           isRetake,
           previousBestScore,
           passingThreshold: passingScore, // What score was needed to pass
+          recoveryEmailSent,
+          resultExpiresAt,
           message: passed
             ? `Congratulations! You passed with ${score}%`
             : `You scored ${score}%. You need at least ${passingScore}% to pass.`,
@@ -1618,6 +1648,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           mastered: examData.mastered,
           isRetake: examData.isRetake,
           previousBestScore: examData.previousBestScore,
+          review: Array.isArray(examData.review) ? examData.review : [],
+          isGuest: examData.userId == null,
+          maskedEmail: typeof examData.userEmail === "string"
+            ? examData.userEmail.replace(/^(.)(.*)(@.*)$/, (_match: string, first: string, middle: string, domain: string) => `${first}${"*".repeat(Math.min(6, middle.length))}${domain}`)
+            : undefined,
+          resultExpiresAt: examData.resultExpiresAt,
+          recoveryEmailSent: Boolean(examData.recoveryEmailSent),
           message: examData.passed
             ? `Congratulations! You passed with ${examData.score}%`
             : `You scored ${examData.score}%. You need at least ${examData.course.passingScore}% to pass.`,

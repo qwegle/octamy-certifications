@@ -8,6 +8,7 @@ import { pathToFileURL } from "node:url";
 import pg from "pg";
 import {
   buildInhouseBlueprint,
+  inhouseAssessmentPriceInr,
   INHOUSE_ASSESSMENTS,
   INHOUSE_ORIGINAL_BANK,
   validateInhouseAssessmentCatalog,
@@ -211,6 +212,7 @@ export async function syncInhouseAssessmentCatalog(options: {
 
       const primaryCategoryId = categoryIds.get(assessment.primaryCategorySlug)!;
       const blueprint = buildInhouseBlueprint(assessment);
+      const priceInr = inhouseAssessmentPriceInr(assessment.slug).toFixed(2);
       if (blueprint.length === 0) emptyBlueprintShells.push(assessment.slug);
       let courseId: number;
       if (!existing) {
@@ -223,12 +225,12 @@ export async function syncInhouseAssessmentCatalog(options: {
              default_review_policy, subscription_eligible, reseller_eligible, featured_at,
              use_blueprint_engine, created_at
            ) VALUES (
-             $1, $2, $3, $4, $5, $6, '0.00',
-             'assessment', '0.00', NULL, false, NULL,
-             $7, false, false, $8, $9, NULL,
+             $1, $2, $3, $4, $5, $6, $7,
+             'assessment', $7, NULL, false, NULL,
+             $8, false, false, $9, $10, NULL,
              'admin', NULL, 'private', 'en', 'none', 'pending',
              'immediate', false, false, NULL,
-             $10, now()
+             $11, now()
            ) RETURNING id`,
           [
             assessment.title,
@@ -237,6 +239,7 @@ export async function syncInhouseAssessmentCatalog(options: {
             primaryCategoryId,
             assessment.durationMinutes,
             assessment.passingScore,
+            priceInr,
             assessment.level,
             assessment.metaTitle,
             assessment.metaDescription,
@@ -254,16 +257,16 @@ export async function syncInhouseAssessmentCatalog(options: {
              category_id = $4,
              duration = $5,
              passing_score = $6,
-             price = '0.00',
-             content_price = '0.00',
+             price = $7,
+             content_price = $7,
              original_price = NULL,
              is_on_sale = false,
              sale_end_date = NULL,
-             level = $7,
+             level = $8,
              is_active = false,
              is_internship = false,
-             meta_title = $8,
-             meta_description = $9,
+             meta_title = $9,
+             meta_description = $10,
              owner_type = 'admin',
              owner_id = NULL,
              visibility = 'private',
@@ -274,7 +277,7 @@ export async function syncInhouseAssessmentCatalog(options: {
              subscription_eligible = false,
              reseller_eligible = false,
              featured_at = NULL,
-             use_blueprint_engine = $10
+             use_blueprint_engine = $11
            WHERE id = $1`,
           [
             courseId,
@@ -283,6 +286,7 @@ export async function syncInhouseAssessmentCatalog(options: {
             primaryCategoryId,
             assessment.durationMinutes,
             assessment.passingScore,
+            priceInr,
             assessment.level,
             assessment.metaTitle,
             assessment.metaDescription,

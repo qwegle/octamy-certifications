@@ -13,6 +13,16 @@ interface EmailOptions {
   attachments?: EmailAttachment[];
 }
 
+function escapeHtml(value: string): string {
+  return value.replace(/[&<>'"]/g, (character) => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    "'": '&#39;',
+    '"': '&quot;',
+  })[character] || character);
+}
+
 class EmailService {
   private transporter: nodemailer.Transporter | null;
   private fromAddress: string;
@@ -235,6 +245,48 @@ class EmailService {
       to: userEmail,
       subject: `💳 Payment Confirmed - ₹${amount} for ${courseName} Certificate`,
       html: htmlContent,
+    });
+  }
+
+  async sendGuestExamRecoveryEmail(input: {
+    userEmail: string;
+    userName: string;
+    courseTitle: string;
+    score: number;
+    resultLink: string;
+    registerLink: string;
+  }): Promise<boolean> {
+    const name = escapeHtml(input.userName);
+    const title = escapeHtml(input.courseTitle);
+    const resultLink = escapeHtml(input.resultLink);
+    const registerLink = escapeHtml(input.registerLink);
+    const html = `
+      <!DOCTYPE html><html><body style="margin:0;background:#f4f1eb;font-family:Arial,sans-serif;color:#172033">
+        <div style="max-width:600px;margin:0 auto;padding:28px 18px">
+          <div style="background:#172033;color:#fff;border-radius:20px 20px 0 0;padding:26px 28px">
+            <div style="font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#c9d4e8">Octamy assessment record</div>
+            <h1 style="margin:10px 0 0;font-size:28px">Your result is safely stored</h1>
+          </div>
+          <div style="background:#fff;border:1px solid #e4e7ec;border-top:0;border-radius:0 0 20px 20px;padding:28px">
+            <p>Hi ${name},</p>
+            <p>You completed <strong>${title}</strong> with a score of <strong>${input.score}%</strong>. Your secure result link remains available for 24 hours.</p>
+            <p style="margin:26px 0">
+              <a href="${resultLink}" style="display:inline-block;background:#172033;color:#fff;text-decoration:none;padding:13px 20px;border-radius:999px;font-weight:700">View my result</a>
+            </p>
+            <div style="background:#f7f4ee;border-radius:14px;padding:18px;margin-top:20px">
+              <strong>Keep this result in your learner record</strong>
+              <p style="margin:8px 0 14px;color:#526077">Create your free account with this email, then return to the result to activate an eligible credential or subscription benefit.</p>
+              <a href="${registerLink}" style="color:#172033;font-weight:700">Create my Octamy account →</a>
+            </div>
+            <p style="font-size:12px;color:#748094;margin-top:24px">This is a private bearer link. Do not forward it. If you did not take this assessment, you can ignore this email.</p>
+          </div>
+        </div>
+      </body></html>`;
+
+    return this.sendEmail({
+      to: input.userEmail,
+      subject: `Your ${input.courseTitle} result is ready`,
+      html,
     });
   }
 

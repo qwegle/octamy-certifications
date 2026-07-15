@@ -8,40 +8,78 @@ const PENDING_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours for paid-pending records
 
 export type CorrectMap = Record<string, number>;
 
+export type ExamQuestionSnapshot = {
+  id: number;
+  question: string;
+  options: string[];
+  correctAnswer: number;
+};
+
+export type ExamSessionState = {
+  correctMap: CorrectMap;
+  questionSnapshot: ExamQuestionSnapshot[];
+};
+
+type SaveQuestionMappingOptions = {
+  ttlMs?: number;
+  questionSnapshot?: ExamQuestionSnapshot[];
+};
+
 export async function saveQuestionMapping(
   sessionId: string,
   correctMap: CorrectMap,
   courseId: number | null = null,
-  ttlMs: number = DEFAULT_TTL_MS,
+  optionsOrTtl: number | SaveQuestionMappingOptions = {},
 ): Promise<void> {
+  const options = typeof optionsOrTtl === "number"
+    ? { ttlMs: optionsOrTtl }
+    : optionsOrTtl;
+  const ttlMs = options.ttlMs ?? DEFAULT_TTL_MS;
   const expires = new Date(Date.now() + ttlMs);
   await pool.query(
-    `INSERT INTO exam_sessions (id, course_id, correct_map, expires_at)
-     VALUES ($1, $2, $3::jsonb, $4)
+    `INSERT INTO exam_sessions (id, course_id, correct_map, question_snapshot, expires_at)
+     VALUES ($1, $2, $3::jsonb, $4::jsonb, $5)
      ON CONFLICT (id) DO UPDATE
        SET correct_map = EXCLUDED.correct_map,
            course_id   = EXCLUDED.course_id,
+           question_snapshot = EXCLUDED.question_snapshot,
            expires_at  = EXCLUDED.expires_at`,
-    [sessionId, courseId, JSON.stringify(correctMap), expires],
+    [
+      sessionId,
+      courseId,
+      JSON.stringify(correctMap),
+      JSON.stringify(options.questionSnapshot || []),
+      expires,
+    ],
   );
+}
+
+export async function loadExamSession(
+  sessionId: string,
+  expectedCourseId?: number,
+): Promise<ExamSessionState | null> {
+  const result = await pool.query(
+    `SELECT correct_map, question_snapshot, course_id FROM exam_sessions
+      WHERE id = $1 AND expires_at > NOW()`,
+    [sessionId],
+  );
+  if (result.rowCount === 0) return null;
+  if (expectedCourseId !== undefined && result.rows[0].course_id !== expectedCourseId) {
+    return null;
+  }
+  const rawMap = result.rows[0].correct_map;
+  const rawSnapshot = result.rows[0].question_snapshot;
+  return {
+    correctMap: typeof rawMap === "string" ? JSON.parse(rawMap) : rawMap,
+    questionSnapshot: typeof rawSnapshot === "string" ? JSON.parse(rawSnapshot) : (rawSnapshot || []),
+  };
 }
 
 export async function loadQuestionMapping(
   sessionId: string,
   expectedCourseId?: number,
 ): Promise<CorrectMap | null> {
-  const r = await pool.query(
-    `SELECT correct_map, course_id FROM exam_sessions
-      WHERE id = $1 AND expires_at > NOW()`,
-    [sessionId],
-  );
-  if (r.rowCount === 0) return null;
-  if (expectedCourseId !== undefined && r.rows[0].course_id !== expectedCourseId) {
-    return null;
-  }
-  const raw = r.rows[0].correct_map;
-  // pg returns jsonb already-parsed
-  return typeof raw === "string" ? JSON.parse(raw) : raw;
+  return (await loadExamSession(sessionId, expectedCourseId))?.correctMap || null;
 }
 
 export async function deleteQuestionMapping(sessionId: string): Promise<void> {

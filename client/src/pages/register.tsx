@@ -11,6 +11,7 @@ import { SEO } from '@/components/seo';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { AuthShell } from '@/components/auth-shell';
 import { ArrowRight, Building2, Briefcase, GraduationCap, ShieldCheck, Sparkles } from 'lucide-react';
+import { safeInternalReturnTo } from '@/lib/navigation-safety';
 
 type Role = 'learner' | 'creator' | 'institute' | 'recruiter';
 
@@ -46,6 +47,11 @@ export default function Register() {
   const selectedPlan = useMemo(() => {
     const plan = query?.get('plan')?.trim().toLowerCase();
     return plan && /^[a-z0-9-]{2,24}$/.test(plan) ? plan : null;
+  }, [query]);
+  const next = useMemo(() => safeInternalReturnTo(query?.get('next')), [query]);
+  const emailHint = useMemo(() => {
+    const value = query?.get('email')?.trim().toLowerCase() || '';
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? value : '';
   }, [query]);
   const setupMode = query?.get('mode');
 
@@ -96,6 +102,10 @@ export default function Register() {
     }
   }, [location, role, setLocation]);
 
+  useEffect(() => {
+    if (!email && emailHint) setEmail(emailHint);
+  }, [email, emailHint]);
+
   const validate = (): string | null => {
     if (!isWorkspaceSetup) {
       if (!name) return 'Please enter your name.';
@@ -132,7 +142,7 @@ export default function Register() {
 
       // Provision the role-specific server-side workspace before we advertise
       // success or send a paid-plan selection to checkout.
-      let dest = '/dashboard';
+      let dest = role === 'learner' && next ? next : '/dashboard';
       let workspaceProvisioned = true;
       try {
         if (role === 'creator') {

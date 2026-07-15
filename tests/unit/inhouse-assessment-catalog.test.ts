@@ -1,6 +1,7 @@
 import { describe, expect, it } from "@jest/globals";
 import {
   buildInhouseBlueprint,
+  inhouseAssessmentPriceInr,
   INHOUSE_ASSESSMENTS,
   validateInhouseAssessmentCatalog,
 } from "../../server/content/inhouse-assessment-catalog";
@@ -47,5 +48,13 @@ describe("in-house assessment catalogue", () => {
 
   it("does not create a generic RI shell without a state and recruiting authority", () => {
     expect(INHOUSE_ASSESSMENTS.some((assessment) => /(^|-)ri(-|$)/.test(assessment.slug))).toBe(false);
+  });
+
+  it("assigns stable in-house prices inside the approved INR range", () => {
+    const firstPass = INHOUSE_ASSESSMENTS.map((assessment) => inhouseAssessmentPriceInr(assessment.slug));
+    const secondPass = INHOUSE_ASSESSMENTS.map((assessment) => inhouseAssessmentPriceInr(assessment.slug));
+    expect(firstPass).toEqual(secondPass);
+    expect(firstPass.every((price) => Number.isInteger(price) && price >= 25 && price <= 100)).toBe(true);
+    expect(new Set(firstPass).size).toBeGreaterThan(10);
   });
 });

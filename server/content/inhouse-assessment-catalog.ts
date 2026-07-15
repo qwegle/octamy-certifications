@@ -2,6 +2,7 @@ import {
   ORIGINAL_QUESTION_BANK_SLUG,
   ORIGINAL_QUESTION_TEMPLATES,
 } from "./original-question-factory";
+import { createHash } from "node:crypto";
 
 export type InhouseAssessmentLevel = "novice" | "intermediate" | "advanced" | "expert";
 
@@ -30,6 +31,16 @@ export interface InhouseBlueprintDefinition {
   marksPerQuestion: 1;
   negativeMarks: 0;
   sortOrder: number;
+}
+
+/**
+ * Stable catalogue pricing for first-party assessments. The deterministic
+ * hash avoids environment drift while distributing prices across the
+ * approved ₹25–₹100 range.
+ */
+export function inhouseAssessmentPriceInr(slug: string): number {
+  const hash = Number.parseInt(createHash("md5").update(slug).digest("hex").slice(0, 8), 16);
+  return 25 + (hash % 76);
 }
 
 export const INHOUSE_ORIGINAL_BANK = {

@@ -14,13 +14,27 @@ import ExamTimer from '@/components/exam-timer';
 import { ExamStructuredData } from '@/components/seo-structured-data';
 import { SEO } from '@/components/seo';
 import { publicAssessmentCategoryPath, publicAssessmentPath } from '@shared/public-assessment-routes';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, RotateCcw, Save, WifiOff } from 'lucide-react';
 
 interface ExamQuestion {
   id: number;
   question: string;
   options: string[];
 }
+
+type SavedExamDraft = {
+  version: 1;
+  courseId: number;
+  slug: string;
+  questions: ExamQuestion[];
+  sessionId: string;
+  answers: Record<string, number>;
+  currentQuestion: number;
+  examStartTime: number;
+  tabSwitches: number;
+  userInfo: { name: string; email: string };
+  expiresAt: number;
+};
 
 type PublicAssessment = {
   id: number;
@@ -57,8 +71,11 @@ export default function Exam() {
   const [examStarted, setExamStarted] = useState(false);
   const [examStartTime, setExamStartTime] = useState<number>(0);
   const [sessionId, setSessionId] = useState<string>('');
+  const [restoredQuestionsData, setRestoredQuestionsData] = useState<{ questions: ExamQuestion[]; sessionId: string } | null>(null);
+  const [savedDraft, setSavedDraft] = useState<SavedExamDraft | null>(null);
   const [tabSwitches, setTabSwitches] = useState(0);
   const [isWindowFocused, setIsWindowFocused] = useState(true);
+  const [isOnline, setIsOnline] = useState(() => typeof navigator === 'undefined' ? true : navigator.onLine);
   const [userInfo, setUserInfo] = useState({
     name: user?.name || '',
     email: user?.email || ''
@@ -103,18 +120,71 @@ export default function Exam() {
       }
       return response.json();
     },
-    enabled: !!course?.id && examStarted,
+    enabled: !!course?.id && examStarted && !restoredQuestionsData,
     retry: 2,
   });
 
-  const questions = questionsData?.questions || [];
+  const activeQuestionsData = restoredQuestionsData || questionsData;
+  const questions = activeQuestionsData?.questions || [];
 
   // Set session ID when questions data is available
   useEffect(() => {
-    if (questionsData?.sessionId) {
-      setSessionId(questionsData.sessionId);
+    if (activeQuestionsData?.sessionId) {
+      setSessionId(activeQuestionsData.sessionId);
     }
-  }, [questionsData]);
+  }, [activeQuestionsData]);
+
+  useEffect(() => {
+    if (!course?.id || typeof window === 'undefined' || examStarted) return;
+    const key = `octamy.examDraft.${course.id}`;
+    try {
+      const draft = JSON.parse(localStorage.getItem(key) || 'null') as SavedExamDraft | null;
+      if (
+        draft?.version === 1
+        && draft.courseId === course.id
+        && draft.slug === course.slug
+        && draft.expiresAt > Date.now()
+        && Array.isArray(draft.questions)
+        && draft.questions.length > 0
+        && typeof draft.sessionId === 'string'
+      ) {
+        setSavedDraft(draft);
+      } else if (draft) {
+        localStorage.removeItem(key);
+      }
+    } catch {
+      localStorage.removeItem(key);
+    }
+  }, [course?.id, course?.slug, examStarted]);
+
+  useEffect(() => {
+    if (!course?.id || !examStarted || !sessionId || questions.length === 0 || typeof window === 'undefined') return;
+    const draft: SavedExamDraft = {
+      version: 1,
+      courseId: course.id,
+      slug: course.slug,
+      questions,
+      sessionId,
+      answers,
+      currentQuestion,
+      examStartTime,
+      tabSwitches,
+      userInfo,
+      expiresAt: examStartTime + 60 * 60 * 1000,
+    };
+    localStorage.setItem(`octamy.examDraft.${course.id}`, JSON.stringify(draft));
+  }, [answers, course?.id, course?.slug, currentQuestion, examStartTime, examStarted, questions, sessionId, tabSwitches, userInfo]);
+
+  useEffect(() => {
+    const online = () => setIsOnline(true);
+    const offline = () => setIsOnline(false);
+    window.addEventListener('online', online);
+    window.addEventListener('offline', offline);
+    return () => {
+      window.removeEventListener('online', online);
+      window.removeEventListener('offline', offline);
+    };
+  }, []);
 
   // Anti-cheating: Monitor tab/window focus
   useEffect(() => {
@@ -125,9 +195,8 @@ export default function Exam() {
         setTabSwitches(prev => prev + 1);
         setIsWindowFocused(false);
         toast({
-          title: "Warning",
-          description: "Tab switching detected. Excessive tab switching may result in exam termination.",
-          variant: "destructive",
+          title: "Assessment integrity notice",
+          description: "A tab change was recorded. Stay in this assessment window to keep the attempt valid.",
         });
       } else if (!document.hidden && !isWindowFocused) {
         setIsWindowFocused(true);
@@ -192,6 +261,7 @@ export default function Exam() {
       // Always redirect to temporary exam results page (payment-first approach)
       // User will see results and then be prompted to pay regardless of pass/fail
       if (result.tempExamId) {
+        if (course?.id) localStorage.removeItem(`octamy.examDraft.${course.id}`);
         setLocation(`/exam-results-temp/${result.tempExamId}`);
       } else {
         // Fallback for any edge cases
@@ -242,6 +312,9 @@ export default function Exam() {
     
     // Reset state for fresh exam attempt
     setSessionId('');
+    setRestoredQuestionsData(null);
+    setSavedDraft(null);
+    if (course?.id) localStorage.removeItem(`octamy.examDraft.${course.id}`);
     setAnswers({});
     setCurrentQuestion(0);
     setTabSwitches(0);
@@ -252,6 +325,23 @@ export default function Exam() {
     
     setExamStarted(true);
     setExamStartTime(Date.now());
+  };
+
+  const resumeSavedExam = () => {
+    if (!savedDraft || savedDraft.expiresAt <= Date.now()) return;
+    setRestoredQuestionsData({ questions: savedDraft.questions, sessionId: savedDraft.sessionId });
+    setSessionId(savedDraft.sessionId);
+    setAnswers(savedDraft.answers || {});
+    setCurrentQuestion(Math.min(savedDraft.currentQuestion || 0, savedDraft.questions.length - 1));
+    setTabSwitches(savedDraft.tabSwitches || 0);
+    setUserInfo(savedDraft.userInfo);
+    setExamStartTime(savedDraft.examStartTime);
+    setExamStarted(true);
+  };
+
+  const discardSavedExam = () => {
+    if (course?.id) localStorage.removeItem(`octamy.examDraft.${course.id}`);
+    setSavedDraft(null);
   };
 
   const handleAnswerChange = (questionId: string, answer: string) => {
@@ -267,9 +357,8 @@ export default function Exam() {
     // Anti-cheating: Check for excessive tab switching
     if (tabSwitches > 5) {
       toast({
-        title: "Exam Terminated",
-        description: "Excessive tab switching detected. Your exam has been flagged for review.",
-        variant: "destructive",
+        title: "Attempt flagged for review",
+        description: "Multiple tab changes were recorded and will be included in the assessment evidence.",
       });
     }
     
@@ -398,6 +487,24 @@ export default function Exam() {
                 </div>
               )}
 
+              {savedDraft && (
+                <div className="rounded-2xl border border-sky-200 bg-sky-50 p-5 text-left">
+                  <div className="flex items-start gap-3">
+                    <RotateCcw className="mt-0.5 h-5 w-5 text-sky-700" />
+                    <div className="flex-1">
+                      <h3 className="font-bold text-slate-950">Continue your saved attempt</h3>
+                      <p className="mt-1 text-sm leading-6 text-slate-600">
+                        {Object.keys(savedDraft.answers).length} of {savedDraft.questions.length} answers are saved securely on this device.
+                      </p>
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        <Button onClick={resumeSavedExam}>Resume assessment</Button>
+                        <Button variant="ghost" onClick={discardSavedExam}>Discard saved attempt</Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div className="text-center">
                 <Button
                   onClick={startExam}
@@ -471,18 +578,24 @@ export default function Exam() {
               <ExamTimer
                 duration={course?.duration || 15}
                 onTimeUp={handleTimeUp}
+                startedAtMs={examStartTime}
               />
             </div>
             <Progress value={progress} className="w-full" />
           </CardHeader>
           
           <CardContent className="space-y-6">
+            <div className="flex flex-wrap items-center gap-3 text-xs font-semibold text-slate-600">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5"><Save className="h-3.5 w-3.5 text-emerald-700" />Progress saved on this device</span>
+              {!isOnline && <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-amber-900"><WifiOff className="h-3.5 w-3.5" />Offline — keep this tab open; answers will remain available</span>}
+            </div>
+
             {/* Anti-cheating warning */}
             {tabSwitches > 0 && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
                 <div className="flex items-center">
-                  <AlertTriangle className="h-5 w-5 text-red-500 mr-2" />
-                  <p className="text-sm text-red-700">
+                  <AlertTriangle className="mr-2 h-5 w-5 text-amber-700" />
+                  <p className="text-sm text-amber-900">
                     Tab switching detected ({tabSwitches} times). 
                     {tabSwitches > 3 && <span className="font-semibold"> Warning: Excessive switching may result in exam termination.</span>}
                   </p>

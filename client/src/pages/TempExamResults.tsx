@@ -4,10 +4,22 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle, XCircle, Award, Clock, Target, Loader2, ShieldCheck } from "lucide-react";
+import { CheckCircle, XCircle, Award, Clock, Target, Loader2, ShieldCheck, Mail, UserPlus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/lib/auth.tsx";
+import Header from "@/components/header";
+
+type ReviewItem = {
+  questionId: number;
+  question: string;
+  options: string[];
+  selectedAnswer: number | null;
+  correctAnswer: number;
+  selectedOption: string | null;
+  correctOption: string;
+  isCorrect: boolean;
+};
 
 interface TempExamResults {
   tempExamId: string;
@@ -31,8 +43,11 @@ interface TempExamResults {
   mastered: boolean;
   isRetake: boolean;
   previousBestScore: number;
-  userEmail: string;
-  userName: string;
+  review: ReviewItem[];
+  isGuest: boolean;
+  maskedEmail?: string;
+  resultExpiresAt?: string;
+  recoveryEmailSent: boolean;
   message: string;
   needsPayment: boolean;
 }
@@ -69,9 +84,8 @@ export default function TempExamResults() {
     } catch (error) {
       console.error("Error fetching temp results:", error);
       toast({
-        title: "Error",
+        title: "Results unavailable",
         description: "Failed to load exam results. Please try again.",
-        variant: "destructive",
       });
       navigate("/");
     } finally {
@@ -119,13 +133,13 @@ export default function TempExamResults() {
   const getScoreColor = (score: number, passingScore: number) => {
     if (score >= 90) return "text-green-600";
     if (score >= passingScore) return "text-blue-600";
-    return "text-red-600";
+    return "text-amber-700";
   };
 
   const getBadgeVariant = (passed: boolean, mastered: boolean) => {
     if (mastered) return "default";
     if (passed) return "secondary";
-    return "destructive";
+    return "secondary";
   };
 
   if (loading) {
@@ -156,8 +170,9 @@ export default function TempExamResults() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
-      <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen bg-[#f5f2ec]">
+      <Header />
+      <div className="container mx-auto px-4 py-10">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="text-center mb-8">
@@ -165,7 +180,7 @@ export default function TempExamResults() {
               {results.passed ? (
                 <CheckCircle className="h-16 w-16 text-green-500" />
               ) : (
-                <XCircle className="h-16 w-16 text-red-500" />
+                <XCircle className="h-16 w-16 text-amber-600" />
               )}
             </div>
             <h1 className="text-3xl font-bold mb-2">
@@ -173,6 +188,22 @@ export default function TempExamResults() {
             </h1>
             <p className="text-lg text-muted-foreground">{results.message}</p>
           </div>
+
+          {results.isGuest && (
+            <Card className="mb-6 overflow-hidden border-slate-800 bg-slate-950 text-white shadow-xl shadow-slate-900/10">
+              <CardContent className="flex flex-col gap-5 p-6 sm:flex-row sm:items-center sm:justify-between">
+                <div className="max-w-2xl">
+                  <div className="flex items-center gap-2 text-sm font-bold text-sky-300"><Mail className="h-4 w-4" />{results.recoveryEmailSent ? `Recovery link sent ${results.maskedEmail ? `to ${results.maskedEmail}` : "to your email"}` : "Your result is saved for 24 hours"}</div>
+                  <h2 className="mt-2 text-xl font-extrabold">Keep this result in your learner record</h2>
+                  <p className="mt-2 text-sm leading-6 text-slate-300">Create a free account or sign in with the same email. You can return to this result, use an eligible subscription benefit, and keep future credentials together.</p>
+                </div>
+                <div className="flex shrink-0 flex-wrap gap-2">
+                  <Button onClick={() => navigate(`/register?role=learner&next=${encodeURIComponent(`/exam-results-temp/${tempExamId}`)}`)} className="bg-white text-slate-950 hover:bg-slate-100"><UserPlus className="mr-2 h-4 w-4" />Create free account</Button>
+                  <Button variant="outline" onClick={() => navigate(`/login?next=${encodeURIComponent(`/exam-results-temp/${tempExamId}`)}`)} className="border-slate-600 bg-transparent text-white hover:bg-slate-800 hover:text-white">Sign in</Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           <div className="grid gap-6 md:grid-cols-2">
             {/* Score Overview */}
@@ -238,6 +269,30 @@ export default function TempExamResults() {
               </CardContent>
             </Card>
           </div>
+
+          {results.review?.length > 0 && (
+            <Card className="mt-6 border-slate-200 shadow-sm">
+              <CardHeader>
+                <CardTitle>Answer review</CardTitle>
+                <CardDescription>Review every response before your next attempt. Correct answers are shown for learning and improvement.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {results.review.map((item, index) => (
+                  <details key={item.questionId} className={`group rounded-2xl border p-4 ${item.isCorrect ? "border-emerald-200 bg-emerald-50/60" : "border-amber-200 bg-amber-50/60"}`}>
+                    <summary className="flex cursor-pointer list-none items-start gap-3 font-semibold text-slate-950">
+                      {item.isCorrect ? <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-emerald-700" /> : <XCircle className="mt-0.5 h-5 w-5 shrink-0 text-amber-700" />}
+                      <span className="flex-1">{index + 1}. {item.question}</span>
+                      <Badge variant="outline" className={item.isCorrect ? "border-emerald-300 text-emerald-800" : "border-amber-300 text-amber-900"}>{item.isCorrect ? "Correct" : item.selectedAnswer == null ? "Not answered" : "Review"}</Badge>
+                    </summary>
+                    <div className="ml-8 mt-4 grid gap-3 text-sm sm:grid-cols-2">
+                      <div className="rounded-xl bg-white/80 p-3"><p className="text-xs font-bold uppercase tracking-wide text-slate-500">Your answer</p><p className="mt-1 font-medium text-slate-800">{item.selectedOption || "No answer selected"}</p></div>
+                      <div className="rounded-xl bg-white/80 p-3"><p className="text-xs font-bold uppercase tracking-wide text-emerald-700">Correct answer</p><p className="mt-1 font-medium text-slate-900">{item.correctOption}</p></div>
+                    </div>
+                  </details>
+                ))}
+              </CardContent>
+            </Card>
+          )}
 
           {/* Action Card */}
           {results.passed && results.course.subscriptionEligible && learnerPlanActive && (

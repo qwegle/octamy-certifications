@@ -1369,6 +1369,12 @@ export const examSessions = pgTable("exam_sessions", {
   id: text("id").primaryKey(),
   courseId: integer("course_id"),
   correctMap: jsonb("correct_map").notNull(),
+  questionSnapshot: jsonb("question_snapshot").$type<Array<{
+    id: number;
+    question: string;
+    options: string[];
+    correctAnswer: number;
+  }>>().default([]).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   expiresAt: timestamp("expires_at").notNull(),
 });
