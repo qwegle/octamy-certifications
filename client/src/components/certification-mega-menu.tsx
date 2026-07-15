@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useRef, useState, type FocusEvent } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
-import { ArrowRight, Award, ChevronDown, ChevronRight, GraduationCap, School, TicketCheck } from "lucide-react";
+import { ArrowRight, Award, ChevronDown, ChevronRight, Code2, FlaskConical, TicketCheck } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
-import { publicAssessmentCategoryPath, publicAssessmentPath } from "@shared/public-assessment-routes";
+import { publicAssessmentCategoryPath, publicAssessmentPath, publicPracticeCategoryPath } from "@shared/public-assessment-routes";
 
 type MenuItem = {
   id: number;
@@ -19,14 +19,12 @@ type MenuResponse = {
 };
 
 const CATEGORY_ORDER = [
-  "ssc",
-  "neet",
-  "jee",
-  "banking-exams",
-  "railway-exams",
-  "mathematics",
-  "physics",
-  "chemistry",
+  "software-engineering",
+  "data-ai-analytics",
+  "cloud-devops",
+  "cybersecurity",
+  "product-business-technology",
+  "tech-certifications",
 ];
 
 function useCertificationMenu() {
@@ -36,16 +34,14 @@ function useCertificationMenu() {
     staleTime: 5 * 60_000,
   });
   const groups = useMemo(() => {
-    const map = new Map<string, { name: string; slug: string; items: MenuItem[]; pathType: "competitive" | "school" }>();
+    const map = new Map<string, { name: string; slug: string; items: MenuItem[] }>();
     for (const item of query.data?.items || []) {
       const existing = map.get(item.category.slug) || {
         name: item.category.name,
         slug: item.category.slug,
         items: [],
-        pathType: item.audienceBands?.some((band) => band.code === "competitive_exam") ? "competitive" : "school",
       };
       existing.items.push(item);
-      if (item.audienceBands?.some((band) => band.code === "competitive_exam")) existing.pathType = "competitive";
       map.set(item.category.slug, existing);
     }
     return Array.from(map.values()).sort((left, right) => {
@@ -67,8 +63,6 @@ export function CertificationMegaMenu({ currentPath }: { currentPath: string }) 
   const containerRef = useRef<HTMLDivElement>(null);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const activeGroup = groups.find((group) => group.slug === activeSlug) || groups[0];
-  const competitiveGroups = groups.filter((group) => group.pathType === "competitive");
-  const schoolGroups = groups.filter((group) => group.pathType === "school");
   const current = currentPath === "/get-certified" || currentPath.startsWith("/get-certified/");
 
   useEffect(() => {
@@ -117,25 +111,26 @@ export function CertificationMegaMenu({ currentPath }: { currentPath: string }) 
           <div className="grid max-h-[min(690px,calc(100vh-7rem))] grid-cols-[230px_280px_minmax(0,1fr)] overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white text-left shadow-2xl shadow-slate-950/15">
             <div className="flex flex-col bg-slate-950 p-5 text-white">
               <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-violet-500/20 text-violet-200"><Award className="h-5 w-5" /></div>
-              <p className="mt-5 text-xs font-bold uppercase tracking-[0.16em] text-violet-300">Explore certification</p>
-              <h2 className="mt-2 text-2xl font-black tracking-tight">Prove what you know.</h2>
-              <p className="mt-3 text-sm leading-6 text-slate-300">Take a serious exam, review your result and activate a verifiable credential after passing.</p>
+              <p className="mt-5 text-xs font-bold uppercase tracking-[0.16em] text-violet-300">Career certifications</p>
+              <h2 className="mt-2 text-2xl font-black tracking-tight">Prove job-ready skills.</h2>
+              <p className="mt-3 text-sm leading-6 text-slate-300">Take serious technology assessments that can become recruiter-visible credentials after passing.</p>
               <nav className="mt-6 grid gap-1">
                 <Link href="/get-certified" className="flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-bold hover:bg-white/10">All certifications <ArrowRight className="h-4 w-4" /></Link>
-                <Link href={publicAssessmentCategoryPath("competitive-exams")} className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm text-slate-200 hover:bg-white/10"><GraduationCap className="h-4 w-4" />Competitive exams</Link>
-                <Link href={publicAssessmentCategoryPath("school-education")} className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm text-slate-200 hover:bg-white/10"><School className="h-4 w-4" />School subjects by grade</Link>
+                <Link href={publicAssessmentCategoryPath("software-engineering")} className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm text-slate-200 hover:bg-white/10"><Code2 className="h-4 w-4" />Software engineering</Link>
+                <Link href={publicAssessmentCategoryPath("data-ai-analytics")} className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm text-slate-200 hover:bg-white/10"><FlaskConical className="h-4 w-4" />Data, AI & analytics</Link>
+                <Link href="/practice" className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm text-slate-200 hover:bg-white/10">Practice exams</Link>
                 <Link href="/institutes" className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm text-slate-200 hover:bg-white/10"><TicketCheck className="h-4 w-4" />Institute vouchers</Link>
               </nav>
               <div className="mt-auto rounded-2xl border border-white/10 bg-white/5 p-4">
-                <p className="text-sm font-bold">Learner All Access</p>
-                <p className="mt-1 text-xs leading-5 text-slate-300">Eligible Octamy certifications included for ₹1,999/month.</p>
-                <Link href="/pricing" className="mt-3 inline-flex items-center text-xs font-bold text-violet-300">See membership <ChevronRight className="h-3.5 w-3.5" /></Link>
+                <p className="text-sm font-bold">Practice Pass</p>
+                <p className="mt-1 text-xs leading-5 text-slate-300">Unlimited non-recruiter practice for ₹299/month. Certifications stay separate.</p>
+                <Link href="/pricing" className="mt-3 inline-flex items-center text-xs font-bold text-violet-300">See pricing <ChevronRight className="h-3.5 w-3.5" /></Link>
               </div>
             </div>
 
             <div className="overflow-y-auto border-r border-slate-200 py-3">
-              <p className="px-5 pb-2 pt-2 text-xs font-black uppercase tracking-[0.14em] text-slate-400">Competitive exams</p>
-              {isLoading ? Array.from({ length: 7 }, (_, index) => <div key={index} className="mx-4 my-2 h-11 animate-pulse rounded-xl bg-slate-100" />) : competitiveGroups.map((group) => (
+              <p className="px-5 pb-2 pt-2 text-xs font-black uppercase tracking-[0.14em] text-slate-400">Technology paths</p>
+              {isLoading ? Array.from({ length: 7 }, (_, index) => <div key={index} className="mx-4 my-2 h-11 animate-pulse rounded-xl bg-slate-100" />) : groups.map((group) => (
                 <Link
                   key={group.slug}
                   href={publicAssessmentCategoryPath(group.slug)}
@@ -147,12 +142,7 @@ export function CertificationMegaMenu({ currentPath }: { currentPath: string }) 
                   <ChevronRight className="h-4 w-4 shrink-0" />
                 </Link>
               ))}
-              {!isLoading && <p className="border-t border-slate-100 px-5 pb-2 pt-4 text-xs font-black uppercase tracking-[0.14em] text-slate-400">School subjects by grade</p>}
-              {!isLoading && schoolGroups.map((group) => (
-                <Link key={group.slug} href={publicAssessmentCategoryPath(group.slug)} onMouseEnter={() => setActiveSlug(group.slug)} onFocus={() => setActiveSlug(group.slug)} className={`flex items-center justify-between gap-3 border-l-2 px-5 py-3 text-sm transition ${activeGroup?.slug === group.slug ? "border-violet-600 bg-violet-50 font-bold text-violet-900" : "border-transparent text-slate-700 hover:bg-slate-50"}`}>
-                  <span><span className="block">{group.name}</span><span className="mt-0.5 block text-[11px] font-medium text-slate-400">{group.items.length} grade-specific certification{group.items.length === 1 ? "" : "s"}</span></span><ChevronRight className="h-4 w-4 shrink-0" />
-                </Link>
-              ))}
+              {!isLoading && <Link href={publicPracticeCategoryPath("competitive-exams")} className="mx-4 mt-3 flex items-center justify-between rounded-xl border border-slate-200 px-3 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50">Practice-only exams <ChevronRight className="h-4 w-4" /></Link>}
             </div>
 
             <div className="overflow-y-auto p-5">

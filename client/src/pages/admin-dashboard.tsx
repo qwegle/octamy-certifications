@@ -1276,7 +1276,7 @@ function CourseForm({ course, onCancel, onSuccess }: { course?: any; onCancel: (
           {isThirdParty && (
             <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
               <p className="font-semibold">Editing a {course.ownerType} submission</p>
-              <p className="mt-1 leading-5">Saving content changes unpublishes the item and returns it to review. Ownership, issuer, approval, All Access, and reseller access cannot be changed in this form.</p>
+              <p className="mt-1 leading-5">Saving content changes unpublishes the item and returns it to review. Ownership, issuer, approval, subscription flags, and reseller access cannot be changed in this form.</p>
             </div>
           )}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1353,7 +1353,7 @@ function CourseForm({ course, onCancel, onSuccess }: { course?: any; onCancel: (
                       <SelectItem value="bundle">Bundle</SelectItem>
                     </SelectContent>
                   </Select>
-                  <FormDescription>Only Octamy assessments can be included in Learner All Access.</FormDescription>
+                  <FormDescription>Career certifications, practice exams, courses, ebooks, and bundles are managed as separate product types.</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -1563,8 +1563,8 @@ function CourseForm({ course, onCancel, onSuccess }: { course?: any; onCancel: (
               render={({ field }) => (
                 <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                   <div className="space-y-0.5 pr-3">
-                    <FormLabel className="text-base">Learner All Access</FormLabel>
-                    <FormDescription>Include this public Octamy assessment in the ₹1,999 plan</FormDescription>
+                    <FormLabel className="text-base">Subscription flag</FormLabel>
+                    <FormDescription>Use only for practice exams that should be unlocked by Practice Pass.</FormDescription>
                   </div>
                   <FormControl>
                     <Switch
@@ -2522,7 +2522,7 @@ export default function AdminDashboard() {
                                     {course.reviewStatus || "draft"}
                                   </Badge>
                                   <Badge variant={course.isActive ? "outline" : "secondary"}>{course.isActive ? "Published" : "Unavailable"}</Badge>
-                                  {course.subscriptionEligible && <Badge className="bg-emerald-100 text-emerald-900 hover:bg-emerald-100">All Access</Badge>}
+                                  {course.subscriptionEligible && <Badge className="bg-emerald-100 text-emerald-900 hover:bg-emerald-100">Subscription</Badge>}
                                   {course.resellerEligible && <Badge variant="outline">Reseller</Badge>}
                                   {course.isInternship && (
                                     <Badge variant="outline">Internship</Badge>

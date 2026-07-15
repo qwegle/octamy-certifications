@@ -37,6 +37,7 @@ interface TempExamResults {
     ownerType?: string;
     subscriptionEligible?: boolean;
     certificationMode?: string;
+    assessmentPurpose?: "certification" | "practice";
   };
   timeTaken: number;
   mastered: boolean;
@@ -80,7 +81,9 @@ export default function TempExamResults() {
       if (token) {
         const subscriptionResponse = await apiRequest("GET", "/api/me/subscription");
         const subscriptionData = await subscriptionResponse.json();
-        setLearnerPlanActive(subscriptionData?.learner?.plan === "all_access" && subscriptionData?.learner?.status === "active");
+        // Internal all_access now represents Practice Pass. It must not issue
+        // recruiter-visible credentials from a result page.
+        setLearnerPlanActive(subscriptionData?.learner?.plan === "credential_access" && subscriptionData?.learner?.status === "active");
       }
     } catch (error) {
       console.error("Error fetching temp results:", error);
@@ -112,7 +115,7 @@ export default function TempExamResults() {
     try {
       const response = await apiRequest("POST", "/api/subscriptions/learner/redeem", { tempExamId });
       const data = await response.json();
-      toast({ title: "Credential issued", description: "Your All Access benefit was applied securely." });
+      toast({ title: "Credential issued", description: "Your sponsored benefit was applied securely." });
       navigate(data.redirectTo || `/certificate/${data.certificateId}`);
     } catch (error) {
       toast({
@@ -190,6 +193,8 @@ export default function TempExamResults() {
       </div>
     );
   }
+
+  const isPractice = results.course.assessmentPurpose === "practice" || results.needsPayment === false;
 
   return (
     <div className="min-h-screen bg-[#f5f2ec]">
@@ -316,19 +321,29 @@ export default function TempExamResults() {
           )}
 
           {/* Action Card */}
-          {results.passed && results.course.subscriptionEligible && learnerPlanActive && (
+          {results.passed && !isPractice && results.course.subscriptionEligible && learnerPlanActive && (
             <Card className="mt-6 border-emerald-200 bg-emerald-50/70">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-emerald-950"><ShieldCheck className="h-5 w-5" />Included with Learner All Access</CardTitle>
+                <CardTitle className="flex items-center gap-2 text-emerald-950"><ShieldCheck className="h-5 w-5" />Included with sponsored activation</CardTitle>
                 <CardDescription>Your passing Octamy in-house assessment includes digital credential activation. No student checkout is required.</CardDescription>
               </CardHeader>
               <CardContent><Button onClick={redeemSubscriptionCredential} disabled={redeeming} size="lg" className="bg-emerald-800 text-white hover:bg-emerald-900">{redeeming && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Issue my included credential</Button></CardContent>
             </Card>
           )}
 
-          {results.passed && results.course.subscriptionEligible && !learnerPlanActive && (
+          {results.passed && !isPractice && results.course.subscriptionEligible && !learnerPlanActive && (
             <Card className="mt-6 border-violet-200 bg-violet-50/60">
-              <CardContent className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between"><div><p className="font-bold text-slate-950">This Octamy assessment is included in All Access</p><p className="mt-1 text-sm text-slate-600">₹1,999/month covers eligible in-house assessment credentials. Creator products are not included.</p></div><Button variant="outline" onClick={() => navigate("/pricing")}>View All Access</Button></CardContent>
+              <CardContent className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between"><div><p className="font-bold text-slate-950">This Octamy certification may support sponsored activation</p><p className="mt-1 text-sm text-slate-600">Certification credentials use direct activation, vouchers, or workspace sponsorship. Practice Pass is separate.</p></div><Button variant="outline" onClick={() => navigate("/pricing")}>View pricing</Button></CardContent>
+            </Card>
+          )}
+
+          {isPractice && (
+            <Card className="mt-6 border-sky-200 bg-sky-50/70">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-sky-950"><ShieldCheck className="h-5 w-5" />Practice result saved</CardTitle>
+                <CardDescription>This was a practice-only exam. It helps preparation and is not shared with recruiters as a verified credential.</CardDescription>
+              </CardHeader>
+              <CardContent><Button variant="outline" onClick={() => navigate("/practice")}>Browse more practice exams</Button></CardContent>
             </Card>
           )}
 
@@ -396,9 +411,9 @@ export default function TempExamResults() {
             </Button>
             <Button
               variant="outline"
-              onClick={() => navigate(results.course.slug ? `/get-certified/${results.course.slug}` : "/get-certified")}
+              onClick={() => navigate(results.course.slug ? `${isPractice ? "/practice" : "/get-certified"}/${results.course.slug}` : isPractice ? "/practice" : "/get-certified")}
             >
-              View Exam
+              {isPractice ? "View Practice Exam" : "View Exam"}
             </Button>
           </div>
         </div>

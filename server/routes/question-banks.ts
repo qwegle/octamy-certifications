@@ -72,10 +72,11 @@ router.get("/", requireAuth, withCtx, async (req: AuthedRequest, res) => {
     const ctx = req.ctx!;
     const search = (req.query.search as string) || undefined;
     const ownerType = (req.query.ownerType as string) || undefined;
+    const bankPurpose = req.query.purpose === "practice" ? "practice" : req.query.purpose === "certification" ? "certification" : undefined;
 
     // Aggregate accessible banks: own + public
     const all = await storage.listQuestionBanks({ search, ownerType });
-    const accessible = all.filter((b) => canListBank(ctx, b));
+    const accessible = all.filter((b) => canListBank(ctx, b) && (!bankPurpose || (b as any).bankPurpose === bankPurpose));
     res.json(accessible);
   } catch (e: any) {
     console.error("list banks error:", e);
@@ -88,6 +89,7 @@ const createBankSchema = z.object({
   slug: z.string().trim().max(180).optional(),
   description: z.string().trim().max(2_000).optional().nullable(),
   visibility: z.enum(["private", "unlisted", "public"]).default("private"),
+  bankPurpose: z.enum(["certification", "practice"]).default("certification"),
   ownerType: z.enum(["admin", "creator", "institute"]).optional(),
   ownerId: z.number().nullable().optional(),
   language: z.string().trim().min(2).max(12).optional(),
@@ -255,6 +257,7 @@ router.post("/", requireAuth, withCtx, async (req: AuthedRequest, res) => {
       ownerType,
       ownerId: ownerId ?? null,
       visibility: body.visibility,
+      bankPurpose: body.bankPurpose,
       language: body.language ?? "en",
       tags: body.tags ?? [],
       createdBy: ctx.user.id,

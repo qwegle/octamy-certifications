@@ -110,8 +110,11 @@ import {
   ASSESSMENT_HUB_PATH,
   canonicalPublicSlug,
   PUBLIC_ASSESSMENT_PRODUCT_TYPES,
+  PRACTICE_HUB_PATH,
   publicAssessmentCategoryPath,
   publicAssessmentPath,
+  publicPracticeCategoryPath,
+  publicPracticePath,
   publicProductPath,
 } from "@shared/public-assessment-routes";
 
@@ -156,6 +159,22 @@ async function isActiveAdminCategory(categoryId: number) {
     eq(categoriesTable.isActive, true),
   )).limit(1);
   return Boolean(category);
+}
+
+async function getActiveLearnerPracticeSubscription(userId: number) {
+  const [subscription] = await db.select({ id: subscriptions.id, plan: subscriptions.plan })
+    .from(subscriptions)
+    .where(and(
+      eq(subscriptions.ownerType, "learner"),
+      eq(subscriptions.ownerId, userId),
+      eq(subscriptions.userId, userId),
+      eq(subscriptions.status, "active"),
+      sql`(${subscriptions.startsAt} IS NULL OR ${subscriptions.startsAt} <= NOW())`,
+      sql`${subscriptions.renewsAt} IS NOT NULL AND ${subscriptions.renewsAt} > NOW()`,
+    ))
+    .orderBy(desc(subscriptions.renewsAt), desc(subscriptions.id))
+    .limit(1);
+  return subscription || null;
 }
 
 /**
@@ -1184,6 +1203,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const staticUrls: Array<{ path: string; priority: string }> = [
         { path: "", priority: "1.0" },
         { path: ASSESSMENT_HUB_PATH, priority: "0.9" },
+        { path: PRACTICE_HUB_PATH, priority: "0.7" },
         { path: "/creator-assessments", priority: "0.8" },
         { path: "/courses", priority: "0.9" },
         { path: "/virtual-internships", priority: "0.9" },
@@ -1213,7 +1233,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const allCourses = await storage.getCourses().catch(() => []);
       const allCategories = await storage.getCategories().catch(() => []);
       const categoryById = new Map((allCategories as any[]).map((category) => [category.id, category]));
-      const sitemapCategoryIds = new Set<number>();
+      const certificationCategoryIds = new Set<number>();
+      const practiceCategoryIds = new Set<number>();
       const publicCourses = (allCourses as any[]).filter((course) => canonicalPublicSlug(course.slug));
       const assessmentCourses = publicCourses.filter((course) => (
         PUBLIC_ASSESSMENT_PRODUCT_TYPES.includes(course.productType)
@@ -1221,11 +1242,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       for (const course of assessmentCourses) {
         if (course.ownerType !== "admin") continue;
+        const targetSet = course.assessmentPurpose === "practice" ? practiceCategoryIds : certificationCategoryIds;
         let categoryId = Number(course.categoryId || course.category?.id);
         const visited = new Set<number>();
         while (Number.isInteger(categoryId) && categoryId > 0 && !visited.has(categoryId)) {
           visited.add(categoryId);
-          sitemapCategoryIds.add(categoryId);
+          targetSet.add(categoryId);
           const category = categoryById.get(categoryId);
           categoryId = Number(category?.parentId);
         }
@@ -1236,11 +1258,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         urls.push({ loc: `${base}${u.path}`, priority: u.priority, freq: "weekly" });
       }
       for (const c of publicCourses) {
-        urls.push({ loc: `${base}${publicProductPath(c.slug, c.productType)}`, priority: "0.8", freq: "weekly" });
+        const path = PUBLIC_ASSESSMENT_PRODUCT_TYPES.includes(c.productType)
+          ? c.assessmentPurpose === "practice"
+            ? publicPracticePath(c.slug)
+            : publicAssessmentPath(c.slug)
+          : publicProductPath(c.slug, c.productType);
+        urls.push({ loc: `${base}${path}`, priority: c.assessmentPurpose === "practice" ? "0.6" : "0.8", freq: "weekly" });
       }
       for (const cat of allCategories as any[]) {
-        if (!sitemapCategoryIds.has(cat.id) || !canonicalPublicSlug(cat.slug)) continue;
-        urls.push({ loc: `${base}${publicAssessmentCategoryPath(cat.slug)}`, priority: "0.6", freq: "weekly" });
+        if (!canonicalPublicSlug(cat.slug)) continue;
+        if (certificationCategoryIds.has(cat.id)) {
+          urls.push({ loc: `${base}${publicAssessmentCategoryPath(cat.slug)}`, priority: "0.6", freq: "weekly" });
+        }
+        if (practiceCategoryIds.has(cat.id)) {
+          urls.push({ loc: `${base}${publicPracticeCategoryPath(cat.slug)}`, priority: "0.4", freq: "weekly" });
+        }
       }
 
       const xmlEscape = (value: string) => value
@@ -1334,7 +1366,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Exam routes
-  app.post("/api/courses/:id/questions", async (req, res) => {
+  app.post("/api/courses/:id/questions", optionalAuth, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const courseId = Number(req.params.id);
       if (!Number.isInteger(courseId) || courseId <= 0) {
@@ -1343,6 +1375,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const course = await storage.getCourse(courseId);
       if (!course || !course.isActive || course.visibility !== "public" || course.reviewStatus !== "approved" || course.ownerType === "institute") {
         return res.status(404).json({ message: "Course not found" });
+      }
+      if (course.assessmentPurpose === "practice") {
+        if (!req.user?.userId) {
+          return res.status(401).json({
+            message: "Sign in and activate Practice Pass to start this practice exam",
+            code: "PRACTICE_SUBSCRIPTION_REQUIRED",
+          });
+        }
+        const subscription = await getActiveLearnerPracticeSubscription(req.user.userId);
+        if (!subscription) {
+          return res.status(402).json({
+            message: "Practice exams require Practice Pass at ₹299/month",
+            code: "PRACTICE_SUBSCRIPTION_REQUIRED",
+          });
+        }
       }
       const questions = course.useBlueprintEngine
         ? await storage.materializeBlueprintForAttempt(courseId)
@@ -1521,6 +1568,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (!course) {
           return res.status(404).json({ message: "Course not found" });
         }
+        if (!course.isActive || course.visibility !== "public" || course.reviewStatus !== "approved") {
+          return res.status(404).json({ message: "Course not found" });
+        }
+        const isPracticeExam = course.assessmentPurpose === "practice";
+        let practiceSubscriptionId: number | null = null;
+        if (isPracticeExam) {
+          if (!req.user?.userId) {
+            return res.status(401).json({
+              message: "Sign in and activate Practice Pass to submit this practice exam",
+              code: "PRACTICE_SUBSCRIPTION_REQUIRED",
+            });
+          }
+          const subscription = await getActiveLearnerPracticeSubscription(req.user.userId);
+          if (!subscription) {
+            return res.status(402).json({
+              message: "Practice exams require Practice Pass at ₹299/month",
+              code: "PRACTICE_SUBSCRIPTION_REQUIRED",
+            });
+          }
+          practiceSubscriptionId = subscription.id;
+        }
 
         // EXAM PASSING LOGIC:
         // Use the course's defined passing score (e.g., 60% for Demo Course)
@@ -1579,6 +1647,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           isRetake,
           previousBestScore,
           course: publicPendingCourseSnapshot(course),
+          assessmentPurpose: course.assessmentPurpose,
+          needsPayment: !isPracticeExam,
           review,
           resultExpiresAt,
           recoveryEmailSent: false,
@@ -1586,8 +1656,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
         };
         await savePendingExam(tempExamId, pendingExamPayload);
 
+        if (isPracticeExam) {
+          await storage.createExamAttempt({
+            userId: req.user!.userId,
+            courseId: numericCourseId,
+            userEmail: effectiveUserEmail,
+            userName: effectiveUserName,
+            score,
+            totalQuestions,
+            answers: answersRecord,
+            timeTaken: finalTimeTaken,
+            passed,
+            mastered,
+            sessionId,
+            ipAddress: req.ip || req.connection?.remoteAddress,
+            userAgent: req.get("User-Agent"),
+            tabSwitches: Number.isInteger(tabSwitches) && tabSwitches >= 0 ? tabSwitches : 0,
+          });
+          await audit({
+            action: "practice_exam.completed",
+            userId: req.user!.userId,
+            actorRole: "learner",
+            resourceType: "course",
+            resourceId: numericCourseId,
+            req,
+            metadata: { score, passed, subscriptionId: practiceSubscriptionId },
+          });
+        }
+
         let recoveryEmailSent = false;
-        if (!req.user?.userId) {
+        if (!req.user?.userId && !isPracticeExam) {
           const baseUrl = (process.env.APP_URL || `${req.protocol}://${req.get("host")}`).replace(/\/+$/, "");
           const resultPath = `/exam-results-temp/${tempExamId}`;
           const resultLink = `${baseUrl}${resultPath}`;
@@ -1660,6 +1758,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           ),
           totalQuestions: examData.totalQuestions,
           course: publicPendingCourseSnapshot(examData.course),
+          assessmentPurpose: examData.assessmentPurpose || examData.course?.assessmentPurpose || "certification",
           timeTaken: examData.timeTaken,
           mastered: examData.mastered,
           isRetake: examData.isRetake,
@@ -1674,7 +1773,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           message: examData.passed
             ? `Congratulations! You passed with ${examData.score}%`
             : `You scored ${examData.score}%. You need at least ${examData.course.passingScore}% to pass.`,
-          needsPayment: true, // Always true for temp results
+          needsPayment: examData.needsPayment !== false,
         });
       } catch (error) {
         console.error("Error fetching temporary exam results:", error);
@@ -4946,13 +5045,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const page = Math.max(1, parseInt(String(req.query.page || "1"), 10) || 1);
         const pageSize = Math.min(100, Math.max(1, parseInt(String(req.query.pageSize || "50"), 10) || 50));
         const search = String(req.query.search || "").trim();
+        const purpose = String(req.query.purpose || "certification") === "practice" ? "practice" : "certification";
         const conditions = [eq(coursesTable.ownerType, "admin"), eq(coursesTable.productType, "assessment")];
+        conditions.push(eq(coursesTable.assessmentPurpose, purpose));
         if (search) conditions.push(or(ilike(coursesTable.title, `%${search}%`), ilike(coursesTable.slug, `%${search}%`))!);
         const where = and(...conditions)!;
         const [{ total }] = await db.select({ total: count() }).from(coursesTable).where(where);
         const items = await db.select({
           id: coursesTable.id, title: coursesTable.title, slug: coursesTable.slug,
           description: coursesTable.description, duration: coursesTable.duration,
+          assessmentPurpose: coursesTable.assessmentPurpose,
           passingScore: coursesTable.passingScore,
           isActive: coursesTable.isActive, visibility: coursesTable.visibility,
           reviewStatus: coursesTable.reviewStatus, certificationMode: coursesTable.certificationMode,
@@ -4980,7 +5082,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const pageSize = Math.min(100, Math.max(1, parseInt(String(req.query.pageSize || "25"), 10) || 25));
         const search = String(req.query.search || "").trim();
         const status = String(req.query.status || "current");
+        const purpose = String(req.query.purpose || "certification") === "practice" ? "practice" : "certification";
         const filters = [];
+        filters.push(eq(questionBanksTable.bankPurpose, purpose));
         if (status === "current") filters.push(not(eq(questionBanksTable.status, "archived")));
         else if (status !== "all") filters.push(eq(questionBanksTable.status, status));
         if (search) filters.push(or(ilike(questionBanksTable.name, `%${search}%`), ilike(questionBanksTable.slug, `%${search}%`))!);
@@ -4993,6 +5097,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           description: questionBanksTable.description,
           ownerType: questionBanksTable.ownerType,
           visibility: questionBanksTable.visibility,
+          bankPurpose: questionBanksTable.bankPurpose,
           bankKind: questionBanksTable.bankKind,
           status: questionBanksTable.status,
           subject: questionBanksTable.subject,
@@ -5035,7 +5140,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (parsed.data.action === "publish") {
           const result = await db.execute(sql`
             UPDATE courses c SET is_active = true, visibility = 'public', review_status = 'approved',
-              certification_mode = 'octamy', use_blueprint_engine = true, subscription_eligible = true
+              certification_mode = CASE WHEN c.assessment_purpose = 'practice' THEN 'none' ELSE 'octamy' END,
+              use_blueprint_engine = true,
+              subscription_eligible = CASE WHEN c.assessment_purpose = 'practice' THEN true ELSE false END
             WHERE c.id IN (${sql.join(ids.map((id) => sql`${id}`), sql`,`)})
               AND c.owner_type = 'admin' AND c.product_type = 'assessment'
               AND EXISTS (SELECT 1 FROM course_question_blueprint b WHERE b.course_id = c.id)
@@ -5150,6 +5257,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           name: z.string().trim().min(3).max(160),
           description: z.string().trim().max(2000).optional(),
           visibility: z.enum(["private", "unlisted", "public"]).default("private"),
+          bankPurpose: z.enum(["certification", "practice"]).default("certification"),
           bankKind: z.enum(["assessment_pool", "subject_pool", "master", "custom"]).default("custom"),
           status: z.enum(["draft", "active", "archived"]).default("draft"),
           subject: z.string().trim().max(120).optional(),
@@ -5176,6 +5284,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         name: z.string().trim().min(3).max(160).optional(),
         description: z.string().trim().max(2000).optional(),
         visibility: z.enum(["private", "unlisted", "public"]).optional(),
+        bankPurpose: z.enum(["certification", "practice"]).optional(),
         bankKind: z.enum(["assessment_pool", "subject_pool", "master", "custom"]).optional(),
         status: z.enum(["draft", "active", "archived"]).optional(),
         subject: z.string().trim().max(120).nullable().optional(),

@@ -17,6 +17,8 @@ export type CertificationCardItem = {
   subscriptionEligible?: boolean;
   originLabel: string;
   certificationLabel: string;
+  canonicalPath?: string;
+  assessmentPurpose?: "certification" | "practice";
   creator?: { displayName: string; slug: string } | null;
   category: { name: string; slug: string };
   audienceBands?: Array<{ id: number; code: string; label: string }>;
@@ -49,19 +51,21 @@ export function certificationDisplayTitle(title: string) {
     .replace(/ Diagnostic$/i, " Skills Diagnostic");
 }
 
-export function CertificationCard({ item, categoryHref }: { item: CertificationCardItem; categoryHref?: string }) {
+export function CertificationCard({ item, categoryHref, variant = "certification" }: { item: CertificationCardItem; categoryHref?: string; variant?: "certification" | "practice" }) {
   const accent = accents[item.category.slug] || "from-slate-800 via-violet-700 to-indigo-600";
-  const title = certificationDisplayTitle(item.title);
+  const practice = variant === "practice" || item.assessmentPurpose === "practice";
+  const title = practice ? item.title : certificationDisplayTitle(item.title);
+  const href = item.canonicalPath || publicAssessmentPath(item.slug);
 
   return (
     <article className="group flex h-full flex-col overflow-hidden rounded-[1.4rem] border border-slate-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:border-slate-300 hover:shadow-xl hover:shadow-slate-900/10">
-      <Link href={publicAssessmentPath(item.slug)} className={`relative block min-h-40 overflow-hidden bg-gradient-to-br ${accent} p-5 text-white`}>
+      <Link href={href} className={`relative block min-h-40 overflow-hidden bg-gradient-to-br ${accent} p-5 text-white`}>
         {item.thumbnailUrl && <img src={item.thumbnailUrl} alt="" className="absolute inset-0 h-full w-full object-cover opacity-25 mix-blend-luminosity transition duration-500 group-hover:scale-105" />}
         <div aria-hidden className="absolute -right-10 -top-12 h-36 w-36 rounded-full border-[24px] border-white/10" />
         <div className="relative flex h-full flex-col justify-between">
           <div className="flex items-start justify-between gap-3">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-black/15 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.13em] backdrop-blur-sm"><Award className="h-3 w-3" />Octamy certified</span>
-            {item.subscriptionEligible && <span className="rounded-full bg-white px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-slate-950">All Access</span>}
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-black/15 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.13em] backdrop-blur-sm"><Award className="h-3 w-3" />{practice ? "Practice only" : "Octamy certified"}</span>
+            {item.subscriptionEligible && <span className="rounded-full bg-white px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-slate-950">{practice ? "Practice Pass" : "Sponsored"}</span>}
           </div>
           <div>
             <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/70">{item.category.name}</p>
@@ -85,11 +89,11 @@ export function CertificationCard({ item, categoryHref }: { item: CertificationC
 
         <div className="mt-auto flex items-end justify-between gap-3 pt-4">
           <div>
-            <p className="flex items-center gap-1 text-xs font-bold text-emerald-700"><Sparkles className="h-3.5 w-3.5" />Exam attempt is free</p>
-            <p className="mt-1 text-xs text-slate-500">Credential activation ₹{item.price}</p>
+            <p className="flex items-center gap-1 text-xs font-bold text-emerald-700"><Sparkles className="h-3.5 w-3.5" />{practice ? "Included with Practice Pass" : "Exam attempt is free"}</p>
+            <p className="mt-1 text-xs text-slate-500">{practice ? "No recruiter credential" : `Credential activation ₹${item.price}`}</p>
           </div>
           <Button asChild size="sm" className="rounded-full px-4">
-            <Link href={publicAssessmentPath(item.slug)} aria-label={`View ${title}`}>View <ArrowUpRight className="ml-1 h-3.5 w-3.5" /></Link>
+            <Link href={href} aria-label={`View ${title}`}>View <ArrowUpRight className="ml-1 h-3.5 w-3.5" /></Link>
           </Button>
         </div>
       </div>

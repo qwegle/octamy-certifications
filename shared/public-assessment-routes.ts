@@ -1,5 +1,7 @@
 export const CERTIFICATION_HUB_PATH = "/get-certified";
 export const CERTIFICATION_CATEGORY_PREFIX = `${CERTIFICATION_HUB_PATH}/categories`;
+export const PRACTICE_HUB_PATH = "/practice";
+export const PRACTICE_CATEGORY_PREFIX = `${PRACTICE_HUB_PATH}/categories`;
 // Kept as aliases because internal authoring and scoring still use the precise
 // domain term "assessment". Public discovery uses outcome-led certification
 // language and URLs.
@@ -28,6 +30,16 @@ export function publicAssessmentPath(slug: unknown): string {
 export function publicAssessmentCategoryPath(slug: unknown): string {
   const canonical = canonicalPublicSlug(slug);
   return canonical ? `${ASSESSMENT_CATEGORY_PREFIX}/${canonical}` : ASSESSMENT_HUB_PATH;
+}
+
+export function publicPracticePath(slug: unknown): string {
+  const canonical = canonicalPublicSlug(slug);
+  return canonical ? `${PRACTICE_HUB_PATH}/${canonical}` : PRACTICE_HUB_PATH;
+}
+
+export function publicPracticeCategoryPath(slug: unknown): string {
+  const canonical = canonicalPublicSlug(slug);
+  return canonical ? `${PRACTICE_CATEGORY_PREFIX}/${canonical}` : PRACTICE_HUB_PATH;
 }
 
 export function publicLearningPath(slug: unknown): string {

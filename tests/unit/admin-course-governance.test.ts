@@ -13,6 +13,7 @@ const adminCourse = {
   ownerType: "admin",
   ownerId: null,
   productType: "assessment",
+  assessmentPurpose: "certification",
   visibility: "public",
   certificationMode: "octamy",
   reviewStatus: "draft",
@@ -51,25 +52,43 @@ describe("admin course governance", () => {
     expect(update.success).toBe(false);
   });
 
-  it("creates server-owned Octamy inventory and makes publication imply approval", () => {
+  it("creates server-owned Octamy certification inventory and makes publication imply approval", () => {
     const parsed = adminCourseCreateSchema.parse({
       ...validCreate,
       isActive: true,
-      subscriptionEligible: true,
+      subscriptionEligible: false,
       resellerEligible: true,
     });
     expect(buildAdminOwnedCourseCreate(parsed, "octamy-quantitative-reasoning")).toMatchObject({
       ownerType: "admin",
       ownerId: null,
       certificationMode: "octamy",
+      assessmentPurpose: "certification",
       reviewStatus: "approved",
       isActive: true,
-      subscriptionEligible: true,
+      subscriptionEligible: false,
       resellerEligible: true,
     });
   });
 
-  it("does not mark non-assessment or non-public items as All Access inventory", () => {
+  it("allows Practice Pass inventory only for practice assessments", () => {
+    const parsed = adminCourseCreateSchema.parse({
+      ...validCreate,
+      assessmentPurpose: "practice",
+      isActive: true,
+      subscriptionEligible: true,
+      resellerEligible: true,
+    });
+    expect(buildAdminOwnedCourseCreate(parsed, "practice-assessment")).toMatchObject({
+      ownerType: "admin",
+      certificationMode: "none",
+      assessmentPurpose: "practice",
+      subscriptionEligible: true,
+      resellerEligible: false,
+    });
+  });
+
+  it("does not mark non-assessment or non-public items as subscription inventory", () => {
     const parsed = adminCourseCreateSchema.parse({
       ...validCreate,
       productType: "video_course",
@@ -93,7 +112,7 @@ describe("admin course governance", () => {
       ownerId: null,
       certificationMode: "octamy",
       reviewStatus: "approved",
-      subscriptionEligible: true,
+      subscriptionEligible: false,
     });
   });
 

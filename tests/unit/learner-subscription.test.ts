@@ -4,6 +4,7 @@ import { isLearnerSubscriptionCourseEligible } from "../../server/routes/learner
 const eligible = {
   ownerType: "admin",
   productType: "assessment",
+  assessmentPurpose: "certification",
   isActive: true,
   visibility: "public",
   reviewStatus: "approved",
@@ -11,8 +12,12 @@ const eligible = {
   certificationMode: "octamy",
 };
 
-describe("Learner All Access inventory policy", () => {
-  it("includes only explicitly eligible Octamy in-house assessments", () => {
+describe("legacy learner credential subscription policy", () => {
+  it("does not include Practice Pass exams as credential-funded inventory", () => {
+    expect(isLearnerSubscriptionCourseEligible({ ...eligible, assessmentPurpose: "practice", certificationMode: "none" })).toBe(false);
+  });
+
+  it("keeps the old helper limited to explicit certification inventory", () => {
     expect(isLearnerSubscriptionCourseEligible(eligible)).toBe(true);
   });
 
@@ -20,6 +25,7 @@ describe("Learner All Access inventory policy", () => {
     { ownerType: "creator" },
     { ownerType: "institute" },
     { productType: "video_course" },
+    { assessmentPurpose: "practice" },
     { isActive: false },
     { visibility: "private" },
     { reviewStatus: "pending" },

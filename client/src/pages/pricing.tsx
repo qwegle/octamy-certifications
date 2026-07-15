@@ -117,7 +117,7 @@ export default function Pricing() {
     <div className="min-h-screen bg-cream-soft flex flex-col">
       <SEO
         title="Pricing"
-        description="Transparent pricing for learners, creators, institutes and recruiters on Octamy, including ₹1,999 Learner All Access for eligible Octamy assessments."
+        description="Transparent pricing for learners, creators, institutes and recruiters on Octamy, including ₹299 Practice Pass for unlimited non-recruiter practice exams."
         path="/pricing"
       />
       <Header />
@@ -198,18 +198,18 @@ export default function Pricing() {
                 cta={{ label: 'Sign up free', href: '/register?role=learner' }}
               />
               <Tier
-                name="All Access"
-                price={discounted(1999, cycle)}
-                meta="Eligible Octamy in-house assessments"
+                name="Practice Pass"
+                price={discounted(299, cycle)}
+                meta="Unlimited practice exams"
                 highlight
                 busy={submitting === 'learner:all_access'}
                 features={[
-                  'Included credential activation after passing',
-                  'Only explicitly eligible Octamy in-house assessments',
-                  'Creator products remain separately priced',
-                  'Institute exams remain private and institute-funded',
+                  'Unlimited practice-only exams',
+                  'SSC/NEET/school-style preparation stays separate from recruiter credentials',
+                  'Review correct and incorrect answers after each attempt',
+                  'Career certifications, creator products, and institute exams stay separately funded',
                 ]}
-                cta={{ label: 'Choose All Access', onClick: () => subscribe('learner', 'all_access', 'learner') }}
+                cta={{ label: 'Choose Practice Pass', onClick: () => subscribe('learner', 'all_access', 'learner') }}
               />
             </Column>
 
@@ -304,7 +304,7 @@ export default function Pricing() {
         </section>
 
         <section className="py-12 px-4 text-center text-sm text-slate-500">
-          <p className="inline-flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-emerald-700" /> Prices in INR. GST extra where applicable. All Access covers eligible Octamy in-house assessments only; creator products and private institute exams are outside the plan.</p>
+          <p className="inline-flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-emerald-700" /> Prices in INR. GST extra where applicable. Practice Pass covers practice exams only; recruiter-visible certifications, creator products, and private institute exams are outside the plan.</p>
         </section>
       </main>
       <Footer />

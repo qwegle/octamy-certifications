@@ -14,7 +14,7 @@ import { certificationDisplayTitle } from '@/components/certification-card';
 import ExamTimer from '@/components/exam-timer';
 import { ExamStructuredData } from '@/components/seo-structured-data';
 import { SEO } from '@/components/seo';
-import { publicAssessmentCategoryPath, publicAssessmentPath } from '@shared/public-assessment-routes';
+import { publicAssessmentCategoryPath, publicAssessmentPath, publicPracticeCategoryPath, publicPracticePath } from '@shared/public-assessment-routes';
 import { AlertTriangle, Award, CheckCircle2, ChevronRight, Clock3, FileQuestion, RotateCcw, Save, ShieldCheck, TicketCheck, WifiOff } from 'lucide-react';
 
 interface ExamQuestion {
@@ -55,6 +55,7 @@ type PublicAssessment = {
   origin: "octamy" | "creator";
   originLabel: string;
   certificationLabel: string;
+  assessmentPurpose: "certification" | "practice";
   canonicalPath: string;
   category: { id: number; name: string; slug: string; kind: string };
   creator: { displayName: string; slug: string } | null;
@@ -62,7 +63,7 @@ type PublicAssessment = {
 
 export default function Exam() {
   const { slug } = useParams();
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -83,11 +84,13 @@ export default function Exam() {
     email: user?.email || ''
   });
 
+  const practicePage = location === "/practice" || location.startsWith("/practice/");
+  const detailEndpoint = practicePage ? "/api/practice-assessments" : "/api/assessments";
   const { data: course, isLoading: courseLoading, error: courseError } = useQuery<PublicAssessment>({
-    queryKey: ["/api/assessments", slug],
+    queryKey: [detailEndpoint, slug],
     enabled: !!slug,
     retry: false,
-    queryFn: async () => (await apiRequest("GET", `/api/assessments/${encodeURIComponent(String(slug || ""))}`)).json(),
+    queryFn: async () => (await apiRequest("GET", `${detailEndpoint}/${encodeURIComponent(String(slug || ""))}`)).json(),
   });
 
   useEffect(() => {
@@ -107,19 +110,7 @@ export default function Exam() {
     queryFn: async () => {
       // Always generate a fresh session for each exam attempt
       const newSessionId = `session_${Date.now()}_${Math.random()}`;
-      const response = await fetch(`/api/courses/${course?.id}/questions`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          sessionId: newSessionId
-        }),
-      });
-      if (!response.ok) {
-        const body = await response.json().catch(() => ({}));
-        throw new Error(body.message || 'Failed to fetch questions');
-      }
+      const response = await apiRequest('POST', `/api/courses/${course?.id}/questions`, { sessionId: newSessionId });
       return response.json();
     },
     enabled: !!course?.id && examStarted && !restoredQuestionsData,
@@ -342,6 +333,10 @@ export default function Exam() {
   };
 
   const startExam = async () => {
+    if (course?.assessmentPurpose === "practice" && !user) {
+      setLocation(`/login?next=${encodeURIComponent(location)}`);
+      return;
+    }
     if (!userInfo.name || !userInfo.email) {
       toast({
         title: "Required Information",
@@ -428,30 +423,33 @@ export default function Exam() {
   const answeredCount = Object.keys(answers).length;
 
   if (courseLoading) {
-    return <div className="min-h-screen bg-slate-50"><SEO title="Loading assessment" path={publicAssessmentPath(slug)} noIndex /><Header /><main className="mx-auto max-w-5xl px-5 py-16"><div className="h-96 animate-pulse rounded-3xl bg-slate-200" /></main></div>;
+    return <div className="min-h-screen bg-slate-50"><SEO title="Loading assessment" path={practicePage ? publicPracticePath(slug) : publicAssessmentPath(slug)} noIndex /><Header /><main className="mx-auto max-w-5xl px-5 py-16"><div className="h-96 animate-pulse rounded-3xl bg-slate-200" /></main></div>;
   }
 
   if (!course || courseError) {
     return (
       <div className="min-h-screen bg-slate-50">
-        <SEO title="Certification not found" description="This certification exam is unavailable or is no longer public." path={publicAssessmentPath(slug)} noIndex />
+        <SEO title={practicePage ? "Practice exam not found" : "Certification not found"} description={practicePage ? "This practice exam is unavailable or is no longer public." : "This certification exam is unavailable or is no longer public."} path={practicePage ? publicPracticePath(slug) : publicAssessmentPath(slug)} noIndex />
         <Header />
         <main className="mx-auto max-w-xl px-5 py-20 text-center">
-          <h1 className="text-3xl font-black text-slate-950">Certification unavailable</h1>
-          <p className="mt-3 leading-7 text-slate-600">The link may be incorrect, or this certification exam is no longer published.</p>
-          <Button asChild variant="outline" className="mt-6"><Link href="/get-certified">Browse certifications</Link></Button>
+          <h1 className="text-3xl font-black text-slate-950">{practicePage ? "Practice exam unavailable" : "Certification unavailable"}</h1>
+          <p className="mt-3 leading-7 text-slate-600">The link may be incorrect, or this exam is no longer published.</p>
+          <Button asChild variant="outline" className="mt-6"><Link href={practicePage ? "/practice" : "/get-certified"}>{practicePage ? "Browse practice" : "Browse certifications"}</Link></Button>
         </main>
       </div>
     );
   }
 
-  const canonicalPath = course.canonicalPath || publicAssessmentPath(course.slug);
-  const displayTitle = certificationDisplayTitle(course.title);
-  const seoTitle = (course.metaTitle || `${displayTitle} | Octamy`)
+  const isPractice = course.assessmentPurpose === "practice";
+  const canonicalPath = course.canonicalPath || (isPractice ? publicPracticePath(course.slug) : publicAssessmentPath(course.slug));
+  const displayTitle = isPractice ? course.title : certificationDisplayTitle(course.title);
+  const seoTitle = isPractice ? (course.metaTitle || `${displayTitle} | Octamy Practice`) : (course.metaTitle || `${displayTitle} | Octamy`)
     .replace(/\bPractice\s*\|\s*Octamy Assessments?\b/gi, "Certification Exam | Octamy")
     .replace(/\bAssessments\b/gi, "Certification Exams")
     .replace(/\bAssessment\b/gi, "Certification Exam");
-  const metaDescription = course.metaDescription || `Take the ${displayTitle} exam free. Review the published passing threshold before you begin; credential activation is optional after a passing result.`;
+  const metaDescription = course.metaDescription || (isPractice
+    ? `Practice ${displayTitle} with rotating questions and answer review. Practice Pass is required to start.`
+    : `Take the ${displayTitle} exam free. Review the published passing threshold before you begin; credential activation is optional after a passing result.`);
 
   if (!examStarted) {
     return (
@@ -463,7 +461,7 @@ export default function Exam() {
         <Header />
         <main id="main-content" className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
           <nav aria-label="Breadcrumb" className="mb-7 flex flex-wrap items-center gap-1.5 text-sm text-slate-500">
-            <Link href={course.origin === "creator" ? "/creator-assessments" : "/get-certified"} className="hover:text-slate-950">{course.origin === "creator" ? "Creator certifications" : "Get certified"}</Link><ChevronRight className="h-3.5 w-3.5" aria-hidden="true" /><Link href={course.origin === "creator" ? `/creator-assessments?category=${encodeURIComponent(course.category.slug)}` : publicAssessmentCategoryPath(course.category.slug)} className="hover:text-slate-950">{course.category.name}</Link><ChevronRight className="h-3.5 w-3.5" aria-hidden="true" /><span className="max-w-xs truncate font-medium text-slate-800" aria-current="page">{displayTitle}</span>
+            <Link href={isPractice ? "/practice" : course.origin === "creator" ? "/creator-assessments" : "/get-certified"} className="hover:text-slate-950">{isPractice ? "Practice" : course.origin === "creator" ? "Creator certifications" : "Get certified"}</Link><ChevronRight className="h-3.5 w-3.5" aria-hidden="true" /><Link href={isPractice ? publicPracticeCategoryPath(course.category.slug) : course.origin === "creator" ? `/creator-assessments?category=${encodeURIComponent(course.category.slug)}` : publicAssessmentCategoryPath(course.category.slug)} className="hover:text-slate-950">{course.category.name}</Link><ChevronRight className="h-3.5 w-3.5" aria-hidden="true" /><span className="max-w-xs truncate font-medium text-slate-800" aria-current="page">{displayTitle}</span>
           </nav>
 
           <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_390px] lg:items-start">
@@ -475,7 +473,7 @@ export default function Exam() {
                   <div className="flex flex-wrap gap-2"><span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-black uppercase tracking-[0.13em]"><Award className="h-3.5 w-3.5 text-violet-300" />{course.originLabel}</span><span className="rounded-full border border-white/15 px-3 py-1.5 text-xs font-bold text-slate-300">{course.category.name}</span></div>
                   <h1 className="mt-6 max-w-3xl text-4xl font-black leading-[1.03] tracking-[-0.04em] sm:text-6xl">{displayTitle}</h1>
                   <p className="mt-5 max-w-2xl text-base leading-7 text-slate-300 sm:text-lg">{course.description}</p>
-                  <p className="mt-5 flex items-start gap-2 text-sm leading-6 text-violet-200"><ShieldCheck className="mt-0.5 h-4 w-4 shrink-0" />{course.certificationLabel}</p>
+                  <p className="mt-5 flex items-start gap-2 text-sm leading-6 text-violet-200"><ShieldCheck className="mt-0.5 h-4 w-4 shrink-0" />{isPractice ? "Practice only. No recruiter credential is issued from this attempt." : course.certificationLabel}</p>
                 </div>
               </div>
 
@@ -490,15 +488,15 @@ export default function Exam() {
               <Card className="overflow-hidden rounded-[1.75rem] border-slate-200 shadow-xl shadow-slate-900/10">
                 <div className="border-b border-slate-100 bg-gradient-to-br from-violet-50 to-sky-50 p-6">
                   <p className="text-xs font-black uppercase tracking-[0.14em] text-violet-800">Start when you are ready</p>
-                  <div className="mt-3 flex items-end justify-between gap-4"><div><p className="text-2xl font-black text-slate-950">Free exam attempt</p><p className="mt-1 text-sm text-slate-600">Activate the credential for ₹{course.price} only after passing.</p></div><CheckCircle2 className="h-8 w-8 shrink-0 text-emerald-600" /></div>
+                  <div className="mt-3 flex items-end justify-between gap-4"><div><p className="text-2xl font-black text-slate-950">{isPractice ? "Included in Practice Pass" : "Free exam attempt"}</p><p className="mt-1 text-sm text-slate-600">{isPractice ? "₹299/month unlocks unlimited practice exams." : `Activate the credential for ₹${course.price} only after passing.`}</p></div><CheckCircle2 className="h-8 w-8 shrink-0 text-emerald-600" /></div>
                 </div>
                 <CardContent className="space-y-5 p-6">
                   {!user && <div className="space-y-4"><div><Label htmlFor="name" className="font-bold">Full name</Label><input id="name" type="text" autoComplete="name" value={userInfo.name} onChange={(e) => setUserInfo(prev => ({ ...prev, name: e.target.value }))} className="mt-1.5 h-11 w-full rounded-xl border border-slate-300 px-3 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-100" placeholder="As it should appear on your credential" /></div><div><Label htmlFor="email" className="font-bold">Email address</Label><input id="email" type="email" autoComplete="email" value={userInfo.email} onChange={(e) => setUserInfo(prev => ({ ...prev, email: e.target.value }))} className="mt-1.5 h-11 w-full rounded-xl border border-slate-300 px-3 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-100" placeholder="For result recovery" /></div></div>}
 
                   {savedDraft && <div className="rounded-2xl border border-sky-200 bg-sky-50 p-4"><div className="flex items-start gap-3"><RotateCcw className="mt-0.5 h-5 w-5 text-sky-700" /><div className="min-w-0 flex-1"><h2 className="font-bold text-slate-950">Saved attempt found</h2><p className="mt-1 text-sm leading-5 text-slate-600">{Object.keys(savedDraft.answers).length} of {savedDraft.questions.length} answers saved on this device.</p><div className="mt-3 flex flex-wrap gap-2"><Button size="sm" onClick={resumeSavedExam}>Resume exam</Button><Button size="sm" variant="ghost" onClick={discardSavedExam}>Discard</Button></div></div></div></div>}
 
-                  {!savedDraft && <Button onClick={startExam} className="h-12 w-full rounded-full text-base font-black" disabled={!userInfo.name || !userInfo.email}>Start certification exam</Button>}
-                  <ul className="space-y-2.5 border-t border-slate-100 pt-5 text-xs leading-5 text-slate-600"><li className="flex gap-2"><CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-600" />Answers autosave on this device during interruptions.</li><li className="flex gap-2"><CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-600" />Your score and answer review appear after submission.</li><li className="flex gap-2"><TicketCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-violet-600" />Institute voucher or All Access can fund activation.</li></ul>
+                  {!savedDraft && <Button onClick={startExam} className="h-12 w-full rounded-full text-base font-black" disabled={!userInfo.name || !userInfo.email}>{isPractice ? "Start practice exam" : "Start certification exam"}</Button>}
+                  <ul className="space-y-2.5 border-t border-slate-100 pt-5 text-xs leading-5 text-slate-600"><li className="flex gap-2"><CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-600" />Answers autosave on this device during interruptions.</li><li className="flex gap-2"><CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-600" />Your score and answer review appear after submission.</li><li className="flex gap-2"><TicketCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-violet-600" />{isPractice ? "Practice attempts are not shared as recruiter credentials." : "Direct payment, coupon, or institute voucher can fund activation."}</li></ul>
                 </CardContent>
               </Card>
             </aside>
@@ -506,7 +504,7 @@ export default function Exam() {
 
           <section className="mt-8 grid gap-4 rounded-[1.75rem] border border-slate-200 bg-white p-6 sm:grid-cols-3 sm:p-8" aria-labelledby="certification-process-title">
             <div className="sm:col-span-3"><h2 id="certification-process-title" className="text-xl font-black">How this certification works</h2><p className="mt-1 text-sm text-slate-600">A transparent result first. Credential activation is your choice after passing.</p></div>
-            {[{ step: "01", title: "Take the exam", copy: "Stay in this tab and complete the timed questions." }, { step: "02", title: "Review your result", copy: "See the score and the published answer review." }, { step: "03", title: "Activate the credential", copy: "Pay, use All Access or redeem an institute voucher." }].map((item) => <div key={item.step} className="rounded-2xl bg-slate-50 p-5"><span className="text-xs font-black text-violet-700">{item.step}</span><h3 className="mt-2 font-black text-slate-950">{item.title}</h3><p className="mt-1 text-sm leading-6 text-slate-600">{item.copy}</p></div>)}
+            {[{ step: "01", title: "Take the exam", copy: "Stay in this tab and complete the timed questions." }, { step: "02", title: "Review your result", copy: "See the score and the published answer review." }, { step: "03", title: isPractice ? "Repeat and improve" : "Activate the credential", copy: isPractice ? "Practice stays separate from recruiter credentials." : "Pay directly, use a coupon, or redeem an institute voucher." }].map((item) => <div key={item.step} className="rounded-2xl bg-slate-50 p-5"><span className="text-xs font-black text-violet-700">{item.step}</span><h3 className="mt-2 font-black text-slate-950">{item.title}</h3><p className="mt-1 text-sm leading-6 text-slate-600">{item.copy}</p></div>)}
           </section>
         </main>
       </div>

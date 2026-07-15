@@ -296,6 +296,7 @@ export const courses = pgTable("courses", {
   visibility: text("visibility").default("public").notNull(), // public | unlisted | private
   language: text("language").default("en").notNull(),
   certificationMode: text("certification_mode").default("none").notNull(),
+  assessmentPurpose: text("assessment_purpose").default("certification").notNull(), // certification | practice
   reviewStatus: text("review_status").default("draft").notNull(),
   defaultReviewPolicy: text("default_review_policy").default("after_final_attempt").notNull(),
   subscriptionEligible: boolean("subscription_eligible").default(false).notNull(),
@@ -309,6 +310,7 @@ export const courses = pgTable("courses", {
   byPublicAssessment: index("courses_public_assessment_idx").on(
     t.ownerType,
     t.productType,
+    t.assessmentPurpose,
     t.reviewStatus,
     t.isActive,
   ),
@@ -962,6 +964,7 @@ export const questionBanks = pgTable("question_banks", {
   ownerType: text("owner_type").default("admin").notNull(), // admin | creator | institute
   ownerId: integer("owner_id"), // null = admin global
   visibility: text("visibility").default("private").notNull(), // private | unlisted | public
+  bankPurpose: text("bank_purpose").default("certification").notNull(), // certification | practice
   bankKind: text("bank_kind").default("custom").notNull(), // assessment_pool | subject_pool | master | custom
   status: text("status").default("draft").notNull(), // draft | active | archived
   subject: text("subject"),

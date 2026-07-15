@@ -20,6 +20,7 @@ type BankItem = {
   description?: string;
   ownerType: string;
   visibility: string;
+  bankPurpose: "certification" | "practice";
   bankKind: "assessment_pool" | "subject_pool" | "master" | "custom";
   status: "draft" | "active" | "archived";
   subject?: string | null;
@@ -43,6 +44,7 @@ interface BankPage {
 const emptyForm = {
   name: "",
   description: "",
+  bankPurpose: "certification" as BankItem["bankPurpose"],
   visibility: "private",
   bankKind: "assessment_pool" as BankItem["bankKind"],
   status: "draft" as BankItem["status"],
@@ -59,6 +61,7 @@ function kindLabel(kind: BankItem["bankKind"]) {
 export function AdminQuestionBanksManagement() {
   const { toast } = useToast();
   const [page, setPage] = useState(1);
+  const [purpose, setPurpose] = useState<BankItem["bankPurpose"]>("certification");
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("current");
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -67,9 +70,9 @@ export function AdminQuestionBanksManagement() {
   const [form, setForm] = useState(emptyForm);
 
   const query = useQuery<BankPage>({
-    queryKey: ["/api/admin/question-banks", page, search, status],
+    queryKey: ["/api/admin/question-banks", purpose, page, search, status],
     queryFn: async () => {
-      const params = new URLSearchParams({ page: String(page), pageSize: "25", search, status });
+      const params = new URLSearchParams({ purpose, page: String(page), pageSize: "25", search, status });
       const response = await apiRequest("GET", `/api/admin/question-banks?${params}`);
       if (!response.ok) throw new Error("Question banks could not be loaded");
       return response.json();
@@ -135,12 +138,13 @@ export function AdminQuestionBanksManagement() {
     onError: (error: Error) => { if (error.message !== "Cancelled") toast({ title: "Inventory update failed", description: error.message, variant: "destructive" }); },
   });
 
-  const openCreate = () => { setEditing(null); setForm(emptyForm); setDialogOpen(true); };
+  const openCreate = () => { setEditing(null); setForm({ ...emptyForm, bankPurpose: purpose }); setDialogOpen(true); };
   const openEdit = (bank: BankItem) => {
     setEditing(bank);
     setForm({
       name: bank.name,
       description: bank.description || "",
+      bankPurpose: bank.bankPurpose,
       visibility: bank.visibility,
       bankKind: bank.bankKind,
       status: bank.status,
@@ -162,8 +166,12 @@ export function AdminQuestionBanksManagement() {
     <Card className="border-slate-200 shadow-sm">
       <CardHeader>
         <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-          <div><CardTitle>Question-bank library</CardTitle><CardDescription>Governed pools are separated by assessment, subject, exam family, and syllabus. Difficulty remains a question-level attribute used by assessment blueprints.</CardDescription></div>
+          <div><CardTitle>Question-bank library</CardTitle><CardDescription>Certification banks power recruiter-relevant tech credentials. Practice banks power preparation products and are not recruiter evidence.</CardDescription></div>
           <Button onClick={openCreate} className="shrink-0"><Plus className="mr-1 h-4 w-4" />New bank</Button>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button size="sm" variant={purpose === "certification" ? "default" : "outline"} onClick={() => { setPurpose("certification"); setPage(1); setSelected(new Set()); setForm((current) => ({ ...current, bankPurpose: "certification" })); }}>Certification banks</Button>
+          <Button size="sm" variant={purpose === "practice" ? "default" : "outline"} onClick={() => { setPurpose("practice"); setPage(1); setSelected(new Set()); setForm((current) => ({ ...current, bankPurpose: "practice" })); }}>Practice banks</Button>
         </div>
         <div className="grid gap-2 md:grid-cols-[minmax(0,1fr)_12rem]">
           <div className="relative"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" /><Input value={search} onChange={(event) => { setSearch(event.target.value); setPage(1); }} placeholder="Search bank name or slug" className="pl-9" /></div>
@@ -182,7 +190,7 @@ export function AdminQuestionBanksManagement() {
             {items.map((bank) => <TableRow key={bank.id}>
               <TableCell><input aria-label={`Select ${bank.name}`} type="checkbox" checked={selected.has(bank.id)} onChange={() => setSelected((current) => { const next = new Set(current); next.has(bank.id) ? next.delete(bank.id) : next.add(bank.id); return next; })} /></TableCell>
               <TableCell><div className="flex min-w-72 items-start gap-3"><div className="rounded-lg bg-slate-100 p-2"><Database className="h-4 w-4 text-slate-600" /></div><div><div className="font-semibold text-slate-950">{bank.name}</div><div className="text-xs text-slate-500">{bank.slug}</div><div className="mt-1 line-clamp-2 max-w-lg text-xs text-slate-500">{bank.description || "No description"}</div></div></div></TableCell>
-              <TableCell><Badge variant="outline">{kindLabel(bank.bankKind)}</Badge><div className="mt-1 text-xs text-slate-600">{[bank.examFamily, bank.subject, bank.gradeBand].filter(Boolean).join(" · ") || "General"}</div>{bank.syllabusVersion && <div className="text-xs text-slate-500">{bank.syllabusVersion}</div>}</TableCell>
+              <TableCell><Badge variant="outline">{kindLabel(bank.bankKind)}</Badge><Badge variant="secondary" className="ml-1 capitalize">{bank.bankPurpose}</Badge><div className="mt-1 text-xs text-slate-600">{[bank.examFamily, bank.subject, bank.gradeBand].filter(Boolean).join(" · ") || "General"}</div>{bank.syllabusVersion && <div className="text-xs text-slate-500">{bank.syllabusVersion}</div>}</TableCell>
               <TableCell><div className="font-semibold text-slate-950">{Number(bank.questionCount).toLocaleString()}</div><div className="mt-1 flex flex-wrap gap-1 text-[11px]"><span className="rounded-full bg-emerald-50 px-2 py-0.5 text-emerald-800">E {Number(bank.easyCount).toLocaleString()}</span><span className="rounded-full bg-blue-50 px-2 py-0.5 text-blue-800">M {Number(bank.mediumCount).toLocaleString()}</span><span className="rounded-full bg-violet-50 px-2 py-0.5 text-violet-800">H {Number(bank.hardCount).toLocaleString()}</span></div></TableCell>
               <TableCell><span className="font-semibold">{Number(bank.assessmentCount).toLocaleString()}</span><div className="text-xs text-slate-500">assessments</div><div className="text-xs text-slate-500">{Number(bank.topicCount).toLocaleString()} topics</div></TableCell>
               <TableCell><Badge variant={bank.status === "active" ? "default" : "secondary"} className="capitalize">{bank.status}</Badge><div className="mt-1 text-xs capitalize text-slate-500">{bank.visibility}</div></TableCell>
@@ -198,6 +206,7 @@ export function AdminQuestionBanksManagement() {
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}><DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto"><DialogHeader><DialogTitle>{editing ? "Edit question bank" : "Create question bank"}</DialogTitle><DialogDescription>Give the pool a durable business identity. Questions inside it still carry their own topic and difficulty.</DialogDescription></DialogHeader><div className="grid gap-4 sm:grid-cols-2">
       <div className="sm:col-span-2"><Label htmlFor="bank-name">Name</Label><Input id="bank-name" value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} placeholder="SSC CGL Quantitative Aptitude — 2026" /></div>
       <div className="sm:col-span-2"><Label htmlFor="bank-description">Description</Label><Textarea id="bank-description" value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} placeholder="Purpose, syllabus boundary, source policy, and intended assessments." /></div>
+      <div><Label htmlFor="bank-purpose">Purpose</Label><select id="bank-purpose" className="h-10 w-full rounded-md border bg-white px-3 text-sm" value={form.bankPurpose} onChange={(event) => setForm({ ...form, bankPurpose: event.target.value as BankItem["bankPurpose"] })}><option value="certification">Certification / recruiter evidence</option><option value="practice">Practice only</option></select></div>
       <div><Label htmlFor="bank-kind">Bank type</Label><select id="bank-kind" className="h-10 w-full rounded-md border bg-white px-3 text-sm" value={form.bankKind} onChange={(event) => setForm({ ...form, bankKind: event.target.value as BankItem["bankKind"] })}><option value="assessment_pool">Assessment pool</option><option value="subject_pool">Subject pool</option><option value="master">Master source</option><option value="custom">Custom</option></select></div>
       <div><Label htmlFor="bank-status">Lifecycle</Label><select id="bank-status" className="h-10 w-full rounded-md border bg-white px-3 text-sm" value={form.status} onChange={(event) => setForm({ ...form, status: event.target.value as BankItem["status"] })}><option value="draft">Draft</option><option value="active">Active</option><option value="archived">Archived</option></select></div>
       <div><Label htmlFor="bank-exam-family">Exam family</Label><Input id="bank-exam-family" value={form.examFamily} onChange={(event) => setForm({ ...form, examFamily: event.target.value })} placeholder="SSC, NEET, JEE…" /></div>

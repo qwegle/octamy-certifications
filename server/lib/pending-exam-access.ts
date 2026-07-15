@@ -56,6 +56,7 @@ export function publicPendingCourseSnapshot(course: {
   ownerType?: string | null;
   subscriptionEligible?: boolean | null;
   certificationMode?: string | null;
+  assessmentPurpose?: string | null;
 }) {
   return {
     id: course.id,
@@ -68,5 +69,6 @@ export function publicPendingCourseSnapshot(course: {
     ownerType: course.ownerType || undefined,
     subscriptionEligible: Boolean(course.subscriptionEligible),
     certificationMode: course.certificationMode || undefined,
+    assessmentPurpose: course.assessmentPurpose || undefined,
   };
 }

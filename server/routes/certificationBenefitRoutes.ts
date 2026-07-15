@@ -268,6 +268,7 @@ async function ensureVoucherCourse(courseId: number | null | undefined) {
   if (!courseId) return true;
   const [course] = await db.select({ id: courses.id }).from(courses).where(and(
     eq(courses.id, courseId), eq(courses.ownerType, "admin"), eq(courses.productType, "assessment"),
+    eq(courses.assessmentPurpose, "certification"),
     eq(courses.certificationMode, "octamy"), eq(courses.isActive, true), eq(courses.reviewStatus, "approved"),
   ));
   return Boolean(course);
@@ -511,8 +512,11 @@ router.post("/admin/coupons", authenticateToken, requireAdmin, async (req: Reque
   const parsed = couponCreateSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ message: parsed.error.issues[0]?.message || "Review the coupon" });
   if (parsed.data.courseId) {
-    const [course] = await db.select({ id: courses.id }).from(courses).where(and(eq(courses.id, parsed.data.courseId), eq(courses.ownerType, "admin")));
+    const [course] = await db.select({ id: courses.id, productType: courses.productType, assessmentPurpose: courses.assessmentPurpose }).from(courses).where(and(eq(courses.id, parsed.data.courseId), eq(courses.ownerType, "admin")));
     if (!course) return res.status(409).json({ message: "Admin coupons can be scoped only to Octamy in-house products" });
+    if (course.productType === "assessment" && course.assessmentPurpose === "practice") {
+      return res.status(409).json({ message: "Practice exams are unlocked by Practice Pass, not item coupons" });
+    }
   }
   const code = normalizedCode(parsed.data.code);
   try {
@@ -546,10 +550,13 @@ async function createWorkspaceCoupon(req: Request, res: Response, ownerType: Cou
   const parsed = couponCreateSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ message: parsed.error.issues[0]?.message || "Review the coupon" });
   if (!parsed.data.courseId) return res.status(400).json({ message: "Choose one of your products for this coupon" });
-  const [course] = await db.select({ id: courses.id, title: courses.title, productType: courses.productType }).from(courses).where(and(
+  const [course] = await db.select({ id: courses.id, title: courses.title, productType: courses.productType, assessmentPurpose: courses.assessmentPurpose }).from(courses).where(and(
     eq(courses.id, parsed.data.courseId), eq(courses.ownerType, ownerType), eq(courses.ownerId, ownerId),
   ));
   if (!course) return res.status(403).json({ message: "You can create coupons only for products owned by this workspace" });
+  if (course.productType === "assessment" && course.assessmentPurpose === "practice") {
+    return res.status(409).json({ message: "Practice exams are unlocked by Practice Pass, not item coupons" });
+  }
   const code = normalizedCode(parsed.data.code);
   try {
     const [coupon] = await db.insert(discountCoupons).values({

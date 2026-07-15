@@ -12,7 +12,9 @@ import { Input } from "@/components/ui/input";
 import { apiRequest } from "@/lib/queryClient";
 import {
   ASSESSMENT_HUB_PATH,
+  PRACTICE_HUB_PATH,
   publicAssessmentCategoryPath,
+  publicPracticeCategoryPath,
 } from "@shared/public-assessment-routes";
 
 type CategoryNode = {
@@ -40,28 +42,33 @@ type CatalogResponse = {
   pagination: { page: number; pageSize: number; total: number; totalPages: number };
 };
 
-export default function CategoryPage() {
+export default function CategoryPage({ mode = "certification" }: { mode?: "certification" | "practice" }) {
   const { slug = "" } = useParams<{ slug: string }>();
   const [, setLocation] = useLocation();
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
+  const isPractice = mode === "practice";
+  const hubPath = isPractice ? PRACTICE_HUB_PATH : ASSESSMENT_HUB_PATH;
+  const categoryPath = isPractice ? publicPracticeCategoryPath : publicAssessmentCategoryPath;
+  const hierarchyEndpoint = isPractice ? "/api/practice-categories" : "/api/assessment-categories";
+  const catalogEndpoint = isPractice ? "/api/practice-assessments" : "/api/assessments";
 
   const hierarchyQuery = useQuery<CategoryHierarchy>({
-    queryKey: ["/api/assessment-categories", slug.toLowerCase()],
+    queryKey: [hierarchyEndpoint, slug.toLowerCase()],
     enabled: !!slug,
     retry: false,
-    queryFn: async () => (await apiRequest("GET", `/api/assessment-categories/${encodeURIComponent(slug)}`)).json(),
+    queryFn: async () => (await apiRequest("GET", `${hierarchyEndpoint}/${encodeURIComponent(slug)}`)).json(),
   });
   const hierarchy = hierarchyQuery.data;
   const category = hierarchy?.category;
 
   const catalogQuery = useQuery<CatalogResponse>({
-    queryKey: ["/api/assessments", "category-page", category?.slug, search],
+    queryKey: [catalogEndpoint, "category-page", category?.slug, search],
     enabled: !!category,
     queryFn: async () => {
       const params = new URLSearchParams({ category: category!.slug, page: "1", pageSize: "48" });
       if (search) params.set("search", search);
-      return (await apiRequest("GET", `/api/assessments?${params}`)).json();
+      return (await apiRequest("GET", `${catalogEndpoint}?${params}`)).json();
     },
   });
 
@@ -72,16 +79,16 @@ export default function CategoryPage() {
     }
   }, [hierarchy?.canonicalPath, setLocation]);
 
-  const canonicalPath = hierarchy?.canonicalPath || publicAssessmentCategoryPath(slug);
-  const title = category ? `${category.name} Certification Exams | Octamy` : "Certification path | Octamy";
-  const description = category?.metaDescription || category?.description || "Explore reviewed Octamy certification exams by subject and exam family.";
+  const canonicalPath = hierarchy?.canonicalPath || categoryPath(slug);
+  const title = category ? `${category.name} ${isPractice ? "Practice Exams" : "Certification Exams"} | Octamy` : `${isPractice ? "Practice" : "Certification"} path | Octamy`;
+  const description = category?.metaDescription || category?.description || (isPractice ? "Explore Octamy practice exams for preparation. Practice scores are not recruiter-facing credentials." : "Explore reviewed Octamy certification exams by technology and industry skill.");
   const breadcrumbNodes = hierarchy ? [...hierarchy.ancestors, hierarchy.category] : [];
   const jsonLd = useMemo(() => {
     if (!hierarchy) return undefined;
     const itemListElement = [
       { name: "Home", path: "/" },
-      { name: "Get certified", path: ASSESSMENT_HUB_PATH },
-      ...breadcrumbNodes.map((node) => ({ name: node.name, path: publicAssessmentCategoryPath(node.slug) })),
+      { name: isPractice ? "Practice" : "Get certified", path: hubPath },
+      ...breadcrumbNodes.map((node) => ({ name: node.name, path: categoryPath(node.slug) })),
     ].map((item, index) => ({
       "@type": "ListItem",
       position: index + 1,
@@ -99,7 +106,7 @@ export default function CategoryPage() {
         isPartOf: { "@type": "WebSite", name: "Octamy", url: "https://octamy.com" },
       },
     ];
-  }, [breadcrumbNodes, canonicalPath, description, hierarchy, title]);
+  }, [breadcrumbNodes, canonicalPath, categoryPath, description, hierarchy, hubPath, isPractice, title]);
 
   const items = catalogQuery.data?.items ?? [];
   const total = catalogQuery.data?.pagination.total ?? 0;
@@ -123,24 +130,24 @@ export default function CategoryPage() {
             <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-1.5 text-sm text-slate-500">
               <Link href="/" className="hover:text-slate-950">Home</Link>
               <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
-              <Link href={ASSESSMENT_HUB_PATH} className="hover:text-slate-950">Get certified</Link>
+              <Link href={hubPath} className="hover:text-slate-950">{isPractice ? "Practice" : "Get certified"}</Link>
               {hierarchy?.ancestors.map((node) => (
                 <span key={node.id} className="contents">
                   <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
-                  <Link href={publicAssessmentCategoryPath(node.slug)} className="hover:text-slate-950">{node.name}</Link>
+                  <Link href={categoryPath(node.slug)} className="hover:text-slate-950">{node.name}</Link>
                 </span>
               ))}
               {category && <><ChevronRight className="h-3.5 w-3.5" aria-hidden="true" /><span className="font-medium text-slate-800" aria-current="page">{category.name}</span></>}
             </nav>
 
-            <Badge className="mt-6 border border-violet-200 bg-violet-50 text-violet-800 hover:bg-violet-50">Octamy certification path</Badge>
+            <Badge className="mt-6 border border-violet-200 bg-violet-50 text-violet-800 hover:bg-violet-50">{isPractice ? "Practice-only path" : "Octamy certification path"}</Badge>
             <h1 className="mt-4 max-w-4xl text-4xl font-black tracking-tight sm:text-6xl">{category?.name || (hierarchyQuery.isLoading ? "Loading category…" : "Category unavailable")}</h1>
             <p className="mt-5 max-w-3xl text-base leading-7 text-slate-600 sm:text-lg">{category ? description : "This certification path could not be found or is no longer public."}</p>
 
             {hierarchy?.children.length ? (
               <div className="mt-7 flex flex-wrap gap-2" aria-label="Subcategories">
                 {hierarchy.children.map((child) => (
-                  <Link key={child.id} href={publicAssessmentCategoryPath(child.slug)} className="rounded-full border border-slate-200 bg-slate-50 px-3.5 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-white">
+                  <Link key={child.id} href={categoryPath(child.slug)} className="rounded-full border border-slate-200 bg-slate-50 px-3.5 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-white">
                     {child.name}
                   </Link>
                 ))}
@@ -151,7 +158,7 @@ export default function CategoryPage() {
               <form className="mt-8 flex max-w-xl gap-2" role="search" onSubmit={(event) => { event.preventDefault(); setSearch(searchInput.trim().slice(0, 120)); }}>
                 <div className="relative flex-1">
                   <Search className="pointer-events-none absolute left-3 top-3.5 h-4 w-4 text-slate-400" />
-                  <Input value={searchInput} onChange={(event) => setSearchInput(event.target.value)} className="h-11 bg-white pl-9" placeholder={`Search ${category.name}`} aria-label={`Search ${category.name} certifications`} />
+                  <Input value={searchInput} onChange={(event) => setSearchInput(event.target.value)} className="h-11 bg-white pl-9" placeholder={`Search ${category.name}`} aria-label={`Search ${category.name} ${isPractice ? "practice exams" : "certifications"}`} />
                 </div>
                 <Button type="submit" className="h-11">Search</Button>
               </form>
@@ -165,24 +172,24 @@ export default function CategoryPage() {
           ) : unavailable || catalogQuery.isError ? (
             <div className="rounded-3xl border border-slate-200 bg-white p-10 text-center">
               <BookOpenCheck className="mx-auto h-10 w-10 text-slate-400" />
-              <h2 className="mt-4 text-xl font-bold">{unavailable ? "Certification path not found" : "Certifications could not be loaded"}</h2>
-              <p className="mt-2 text-sm text-slate-600">Browse all certification paths or try this page again.</p>
-              <Button asChild variant="outline" className="mt-5"><Link href={ASSESSMENT_HUB_PATH}>Browse certifications</Link></Button>
+              <h2 className="mt-4 text-xl font-bold">{unavailable ? `${isPractice ? "Practice" : "Certification"} path not found` : `${isPractice ? "Practice exams" : "Certifications"} could not be loaded`}</h2>
+              <p className="mt-2 text-sm text-slate-600">Browse all {isPractice ? "practice" : "certification"} paths or try this page again.</p>
+              <Button asChild variant="outline" className="mt-5"><Link href={hubPath}>Browse {isPractice ? "practice" : "certifications"}</Link></Button>
             </div>
           ) : items.length === 0 ? (
             <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-12 text-center">
               <BookOpenCheck className="mx-auto h-10 w-10 text-slate-400" />
-              <h2 className="mt-4 text-xl font-bold">No matching certifications yet</h2>
+              <h2 className="mt-4 text-xl font-bold">No matching {isPractice ? "practice exams" : "certifications"} yet</h2>
               <p className="mt-2 text-sm text-slate-600">Try a broader search or explore a related subcategory.</p>
             </div>
           ) : (
             <>
               <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
-                <div><h2 id="category-assessments-heading" className="text-2xl font-black">Available certification exams</h2><p className="mt-1 text-sm text-slate-600">{total} reviewed Octamy certification{total === 1 ? "" : "s"} in this path.</p></div>
-                {total > items.length && <Button asChild variant="outline"><Link href={`${ASSESSMENT_HUB_PATH}?category=${encodeURIComponent(category!.slug)}${search ? `&q=${encodeURIComponent(search)}` : ""}`}>View all results</Link></Button>}
+                <div><h2 id="category-assessments-heading" className="text-2xl font-black">Available {isPractice ? "practice exams" : "certification exams"}</h2><p className="mt-1 text-sm text-slate-600">{total} reviewed Octamy {isPractice ? "practice exam" : "certification"}{total === 1 ? "" : "s"} in this path.</p></div>
+                {total > items.length && <Button asChild variant="outline"><Link href={`${hubPath}?category=${encodeURIComponent(category!.slug)}${search ? `&q=${encodeURIComponent(search)}` : ""}`}>View all results</Link></Button>}
               </div>
               <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-                {items.map((item) => <CertificationCard key={item.id} item={item} />)}
+                {items.map((item) => <CertificationCard key={item.id} item={item} variant={isPractice ? "practice" : "certification"} categoryHref={categoryPath(item.category.slug)} />)}
               </div>
             </>
           )}

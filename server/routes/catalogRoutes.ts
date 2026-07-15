@@ -26,6 +26,8 @@ import {
   PUBLIC_ASSESSMENT_PRODUCT_TYPES,
   publicAssessmentCategoryPath,
   publicAssessmentPath,
+  publicPracticeCategoryPath,
+  publicPracticePath,
 } from "@shared/public-assessment-routes";
 
 const router = Router();
@@ -47,6 +49,8 @@ export function catalogCertificationLabel(ownerType: "admin" | "creator", mode: 
   return "Creator-issued · verified on Octamy";
 }
 
+type AssessmentPurpose = "certification" | "practice";
+
 type PublicCategoryNode = {
   id: number;
   name: string;
@@ -60,7 +64,7 @@ type PublicCategoryNode = {
   metaDescription: string | null;
 };
 
-export function buildPublicCategoryHierarchy(rows: PublicCategoryNode[], requestedSlug: string) {
+export function buildPublicCategoryHierarchy(rows: PublicCategoryNode[], requestedSlug: string, purpose: AssessmentPurpose = "certification") {
   const slug = canonicalPublicSlug(requestedSlug);
   if (!slug) return null;
   const category = rows.find((row) => row.slug === slug);
@@ -83,11 +87,11 @@ export function buildPublicCategoryHierarchy(rows: PublicCategoryNode[], request
     category,
     ancestors,
     children: rows.filter((row) => row.parentId === category.id),
-    canonicalPath: publicAssessmentCategoryPath(category.slug),
+    canonicalPath: purpose === "practice" ? publicPracticeCategoryPath(category.slug) : publicAssessmentCategoryPath(category.slug),
   };
 }
 
-async function assessmentCatalog(req: Request, res: Response, ownerType: "admin" | "creator") {
+async function assessmentCatalog(req: Request, res: Response, ownerType: "admin" | "creator", purpose: AssessmentPurpose = "certification") {
   const parsed = assessmentCatalogQuerySchema.safeParse(req.query);
   if (!parsed.success) {
     return res.status(400).json({
@@ -101,6 +105,7 @@ async function assessmentCatalog(req: Request, res: Response, ownerType: "admin"
     const conditions: SQL[] = [
       eq(courses.ownerType, ownerType),
       inArray(courses.productType, [...PUBLIC_ASSESSMENT_PRODUCT_TYPES]),
+      eq(courses.assessmentPurpose, purpose),
       eq(courses.isActive, true),
       eq(courses.visibility, "public"),
       eq(courses.reviewStatus, "approved"),
@@ -159,6 +164,7 @@ async function assessmentCatalog(req: Request, res: Response, ownerType: "admin"
         language: courses.language,
         thumbnailUrl: courses.thumbnailUrl,
         certificationMode: courses.certificationMode,
+        assessmentPurpose: courses.assessmentPurpose,
         subscriptionEligible: courses.subscriptionEligible,
         featuredAt: courses.featuredAt,
         createdAt: courses.createdAt,
@@ -228,6 +234,7 @@ async function assessmentCatalog(req: Request, res: Response, ownerType: "admin"
         origin: ownerType === "admin" ? "octamy" : "creator",
         originLabel: ownerType === "admin" ? "Octamy in-house" : "Creator marketplace",
         certificationLabel: catalogCertificationLabel(ownerType, item.certificationMode),
+        canonicalPath: purpose === "practice" ? publicPracticePath(item.slug) : publicAssessmentPath(item.slug),
         audienceBands: audienceRows
           .filter((row) => row.courseId === item.id)
           .map(({ courseId: _courseId, ...band }) => band),
@@ -249,8 +256,9 @@ async function assessmentCatalog(req: Request, res: Response, ownerType: "admin"
   }
 }
 
-router.get("/assessments", (req, res) => assessmentCatalog(req, res, "admin"));
-router.get("/creator-assessments", (req, res) => assessmentCatalog(req, res, "creator"));
+router.get("/assessments", (req, res) => assessmentCatalog(req, res, "admin", "certification"));
+router.get("/practice-assessments", (req, res) => assessmentCatalog(req, res, "admin", "practice"));
+router.get("/creator-assessments", (req, res) => assessmentCatalog(req, res, "creator", "certification"));
 
 router.get("/assessment-categories/:slug", async (req: Request, res: Response) => {
   const slug = canonicalPublicSlug(req.params.slug);
@@ -271,12 +279,40 @@ router.get("/assessment-categories/:slug", async (req: Request, res: Response) =
     }).from(categories)
       .where(eq(categories.isActive, true))
       .orderBy(asc(categories.sortOrder), asc(categories.name));
-    const hierarchy = buildPublicCategoryHierarchy(rows, slug);
+    const hierarchy = buildPublicCategoryHierarchy(rows, slug, "certification");
     if (!hierarchy) return res.status(404).json({ message: "Assessment category not found" });
     res.setHeader("Cache-Control", "public, max-age=300, stale-while-revalidate=600");
     res.json(hierarchy);
   } catch {
     res.status(500).json({ message: "Assessment category is temporarily unavailable" });
+  }
+});
+
+router.get("/practice-categories/:slug", async (req: Request, res: Response) => {
+  const slug = canonicalPublicSlug(req.params.slug);
+  if (!slug) return res.status(404).json({ message: "Practice category not found" });
+
+  try {
+    const rows = await db.select({
+      id: categories.id,
+      name: categories.name,
+      description: categories.description,
+      icon: categories.icon,
+      slug: categories.slug,
+      parentId: categories.parentId,
+      kind: categories.kind,
+      sortOrder: categories.sortOrder,
+      metaTitle: categories.metaTitle,
+      metaDescription: categories.metaDescription,
+    }).from(categories)
+      .where(eq(categories.isActive, true))
+      .orderBy(asc(categories.sortOrder), asc(categories.name));
+    const hierarchy = buildPublicCategoryHierarchy(rows, slug, "practice");
+    if (!hierarchy) return res.status(404).json({ message: "Practice category not found" });
+    res.setHeader("Cache-Control", "public, max-age=300, stale-while-revalidate=600");
+    res.json(hierarchy);
+  } catch {
+    res.status(500).json({ message: "Practice category is temporarily unavailable" });
   }
 });
 
@@ -306,6 +342,7 @@ router.get("/assessments/:slug", async (req: Request, res: Response) => {
       metaDescription: courses.metaDescription,
       ownerType: courses.ownerType,
       certificationMode: courses.certificationMode,
+      assessmentPurpose: courses.assessmentPurpose,
       subscriptionEligible: courses.subscriptionEligible,
       category: {
         id: categories.id,
@@ -326,6 +363,7 @@ router.get("/assessments/:slug", async (req: Request, res: Response) => {
         identityCondition,
         inArray(courses.ownerType, ["admin", "creator"]),
         inArray(courses.productType, [...PUBLIC_ASSESSMENT_PRODUCT_TYPES]),
+        eq(courses.assessmentPurpose, "certification"),
         eq(courses.isActive, true),
         eq(courses.visibility, "public"),
         eq(courses.reviewStatus, "approved"),
@@ -345,6 +383,70 @@ router.get("/assessments/:slug", async (req: Request, res: Response) => {
     });
   } catch {
     res.status(500).json({ message: "Assessment is temporarily unavailable" });
+  }
+});
+
+router.get("/practice-assessments/:slug", async (req: Request, res: Response) => {
+  const slug = canonicalPublicSlug(req.params.slug);
+  if (!slug) return res.status(404).json({ message: "Practice exam not found" });
+  const numericId = /^\d+$/.test(slug) ? Number(slug) : null;
+  const identityCondition = numericId && Number.isSafeInteger(numericId) && numericId > 0
+    ? eq(courses.id, numericId)
+    : eq(courses.slug, slug);
+
+  try {
+    const [item] = await db.select({
+      id: courses.id,
+      title: courses.title,
+      description: courses.description,
+      slug: courses.slug,
+      categoryId: courses.categoryId,
+      duration: courses.duration,
+      passingScore: courses.passingScore,
+      price: courses.price,
+      productType: courses.productType,
+      level: courses.level,
+      language: courses.language,
+      thumbnailUrl: courses.thumbnailUrl,
+      metaTitle: courses.metaTitle,
+      metaDescription: courses.metaDescription,
+      ownerType: courses.ownerType,
+      certificationMode: courses.certificationMode,
+      assessmentPurpose: courses.assessmentPurpose,
+      subscriptionEligible: courses.subscriptionEligible,
+      category: {
+        id: categories.id,
+        name: categories.name,
+        slug: categories.slug,
+        kind: categories.kind,
+        metaTitle: categories.metaTitle,
+        metaDescription: categories.metaDescription,
+      },
+    }).from(courses)
+      .innerJoin(categories, eq(categories.id, courses.categoryId))
+      .where(and(
+        identityCondition,
+        eq(courses.ownerType, "admin"),
+        inArray(courses.productType, [...PUBLIC_ASSESSMENT_PRODUCT_TYPES]),
+        eq(courses.assessmentPurpose, "practice"),
+        eq(courses.isActive, true),
+        eq(courses.visibility, "public"),
+        eq(courses.reviewStatus, "approved"),
+        eq(categories.isActive, true),
+      ));
+    if (!item) return res.status(404).json({ message: "Practice exam not found" });
+
+    res.setHeader("Cache-Control", "public, max-age=120, stale-while-revalidate=300");
+    res.json({
+      ...item,
+      creator: null,
+      origin: "practice",
+      originLabel: "Octamy practice",
+      certificationLabel: "Practice only",
+      canonicalPath: publicPracticePath(item.slug),
+    });
+  } catch {
+    res.status(500).json({ message: "Practice exam is temporarily unavailable" });
   }
 });
 

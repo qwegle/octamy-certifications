@@ -83,6 +83,7 @@ const Progress = lazy(() => import("@/pages/progress"));
 const EnhancedCheckout = lazy(() => import("@/pages/EnhancedCheckout"));
 const Courses = lazy(() => import("@/pages/courses"));
 const Assessments = lazy(() => import("@/pages/assessments"));
+const Practice = lazy(() => import("@/pages/practice"));
 const CreatorAssessments = lazy(() => import("@/pages/creator-assessments"));
 const CourseLearning = lazy(() => import("@/pages/course-learning"));
 const VirtualInternships = lazy(() => import("@/pages/virtual-internships"));
@@ -114,6 +115,7 @@ import {
   ASSESSMENT_HUB_PATH,
   publicAssessmentCategoryPath,
   publicAssessmentPath,
+  publicPracticePath,
 } from "@shared/public-assessment-routes";
 
 // P1 Question Bank Pro — lazy-loaded
@@ -173,9 +175,12 @@ function Router() {
       <Route path="/pricing" component={Pricing} />
       <Route path="/billing/return" component={BillingReturn} />
       <Route path="/exams" component={LegacyAssessmentHubRedirect} />
-      <Route path="/get-certified/categories/:slug" component={CategoryPage} />
+      <Route path="/get-certified/categories/:slug">{() => <CategoryPage />}</Route>
       <Route path="/get-certified/:slug" component={Exam} />
       <Route path="/get-certified" component={Assessments} />
+      <Route path="/practice/categories/:slug">{() => <CategoryPage mode="practice" />}</Route>
+      <Route path="/practice/:slug" component={Exam} />
+      <Route path="/practice" component={Practice} />
       <Route path="/assessments/categories/:slug">{() => <LegacyAssessmentRedirect category />}</Route>
       <Route path="/assessments/:slug">{() => <LegacyAssessmentRedirect />}</Route>
       <Route path="/assessments" component={LegacyAssessmentHubRedirect} />

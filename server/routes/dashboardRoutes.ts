@@ -989,7 +989,8 @@ router.get('/user/exam-history', authenticateToken, async (req: any, res: Respon
 
 const SUB_PLANS: Record<string, Record<string, { amount: number; cycle: 'monthly' | 'yearly' }>> = {
   learner: {
-    all_access: { amount: 1999, cycle: 'monthly' },
+    // Internal plan key kept for backward compatibility; product copy is Practice Pass.
+    all_access: { amount: 299, cycle: 'monthly' },
   },
   creator: {
     free:    { amount: 0,    cycle: 'monthly' },

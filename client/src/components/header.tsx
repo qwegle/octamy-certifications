@@ -27,6 +27,7 @@ type RoleFlags = {
 };
 
 const PUBLIC_LINKS = [
+  { href: "/practice", label: "Practice" },
   { href: "/creator", label: "For creators" },
   { href: "/institute", label: "For institutes" },
   { href: "/for-recruiters", label: "For recruiters" },

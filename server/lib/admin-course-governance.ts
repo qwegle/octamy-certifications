@@ -32,6 +32,7 @@ const commonAdminCourseFields = {
   isInternship: z.boolean(),
   visibility: z.enum(["public", "unlisted", "private"]),
   language: z.string().trim().min(2).max(20),
+  assessmentPurpose: z.enum(["certification", "practice"]),
   defaultReviewPolicy: z.enum(["immediate", "after_final_attempt", "after_window", "score_only"]),
   subscriptionEligible: z.boolean(),
   resellerEligible: z.boolean(),
@@ -56,6 +57,7 @@ export const adminCourseCreateSchema = z.object(commonAdminCourseFields).strict(
   isInternship: commonAdminCourseFields.isInternship.default(false),
   visibility: commonAdminCourseFields.visibility.default("public"),
   language: commonAdminCourseFields.language.default("en"),
+  assessmentPurpose: commonAdminCourseFields.assessmentPurpose.default("certification"),
   defaultReviewPolicy: commonAdminCourseFields.defaultReviewPolicy.default("immediate"),
   subscriptionEligible: commonAdminCourseFields.subscriptionEligible.default(false),
   resellerEligible: commonAdminCourseFields.resellerEligible.default(false),
@@ -91,6 +93,7 @@ export type GovernedCourse = {
   productType: string;
   visibility: string;
   certificationMode: string;
+  assessmentPurpose: string;
   reviewStatus: string;
   isActive: boolean;
   subscriptionEligible: boolean;
@@ -110,12 +113,12 @@ export function slugifyCourseTitle(value: string) {
 
 function isStructurallySubscriptionEligible(course: {
   ownerType: string;
-  certificationMode: string;
   productType: string;
   visibility: string;
+  assessmentPurpose: string;
 }) {
   return course.ownerType === "admin"
-    && course.certificationMode === "octamy"
+    && course.assessmentPurpose === "practice"
     && course.productType === "assessment"
     && course.visibility === "public";
 }
@@ -136,20 +139,22 @@ export function buildAdminOwnedCourseCreate(
 ) {
   const structural = {
     ownerType: "admin",
-    certificationMode: "octamy",
     productType: input.productType,
     visibility: input.visibility,
+    assessmentPurpose: input.assessmentPurpose,
   };
+  const certificationMode = input.assessmentPurpose === "practice" ? "none" : "octamy";
   return {
     ...input,
     slug,
     contentPrice: input.productType === "assessment" ? null : input.contentPrice,
     ownerType: "admin" as const,
     ownerId: null,
-    certificationMode: "octamy",
+    certificationMode,
+    assessmentPurpose: input.assessmentPurpose,
     reviewStatus: input.isActive ? "approved" : "draft",
     subscriptionEligible: input.subscriptionEligible && isStructurallySubscriptionEligible(structural),
-    resellerEligible: input.resellerEligible && isStructurallyResellerEligible(structural),
+    resellerEligible: input.assessmentPurpose === "certification" && input.resellerEligible && isStructurallyResellerEligible({ ownerType: "admin", certificationMode, visibility: input.visibility }),
   };
 }
 
@@ -165,6 +170,8 @@ export function buildGovernedAdminCourseUpdate(
   if (existing.ownerType === "admin") {
     const productType = input.productType ?? existing.productType;
     const visibility = input.visibility ?? existing.visibility;
+    const assessmentPurpose = input.assessmentPurpose ?? existing.assessmentPurpose;
+    const certificationMode = assessmentPurpose === "practice" ? "none" : "octamy";
     const requestedSubscription = input.subscriptionEligible ?? existing.subscriptionEligible;
     const requestedReseller = input.resellerEligible ?? existing.resellerEligible;
     const updates = {
@@ -172,16 +179,17 @@ export function buildGovernedAdminCourseUpdate(
       contentPrice: productType === "assessment" ? null : input.contentPrice,
       ownerType: "admin" as const,
       ownerId: null,
-      certificationMode: "octamy",
+      certificationMode,
+      assessmentPurpose,
       subscriptionEligible: requestedSubscription && isStructurallySubscriptionEligible({
         ownerType: "admin",
-        certificationMode: "octamy",
         productType,
         visibility,
+        assessmentPurpose,
       }),
-      resellerEligible: requestedReseller && isStructurallyResellerEligible({
+      resellerEligible: assessmentPurpose === "certification" && requestedReseller && isStructurallyResellerEligible({
         ownerType: "admin",
-        certificationMode: "octamy",
+        certificationMode,
         visibility,
       }),
     } as Record<string, unknown>;
