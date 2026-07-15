@@ -260,6 +260,39 @@ router.get("/assessments", (req, res) => assessmentCatalog(req, res, "admin", "c
 router.get("/practice-assessments", (req, res) => assessmentCatalog(req, res, "admin", "practice"));
 router.get("/creator-assessments", (req, res) => assessmentCatalog(req, res, "creator", "certification"));
 
+router.get("/certification-navigation", async (_req: Request, res: Response) => {
+  try {
+    const items = await db.select({
+      id: courses.id,
+      title: courses.title,
+      slug: courses.slug,
+      isActive: courses.isActive,
+      visibility: courses.visibility,
+      reviewStatus: courses.reviewStatus,
+      category: { id: categories.id, name: categories.name, slug: categories.slug },
+    }).from(courses)
+      .innerJoin(categories, eq(categories.id, courses.categoryId))
+      .where(and(
+        eq(courses.ownerType, "admin"),
+        inArray(courses.productType, [...PUBLIC_ASSESSMENT_PRODUCT_TYPES]),
+        eq(courses.assessmentPurpose, "certification"),
+        eq(categories.isActive, true),
+      ))
+      .orderBy(asc(categories.sortOrder), asc(courses.title))
+      .limit(100);
+    res.setHeader("Cache-Control", "public, max-age=120, stale-while-revalidate=300");
+    res.json({
+      items: items.map((item) => ({
+        ...item,
+        availability: item.isActive && item.visibility === "public" && item.reviewStatus === "approved" ? "available" : "in_review",
+      })),
+      pagination: { total: items.length },
+    });
+  } catch {
+    res.status(500).json({ message: "Certification navigation is temporarily unavailable" });
+  }
+});
+
 router.get("/assessment-categories/:slug", async (req: Request, res: Response) => {
   const slug = canonicalPublicSlug(req.params.slug);
   if (!slug) return res.status(404).json({ message: "Assessment category not found" });
