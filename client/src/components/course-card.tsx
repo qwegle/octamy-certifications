@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Clock, Users, Star, ChevronRight, Award } from "lucide-react";
 import { Link } from "wouter";
 import type { Course, Category } from "@shared/schema";
-import { publicAssessmentPath } from "@shared/public-assessment-routes";
+import { publicAssessmentPath, publicPracticePath } from "@shared/public-assessment-routes";
 
 // Import category images (fallbacks)
 import aiImage from "@/assets/course-images/ai-assessment.jpg";
@@ -45,6 +45,7 @@ export default function CourseCard({
   rating,
   viewMode = "grid",
 }: CourseCardProps) {
+  const isPractice = course.productType === "assessment" && course.assessmentPurpose === "practice";
   const courseSlug = course.slug || course.title.toLowerCase()
     .replace(/[^a-zA-Z0-9\s]/g, '')
     .replace(/\s+/g, '-');
@@ -225,8 +226,8 @@ export default function CourseCard({
                 )}
               </div>
               <Button asChild className="bg-slate-950 text-white hover:bg-slate-800">
-                <Link href={course.productType === "assessment" ? publicAssessmentPath(courseSlug) : `/learn/${courseSlug}`}>
-                  {course.productType === "assessment" ? "View assessment" : "View course"}
+                <Link href={course.productType === "assessment" ? (isPractice ? publicPracticePath(courseSlug) : publicAssessmentPath(courseSlug)) : `/learn/${courseSlug}`}>
+                  {course.productType === "assessment" ? (isPractice ? "Start practice" : "View certification") : "View course"}
                   <ChevronRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </Link>
               </Button>

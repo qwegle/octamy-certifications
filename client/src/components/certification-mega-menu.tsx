@@ -19,6 +19,7 @@ type MenuResponse = {
 };
 
 const CATEGORY_ORDER = [
+  "enterprise-applications",
   "software-engineering",
   "data-ai-analytics",
   "cloud-devops",
@@ -107,24 +108,24 @@ export function CertificationMegaMenu({ currentPath }: { currentPath: string }) 
       </button>
 
       {open && (
-        <div className="absolute inset-x-0 top-[calc(100%-1px)] z-50 pt-3" role="dialog" aria-label="Get certified navigation" onMouseEnter={openMenu} onMouseLeave={scheduleClose}>
-          <div className="grid max-h-[min(690px,calc(100vh-7rem))] grid-cols-[230px_280px_minmax(0,1fr)] overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white text-left shadow-2xl shadow-slate-950/15">
-            <div className="flex flex-col bg-slate-950 p-5 text-white">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-violet-500/20 text-violet-200"><Award className="h-5 w-5" /></div>
-              <p className="mt-5 text-xs font-bold uppercase tracking-[0.16em] text-violet-300">Career certifications</p>
-              <h2 className="mt-2 text-2xl font-black tracking-tight">Prove job-ready skills.</h2>
-              <p className="mt-3 text-sm leading-6 text-slate-300">Take serious technology assessments that can become recruiter-visible credentials after passing.</p>
-              <nav className="mt-6 grid gap-1">
-                <Link href="/get-certified" className="flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-bold hover:bg-white/10">All certifications <ArrowRight className="h-4 w-4" /></Link>
-                <Link href={publicAssessmentCategoryPath("software-engineering")} className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm text-slate-200 hover:bg-white/10"><Code2 className="h-4 w-4" />Software engineering</Link>
-                <Link href={publicAssessmentCategoryPath("data-ai-analytics")} className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm text-slate-200 hover:bg-white/10"><FlaskConical className="h-4 w-4" />Data, AI & analytics</Link>
-                <Link href="/practice" className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm text-slate-200 hover:bg-white/10">Practice exams</Link>
-                <Link href="/institutes" className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm text-slate-200 hover:bg-white/10"><TicketCheck className="h-4 w-4" />Institute vouchers</Link>
+        <div className="absolute inset-x-0 top-[calc(100%-1px)] z-50 pt-2" role="dialog" aria-label="Get certified navigation" onMouseEnter={openMenu} onMouseLeave={scheduleClose}>
+          <div className="grid max-h-[min(560px,calc(100vh-6rem))] grid-cols-[200px_260px_minmax(0,1fr)] overflow-hidden rounded-[1.35rem] border border-slate-200 bg-white text-left shadow-2xl shadow-slate-950/15">
+            <div className="flex flex-col bg-slate-950 p-4 text-white">
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-violet-500/20 text-violet-200"><Award className="h-4 w-4" /></div>
+                <div><p className="text-[10px] font-bold uppercase tracking-[0.16em] text-violet-300">Career</p><h2 className="text-lg font-black tracking-tight">Get certified</h2></div>
+              </div>
+              <p className="mt-3 text-xs leading-5 text-slate-300">Job-focused exams for cloud, AI, ERP, software, data and security roles.</p>
+              <nav className="mt-4 grid gap-1">
+                <Link href="/get-certified" className="flex items-center justify-between rounded-xl px-3 py-2 text-sm font-bold hover:bg-white/10">All certifications <ArrowRight className="h-4 w-4" /></Link>
+                <Link href={publicAssessmentCategoryPath("enterprise-applications")} className="flex items-center gap-2 rounded-xl px-3 py-2 text-xs text-slate-200 hover:bg-white/10"><TicketCheck className="h-4 w-4" />SAP / Oracle / CRM</Link>
+                <Link href={publicAssessmentCategoryPath("cloud-devops")} className="flex items-center gap-2 rounded-xl px-3 py-2 text-xs text-slate-200 hover:bg-white/10"><Code2 className="h-4 w-4" />Cloud & DevOps</Link>
+                <Link href={publicAssessmentCategoryPath("data-ai-analytics")} className="flex items-center gap-2 rounded-xl px-3 py-2 text-xs text-slate-200 hover:bg-white/10"><FlaskConical className="h-4 w-4" />AI & data</Link>
               </nav>
-              <div className="mt-auto rounded-2xl border border-white/10 bg-white/5 p-4">
-                <p className="text-sm font-bold">Practice Pass</p>
-                <p className="mt-1 text-xs leading-5 text-slate-300">Unlimited non-recruiter practice for ₹299/month. Certifications stay separate.</p>
-                <Link href="/pricing" className="mt-3 inline-flex items-center text-xs font-bold text-violet-300">See pricing <ChevronRight className="h-3.5 w-3.5" /></Link>
+              <div className="mt-4 overflow-hidden rounded-xl border border-amber-200/25 bg-gradient-to-br from-violet-500/25 to-cyan-400/10 p-3 shadow-inner">
+                <div className="flex items-center justify-between gap-2"><p className="text-[10px] font-black uppercase tracking-[0.14em] text-amber-200">Premium practice</p><span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-black text-violet-950">₹299/mo</span></div>
+                <p className="mt-1.5 text-[11px] leading-4 text-slate-200">Unlimited practice, answer review and progress tracking.</p>
+                <Link href="/practice" className="mt-2 inline-flex items-center text-[11px] font-bold text-white">Explore Practice Pass <ChevronRight className="h-3 w-3" /></Link>
               </div>
             </div>
 
@@ -158,7 +159,7 @@ export function CertificationMegaMenu({ currentPath }: { currentPath: string }) 
                   </Link>
                 ))}
               </div>
-              {!isLoading && !activeGroup && <p className="py-12 text-center text-sm text-slate-500">Certification paths are being prepared.</p>}
+              {!isLoading && !activeGroup && <div className="mx-auto max-w-sm py-8 text-center"><p className="font-bold text-slate-800">Explore job-ready certifications</p><p className="mt-2 text-sm leading-6 text-slate-500">Browse software, cloud, AI, data, ERP and security credentials.</p><Link href="/get-certified" className="mt-4 inline-flex items-center text-sm font-bold text-violet-700">View certification catalog <ArrowRight className="ml-1 h-4 w-4" /></Link></div>}
             </div>
           </div>
         </div>

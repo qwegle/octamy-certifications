@@ -271,13 +271,16 @@ export default function Landing() {
   });
 
   const filteredCourses = courses.filter((course) => {
+    // Keep preparation products under /practice; this is a career surface.
+    const isCareerProduct =
+      course.productType !== "assessment" || course.assessmentPurpose === "certification";
     const matchesSearch =
       !searchQuery ||
       course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       course.description.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory =
       !selectedCategory || course.categoryId === selectedCategory;
-    return matchesSearch && matchesCategory;
+    return isCareerProduct && matchesSearch && matchesCategory;
   });
 
   // Product safeguards only. Corporate certifications are shown elsewhere only
@@ -300,7 +303,10 @@ export default function Landing() {
   // 8-tile featured tracks grid (with course counts)
   const featuredTracks = categories.slice(0, 8).map((cat) => ({
     ...cat,
-    count: courses.filter((c) => c.categoryId === cat.id).length,
+    count: courses.filter((c) =>
+      c.categoryId === cat.id &&
+      (c.productType !== "assessment" || c.assessmentPurpose === "certification")
+    ).length,
     Icon: iconForCategory(cat.slug),
     isPremium: PREMIUM_CATEGORY_SLUGS.includes((cat.slug || "").toLowerCase()),
   }));

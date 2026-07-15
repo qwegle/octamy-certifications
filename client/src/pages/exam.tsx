@@ -93,6 +93,13 @@ export default function Exam() {
     queryFn: async () => (await apiRequest("GET", `${detailEndpoint}/${encodeURIComponent(String(slug || ""))}`)).json(),
   });
 
+  // Preserve old indexed links while keeping preparation content out of the
+  // recruiter-facing certification namespace.
+  useEffect(() => {
+    if (practicePage || !slug || !/(?:practice|diagnostic)$/i.test(slug)) return;
+    setLocation(publicPracticePath(slug), { replace: true });
+  }, [practicePage, setLocation, slug]);
+
   useEffect(() => {
     if (!course?.canonicalPath || typeof window === "undefined") return;
     if (window.location.pathname !== course.canonicalPath) {
