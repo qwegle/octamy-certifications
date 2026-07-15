@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { CheckCircle2, Edit, Link2, Plus, Search, Trash2, EyeOff } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Edit, Link2, Plus, Search, Trash2, EyeOff } from "lucide-react";
 
 type AssessmentPurpose = "certification" | "practice";
 type Assessment = {
@@ -26,6 +26,8 @@ type Assessment = {
   visibility: string;
   reviewStatus: string;
   questionCount: number;
+  approvedQuestionInventory: number;
+  requiredQuestionInventory: number;
   bankCount: number;
   bankNames: string[];
   difficultyRules: string[];
@@ -162,13 +164,19 @@ export function AdminAssessmentsManagement() {
       {query.isLoading ? <p className="py-12 text-center text-sm text-slate-500">Loading assessments…</p> : query.isError ? <div className="rounded-lg border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">Assessments could not be loaded. <Button size="sm" variant="outline" className="ml-2" onClick={() => query.refetch()}>Retry</Button></div> : <>
         <div className="overflow-x-auto rounded-lg border">
           <Table>
-            <TableHeader><TableRow><TableHead className="w-10"><input aria-label="Select page" type="checkbox" checked={allSelected} onChange={() => setSelected(allSelected ? new Set() : new Set(items.map((item) => item.id)))} /></TableHead><TableHead>Assessment</TableHead><TableHead>Category</TableHead><TableHead>Blueprint questions</TableHead><TableHead>State</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
+            <TableHeader><TableRow><TableHead className="w-10"><input aria-label="Select page" type="checkbox" checked={allSelected} onChange={() => setSelected(allSelected ? new Set() : new Set(items.map((item) => item.id)))} /></TableHead><TableHead>Assessment</TableHead><TableHead>Category</TableHead><TableHead>Bank readiness</TableHead><TableHead>State</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
             <TableBody>
               {items.map((item) => <TableRow key={item.id}>
                 <TableCell><input aria-label={`Select ${item.title}`} type="checkbox" checked={selected.has(item.id)} onChange={() => setSelected((current) => { const next = new Set(current); next.has(item.id) ? next.delete(item.id) : next.add(item.id); return next; })} /></TableCell>
                 <TableCell><div className="font-semibold">{item.title}</div><div className="text-xs text-slate-500">/{item.slug}</div><Badge variant="outline" className="mt-1 capitalize">{item.assessmentPurpose}</Badge></TableCell>
                 <TableCell>{item.category?.name || "Uncategorised"}</TableCell>
-                <TableCell><span className="font-semibold">{Number(item.questionCount || 0).toLocaleString()}</span><div className="text-xs text-slate-500">drawn per attempt from {item.bankCount || 0} bank(s)</div></TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2"><span className="font-semibold">{Number(item.approvedQuestionInventory || 0).toLocaleString()}</span><span className="text-xs text-slate-500">approved</span></div>
+                  <div className="text-xs text-slate-500">Draw {Number(item.questionCount || 0).toLocaleString()} · {item.bankCount || 0} bank(s)</div>
+                  {Number(item.approvedQuestionInventory || 0) >= Number(item.requiredQuestionInventory || 0)
+                    ? <Badge className="mt-1 bg-emerald-100 text-emerald-800 hover:bg-emerald-100">Ready</Badge>
+                    : <Badge variant="outline" className="mt-1 border-amber-300 bg-amber-50 text-amber-800"><AlertTriangle className="mr-1 h-3 w-3" />Needs {Number(item.requiredQuestionInventory || 0).toLocaleString()}+</Badge>}
+                </TableCell>
                 <TableCell><Badge variant={item.isActive && item.visibility === "public" && item.reviewStatus === "approved" ? "default" : "secondary"}>{item.isActive ? "Published" : `${item.reviewStatus} · ${item.visibility}`}</Badge></TableCell>
                 <TableCell><div className="flex justify-end gap-2"><Button size="sm" variant="outline" onClick={() => openEdit(item)}><Edit className="mr-1 h-4 w-4" />Edit</Button><Button asChild size="sm" variant="outline"><Link href={`/admin/courses/${item.id}/blueprint`}><Link2 className="mr-1 h-4 w-4" />Assign questions</Link></Button></div></TableCell>
               </TableRow>)}

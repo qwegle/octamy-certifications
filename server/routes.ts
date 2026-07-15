@@ -5060,6 +5060,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           reviewStatus: coursesTable.reviewStatus, certificationMode: coursesTable.certificationMode,
           category: { id: categoriesTable.id, name: categoriesTable.name, slug: categoriesTable.slug },
           questionCount: sql<number>`COALESCE((select sum(question_count) from course_question_blueprint where course_id = ${coursesTable.id}), (select count(*) from questions where questions.course_id = ${coursesTable.id}), 0)`,
+          approvedQuestionInventory: sql<number>`(select count(distinct q.id) from course_question_blueprint blueprint inner join questions q on q.bank_id = blueprint.bank_id where blueprint.course_id = ${coursesTable.id} and q.is_active = true and q.review_status = 'approved')`,
+          requiredQuestionInventory: sql<number>`GREATEST(CASE WHEN ${coursesTable.assessmentPurpose} = 'practice' THEN 200 ELSE 80 END, COALESCE((select sum(question_count) from course_question_blueprint where course_id = ${coursesTable.id}), 0) * CASE WHEN ${coursesTable.assessmentPurpose} = 'practice' THEN 5 ELSE 4 END)`,
           bankCount: sql<number>`(select count(distinct bank_id) from course_question_blueprint where course_id = ${coursesTable.id})`,
           bankNames: sql<string[]>`COALESCE((select array_agg(distinct bank.name order by bank.name) from course_question_blueprint blueprint inner join question_banks bank on bank.id = blueprint.bank_id where blueprint.course_id = ${coursesTable.id}), ARRAY[]::text[])`,
           difficultyRules: sql<string[]>`COALESCE((select array_agg(distinct difficulty order by difficulty) from course_question_blueprint where course_id = ${coursesTable.id}), ARRAY[]::text[])`,
@@ -5154,7 +5156,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
                     AND (b.topic_id IS NULL OR q.topic_id = b.topic_id)
                     AND q.is_active = true AND q.review_status = 'approved'
                     AND (b.difficulty = 'mixed' OR q.difficulty = b.difficulty)
-                ) < b.question_count
+                ) < GREATEST(
+                  b.question_count * CASE WHEN c.assessment_purpose = 'practice' THEN 5 ELSE 4 END,
+                  CASE WHEN c.assessment_purpose = 'practice' THEN 200 ELSE 80 END
+                )
               )
             RETURNING c.id
           `);
