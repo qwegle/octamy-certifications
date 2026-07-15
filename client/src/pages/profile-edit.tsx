@@ -8,9 +8,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/lib/auth.tsx';
 import { useLocation } from 'wouter';
-import Header from '@/components/header';
-import Footer from '@/components/footer';
-import { User, Save, ArrowLeft, Upload, FileText, Building2, Sparkles } from 'lucide-react';
+import DashboardLayout from '@/components/dashboard-layout';
+import { SEO } from '@/components/seo';
+import { User, Save, Upload, FileText, Building2, Sparkles, ShieldCheck, Eye } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface UserProfile {
@@ -307,26 +307,28 @@ export default function ProfileEdit() {
     updateProfileMutation.mutate(formData);
   };
 
+  const completionFields = [formData.name, formData.phone, formData.bio, formData.location, formData.currentRole, formData.skills?.length ? "skills" : "", formData.portfolioUrl, formData.resume];
+  const completion = Math.round((completionFields.filter(Boolean).length / completionFields.length) * 100);
+
   if (!user) {
     return (
-      <div className="min-h-screen bg-cream-soft">
-        <Header />
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="grid min-h-screen place-items-center bg-slate-50 px-5">
+        <Card className="w-full max-w-lg rounded-3xl"><CardContent className="p-10 text-center">
+          <User className="mx-auto h-10 w-10 text-violet-700" />
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-octamy-black mb-4">Login Required</h2>
-            <p className="text-octamy-gray-600">Please log in to edit your profile.</p>
+            <h2 className="mt-4 text-2xl font-black text-slate-950">Sign in to manage your profile</h2>
+            <p className="mt-2 text-slate-600">Your learner identity, evidence settings, and recruiter visibility stay behind your account.</p>
+            <Button className="mt-6" onClick={() => setLocation('/login?next=/profile-edit')}>Sign in</Button>
           </div>
-        </div>
-        <Footer />
+        </CardContent></Card>
       </div>
     );
   }
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-cream-soft">
-        <Header />
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <DashboardLayout role="learner" title="Profile" description="Loading your learner identity and visibility controls…" breadcrumbs={[{ label: "Learner", href: "/dashboard" }, { label: "Profile" }]}>
+        <div className="max-w-5xl">
           <div className="animate-pulse">
             <div className="h-8 bg-gray-200 rounded w-1/3 mb-8"></div>
             <div className="space-y-6">
@@ -336,34 +338,16 @@ export default function ProfileEdit() {
             </div>
           </div>
         </div>
-        <Footer />
-      </div>
+      </DashboardLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-cream-soft">
-      <Header />
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Header */}
-        <div className="mb-8">
-          <Button
-            variant="outline"
-            onClick={() => setLocation('/dashboard')}
-            className="mb-4"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Dashboard
-          </Button>
-          <h1 className="text-4xl font-bold text-octamy-black mb-2">
-            Edit Profile
-          </h1>
-          <p className="text-xl text-octamy-gray-600">
-            Update your personal information and professional details
-          </p>
-        </div>
-
-        <form onSubmit={handleSubmit}>
+    <DashboardLayout role="learner" title="Your learner profile" description="Manage your identity, career context, evidence sharing, and recruiter visibility." breadcrumbs={[{ label: "Learner", href: "/dashboard" }, { label: "Profile" }]} actions={<Button type="submit" form="learner-profile-form" disabled={updateProfileMutation.isPending} className="w-full rounded-xl sm:w-auto"><Save className="mr-2 h-4 w-4" />{updateProfileMutation.isPending ? 'Saving…' : 'Save profile'}</Button>}>
+      <SEO title="Learner profile" description="Manage your private Octamy learner profile and evidence sharing preferences." path="/profile-edit" noIndex />
+      <div className="max-w-6xl">
+        <section className="mb-6 grid gap-3 sm:grid-cols-3" aria-label="Profile summary"><Card><CardContent className="flex items-center gap-4 p-5"><span className="grid h-11 w-11 place-items-center rounded-2xl bg-violet-50 text-violet-700"><User className="h-5 w-5" /></span><div><p className="text-sm text-slate-500">Profile completion</p><p className="text-2xl font-black">{completion}%</p></div></CardContent></Card><Card><CardContent className="flex items-center gap-4 p-5"><span className="grid h-11 w-11 place-items-center rounded-2xl bg-emerald-50 text-emerald-700"><Eye className="h-5 w-5" /></span><div><p className="text-sm text-slate-500">Recruiter visibility</p><p className="font-black">{formData.profileVisibility ? "Visible" : "Private"}</p></div></CardContent></Card><Card><CardContent className="flex items-center gap-4 p-5"><span className="grid h-11 w-11 place-items-center rounded-2xl bg-sky-50 text-sky-700"><ShieldCheck className="h-5 w-5" /></span><div><p className="text-sm text-slate-500">Evidence passport</p><p className="font-black">{formData.evidencePassportPublic ? "Share link on" : "Share link off"}</p></div></CardContent></Card></section>
+        <form id="learner-profile-form" onSubmit={handleSubmit}>
           <div className="space-y-6">
             {/* Role-aware workspace cards: link out to org/creator dashboards */}
             {(roles?.isInstituteMember || roles?.isCreator) && (
@@ -418,9 +402,11 @@ export default function ProfileEdit() {
                       id="email"
                       type="email"
                       value={formData.email}
-                      onChange={(e) => handleInputChange('email', e.target.value)}
+                      readOnly
+                      className="bg-slate-50 text-slate-500"
                       required
                     />
+                    <p className="mt-1 text-xs text-slate-500">Your sign-in email cannot be changed from the public profile form.</p>
                   </div>
                 </div>
                 <div>
@@ -597,7 +583,7 @@ export default function ProfileEdit() {
 
                 <div>
                   <Label>Work Type Preferences</Label>
-                  <div className="mt-2 space-y-2">
+                  <div className="mt-2 grid gap-2 sm:grid-cols-2">
                     {['Remote', 'Hybrid', 'On-site', 'Flexible'].map((type) => (
                       <label key={type} className="flex items-center space-x-2">
                         <input
@@ -621,7 +607,7 @@ export default function ProfileEdit() {
 
                 <div>
                   <Label>Professional Categories</Label>
-                  <div className="mt-2 space-y-2">
+                  <div className="mt-2 grid gap-2 sm:grid-cols-2">
                     {['Software Development', 'Data Science', 'Product Management', 'Design', 'Marketing', 'Sales', 'Operations', 'HR', 'Finance', 'Consulting'].map((category) => (
                       <label key={category} className="flex items-center space-x-2">
                         <input
@@ -665,6 +651,7 @@ export default function ProfileEdit() {
                     />
                   </div>
                 </div>
+                <div><Label htmlFor="github">GitHub profile</Label><Input id="github" type="url" value={formData.github} onChange={(e) => handleInputChange('github', e.target.value)} placeholder="https://github.com/username" /></div>
 
                 <div>
                   <Label htmlFor="careerGoals">Career Goals & Aspirations</Label>
@@ -767,35 +754,6 @@ export default function ProfileEdit() {
               </CardContent>
             </Card>
 
-            {/* Social Links */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Social Links</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="linkedin">LinkedIn Profile</Label>
-                    <Input
-                      id="linkedin"
-                      value={formData.linkedin}
-                      onChange={(e) => handleInputChange('linkedin', e.target.value)}
-                      placeholder="https://linkedin.com/in/username"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="github">GitHub Profile</Label>
-                    <Input
-                      id="github"
-                      value={formData.github}
-                      onChange={(e) => handleInputChange('github', e.target.value)}
-                      placeholder="https://github.com/username"
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
             {/* Save Button */}
             <div className="flex justify-end">
               <Button
@@ -810,7 +768,6 @@ export default function ProfileEdit() {
           </div>
         </form>
       </div>
-      <Footer />
-    </div>
+    </DashboardLayout>
   );
 }

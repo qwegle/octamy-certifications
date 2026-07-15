@@ -6,8 +6,9 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import Header from '@/components/header';
-import { Trophy, Award, Truck, MapPin } from 'lucide-react';
+import { Trophy, Award, Truck, MapPin, TicketPercent, CheckCircle2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
@@ -41,11 +42,24 @@ interface CheckoutCourse {
   isOnSale: boolean;
 }
 
+interface CouponQuote {
+  valid: true;
+  couponId: number;
+  codeHint: string;
+  originalAmount: string;
+  discountAmount: string;
+  finalAmount: string;
+  currency: string;
+}
+
 export default function PaymentTemp() {
   const [location, navigate] = useLocation();
   const { toast } = useToast();
   const [includesPhysicalCopy, setIncludesPhysicalCopy] = useState(false);
   const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
+  const [couponCode, setCouponCode] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState<CouponQuote | null>(null);
+  const [couponPending, setCouponPending] = useState(false);
   const hasUserSession = Boolean(localStorage.getItem('token'));
 
 
@@ -96,6 +110,31 @@ export default function PaymentTemp() {
     }
   }, [addresses, selectedAddressId]);
 
+  const applyCoupon = async () => {
+    if (!course || !couponCode.trim()) return;
+    setCouponPending(true);
+    try {
+      const response = await apiRequest("POST", "/api/coupons/quote", {
+        code: couponCode,
+        courseId: course.id,
+      });
+      const quote = await response.json() as CouponQuote;
+      setAppliedCoupon(quote);
+      toast({
+        title: "Coupon applied",
+        description: `You save ₹${Number(quote.discountAmount).toLocaleString('en-IN')}.`,
+      });
+    } catch (error) {
+      setAppliedCoupon(null);
+      toast({
+        title: "Coupon could not be applied",
+        description: error instanceof Error ? error.message : "Review the code and try again.",
+      });
+    } finally {
+      setCouponPending(false);
+    }
+  };
+
   const handlePayment = async () => {
     if (!examResults || !course || !tempExamId) {
       toast({
@@ -128,7 +167,7 @@ export default function PaymentTemp() {
         sellerCode: referralCode || "",
         includesPhysicalCopy,
         selectedAddressId,
-        amount: course.price || '0'
+        couponCode: appliedCoupon ? couponCode.trim() : undefined,
       };
 
       const response = await apiRequest("POST", "/api/payment/initiate", paymentData);
@@ -191,9 +230,8 @@ export default function PaymentTemp() {
     } catch (error) {
       console.error("Payment error:", error);
       toast({
-        title: "Payment Error",
-        description: "Failed to initialize payment. Please try again.",
-        variant: "destructive",
+        title: "Checkout could not be started",
+        description: error instanceof Error ? error.message : "Please try again.",
       });
     }
   };
@@ -253,7 +291,8 @@ export default function PaymentTemp() {
 
 
 
-  const baseAmount = parseFloat(course.price || '0');
+  const baseAmount = appliedCoupon ? Number(appliedCoupon.finalAmount) : parseFloat(course.price || '0');
+  const discountAmount = appliedCoupon ? Number(appliedCoupon.discountAmount) : 0;
   const shippingCost = includesPhysicalCopy ? 50 : 0;
   const totalAmount = baseAmount + shippingCost;
 
@@ -348,6 +387,47 @@ export default function PaymentTemp() {
                     </span>
                   </div>
 
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                    <Label htmlFor="coupon" className="flex items-center gap-2 text-sm font-semibold text-slate-800">
+                      <TicketPercent className="h-4 w-4 text-violet-600" />
+                      Coupon code
+                    </Label>
+                    <div className="mt-2 flex gap-2">
+                      <Input
+                        id="coupon"
+                        value={couponCode}
+                        onChange={(event) => {
+                          setCouponCode(event.target.value.toUpperCase());
+                          setAppliedCoupon(null);
+                        }}
+                        onKeyDown={(event) => {
+                          if (event.key === 'Enter') {
+                            event.preventDefault();
+                            void applyCoupon();
+                          }
+                        }}
+                        placeholder="Enter code"
+                        className="bg-white uppercase"
+                      />
+                      <Button type="button" variant="outline" onClick={applyCoupon} disabled={couponPending || !couponCode.trim()}>
+                        {couponPending ? 'Checking…' : 'Apply'}
+                      </Button>
+                    </div>
+                    {appliedCoupon && (
+                      <p className="mt-2 flex items-center gap-1.5 text-sm font-medium text-emerald-700">
+                        <CheckCircle2 className="h-4 w-4" />
+                        Applied {appliedCoupon.codeHint}
+                      </p>
+                    )}
+                  </div>
+
+                  {discountAmount > 0 && (
+                    <div className="flex justify-between text-sm font-medium text-emerald-700">
+                      <span>Coupon saving</span>
+                      <span>−₹{discountAmount.toLocaleString('en-IN')}</span>
+                    </div>
+                  )}
+
                   {/* Physical Copy Option */}
                   <div className="flex items-center space-x-2 p-3 border rounded-lg">
                     <Checkbox
@@ -430,7 +510,7 @@ export default function PaymentTemp() {
                 </Button>
 
                 <div className="text-xs text-center text-muted-foreground">
-                  Secure payment powered by PayUMoney
+                  Coupon and pricing are revalidated securely before payment.
                 </div>
               </CardContent>
             </Card>

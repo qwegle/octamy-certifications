@@ -56,7 +56,7 @@ router.get('/admin/creators', authenticateAdmin, async (req: Request, res: Respo
     const status = String(req.query.status || '');
     const rows = await execRows(sql`
       SELECT c.id, c.user_id, c.display_name, c.slug, c.bio, c.status, c.created_at,
-             u.email, u.username
+             u.email, u.name AS username
       FROM creators c
       LEFT JOIN users u ON u.id = c.user_id
       ${status ? sql`WHERE c.status = ${status}` : sql``}

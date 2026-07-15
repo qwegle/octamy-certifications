@@ -83,6 +83,12 @@ import {
   reserveCredentialActivationPayment,
 } from "./lib/credential-activation";
 import {
+  CouponError,
+  couponPaymentMetadata,
+  recordCouponRedemption,
+  resolveCouponQuote,
+} from "./lib/coupons";
+import {
   AdminCourseGovernanceError,
   adminCourseCreateSchema,
   adminCourseReviewSchema,
@@ -1188,11 +1194,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         { path: "/institute", priority: "0.8" },
         { path: "/for-recruiters", priority: "0.8" },
         { path: "/pricing", priority: "0.8" },
-        { path: "/login", priority: "0.5" },
-        { path: "/register", priority: "0.6" },
-        { path: "/forgot-password", priority: "0.2" },
         { path: "/sponsor", priority: "0.6" },
         { path: "/about", priority: "0.7" },
+        { path: "/vision", priority: "0.7" },
         { path: "/contact", priority: "0.6" },
         { path: "/help-center", priority: "0.5" },
         { path: "/verify", priority: "0.5" },
@@ -1210,9 +1214,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const allCategories = await storage.getCategories().catch(() => []);
       const categoryById = new Map((allCategories as any[]).map((category) => [category.id, category]));
       const sitemapCategoryIds = new Set<number>();
-      const assessmentCourses = (allCourses as any[]).filter((course) => (
+      const publicCourses = (allCourses as any[]).filter((course) => canonicalPublicSlug(course.slug));
+      const assessmentCourses = publicCourses.filter((course) => (
         PUBLIC_ASSESSMENT_PRODUCT_TYPES.includes(course.productType)
-        && canonicalPublicSlug(course.slug)
       ));
 
       for (const course of assessmentCourses) {
@@ -1231,8 +1235,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       for (const u of staticUrls) {
         urls.push({ loc: `${base}${u.path}`, priority: u.priority, freq: "weekly" });
       }
-      for (const c of assessmentCourses) {
-        urls.push({ loc: `${base}${publicAssessmentPath(c.slug)}`, priority: "0.8", freq: "weekly" });
+      for (const c of publicCourses) {
+        urls.push({ loc: `${base}${publicProductPath(c.slug, c.productType)}`, priority: "0.8", freq: "weekly" });
       }
       for (const cat of allCategories as any[]) {
         if (!sitemapCategoryIds.has(cat.id) || !canonicalPublicSlug(cat.slug)) continue;
@@ -1897,6 +1901,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       tempExamId: string;
       userPhone?: string;
       sellerCode?: string;
+      couponCode?: string;
       includesPhysicalCopy?: boolean;
       selectedAddressId?: number | null;
     }
@@ -1916,7 +1921,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     const includesPhysicalCopy = Boolean(payload.includesPhysicalCopy);
-    const baseAmount = parseFloat(course.price);
+    const couponQuote = payload.couponCode?.trim()
+      ? await resolveCouponQuote({
+          code: payload.couponCode,
+          courseId: examData.courseId,
+          userId: examData.userId,
+          userEmail: examData.userEmail,
+        })
+      : null;
+    const baseAmount = couponQuote ? Number(couponQuote.finalAmount) : parseFloat(course.price);
     const shippingCost = includesPhysicalCopy ? 50 : 0;
     const totalAmount = (baseAmount + shippingCost).toFixed(2);
 
@@ -1938,6 +1951,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         tempExamId: payload.tempExamId,
         sellerCode: payload.sellerCode || "",
         selectedAddressId: payload.selectedAddressId || null,
+        ...couponPaymentMetadata(couponQuote),
       },
     } as any);
 
@@ -1960,9 +1974,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       },
     });
 
+    const paymentMetadata = (payment.gatewayStatusRaw || {}) as Record<string, unknown>;
     await storage.updatePayment(payment.id, {
       cashfreeOrderId: order.orderId,
-      gatewayStatusRaw: order.raw,
+      gatewayStatusRaw: { ...paymentMetadata, providerOrder: order.raw },
     } as any);
 
     return {
@@ -1989,6 +2004,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             tempExamId,
             userPhone,
             sellerCode,
+            couponCode,
             includesPhysicalCopy = false,
             selectedAddressId = null,
           } = req.body;
@@ -2002,6 +2018,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               tempExamId,
               userPhone,
               sellerCode,
+              couponCode,
               includesPhysicalCopy,
               selectedAddressId,
             });
@@ -2019,6 +2036,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
             if (cashfreeError instanceof PendingExamAccessError) {
               return res.status(cashfreeError.statusCode).json({ message: cashfreeError.message });
             }
+            if (cashfreeError instanceof CouponError) {
+              return res.status(cashfreeError.statusCode).json({ message: cashfreeError.message });
+            }
             console.error("Cashfree init failed, falling back to PayU:", cashfreeError);
           }
         }
@@ -2030,6 +2050,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           userName,
           userPhone,
           sellerCode,
+          couponCode,
           includesPhysicalCopy = false,
           selectedAddressId = null,
           amount,
@@ -2072,10 +2093,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(404).json({ message: "Course not found" });
         }
 
+        const couponQuote = typeof couponCode === "string" && couponCode.trim()
+          ? await resolveCouponQuote({
+              code: couponCode,
+              courseId: examData.courseId,
+              userId: examData.userId,
+              userEmail: examData.userEmail,
+            })
+          : null;
         const txnid = payuMoneyService.generateTransactionId();
 
         // Calculate total amount based on physical copy selection - use current price for payment
-        const baseAmount = parseFloat(course.price);
+        const baseAmount = couponQuote ? Number(couponQuote.finalAmount) : parseFloat(course.price);
         const shippingCost = includesPhysicalCopy ? 50 : 0;
         const totalAmount = baseAmount + shippingCost;
         const formattedAmount = payuMoneyService.formatAmount(
@@ -2109,6 +2138,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           includesPhysicalCopy,
           currency: "INR",
           status: "pending",
+          gatewayStatusRaw: {
+            tempExamId,
+            sellerCode: sellerCode || "",
+            selectedAddressId,
+            ...couponPaymentMetadata(couponQuote),
+          },
         });
 
         const baseUrl = `${req.protocol}://${req.get("host")}`;
@@ -2140,6 +2175,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           amount: formattedAmount,
         });
       } catch (error) {
+        if (error instanceof CouponError) {
+          return res.status(error.statusCode).json({ message: error.message });
+        }
         console.error("Error initiating payment:", error);
         res.status(500).json({ message: "Failed to initiate payment" });
       }
@@ -2155,6 +2193,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           tempExamId,
           userPhone,
           sellerCode,
+          couponCode,
           includesPhysicalCopy = false,
           selectedAddressId = null,
         } = req.body || {};
@@ -2167,6 +2206,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           tempExamId,
           userPhone,
           sellerCode,
+          couponCode,
           includesPhysicalCopy,
           selectedAddressId,
         });
@@ -2182,6 +2222,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       } catch (error: any) {
         if (error instanceof PendingExamAccessError) {
+          return res.status(error.statusCode).json({ message: error.message });
+        }
+        if (error instanceof CouponError) {
           return res.status(error.statusCode).json({ message: error.message });
         }
         console.error("Error creating Cashfree order:", error);
@@ -2314,6 +2357,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(200).json({ ok: true, status: "pending" });
       }
 
+      const verifiedProviderAmount =
+        payload?.data?.order?.order_amount ??
+        payload?.data?.order?.orderAmount ??
+        payload?.data?.payment?.payment_amount ??
+        payload?.data?.payment?.paymentAmount;
+      if (verifiedProviderAmount == null || !amountsMatch(payment.amount, verifiedProviderAmount)) {
+        await storage.updatePayment(payment.id, {
+          status: "failed",
+          cashfreePaymentId: cashfreePaymentId || payment.cashfreePaymentId,
+          gatewayStatusRaw: {
+            ...meta,
+            providerWebhook: payload,
+            reason: "verified_gateway_amount_mismatch",
+          },
+        } as any);
+        await audit({
+          action: "payment.amount_mismatch",
+          status: "failure",
+          actorRole: "system",
+          userId: payment.userId || undefined,
+          resourceType: "payment",
+          resourceId: payment.id,
+          req,
+          metadata: { expected: payment.amount, received: verifiedProviderAmount ?? null, orderId },
+        });
+        return res.status(200).json({ ok: true, status: "failed_amount_verification" });
+      }
+
       // Idempotency for duplicate success webhooks.
       if (payment.status === "completed" && payment.certificateId) {
         if (isCredentialActivationPayment(payment) && payment.courseId) {
@@ -2442,6 +2513,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           target: [courseEntitlements.userId, courseEntitlements.courseId],
           set: { paymentId: payment.id, source: 'purchase', status: 'active', expiresAt: null },
         });
+        const purchaser = await storage.getUser(userId);
+        if (purchaser) {
+          await recordCouponRedemption({ payment, userEmail: purchaser.email });
+        }
         await storage.updatePayment(payment.id, {
           status: 'completed',
           paymentMethod: 'cashfree',
@@ -2518,6 +2593,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         cashfreePaymentId: cashfreePaymentId || null,
         gatewayStatusRaw: payload,
       } as any);
+
+      await recordCouponRedemption({
+        payment,
+        userEmail: examData.userEmail,
+      });
 
       await ensureRevenueSplits({
         paymentId: payment.id,
@@ -2607,6 +2687,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
             `${req.protocol}://${req.get(
               "host"
             )}/payment-failed?error=payment_not_found&courseId=${courseId}`
+          );
+        }
+
+        if (
+          responseData.txnid !== payment.transactionId ||
+          !amountsMatch(payment.amount, responseData.amount)
+        ) {
+          await storage.updatePayment(payment.id, {
+            status: "failed",
+            gatewayStatusRaw: {
+              ...activationMetadata(payment.gatewayStatusRaw),
+              reason: "verified_callback_did_not_match_payment_reservation",
+              providerStatus: responseData.status,
+              providerTransactionId: responseData.txnid,
+            },
+          } as any);
+          await audit({
+            action: "payment.callback_mismatch",
+            status: "failure",
+            actorRole: "system",
+            userId: payment.userId || undefined,
+            resourceType: "payment",
+            resourceId: payment.id,
+            req,
+            metadata: { expectedTransactionId: payment.transactionId, receivedTransactionId: responseData.txnid },
+          });
+          return res.redirect(
+            `${req.protocol}://${req.get("host")}/payment-failed?error=payment_verification_failed`,
           );
         }
 
@@ -2822,6 +2930,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           certificateId: certificate.id,
           razorpayPaymentId: responseData.mihpayid,
           razorpayOrderId: responseData.txnid,
+        });
+
+        await recordCouponRedemption({
+          payment,
+          userEmail: examData.userEmail,
         });
 
         await ensureRevenueSplits({

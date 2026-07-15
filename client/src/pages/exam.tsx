@@ -77,6 +77,7 @@ export default function Exam() {
   const [tabSwitches, setTabSwitches] = useState(0);
   const [isWindowFocused, setIsWindowFocused] = useState(true);
   const [isOnline, setIsOnline] = useState(() => typeof navigator === 'undefined' ? true : navigator.onLine);
+  const [fullscreenActive, setFullscreenActive] = useState(false);
   const [userInfo, setUserInfo] = useState({
     name: user?.name || '',
     email: user?.email || ''
@@ -237,11 +238,30 @@ export default function Exam() {
       }
     };
 
+    const handlePasteOrCopy = (event: ClipboardEvent) => {
+      event.preventDefault();
+      setTabSwitches((previous) => previous + 1);
+      toast({ title: "Assessment integrity notice", description: "Copy and paste activity is disabled and was recorded for this attempt." });
+    };
+
+    const handleFullscreenChange = () => {
+      const active = Boolean(document.fullscreenElement);
+      setFullscreenActive(active);
+      if (!active) {
+        setTabSwitches((previous) => previous + 1);
+        toast({ title: "Fullscreen exited", description: "The exit was recorded. Return to fullscreen before continuing." });
+      }
+    };
+
     document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('blur', handleBlur);
     window.addEventListener('focus', handleFocus);
     document.addEventListener('contextmenu', handleContextMenu);
     document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('paste', handlePasteOrCopy);
+    document.addEventListener('copy', handlePasteOrCopy);
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    setFullscreenActive(Boolean(document.fullscreenElement));
 
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
@@ -249,6 +269,9 @@ export default function Exam() {
       window.removeEventListener('focus', handleFocus);
       document.removeEventListener('contextmenu', handleContextMenu);
       document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('paste', handlePasteOrCopy);
+      document.removeEventListener('copy', handlePasteOrCopy);
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
     };
   }, [examStarted, isWindowFocused, toast]);
 
@@ -263,6 +286,7 @@ export default function Exam() {
       // User will see results and then be prompted to pay regardless of pass/fail
       if (result.tempExamId) {
         if (course?.id) localStorage.removeItem(`octamy.examDraft.${course.id}`);
+        if (document.fullscreenElement) await document.exitFullscreen().catch(() => undefined);
         setLocation(`/exam-results-temp/${result.tempExamId}`);
       } else {
         // Fallback for any edge cases
@@ -301,7 +325,23 @@ export default function Exam() {
     },
   });
 
-  const startExam = () => {
+  const enterFullscreen = async () => {
+    if (document.fullscreenElement) return true;
+    if (!document.documentElement.requestFullscreen) {
+      toast({ title: "Fullscreen unavailable", description: "This browser cannot enter fullscreen. Other browser-integrity events will still be recorded." });
+      return false;
+    }
+    try {
+      await document.documentElement.requestFullscreen();
+      setFullscreenActive(true);
+      return true;
+    } catch {
+      toast({ title: "Fullscreen permission needed", description: "Allow fullscreen for the strongest proctored assessment experience." });
+      return false;
+    }
+  };
+
+  const startExam = async () => {
     if (!userInfo.name || !userInfo.email) {
       toast({
         title: "Required Information",
@@ -324,11 +364,12 @@ export default function Exam() {
     // Invalidate queries to force fresh fetch
     queryClient.invalidateQueries({ queryKey: [`/api/courses/${course?.id}/questions`] });
     
+    await enterFullscreen();
     setExamStarted(true);
     setExamStartTime(Date.now());
   };
 
-  const resumeSavedExam = () => {
+  const resumeSavedExam = async () => {
     if (!savedDraft || savedDraft.expiresAt <= Date.now()) return;
     setRestoredQuestionsData({ questions: savedDraft.questions, sessionId: savedDraft.sessionId });
     setSessionId(savedDraft.sessionId);
@@ -337,6 +378,7 @@ export default function Exam() {
     setTabSwitches(savedDraft.tabSwitches || 0);
     setUserInfo(savedDraft.userInfo);
     setExamStartTime(savedDraft.examStartTime);
+    await enterFullscreen();
     setExamStarted(true);
   };
 
@@ -475,7 +517,6 @@ export default function Exam() {
     return (
       <div className="min-h-screen bg-cream-deep">
         <SEO title={`${course.title} assessment unavailable`} description={metaDescription} path={canonicalPath} noIndex />
-        <Header />
         <main className="mx-auto max-w-xl px-4 py-16 text-center sm:px-6">
           <Card className="border-amber-200 shadow-sm">
             <CardContent className="py-12">
@@ -497,7 +538,6 @@ export default function Exam() {
     return (
     <div className="min-h-screen bg-cream-deep">
       <SEO title={`${course.title} assessment session`} description={metaDescription} path={canonicalPath} noIndex />
-      <Header />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <Card className="border-cream-deep shadow-sm">
             <CardContent className="text-center py-12">
@@ -514,8 +554,8 @@ export default function Exam() {
   return (
     <div className="min-h-screen bg-cream-soft">
       <SEO title={`${course.title} assessment session`} description={metaDescription} path={canonicalPath} noIndex />
-      <Header />
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="mx-auto max-w-5xl px-4 py-5 sm:px-6 sm:py-8 lg:px-8">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-950 px-4 py-3 text-white shadow-sm"><div><p className="text-xs font-black uppercase tracking-[0.14em] text-violet-300">Proctored assessment</p><p className="mt-0.5 text-sm text-slate-300">Navigation, focus, fullscreen exits, and clipboard actions are monitored.</p></div>{fullscreenActive ? <span className="inline-flex items-center gap-2 rounded-full bg-emerald-400/15 px-3 py-1.5 text-xs font-bold text-emerald-200"><ShieldCheck className="h-4 w-4" />Fullscreen active</span> : <Button type="button" size="sm" variant="secondary" onClick={() => void enterFullscreen()}>Return to fullscreen</Button>}</div>
         <Card>
           <CardHeader>
             <div className="flex flex-col md:flex-row justify-between items-center mb-4">

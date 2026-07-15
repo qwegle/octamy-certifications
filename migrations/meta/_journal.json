@@ -141,6 +141,20 @@
       "when": 1784125000000,
       "tag": "0019_voucher_redemption_idempotency",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1784129348000,
+      "tag": "0020_workspace_benefit_ownership",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1784131754000,
+      "tag": "0021_voucher_funding_sources",
+      "breakpoints": true
     }
   ]
 }

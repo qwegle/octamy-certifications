@@ -30,14 +30,13 @@ const PUBLIC_LINKS = [
   { href: "/creator", label: "For creators" },
   { href: "/institute", label: "For institutes" },
   { href: "/for-recruiters", label: "For recruiters" },
-  { href: "/verify", label: "Verify" },
 ] as const;
 
 const APP_ROUTE_PREFIXES = [
   "/login", "/register", "/forgot-password", "/reset-password", "/dashboard",
   "/progress", "/preferences", "/profile", "/creator/dashboard", "/creator/courses",
-  "/creator/payouts", "/creator/earnings", "/institute/dashboard", "/institute/courses", "/institute/students",
-  "/institute/cohorts", "/institute/exams", "/institute/reports", "/institute/team", "/institute/vouchers", "/institute/media", "/institute/settings",
+  "/creator/payouts", "/creator/earnings", "/creator/vouchers", "/creator/coupons", "/institute/dashboard", "/institute/courses", "/institute/students",
+  "/institute/cohorts", "/institute/exams", "/institute/reports", "/institute/team", "/institute/vouchers", "/institute/coupons", "/institute/media", "/institute/settings",
   "/recruiter/dashboard", "/recruiter/analytics", "/recruiter/search", "/recruiter/wallet",
   "/recruiter/profile", "/recruiter/settings", "/recruiter/saved-searches", "/admin",
   "/qwegle", "/enhanced-admin", "/seller-dashboard", "/partner-dashboard", "/question-banks",

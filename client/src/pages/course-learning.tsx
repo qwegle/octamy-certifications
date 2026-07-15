@@ -11,6 +11,7 @@ import {
   LockKeyhole,
   PlayCircle,
   ShieldCheck,
+  TicketPercent,
 } from "lucide-react";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
@@ -18,6 +19,7 @@ import { SEO } from "@/components/seo";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
@@ -44,6 +46,7 @@ type Access = {
   lessonCount: number;
   previewCount: number;
 };
+type CouponQuote = { valid: true; codeHint: string; discountAmount: string; finalAmount: string };
 
 export default function CourseLearning() {
   const { slug } = useParams<{ slug: string }>();
@@ -55,6 +58,9 @@ export default function CourseLearning() {
   const [streamError, setStreamError] = useState<string | null>(null);
   const [streamLoading, setStreamLoading] = useState(false);
   const [streamRetry, setStreamRetry] = useState(0);
+  const [couponCode, setCouponCode] = useState("");
+  const [couponQuote, setCouponQuote] = useState<CouponQuote | null>(null);
+  const [couponPending, setCouponPending] = useState(false);
 
   const { data: course, isLoading: courseLoading } = useQuery<Course & { category: Category }>({
     queryKey: ["/api/courses/slug", slug],
@@ -119,7 +125,10 @@ export default function CourseLearning() {
     mutationFn: async () => {
       if (!user) throw new Error("Sign in before purchasing course access");
       const sellerCode = localStorage.getItem("referralCode") || "";
-      return (await apiRequest("POST", `/api/courses/${course!.id}/access-checkout`, { sellerCode })).json();
+      return (await apiRequest("POST", `/api/courses/${course!.id}/access-checkout`, {
+        sellerCode,
+        couponCode: couponQuote ? couponCode.trim() : undefined,
+      })).json();
     },
     onSuccess: async (data) => {
       if (data.paymentSessionId) {
@@ -144,6 +153,22 @@ export default function CourseLearning() {
     },
     onError: (error: Error) => toast({ title: "Checkout could not be started", description: error.message, variant: "destructive" }),
   });
+
+  const applyCoupon = async () => {
+    if (!course || !couponCode.trim()) return;
+    setCouponPending(true);
+    try {
+      const response = await apiRequest("POST", "/api/coupons/quote", { code: couponCode, courseId: course.id });
+      const quote = await response.json() as CouponQuote;
+      setCouponQuote(quote);
+      toast({ title: "Coupon applied", description: `Your course price is ₹${Number(quote.finalAmount).toLocaleString("en-IN")}.` });
+    } catch (error) {
+      setCouponQuote(null);
+      toast({ title: "Coupon could not be applied", description: error instanceof Error ? error.message : "Review the code and try again." });
+    } finally {
+      setCouponPending(false);
+    }
+  };
 
   const unlock = () => {
     if (!user) { setLocation(`/login?next=${encodeURIComponent(`/learn/${slug}`)}`); return; }
@@ -192,7 +217,14 @@ export default function CourseLearning() {
             <div className="mt-2 max-h-[65vh] space-y-4 overflow-y-auto pr-1">
               {sections.map((section) => <div key={section.id}><p className="px-2 text-xs font-black uppercase tracking-wider text-slate-400">{section.title}</p><div className="mt-1 space-y-1">{section.lessons.map((lesson) => <button key={lesson.id} onClick={() => setSelectedId(lesson.id)} className={`flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm transition ${selected?.id === lesson.id ? "bg-slate-950 text-white" : "hover:bg-slate-100"}`}>{lesson.locked ? <LockKeyhole className="h-4 w-4 shrink-0" /> : lesson.kind === "video" ? <PlayCircle className="h-4 w-4 shrink-0" /> : <FileText className="h-4 w-4 shrink-0" />}<span className="min-w-0 flex-1 truncate">{lesson.title}</span>{lesson.isPreview && <span className="text-[10px] font-bold uppercase text-emerald-600">Preview</span>}</button>)}</div></div>)}
             </div>
-            {!access?.hasAccess && access?.productType !== "assessment" && <Button onClick={unlock} disabled={freeEnrol.isPending || paidCheckout.isPending} className="mt-5 w-full bg-violet-700 text-white hover:bg-violet-800">{access?.requiresPurchase ? `Buy course · ₹${Number(access.contentPrice).toLocaleString("en-IN")}` : "Enrol free"}</Button>}
+            {!access?.hasAccess && access?.requiresPurchase && (
+              <div className="mt-5 rounded-2xl bg-slate-50 p-3">
+                <label htmlFor="course-coupon" className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-slate-500"><TicketPercent className="h-4 w-4 text-violet-600" />Coupon</label>
+                <div className="mt-2 flex gap-2"><Input id="course-coupon" value={couponCode} onChange={(event) => { setCouponCode(event.target.value.toUpperCase()); setCouponQuote(null); }} placeholder="Enter code" className="h-9 bg-white uppercase" /><Button type="button" variant="outline" size="sm" onClick={applyCoupon} disabled={couponPending || !couponCode.trim()}>{couponPending ? "…" : "Apply"}</Button></div>
+                {couponQuote && <p className="mt-2 text-xs font-bold text-emerald-700">Applied {couponQuote.codeHint} · save ₹{Number(couponQuote.discountAmount).toLocaleString("en-IN")}</p>}
+              </div>
+            )}
+            {!access?.hasAccess && access?.productType !== "assessment" && <Button onClick={unlock} disabled={freeEnrol.isPending || paidCheckout.isPending} className="mt-5 w-full bg-violet-700 text-white hover:bg-violet-800">{access?.requiresPurchase ? `Buy course · ₹${Number(couponQuote?.finalAmount ?? access.contentPrice).toLocaleString("en-IN")}` : "Enrol free"}</Button>}
           </aside>
         </section>
       </main>

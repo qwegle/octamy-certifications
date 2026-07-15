@@ -1242,7 +1242,8 @@ export const subscriptionBenefitUsages = pgTable("subscription_benefit_usages", 
 // institute workflow. This prevents a database read from exposing live codes.
 export const certificationVoucherBatches = pgTable("certification_voucher_batches", {
   id: serial("id").primaryKey(),
-  instituteId: integer("institute_id").references(() => institutes.id, { onDelete: "restrict" }).notNull(),
+  instituteId: integer("institute_id").references(() => institutes.id, { onDelete: "restrict" }),
+  creatorId: integer("creator_id").references(() => creators.id, { onDelete: "restrict" }),
   courseId: integer("course_id").references(() => courses.id, { onDelete: "restrict" }),
   name: text("name").notNull(),
   quantity: integer("quantity").notNull(),
@@ -1253,7 +1254,29 @@ export const certificationVoucherBatches = pgTable("certification_voucher_batche
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 }, (t) => ({
   byInstitute: index("certification_voucher_batches_institute_idx").on(t.instituteId, t.createdAt),
+  byCreator: index("certification_voucher_batches_creator_idx").on(t.creatorId, t.createdAt),
   byCourse: index("certification_voucher_batches_course_idx").on(t.courseId, t.status),
+}));
+
+// Creators and institutes request sponsored voucher allocations; Octamy
+// reviews and issues the actual bearer codes. This keeps free in-house
+// credential issuance governed while giving both workspaces a real workflow.
+export const voucherProgramRequests = pgTable("voucher_program_requests", {
+  id: serial("id").primaryKey(),
+  requesterType: text("requester_type").notNull(), // creator | institute
+  requesterId: integer("requester_id").notNull(),
+  courseId: integer("course_id").references(() => courses.id, { onDelete: "restrict" }),
+  quantity: integer("quantity").notNull(),
+  purpose: text("purpose").notNull(),
+  status: text("status").default("pending").notNull(), // pending | approved | rejected | cancelled
+  reviewNote: text("review_note"),
+  reviewedBy: integer("reviewed_by").references(() => users.id, { onDelete: "set null" }),
+  reviewedAt: timestamp("reviewed_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (t) => ({
+  byRequester: index("voucher_program_requests_requester_idx").on(t.requesterType, t.requesterId, t.createdAt),
+  byStatus: index("voucher_program_requests_status_idx").on(t.status, t.createdAt),
 }));
 
 export const certificationVouchers = pgTable("certification_vouchers", {
@@ -1282,6 +1305,8 @@ export const discountCoupons = pgTable("discount_coupons", {
   codeHash: varchar("code_hash", { length: 64 }).notNull().unique(),
   codeHint: text("code_hint").notNull(),
   name: text("name").notNull(),
+  ownerType: text("owner_type").default("admin").notNull(), // admin | creator | institute
+  ownerId: integer("owner_id"),
   courseId: integer("course_id").references(() => courses.id, { onDelete: "restrict" }),
   discountType: text("discount_type").notNull(), // percent | fixed
   discountValue: decimal("discount_value", { precision: 10, scale: 2 }).notNull(),
@@ -1295,6 +1320,7 @@ export const discountCoupons = pgTable("discount_coupons", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 }, (t) => ({
+  byOwner: index("discount_coupons_owner_idx").on(t.ownerType, t.ownerId, t.createdAt),
   byCourseStatus: index("discount_coupons_course_status_idx").on(t.courseId, t.status),
   byValidity: index("discount_coupons_validity_idx").on(t.status, t.validFrom, t.expiresAt),
 }));

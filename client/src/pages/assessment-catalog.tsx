@@ -38,13 +38,12 @@ const levelLabels: Record<string, string> = {
   expert: "Expert",
 };
 
-const featuredSlugs = ["ssc", "neet-ug", "jee", "banking-recruitment", "railway-recruitment", "mathematics", "physics", "chemistry"];
 const familyAccents: Record<string, string> = {
   ssc: "bg-rose-50 text-rose-800 border-rose-100",
-  "neet-ug": "bg-fuchsia-50 text-fuchsia-800 border-fuchsia-100",
+  neet: "bg-fuchsia-50 text-fuchsia-800 border-fuchsia-100",
   jee: "bg-indigo-50 text-indigo-800 border-indigo-100",
-  "banking-recruitment": "bg-emerald-50 text-emerald-800 border-emerald-100",
-  "railway-recruitment": "bg-sky-50 text-sky-800 border-sky-100",
+  "banking-exams": "bg-emerald-50 text-emerald-800 border-emerald-100",
+  "railway-exams": "bg-sky-50 text-sky-800 border-sky-100",
   mathematics: "bg-violet-50 text-violet-800 border-violet-100",
   physics: "bg-blue-50 text-blue-800 border-blue-100",
   chemistry: "bg-pink-50 text-pink-800 border-pink-100",
@@ -80,9 +79,10 @@ export function AssessmentCatalog({ mode }: { mode: CatalogMode }) {
   const categoryFacets = data?.facets.categories ?? [];
   const rootCategories = categoryFacets.filter((item) => item.parentId == null);
   const orphanCategories = categoryFacets.filter((item) => item.parentId != null && !categoryFacets.some((candidate) => candidate.id === item.parentId));
-  const featuredFamilies = featuredSlugs
-    .map((slug) => categoryFacets.find((item) => item.slug === slug))
-    .filter((item): item is CatalogResponse["facets"]["categories"][number] => Boolean(item));
+  const schoolRoot = categoryFacets.find((item) => item.slug === "school-education");
+  const competitiveRoot = categoryFacets.find((item) => item.slug === "competitive-exams");
+  const schoolSubjects = categoryFacets.filter((item) => item.parentId === schoolRoot?.id && item.kind === "subject");
+  const competitiveFamilies = categoryFacets.filter((item) => item.parentId === competitiveRoot?.id && item.kind === "exam_family");
 
   return (
     <div className="min-h-screen bg-[#f7f5f0] text-slate-950">
@@ -130,11 +130,12 @@ export function AssessmentCatalog({ mode }: { mode: CatalogMode }) {
           </div>
         </section>
 
-        {octamy && featuredFamilies.length > 0 && (
+        {octamy && (schoolSubjects.length > 0 || competitiveFamilies.length > 0) && (
           <section className="mx-auto max-w-7xl px-5 pb-8" aria-labelledby="certification-paths-heading">
-            <div className="flex items-end justify-between gap-4"><div><p className="text-xs font-black uppercase tracking-[0.14em] text-violet-700">Browse by path</p><h2 id="certification-paths-heading" className="mt-2 text-2xl font-black tracking-tight sm:text-3xl">Popular certification paths</h2></div><Link href="#certification-results" className="hidden text-sm font-bold text-slate-600 hover:text-violet-700 sm:inline-flex">View all results <ArrowRight className="ml-1 h-4 w-4" /></Link></div>
-            <div className="mt-5 flex snap-x gap-3 overflow-x-auto pb-3">
-              {featuredFamilies.map((family) => <Link key={family.id} href={publicAssessmentCategoryPath(family.slug)} className={`min-w-[180px] snap-start rounded-2xl border p-4 transition hover:-translate-y-0.5 hover:shadow-lg ${familyAccents[family.slug] || "border-slate-200 bg-white text-slate-800"}`}><div className="flex items-center justify-between"><GraduationCap className="h-5 w-5" /><ChevronRight className="h-4 w-4" /></div><p className="mt-5 text-sm font-black">{family.name}</p><p className="mt-1 text-xs opacity-70">View certifications</p></Link>)}
+            <div className="flex items-end justify-between gap-4"><div><p className="text-xs font-black uppercase tracking-[0.14em] text-violet-700">Choose the right learner track</p><h2 id="certification-paths-heading" className="mt-2 text-2xl font-black tracking-tight sm:text-3xl">School and competitive exams stay separate.</h2><p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">School content is organised by non-overlapping grade bands and subject. Recruitment and entrance preparation is organised by examination family and stage.</p></div><Link href="#certification-results" className="hidden text-sm font-bold text-slate-600 hover:text-violet-700 sm:inline-flex">View results <ArrowRight className="ml-1 h-4 w-4" /></Link></div>
+            <div className="mt-6 grid gap-5 lg:grid-cols-2">
+              <div className="min-w-0 rounded-3xl border border-sky-100 bg-sky-50/70 p-5"><div className="flex items-center justify-between"><div><p className="text-xs font-black uppercase tracking-wide text-sky-800">School learners</p><h3 className="mt-1 text-xl font-black">Browse by grade, then subject</h3></div><GraduationCap className="h-6 w-6 text-sky-700" /></div><div className="mt-4 flex flex-wrap gap-2">{(data?.facets.audienceBands || []).filter((band) => band.code.startsWith("grade_")).map((band) => <Button key={band.id} type="button" size="sm" variant={audience === band.code ? "default" : "outline"} className="rounded-full bg-white" onClick={() => updateFilters({ audience: band.code, category: "school-education", page: 1 })}>{band.label}</Button>)}</div><div className="mt-4 flex snap-x gap-2 overflow-x-auto pb-1">{schoolSubjects.map((item) => <Link key={item.id} href={publicAssessmentCategoryPath(item.slug)} className="min-w-[145px] rounded-2xl border border-white bg-white p-3 text-sm font-bold text-slate-800 shadow-sm hover:text-violet-700">{item.name}<ChevronRight className="mt-3 h-4 w-4" /></Link>)}</div></div>
+              <div className="min-w-0 rounded-3xl border border-violet-100 bg-violet-50/70 p-5"><div className="flex items-center justify-between"><div><p className="text-xs font-black uppercase tracking-wide text-violet-800">Aspirants</p><h3 className="mt-1 text-xl font-black">Browse by exam family</h3></div><Award className="h-6 w-6 text-violet-700" /></div><div className="mt-4 flex snap-x gap-2 overflow-x-auto pb-1">{competitiveFamilies.map((family) => <Link key={family.id} href={publicAssessmentCategoryPath(family.slug)} className={`min-w-[155px] rounded-2xl border p-3 text-sm font-black shadow-sm hover:-translate-y-0.5 ${familyAccents[family.slug] || "border-white bg-white text-slate-800"}`}>{family.name}<span className="mt-3 flex items-center text-xs font-semibold opacity-70">View stages <ChevronRight className="ml-1 h-3.5 w-3.5" /></span></Link>)}</div></div>
             </div>
           </section>
         )}

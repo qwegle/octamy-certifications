@@ -95,6 +95,7 @@ import {
 } from '../lib/exam-instance-policy';
 import { safeCsvCell } from '../lib/csv-safety';
 import { withSessionAdvisoryLock } from '../lib/pg-advisory-lock';
+import { CouponError, couponPaymentMetadata, resolveCouponQuote } from '../lib/coupons';
 
 const LOCAL_MEDIA_DIR = path.join(process.cwd(), 'uploads', 'media');
 const LESSON_SESSION_TTL_MS = 4 * 60 * 60 * 1000;
@@ -436,8 +437,8 @@ router.post('/courses/:id/access-checkout', authenticateToken, async (req: Reque
       return res.status(404).json({ message: 'Course not found' });
     }
     if (course.productType === 'assessment') return res.status(400).json({ message: 'This product does not sell course-content access' });
-    const amount = Number(course.contentPrice || 0);
-    if (amount <= 0) return res.status(400).json({ message: 'Use free enrolment for this course' });
+    const listAmount = Number(course.contentPrice || 0);
+    if (listAmount <= 0) return res.status(400).json({ message: 'Use free enrolment for this course' });
     const [existing] = await db.select({ id: courseEntitlements.id }).from(courseEntitlements).where(and(
       eq(courseEntitlements.userId, req.user!.userId),
       eq(courseEntitlements.courseId, courseId),
@@ -447,6 +448,11 @@ router.post('/courses/:id/access-checkout', authenticateToken, async (req: Reque
 
     const user = await storage.getUser(req.user!.userId);
     if (!user) return res.status(401).json({ message: 'User account not found' });
+    const couponCode = typeof req.body?.couponCode === 'string' ? req.body.couponCode.trim() : '';
+    const couponQuote = couponCode
+      ? await resolveCouponQuote({ code: couponCode, courseId, userId: user.id, userEmail: user.email })
+      : null;
+    const amount = couponQuote ? Number(couponQuote.finalAmount) : listAmount;
     const orderId = `COURSE_${req.user!.userId}_${courseId}_${crypto.randomBytes(6).toString('hex')}`;
     const sellerCode = typeof req.body?.sellerCode === 'string' ? req.body.sellerCode.trim().slice(0, 100) : '';
     const payment = await storage.createPayment({
@@ -462,7 +468,7 @@ router.post('/courses/:id/access-checkout', authenticateToken, async (req: Reque
       currency: 'INR',
       status: 'pending',
       cashfreeOrderId: orderId,
-      gatewayStatusRaw: { kind: 'course_access', courseId, userId: user.id, sellerCode },
+      gatewayStatusRaw: { kind: 'course_access', courseId, userId: user.id, sellerCode, ...couponPaymentMetadata(couponQuote) },
     } as any);
     const baseUrl = `${req.protocol}://${req.get('host')}`;
     const order = await createCashfreeOrder({
@@ -478,10 +484,11 @@ router.post('/courses/:id/access-checkout', authenticateToken, async (req: Reque
     });
     await storage.updatePayment(payment.id, {
       cashfreeOrderId: order.orderId,
-      gatewayStatusRaw: { ...(order.raw as any), kind: 'course_access', courseId, userId: user.id, sellerCode },
+      gatewayStatusRaw: { kind: 'course_access', courseId, userId: user.id, sellerCode, ...couponPaymentMetadata(couponQuote), providerOrder: order.raw },
     } as any);
-    res.json({ success: true, gateway: 'cashfree', orderId: order.orderId, paymentSessionId: order.paymentSessionId, paymentLink: order.paymentLink, amount: amount.toFixed(2) });
+    res.json({ success: true, gateway: 'cashfree', orderId: order.orderId, paymentSessionId: order.paymentSessionId, paymentLink: order.paymentLink, amount: amount.toFixed(2), discountAmount: couponQuote?.discountAmount || '0.00' });
   } catch (err: any) {
+    if (err instanceof CouponError) return res.status(err.statusCode).json({ message: err.message });
     logger.error('course.access.checkout.error', { err });
     res.status(500).json({ message: err?.message || 'Course checkout could not be started' });
   }

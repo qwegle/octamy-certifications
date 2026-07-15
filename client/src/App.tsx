@@ -36,6 +36,7 @@ const InstituteTeam = lazy(() => import("@/pages/institute-team"));
 const InstitutePayouts = lazy(() => import("@/pages/institute-payouts"));
 const InstituteSettings = lazy(() => import("@/pages/institute-settings"));
 const InstituteVouchers = lazy(() => import("@/pages/institute-vouchers"));
+const WorkspaceCoupons = lazy(() => import("@/pages/workspace-coupons"));
 const CreatorCurriculum = lazy(() => import("@/pages/creator-curriculum"));
 const CreatorEarnings = lazy(() => import("@/pages/creator-earnings"));
 const MediaLibraryPage = lazy(() => import("@/pages/media-library"));
@@ -189,6 +190,8 @@ function Router() {
       <Route path="/intern-payment" component={InternShipPayment} />
       <Route path="/qwegle/login" component={AdminLogin} />
       <Route path="/admin/login" component={AdminLogin} />
+      <Route path="/qwegle/benefits" component={AdminDashboard} />
+      <Route path="/admin/benefits" component={AdminDashboard} />
       <Route path="/qwegle/dashboard" component={AdminDashboard} />
       <Route path="/admin/dashboard" component={AdminDashboard} />
       <Route path="/admin" component={AdminDashboard} />
@@ -210,6 +213,8 @@ function Router() {
       <Route path="/creator/courses/new" component={CreatorCourseNew} />
       <Route path="/creator/media">{() => <MediaLibraryPage role="creator" />}</Route>
       <Route path="/creator/payouts" component={CreatorPayouts} />
+      <Route path="/creator/vouchers">{() => <InstituteVouchers role="creator" />}</Route>
+      <Route path="/creator/coupons">{() => <WorkspaceCoupons role="creator" />}</Route>
       <Route path="/x/:code" component={ExamShare} />
       <Route path="/institute/dashboard" component={InstituteDashboard} />
       <Route path="/institute/courses" component={InstituteCourses} />
@@ -225,7 +230,8 @@ function Router() {
       <Route path="/institute/team" component={InstituteTeam} />
       <Route path="/institute/payouts" component={InstitutePayouts} />
       <Route path="/institute/settings" component={InstituteSettings} />
-      <Route path="/institute/vouchers" component={InstituteVouchers} />
+      <Route path="/institute/vouchers">{() => <InstituteVouchers role="institute" />}</Route>
+      <Route path="/institute/coupons">{() => <WorkspaceCoupons role="institute" />}</Route>
       <Route path="/institute/media">{() => <MediaLibraryPage role="institute" />}</Route>
       <Route path="/creator/courses/:id/curriculum" component={CreatorCurriculum} />
       <Route path="/creator/earnings" component={CreatorEarnings} />

@@ -8,7 +8,6 @@ import { CheckCircle, XCircle, Award, Clock, Target, Loader2, ShieldCheck, Mail,
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/lib/auth.tsx";
-import Header from "@/components/header";
 
 type ReviewItem = {
   questionId: number;
@@ -194,8 +193,7 @@ export default function TempExamResults() {
 
   return (
     <div className="min-h-screen bg-[#f5f2ec]">
-      <Header />
-      <div className="container mx-auto px-4 py-10">
+      <div className="container mx-auto px-4 py-8 sm:py-10">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="text-center mb-8">

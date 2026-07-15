@@ -1855,7 +1855,7 @@ interface WithdrawalRequest {
 }
 
 export default function AdminDashboard() {
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("overview");
   const [selectedCourse, setSelectedCourse] = useState<AdminCourse | null>(null);
@@ -1884,6 +1884,10 @@ export default function AdminDashboard() {
       return;
     }
   }, [setLocation]);
+
+  useEffect(() => {
+    if (location === "/qwegle/benefits" || location === "/admin/benefits") setActiveTab("benefits");
+  }, [location]);
 
   // State for modals and pagination
   const [isCreatingCategory, setIsCreatingCategory] = useState(false);
