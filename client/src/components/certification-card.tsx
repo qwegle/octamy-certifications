@@ -64,9 +64,9 @@ export function CertificationCard({ item, categoryHref, variant = "certification
         {item.thumbnailUrl && <img src={item.thumbnailUrl} alt="" className="absolute inset-0 h-full w-full object-cover opacity-25 mix-blend-luminosity transition duration-500 group-hover:scale-105" />}
         <div aria-hidden className="absolute -right-10 -top-12 h-36 w-36 rounded-full border-[24px] border-white/10" />
         <div className="relative flex h-full flex-col justify-between">
-          <div className="flex items-start justify-between gap-3">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-black/15 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.13em] backdrop-blur-sm"><Award className="h-3 w-3" />{practice ? "Skill practice" : "Octamy certified"}</span>
-            {practice ? <span className="rounded-full border border-amber-200/70 bg-gradient-to-r from-amber-100 to-white px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-violet-950 shadow-sm">Practice Pass</span> : item.subscriptionEligible && <span className="rounded-full bg-white px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-slate-950">Sponsored</span>}
+          <div className="flex flex-nowrap items-start justify-between gap-2">
+            <span className="inline-flex shrink-0 whitespace-nowrap items-center gap-1.5 rounded-full border border-white/20 bg-black/15 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.1em] backdrop-blur-sm"><Award className="h-3 w-3 shrink-0" />{practice ? "Skill practice" : "Octamy certified"}</span>
+            {practice ? <span className="shrink-0 whitespace-nowrap rounded-full border border-amber-200/70 bg-gradient-to-r from-amber-100 to-white px-2.5 py-1 text-[10px] font-black uppercase tracking-normal text-violet-950 shadow-sm">Practice Pass</span> : item.subscriptionEligible && <span className="shrink-0 whitespace-nowrap rounded-full bg-white px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-slate-950">Sponsored</span>}
           </div>
           <div>
             <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/70">{item.category.name}</p>
