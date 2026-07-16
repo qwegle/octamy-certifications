@@ -405,6 +405,12 @@ export function registerRecruiterRoutes(app: any) {
       if (!normalizedAccessType || !Number.isInteger(candidateId) || candidateId <= 0) {
         return res.status(400).json({ message: 'Invalid profile access request' });
       }
+      if (normalizedAccessType === 'interview_access') {
+        return res.status(410).json({
+          message: 'Legacy interview evidence is retired. No credits were charged. Verified Interview Studio sharing is not released yet.',
+          code: 'VERIFIED_INTERVIEW_EVIDENCE_NOT_RELEASED',
+        });
+      }
 
       const accessResult = await storage.processProfileAccess(recruiterId, candidateId, normalizedAccessType);
       
@@ -774,54 +780,15 @@ export function registerRecruiterRoutes(app: any) {
     }
   });
 
-  // Access Interview Video with Credit Deduction
-  app.post('/recruiter/access-interview-video', authenticateRecruiterToken, async (req: AuthenticatedRecruiterRequest, res: Response) => {
-    try {
-      const { interviewId, candidateId } = req.body;
-      const recruiterId = req.recruiter?.recruiterId;
-
-      if (!recruiterId) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
-
-      const recruiter = await storage.getRecruiterById(recruiterId);
-      if (!recruiter) {
-        return res.status(404).json({ message: "Recruiter not found" });
-      }
-      if (!recruiter.isActive) {
-        return res.status(403).json({ message: 'Recruiter workspace is inactive' });
-      }
-      if (recruiter.kycStatus !== 'approved') {
-        return res.status(403).json({ message: 'KYC verification required' });
-      }
-
-      // Get interview details
-      const interview = await storage.getInterviewById(interviewId);
-      if (!interview) {
-        return res.status(404).json({ message: "Interview not found" });
-      }
-      if (interview.userId !== Number(candidateId)) {
-        return res.status(403).json({ message: 'Interview does not belong to this candidate' });
-      }
-
-      if (!interview.videoUrl) {
-        return res.status(404).json({ message: "Video not available for this interview" });
-      }
-
-      const access = await storage.processProfileAccess(recruiterId, Number(candidateId), 'interview_access');
-
-      res.json({ 
-        videoUrl: interview.videoUrl,
-        creditsRemaining: access.remainingCredits,
-        creditsUsed: access.creditsUsed,
-        alreadyUnlocked: access.alreadyUnlocked,
-        message: access.message,
-      });
-
-    } catch (error: any) {
-      if (!(error instanceof RecruiterAccessError)) console.error("Interview video access error:", error);
-      return sendRecruiterAccessError(res, error, 'Failed to access interview video');
-    }
+  // Legacy interview recordings used permanent provider URLs and only the
+  // candidate's global profile switch as consent. They are deliberately not
+  // exposed. Interview Studio evidence will use a per-session, expiring grant
+  // and a protected playback proxy when verified mode is released.
+  app.post('/recruiter/access-interview-video', authenticateRecruiterToken, (_req: AuthenticatedRecruiterRequest, res: Response) => {
+    res.status(410).json({
+      message: 'Legacy interview recordings are no longer available. Verified Interview Studio evidence will require a live learner grant.',
+      code: 'LEGACY_INTERVIEW_EVIDENCE_RETIRED',
+    });
   });
 
   // Analytics aggregations for the recruiter analytics page.

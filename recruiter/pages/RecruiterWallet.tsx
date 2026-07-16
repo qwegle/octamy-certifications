@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import RecruiterLayout from '../components/RecruiterLayout';
+import InterviewEvidenceNotice from '../components/InterviewEvidenceNotice';
 import { useRecruiterAuth } from '../auth/RecruiterAuthProvider';
 import {
   CreditCard,
@@ -14,7 +15,7 @@ import {
   Wallet,
   Eye,
   Download,
-  FileText
+  History
 } from 'lucide-react';
 
 interface Transaction {
@@ -29,7 +30,7 @@ interface Transaction {
 interface WalletData {
   balance: string;
   transactions: Transaction[];
-  costs: { profile_view: number; cv_download: number; interview_access: number };
+  costs: { profile_view: number; cv_download: number };
   chargingModel: 'one_time_unlock';
   rules: string[];
 }
@@ -122,9 +123,15 @@ export default function RecruiterWallet() {
   const getActivityIcon = (description: string) => {
     if (description.includes('profile_view')) return <Eye className="h-4 w-4" />;
     if (description.includes('cv_download')) return <Download className="h-4 w-4" />;
-    if (description.includes('interview_access')) return <FileText className="h-4 w-4" />;
+    if (description.toLowerCase().includes('interview')) return <History className="h-4 w-4 text-slate-500" />;
     return <CreditCard className="h-4 w-4" />;
   };
+
+  const isHistoricalInterviewTransaction = (description: string) => description.toLowerCase().includes('interview');
+
+  const formatTransactionDescription = (description: string) => isHistoricalInterviewTransaction(description)
+    ? 'Historical interview prototype access (retired)'
+    : description;
 
   if (loading) {
     return (
@@ -165,7 +172,6 @@ export default function RecruiterWallet() {
                 <div className="space-y-2 text-xs text-slate-200">
                   <p className="flex justify-between gap-6"><span>Candidate profile</span><span className="font-semibold text-white">{walletData?.costs?.profile_view ?? 1} credit</span></p>
                   <p className="flex justify-between gap-6"><span>Shared CV</span><span className="font-semibold text-white">{walletData?.costs?.cv_download ?? 1} credit</span></p>
-                  <p className="flex justify-between gap-6"><span>Interview evidence</span><span className="font-semibold text-white">{walletData?.costs?.interview_access ?? 2} credits</span></p>
                 </div>
                 <p className="mt-3 border-t border-white/10 pt-3 text-xs text-slate-300">Reopen an unlocked item anytime for 0 credits.</p>
               </div>
@@ -173,11 +179,15 @@ export default function RecruiterWallet() {
           </CardContent>
         </Card>
 
+        <InterviewEvidenceNotice compact />
+
         <Card className="border-sky-200 bg-sky-50/60">
           <CardHeader className="pb-2"><CardTitle className="text-base text-sky-950">How credits are protected</CardTitle></CardHeader>
           <CardContent>
             <ul className="grid gap-2 text-sm text-sky-900 md:grid-cols-3">
-              {(walletData?.rules || []).map((rule) => <li key={rule} className="rounded-lg border border-sky-100 bg-white/80 p-3">{rule}</li>)}
+              {(walletData?.rules || [])
+                .filter((rule) => !rule.toLowerCase().includes('interview'))
+                .map((rule) => <li key={rule} className="rounded-lg border border-sky-100 bg-white/80 p-3">{rule}</li>)}
             </ul>
           </CardContent>
         </Card>
@@ -256,9 +266,14 @@ export default function RecruiterWallet() {
                     className="flex items-center justify-between p-4 border rounded-lg"
                   >
                     <div className="flex items-center space-x-3">
-                      {getTransactionIcon(transaction.type)}
+                      {transaction.type === 'spend' ? getActivityIcon(transaction.description) : getTransactionIcon(transaction.type)}
                       <div>
-                        <p className="font-medium">{transaction.description}</p>
+                        <p className="flex flex-wrap items-center gap-2 font-medium">
+                          <span>{formatTransactionDescription(transaction.description)}</span>
+                          {isHistoricalInterviewTransaction(transaction.description) ? (
+                            <Badge variant="outline" className="border-slate-300 bg-slate-50 text-[10px] uppercase tracking-wide text-slate-600">Historical</Badge>
+                          ) : null}
+                        </p>
                         <p className="text-sm text-gray-500">
                           {new Date(transaction.createdAt).toLocaleString()}
                         </p>

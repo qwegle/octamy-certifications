@@ -9,6 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import RecruiterLayout from '../components/RecruiterLayout';
+import InterviewEvidenceNotice from '../components/InterviewEvidenceNotice';
 import { useRecruiterAuth } from '../auth/RecruiterAuthProvider';
 import { downloadCandidateCv } from '../utils/downloadCandidateCv';
 import {
@@ -19,9 +20,7 @@ import {
   MapPin,
   Calendar,
   Briefcase,
-  Star,
   Award,
-  FileText,
   RefreshCw,
   ChevronDown,
   ChevronUp,
@@ -43,7 +42,6 @@ interface SearchFilters {
   category: string[];
   minScore: number;
   hasCertificates: boolean;
-  hasInterviews: boolean;
 }
 
 interface Candidate {
@@ -59,13 +57,12 @@ interface Candidate {
     score: number;
     badge: string;
   }>;
-  interviewCount: number;
   hasResume: boolean;
-  access: { profile: boolean; cv: boolean; interview: boolean };
+  access: { profile: boolean; cv: boolean };
   lastActive: string;
 }
 
-type CreditCosts = { profile_view: number; cv_download: number; interview_access: number };
+type CreditCosts = { profile_view: number; cv_download: number };
 
 const TECHNOLOGIES = [
   'JavaScript', 'Python', 'React', 'Node.js', 'Java', 'C++', 'Angular',
@@ -84,7 +81,7 @@ export default function CandidateSearch() {
   const [showFilters, setShowFilters] = useState(true);
   const [totalResults, setTotalResults] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
-  const [creditCosts, setCreditCosts] = useState<CreditCosts>({ profile_view: 1, cv_download: 1, interview_access: 2 });
+  const [creditCosts, setCreditCosts] = useState<CreditCosts>({ profile_view: 1, cv_download: 1 });
   const [searchError, setSearchError] = useState<string | null>(null);
   const [unlocking, setUnlocking] = useState<string | null>(null);
 
@@ -103,7 +100,6 @@ export default function CandidateSearch() {
       category: [],
       minScore: Number.isFinite(savedMinScore) ? Math.min(100, Math.max(0, savedMinScore)) : 0,
       hasCertificates: false,
-      hasInterviews: false,
     };
   });
 
@@ -154,7 +150,7 @@ export default function CandidateSearch() {
     }
   };
 
-  const handleAccessProfile = async (candidateId: number, accessType: 'view' | 'cv' | 'interview') => {
+  const handleAccessProfile = async (candidateId: number, accessType: 'view' | 'cv') => {
     const unlockKey = `${candidateId}:${accessType}`;
     setUnlocking(unlockKey);
     try {
@@ -187,8 +183,6 @@ export default function CandidateSearch() {
           // Download CV
           if (!data.cvUrl) throw new Error('Candidate CV is not available');
           await downloadCandidateCv(data.cvUrl, candidateId);
-        } else if (accessType === 'interview') {
-          window.location.href = `/recruiter/profile/${candidateId}`;
         }
       } else {
         const errorData = await response.json();
@@ -257,7 +251,7 @@ export default function CandidateSearch() {
               <div>
                 <h2 className="font-semibold text-slate-950">Search is free. Candidate data uses one-time unlocks.</h2>
                 <p className="mt-1 text-sm leading-6 text-slate-600">
-                  Profile {creditCosts.profile_view} credit · CV {creditCosts.cv_download} credit · Interview evidence {creditCosts.interview_access} credits. Reopening the same item costs 0 credits. If a learner withdraws consent, access stops immediately.
+                  Profile {creditCosts.profile_view} credit · CV {creditCosts.cv_download} credit. Reopening the same item costs 0 credits. If a learner withdraws consent, access stops immediately.
                 </p>
               </div>
             </div>
@@ -272,6 +266,8 @@ export default function CandidateSearch() {
             </div>
           </CardContent>
         </Card>
+
+        <InterviewEvidenceNotice compact />
 
         {searchError ? (
           <Card className="border-amber-200 bg-amber-50/70">
@@ -448,14 +444,6 @@ export default function CandidateSearch() {
                 <div className="flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-800">
                   <Check className="h-4 w-4" /> Current paid evidence required
                 </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="hasInterviews"
-                    checked={filters.hasInterviews}
-                    onCheckedChange={(checked) => updateFilter('hasInterviews', checked)}
-                  />
-                  <Label htmlFor="hasInterviews">Has Interview Data</Label>
-                </div>
               </div>
 
               <div className="flex space-x-4">
@@ -477,7 +465,6 @@ export default function CandidateSearch() {
                       category: [],
                       minScore: 0,
                       hasCertificates: false,
-                      hasInterviews: false,
                     });
                   }}
                 >
@@ -561,8 +548,8 @@ export default function CandidateSearch() {
                           </div>
                         </div>
 
-                        {/* Certificates and Interviews */}
-                        <div className="mb-4 grid gap-4 sm:grid-cols-2">
+                        {/* Recruiter-visible credential evidence */}
+                        <div className="mb-4">
                           <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3">
                             <Label className="text-sm font-medium flex items-center space-x-1">
                               <Award className="h-4 w-4" />
@@ -574,18 +561,11 @@ export default function CandidateSearch() {
                               </div>
                             ))}
                           </div>
-                          <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3">
-                            <Label className="text-sm font-medium flex items-center space-x-1">
-                              <Star className="h-4 w-4" />
-                              <span>Interview evidence</span>
-                            </Label>
-                            <p className="mt-1 text-sm text-slate-600">{candidate.interviewCount || 0} completed record{candidate.interviewCount === 1 ? '' : 's'}{candidate.access.interview ? ' · unlocked' : ''}</p>
-                          </div>
                         </div>
                       </div>
 
                       {/* Action Buttons */}
-                      <div className="grid shrink-0 gap-2 sm:grid-cols-3 lg:w-52 lg:grid-cols-1">
+                      <div className="grid shrink-0 gap-2 sm:grid-cols-2 lg:w-52 lg:grid-cols-1">
                         <Button
                           size="sm"
                           className="bg-slate-950 text-white hover:bg-slate-800"
@@ -604,16 +584,6 @@ export default function CandidateSearch() {
                         >
                           <Download className="mr-2 h-4 w-4" />
                           <span>{!candidate.hasResume ? 'CV not shared' : candidate.access.cv ? 'Download CV' : `Unlock CV · ${creditCosts.cv_download}`}</span>
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="border-slate-300 text-slate-800"
-                          onClick={() => handleAccessProfile(candidate.id, 'interview')}
-                          disabled={!candidate.interviewCount || unlocking === `${candidate.id}:interview`}
-                        >
-                          <FileText className="mr-2 h-4 w-4" />
-                          <span>{!candidate.interviewCount ? 'No interview evidence' : candidate.access.interview ? 'Open interviews' : `Unlock interviews · ${creditCosts.interview_access}`}</span>
                         </Button>
                       </div>
                     </div>

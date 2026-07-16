@@ -133,7 +133,13 @@ export function useGoogleAuthHandler() {
 
         const destination = await destinationForGoogleUser(token, intent);
         localStorage.removeItem('octamy.oauthIntent');
-        setTimeout(() => setLocation(destination), 450);
+        setTimeout(() => {
+          if (destination === '/interview-studio' || destination.startsWith('/interview-studio/')) {
+            window.location.assign(destination);
+          } else {
+            setLocation(destination);
+          }
+        }, 450);
       };
       void completeGoogleAuth();
     } else if (error) {

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useRecruiterAuth } from '../auth/RecruiterAuthProvider';
 import { apiRequest } from '@/lib/queryClient';
 import RecruiterLayout from '../components/RecruiterLayout';
+import InterviewEvidenceNotice from '../components/InterviewEvidenceNotice';
 import { Link, useLocation } from 'wouter';
 import {
   Users,
@@ -16,7 +17,7 @@ import {
   CheckCircle,
   Clock,
   CreditCard,
-  Activity
+  History
 } from 'lucide-react';
 
 interface DashboardData {
@@ -181,6 +182,8 @@ export default function RecruiterDashboard() {
           </div>
         )}
 
+        <InterviewEvidenceNotice compact />
+
         {/* Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card>
@@ -207,12 +210,12 @@ export default function RecruiterDashboard() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Interview Access</CardTitle>
-              <Activity className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium">Historical interview access</CardTitle>
+              <History className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{dashboardData?.interviewAccess || 0}</div>
-              <p className="text-xs text-muted-foreground">This month</p>
+              <p className="text-xs text-muted-foreground">Retired prototype records only</p>
             </CardContent>
           </Card>
 
@@ -304,7 +307,7 @@ export default function RecruiterDashboard() {
                         <p className="font-medium">
                           {activity.type === 'profile_view' && 'Viewed profile of '}
                           {activity.type === 'cv_download' && 'Downloaded CV of '}
-                          {activity.type === 'interview_access' && 'Accessed interview data of '}
+                          {activity.type === 'interview_access' && 'Historical prototype interview access for '}
                           {activity.userName}
                         </p>
                         <p className="text-sm text-gray-500">
@@ -312,8 +315,8 @@ export default function RecruiterDashboard() {
                         </p>
                       </div>
                     </div>
-                    <Badge variant="outline">
-                      {activity.creditsUsed} credits
+                    <Badge variant="outline" className={activity.type === 'interview_access' ? 'border-slate-300 bg-slate-50 text-slate-600' : ''}>
+                      {activity.type === 'interview_access' ? 'Historical · ' : ''}{activity.creditsUsed} credits
                     </Badge>
                   </div>
                 ))}

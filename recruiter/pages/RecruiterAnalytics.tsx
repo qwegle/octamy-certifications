@@ -4,7 +4,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { apiRequest } from '@/lib/queryClient';
 import RecruiterLayout from '../components/RecruiterLayout';
-import { Eye, Download, Activity, CreditCard, BarChart3 } from 'lucide-react';
+import InterviewEvidenceNotice from '../components/InterviewEvidenceNotice';
+import { Eye, Download, History, CreditCard, BarChart3 } from 'lucide-react';
 
 type Analytics = {
   totals: { profileViews: number; cvDownloads: number; interviewAccess: number; creditsUsed: number };
@@ -30,12 +31,22 @@ export default function RecruiterAnalytics() {
     })();
   }, []);
 
+  const isHistoricalInterviewAccess = (value: string) => value.toLowerCase().includes('interview');
+
+  const formatAccessType = (accessType: string) => isHistoricalInterviewAccess(accessType)
+    ? 'Historical interview prototype access'
+    : accessType.replace(/_/g, ' ');
+
+  const formatTransactionDescription = (description: string) => isHistoricalInterviewAccess(description)
+    ? 'Historical interview prototype access (retired)'
+    : description;
+
   const exportCsv = () => {
     if (!data) return;
     const rows = [
       ['type', 'id', 'detail', 'value', 'date'].join(','),
-      ...data.recentAccess.map((a) => ['access', a.id, a.access_type, a.user_name || '—', a.created_at].join(',')),
-      ...data.recentTransactions.map((t) => ['credit', t.id, t.type, `${t.amount}`, t.created_at].join(',')),
+      ...data.recentAccess.map((a) => ['access', a.id, formatAccessType(a.access_type), a.user_name || '—', a.created_at].join(',')),
+      ...data.recentTransactions.map((t) => ['credit', t.id, formatTransactionDescription(t.description), `${t.amount}`, t.created_at].join(',')),
     ].join('\n');
     const blob = new Blob([rows], { type: 'text/csv' });
     const a = document.createElement('a');
@@ -60,15 +71,20 @@ export default function RecruiterAnalytics() {
           </Button>
         </div>
 
+        <InterviewEvidenceNotice compact />
+
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Stat icon={<Eye className="w-4 h-4" />} label="Profile views" value={data?.totals.profileViews ?? 0} />
           <Stat icon={<Download className="w-4 h-4" />} label="CV downloads" value={data?.totals.cvDownloads ?? 0} />
-          <Stat icon={<Activity className="w-4 h-4" />} label="Interview access" value={data?.totals.interviewAccess ?? 0} />
+          <Stat icon={<History className="w-4 h-4" />} label="Historical interview access" value={data?.totals.interviewAccess ?? 0} hint="Retired prototype" />
           <Stat icon={<CreditCard className="w-4 h-4" />} label="Credits used" value={Number(data?.totals.creditsUsed ?? 0).toFixed(2)} />
         </div>
 
         <Card>
-          <CardHeader><CardTitle className="text-base">Last 30 days</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle className="text-base">Last 30 days access activity</CardTitle>
+            <p className="text-xs text-slate-500">Aggregates may include historical prototype activity recorded before Interview Studio was made private.</p>
+          </CardHeader>
           <CardContent>
             {loading ? <div className="text-sm text-gray-500 py-6 text-center">Loading…</div>
               : !data?.daily.length ? <div className="text-sm text-gray-500 py-6 text-center">No activity in the last 30 days.</div>
@@ -96,7 +112,11 @@ export default function RecruiterAnalytics() {
                     {data.recentAccess.map((a) => (
                       <tr key={a.id} className="border-b last:border-0">
                         <td className="py-2">{a.user_name || '—'}</td>
-                        <td className="py-2"><Badge variant="outline" className="capitalize">{a.access_type.replace(/_/g, ' ')}</Badge></td>
+                        <td className="py-2">
+                          <Badge variant="outline" className={isHistoricalInterviewAccess(a.access_type) ? 'border-slate-300 bg-slate-50 text-slate-600' : 'capitalize'}>
+                            {formatAccessType(a.access_type)}
+                          </Badge>
+                        </td>
                         <td className="py-2">{a.credits_used}</td>
                         <td className="py-2 text-gray-600">{new Date(a.created_at).toLocaleString()}</td>
                       </tr>
@@ -129,7 +149,10 @@ export default function RecruiterAnalytics() {
                         <td className="py-2"><Badge variant="outline" className="capitalize">{t.type}</Badge></td>
                         <td className={`py-2 ${t.type === 'spend' ? 'text-rose-600' : 'text-emerald-700'}`}>{t.type === 'spend' ? '-' : '+'}{t.amount}</td>
                         <td className="py-2">{t.balance_after}</td>
-                        <td className="py-2 text-gray-700">{t.description}</td>
+                        <td className="py-2 text-gray-700">
+                          <span>{formatTransactionDescription(t.description)}</span>
+                          {isHistoricalInterviewAccess(t.description) ? <span className="ml-2 text-[10px] font-semibold uppercase tracking-wide text-slate-500">Historical</span> : null}
+                        </td>
                         <td className="py-2 text-gray-600">{new Date(t.created_at).toLocaleString()}</td>
                       </tr>
                     ))}
@@ -144,7 +167,7 @@ export default function RecruiterAnalytics() {
   );
 }
 
-function Stat({ icon, label, value }: { icon: React.ReactNode; label: string; value: React.ReactNode }) {
+function Stat({ icon, label, value, hint }: { icon: React.ReactNode; label: string; value: React.ReactNode; hint?: string }) {
   return (
     <Card>
       <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
@@ -153,6 +176,7 @@ function Stat({ icon, label, value }: { icon: React.ReactNode; label: string; va
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold">{value}</div>
+        {hint ? <p className="mt-1 text-[11px] text-slate-500">{hint}</p> : null}
       </CardContent>
     </Card>
   );

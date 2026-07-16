@@ -80,6 +80,7 @@ const Verify = lazy(() => import("@/pages/verify"));
 const EvidencePassport = lazy(() => import("@/pages/evidence-passport"));
 const Preferences = lazy(() => import("@/pages/preferences"));
 const Progress = lazy(() => import("@/pages/progress"));
+const InterviewStudio = lazy(() => import("@/pages/interview-studio"));
 const EnhancedCheckout = lazy(() => import("@/pages/EnhancedCheckout"));
 const Courses = lazy(() => import("@/pages/courses"));
 const Assessments = lazy(() => import("@/pages/assessments"));
@@ -248,6 +249,8 @@ function Router() {
         )}
       </Route>
       <Route path="/progress" component={Progress} />
+      <Route path="/interview-studio/:sessionId" component={InterviewStudio} />
+      <Route path="/interview-studio" component={InterviewStudio} />
       <Route path="/preferences" component={Preferences} />
       <Route path="/qwegle" component={AdminDashboard} />
       <Route path="/verify" component={Verify} />

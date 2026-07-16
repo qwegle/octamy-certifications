@@ -1,9 +1,101 @@
 import { describe, it, expect, beforeEach, beforeAll } from '@jest/globals';
 import request from 'supertest';
 import express, { type Express } from 'express';
-import { cleanupTestData, setupTestData } from '../setup';
+import { and, eq } from 'drizzle-orm';
+import { cleanupTestData, setupTestData, testDb } from '../setup';
 import jwt from 'jsonwebtoken';
 import crypto from 'node:crypto';
+import {
+  interviewStudioDailyUsage,
+  interviewStudioEvaluationJobs,
+  interviewStudioEvents,
+  interviewStudioSessions,
+  interviewStudioTemplates,
+} from '../../shared/schema';
+import {
+  INTERVIEW_STUDIO_BLUEPRINT_SCHEMA_VERSION,
+  INTERVIEW_STUDIO_JAVASCRIPT_RUNTIME,
+  canonicalizeInterviewStudioBlueprint,
+  type InterviewStudioBlueprint,
+} from '../../shared/interview-studio';
+
+const interviewStudioTestBlueprint: InterviewStudioBlueprint = {
+  schemaVersion: INTERVIEW_STUDIO_BLUEPRINT_SCHEMA_VERSION,
+  templateKey: 'integration.frontend-foundations',
+  version: 1,
+  title: 'Frontend Foundations Interview',
+  summary: 'A disposable private-practice interview used only by integration tests.',
+  role: 'Frontend Engineer',
+  level: 'foundation',
+  skills: ['JavaScript', 'Communication'],
+  allowedModes: ['practice'],
+  estimatedDurationMinutes: 5,
+  rubricVersion: 'integration-rubric-v1',
+  items: [
+    {
+      key: 'communication.answer',
+      kind: 'structured_response',
+      title: 'Explain a technical decision',
+      competency: 'Communication',
+      timeLimitSeconds: 120,
+      instructions: 'Explain the decision, trade-offs, and resulting outcome.',
+      prompt: 'Describe a frontend technical decision and the trade-offs you considered.',
+      responseFormat: 'text_or_transient_voice',
+      minimumWords: 0,
+      maximumWords: 20,
+      rubric: [{
+        key: 'communication.clarity',
+        label: 'Clarity',
+        description: 'Explains the decision and trade-offs with concrete evidence.',
+        weight: 100,
+      }],
+    },
+    {
+      key: 'coding.sum',
+      kind: 'coding',
+      title: 'Sum two integers',
+      competency: 'JavaScript',
+      timeLimitSeconds: 180,
+      instructions: 'Read two integers from stdin and print their sum to stdout.',
+      language: 'javascript',
+      runtime: INTERVIEW_STUDIO_JAVASCRIPT_RUNTIME,
+      interface: 'stdin_stdout',
+      problemStatement: 'Read two integer values from standard input and print their sum.',
+      starterCode: "const fs = require('node:fs');\n",
+      constraints: ['Inputs are safe integers.'],
+      testCases: [
+        {
+          key: 'public.basic',
+          title: 'Public basic case',
+          visibility: 'public',
+          input: '2 3\n',
+          expectedOutput: '5\n',
+          weight: 50,
+        },
+        {
+          key: 'hidden.negative-secret',
+          title: 'Never expose this hidden title',
+          visibility: 'hidden',
+          input: '-17 4\n',
+          expectedOutput: '-13\n',
+          weight: 50,
+        },
+      ],
+      rubric: [{
+        key: 'coding.correctness',
+        label: 'Correctness',
+        description: 'Produces correct output for the governed test cases.',
+        weight: 100,
+      }],
+    },
+  ],
+};
+
+function interviewStudioBlueprintHash() {
+  return crypto.createHash('sha256')
+    .update(canonicalizeInterviewStudioBlueprint(interviewStudioTestBlueprint), 'utf8')
+    .digest('hex');
+}
 
 describe('API Integration Tests', () => {
   let app: Express;
@@ -28,6 +120,8 @@ describe('API Integration Tests', () => {
     process.env.PAYUMONEY_MERCHANT_ID = 'test-merchant';
     process.env.PAYUMONEY_MERCHANT_KEY = 'test-key';
     process.env.PAYUMONEY_SALT = 'test-salt';
+    process.env.INTERVIEW_STUDIO_ENABLED = 'true';
+    process.env.INTERVIEW_STUDIO_DAILY_EVALUATION_LIMIT = '10';
 
     const { registerRoutes } = await import('../../server/routes');
     const { DatabaseStorage } = await import('../../server/storage');
@@ -135,6 +229,276 @@ describe('API Integration Tests', () => {
 
       expect(Array.isArray(response.body)).toBe(true);
       expect(response.body.some((cat: any) => cat.id === testData.testCategory.id)).toBe(true);
+    });
+  });
+
+  describe('Interview Studio Endpoints', () => {
+    let templateId: number;
+
+    beforeEach(async () => {
+      const [template] = await testDb.insert(interviewStudioTemplates).values({
+        templateKey: interviewStudioTestBlueprint.templateKey,
+        version: interviewStudioTestBlueprint.version,
+        ownerType: 'admin',
+        ownerId: null,
+        title: interviewStudioTestBlueprint.title,
+        summary: interviewStudioTestBlueprint.summary,
+        state: 'published',
+        isCurrent: true,
+        supportedModes: ['practice'],
+        rubricVersion: interviewStudioTestBlueprint.rubricVersion,
+        blueprint: interviewStudioTestBlueprint,
+        blueprintHash: interviewStudioBlueprintHash(),
+        publishedAt: new Date(),
+        createdBy: testData.adminUser.id,
+      }).returning({ id: interviewStudioTemplates.id });
+      templateId = template.id;
+    });
+
+    function createPracticeSession(token = userToken, consent: Record<string, unknown> = {}) {
+      return request(app)
+        .post('/api/interview-studio/sessions')
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          templateId,
+          mode: 'practice',
+          consent: {
+            aiProcessing: true,
+            microphone: false,
+            camera: true,
+            screen: true,
+            consentVersion: 'interview-practice-2026-07-16',
+            ...consent,
+          },
+        });
+    }
+
+    function startPracticeSession(sessionId: string, token = userToken) {
+      return request(app)
+        .post(`/api/interview-studio/sessions/${sessionId}/start`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ permissions: { camera: true, microphone: false, screen: true } });
+    }
+
+    it('requires authentication and redacts every hidden test detail from template and session payloads', async () => {
+      await request(app)
+        .get('/api/interview-studio/templates')
+        .expect(401);
+
+      const templatesResponse = await request(app)
+        .get('/api/interview-studio/templates')
+        .set('Authorization', `Bearer ${userToken}`)
+        .expect(200);
+
+      expect(templatesResponse.headers['cache-control']).toContain('no-store');
+      expect(templatesResponse.body.items).toHaveLength(1);
+      const codingItem = templatesResponse.body.items[0].blueprint.items.find(
+        (item: { key: string }) => item.key === 'coding.sum',
+      );
+      expect(codingItem.testCases).toEqual([
+        expect.objectContaining({
+          key: 'public.basic',
+          visibility: 'public',
+          input: '2 3\n',
+          expectedOutput: '5\n',
+        }),
+      ]);
+      expect(codingItem.testCaseSummary).toEqual({ publicCount: 1, hiddenCount: 1, totalCount: 2 });
+
+      const created = await createPracticeSession().expect(201);
+      expect(created.body.status).toBe('ready');
+      expect(created.body.deadlineAt).toBeNull();
+      const serializedCreation = JSON.stringify(created.body);
+      expect(serializedCreation).not.toContain('hidden.negative-secret');
+      expect(serializedCreation).not.toContain('Never expose this hidden title');
+      expect(serializedCreation).not.toContain('-17 4');
+      expect(serializedCreation).not.toContain('-13');
+
+      const resumed = await request(app)
+        .get(`/api/interview-studio/sessions/${created.body.id}`)
+        .set('Authorization', `Bearer ${userToken}`)
+        .expect(200);
+      expect(JSON.stringify(resumed.body)).not.toContain('hidden.negative-secret');
+      expect(resumed.body.blueprint.items.find((item: { key: string }) => item.key === 'coding.sum').testCaseSummary)
+        .toEqual({ publicCount: 1, hiddenCount: 1, totalCount: 2 });
+    });
+
+    it('enforces learner ownership, server timing, autosave shape, and structured-response word limits', async () => {
+      const created = await createPracticeSession().expect(201);
+      const sessionId = created.body.id as string;
+
+      await request(app)
+        .get(`/api/interview-studio/sessions/${sessionId}`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(404);
+      await startPracticeSession(sessionId, adminToken).expect(404);
+
+      const started = await startPracticeSession(sessionId).expect(200);
+      expect(started.body.status).toBe('in_progress');
+      expect(new Date(started.body.deadlineAt).getTime()).toBeGreaterThan(new Date(started.body.startedAt).getTime());
+      expect(started.body.permissions).toMatchObject({
+        camera: { required: true, state: 'granted' },
+        microphone: { required: false, state: 'not_requested' },
+        screen: { required: true, state: 'granted' },
+      });
+
+      const tooManyWords = Array.from({ length: 21 }, (_value, index) => `word${index}`).join(' ');
+      const rejected = await request(app)
+        .put(`/api/interview-studio/sessions/${sessionId}/responses/communication.answer`)
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({ answerText: tooManyWords, timeSpentSeconds: 12 })
+        .expect(422);
+      expect(rejected.body.code).toBe('INTERVIEW_RESPONSE_WORD_LIMIT');
+
+      const saved = await request(app)
+        .put(`/api/interview-studio/sessions/${sessionId}/responses/communication.answer`)
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({ answerText: 'I chose composition to isolate state and make behavior easier to test.', timeSpentSeconds: 37 })
+        .expect(200);
+      expect(saved.body.saved).toBe(true);
+      expect(saved.body.response).toMatchObject({
+        itemKey: 'communication.answer',
+        itemKind: 'structured_response',
+        timeSpentSeconds: 37,
+      });
+
+      await request(app)
+        .put(`/api/interview-studio/sessions/${sessionId}/responses/communication.answer`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ answerText: 'An unauthorized replacement.' })
+        .expect(404);
+
+      const resumed = await request(app)
+        .get(`/api/interview-studio/sessions/${sessionId}`)
+        .set('Authorization', `Bearer ${userToken}`)
+        .expect(200);
+      expect(resumed.body.responses).toEqual([
+        expect.objectContaining({
+          itemKey: 'communication.answer',
+          answerText: 'I chose composition to isolate state and make behavior easier to test.',
+          timeSpentSeconds: 37,
+        }),
+      ]);
+    });
+
+    it('accepts only allowlisted browser telemetry and replaces browser timestamps with server time', async () => {
+      const created = await createPracticeSession().expect(201);
+      const sessionId = created.body.id as string;
+      await startPracticeSession(sessionId).expect(200);
+
+      await request(app)
+        .post(`/api/interview-studio/sessions/${sessionId}/events`)
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({
+          eventType: 'focus_left',
+          metadata: {
+            itemKey: 'communication.answer',
+            deviceFingerprint: 'must-never-be-persisted',
+          },
+        })
+        .expect(400);
+
+      await request(app)
+        .post(`/api/interview-studio/sessions/${sessionId}/events`)
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({ eventType: 'keystrokes_captured', metadata: {} })
+        .expect(400);
+
+      await request(app)
+        .post(`/api/interview-studio/sessions/${sessionId}/events`)
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({
+          eventType: 'focus_left',
+          idempotencyKey: 'browser-focus-left-0001',
+          occurredAt: '2001-01-01T00:00:00.000Z',
+          severity: 'warning',
+          metadata: { itemKey: 'communication.answer' },
+        })
+        .expect(202);
+
+      const persisted = await testDb.select().from(interviewStudioEvents)
+        .where(and(
+          eq(interviewStudioEvents.sessionId, sessionId),
+          eq(interviewStudioEvents.type, 'focus_left'),
+        ));
+      expect(persisted).toHaveLength(1);
+      expect(persisted[0].payload).toEqual({ itemKey: 'communication.answer' });
+      expect(persisted[0].occurredAt.getUTCFullYear()).toBeGreaterThan(2020);
+      expect(JSON.stringify(persisted[0])).not.toContain('must-never-be-persisted');
+    });
+
+    it('returns 202 and atomically persists one evaluation job, one usage charge, and immutable submission state', async () => {
+      const created = await createPracticeSession().expect(201);
+      const sessionId = created.body.id as string;
+      await startPracticeSession(sessionId).expect(200);
+      await request(app)
+        .put(`/api/interview-studio/sessions/${sessionId}/responses/communication.answer`)
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({ answerText: 'I used an explicit interface and verified the behavior with focused tests.', timeSpentSeconds: 42 })
+        .expect(200);
+
+      const submitted = await request(app)
+        .post(`/api/interview-studio/sessions/${sessionId}/submit`)
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({})
+        .expect(202);
+      expect(submitted.body).toMatchObject({ status: 'evaluating', evaluationStatus: 'pending' });
+
+      const [storedSession] = await testDb.select().from(interviewStudioSessions)
+        .where(eq(interviewStudioSessions.id, sessionId));
+      const jobs = await testDb.select().from(interviewStudioEvaluationJobs)
+        .where(eq(interviewStudioEvaluationJobs.sessionId, sessionId));
+      const usage = await testDb.select().from(interviewStudioDailyUsage)
+        .where(eq(interviewStudioDailyUsage.userId, testData.testUser.id));
+      const submissionEvents = await testDb.select().from(interviewStudioEvents)
+        .where(and(
+          eq(interviewStudioEvents.sessionId, sessionId),
+          eq(interviewStudioEvents.type, 'session_submitted'),
+        ));
+
+      expect(storedSession).toMatchObject({ status: 'evaluating', evaluationStatus: 'pending' });
+      expect(storedSession.submittedAt).toBeInstanceOf(Date);
+      expect(jobs).toHaveLength(1);
+      expect(jobs[0]).toMatchObject({ status: 'queued', attempts: 0 });
+      expect(usage).toHaveLength(1);
+      expect(usage[0].evaluationJobs).toBe(1);
+      expect(submissionEvents).toHaveLength(1);
+
+      await request(app)
+        .post(`/api/interview-studio/sessions/${sessionId}/submit`)
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({})
+        .expect(202);
+      expect(await testDb.select().from(interviewStudioEvaluationJobs)
+        .where(eq(interviewStudioEvaluationJobs.sessionId, sessionId))).toHaveLength(1);
+      expect((await testDb.select().from(interviewStudioDailyUsage)
+        .where(eq(interviewStudioDailyUsage.userId, testData.testUser.id)))[0].evaluationJobs).toBe(1);
+
+      await request(app)
+        .put(`/api/interview-studio/sessions/${sessionId}/responses/communication.answer`)
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({ answerText: 'This late replacement must be rejected.' })
+        .expect(409);
+    });
+
+    it('lets only the owning learner delete private practice data', async () => {
+      const created = await createPracticeSession().expect(201);
+      const sessionId = created.body.id as string;
+
+      await request(app)
+        .delete(`/api/interview-studio/sessions/${sessionId}`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(404);
+      await request(app)
+        .delete(`/api/interview-studio/sessions/${sessionId}`)
+        .set('Authorization', `Bearer ${userToken}`)
+        .expect(204);
+      await request(app)
+        .get(`/api/interview-studio/sessions/${sessionId}`)
+        .set('Authorization', `Bearer ${userToken}`)
+        .expect(404);
+      expect(await testDb.select().from(interviewStudioSessions)
+        .where(eq(interviewStudioSessions.id, sessionId))).toHaveLength(0);
     });
   });
 

@@ -1,7 +1,16 @@
-import { pgTable, text, varchar, serial, integer, boolean, timestamp, decimal, json, index, uniqueIndex, jsonb, unique, check, foreignKey, type AnyPgColumn } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, serial, integer, boolean, timestamp, date, decimal, json, index, uniqueIndex, jsonb, unique, check, foreignKey, type AnyPgColumn } from "drizzle-orm/pg-core";
 import { relations, eq, desc, and, asc, sql } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import type {
+  InterviewStudioBlueprint,
+  InterviewStudioConsentSnapshot,
+  InterviewStudioItemEvaluation,
+  InterviewStudioOverallEvaluation,
+  InterviewStudioPermissionSnapshot,
+  InterviewStudioPrivateArtifactManifest,
+  InterviewStudioTestRunResult,
+} from "./interview-studio";
 
 // Sponsors table for donations/sponsorships
 export const sponsors = pgTable("sponsors", {
@@ -2072,7 +2081,336 @@ export type InsertAchievement = typeof achievements.$inferInsert;
 export type UserAchievement = typeof userAchievements.$inferSelect;
 export type InsertUserAchievement = typeof userAchievements.$inferInsert;
 
-// AI Interview Tables
+// Interview Studio is the auditable replacement for the legacy AI interview
+// prototype below. Published template payloads are immutable; sessions keep a
+// complete snapshot so later template versions cannot change learner evidence.
+export const interviewStudioTemplates = pgTable("interview_studio_templates", {
+  id: serial("id").primaryKey(),
+  templateKey: text("template_key").notNull(),
+  version: integer("version").notNull(),
+  ownerType: text("owner_type").default("admin").notNull(), // admin | creator | institute
+  ownerId: integer("owner_id"),
+  title: text("title").notNull(),
+  summary: text("summary").notNull(),
+  state: text("state").default("draft").notNull(), // draft | published | retired
+  isCurrent: boolean("is_current").default(false).notNull(),
+  supportedModes: jsonb("supported_modes").$type<Array<"practice" | "verified">>().notNull(),
+  rubricVersion: text("rubric_version").notNull(),
+  blueprint: jsonb("blueprint").$type<InterviewStudioBlueprint>().notNull(),
+  blueprintHash: text("blueprint_hash").notNull(),
+  publishedAt: timestamp("published_at", { withTimezone: true }),
+  createdBy: integer("created_by").references(() => users.id, { onDelete: "set null" }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => ({
+  keyVersionUnique: unique("interview_studio_templates_key_version_unique").on(t.templateKey, t.version),
+  currentKeyUnique: uniqueIndex("interview_studio_templates_current_key_unique")
+    .on(t.templateKey)
+    .where(sql`${t.isCurrent} = true`),
+  byOwnerState: index("interview_studio_templates_owner_state_idx").on(t.ownerType, t.ownerId, t.state, t.createdAt),
+  validVersion: check("interview_studio_templates_version_check", sql`${t.version} > 0`),
+  validKey: check("interview_studio_templates_key_check", sql`${t.templateKey} ~ '^[a-z0-9][a-z0-9._-]{2,119}$'`),
+  validOwner: check("interview_studio_templates_owner_check", sql`
+    (${t.ownerType} = 'admin' AND ${t.ownerId} IS NULL)
+    OR (${t.ownerType} IN ('creator', 'institute') AND ${t.ownerId} IS NOT NULL)
+  `),
+  validState: check("interview_studio_templates_state_check", sql`${t.state} IN ('draft','published','retired')`),
+  publishedState: check("interview_studio_templates_published_check", sql`
+    (${t.state} = 'published' AND ${t.publishedAt} IS NOT NULL)
+    OR (${t.state} <> 'published' AND ${t.isCurrent} = false)
+  `),
+  modesArray: check("interview_studio_templates_modes_check", sql`
+    jsonb_typeof(${t.supportedModes}) = 'array'
+    AND jsonb_array_length(${t.supportedModes}) BETWEEN 1 AND 2
+    AND ${t.supportedModes} <@ '["practice","verified"]'::jsonb
+  `),
+  blueprintObject: check("interview_studio_templates_blueprint_check", sql`
+    jsonb_typeof(${t.blueprint}) = 'object'
+    AND ${t.blueprint}->>'schemaVersion' = 'interview-studio-blueprint/v1'
+    AND ${t.blueprint}->>'templateKey' = ${t.templateKey}
+    AND (${t.blueprint}->>'version')::integer = ${t.version}
+    AND ${t.blueprint}->>'rubricVersion' = ${t.rubricVersion}
+  `),
+  modeSnapshot: check("interview_studio_templates_mode_snapshot_check", sql`
+    ${t.supportedModes} @> (${t.blueprint}->'allowedModes')
+    AND ${t.supportedModes} <@ (${t.blueprint}->'allowedModes')
+  `),
+  validHash: check("interview_studio_templates_hash_check", sql`${t.blueprintHash} ~ '^[0-9a-f]{64}$'`),
+}));
+
+export const interviewStudioSessions = pgTable("interview_studio_sessions", {
+  id: text("id").primaryKey(),
+  templateId: integer("template_id").references(() => interviewStudioTemplates.id, { onDelete: "restrict" }).notNull(),
+  templateKey: text("template_key").notNull(),
+  templateVersion: integer("template_version").notNull(),
+  userId: integer("user_id").references(() => users.id, { onDelete: "restrict" }).notNull(),
+  mode: text("mode").notNull(), // practice | verified
+  status: text("status").default("ready").notNull(),
+  blueprintSnapshot: jsonb("blueprint_snapshot").$type<InterviewStudioBlueprint>().notNull(),
+  blueprintHash: text("blueprint_hash").notNull(),
+  consentSnapshot: jsonb("consent_snapshot").$type<InterviewStudioConsentSnapshot>().notNull(),
+  permissionSnapshot: jsonb("permission_snapshot").$type<InterviewStudioPermissionSnapshot>().notNull(),
+  // Set once, atomically with ready -> in_progress, from the server clock.
+  serverDeadlineAt: timestamp("server_deadline_at", { withTimezone: true }),
+  evaluationStatus: text("evaluation_status").default("not_requested").notNull(),
+  overallScore: integer("overall_score"),
+  evaluation: jsonb("evaluation").$type<InterviewStudioOverallEvaluation>(),
+  evaluationModel: text("evaluation_model"),
+  evaluationPromptVersion: text("evaluation_prompt_version"),
+  evaluationStartedAt: timestamp("evaluation_started_at", { withTimezone: true }),
+  evaluationCompletedAt: timestamp("evaluation_completed_at", { withTimezone: true }),
+  recruiterSharingEnabled: boolean("recruiter_sharing_enabled").default(false).notNull(),
+  recruiterSharingEnabledAt: timestamp("recruiter_sharing_enabled_at", { withTimezone: true }),
+  retentionUntil: timestamp("retention_until", { withTimezone: true }).default(sql`now() + interval '30 days'`).notNull(),
+  startedAt: timestamp("started_at", { withTimezone: true }),
+  submittedAt: timestamp("submitted_at", { withTimezone: true }),
+  completedAt: timestamp("completed_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => ({
+  byLearner: index("interview_studio_sessions_learner_idx").on(t.userId, t.status, t.createdAt),
+  byDeadline: index("interview_studio_sessions_deadline_idx").on(t.status, t.serverDeadlineAt),
+  byRetention: index("interview_studio_sessions_retention_idx").on(t.retentionUntil),
+  validId: check("interview_studio_sessions_id_check", sql`${t.id} ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'`),
+  validMode: check("interview_studio_sessions_mode_check", sql`${t.mode} IN ('practice','verified')`),
+  validStatus: check("interview_studio_sessions_status_check", sql`
+    ${t.status} IN ('ready','in_progress','evaluating','completed','review_required','expired','cancelled')
+  `),
+  validEvaluationStatus: check("interview_studio_sessions_evaluation_status_check", sql`
+    ${t.evaluationStatus} IN ('not_requested','pending','in_progress','completed','failed','review_required')
+  `),
+  validScore: check("interview_studio_sessions_score_check", sql`${t.overallScore} IS NULL OR ${t.overallScore} BETWEEN 0 AND 100`),
+  validHash: check("interview_studio_sessions_hash_check", sql`${t.blueprintHash} ~ '^[0-9a-f]{64}$'`),
+  snapshots: check("interview_studio_sessions_snapshots_check", sql`
+    jsonb_typeof(${t.blueprintSnapshot}) = 'object'
+    AND jsonb_typeof(${t.consentSnapshot}) = 'object'
+    AND jsonb_typeof(${t.permissionSnapshot}) = 'object'
+    AND ${t.blueprintSnapshot}->>'templateKey' = ${t.templateKey}
+    AND (${t.blueprintSnapshot}->>'version')::integer = ${t.templateVersion}
+    AND ${t.consentSnapshot}->>'recruiterSharing' IN ('true','false')
+    AND (
+      ${t.mode} <> 'practice'
+      OR (
+        ${t.consentSnapshot}->>'recruiterSharing' = 'false'
+        AND ${t.consentSnapshot}->>'cameraRecording' = 'false'
+        AND ${t.consentSnapshot}->>'screenRecording' = 'false'
+      )
+    )
+  `),
+  deadlineAfterCreation: check("interview_studio_sessions_deadline_check", sql`
+    ${t.serverDeadlineAt} IS NULL OR ${t.serverDeadlineAt} > ${t.createdAt}
+  `),
+  retentionAfterCreation: check("interview_studio_sessions_retention_check", sql`${t.retentionUntil} > ${t.createdAt}`),
+  sharingTimestamp: check("interview_studio_sessions_sharing_check", sql`
+    (${t.recruiterSharingEnabled} = false AND ${t.recruiterSharingEnabledAt} IS NULL)
+    OR (
+      ${t.recruiterSharingEnabled} = true
+      AND ${t.recruiterSharingEnabledAt} IS NOT NULL
+      AND ${t.mode} = 'verified'
+      AND ${t.status} = 'completed'
+      AND ${t.consentSnapshot}->>'recruiterSharing' = 'true'
+    )
+  `),
+}));
+
+export const interviewStudioResponses = pgTable("interview_studio_responses", {
+  id: serial("id").primaryKey(),
+  sessionId: text("session_id").references(() => interviewStudioSessions.id, { onDelete: "cascade" }).notNull(),
+  itemKey: text("item_key").notNull(),
+  itemKind: text("item_kind").notNull(), // structured_response | coding
+  answerText: text("answer_text"),
+  code: text("code"),
+  language: text("language"),
+  timeSpentSeconds: integer("time_spent_seconds").default(0).notNull(),
+  answerHash: text("answer_hash"),
+  sampleTestResult: jsonb("sample_test_result").$type<InterviewStudioTestRunResult>(),
+  finalTestResult: jsonb("final_test_result").$type<InterviewStudioTestRunResult>(),
+  evaluationStatus: text("evaluation_status").default("not_requested").notNull(),
+  evaluation: jsonb("evaluation").$type<InterviewStudioItemEvaluation>(),
+  evaluationModel: text("evaluation_model"),
+  evaluationPromptVersion: text("evaluation_prompt_version"),
+  isFinal: boolean("is_final").default(false).notNull(),
+  finalizedAt: timestamp("finalized_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => ({
+  sessionItemUnique: unique("interview_studio_responses_session_item_unique").on(t.sessionId, t.itemKey),
+  bySession: index("interview_studio_responses_session_idx").on(t.sessionId, t.createdAt),
+  validKind: check("interview_studio_responses_kind_check", sql`${t.itemKind} IN ('structured_response','coding')`),
+  validLanguage: check("interview_studio_responses_language_check", sql`
+    (${t.itemKind} = 'structured_response' AND ${t.language} IS NULL AND ${t.code} IS NULL)
+    OR (${t.itemKind} = 'coding' AND ${t.language} = 'javascript')
+  `),
+  hasAnswer: check("interview_studio_responses_answer_check", sql`${t.answerText} IS NOT NULL OR ${t.code} IS NOT NULL`),
+  validHash: check("interview_studio_responses_hash_check", sql`${t.answerHash} IS NULL OR ${t.answerHash} ~ '^[0-9a-f]{64}$'`),
+  validTimeSpent: check("interview_studio_responses_time_spent_check", sql`${t.timeSpentSeconds} BETWEEN 0 AND 86400`),
+  testResultObjects: check("interview_studio_responses_test_results_check", sql`
+    (${t.sampleTestResult} IS NULL OR jsonb_typeof(${t.sampleTestResult}) = 'object')
+    AND (${t.finalTestResult} IS NULL OR jsonb_typeof(${t.finalTestResult}) = 'object')
+  `),
+  validEvaluationStatus: check("interview_studio_responses_evaluation_status_check", sql`
+    ${t.evaluationStatus} IN ('not_requested','pending','in_progress','completed','failed','review_required')
+  `),
+  finalTimestamp: check("interview_studio_responses_finalized_check", sql`
+    (${t.isFinal} = false AND ${t.finalizedAt} IS NULL) OR (${t.isFinal} = true AND ${t.finalizedAt} IS NOT NULL)
+  `),
+}));
+
+// Durable outbox/queue for asynchronous Interview Studio evaluation. A
+// session has exactly one job, so retries and process crashes cannot create a
+// second billable evaluation pipeline for the same immutable submission.
+export const interviewStudioEvaluationJobs = pgTable("interview_studio_evaluation_jobs", {
+  id: text("id").primaryKey(),
+  sessionId: text("session_id").references(() => interviewStudioSessions.id, { onDelete: "cascade" }).notNull(),
+  status: text("status").default("queued").notNull(), // queued | running | completed | failed
+  attempts: integer("attempts").default(0).notNull(),
+  maxAttempts: integer("max_attempts").default(3).notNull(),
+  aiEvaluationAllowed: boolean("ai_evaluation_allowed").default(false).notNull(),
+  codeRunnerAllowed: boolean("code_runner_allowed").default(false).notNull(),
+  availableAt: timestamp("available_at", { withTimezone: true }).defaultNow().notNull(),
+  lockedAt: timestamp("locked_at", { withTimezone: true }),
+  lockedBy: text("locked_by"),
+  lastErrorCode: text("last_error_code"),
+  startedAt: timestamp("started_at", { withTimezone: true }),
+  completedAt: timestamp("completed_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => ({
+  sessionUnique: unique("interview_studio_evaluation_jobs_session_unique").on(t.sessionId),
+  availableJob: index("interview_studio_evaluation_jobs_available_idx").on(t.status, t.availableAt, t.id),
+  staleLease: index("interview_studio_evaluation_jobs_stale_lease_idx").on(t.status, t.lockedAt),
+  validId: check("interview_studio_evaluation_jobs_id_check", sql`${t.id} ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'`),
+  validStatus: check("interview_studio_evaluation_jobs_status_check", sql`${t.status} IN ('queued','running','completed','failed')`),
+  validAttempts: check("interview_studio_evaluation_jobs_attempts_check", sql`${t.attempts} BETWEEN 0 AND ${t.maxAttempts} AND ${t.maxAttempts} BETWEEN 1 AND 10`),
+  leasePair: check("interview_studio_evaluation_jobs_lease_check", sql`
+    (${t.status} = 'running' AND ${t.lockedAt} IS NOT NULL AND ${t.lockedBy} IS NOT NULL)
+    OR (${t.status} <> 'running' AND ${t.lockedAt} IS NULL AND ${t.lockedBy} IS NULL)
+  `),
+  terminalTimestamp: check("interview_studio_evaluation_jobs_completed_check", sql`
+    (${t.status} IN ('completed','failed') AND ${t.completedAt} IS NOT NULL)
+    OR (${t.status} NOT IN ('completed','failed') AND ${t.completedAt} IS NULL)
+  `),
+}));
+
+// Persistent per-account allowance. It deliberately does not reference a
+// session, so deleting a private practice session never restores AI quota.
+export const interviewStudioDailyUsage = pgTable("interview_studio_daily_usage", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+  usageDate: date("usage_date", { mode: "string" }).notNull(),
+  evaluationJobs: integer("evaluation_jobs").default(0).notNull(),
+  aiEvaluationJobs: integer("ai_evaluation_jobs").default(0).notNull(),
+  codeRunnerJobs: integer("code_runner_jobs").default(0).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => ({
+  userDayUnique: unique("interview_studio_daily_usage_user_day_unique").on(t.userId, t.usageDate),
+  byDate: index("interview_studio_daily_usage_date_idx").on(t.usageDate, t.userId),
+  validCount: check("interview_studio_daily_usage_count_check", sql`${t.evaluationJobs} BETWEEN 0 AND 100`),
+  validAiCount: check("interview_studio_daily_usage_ai_count_check", sql`${t.aiEvaluationJobs} BETWEEN 0 AND ${t.evaluationJobs}`),
+  validRunnerCount: check("interview_studio_daily_usage_runner_count_check", sql`${t.codeRunnerJobs} BETWEEN 0 AND ${t.evaluationJobs}`),
+}));
+
+export const interviewStudioArtifacts = pgTable("interview_studio_artifacts", {
+  id: text("id").primaryKey(),
+  sessionId: text("session_id").references(() => interviewStudioSessions.id, { onDelete: "cascade" }).notNull(),
+  userId: integer("user_id").references(() => users.id, { onDelete: "restrict" }).notNull(),
+  kind: text("kind").notNull(), // camera | microphone | screen | combined
+  status: text("status").default("pending").notNull(),
+  privateManifest: jsonb("private_manifest").$type<InterviewStudioPrivateArtifactManifest>().notNull(),
+  originalFileName: text("original_file_name").notNull(),
+  mimeType: text("mime_type").notNull(),
+  sizeBytes: integer("size_bytes"),
+  sha256: text("sha256"),
+  durationSeconds: integer("duration_seconds"),
+  consentPolicyVersion: text("consent_policy_version").notNull(),
+  retentionUntil: timestamp("retention_until", { withTimezone: true }).notNull(),
+  uploadedAt: timestamp("uploaded_at", { withTimezone: true }),
+  deletedAt: timestamp("deleted_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => ({
+  bySession: index("interview_studio_artifacts_session_idx").on(t.sessionId, t.kind, t.createdAt),
+  byRetention: index("interview_studio_artifacts_retention_idx").on(t.status, t.retentionUntil),
+  validId: check("interview_studio_artifacts_id_check", sql`${t.id} ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'`),
+  validKind: check("interview_studio_artifacts_kind_check", sql`${t.kind} IN ('camera','microphone','screen','combined')`),
+  validStatus: check("interview_studio_artifacts_status_check", sql`${t.status} IN ('pending','uploaded','quarantined','deleted','failed')`),
+  manifestObject: check("interview_studio_artifacts_manifest_check", sql`
+    jsonb_typeof(${t.privateManifest}) = 'object'
+    AND ${t.privateManifest}->>'access' = 'private'
+    AND length(btrim(${t.privateManifest}->>'objectKey')) >= 3
+    AND ${t.privateManifest}->>'objectKey' !~* '^[a-z][a-z0-9+.-]*://'
+    AND NOT (${t.privateManifest} ? 'url')
+  `),
+  validSize: check("interview_studio_artifacts_size_check", sql`${t.sizeBytes} IS NULL OR ${t.sizeBytes} BETWEEN 1 AND 1073741824`),
+  validDuration: check("interview_studio_artifacts_duration_check", sql`${t.durationSeconds} IS NULL OR ${t.durationSeconds} BETWEEN 0 AND 14400`),
+  validHash: check("interview_studio_artifacts_hash_check", sql`${t.sha256} IS NULL OR ${t.sha256} ~ '^[0-9a-f]{64}$'`),
+}));
+
+export const interviewStudioEvents = pgTable("interview_studio_events", {
+  id: serial("id").primaryKey(),
+  sessionId: text("session_id").references(() => interviewStudioSessions.id, { onDelete: "cascade" }).notNull(),
+  userId: integer("user_id").references(() => users.id, { onDelete: "set null" }),
+  idempotencyKey: text("idempotency_key").notNull(),
+  type: text("type").notNull(),
+  payload: jsonb("payload").$type<Record<string, unknown>>().default(sql`'{}'::jsonb`).notNull(),
+  occurredAt: timestamp("occurred_at", { withTimezone: true }).notNull(),
+  receivedAt: timestamp("received_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => ({
+  sessionIdempotencyUnique: unique("interview_studio_events_session_idempotency_unique").on(t.sessionId, t.idempotencyKey),
+  bySessionTime: index("interview_studio_events_session_time_idx").on(t.sessionId, t.occurredAt, t.id),
+  validType: check("interview_studio_events_type_check", sql`
+    ${t.type} IN ('session_started','session_submitted','permission_changed','recording_started','recording_stopped',
+      'screen_share_ended','focus_left','focus_returned','network_offline','network_online','response_saved','tests_requested')
+  `),
+  payloadObject: check("interview_studio_events_payload_check", sql`jsonb_typeof(${t.payload}) = 'object'`),
+}));
+
+export const interviewStudioShareGrants = pgTable("interview_studio_share_grants", {
+  id: text("id").primaryKey(),
+  sessionId: text("session_id").references(() => interviewStudioSessions.id, { onDelete: "cascade" }).notNull(),
+  learnerUserId: integer("learner_user_id").references(() => users.id, { onDelete: "restrict" }).notNull(),
+  recruiterId: integer("recruiter_id").references(() => recruiters.id, { onDelete: "cascade" }).notNull(),
+  scopes: jsonb("scopes").$type<Array<"summary" | "responses" | "code" | "artifacts">>().notNull(),
+  status: text("status").default("active").notNull(), // active | revoked | expired
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  grantedAt: timestamp("granted_at", { withTimezone: true }).defaultNow().notNull(),
+  revokedAt: timestamp("revoked_at", { withTimezone: true }),
+  revocationReason: text("revocation_reason"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => ({
+  byRecruiter: index("interview_studio_share_grants_recruiter_idx").on(t.recruiterId, t.status, t.expiresAt),
+  bySession: index("interview_studio_share_grants_session_idx").on(t.sessionId, t.status, t.expiresAt),
+  validId: check("interview_studio_share_grants_id_check", sql`${t.id} ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'`),
+  validStatus: check("interview_studio_share_grants_status_check", sql`${t.status} IN ('active','revoked','expired')`),
+  scopesArray: check("interview_studio_share_grants_scopes_check", sql`
+    jsonb_typeof(${t.scopes}) = 'array'
+    AND jsonb_array_length(${t.scopes}) BETWEEN 1 AND 4
+    AND ${t.scopes} <@ '["summary","responses","code","artifacts"]'::jsonb
+  `),
+  validExpiry: check("interview_studio_share_grants_expiry_check", sql`${t.expiresAt} > ${t.grantedAt}`),
+  revokedTimestamp: check("interview_studio_share_grants_revoked_check", sql`
+    (${t.status} = 'revoked' AND ${t.revokedAt} IS NOT NULL) OR (${t.status} <> 'revoked' AND ${t.revokedAt} IS NULL)
+  `),
+}));
+
+export type InterviewStudioTemplate = typeof interviewStudioTemplates.$inferSelect;
+export type InsertInterviewStudioTemplate = typeof interviewStudioTemplates.$inferInsert;
+export type InterviewStudioSession = typeof interviewStudioSessions.$inferSelect;
+export type InsertInterviewStudioSession = typeof interviewStudioSessions.$inferInsert;
+export type InterviewStudioResponse = typeof interviewStudioResponses.$inferSelect;
+export type InsertInterviewStudioResponse = typeof interviewStudioResponses.$inferInsert;
+export type InterviewStudioArtifact = typeof interviewStudioArtifacts.$inferSelect;
+export type InsertInterviewStudioArtifact = typeof interviewStudioArtifacts.$inferInsert;
+export type InterviewStudioEvent = typeof interviewStudioEvents.$inferSelect;
+export type InsertInterviewStudioEvent = typeof interviewStudioEvents.$inferInsert;
+export type InterviewStudioShareGrant = typeof interviewStudioShareGrants.$inferSelect;
+export type InsertInterviewStudioShareGrant = typeof interviewStudioShareGrants.$inferInsert;
+export type InterviewStudioEvaluationJob = typeof interviewStudioEvaluationJobs.$inferSelect;
+export type InsertInterviewStudioEvaluationJob = typeof interviewStudioEvaluationJobs.$inferInsert;
+export type InterviewStudioDailyUsage = typeof interviewStudioDailyUsage.$inferSelect;
+export type InsertInterviewStudioDailyUsage = typeof interviewStudioDailyUsage.$inferInsert;
+
+// AI Interview Tables (legacy, retained only for historical compatibility)
 export const interviewQuestions = pgTable("interview_questions", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),

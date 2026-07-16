@@ -26,7 +26,7 @@ export default function PrivacyPolicy() {
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Privacy Policy</h1>
           <p className="text-gray-600 dark:text-gray-300">
-            Last updated: {new Date().toLocaleDateString()}
+            Last updated: 16 July 2026
           </p>
         </div>
 
@@ -52,6 +52,15 @@ export default function PrivacyPolicy() {
                   The authorised exam owner can review this evidence with the assessment result. These signals do not change a score automatically and are not an automated finding of misconduct.
                 </p>
               </div>
+              <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-950">
+                <p className="font-semibold">AI Interview Practice</p>
+                <p className="mt-2">
+                  Interview Practice is private by design. Camera, microphone, screen sharing and AI processing are separate choices shown before a session starts. Camera and screen checks stay in your browser and are not recorded in Practice mode. If you choose voice transcription, the short audio response is sent to the OpenAI API, converted to editable text and removed from Octamy&apos;s temporary upload storage after the request. OpenAI&apos;s API data handling and any abuse-monitoring retention remain governed by its configured data controls and processor terms; Octamy does not use these responses to train its own models.
+                </p>
+                <p className="mt-2">
+                  Octamy stores the response text, submitted code, test outcomes and feedback for session recovery until you delete the practice session or its retention period ends. When enabled, code is sent only to Octamy&apos;s separately isolated execution service with networking disabled. We do not score facial appearance, gaze, emotion, accent or other protected or personality characteristics. Practice sessions are never shown to recruiters.
+                </p>
+              </div>
             </section>
 
             <section className="mb-8">
@@ -64,6 +73,7 @@ export default function PrivacyPolicy() {
                 <li>Respond to your comments and questions</li>
                 <li>Generate and validate certificates</li>
                 <li>Maintain records for internship programs</li>
+                <li>Provide learner-requested interview transcription, test execution, and rubric-based practice feedback</li>
                 <li>Prevent fraud and enhance security</li>
               </ul>
             </section>

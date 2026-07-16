@@ -12,6 +12,15 @@ import path from "path";
 import { generateCertificateHTML } from "./utils/newCertificateGenerator";
 import { fileURLToPath } from "url";
 import { isGoogleAuthConfigured } from "./google-auth";
+import {
+  getInterviewStudioEvaluationQueueHealth,
+  startInterviewStudioEvaluationWorker,
+  stopInterviewStudioEvaluationWorker,
+} from "./lib/interview-studio-evaluation-worker";
+import {
+  startInterviewStudioRetentionWorker,
+  stopInterviewStudioRetentionWorker,
+} from "./lib/interview-studio-retention-worker";
 
 const app = express();
 
@@ -50,7 +59,16 @@ app.use((req, res, next) => {
   res.setHeader('X-Frame-Options', 'SAMEORIGIN');
   res.setHeader('X-XSS-Protection', '1; mode=block');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=(self "https://secure.payu.in" "https://api.cashfree.com" "https://sandbox.cashfree.com")');
+  // Camera and microphone remain disabled across the product by default. The
+  // private Interview Studio is the only document allowed to request them,
+  // and it still does so only after an explicit learner gesture. Screen
+  // capture is a browser-mediated picker and is likewise scoped to this page.
+  const isInterviewStudioDocument = req.path === '/interview-studio'
+    || req.path.startsWith('/interview-studio/');
+  const interviewCapturePolicy = isInterviewStudioDocument
+    ? 'camera=(self), microphone=(self), display-capture=(self)'
+    : 'camera=(), microphone=(), display-capture=()';
+  res.setHeader('Permissions-Policy', `${interviewCapturePolicy}, geolocation=(), payment=(self "https://secure.payu.in" "https://api.cashfree.com" "https://sandbox.cashfree.com")`);
   res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' https://secure.payu.in https://test.payu.in https://accounts.google.com https://sdk.cashfree.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' blob: https:; frame-src 'self' https://secure.payu.in https://test.payu.in https://accounts.google.com https://api.cashfree.com https://sandbox.cashfree.com; connect-src 'self' https://secure.payu.in https://test.payu.in https://accounts.google.com https://api.cashfree.com https://sandbox.cashfree.com;");
 
   next();
@@ -134,6 +152,13 @@ app.get("/readyz", async (_req, res) => {
       : "not_configured";
   checks.nodeEnv = process.env.NODE_ENV || "development";
   checks.commit = process.env.GIT_COMMIT || "unknown";
+  try {
+    checks.interviewEvaluationQueue = await getInterviewStudioEvaluationQueueHealth();
+    if (checks.interviewEvaluationQueue.status === "degraded") checks.status = "not_ready";
+  } catch (err: any) {
+    checks.status = "not_ready";
+    checks.interviewEvaluationQueue = { ok: false, error: err?.message };
+  }
   res.status(checks.status === "ready" ? 200 : 503).json(checks);
 });
 // const __filename = fileURLToPath(import.meta.url);
@@ -203,6 +228,8 @@ app.use((req, res, next) => {
   const httpServer = server.listen(port, () => {
     log(`serving on port ${port}`);
   });
+  startInterviewStudioEvaluationWorker();
+  startInterviewStudioRetentionWorker();
 
   // Tighten timeouts to defeat slowloris-style attacks.
   // headersTimeout must be > keepAliveTimeout per Node docs.
@@ -216,6 +243,8 @@ app.use((req, res, next) => {
     if (shuttingDown) return;
     shuttingDown = true;
     logger.info('server.shutdown.begin', { signal });
+    stopInterviewStudioEvaluationWorker();
+    stopInterviewStudioRetentionWorker();
     // After 25s, force-exit so pm2 / docker can restart us instead of hanging.
     const forceExit = setTimeout(() => {
       logger.error('server.shutdown.force_exit');

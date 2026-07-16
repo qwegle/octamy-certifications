@@ -1477,6 +1477,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
             eq(questionsTable.bankId, rule.bankId),
             eq(questionsTable.isActive, true),
             eq(questionsTable.reviewStatus, "approved"),
+            sql`${questionsTable.questionFormat} IN ('mcq_single', 'true_false')`,
+            sql`json_typeof(${questionsTable.options}) = 'array'`,
+            sql`${questionsTable.correctAnswer} >= 0`,
+            sql`${questionsTable.correctAnswer} < json_array_length(${questionsTable.options})`,
           ];
           if (rule.topicId) filters.push(eq(questionsTable.topicId, rule.topicId));
           if (rule.difficulty !== "mixed") filters.push(eq(questionsTable.difficulty, rule.difficulty));
@@ -1500,6 +1504,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
             inArray(questionsTable.bankId, bankIds),
             eq(questionsTable.isActive, true),
             eq(questionsTable.reviewStatus, "approved"),
+            sql`${questionsTable.questionFormat} IN ('mcq_single', 'true_false')`,
+            sql`json_typeof(${questionsTable.options}) = 'array'`,
+            sql`${questionsTable.correctAnswer} >= 0`,
+            sql`${questionsTable.correctAnswer} < json_array_length(${questionsTable.options})`,
           ));
         const required = requiredQuestionInventory(
           purpose,

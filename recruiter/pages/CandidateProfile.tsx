@@ -3,12 +3,12 @@ import { useRoute } from 'wouter';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import RecruiterLayout from '../components/RecruiterLayout';
+import InterviewEvidenceNotice from '../components/InterviewEvidenceNotice';
 import { useRecruiterAuth } from '../auth/RecruiterAuthProvider';
 import { downloadCandidateCv } from '../utils/downloadCandidateCv';
 import {
@@ -16,23 +16,11 @@ import {
   MapPin,
   Calendar,
   Trophy,
-  Play,
-  Star,
-  TrendingUp,
   Award,
-  Clock,
-  X,
-  Target,
   BarChart3,
-  Video,
-  FileText,
   Download,
   Eye,
-  Heart,
-  Zap,
-  Brain,
   Code,
-  Database,
   Briefcase
 } from 'lucide-react';
 
@@ -46,17 +34,6 @@ interface Certificate {
   category?: string;
 }
 
-interface Interview {
-  id: number;
-  technology: string;
-  score?: number;
-  grade?: string;
-  duration?: number;
-  completedAt: string;
-  videoUrl?: string;
-  feedback?: string;
-}
-
 interface CandidateProfile {
   id: number;
   name: string;
@@ -66,7 +43,6 @@ interface CandidateProfile {
   currentRole: string;
   skills: string[];
   certificates: Certificate[];
-  interviews: Interview[];
   profileViews: number;
   lastActive: string;
   profileCompleteness?: number;
@@ -79,16 +55,13 @@ interface CandidateProfile {
   expectedSalary?: string;
   hasResume: boolean;
   cvAccessUnlocked: boolean;
-  interviewAccessUnlocked: boolean;
-  creditCosts: { profile_view: number; cv_download: number; interview_access: number };
+  creditCosts: { profile_view: number; cv_download: number };
 }
 
 export default function CandidateProfile() {
   const [, params] = useRoute('/recruiter/profile/:id');
   const [candidate, setCandidate] = useState<CandidateProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [watchingVideo, setWatchingVideo] = useState<{interview: Interview, videoUrl: string} | null>(null);
-  const [unlockingInterviews, setUnlockingInterviews] = useState(false);
   const { toast } = useToast();
   const { updateRecruiter } = useRecruiterAuth();
 
@@ -118,14 +91,20 @@ export default function CandidateProfile() {
       }
       
       const profileData = await response.json();
+      const {
+        interviews: retiredPrototypeInterviews,
+        interviewAccessUnlocked: retiredPrototypeAccess,
+        ...recruiterVisibleProfile
+      } = profileData;
+      void retiredPrototypeInterviews;
+      void retiredPrototypeAccess;
       const certs = Array.isArray(profileData.certificates) ? profileData.certificates : [];
       setCandidate({
-        ...profileData,
+        ...recruiterVisibleProfile,
         location: profileData.location || 'Location not provided',
         currentRole: profileData.currentRole || 'Role not provided',
         experience: Number(profileData.experience || 0),
         skills: Array.isArray(profileData.skills) ? profileData.skills : [],
-        interviews: Array.isArray(profileData.interviews) ? profileData.interviews : [],
         certificates: certs,
         averageScore: calculateAverageScore(certs),
         dedicationScore: Number(profileData.profileCompleteness || 0),
@@ -233,47 +212,6 @@ export default function CandidateProfile() {
     }
   };
 
-  const handleWatchInterview = async (interview: Interview) => {
-    setUnlockingInterviews(true);
-    try {
-      const response = await fetch('/api/recruiter/access-interview-video', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('recruiterToken')}`,
-        },
-        body: JSON.stringify({
-          interviewId: interview.id,
-          candidateId: params?.id,
-        }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        toast({
-          title: "Interview access unchanged",
-          description: error.message || "Failed to access interview video",
-        });
-        return;
-      }
-
-      const data = await response.json();
-      updateRecruiter({ creditsBalance: data.creditsRemaining });
-      setWatchingVideo({ interview, videoUrl: data.videoUrl });
-      if (!data.alreadyUnlocked) {
-        toast({ title: 'Interview evidence unlocked', description: data.message });
-        await fetchCandidateProfile(String(candidate?.id || candidateId));
-      }
-    } catch (error) {
-      toast({
-        title: "Interview unavailable",
-        description: "An error occurred while accessing the video",
-      });
-    } finally {
-      setUnlockingInterviews(false);
-    }
-  };
-
   const handleDownloadCv = async () => {
     if (!candidate) return;
     try {
@@ -365,7 +303,7 @@ export default function CandidateProfile() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-blue-600">{candidate.averageScore}%</div>
                     <div className="text-sm text-gray-500">Avg Score</div>
@@ -373,10 +311,6 @@ export default function CandidateProfile() {
                   <div className="text-center">
                     <div className="text-2xl font-bold text-green-600">{candidate.certificates.length}</div>
                     <div className="text-sm text-gray-500">Certificates</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-purple-600">{candidate.interviews.length}</div>
-                    <div className="text-sm text-gray-500">Interviews</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-orange-600">{candidate.dedicationScore}%</div>
@@ -395,15 +329,9 @@ export default function CandidateProfile() {
               </CardContent>
             </Card>
 
-            {/* Tabs for detailed information */}
-            <Tabs defaultValue="certificates" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="certificates">Certificates</TabsTrigger>
-                <TabsTrigger value="interviews">Interviews</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="certificates" className="space-y-4">
-                <Card>
+            <InterviewEvidenceNotice compact />
+
+            <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center">
                       <Award className="h-5 w-5 mr-2" />
@@ -412,7 +340,11 @@ export default function CandidateProfile() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {candidate.certificates.map((cert, index) => (
+                      {candidate.certificates.length === 0 ? (
+                        <div className="rounded-xl border border-dashed border-slate-300 py-8 text-center text-sm text-slate-500">
+                          No current credential evidence is available for this candidate.
+                        </div>
+                      ) : candidate.certificates.map((cert, index) => (
                         <div key={index} className="border rounded-lg p-4">
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
@@ -441,72 +373,7 @@ export default function CandidateProfile() {
                       ))}
                     </div>
                   </CardContent>
-                </Card>
-              </TabsContent>
-              
-              <TabsContent value="interviews" className="space-y-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center">
-                      <Video className="h-5 w-5 mr-2" />
-                      Interview Recordings ({candidate.interviews.length})
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {candidate.interviews.length === 0 ? (
-                      <div className="text-center py-8 text-gray-500">
-                        <Video className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                        <p>No interview recordings available</p>
-                        <p className="text-sm">This candidate hasn't completed any AI interviews yet</p>
-                      </div>
-                    ) : (
-                      <div className="space-y-4">
-                        {!candidate.interviewAccessUnlocked ? (
-                          <div className="flex flex-col gap-4 rounded-xl border border-sky-200 bg-sky-50 p-4 sm:flex-row sm:items-center sm:justify-between">
-                            <div>
-                              <p className="font-semibold text-sky-950">Interview scores and recordings are protected</p>
-                              <p className="mt-1 text-sm text-sky-800">One unlock covers this candidate's available interview evidence in your workspace. Reopening costs 0 credits.</p>
-                            </div>
-                            <span className="shrink-0 rounded-lg bg-white px-3 py-2 text-sm font-semibold text-sky-900 shadow-sm">{candidate.creditCosts.interview_access} credits</span>
-                          </div>
-                        ) : null}
-                        {candidate.interviews.map((interview, index) => (
-                          <div key={index} className="border rounded-lg p-4">
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <h4 className="font-medium">{interview.technology} Interview</h4>
-                                <div className="flex items-center mt-1 space-x-4 text-sm">
-                                  {candidate.interviewAccessUnlocked ? (
-                                    <span className={`font-semibold ${getScoreColor(interview.score)}`}>
-                                      Score: {interview.score}% ({interview.grade || 'No grade'})
-                                    </span>
-                                  ) : (
-                                    <span className="font-medium text-slate-500">Score hidden until unlocked</span>
-                                  )}
-                                  <span className="text-gray-500">
-                                    {interview.completedAt ? new Date(interview.completedAt).toLocaleDateString() : 'Date unavailable'}
-                                  </span>
-                                </div>
-                              </div>
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                onClick={() => handleWatchInterview(interview)}
-                                disabled={unlockingInterviews}
-                              >
-                                <Play className="h-4 w-4 mr-2" />
-                                {candidate.interviewAccessUnlocked ? 'Watch · unlocked' : `Unlock & watch · ${candidate.creditCosts.interview_access}`}
-                              </Button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-              
-            </Tabs>
+            </Card>
           </div>
 
           {/* Right Column - Quick Info & Actions */}
@@ -608,61 +475,6 @@ export default function CandidateProfile() {
         </div>
       </div>
 
-      {/* Video Modal */}
-      {watchingVideo && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-cream-soft rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-semibold">
-                {watchingVideo.interview.technology} Interview - {candidate?.name}
-              </h3>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setWatchingVideo(null)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-            
-            <div className="mb-4">
-              <video
-                src={watchingVideo.videoUrl}
-                controls
-                className="w-full h-96 bg-black rounded-lg"
-                onError={() => {
-                  toast({
-                    title: "Video unavailable",
-                    description: "The recording could not be loaded. No additional credits were charged.",
-                  });
-                }}
-              >
-                Your browser does not support the video tag.
-              </video>
-            </div>
-            
-            <div className="flex items-center justify-between text-sm text-gray-600">
-              <div>
-                {watchingVideo.interview.score == null ? 'Interview evidence unlocked' : <>Score: <span className={`font-semibold ${getScoreColor(watchingVideo.interview.score)}`}>
-                  {watchingVideo.interview.score}% ({watchingVideo.interview.grade || 'No grade'})
-                </span></>}
-              </div>
-              <div>
-                Date: {watchingVideo.interview.completedAt ? new Date(watchingVideo.interview.completedAt).toLocaleDateString() : 'Not available'}
-              </div>
-            </div>
-            
-            {watchingVideo.interview.feedback && (
-              <div className="mt-4">
-                <h4 className="font-medium mb-2">AI Feedback</h4>
-                <p className="text-sm text-gray-600 bg-cream-deep p-3 rounded-lg">
-                  {watchingVideo.interview.feedback}
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
     </div></RecruiterLayout>
   );
 }

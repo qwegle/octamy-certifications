@@ -116,7 +116,16 @@ export default function Login() {
           }
         } catch {}
       }
-      setTimeout(() => setLocation(dest), 600);
+      setTimeout(() => {
+        // Interview Studio receives a narrowly scoped camera/microphone
+        // Permissions-Policy on its document response. A full navigation is
+        // required when login began on a different SPA document.
+        if (dest === '/interview-studio' || dest.startsWith('/interview-studio/')) {
+          window.location.assign(dest);
+        } else {
+          setLocation(dest);
+        }
+      }, 600);
     } catch (err) {
       toast({
         title: 'Sign in failed',

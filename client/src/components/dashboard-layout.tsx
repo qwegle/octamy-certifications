@@ -23,6 +23,7 @@ import {
   ListChecks,
   LogOut,
   Menu,
+  MessagesSquare,
   MoreHorizontal,
   Search,
   Settings,
@@ -60,6 +61,7 @@ type NavItem = {
   href: string;
   icon: LucideIcon;
   group?: string;
+  reloadDocument?: boolean;
 };
 
 type WorkspaceOption = {
@@ -106,6 +108,9 @@ const NAV_BY_ROLE: Record<DashboardRole, NavItem[]> = {
     { label: "Overview", href: "/dashboard", icon: LayoutDashboard, group: "Main" },
     { label: "My certificates", href: "/my-certificates", icon: Award, group: "Learning" },
     { label: "Progress", href: "/progress", icon: BarChart3, group: "Learning" },
+    // Capture permissions are scoped by the document response header, so this
+    // route needs a real navigation instead of an in-document SPA transition.
+    { label: "Interview studio", href: "/interview-studio", icon: MessagesSquare, group: "Career", reloadDocument: true },
     { label: "Get certified", href: "/get-certified", icon: BookOpen, group: "Learning" },
     { label: "Preferences", href: "/preferences", icon: SlidersHorizontal, group: "Account" },
     { label: "Profile", href: "/profile-edit", icon: Settings, group: "Account" },
@@ -308,20 +313,37 @@ function SidebarNavigation({
                   const active = isActiveRoute(location, item.href);
                   return (
                     <li key={item.href}>
-                      <Link
-                        href={item.href}
-                        onClick={onNavigate}
-                        aria-current={active ? "page" : undefined}
-                        className={cn(
-                          "flex min-h-11 items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-1",
-                          active
-                            ? "bg-slate-950 text-white shadow-sm"
-                            : "text-slate-600 hover:bg-slate-100 hover:text-slate-950",
-                        )}
-                      >
+                      {item.reloadDocument ? (
+                        <a
+                          href={item.href}
+                          onClick={onNavigate}
+                          aria-current={active ? "page" : undefined}
+                          className={cn(
+                            "flex min-h-11 items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-1",
+                            active
+                              ? "bg-slate-950 text-white shadow-sm"
+                              : "text-slate-600 hover:bg-slate-100 hover:text-slate-950",
+                          )}
+                        >
+                          <Icon className={cn("h-[18px] w-[18px] shrink-0", active ? "text-white" : "text-slate-400")} aria-hidden="true" />
+                          <span className="truncate">{item.label}</span>
+                        </a>
+                      ) : (
+                        <Link
+                          href={item.href}
+                          onClick={onNavigate}
+                          aria-current={active ? "page" : undefined}
+                          className={cn(
+                            "flex min-h-11 items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-1",
+                            active
+                              ? "bg-slate-950 text-white shadow-sm"
+                              : "text-slate-600 hover:bg-slate-100 hover:text-slate-950",
+                          )}
+                        >
                         <Icon className={cn("h-[18px] w-[18px] shrink-0", active ? "text-white" : "text-slate-400")} aria-hidden="true" />
                         <span className="truncate">{item.label}</span>
-                      </Link>
+                        </Link>
+                      )}
                     </li>
                   );
                 })}

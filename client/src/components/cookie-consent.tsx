@@ -6,7 +6,7 @@ const KEY = "octamy.cookieConsent.v1";
 export function CookieConsent() {
   const [location] = useLocation();
   const [show, setShow] = useState(false);
-  const isFocusedWorkspace = /^\/(?:login|register|forgot-password|reset-password|creator\/|institute\/|recruiter\/)/.test(location);
+  const isFocusedWorkspace = /^\/(?:login|register|forgot-password|reset-password|interview-studio(?:\/|$)|creator\/|institute\/|recruiter\/)/.test(location);
   const isExamRoute = /^\/(?:x\/[^/]+|get-certified\/[^/]+|practice\/[^/]+)\/?$/.test(location);
 
   useEffect(() => {

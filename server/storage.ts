@@ -645,6 +645,13 @@ export class DatabaseStorage implements IStorage {
         eq(questions.courseId, courseId),
         eq(questions.isActive, true),
         eq(questions.reviewStatus, "approved"),
+        // The public assessment renderer currently supports option-based
+        // questions only. Code/free-text authoring metadata must never leak
+        // into a live attempt until a dedicated runner/scorer is available.
+        sql`${questions.questionFormat} IN ('mcq_single', 'true_false')`,
+        sql`json_typeof(${questions.options}) = 'array'`,
+        sql`${questions.correctAnswer} >= 0`,
+        sql`${questions.correctAnswer} < json_array_length(${questions.options})`,
       ));
   }
 
@@ -2845,7 +2852,10 @@ export class DatabaseStorage implements IStorage {
     if (Array.isArray(safeFilters.workType) && safeFilters.workType.length) conditions.push(sql`${users.workType} && ${safeFilters.workType}::text[]`);
     if (Array.isArray(safeFilters.category) && safeFilters.category.length) conditions.push(sql`${users.category} && ${safeFilters.category}::text[]`);
     if (safeFilters.hasInterviews) {
-      conditions.push(sql`EXISTS (SELECT 1 FROM interviews i WHERE i.user_id = ${users.id} AND i.status = 'completed')`);
+      // Legacy interview rows are not governed recruiter evidence. Verified
+      // Interview Studio grants are intentionally unreleased, so this filter
+      // must fail closed instead of surfacing old prototype data.
+      conditions.push(sql`false`);
     }
     const minScore = Number(safeFilters.minScore);
     if (Number.isFinite(minScore) && minScore > 0) {
@@ -2872,10 +2882,7 @@ export class DatabaseStorage implements IStorage {
       profileCompleteness: users.profileCompleteness,
       lastActive: users.lastActive,
       hasResume: sql<boolean>`${users.resume} IS NOT NULL AND btrim(${users.resume}) <> ''`.as('has_resume'),
-      interviewCount: sql<number>`(
-        SELECT COUNT(*)::int FROM interviews i
-        WHERE i.user_id = ${users.id} AND i.status = 'completed'
-      )`.as('interview_count'),
+      interviewCount: sql<number>`0::int`.as('interview_count'),
       profileUnlocked: sql<boolean>`EXISTS (
         SELECT 1 FROM profile_access_logs pal
         WHERE pal.recruiter_id = ${recruiterId}
@@ -2888,12 +2895,7 @@ export class DatabaseStorage implements IStorage {
           AND pal.user_id = ${users.id}
           AND pal.access_type = 'cv_download'
       )`.as('cv_unlocked'),
-      interviewUnlocked: sql<boolean>`EXISTS (
-        SELECT 1 FROM profile_access_logs pal
-        WHERE pal.recruiter_id = ${recruiterId}
-          AND pal.user_id = ${users.id}
-          AND pal.access_type = 'interview_access'
-      )`.as('interview_unlocked'),
+      interviewUnlocked: sql<boolean>`false`.as('interview_unlocked'),
     }).from(users)
       .where(whereClause)
       .orderBy(desc(users.lastActive))
@@ -3012,14 +3014,6 @@ export class DatabaseStorage implements IStorage {
       ))
       .orderBy(desc(certificates.issuedAt));
 
-    const [interviewAccess] = await db.select({ id: profileAccessLogs.id })
-      .from(profileAccessLogs)
-      .where(and(
-        eq(profileAccessLogs.recruiterId, recruiterId),
-        eq(profileAccessLogs.userId, candidateId),
-        eq(profileAccessLogs.accessType, 'interview_access'),
-      ))
-      .limit(1);
     const [cvAccess] = await db.select({ id: profileAccessLogs.id })
       .from(profileAccessLogs)
       .where(and(
@@ -3029,30 +3023,12 @@ export class DatabaseStorage implements IStorage {
       ))
       .limit(1);
 
-    const userInterviews = interviewAccess
-      ? await db.select({
-          id: interviews.id,
-          technology: interviews.technology,
-          status: interviews.status,
-          score: interviews.score,
-          grade: interviews.grade,
-          completedAt: interviews.completedAt,
-        }).from(interviews)
-          .where(and(eq(interviews.userId, candidateId), eq(interviews.status, 'completed')))
-      : await db.select({
-          id: interviews.id,
-          technology: interviews.technology,
-          status: interviews.status,
-          completedAt: interviews.completedAt,
-        }).from(interviews)
-          .where(and(eq(interviews.userId, candidateId), eq(interviews.status, 'completed')));
-
     return {
       ...candidate[0],
       certificates: certs,
-      interviews: userInterviews,
+      interviews: [],
       cvAccessUnlocked: Boolean(cvAccess),
-      interviewAccessUnlocked: Boolean(interviewAccess),
+      interviewAccessUnlocked: false,
       creditCosts: RECRUITER_ACCESS_COSTS,
       profileViews: 0,
     };
@@ -3852,6 +3828,10 @@ export class DatabaseStorage implements IStorage {
           eq(questions.bankId, item.bankId),
           eq(questions.isActive, true),
           eq(questions.reviewStatus, "approved"),
+          sql`${questions.questionFormat} IN ('mcq_single', 'true_false')`,
+          sql`json_typeof(${questions.options}) = 'array'`,
+          sql`${questions.correctAnswer} >= 0`,
+          sql`${questions.correctAnswer} < json_array_length(${questions.options})`,
         ];
         if (item.topicId) inventoryFilters.push(eq(questions.topicId, item.topicId));
         if (item.difficulty !== "mixed") inventoryFilters.push(eq(questions.difficulty, item.difficulty));
@@ -3903,6 +3883,10 @@ export class DatabaseStorage implements IStorage {
         eq(questions.bankId, item.bankId),
         eq(questions.isActive, true),
         eq(questions.reviewStatus, "approved"),
+        sql`${questions.questionFormat} IN ('mcq_single', 'true_false')`,
+        sql`json_typeof(${questions.options}) = 'array'`,
+        sql`${questions.correctAnswer} >= 0`,
+        sql`${questions.correctAnswer} < json_array_length(${questions.options})`,
       ];
       if (item.topicId) where.push(eq(questions.topicId, item.topicId));
       if (item.difficulty && item.difficulty !== "mixed") {

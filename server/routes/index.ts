@@ -22,6 +22,7 @@ import taxonomyRoutes from './taxonomyRoutes';
 import catalogRoutes from './catalogRoutes';
 import learnerSubscriptionRoutes from './learnerSubscriptionRoutes';
 import certificationBenefitRoutes from './certificationBenefitRoutes';
+import interviewStudioRoutes from './interviewStudioRoutes';
 // Remove sellerRoutes import to prevent conflicts - seller routes are handled directly in main routes.ts
 
 const router = Router();
@@ -50,6 +51,7 @@ router.use('/', taxonomyRoutes); // Admin taxonomy CRUD + public audience bands
 router.use('/', catalogRoutes); // Split Octamy/creator assessment discovery with server filters
 router.use('/', learnerSubscriptionRoutes); // In-house-only learner subscription benefits
 router.use('/', certificationBenefitRoutes); // Institute vouchers + governed coupon pricing
+router.use('/', interviewStudioRoutes); // Private AI interview practice + gated verified evidence
 // Remove seller routes mounting - handled directly in main routes.ts
 
 // Register recruiter routes
