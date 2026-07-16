@@ -63,6 +63,7 @@ import {
   isScheduledDeadlineExceeded,
   scheduledAttemptDeadline,
   scheduledAttemptPassed,
+  scheduledSubmissionAnswers,
   scheduledDeadlineRemainingSeconds,
   scheduledRetakeAvailableAt,
   scheduledReviewDecision,
@@ -2530,7 +2531,7 @@ router.post('/x/:code/start', examStartLimiter, optionalAuth, async (req: Reques
         ? sql`(user_id = ${userId} OR lower(email) = ${resolvedEmail})`
         : sql`lower(email) = ${resolvedEmail}`;
       const priorResult: any = await tx.execute(sql`
-        SELECT id, started_at, deadline_at, submitted_at, status, answers
+        SELECT id, started_at, deadline_at, submitted_at, status, answers, passing_score_snapshot
         FROM exam_instance_attempts
         WHERE instance_id = ${inst.id} AND ${identityPredicate}
         ORDER BY started_at DESC, id DESC
@@ -2543,6 +2544,7 @@ router.post('/x/:code/start', examStartLimiter, optionalAuth, async (req: Reques
         submitted_at: Date | string | null;
         status: string;
         answers: Record<string, number | string | number[]> | null;
+        passing_score_snapshot: number | null;
       }>;
       // A device may disappear after its last autosave and never send the final
       // request. Finalise an expired immutable snapshot here so that orphaned
@@ -2570,10 +2572,16 @@ router.post('/x/:code/start', examStartLimiter, optionalAuth, async (req: Reques
             // progress forever. Preserve its existing totals and fail it closed.
           }
         }
+        const expiredScorePct = expiredScoring
+          ? scheduledScorePercentage(expiredScoring.score, expiredScoring.totalPoints)
+          : null;
+        const expiredPassed = expiredScorePct === null
+          ? false
+          : scheduledAttemptPassed(expiredScorePct, candidate.passing_score_snapshot ?? inst.passingScore);
         await tx.update(examInstanceAttempts).set({
           submittedAt: frozenDeadline,
           status: 'timed_out',
-          passed: false,
+          passed: expiredPassed,
           ...(expiredScoring ? {
             score: expiredScoring.score,
             totalPoints: expiredScoring.totalPoints,
@@ -2809,7 +2817,9 @@ router.post('/exam-attempts/:id/sync', async (req: Request, res: Response) => {
       events: z.array(examEvidenceEventSchema).max(50).default([]),
     }).safeParse(req.body);
     if (!parsed.success) return res.status(400).json({ message: 'Invalid exam sync payload', errors: parsed.error.flatten() });
-    if (parsed.data.answers && Object.keys(parsed.data.answers).length > 100) {
+    // Exam instances allow up to 500 questions, so a full autosave must support
+    // the same bounded inventory instead of failing once question 101 is answered.
+    if (parsed.data.answers && Object.keys(parsed.data.answers).length > 500) {
       return res.status(400).json({ message: 'Too many answers in one sync' });
     }
 
@@ -2818,6 +2828,12 @@ router.post('/exam-attempts/:id/sync', async (req: Request, res: Response) => {
     }
 
     let safeAnswers = parsed.data.answers;
+    const attemptDeadline = authoritativeAttemptDeadline(attempt, inst);
+    const deadlineExceeded = isScheduledDeadlineExceeded(attemptDeadline);
+    const submissionClosesAt = new Date(attemptDeadline.getTime() + 15_000);
+    // Browser/network retries after the grace window may still deliver evidence,
+    // but they must never rewrite the answer snapshot that existed at deadline.
+    if (deadlineExceeded) safeAnswers = undefined;
     if (safeAnswers) {
       const selected = await db.select({ questionId: examInstanceAttemptItems.questionId })
         .from(examInstanceAttemptItems)
@@ -2829,13 +2845,24 @@ router.post('/exam-attempts/:id/sync', async (req: Request, res: Response) => {
     }
 
     const now = new Date();
-    await db.transaction(async (tx) => {
+    const syncApplied = await db.transaction(async (tx) => {
       const update: Record<string, any> = { lastHeartbeatAt: now };
       if (safeAnswers) {
         update.answers = safeAnswers;
         update.lastAutosaveAt = now;
       }
-      await tx.update(examInstanceAttempts).set(update).where(eq(examInstanceAttempts.id, attempt.id));
+      // A sync request that was already in flight when submit acquired the row
+      // lock must not overwrite the immutable submitted answer snapshot.
+      const updated = await tx.update(examInstanceAttempts).set(update).where(and(
+        eq(examInstanceAttempts.id, attempt.id),
+        isNull(examInstanceAttempts.submittedAt),
+        // Re-check at write time so a request that waited on a row lock cannot
+        // cross the grace boundary and persist late answer changes.
+        // PostgreSQL NOW() is fixed at transaction start; clock_timestamp()
+        // prevents a row-lock wait from carrying a stale pre-deadline time.
+        sql`clock_timestamp() <= ${submissionClosesAt}`,
+      )).returning({ id: examInstanceAttempts.id });
+      if (updated.length === 0) return false;
 
       if (parsed.data.events.length) {
         await tx.insert(examProctorEvents).values(parsed.data.events.map((event) => {
@@ -2850,7 +2877,37 @@ router.post('/exam-attempts/:id/sync', async (req: Request, res: Response) => {
           };
         })).onConflictDoNothing();
       }
+      return true;
     });
+
+    if (!syncApplied) {
+      const [submittedAttempt] = await db.select().from(examInstanceAttempts)
+        .where(eq(examInstanceAttempts.id, attempt.id));
+      if (submittedAttempt && !submittedAttempt.submittedAt) {
+        return res.status(409).json({
+          message: 'The exam timer has ended. Late answer changes were not saved; submit will grade the last server-saved snapshot.',
+          code: 'EXAM_TIME_EXPIRED',
+          remainingSeconds: 0,
+          deadlineExceeded: true,
+          answerWriteAccepted: false,
+        });
+      }
+      return res.status(409).json({
+        message: 'Attempt already submitted',
+        submitted: true,
+        result: submittedAttempt ? storedScheduledAttemptResult(submittedAttempt) : undefined,
+      });
+    }
+
+    if (deadlineExceeded && parsed.data.answers !== undefined) {
+      return res.status(409).json({
+        message: 'The exam timer has ended. Late answer changes were not saved; submit will grade the last server-saved snapshot.',
+        code: 'EXAM_TIME_EXPIRED',
+        remainingSeconds: 0,
+        deadlineExceeded: true,
+        answerWriteAccepted: false,
+      });
+    }
 
     res.json({
       ok: true,
@@ -2860,6 +2917,8 @@ router.post('/exam-attempts/:id/sync', async (req: Request, res: Response) => {
         authoritativeAttemptDeadline(attempt, inst),
         now.getTime(),
       ),
+      deadlineExceeded,
+      answerWriteAccepted: parsed.data.answers === undefined || Boolean(safeAnswers),
     });
   } catch (err: any) {
     logger.error('exam-attempt.sync.error', { err });
@@ -3006,10 +3065,13 @@ router.post('/exam-attempts/:id/submit', async (req: Request, res: Response) => 
       // Server-side timer enforcement: the earlier of the frozen deadline and
       // its small network grace period wins.
       const timedOut = isScheduledDeadlineExceeded(authoritativeAttemptDeadline(lockedAttempt, inst));
-      const submittedAnswers = {
-        ...((lockedAttempt.answers && typeof lockedAttempt.answers === 'object') ? lockedAttempt.answers : {}),
-        ...parsed.data.answers,
-      } as Record<string, number | string | number[]>;
+      const submittedAnswers = scheduledSubmissionAnswers(
+        (lockedAttempt.answers && typeof lockedAttempt.answers === 'object')
+          ? lockedAttempt.answers as Record<string, number | string | number[]>
+          : {},
+        parsed.data.answers,
+        timedOut,
+      );
       const snapshotItems = await tx.select({
         questionId: examInstanceAttemptItems.questionId,
         correctAnswer: examInstanceAttemptItems.correctAnswer,
@@ -3029,7 +3091,7 @@ router.post('/exam-attempts/:id/submit', async (req: Request, res: Response) => 
       const scoring = scoreScheduledQuestionSnapshots(snapshotItems, submittedAnswers);
       const scorePct = scheduledScorePercentage(scoring.score, scoring.totalPoints);
       const passingScore = lockedAttempt.passingScoreSnapshot ?? inst.passingScore;
-      const passed = scheduledAttemptPassed(scorePct, timedOut, passingScore);
+      const passed = scheduledAttemptPassed(scorePct, passingScore);
       const submittedAt = new Date();
       await tx.update(examInstanceAttempts).set({
         answers: submittedAnswers as any,

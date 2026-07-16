@@ -162,6 +162,20 @@
       "when": 1784140400000,
       "tag": "0022_assessment_purpose_split",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1784140401000,
+      "tag": "0023_public_exam_evidence_consent",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1784140402000,
+      "tag": "0024_exam_session_owner",
+      "breakpoints": true
     }
   ]
 }

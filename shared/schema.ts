@@ -1477,6 +1477,7 @@ export const referralClicks = pgTable("referral_clicks", {
 export const examSessions = pgTable("exam_sessions", {
   id: text("id").primaryKey(),
   courseId: integer("course_id"),
+  userId: integer("user_id").references(() => users.id, { onDelete: "set null" }),
   correctMap: jsonb("correct_map").notNull(),
   questionSnapshot: jsonb("question_snapshot").$type<Array<{
     id: number;
@@ -1484,6 +1485,8 @@ export const examSessions = pgTable("exam_sessions", {
     options: string[];
     correctAnswer: number;
   }>>().default([]).notNull(),
+  evidenceConsentAt: timestamp("evidence_consent_at"),
+  evidenceConsentVersion: text("evidence_consent_version"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   expiresAt: timestamp("expires_at").notNull(),
 });

@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SEO } from "@/components/seo";
+import { FullscreenExitGuard, QuestionNavigator, SubmitExamDialog } from "@/components/exam-session-controls";
 import { resyncAuthoritativeExamTimer } from "@/lib/exam-timer";
 import {
   AlertCircle,
@@ -13,10 +14,12 @@ import {
   ChevronLeft,
   ChevronRight,
   Clock,
+  Flag,
   Loader2,
   Lock,
   Maximize,
   Save,
+  Send,
   ShieldCheck,
   Wifi,
   WifiOff,
@@ -97,6 +100,7 @@ type RecoveryState = {
   startedAt: string;
   proctorMode: ProctorMode;
   answers: Record<number, number>;
+  flaggedQuestionIds?: number[];
   pendingEvents: EvidenceEvent[];
 };
 
@@ -198,6 +202,9 @@ export default function ExamShare() {
   );
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [flaggedQuestionIds, setFlaggedQuestionIds] = useState<Set<number>>(() => new Set());
+  const [submitDialogOpen, setSubmitDialogOpen] = useState(false);
+  const [returningToFullscreen, setReturningToFullscreen] = useState(false);
   const [activeProctorMode, setActiveProctorMode] = useState<ProctorMode>("standard");
   const [excludedQuestionCount, setExcludedQuestionCount] = useState(0);
 
@@ -207,6 +214,7 @@ export default function ExamShare() {
   const startedAtRef = useRef<string | null>(null);
   const deadlineRef = useRef<number>(0);
   const answersRef = useRef<Record<number, number>>({});
+  const flaggedQuestionIdsRef = useRef<Set<number>>(new Set());
   const eventsRef = useRef<EvidenceEvent[]>([]);
   const proctorModeRef = useRef<ProctorMode>("standard");
   const syncInFlightRef = useRef(false);
@@ -258,6 +266,7 @@ export default function ExamShare() {
       startedAt: startedAtRef.current,
       proctorMode: proctorModeRef.current,
       answers: answersRef.current,
+      flaggedQuestionIds: Array.from(flaggedQuestionIdsRef.current),
       pendingEvents: eventsRef.current.slice(-100),
     };
     try { localStorage.setItem(recoveryKey, JSON.stringify(value)); } catch { /* storage can be unavailable */ }
@@ -327,6 +336,8 @@ export default function ExamShare() {
     proctorModeRef.current = recovery.proctorMode;
     setActiveProctorMode(recovery.proctorMode);
     answersRef.current = recovery.answers || {};
+    flaggedQuestionIdsRef.current = new Set(recovery.flaggedQuestionIds || []);
+    setFlaggedQuestionIds(new Set(flaggedQuestionIdsRef.current));
     eventsRef.current = recovery.pendingEvents || [];
     setAttemptId(recovery.attemptId);
     setAccessToken(recovery.accessToken);
@@ -353,6 +364,7 @@ export default function ExamShare() {
       const firstUnanswered = payload.questions.findIndex((question) => mergedAnswers[question.id] === undefined);
       setCurrentIdx(firstUnanswered >= 0 ? firstUnanswered : 0);
       queueEvent(resumed ? "session_resumed" : "session_started");
+      if (payload.proctorMode === "browser_evidence" && document.fullscreenElement) queueEvent("fullscreen_enter");
       setPhase("live");
       persistRecovery();
       void syncNow();
@@ -398,6 +410,9 @@ export default function ExamShare() {
     setStarting(true);
     setMessage(null);
     try {
+      proctorModeRef.current = inst.proctorMode;
+      setActiveProctorMode(inst.proctorMode);
+      if (inst.proctorMode === "browser_evidence" && !document.fullscreenElement && !(await enterFullscreen())) return;
       const data = await (
         await apiRequest("POST", `/api/x/${code}/start`, {
           email,
@@ -413,7 +428,8 @@ export default function ExamShare() {
         startedAt: data.startedAt,
         proctorMode: data.proctorMode,
         answers: {},
-        pendingEvents: [],
+        flaggedQuestionIds: [],
+        pendingEvents: eventsRef.current,
       };
       await loadLiveSession(recovery, false);
     } catch (error) {
@@ -434,14 +450,24 @@ export default function ExamShare() {
     syncTimerRef.current = setTimeout(() => { void syncNow(); }, 700);
   };
 
+  const toggleFlaggedQuestion = (questionId: number) => {
+    const next = new Set(flaggedQuestionIdsRef.current);
+    if (next.has(questionId)) next.delete(questionId);
+    else next.add(questionId);
+    flaggedQuestionIdsRef.current = next;
+    setFlaggedQuestionIds(next);
+    persistRecovery();
+  };
+
   const submitExam = useCallback(async () => {
     const activeAttemptId = attemptIdRef.current;
     const token = accessTokenRef.current;
     if (!activeAttemptId || !token || submittingRef.current) return;
+    setSubmitDialogOpen(false);
     if (!navigator.onLine) {
       autoSubmitRef.current = true;
       setSyncState("offline");
-      setMessage("Time is up. Your saved answers will submit automatically when the connection returns.");
+      setMessage("Your submission is queued. Saved answers will submit automatically when the connection returns; the timer continues until then.");
       return;
     }
     submittingRef.current = true;
@@ -516,6 +542,7 @@ export default function ExamShare() {
     const onFullscreen = () => {
       const active = !!document.fullscreenElement;
       setIsFullscreen(active);
+      if (!active) setSubmitDialogOpen(false);
       queueEvent(active ? "fullscreen_enter" : "fullscreen_exit");
     };
     const onPaste = () => queueEvent("paste");
@@ -529,6 +556,7 @@ export default function ExamShare() {
     document.addEventListener("fullscreenchange", onFullscreen);
     document.addEventListener("paste", onPaste);
     window.addEventListener("pagehide", onPageHide);
+    setIsFullscreen(Boolean(document.fullscreenElement));
     return () => {
       window.removeEventListener("offline", onOffline);
       window.removeEventListener("online", onOnline);
@@ -546,11 +574,27 @@ export default function ExamShare() {
   }, []);
 
   const enterFullscreen = async () => {
+    if (document.fullscreenElement) {
+      setIsFullscreen(true);
+      return true;
+    }
     try {
       await document.documentElement.requestFullscreen();
+      setIsFullscreen(true);
+      return true;
     } catch {
       queueEvent("fullscreen_unavailable", { reason: "browser_or_user_denied" });
-      setMessage("Fullscreen was not available. You can continue; the reviewer will see that it was unavailable.");
+      setMessage("Fullscreen is required for this browser-evidence exam. Allow fullscreen to continue, or submit the attempt.");
+      return false;
+    }
+  };
+
+  const returnToFullscreen = async () => {
+    setReturningToFullscreen(true);
+    try {
+      await enterFullscreen();
+    } finally {
+      setReturningToFullscreen(false);
     }
   };
 
@@ -586,11 +630,12 @@ export default function ExamShare() {
   const opensAt = inst.startsAt ? new Date(inst.startsAt) : null;
   const hasNotOpened = !!opensAt && opensAt.getTime() > Date.now();
   const isBrowserEvidence = (phase === "gate" ? inst.proctorMode : activeProctorMode) === "browser_evidence";
+  const currentQuestionIsFlagged = current ? flaggedQuestionIds.has(current.id) : false;
 
   return (
     <div className="min-h-screen bg-cream-deep px-4 py-8 sm:py-12">
       <SEO title={`${inst.title} — Exam`} description="Octamy scheduled assessment" />
-      <Card className="w-full max-w-3xl mx-auto border-slate-200 shadow-sm">
+      <Card className={`mx-auto w-full border-slate-200 shadow-sm ${phase === "live" ? "max-w-6xl" : "max-w-3xl"}`}>
         <CardHeader className="border-b border-slate-100">
           <CardTitle className="flex items-center justify-between gap-3">
             <span className="truncate">{inst.title}</span>
@@ -676,6 +721,7 @@ export default function ExamShare() {
                   startedAt: startedAtRef.current!,
                   proctorMode: proctorModeRef.current,
                   answers: answersRef.current,
+                  flaggedQuestionIds: Array.from(flaggedQuestionIdsRef.current),
                   pendingEvents: eventsRef.current,
                 }, true)}>Retry recovery</Button>
               )}
@@ -683,54 +729,85 @@ export default function ExamShare() {
           )}
 
           {phase === "live" && current && (
-            <div className="space-y-5">
-              <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
-                <span>Question {currentIdx + 1} of {questions.length} · {answeredCount} answered</span>
-                <div className="flex items-center gap-2">
-                  <SyncStatus state={syncState} lastSavedAt={lastSavedAt} />
-                  {isBrowserEvidence && !isFullscreen && <Button size="sm" variant="outline" className="h-7 text-xs" onClick={enterFullscreen}><Maximize className="w-3 h-3 mr-1" /> Fullscreen</Button>}
+            <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_250px] lg:items-start">
+              <div className="space-y-5">
+                <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
+                  <span>Question {currentIdx + 1} of {questions.length} · {answeredCount} answered · {flaggedQuestionIds.size} flagged</span>
+                  <div className="flex items-center gap-2">
+                    <SyncStatus state={syncState} lastSavedAt={lastSavedAt} />
+                    {isBrowserEvidence && !isFullscreen && <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => void returnToFullscreen()}><Maximize className="mr-1 h-3 w-3" /> Fullscreen</Button>}
+                  </div>
                 </div>
-              </div>
-              {syncState === "offline" && <Notice><WifiOff className="w-4 h-4 inline mr-1" /> You are offline. Answers remain on this device and will sync automatically when the connection returns. The timer continues.</Notice>}
-              {excludedQuestionCount > 0 && (
-                <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs leading-5 text-slate-600">
-                  {excludedQuestionCount} question-bank item{excludedQuestionCount === 1 ? "" : "s"} use formats this runner does not auto-grade and are not part of this scored attempt. Only the {questions.length} displayed single-choice/true-false questions count.
-                </div>
-              )}
-              {message && <Notice>{message}</Notice>}
-              <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden"><div className="h-full bg-slate-900 transition-all" style={{ width: `${((currentIdx + 1) / questions.length) * 100}%` }} /></div>
-
-              <div>
-                <h3 className="text-base sm:text-lg font-medium text-slate-900 mb-4 whitespace-pre-wrap">{current.question}</h3>
-                {current.imageUrl && <img src={current.imageUrl} alt="Question reference" className="mb-4 rounded-lg max-h-64 border border-slate-200" />}
-                <div className="space-y-2">
-                  {current.options.map((option, index) => {
-                    const selected = answers[current.id] === index;
-                    return (
-                      <button
-                        key={index}
-                        type="button"
-                        disabled={secondsLeft <= 0}
-                        onClick={() => chooseAnswer(current.id, index)}
-                        className={`w-full text-left px-4 py-3 rounded-xl border-2 transition disabled:opacity-60 ${selected ? "border-slate-900 bg-slate-900 text-white" : "border-slate-200 bg-white hover:border-slate-400"}`}
-                      >
-                        <span className="font-mono text-xs mr-3 opacity-70">{String.fromCharCode(65 + index)}</span>{option}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between pt-4 border-t border-slate-100">
-                <Button variant="outline" onClick={() => setCurrentIdx((index) => Math.max(0, index - 1))} disabled={currentIdx === 0}><ChevronLeft className="w-4 h-4 mr-1" /> Previous</Button>
-                {currentIdx < questions.length - 1 ? (
-                  <Button onClick={() => setCurrentIdx((index) => Math.min(questions.length - 1, index + 1))}>Next <ChevronRight className="w-4 h-4 ml-1" /></Button>
-                ) : (
-                  <Button onClick={() => void submitExam()} disabled={submitting} className="bg-slate-900 text-white">
-                    {submitting ? <><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Submitting…</> : secondsLeft <= 0 ? "Retry submission" : "Submit exam"}
-                  </Button>
+                {syncState === "offline" && <Notice><WifiOff className="mr-1 inline h-4 w-4" /> You are offline. Answers remain on this device and will sync automatically when the connection returns. The timer continues.</Notice>}
+                {excludedQuestionCount > 0 && (
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs leading-5 text-slate-600">
+                    {excludedQuestionCount} question-bank item{excludedQuestionCount === 1 ? "" : "s"} use formats this runner does not auto-grade and are not part of this scored attempt. Only the {questions.length} displayed single-choice/true-false questions count.
+                  </div>
                 )}
+                {message && <Notice>{message}</Notice>}
+                <div className="h-1.5 overflow-hidden rounded-full bg-slate-100"><div className="h-full bg-slate-900 transition-all" style={{ width: `${((currentIdx + 1) / questions.length) * 100}%` }} /></div>
+
+                <section aria-labelledby={`shared-question-${current.id}`}>
+                  <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <h2 id={`shared-question-${current.id}`} className="whitespace-pre-wrap text-base font-medium leading-7 text-slate-900 sm:text-lg">{current.question}</h2>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      aria-pressed={currentQuestionIsFlagged}
+                      onClick={() => toggleFlaggedQuestion(current.id)}
+                      className={currentQuestionIsFlagged ? "shrink-0 border-amber-300 bg-amber-50 text-amber-950 hover:bg-amber-100" : "shrink-0"}
+                    >
+                      <Flag className={`mr-2 h-4 w-4 ${currentQuestionIsFlagged ? "fill-amber-500 text-amber-600" : ""}`} />
+                      {currentQuestionIsFlagged ? "Flagged for review" : "Flag for review"}
+                    </Button>
+                  </div>
+                  {current.imageUrl && <img src={current.imageUrl} alt="Question reference" className="mb-4 max-h-64 rounded-lg border border-slate-200" />}
+                  <div className="space-y-2" role="radiogroup" aria-labelledby={`shared-question-${current.id}`}>
+                    {current.options.map((option, index) => {
+                      const selected = answers[current.id] === index;
+                      return (
+                        <button
+                          key={index}
+                          type="button"
+                          role="radio"
+                          aria-checked={selected}
+                          disabled={secondsLeft <= 0}
+                          onClick={() => chooseAnswer(current.id, index)}
+                          className={`flex min-h-14 w-full items-center gap-3 rounded-xl border-2 px-4 py-3 text-left text-sm leading-6 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 sm:text-base ${selected ? "border-violet-600 bg-violet-50 text-slate-950" : "border-slate-200 bg-white hover:border-slate-400 hover:bg-slate-50"}`}
+                        >
+                          <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg text-xs font-black ${selected ? "bg-violet-700 text-white" : "bg-slate-100 text-slate-600"}`}>{String.fromCharCode(65 + index)}</span>
+                          <span className="flex-1">{option}</span>
+                          <span className={`h-5 w-5 shrink-0 rounded-full border-2 ${selected ? "border-violet-700 bg-violet-700 shadow-[inset_0_0_0_4px_white]" : "border-slate-300"}`} aria-hidden="true" />
+                        </button>
+                      );
+                    })}
+                  </div>
+                </section>
+
+                <div className="flex items-center justify-between gap-3 border-t border-slate-100 pt-4">
+                  <Button variant="outline" onClick={() => setCurrentIdx((index) => Math.max(0, index - 1))} disabled={currentIdx === 0}><ChevronLeft className="mr-1 h-4 w-4" /> Previous</Button>
+                  <Button onClick={() => setCurrentIdx((index) => Math.min(questions.length - 1, index + 1))} disabled={currentIdx === questions.length - 1}>Next <ChevronRight className="ml-1 h-4 w-4" /></Button>
+                </div>
+                <Button type="button" variant="outline" onClick={() => setSubmitDialogOpen(true)} disabled={submitting} className="w-full lg:hidden">
+                  <Send className="mr-2 h-4 w-4" />{secondsLeft <= 0 ? "Retry submission" : "Submit exam"}
+                </Button>
               </div>
+
+              <aside className="space-y-3 lg:sticky lg:top-4">
+                <QuestionNavigator
+                  questionIds={questions.map((question) => question.id)}
+                  currentIndex={currentIdx}
+                  answers={answers}
+                  flaggedQuestionIds={flaggedQuestionIds}
+                  onNavigate={setCurrentIdx}
+                />
+                <Button type="button" onClick={() => setSubmitDialogOpen(true)} disabled={submitting} className="hidden h-12 w-full bg-slate-950 text-white hover:bg-slate-800 lg:flex">
+                  {submitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
+                  {submitting ? "Submitting…" : secondsLeft <= 0 ? "Retry submission" : "Submit exam"}
+                </Button>
+                <p className="hidden px-2 text-center text-xs leading-5 text-slate-500 lg:block">Submit at any time. Unanswered questions will be counted as skipped.</p>
+              </aside>
             </div>
           )}
 
@@ -775,6 +852,22 @@ export default function ExamShare() {
           )}
         </CardContent>
       </Card>
+      <SubmitExamDialog
+        open={submitDialogOpen}
+        onOpenChange={setSubmitDialogOpen}
+        totalQuestions={questions.length}
+        answeredQuestions={answeredCount}
+        flaggedQuestions={flaggedQuestionIds.size}
+        submitting={submitting}
+        onConfirm={() => void submitExam()}
+      />
+      <FullscreenExitGuard
+        open={phase === "live" && isBrowserEvidence && !isFullscreen && !submitting}
+        returningToFullscreen={returningToFullscreen}
+        submitting={submitting}
+        onReturnToFullscreen={() => void returnToFullscreen()}
+        onSubmit={() => void submitExam()}
+      />
     </div>
   );
 }

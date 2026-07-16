@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useParams, useLocation } from 'wouter';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,8 +14,9 @@ import { certificationDisplayTitle } from '@/components/certification-card';
 import ExamTimer from '@/components/exam-timer';
 import { ExamStructuredData } from '@/components/seo-structured-data';
 import { SEO } from '@/components/seo';
+import { FullscreenExitGuard, QuestionNavigator, SubmitExamDialog } from '@/components/exam-session-controls';
 import { publicAssessmentCategoryPath, publicAssessmentPath, publicPracticeCategoryPath, publicPracticePath } from '@shared/public-assessment-routes';
-import { AlertTriangle, Award, CheckCircle2, ChevronRight, Clock3, FileQuestion, RotateCcw, Save, ShieldCheck, TicketCheck, WifiOff } from 'lucide-react';
+import { AlertTriangle, Award, CheckCircle2, ChevronLeft, ChevronRight, Clock3, FileQuestion, Flag, RotateCcw, Save, Send, ShieldCheck, TicketCheck, WifiOff } from 'lucide-react';
 
 interface ExamQuestion {
   id: number;
@@ -23,15 +24,24 @@ interface ExamQuestion {
   options: string[];
 }
 
+type ExamQuestionsPayload = {
+  questions: ExamQuestion[];
+  sessionId: string;
+  startedAt: string;
+  deadlineAt: string;
+};
+
 type SavedExamDraft = {
-  version: 1;
+  version: 2;
   courseId: number;
   slug: string;
   questions: ExamQuestion[];
   sessionId: string;
   answers: Record<string, number>;
+  flaggedQuestionIds?: number[];
   currentQuestion: number;
   examStartTime: number;
+  deadlineAt: number;
   tabSwitches: number;
   userInfo: { name: string; email: string };
   expiresAt: number;
@@ -73,12 +83,19 @@ export default function Exam() {
   const [examStarted, setExamStarted] = useState(false);
   const [examStartTime, setExamStartTime] = useState<number>(0);
   const [sessionId, setSessionId] = useState<string>('');
-  const [restoredQuestionsData, setRestoredQuestionsData] = useState<{ questions: ExamQuestion[]; sessionId: string } | null>(null);
+  const [restoredQuestionsData, setRestoredQuestionsData] = useState<ExamQuestionsPayload | null>(null);
   const [savedDraft, setSavedDraft] = useState<SavedExamDraft | null>(null);
   const [tabSwitches, setTabSwitches] = useState(0);
   const [isWindowFocused, setIsWindowFocused] = useState(true);
   const [isOnline, setIsOnline] = useState(() => typeof navigator === 'undefined' ? true : navigator.onLine);
   const [fullscreenActive, setFullscreenActive] = useState(false);
+  const [flaggedQuestionIds, setFlaggedQuestionIds] = useState<Set<number>>(() => new Set());
+  const [submitDialogOpen, setSubmitDialogOpen] = useState(false);
+  const [returningToFullscreen, setReturningToFullscreen] = useState(false);
+  const [integrityConsent, setIntegrityConsent] = useState(false);
+  const examEndingRef = useRef(false);
+  const submissionRequestedRef = useRef(false);
+  const autoSubmitFiredRef = useRef(false);
   const [userInfo, setUserInfo] = useState({
     name: user?.name || '',
     email: user?.email || ''
@@ -112,12 +129,12 @@ export default function Exam() {
     error: questionsError,
     isLoading: questionsLoading,
     refetch: refetchQuestions,
-  } = useQuery<{questions: ExamQuestion[], sessionId: string}>({
-    queryKey: [`/api/courses/${course?.id}/questions`, examStarted, examStartTime],
+  } = useQuery<ExamQuestionsPayload>({
+    queryKey: [`/api/courses/${course?.id}/questions`, examStarted],
     queryFn: async () => {
       // Always generate a fresh session for each exam attempt
       const newSessionId = `session_${Date.now()}_${Math.random()}`;
-      const response = await apiRequest('POST', `/api/courses/${course?.id}/questions`, { sessionId: newSessionId });
+      const response = await apiRequest('POST', `/api/courses/${course?.id}/questions`, { sessionId: newSessionId, evidenceConsent: true });
       return response.json();
     },
     enabled: !!course?.id && examStarted && !restoredQuestionsData,
@@ -132,6 +149,8 @@ export default function Exam() {
     if (activeQuestionsData?.sessionId) {
       setSessionId(activeQuestionsData.sessionId);
     }
+    const authoritativeStart = Date.parse(activeQuestionsData?.startedAt || "");
+    if (Number.isFinite(authoritativeStart)) setExamStartTime(authoritativeStart);
   }, [activeQuestionsData]);
 
   useEffect(() => {
@@ -140,13 +159,15 @@ export default function Exam() {
     try {
       const draft = JSON.parse(localStorage.getItem(key) || 'null') as SavedExamDraft | null;
       if (
-        draft?.version === 1
+        draft?.version === 2
         && draft.courseId === course.id
         && draft.slug === course.slug
         && draft.expiresAt > Date.now()
         && Array.isArray(draft.questions)
         && draft.questions.length > 0
         && typeof draft.sessionId === 'string'
+        && Number.isFinite(draft.examStartTime)
+        && Number.isFinite(draft.deadlineAt)
       ) {
         setSavedDraft(draft);
       } else if (draft) {
@@ -158,22 +179,24 @@ export default function Exam() {
   }, [course?.id, course?.slug, examStarted]);
 
   useEffect(() => {
-    if (!course?.id || !examStarted || !sessionId || questions.length === 0 || typeof window === 'undefined') return;
+    if (!course?.id || !examStarted || !sessionId || !activeQuestionsData || questions.length === 0 || typeof window === 'undefined') return;
     const draft: SavedExamDraft = {
-      version: 1,
+      version: 2,
       courseId: course.id,
       slug: course.slug,
       questions,
       sessionId,
       answers,
+      flaggedQuestionIds: Array.from(flaggedQuestionIds),
       currentQuestion,
       examStartTime,
+      deadlineAt: Date.parse(activeQuestionsData.deadlineAt),
       tabSwitches,
       userInfo,
-      expiresAt: examStartTime + 60 * 60 * 1000,
+      expiresAt: Date.parse(activeQuestionsData.deadlineAt) + 15_000,
     };
     localStorage.setItem(`octamy.examDraft.${course.id}`, JSON.stringify(draft));
-  }, [answers, course?.id, course?.slug, currentQuestion, examStartTime, examStarted, questions, sessionId, tabSwitches, userInfo]);
+  }, [activeQuestionsData, answers, course?.id, course?.slug, currentQuestion, examStartTime, examStarted, flaggedQuestionIds, questions, sessionId, tabSwitches, userInfo]);
 
   useEffect(() => {
     const online = () => setIsOnline(true);
@@ -245,7 +268,8 @@ export default function Exam() {
     const handleFullscreenChange = () => {
       const active = Boolean(document.fullscreenElement);
       setFullscreenActive(active);
-      if (!active) {
+      if (!active && !examEndingRef.current) {
+        setSubmitDialogOpen(false);
         setTabSwitches((previous) => previous + 1);
         toast({ title: "Fullscreen exited", description: "The exit was recorded. Return to fullscreen before continuing." });
       }
@@ -279,6 +303,7 @@ export default function Exam() {
     },
     onSuccess: async (response) => {
       const result = await response.json();
+      examEndingRef.current = true;
       
       // Always redirect to temporary exam results page (payment-first approach)
       // User will see results and then be prompted to pay regardless of pass/fail
@@ -296,6 +321,8 @@ export default function Exam() {
       }
     },
     onError: async (error: any) => {
+      submissionRequestedRef.current = false;
+      examEndingRef.current = false;
       try {
         const errorData = await error.json();
         if (errorData.code === 'SESSION_EXPIRED') {
@@ -339,6 +366,15 @@ export default function Exam() {
     }
   };
 
+  const returnToFullscreen = async () => {
+    setReturningToFullscreen(true);
+    try {
+      await enterFullscreen();
+    } finally {
+      setReturningToFullscreen(false);
+    }
+  };
+
   const startExam = async () => {
     if (course?.assessmentPurpose === "practice" && !user) {
       setLocation(`/login?next=${encodeURIComponent(location)}`);
@@ -352,6 +388,11 @@ export default function Exam() {
       });
       return;
     }
+    if (!integrityConsent) {
+      toast({ title: "Consent required", description: "Review and accept the browser integrity evidence notice before starting." });
+      return;
+    }
+    if (!(await enterFullscreen())) return;
     
     // Reset state for fresh exam attempt
     setSessionId('');
@@ -359,28 +400,44 @@ export default function Exam() {
     setSavedDraft(null);
     if (course?.id) localStorage.removeItem(`octamy.examDraft.${course.id}`);
     setAnswers({});
+    setFlaggedQuestionIds(new Set());
     setCurrentQuestion(0);
     setTabSwitches(0);
     setIsWindowFocused(true);
+    examEndingRef.current = false;
+    submissionRequestedRef.current = false;
+    autoSubmitFiredRef.current = false;
     
     // Invalidate queries to force fresh fetch
     queryClient.invalidateQueries({ queryKey: [`/api/courses/${course?.id}/questions`] });
     
-    await enterFullscreen();
     setExamStarted(true);
     setExamStartTime(Date.now());
   };
 
   const resumeSavedExam = async () => {
     if (!savedDraft || savedDraft.expiresAt <= Date.now()) return;
-    setRestoredQuestionsData({ questions: savedDraft.questions, sessionId: savedDraft.sessionId });
+    if (!integrityConsent) {
+      toast({ title: "Consent required", description: "Review and accept the browser integrity evidence notice before resuming." });
+      return;
+    }
+    if (!(await enterFullscreen())) return;
+    setRestoredQuestionsData({
+      questions: savedDraft.questions,
+      sessionId: savedDraft.sessionId,
+      startedAt: new Date(savedDraft.examStartTime).toISOString(),
+      deadlineAt: new Date(savedDraft.deadlineAt).toISOString(),
+    });
     setSessionId(savedDraft.sessionId);
     setAnswers(savedDraft.answers || {});
+    setFlaggedQuestionIds(new Set(savedDraft.flaggedQuestionIds || []));
     setCurrentQuestion(Math.min(savedDraft.currentQuestion || 0, savedDraft.questions.length - 1));
     setTabSwitches(savedDraft.tabSwitches || 0);
     setUserInfo(savedDraft.userInfo);
     setExamStartTime(savedDraft.examStartTime);
-    await enterFullscreen();
+    examEndingRef.current = false;
+    submissionRequestedRef.current = false;
+    autoSubmitFiredRef.current = false;
     setExamStarted(true);
   };
 
@@ -396,7 +453,19 @@ export default function Exam() {
     }));
   };
 
+  const toggleFlaggedQuestion = (questionId: number) => {
+    setFlaggedQuestionIds((previous) => {
+      const next = new Set(previous);
+      if (next.has(questionId)) next.delete(questionId);
+      else next.add(questionId);
+      return next;
+    });
+  };
+
   const handleSubmit = () => {
+    if (submissionRequestedRef.current || submitExamMutation.isPending) return;
+    submissionRequestedRef.current = true;
+    setSubmitDialogOpen(false);
     const timeTaken = Math.floor((Date.now() - examStartTime) / 1000);
     
     // Anti-cheating: Check for excessive tab switching
@@ -419,6 +488,8 @@ export default function Exam() {
   };
 
   const handleTimeUp = () => {
+    if (autoSubmitFiredRef.current || submissionRequestedRef.current) return;
+    autoSubmitFiredRef.current = true;
     toast({
       title: "Time's Up!",
       description: "Your exam has been auto-submitted.",
@@ -500,9 +571,14 @@ export default function Exam() {
                 <CardContent className="space-y-5 p-6">
                   {!user && <div className="space-y-4"><div><Label htmlFor="name" className="font-bold">Full name</Label><input id="name" type="text" autoComplete="name" value={userInfo.name} onChange={(e) => setUserInfo(prev => ({ ...prev, name: e.target.value }))} className="mt-1.5 h-11 w-full rounded-xl border border-slate-300 px-3 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-100" placeholder="As it should appear on your credential" /></div><div><Label htmlFor="email" className="font-bold">Email address</Label><input id="email" type="email" autoComplete="email" value={userInfo.email} onChange={(e) => setUserInfo(prev => ({ ...prev, email: e.target.value }))} className="mt-1.5 h-11 w-full rounded-xl border border-slate-300 px-3 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-100" placeholder="For result recovery" /></div></div>}
 
-                  {savedDraft && <div className="rounded-2xl border border-sky-200 bg-sky-50 p-4"><div className="flex items-start gap-3"><RotateCcw className="mt-0.5 h-5 w-5 text-sky-700" /><div className="min-w-0 flex-1"><h2 className="font-bold text-slate-950">Saved attempt found</h2><p className="mt-1 text-sm leading-5 text-slate-600">{Object.keys(savedDraft.answers).length} of {savedDraft.questions.length} answers saved on this device.</p><div className="mt-3 flex flex-wrap gap-2"><Button size="sm" onClick={resumeSavedExam}>Resume exam</Button><Button size="sm" variant="ghost" onClick={discardSavedExam}>Discard</Button></div></div></div></div>}
+                  <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <input type="checkbox" checked={integrityConsent} onChange={(event) => setIntegrityConsent(event.target.checked)} className="mt-1 h-4 w-4 shrink-0 rounded border-slate-300 accent-violet-700" />
+                    <span className="text-xs leading-5 text-slate-600"><strong className="block text-sm text-slate-900">Browser integrity evidence consent</strong>I understand that fullscreen changes, tab/window focus changes, and the occurrence of copy or paste attempts are recorded for assessment integrity. Octamy does not capture screen contents, webcam, microphone, audio, or keystrokes in this exam.</span>
+                  </label>
 
-                  {!savedDraft && <Button onClick={startExam} className="h-12 w-full rounded-full text-base font-black" disabled={!userInfo.name || !userInfo.email}>{isPractice ? "Start practice exam" : "Start certification exam"}</Button>}
+                  {savedDraft && <div className="rounded-2xl border border-sky-200 bg-sky-50 p-4"><div className="flex items-start gap-3"><RotateCcw className="mt-0.5 h-5 w-5 text-sky-700" /><div className="min-w-0 flex-1"><h2 className="font-bold text-slate-950">Saved attempt found</h2><p className="mt-1 text-sm leading-5 text-slate-600">{Object.keys(savedDraft.answers).length} of {savedDraft.questions.length} answers saved on this device.</p><div className="mt-3 flex flex-wrap gap-2"><Button size="sm" onClick={resumeSavedExam} disabled={!integrityConsent}>Resume exam</Button><Button size="sm" variant="ghost" onClick={discardSavedExam}>Discard</Button></div></div></div></div>}
+
+                  {!savedDraft && <Button onClick={startExam} className="h-12 w-full rounded-full text-base font-black" disabled={!userInfo.name || !userInfo.email || !integrityConsent}>{isPractice ? "Start practice exam" : "Start certification exam"}</Button>}
                   <ul className="space-y-2.5 border-t border-slate-100 pt-5 text-xs leading-5 text-slate-600"><li className="flex gap-2"><CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-600" />Answers autosave on this device during interruptions.</li><li className="flex gap-2"><CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-600" />Your score and answer review appear after submission.</li><li className="flex gap-2"><TicketCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-violet-600" />{isPractice ? "Practice attempts are not shared as recruiter credentials." : "Direct payment, coupon, or institute voucher can fund activation."}</li></ul>
                 </CardContent>
               </Card>
@@ -555,102 +631,123 @@ export default function Exam() {
   }
 
   const currentQ = questions[currentQuestion];
+  const currentQuestionIsFlagged = flaggedQuestionIds.has(currentQ.id);
 
   return (
     <div className="min-h-screen bg-cream-soft">
       <SEO title={`${course.title} assessment session`} description={metaDescription} path={canonicalPath} noIndex />
-      <div className="mx-auto max-w-5xl px-4 py-5 sm:px-6 sm:py-8 lg:px-8">
+      <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-8 lg:px-8">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-950 px-4 py-3 text-white shadow-sm"><div><p className="text-xs font-black uppercase tracking-[0.14em] text-violet-300">Proctored assessment</p><p className="mt-0.5 text-sm text-slate-300">Navigation, focus, fullscreen exits, and clipboard actions are monitored.</p></div>{fullscreenActive ? <span className="inline-flex items-center gap-2 rounded-full bg-emerald-400/15 px-3 py-1.5 text-xs font-bold text-emerald-200"><ShieldCheck className="h-4 w-4" />Fullscreen active</span> : <Button type="button" size="sm" variant="secondary" onClick={() => void enterFullscreen()}>Return to fullscreen</Button>}</div>
-        <Card>
-          <CardHeader>
-            <div className="flex flex-col md:flex-row justify-between items-center mb-4">
-              <div>
-                <CardTitle className="text-2xl">{course?.title}</CardTitle>
-                <p className="text-octamy-gray-600">
-                  Question {currentQuestion + 1} of {questions.length}
-                </p>
-              </div>
-              <ExamTimer
-                duration={course?.duration || 15}
-                onTimeUp={handleTimeUp}
-                startedAtMs={examStartTime}
-              />
-            </div>
-            <Progress value={progress} className="w-full" />
-          </CardHeader>
-          
-          <CardContent className="space-y-6">
-            <div className="flex flex-wrap items-center gap-3 text-xs font-semibold text-slate-600">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5"><Save className="h-3.5 w-3.5 text-emerald-700" />Progress saved on this device</span>
-              {!isOnline && <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-amber-900"><WifiOff className="h-3.5 w-3.5" />Offline — keep this tab open; answers will remain available</span>}
-            </div>
-
-            {/* Anti-cheating warning */}
-            {tabSwitches > 0 && (
-              <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
-                <div className="flex items-center">
-                  <AlertTriangle className="mr-2 h-5 w-5 text-amber-700" />
-                  <p className="text-sm text-amber-900">
-                    Tab switching detected ({tabSwitches} times). 
-                    {tabSwitches > 3 && <span className="font-semibold"> Warning: Excessive switching may result in exam termination.</span>}
-                  </p>
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_260px] lg:items-start">
+          <Card className="overflow-hidden border-slate-200 shadow-sm">
+            <CardHeader className="border-b border-slate-100 bg-white">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0">
+                  <CardTitle className="truncate text-xl sm:text-2xl">{course?.title}</CardTitle>
+                  <p className="mt-1 text-sm text-slate-600">Question {currentQuestion + 1} of {questions.length}</p>
                 </div>
+                <ExamTimer duration={course?.duration || 15} onTimeUp={handleTimeUp} startedAtMs={examStartTime} />
               </div>
-            )}
-            
-            <div>
-              <h3 className="text-xl font-semibold mb-6">{currentQ.question}</h3>
-              
-              <RadioGroup
-                value={answers[currentQ.id.toString()]?.toString() || ''}
-                onValueChange={(value) => handleAnswerChange(currentQ.id.toString(), value)}
-              >
-                {currentQ.options.map((option: string, index: number) => (
-                  <div key={index} className="flex items-center space-x-2 p-4 border border-octamy-gray-300 rounded-lg hover:bg-octamy-gray-50 transition-colors">
-                    <RadioGroupItem value={index.toString()} id={`option-${index}`} />
-                    <Label htmlFor={`option-${index}`} className="flex-1 cursor-pointer">
-                      {option}
-                    </Label>
+              <Progress value={progress} className="mt-4 w-full" />
+            </CardHeader>
+
+            <CardContent className="space-y-6 p-4 sm:p-6">
+              <div className="flex flex-wrap items-center gap-3 text-xs font-semibold text-slate-600">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5"><Save className="h-3.5 w-3.5 text-emerald-700" />Progress saved on this device</span>
+                {!isOnline && <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-amber-900"><WifiOff className="h-3.5 w-3.5" />Offline — keep this tab open; answers will remain available</span>}
+              </div>
+
+              {tabSwitches > 0 && (
+                <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+                  <div className="flex items-start">
+                    <AlertTriangle className="mr-2 mt-0.5 h-5 w-5 shrink-0 text-amber-700" />
+                    <p className="text-sm leading-6 text-amber-900">Tab or window switching detected ({tabSwitches} event{tabSwitches === 1 ? '' : 's'}).{tabSwitches > 3 && <span className="font-semibold"> Repeated exits may cause this attempt to be reviewed.</span>}</p>
                   </div>
-                ))}
-              </RadioGroup>
-            </div>
-
-            <div className="flex justify-between items-center pt-6 border-t">
-              <Button
-                variant="outline"
-                onClick={() => setCurrentQuestion(prev => Math.max(0, prev - 1))}
-                disabled={currentQuestion === 0}
-              >
-                Previous
-              </Button>
-              
-              <div className="text-sm text-octamy-gray-500">
-                {answeredCount}/{questions.length} answered
-              </div>
-              
-              {currentQuestion === questions.length - 1 ? (
-                <Button
-                  onClick={handleSubmit}
-                  disabled={submitExamMutation.isPending}
-                  className="bg-octamy-black text-white hover:bg-octamy-gray-800"
-                >
-                  {submitExamMutation.isPending ? 'Submitting...' : 'Submit Exam'}
-                </Button>
-              ) : (
-                <Button
-                  onClick={() => setCurrentQuestion(prev => Math.min(questions.length - 1, prev + 1))}
-                  className="bg-octamy-black text-white hover:bg-octamy-gray-800"
-                >
-                  Next Question
-                </Button>
+                </div>
               )}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-      
 
+              <section aria-labelledby={`question-${currentQ.id}`}>
+                <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <h2 id={`question-${currentQ.id}`} className="text-lg font-semibold leading-7 text-slate-950 sm:text-xl">{currentQ.question}</h2>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    aria-pressed={currentQuestionIsFlagged}
+                    onClick={() => toggleFlaggedQuestion(currentQ.id)}
+                    className={currentQuestionIsFlagged ? "shrink-0 border-amber-300 bg-amber-50 text-amber-950 hover:bg-amber-100" : "shrink-0"}
+                  >
+                    <Flag className={`mr-2 h-4 w-4 ${currentQuestionIsFlagged ? "fill-amber-500 text-amber-600" : ""}`} />
+                    {currentQuestionIsFlagged ? "Flagged for review" : "Flag for review"}
+                  </Button>
+                </div>
+
+                <RadioGroup value={answers[currentQ.id.toString()]?.toString() || ''} onValueChange={(value) => handleAnswerChange(currentQ.id.toString(), value)} aria-labelledby={`question-${currentQ.id}`}>
+                  {currentQ.options.map((option: string, index: number) => {
+                    const optionId = `question-${currentQ.id}-option-${index}`;
+                    const selected = answers[currentQ.id.toString()] === index;
+                    return (
+                      <Label
+                        key={optionId}
+                        htmlFor={optionId}
+                        className={`flex min-h-14 w-full cursor-pointer items-center gap-3 rounded-xl border-2 px-4 py-3 text-sm leading-6 transition focus-within:ring-2 focus-within:ring-violet-500 focus-within:ring-offset-2 sm:text-base ${selected ? "border-violet-600 bg-violet-50 text-slate-950" : "border-slate-200 bg-white text-slate-800 hover:border-slate-400 hover:bg-slate-50"}`}
+                      >
+                        <RadioGroupItem value={index.toString()} id={optionId} className="h-5 w-5 shrink-0" />
+                        <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg text-xs font-black ${selected ? "bg-violet-700 text-white" : "bg-slate-100 text-slate-600"}`}>{String.fromCharCode(65 + index)}</span>
+                        <span className="flex-1">{option}</span>
+                      </Label>
+                    );
+                  })}
+                </RadioGroup>
+              </section>
+
+              <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-5">
+                <Button variant="outline" onClick={() => setCurrentQuestion((previous) => Math.max(0, previous - 1))} disabled={currentQuestion === 0}>
+                  <ChevronLeft className="mr-1 h-4 w-4" />Previous
+                </Button>
+                <span className="order-first w-full text-center text-xs font-semibold text-slate-500 sm:order-none sm:w-auto">{answeredCount}/{questions.length} answered · {flaggedQuestionIds.size} flagged</span>
+                <Button onClick={() => setCurrentQuestion((previous) => Math.min(questions.length - 1, previous + 1))} disabled={currentQuestion === questions.length - 1} className="bg-slate-950 text-white hover:bg-slate-800">
+                  Next<ChevronRight className="ml-1 h-4 w-4" />
+                </Button>
+                <Button type="button" variant="outline" onClick={() => setSubmitDialogOpen(true)} disabled={submitExamMutation.isPending} className="w-full lg:hidden">
+                  <Send className="mr-2 h-4 w-4" />Submit exam
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          <aside className="space-y-3 lg:sticky lg:top-4">
+            <QuestionNavigator
+              questionIds={questions.map((question) => question.id)}
+              currentIndex={currentQuestion}
+              answers={answers}
+              flaggedQuestionIds={flaggedQuestionIds}
+              onNavigate={setCurrentQuestion}
+            />
+            <Button type="button" onClick={() => setSubmitDialogOpen(true)} disabled={submitExamMutation.isPending} className="hidden h-12 w-full bg-slate-950 text-white hover:bg-slate-800 lg:flex">
+              <Send className="mr-2 h-4 w-4" />{submitExamMutation.isPending ? "Submitting…" : "Submit exam"}
+            </Button>
+            <p className="hidden px-2 text-center text-xs leading-5 text-slate-500 lg:block">You can submit at any time. Unanswered questions will be counted as skipped.</p>
+          </aside>
+        </div>
+      </div>
+
+      <SubmitExamDialog
+        open={submitDialogOpen}
+        onOpenChange={setSubmitDialogOpen}
+        totalQuestions={questions.length}
+        answeredQuestions={answeredCount}
+        flaggedQuestions={flaggedQuestionIds.size}
+        submitting={submitExamMutation.isPending}
+        onConfirm={handleSubmit}
+      />
+      <FullscreenExitGuard
+        open={!fullscreenActive && !examEndingRef.current && !submitExamMutation.isPending}
+        returningToFullscreen={returningToFullscreen}
+        submitting={submitExamMutation.isPending}
+        onReturnToFullscreen={() => void returnToFullscreen()}
+        onSubmit={handleSubmit}
+      />
     </div>
   );
 }

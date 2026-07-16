@@ -1064,7 +1064,6 @@ const adminSectionCopy: Record<string, { title: string; description: string }> =
   categories: { title: "Taxonomy", description: "Manage the category hierarchy shared by learning products and assessments." },
   customers: { title: "Learners and customers", description: "Accounts, purchases, certificates, and account status." },
   exams: { title: "Assessment attempts", description: "Learner submissions, scores, pass status, and completion activity." },
-  "ai-questions": { title: "AI interview questions", description: "Technical interview prompts maintained separately from assessment banks." },
   contacts: { title: "Support inbox", description: "Contact requests and operational follow-up." },
   partners: { title: "Partners", description: "Reseller and partner applications, approval, and earnings." },
   transactions: { title: "Transactions", description: "Payments and transaction records across the platform." },
@@ -2149,7 +2148,6 @@ export default function AdminDashboard() {
               <TabsTrigger value="question-banks" className="justify-start">Question banks</TabsTrigger>
               <TabsTrigger value="questions" className="justify-start">Course questions</TabsTrigger>
               <TabsTrigger value="categories" className="justify-start">Taxonomy</TabsTrigger>
-              <TabsTrigger value="ai-questions" className="justify-start">AI interviews</TabsTrigger>
               <p className="px-3 pb-1 pt-4 text-[11px] font-bold uppercase tracking-[0.14em] text-slate-400">People & operations</p>
               <TabsTrigger value="customers" className="justify-start">Learners</TabsTrigger>
               <TabsTrigger value="exams" className="justify-start">Assessment attempts</TabsTrigger>
@@ -2985,11 +2983,6 @@ export default function AdminDashboard() {
             </TabsContent>
             <TabsContent value="assessments" className="space-y-4"><AdminAssessmentsManagement /></TabsContent>
             <TabsContent value="benefits" className="space-y-4"><AdminCertificationBenefits /></TabsContent>
-
-            {/* AI Questions Tab */}
-            <TabsContent value="ai-questions" className="space-y-4">
-              <AIQuestionsManagement />
-            </TabsContent>
 
             {/* Contact Submissions Tab */}
             <TabsContent value="contacts" className="space-y-4">

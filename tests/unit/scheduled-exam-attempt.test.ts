@@ -5,6 +5,7 @@ import {
   isScheduledDeadlineExceeded,
   scheduledAttemptDeadline,
   scheduledAttemptPassed,
+  scheduledSubmissionAnswers,
   scheduledAttemptRemainingSeconds,
   scheduledDeadlineRemainingSeconds,
   scheduledRetakeAvailableAt,
@@ -165,13 +166,26 @@ describe("scheduled exam authoritative deadline", () => {
 });
 
 describe("scheduled exam pass-mark snapshot", () => {
+  const passingScoreAtStart = 70;
+
   it("uses the pass mark captured at start rather than a later exam edit", () => {
-    const passingScoreAtStart = 70;
     const editedExamPassingScore = 95;
 
-    expect(scheduledAttemptPassed(80, false, passingScoreAtStart)).toBe(true);
-    expect(scheduledAttemptPassed(80, false, editedExamPassingScore)).toBe(false);
-    expect(scheduledAttemptPassed(100, true, passingScoreAtStart)).toBe(false);
+    expect(scheduledAttemptPassed(80, passingScoreAtStart)).toBe(true);
+    expect(scheduledAttemptPassed(80, editedExamPassingScore)).toBe(false);
+  });
+
+  it("scores the server-saved snapshot at timeout and ignores late answer changes", () => {
+    const saved = { "10": 1, "11": 0 };
+    const latePayload = { "10": 3, "12": 2 };
+
+    expect(scheduledSubmissionAnswers(saved, latePayload, true)).toEqual(saved);
+    expect(scheduledSubmissionAnswers(saved, latePayload, false)).toEqual({
+      "10": 3,
+      "11": 0,
+      "12": 2,
+    });
+    expect(scheduledAttemptPassed(100, passingScoreAtStart)).toBe(true);
   });
 });
 

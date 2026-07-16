@@ -13,7 +13,6 @@ import {
   ChevronDown, ChevronRight, User, Calendar, Clock, MapPin, Phone, Mail, CreditCard
 } from "lucide-react";
 import { EnhancedQuestionsManagement } from "@/components/enhanced-questions-management";
-import { EnhancedAIQuestionsManagement } from "@/components/enhanced-ai-questions-management";
 import { AdminAssessmentsManagement } from "@/components/admin-assessments-management";
 import { AdminQuestionBanksManagement } from "@/components/admin-question-banks-management";
 import { EnhancedContactSubmissionsManagement } from "@/components/enhanced-contact-submissions-management";
@@ -303,7 +302,6 @@ function EnhancedAdminDashboard() {
             <TabsTrigger value="questions" className="data-[state=active]:bg-cream-soft data-[state=active]:text-black">Questions</TabsTrigger>
             <TabsTrigger value="question-banks" className="data-[state=active]:bg-cream-soft data-[state=active]:text-black">Question banks</TabsTrigger>
             <TabsTrigger value="assessments" className="data-[state=active]:bg-cream-soft data-[state=active]:text-black">Assessments</TabsTrigger>
-            <TabsTrigger value="ai-questions" className="data-[state=active]:bg-cream-soft data-[state=active]:text-black">AI Interview</TabsTrigger>
             <TabsTrigger value="contacts" className="data-[state=active]:bg-cream-soft data-[state=active]:text-black">Contact</TabsTrigger>
             <TabsTrigger value="customers" className="data-[state=active]:bg-cream-soft data-[state=active]:text-black">Customers</TabsTrigger>
             <TabsTrigger value="transactions" className="data-[state=active]:bg-cream-soft data-[state=active]:text-black">Transactions</TabsTrigger>
@@ -1107,11 +1105,6 @@ function EnhancedAdminDashboard() {
           </TabsContent>
           <TabsContent value="assessments"><AdminAssessmentsManagement /></TabsContent>
           <TabsContent value="question-banks"><AdminQuestionBanksManagement /></TabsContent>
-
-          {/* AI Questions Tab */}
-          <TabsContent value="ai-questions">
-            <EnhancedAIQuestionsManagement />
-          </TabsContent>
 
           {/* Contact Submissions Tab */}
           <TabsContent value="contacts">

@@ -7,6 +7,7 @@ export function CookieConsent() {
   const [location] = useLocation();
   const [show, setShow] = useState(false);
   const isFocusedWorkspace = /^\/(?:login|register|forgot-password|reset-password|creator\/|institute\/|recruiter\/)/.test(location);
+  const isExamRoute = /^\/(?:x\/[^/]+|get-certified\/[^/]+|practice\/[^/]+)\/?$/.test(location);
 
   useEffect(() => {
     try {
@@ -17,10 +18,10 @@ export function CookieConsent() {
   }, []);
 
   useEffect(() => {
-    if (!show || isFocusedWorkspace) return;
+    if (!show || isFocusedWorkspace || isExamRoute) return;
     document.body.classList.add("cookie-banner-visible");
     return () => document.body.classList.remove("cookie-banner-visible");
-  }, [isFocusedWorkspace, show]);
+  }, [isExamRoute, isFocusedWorkspace, show]);
 
   function setChoice(value: "all" | "necessary") {
     try { localStorage.setItem(KEY, JSON.stringify({ value, at: Date.now() })); } catch {}
@@ -28,7 +29,7 @@ export function CookieConsent() {
     setShow(false);
   }
 
-  if (!show) return null;
+  if (!show || isExamRoute) return null;
   return (
     <aside
       role="dialog"

@@ -139,9 +139,19 @@ describe('API Integration Tests', () => {
   });
 
   describe('Exam Endpoints', () => {
+    it('requires explicit browser-evidence consent before issuing an exam session', async () => {
+      const response = await request(app)
+        .post(`/api/courses/${testData.testCourse.id}/questions`)
+        .send({})
+        .expect(400);
+
+      expect(response.body.code).toBe('EVIDENCE_CONSENT_REQUIRED');
+    });
+
     it('POST /api/courses/:id/questions should create exam session', async () => {
       const response = await request(app)
         .post(`/api/courses/${testData.testCourse.id}/questions`)
+        .send({ evidenceConsent: true })
         .expect(200);
 
       expect(response.body.sessionId).toBeDefined();
@@ -153,12 +163,25 @@ describe('API Integration Tests', () => {
       // First start exam
       const startResponse = await request(app)
         .post(`/api/courses/${testData.testCourse.id}/questions`)
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({ evidenceConsent: true })
         .expect(200);
 
       const { sessionId, questions } = startResponse.body;
       const answers = Object.fromEntries(
         questions.map((question: { id: number }) => [String(question.id), 0]),
       );
+
+      await request(app)
+        .post('/api/exam/submit')
+        .send({
+          courseId: testData.testCourse.id,
+          sessionId,
+          answers,
+          userEmail: testData.testUser.email,
+          userName: testData.testUser.name,
+        })
+        .expect(403);
 
       const submitResponse = await request(app)
         .post('/api/exam/submit')
@@ -176,6 +199,24 @@ describe('API Integration Tests', () => {
       expect(submitResponse.body.tempExamId).toBeDefined();
       expect(submitResponse.body.score).toBeDefined();
       expect(submitResponse.body.passed).toBeDefined();
+
+      const replayResponse = await request(app)
+        .post('/api/exam/submit')
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({
+          courseId: testData.testCourse.id,
+          sessionId,
+          answers,
+          // This deliberately differs: the server must replay the immutable
+          // first result and never trust a client-reported elapsed time.
+          timeTaken: 999999,
+          userEmail: testData.testUser.email,
+          userName: testData.testUser.name,
+        })
+        .expect(200);
+
+      expect(replayResponse.body.tempExamId).toBe(submitResponse.body.tempExamId);
+      expect(replayResponse.body.score).toBe(submitResponse.body.score);
     });
 
     it('should prevent exam submission without valid session', async () => {

@@ -207,13 +207,34 @@ export function scheduledReviewDecision(input: ScheduledReviewDecisionInput): Sc
 
 export function scheduledAttemptPassed(
   scorePct: number,
-  timedOut: boolean,
   passingScoreSnapshot: number,
 ): boolean {
   if (!Number.isFinite(scorePct) || !Number.isFinite(passingScoreSnapshot)) {
     throw new Error("Invalid scheduled exam score");
   }
-  return !timedOut && scorePct >= passingScoreSnapshot;
+  // Reaching the deadline is an automatic submission condition, not evidence
+  // of misconduct. A candidate can still pass from answers durably saved before
+  // the deadline; callers are responsible for excluding any late answer writes.
+  return scorePct >= passingScoreSnapshot;
+}
+
+export type ScheduledAnswer = number | string | number[];
+
+/**
+ * Once the authoritative deadline (including network grace) has elapsed, only
+ * the last server-autosaved snapshot may be graded. This prevents a late client
+ * from changing answers while still allowing an on-time automatic submission to
+ * be scored normally.
+ */
+export function scheduledSubmissionAnswers(
+  savedAnswers: Record<string, ScheduledAnswer> | null | undefined,
+  incomingAnswers: Record<string, ScheduledAnswer> | null | undefined,
+  deadlineExceeded: boolean,
+): Record<string, ScheduledAnswer> {
+  const saved = savedAnswers && typeof savedAnswers === "object" ? savedAnswers : {};
+  if (deadlineExceeded) return { ...saved };
+  const incoming = incomingAnswers && typeof incomingAnswers === "object" ? incomingAnswers : {};
+  return { ...saved, ...incoming };
 }
 
 export function scheduledScorePercentage(score: number, totalPoints: number): number {

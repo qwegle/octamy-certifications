@@ -31,6 +31,7 @@ import {
   categories as categoriesTable,
   courses as coursesTable,
   courseQuestionBlueprint,
+  examAttempts as examAttemptsTable,
   questionBanks as questionBanksTable,
   questions as questionsTable,
   questionPackImportRuns,
@@ -65,7 +66,8 @@ import { evaluateAnswersWithAI } from "./utils/openai";
 import {
   saveQuestionMapping,
   loadExamSession,
-  deleteQuestionMapping,
+  commitPendingExamForSession,
+  loadPendingExamBySessionId,
   savePendingExam,
   loadPendingExam,
   deletePendingExam,
@@ -107,7 +109,17 @@ import {
   publicPendingCourseSnapshot,
 } from "./lib/pending-exam-access";
 import { buildExamReview } from "./lib/exam-review";
+import {
+  PUBLIC_EXAM_EVIDENCE_CONSENT_VERSION,
+  PUBLIC_EXAM_SUBMISSION_GRACE_SECONDS,
+  publicExamDeadline,
+  publicExamSubmissionTiming,
+} from "./lib/public-exam-attempt";
 import { requiredQuestionInventory } from "./lib/assessment-bank-readiness";
+import {
+  RETIRED_AI_INTERVIEW_PATHS,
+  retiredAiInterviewHandler,
+} from "./lib/retired-ai-interview";
 import {
   ASSESSMENT_HUB_PATH,
   canonicalPublicSlug,
@@ -139,6 +151,68 @@ const JWT_SECRET = process.env.JWT_SECRET!;
 function boundedPercent(value: string | null | undefined, fallback: number) {
   const parsed = Number(value);
   return Number.isFinite(parsed) && parsed >= 0 && parsed <= 100 ? parsed : fallback;
+}
+
+function publicExamResultResponse(tempExamId: string, examData: any) {
+  const correctAnswers = Number.isInteger(examData.correctAnswers)
+    ? examData.correctAnswers
+    : Array.isArray(examData.review)
+      ? examData.review.filter((item: any) => item?.isCorrect).length
+      : Math.round((Number(examData.score || 0) / 100) * Number(examData.totalQuestions || 0));
+  return {
+    tempExamId,
+    score: examData.score,
+    passed: examData.passed,
+    correctAnswers,
+    totalQuestions: examData.totalQuestions,
+    isRetake: Boolean(examData.isRetake),
+    previousBestScore: Number(examData.previousBestScore || 0),
+    passingThreshold: Number(examData.course?.passingScore || 0),
+    recoveryEmailSent: Boolean(examData.recoveryEmailSent),
+    resultExpiresAt: examData.resultExpiresAt,
+    timedOut: Boolean(examData.timedOut),
+    message: examData.passed
+      ? `Congratulations! You passed with ${examData.score}%`
+      : `You scored ${examData.score}%. You need at least ${examData.course?.passingScore}% to pass.`,
+    redirectTo: `/exam-results-temp/${tempExamId}`,
+  };
+}
+
+function publicPendingExamOwnerMatches(
+  examData: any,
+  requestUserId: number | null | undefined,
+  requestEmail: string,
+) {
+  return examData?.userId != null
+    ? examData.userId === requestUserId
+    : String(examData?.userEmail || "").toLowerCase() === requestEmail.toLowerCase();
+}
+
+function boundedPublicExamTabSwitches(value: unknown) {
+  return Number.isInteger(value) && Number(value) >= 0
+    ? Math.min(Number(value), 10_000)
+    : 0;
+}
+
+async function persistPracticeAttemptFromPending(examData: any) {
+  if (examData?.assessmentPurpose !== "practice" || !Number.isInteger(examData?.userId)) return false;
+  const inserted = await db.insert(examAttemptsTable).values({
+    userId: examData.userId,
+    courseId: examData.courseId,
+    userEmail: examData.userEmail,
+    userName: examData.userName,
+    score: examData.score,
+    totalQuestions: examData.totalQuestions,
+    answers: examData.answers,
+    timeTaken: examData.timeTaken,
+    passed: examData.passed,
+    mastered: examData.mastered,
+    sessionId: examData.sessionId,
+    ipAddress: examData.ipAddress || null,
+    userAgent: examData.userAgent || null,
+    tabSwitches: boundedPublicExamTabSwitches(examData.tabSwitches),
+  }).onConflictDoNothing({ target: examAttemptsTable.sessionId }).returning({ id: examAttemptsTable.id });
+  return inserted.length > 0;
 }
 
 async function uniqueAdminCourseSlug(value: string, excludeCourseId?: number) {
@@ -423,18 +497,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // 410 Gone for the removed AI Interview feature. Any inline endpoint mounted
   // later in this file is intercepted here so the feature is fully unreachable
   // without having to surgically delete ~500 lines of legacy code below.
-  app.all(["/api/interview-technologies",
-           "/api/interviews",
-           "/api/interviews/*",
-           "/api/interview-responses/*",
-           "/api/admin/interview-questions",
-           "/api/admin/interview-questions/*",
-           "/api/user/interviews"], (_req, res) => {
-    res.status(410).json({
-      message: "The AI Interview feature has been retired. Please use Skill Verification assessments instead.",
-      code: "FEATURE_REMOVED",
-    });
-  });
+  app.all([...RETIRED_AI_INTERVIEW_PATHS], retiredAiInterviewHandler);
 
   // Background cleanup of expired exam_sessions / pending_exams rows
   if (process.env.NODE_ENV !== "test") {
@@ -1370,6 +1433,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Exam routes
   app.post("/api/courses/:id/questions", optionalAuth, async (req: AuthenticatedRequest, res: Response) => {
     try {
+      const evidenceConsent = z.object({ evidenceConsent: z.literal(true) }).safeParse(req.body);
+      if (!evidenceConsent.success) {
+        return res.status(400).json({
+          message: "Confirm the disclosed browser-integrity evidence policy before starting the exam.",
+          code: "EVIDENCE_CONSENT_REQUIRED",
+        });
+      }
       const courseId = Number(req.params.id);
       if (!Number.isInteger(courseId) || courseId <= 0) {
         return res.status(400).json({ message: "Invalid course ID" });
@@ -1509,8 +1579,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
         {},
       );
-      await saveQuestionMapping(finalSessionId, correctMap, courseId, {
+      const sessionStartedAt = new Date();
+      const sessionTiming = await saveQuestionMapping(finalSessionId, correctMap, courseId, {
         questionSnapshot: questionsWithShuffledOptions,
+        createdAt: sessionStartedAt,
+        evidenceConsentAt: sessionStartedAt,
+        evidenceConsentVersion: PUBLIC_EXAM_EVIDENCE_CONSENT_VERSION,
+        userId: req.user?.userId ?? null,
+        // Retain a short recovery window after the authoritative deadline. The
+        // submission route still rejects answer payloads after deadline grace.
+        ttlMs: Math.max(1, course.duration) * 60_000 + 15 * 60_000,
       });
 
       // Remove correct answers from response
@@ -1523,6 +1601,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({
         questions: questionsWithoutAnswers,
         sessionId: finalSessionId,
+        startedAt: sessionTiming.createdAt.toISOString(),
+        deadlineAt: publicExamDeadline(sessionTiming.createdAt, course.duration).toISOString(),
+        proctorMode: "browser_evidence",
+        evidenceConsentVersion: PUBLIC_EXAM_EVIDENCE_CONSENT_VERSION,
       });
     } catch (error) {
       console.error("Error fetching questions:", error);
@@ -1540,8 +1622,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // EXAM SUBMISSION ENDPOINT - PAYMENT-FIRST APPROACH
-  // This endpoint calculates exam results but DOES NOT save to database until payment is completed
-  // Exam data is stored temporarily in memory until PayUMoney payment success
+  // Certification results use an expiring Postgres handoff until credential
+  // activation; subscribed practice results are persisted immediately.
   app.post(
     "/api/exam/submit",
     optionalAuth,
@@ -1550,8 +1632,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const {
           courseId,
           answers,
-          timeSpent,
-          timeTaken,
           userEmail,
           userName,
           sessionId,
@@ -1561,10 +1641,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (!sessionId || typeof sessionId !== "string" ||
             !Number.isInteger(numericCourseId) || numericCourseId <= 0) {
           return res.status(400).json({ message: "Valid course and exam session are required" });
-        }
-        const finalTimeTaken = Number(timeTaken || timeSpent || 60);
-        if (!Number.isFinite(finalTimeTaken) || finalTimeTaken <= 0) {
-          return res.status(400).json({ message: "Invalid exam duration" });
         }
 
         let effectiveUserEmail: string;
@@ -1588,6 +1664,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
           effectiveUserName = guestIdentity.data.userName;
         }
 
+        // A network retry after the first successful commit must replay the
+        // original result instead of creating a second payable assessment.
+        const previousPending = await loadPendingExamBySessionId<any>(sessionId, numericCourseId);
+        if (previousPending) {
+          const pendingOwnerMatches = publicPendingExamOwnerMatches(
+            previousPending.payload,
+            req.user?.userId,
+            effectiveUserEmail,
+          );
+          if (!pendingOwnerMatches) {
+            return res.status(403).json({ message: "This assessment session belongs to another learner" });
+          }
+          const restoredPracticeAttempt = await persistPracticeAttemptFromPending(previousPending.payload);
+          if (restoredPracticeAttempt) {
+            await audit({
+              action: "practice_exam.completed",
+              userId: previousPending.payload.userId,
+              actorRole: "learner",
+              resourceType: "course",
+              resourceId: numericCourseId,
+              req,
+              metadata: { score: previousPending.payload.score, passed: previousPending.payload.passed, replayRecovery: true },
+            });
+          }
+          return res.json(publicExamResultResponse(previousPending.id, previousPending.payload));
+        }
+
         // Get correct answers from persisted session mapping
         const examSession = await loadExamSession(sessionId, numericCourseId);
         const correctAnswersMapping = examSession?.correctMap || {};
@@ -1597,7 +1700,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         );
 
         // Safety check: Ensure we have questions to evaluate
-        if (Object.keys(correctAnswersMapping).length === 0) {
+        if (!examSession || Object.keys(correctAnswersMapping).length === 0) {
           console.warn(`No question mappings found for session ${sessionId}`);
           return res.status(400).json({
             message:
@@ -1605,23 +1708,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
             code: "SESSION_EXPIRED",
           });
         }
-
-        const answersRecord = normalizeExamAnswers(answers);
-        const { correctAnswers, totalQuestions, score } = scoreExam(
-          correctAnswersMapping,
-          answersRecord,
-        );
-        const review = buildExamReview(examSession?.questionSnapshot || [], answersRecord);
-
-        // Clean up persisted session mapping AFTER score calculation
-        await deleteQuestionMapping(sessionId).catch(() => {});
-
-        // Get course data to check passing score
-        const course = await storage.getCourse(numericCourseId);
-        if (!course) {
-          return res.status(404).json({ message: "Course not found" });
+        if (examSession.userId != null && examSession.userId !== req.user?.userId) {
+          return res.status(403).json({ message: "This assessment session belongs to another learner" });
         }
-        if (!course.isActive || course.visibility !== "public" || course.reviewStatus !== "approved") {
+
+        const course = await storage.getCourse(numericCourseId);
+        if (!course || !course.isActive || course.visibility !== "public" || course.reviewStatus !== "approved") {
           return res.status(404).json({ message: "Course not found" });
         }
         const isPracticeExam = course.assessmentPurpose === "practice";
@@ -1643,10 +1735,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
           practiceSubscriptionId = subscription.id;
         }
 
+        const submissionTiming = publicExamSubmissionTiming(examSession.createdAt, course.duration);
+        if (submissionTiming.deadlineExceeded) {
+          return res.status(409).json({
+            message: "This exam's server-authoritative submission window has closed.",
+            code: "SESSION_EXPIRED",
+          });
+        }
+        const finalTimeTaken = submissionTiming.elapsedSeconds;
+
+        const answersRecord = normalizeExamAnswers(answers);
+        const { correctAnswers, totalQuestions, score } = scoreExam(
+          correctAnswersMapping,
+          answersRecord,
+        );
+        const review = buildExamReview(examSession?.questionSnapshot || [], answersRecord);
+
         // EXAM PASSING LOGIC:
         // Use the course's defined passing score (e.g., 60% for Demo Course)
         const passingScore = course.passingScore;
-        let passed = score >= passingScore;
+        const passed = score >= passingScore;
         let isRetake = false;
         let previousBestScore = 0;
 
@@ -1669,15 +1777,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Mastery is achieved at 90% regardless of attempt number
         const mastered = score >= 90;
 
-        // Anti-cheating validation (relaxed for demo purposes)
-        const minTimePerQuestion = 1; // seconds (very relaxed for testing)
-        const expectedMinTime = totalQuestions * minTimePerQuestion;
-        if (finalTimeTaken < expectedMinTime) {
-          return res.status(400).json({
-            message: `Exam completed too quickly. Please spend at least ${minTimePerQuestion} seconds per question.`,
-          });
-        }
-
         // Persist exam data until payment completion (replaces in-memory global.tempExamData).
         const tempExamId = `temp_${crypto.randomUUID()}`;
         const resultExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
@@ -1688,6 +1787,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           userEmail: effectiveUserEmail,
           userName: effectiveUserName,
           score,
+          correctAnswers,
           totalQuestions,
           answers: answersRecord,
           timeTaken: finalTimeTaken,
@@ -1696,54 +1796,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
           sessionId,
           ipAddress: req.ip || req.connection?.remoteAddress,
           userAgent: req.get("User-Agent"),
-          tabSwitches: Number.isInteger(tabSwitches) && tabSwitches >= 0 ? tabSwitches : 0,
+          tabSwitches: boundedPublicExamTabSwitches(tabSwitches),
           isRetake,
           previousBestScore,
           course: publicPendingCourseSnapshot(course),
           assessmentPurpose: course.assessmentPurpose,
           needsPayment: !isPracticeExam,
           review,
+          evidenceConsentAt: examSession.evidenceConsentAt?.toISOString() || null,
+          evidenceConsentVersion: examSession.evidenceConsentVersion,
+          startedAt: submissionTiming.startedAt.toISOString(),
+          deadlineAt: submissionTiming.deadlineAt.toISOString(),
+          timedOut: Date.now() > submissionTiming.deadlineAt.getTime(),
           resultExpiresAt,
           recoveryEmailSent: false,
           createdAt: new Date(),
         };
-        await savePendingExam(tempExamId, pendingExamPayload);
-
-        if (isPracticeExam) {
-          await storage.createExamAttempt({
-            userId: req.user!.userId,
-            courseId: numericCourseId,
-            userEmail: effectiveUserEmail,
-            userName: effectiveUserName,
-            score,
-            totalQuestions,
-            answers: answersRecord,
-            timeTaken: finalTimeTaken,
-            passed,
-            mastered,
-            sessionId,
-            ipAddress: req.ip || req.connection?.remoteAddress,
-            userAgent: req.get("User-Agent"),
-            tabSwitches: Number.isInteger(tabSwitches) && tabSwitches >= 0 ? tabSwitches : 0,
-          });
-          await audit({
-            action: "practice_exam.completed",
-            userId: req.user!.userId,
-            actorRole: "learner",
-            resourceType: "course",
-            resourceId: numericCourseId,
-            req,
-            metadata: { score, passed, subscriptionId: practiceSubscriptionId },
+        const committed = await commitPendingExamForSession({
+          sessionId,
+          courseId: numericCourseId,
+          pendingExamId: tempExamId,
+          payload: pendingExamPayload,
+          submissionClosesAt: new Date(
+            submissionTiming.deadlineAt.getTime() + PUBLIC_EXAM_SUBMISSION_GRACE_SECONDS * 1000,
+          ),
+        });
+        if (!committed) {
+          return res.status(409).json({
+            message: "This exam session was already submitted or expired.",
+            code: "SESSION_EXPIRED",
           });
         }
+        if (!publicPendingExamOwnerMatches(committed.payload, req.user?.userId, effectiveUserEmail)) {
+          return res.status(403).json({ message: "This assessment session belongs to another learner" });
+        }
 
-        let recoveryEmailSent = false;
-        if (!req.user?.userId && !isPracticeExam) {
+        if (isPracticeExam) {
+          const insertedAttempt = await persistPracticeAttemptFromPending(committed.payload);
+          if (insertedAttempt) {
+            await audit({
+              action: "practice_exam.completed",
+              userId: committed.payload.userId as number,
+              actorRole: "learner",
+              resourceType: "course",
+              resourceId: numericCourseId,
+              req,
+              metadata: {
+                score: committed.payload.score,
+                passed: committed.payload.passed,
+                subscriptionId: practiceSubscriptionId,
+              },
+            });
+          }
+        }
+
+        if (!committed.replayed && !req.user?.userId && !isPracticeExam) {
           const baseUrl = (process.env.APP_URL || `${req.protocol}://${req.get("host")}`).replace(/\/+$/, "");
-          const resultPath = `/exam-results-temp/${tempExamId}`;
+          const resultPath = `/exam-results-temp/${committed.id}`;
           const resultLink = `${baseUrl}${resultPath}`;
           const registerLink = `${baseUrl}/register?role=learner&email=${encodeURIComponent(effectiveUserEmail)}&next=${encodeURIComponent(resultPath)}`;
-          recoveryEmailSent = await emailService.sendGuestExamRecoveryEmail({
+          const recoveryEmailSent = await emailService.sendGuestExamRecoveryEmail({
             userEmail: effectiveUserEmail,
             userName: effectiveUserName,
             courseTitle: course.title,
@@ -1751,28 +1863,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             resultLink,
             registerLink,
           });
-          pendingExamPayload.recoveryEmailSent = recoveryEmailSent;
-          await savePendingExam(tempExamId, pendingExamPayload);
+          committed.payload.recoveryEmailSent = recoveryEmailSent;
+          await savePendingExam(committed.id, committed.payload);
         }
 
-        // Return comprehensive exam result with temporary ID for payment processing
-        res.json({
-          tempExamId, // Use temporary ID instead of database ID
-          score,
-          passed,
-          correctAnswers,
-          totalQuestions,
-          // Additional information for developers and frontend logic
-          isRetake,
-          previousBestScore,
-          passingThreshold: passingScore, // What score was needed to pass
-          recoveryEmailSent,
-          resultExpiresAt,
-          message: passed
-            ? `Congratulations! You passed with ${score}%`
-            : `You scored ${score}%. You need at least ${passingScore}% to pass.`,
-          redirectTo: `/exam-results-temp/${tempExamId}`, // Temporary results page
-        });
+        res.json(publicExamResultResponse(committed.id, committed.payload));
       } catch (error) {
         console.error("Error submitting exam:", error);
         res.status(500).json({ message: "Failed to submit exam" });
@@ -1806,13 +1901,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           tempExamId,
           score: examData.score,
           passed: examData.passed,
-          correctAnswers: Math.round(
-            (examData.score / 100) * examData.totalQuestions
-          ),
+          correctAnswers: Number.isInteger(examData.correctAnswers)
+            ? examData.correctAnswers
+            : Math.round((examData.score / 100) * examData.totalQuestions),
           totalQuestions: examData.totalQuestions,
           course: publicPendingCourseSnapshot(examData.course),
           assessmentPurpose: examData.assessmentPurpose || examData.course?.assessmentPurpose || "certification",
           timeTaken: examData.timeTaken,
+          timedOut: Boolean(examData.timedOut),
           mastered: examData.mastered,
           isRetake: examData.isRetake,
           previousBestScore: examData.previousBestScore,
