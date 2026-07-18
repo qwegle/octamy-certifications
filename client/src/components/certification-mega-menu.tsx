@@ -11,7 +11,7 @@ type MenuItem = {
   slug: string;
   category: { id?: number; name: string; slug: string };
   audienceBands?: Array<{ code: string; label: string }>;
-  availability?: "available" | "in_review";
+  availability: "available";
 };
 
 type MenuResponse = {
@@ -149,16 +149,16 @@ export function CertificationMegaMenu({ currentPath }: { currentPath: string }) 
 
             <div className="overflow-y-auto p-5">
               <div className="flex items-center justify-between gap-4 border-b border-slate-100 pb-4">
-                <div><p className="text-xs font-black uppercase tracking-[0.14em] text-violet-700">{activeGroup?.name || "Certifications"}</p><p className="mt-1 text-sm text-slate-500">Available exams open directly. New paths remain in review until their banks are ready.</p></div>
+                <div><p className="text-xs font-black uppercase tracking-[0.14em] text-violet-700">{activeGroup?.name || "Certifications"}</p><p className="mt-1 text-sm text-slate-500">Choose a published, quality-reviewed Octamy certification exam.</p></div>
                 {activeGroup && <Link href={publicAssessmentCategoryPath(activeGroup.slug)} className="shrink-0 text-xs font-bold text-slate-700 hover:text-violet-700">View path</Link>}
               </div>
               <div className="grid gap-1 py-3 sm:grid-cols-2">
-                {(activeGroup?.items || []).map((item) => item.availability === "available" ? (
+                {(activeGroup?.items || []).map((item) => (
                   <Link key={item.id} href={publicAssessmentPath(item.slug)} className="group rounded-xl px-3 py-3 hover:bg-slate-50">
                     <span className="block text-sm font-semibold leading-5 text-slate-800 group-hover:text-violet-800">{item.title.replace(/\s+(Practice|Diagnostic)$/i, "")}</span>
                     <span className="mt-1 block text-[11px] font-medium text-slate-400">{item.audienceBands?.map((band) => band.label).join(" · ") || "Octamy certification exam"}</span>
                   </Link>
-                ) : <div key={item.id} className="rounded-xl px-3 py-3"><span className="block text-sm font-semibold leading-5 text-slate-700">{item.title}</span><span className="mt-1 inline-flex rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-800">Question bank in review</span></div>)}
+                ))}
               </div>
               {!isLoading && !activeGroup && <div className="mx-auto max-w-sm py-8 text-center"><p className="font-bold text-slate-800">Explore job-ready certifications</p><p className="mt-2 text-sm leading-6 text-slate-500">Browse software, cloud, AI, data, ERP and security credentials.</p><Link href="/get-certified" className="mt-4 inline-flex items-center text-sm font-bold text-violet-700">View certification catalog <ArrowRight className="ml-1 h-4 w-4" /></Link></div>}
             </div>
@@ -182,7 +182,7 @@ export function MobileCertificationMenu({ onNavigate }: { onNavigate: () => void
           <details key={group.slug} className="group/path border-t border-slate-100 first:border-0">
             <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between rounded-xl px-3 text-sm font-semibold text-slate-700 hover:bg-slate-50">{group.name}<ChevronDown className="h-3.5 w-3.5 transition group-open/path:rotate-180" /></summary>
             <div className="mb-2 ml-2 border-l border-slate-200 pl-2">
-              {group.items.slice(0, 6).map((item) => item.availability === "available" ? <Link key={item.id} href={publicAssessmentPath(item.slug)} onClick={onNavigate} className="block rounded-lg px-3 py-2 text-xs leading-5 text-slate-600 hover:bg-violet-50 hover:text-violet-800">{item.title.replace(/\s+(Practice|Diagnostic)$/i, "")}</Link> : <div key={item.id} className="rounded-lg px-3 py-2 text-xs leading-5 text-slate-500">{item.title}<span className="ml-1 text-[9px] font-bold uppercase text-amber-700">In review</span></div>)}
+              {group.items.slice(0, 6).map((item) => <Link key={item.id} href={publicAssessmentPath(item.slug)} onClick={onNavigate} className="block rounded-lg px-3 py-2 text-xs leading-5 text-slate-600 hover:bg-violet-50 hover:text-violet-800">{item.title.replace(/\s+(Practice|Diagnostic)$/i, "")}</Link>)}
               <Link href={publicAssessmentCategoryPath(group.slug)} onClick={onNavigate} className="block rounded-lg px-3 py-2 text-xs font-bold text-violet-700">View all {group.name}</Link>
             </div>
           </details>

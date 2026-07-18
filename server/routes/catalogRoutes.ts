@@ -281,6 +281,9 @@ router.get("/certification-navigation", async (_req: Request, res: Response) => 
         eq(courses.ownerType, "admin"),
         eq(courses.productType, "assessment"),
         eq(courses.assessmentPurpose, "certification"),
+        eq(courses.isActive, true),
+        eq(courses.visibility, "public"),
+        eq(courses.reviewStatus, "approved"),
         eq(categories.isActive, true),
         sql`EXISTS (
           SELECT 1 FROM course_question_blueprint blueprint
@@ -295,7 +298,7 @@ router.get("/certification-navigation", async (_req: Request, res: Response) => 
     res.json({
       items: items.map((item) => ({
         ...item,
-        availability: item.isActive && item.visibility === "public" && item.reviewStatus === "approved" ? "available" : "in_review",
+        availability: "available" as const,
       })),
       pagination: { total: items.length },
     });
