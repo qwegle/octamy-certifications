@@ -8,6 +8,12 @@ Syllabus: `OCT-TSAD-2026.1 (TypeScript 5.6.3; Handbook snapshot 2026-07-18)`
 
 Status: content-complete release candidate. It is neither independently reviewed nor approved, imported, active, or published.
 
+Substantive audit update (2026-07-18): all 80 stems, answer keys, options,
+explanations, topic mappings and primary references were reread. Question
+`tsad-v1-027` was corrected because its earlier wording misstated what a
+truthiness branch proves. The regenerated pack digest is
+`369f70f1d5711dddb4c9c3f7362a7347efa5cba7df4e5d9b9d0e2431246c11dc`.
+
 ## Scope and blueprint
 
 This version narrows the shell to vendor-neutral TypeScript application-development skills that are stable in TypeScript 5.6.3. It does not claim framework expertise, runtime-specific Node.js expertise, or mastery of every compiler feature.
