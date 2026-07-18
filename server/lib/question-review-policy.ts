@@ -9,6 +9,26 @@ export interface QuestionGovernanceUpdate {
   reviewedAt: Date | null;
 }
 
+export type QuestionBankReviewContext = {
+  ownerType: string;
+  bankPurpose: string;
+};
+
+/** First-party assessment content always requires a second accountable person. */
+export function requiresIndependentQuestionReview(
+  bank: QuestionBankReviewContext,
+): boolean {
+  return bank.ownerType === "admin"
+    && (bank.bankPurpose === "certification" || bank.bankPurpose === "practice");
+}
+
+export function isIndependentQuestionReviewer(
+  createdBy: number | null | undefined,
+  reviewerId: number | null | undefined,
+): boolean {
+  return createdBy != null && reviewerId != null && createdBy !== reviewerId;
+}
+
 /** Manual editor submission is itself an explicit human authoring decision. */
 export function governanceForHumanQuestion(
   reviewerId: number,

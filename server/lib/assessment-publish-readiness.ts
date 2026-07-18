@@ -12,10 +12,16 @@ import {
   type AssessmentPublishReadiness,
   type AssessmentPurpose,
 } from "./assessment-bank-readiness";
+import {
+  evaluateAssessmentContentAcceptance,
+  type AssessmentAcceptanceReport,
+} from "./assessment-content-acceptance";
 
 export type AssessmentPublishCourseState = AssessmentPublicationState & {
   assessmentPurpose: string;
   useBlueprintEngine: boolean;
+  ownerType?: string;
+  slug?: string;
 };
 
 export class AssessmentPublishReadinessError extends Error {
@@ -24,6 +30,7 @@ export class AssessmentPublishReadinessError extends Error {
   constructor(
     message: string,
     readonly readiness?: AssessmentPublishReadiness,
+    readonly acceptance?: AssessmentAcceptanceReport,
   ) {
     super(message);
     this.name = "AssessmentPublishReadinessError";
@@ -59,6 +66,7 @@ async function loadAssessmentPublishReadiness(
       difficulty: courseQuestionBlueprint.difficulty,
       bankPurpose: questionBanks.bankPurpose,
       bankStatus: questionBanks.status,
+      syllabusVersion: questionBanks.syllabusVersion,
     })
     .from(courseQuestionBlueprint)
     .innerJoin(questionBanks, eq(questionBanks.id, courseQuestionBlueprint.bankId))
@@ -71,6 +79,7 @@ async function loadAssessmentPublishReadiness(
     difficulty: string;
     bankPurpose: string;
     bankStatus: string;
+    syllabusVersion: string | null;
   }) => {
     if (rule.bankPurpose !== purpose || rule.bankStatus !== "active") {
       return { ...rule, approvedInventory: 0 };
@@ -122,6 +131,76 @@ async function loadAssessmentPublishReadiness(
   });
 }
 
+async function loadAssessmentContentAcceptance(
+  courseId: number,
+  course: AssessmentPublishCourseState,
+  executor: any = db,
+): Promise<AssessmentAcceptanceReport> {
+  const purpose = assessmentPurpose(course.assessmentPurpose);
+  const blueprint = await executor
+    .select({
+      bankId: courseQuestionBlueprint.bankId,
+      topicId: courseQuestionBlueprint.topicId,
+      questionCount: courseQuestionBlueprint.questionCount,
+      difficulty: courseQuestionBlueprint.difficulty,
+      syllabusVersion: questionBanks.syllabusVersion,
+    })
+    .from(courseQuestionBlueprint)
+    .innerJoin(questionBanks, eq(questionBanks.id, courseQuestionBlueprint.bankId))
+    .where(eq(courseQuestionBlueprint.courseId, courseId));
+
+  const syllabusVersions = Array.from(new Set(
+    blueprint.map((rule: { syllabusVersion: string | null }) => rule.syllabusVersion?.trim()).filter(Boolean),
+  )) as string[];
+  const syllabusVersion = syllabusVersions.length === 1 ? syllabusVersions[0] : "";
+  const scopedQuestions = blueprint.length > 0
+    ? await executor.select({
+      id: questions.id,
+      bankId: questions.bankId,
+      topicId: questions.topicId,
+      question: questions.question,
+      questionFormat: questions.questionFormat,
+      options: questions.options,
+      correctAnswer: questions.correctAnswer,
+      difficulty: questions.difficulty,
+      explanation: questions.explanation,
+      generationSource: questions.generationSource,
+      reviewStatus: questions.reviewStatus,
+      isActive: questions.isActive,
+      createdBy: questions.createdBy,
+      reviewedBy: questions.reviewedBy,
+      reviewedAt: questions.reviewedAt,
+      version: questions.version,
+      contentHash: questions.contentHash,
+      answerMetadata: questions.answerMetadata,
+    }).from(questions).where(and(
+      ...eligibleQuestionFilters,
+      sql`EXISTS (
+        SELECT 1
+          FROM ${courseQuestionBlueprint} scoped_rule
+         WHERE scoped_rule.course_id = ${courseId}
+           AND scoped_rule.bank_id = ${questions.bankId}
+           AND (scoped_rule.topic_id IS NULL OR scoped_rule.topic_id = ${questions.topicId})
+           AND (scoped_rule.difficulty = 'mixed' OR scoped_rule.difficulty = ${questions.difficulty})
+      )`,
+    ))
+    : [];
+
+  return evaluateAssessmentContentAcceptance({
+    assessmentSlug: course.slug || `assessment-${courseId}`,
+    purpose,
+    syllabusVersion,
+    useBlueprintEngine: course.useBlueprintEngine,
+    rules: blueprint,
+    questions: scopedQuestions.map((question: any) => ({
+      ...question,
+      bankId: Number(question.bankId),
+      correctAnswer: Number(question.correctAnswer),
+      version: Number(question.version),
+    })),
+  });
+}
+
 /**
  * Enforces publication readiness before a course mutation is persisted. The
  * same assertion is shared by create, update, and review/approval handlers so
@@ -152,6 +231,25 @@ export async function assertAssessmentPublishReadiness(input: {
         || "Complete and review the question-bank blueprint before publishing this assessment.",
       readiness,
     );
+  }
+
+  // First-party publication additionally requires item-level content
+  // acceptance for the exact blueprint-scoped pool. This is deliberately
+  // inside the same locked transaction as the final course activation.
+  if (input.next.ownerType === "admin") {
+    const acceptance = await loadAssessmentContentAcceptance(
+      input.courseId,
+      input.next,
+      input.executor ?? db,
+    );
+    if (!acceptance.releasable) {
+      throw new AssessmentPublishReadinessError(
+        acceptance.issues[0]?.message
+          || "Complete item-level assessment content review before publication.",
+        acceptance.readiness,
+        acceptance,
+      );
+    }
   }
 }
 

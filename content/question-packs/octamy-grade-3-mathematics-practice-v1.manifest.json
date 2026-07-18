@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "sourceKey": "octamy-original:grade-3-mathematics-practice:v1",
+  "name": "Octamy Grade 3 Arithmetic, Time and Perimeter Practice Bank v1",
+  "publisher": "Octamy",
+  "datasetVersion": "1.0.0",
+  "description": "Two hundred first-party questions for a deliberately narrow Grade 3 practice product covering eight skills: whole-number addition, whole-number subtraction, multiplication with factors through 10, exact division within 100, missing-number addition/subtraction equations, halves and fourths of quantities, elapsed time in minutes, and perimeter by adding side lengths. This bank does not claim full Grade 3 curriculum coverage.",
+  "sourceUrl": "https://ncert.nic.in/textbook/pdf/cemm1ps.pdf",
+  "retrievedAt": "2026-07-18T00:00:00.000Z",
+  "license": {
+    "identifier": "Proprietary-Octamy-Original-1.0",
+    "name": "Octamy original-content rights",
+    "url": "https://octamy.com/terms-of-service",
+    "rightsBasis": "owned",
+    "commercialUseAllowed": true,
+    "derivativesAllowed": true,
+    "shareAlikeObligation": "none",
+    "attributionText": "Octamy original Grade 3 arithmetic, time and perimeter practice content",
+    "evidenceReference": "octamy-grade-3-mathematics-practice-v1:source-controlled-authored-cases"
+  },
+  "provenance": {
+    "acquisitionMethod": "first_party",
+    "originalFormat": "JSONL",
+    "chainOfTitle": "Every prompt, option, answer and explanation is authored as first-party Octamy practice content; NCERT is referenced only for broad age-band context and no NCERT exercise text is copied.",
+    "notes": "This is an eight-skill practice bank, not a full-curriculum Grade 3 assessment. Registration and validation do not approve or publish it. A named independent mathematics reviewer must record item review before activation."
+  }
+}

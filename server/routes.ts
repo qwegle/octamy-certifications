@@ -3799,6 +3799,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             message: error.message,
             code: error.code,
             readiness: error.readiness,
+            acceptance: error.acceptance,
           });
         }
         if (error instanceof AdminCourseGovernanceError) {
@@ -3871,6 +3872,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             message: error.message,
             code: error.code,
             readiness: error.readiness,
+            acceptance: error.acceptance,
           });
         }
         if (error instanceof AdminCourseGovernanceError) {
@@ -3934,6 +3936,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             message: error.message,
             code: error.code,
             readiness: error.readiness,
+            acceptance: error.acceptance,
           });
         }
         if (error instanceof AdminCourseGovernanceError) {

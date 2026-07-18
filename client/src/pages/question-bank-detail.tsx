@@ -217,6 +217,7 @@ export default function QuestionBankDetail() {
         `/api/question-banks/${id}/questions/${questionId}/review`,
         { status, expectedVersion, ...(note?.trim() ? { note: note.trim() } : {}) },
       );
+      if (!response.ok) throw new Error((await response.json().catch(() => ({}))).message || "Failed to save review decision");
       return response.json() as Promise<Question>;
     },
     onSuccess: (reviewed, variables) => {
@@ -234,6 +235,35 @@ export default function QuestionBankDetail() {
       title: "Review decision could not be saved",
       description: error.message,
     }),
+  });
+
+  const releaseEvidenceMut = useMutation({
+    mutationFn: async ({ questionId, ...payload }: {
+      questionId: number;
+      expectedVersion: number;
+      changeNote: string;
+      syllabusVersion: string;
+      objectiveCode: string;
+      answerValidationMethod: "authoritative_reference" | "primary_source" | "independent_calculation";
+      answerValidationReference: string;
+      distractorReviewNote: string;
+    }) => {
+      const response = await apiRequest(
+        "PATCH",
+        `/api/question-banks/${id}/questions/${questionId}/release-evidence`,
+        payload,
+      );
+      if (!response.ok) throw new Error((await response.json().catch(() => ({}))).message || "Failed to save release evidence");
+      return response.json() as Promise<Question>;
+    },
+    onSuccess: (saved) => {
+      qc.invalidateQueries({ queryKey: [`/api/question-banks/${id}/questions`] });
+      qc.invalidateQueries({ queryKey: [`/api/question-banks/${id}/questions/${saved.id}/versions`] });
+      qc.invalidateQueries({ queryKey: [`/api/question-banks/${id}`] });
+      setEditing(null);
+      toast({ title: "Release evidence saved", description: "The new version is pending independent review." });
+    },
+    onError: (error: Error) => toast({ title: "Release evidence could not be saved", description: error.message, variant: "destructive" }),
   });
 
   const exportQuestions = async () => {
@@ -641,6 +671,9 @@ export default function QuestionBankDetail() {
           saving={saveQuestionMut.isPending}
           onReview={(questionId, status, expectedVersion, note) => reviewQuestionMut.mutate({ questionId, status, expectedVersion, note })}
           reviewing={reviewQuestionMut.isPending}
+          requiresReleaseEvidence={bank.ownerType === "admin" && ["certification", "practice"].includes(bank.bankPurpose)}
+          onSaveEvidence={(payload) => releaseEvidenceMut.mutate(payload)}
+          savingEvidence={releaseEvidenceMut.isPending}
         />
       )}
 
@@ -668,7 +701,7 @@ export default function QuestionBankDetail() {
   );
 }
 
-function QuestionEditor({ bankId, topics, question, canEdit, onClose, onSave, saving, onReview, reviewing }: {
+function QuestionEditor({ bankId, topics, question, canEdit, onClose, onSave, saving, onReview, reviewing, requiresReleaseEvidence, onSaveEvidence, savingEvidence }: {
   bankId: number;
   topics: QuestionTopic[];
   question: Question;
@@ -678,9 +711,30 @@ function QuestionEditor({ bankId, topics, question, canEdit, onClose, onSave, sa
   saving: boolean;
   onReview: (questionId: number, status: QuestionReviewDecision, expectedVersion: number, note?: string) => void;
   reviewing: boolean;
+  requiresReleaseEvidence: boolean;
+  onSaveEvidence: (payload: {
+    questionId: number;
+    expectedVersion: number;
+    changeNote: string;
+    syllabusVersion: string;
+    objectiveCode: string;
+    answerValidationMethod: "authoritative_reference" | "primary_source" | "independent_calculation";
+    answerValidationReference: string;
+    distractorReviewNote: string;
+  }) => void;
+  savingEvidence: boolean;
 }) {
   const [q, setQ] = useState<any>({ ...question });
   const [reviewNote, setReviewNote] = useState("");
+  const existingEvidence = (question.answerMetadata as any)?.releaseEvidence;
+  const [evidence, setEvidence] = useState({
+    syllabusVersion: existingEvidence?.syllabusVersion || "",
+    objectiveCode: existingEvidence?.objectiveCode || "",
+    answerValidationMethod: (existingEvidence?.answerValidation?.method || "primary_source") as "authoritative_reference" | "primary_source" | "independent_calculation",
+    answerValidationReference: existingEvidence?.answerValidation?.reference || "",
+    distractorReviewNote: existingEvidence?.distractorReview?.note || "",
+    changeNote: "",
+  });
   const isMcq = q.questionFormat === "mcq_single" || q.questionFormat === "mcq_multi";
   const opts: string[] = Array.isArray(q.options) ? q.options : [];
   const editorId = `question-editor-${q.id || "new"}`;
@@ -752,15 +806,16 @@ function QuestionEditor({ bankId, topics, question, canEdit, onClose, onSave, sa
               )}
               {canModify && (
                 <div className="mt-3">
-                  <Label htmlFor={`${editorId}-review-note`}>Review note (optional for approval; required for rejection)</Label>
+                  <Label htmlFor={`${editorId}-review-note`}>Item-specific review attestation</Label>
                   <Textarea
                     id={`${editorId}-review-note`}
                     value={reviewNote}
                     onChange={(event) => setReviewNote(event.target.value)}
                     maxLength={500}
                     rows={2}
-                    placeholder="Record syllabus checks, corrections, or a rejection reason."
+                    placeholder="Describe the answer, distractor, syllabus, and language checks performed (minimum 20 characters)."
                   />
+                  <p className="mt-1 text-xs text-slate-600">Required for approval and rejection. It is tied to this exact content hash and version.</p>
                   {isDirty && (
                     <p role="status" className="mt-1 text-xs font-medium text-amber-800">
                       Save your edits first. The saved version will return to pending review.
@@ -773,6 +828,25 @@ function QuestionEditor({ bankId, topics, question, canEdit, onClose, onSave, sa
             <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900">
               Octamy certification questions are saved for independent review; other workspace questions follow the owner’s review policy.
             </div>
+          )}
+          {q.id && canModify && requiresReleaseEvidence && (
+            <section className="rounded-xl border border-sky-200 bg-sky-50 p-4 space-y-3" aria-labelledby={`${editorId}-evidence-title`}>
+              <div><h3 id={`${editorId}-evidence-title`} className="font-semibold text-slate-900">Assessment release evidence</h3><p className="mt-1 text-xs leading-5 text-slate-600">Saving evidence creates a new pending version and invalidates any earlier approval.</p></div>
+              <div><Label htmlFor={`${editorId}-syllabus`}>Syllabus version</Label><Input id={`${editorId}-syllabus`} value={evidence.syllabusVersion} onChange={(event) => setEvidence({ ...evidence, syllabusVersion: event.target.value })} maxLength={160} /></div>
+              <div><Label htmlFor={`${editorId}-objective`}>Objective code</Label><Input id={`${editorId}-objective`} value={evidence.objectiveCode} onChange={(event) => setEvidence({ ...evidence, objectiveCode: event.target.value })} maxLength={160} /></div>
+              <div><Label htmlFor={`${editorId}-validation-method`}>Answer validation method</Label><Select value={evidence.answerValidationMethod} onValueChange={(value: "authoritative_reference" | "primary_source" | "independent_calculation") => setEvidence({ ...evidence, answerValidationMethod: value })}><SelectTrigger id={`${editorId}-validation-method`}><SelectValue /></SelectTrigger><SelectContent><SelectItem value="primary_source">Primary source</SelectItem><SelectItem value="authoritative_reference">Authoritative reference</SelectItem><SelectItem value="independent_calculation">Independent calculation</SelectItem></SelectContent></Select></div>
+              <div><Label htmlFor={`${editorId}-validation-reference`}>Answer validation reference</Label><Textarea id={`${editorId}-validation-reference`} value={evidence.answerValidationReference} onChange={(event) => setEvidence({ ...evidence, answerValidationReference: event.target.value })} maxLength={2000} rows={2} placeholder="Exact source URL/citation or independently reproduced calculation." /></div>
+              <div><Label htmlFor={`${editorId}-distractor-note`}>Distractor review note</Label><Textarea id={`${editorId}-distractor-note`} value={evidence.distractorReviewNote} onChange={(event) => setEvidence({ ...evidence, distractorReviewNote: event.target.value })} maxLength={2000} rows={2} placeholder="Explain why distractors are plausible but not alternate correct answers." /></div>
+              <div><Label htmlFor={`${editorId}-evidence-change-note`}>Evidence change note</Label><Input id={`${editorId}-evidence-change-note`} value={evidence.changeNote} onChange={(event) => setEvidence({ ...evidence, changeNote: event.target.value })} maxLength={500} placeholder="Why this evidence is being added or changed." /></div>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={savingEvidence || isDirty || evidence.syllabusVersion.trim().length < 3 || evidence.objectiveCode.trim().length < 2 || evidence.answerValidationReference.trim().length < 8 || evidence.distractorReviewNote.trim().length < 10 || evidence.changeNote.trim().length < 10}
+                onClick={() => onSaveEvidence({ questionId: q.id, expectedVersion: q.version, ...evidence })}
+              >
+                {savingEvidence ? "Saving evidence…" : "Save release evidence"}
+              </Button>
+            </section>
           )}
           <div>
             <Label htmlFor={`${editorId}-format`}>Format</Label>
@@ -963,7 +1037,7 @@ function QuestionEditor({ bankId, topics, question, canEdit, onClose, onSave, sa
                 type="button"
                 variant="outline"
                 className="border-rose-200 text-rose-800 hover:bg-rose-50 hover:text-rose-900"
-                disabled={isDirty || reviewing || reviewNote.trim().length < 3}
+                disabled={isDirty || reviewing || reviewNote.trim().length < 20}
                 onClick={() => onReview(q.id, "rejected", q.version, reviewNote)}
               >
                 <XCircle className="h-4 w-4" /> Reject
@@ -973,7 +1047,7 @@ function QuestionEditor({ bankId, topics, question, canEdit, onClose, onSave, sa
               <Button
                 type="button"
                 className="bg-emerald-700 hover:bg-emerald-800"
-                disabled={isDirty || reviewing}
+                disabled={isDirty || reviewing || reviewNote.trim().length < 20}
                 onClick={() => onReview(q.id, "approved", q.version, reviewNote)}
               >
                 <CheckCircle2 className="h-4 w-4" /> {reviewing ? "Saving review…" : "Approve version"}

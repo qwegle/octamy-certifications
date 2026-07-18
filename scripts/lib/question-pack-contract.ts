@@ -214,6 +214,20 @@ const questionOriginSchema = z.enum([
   "licensed_adapted",
 ]);
 
+const assessmentReleaseEvidenceSchema = z.object({
+  syllabusVersion: z.string().trim().min(3).max(160),
+  objectiveCode: z.string().trim().min(2).max(160),
+  answerValidation: z.object({
+    status: z.literal("verified"),
+    method: z.enum(["authoritative_reference", "primary_source", "independent_calculation"]),
+    reference: z.string().trim().min(8).max(2_000),
+  }).strict(),
+  distractorReview: z.object({
+    status: z.literal("verified"),
+    note: z.string().trim().min(10).max(2_000),
+  }).strict(),
+}).strict();
+
 export const questionPackItemSchema = z.object({
   schemaVersion: z.literal(QUESTION_PACK_SCHEMA_VERSION),
   sourceRecordId: z.string().trim().min(3).max(300).regex(/^[A-Za-z0-9][A-Za-z0-9._:/@-]+$/),
@@ -258,6 +272,16 @@ export const questionPackItemSchema = z.object({
       path: ["answer", "kind"],
       message: `${item.format} requires a ${expectedKind[item.format]} answer`,
     });
+  }
+  if (Object.prototype.hasOwnProperty.call(item.metadata, "releaseEvidence")) {
+    const evidence = assessmentReleaseEvidenceSchema.safeParse(item.metadata.releaseEvidence);
+    if (!evidence.success) {
+      evidence.error.issues.forEach((issue) => ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["metadata", "releaseEvidence", ...issue.path],
+        message: issue.message,
+      }));
+    }
   }
   if (item.negativeMarks > item.maxPoints) {
     ctx.addIssue({
@@ -473,6 +497,7 @@ export function normalizeQuestionPackItem(input: unknown): ValidationResult<Norm
     ? ["False", "True"]
     : item.options.map(normalizeText);
   const answer = normalizeAnswer(item);
+  const releaseEvidence = assessmentReleaseEvidenceSchema.safeParse(item.metadata.releaseEvidence);
   const tags = item.tags.map(normalizeText).filter((tag, index, all) => (
     all.findIndex((candidate) => normalizeComparableText(candidate) === normalizeComparableText(tag)) === index
   ));
@@ -524,7 +549,10 @@ export function normalizeQuestionPackItem(input: unknown): ValidationResult<Norm
       correctAnswer: answer.correctAnswer,
       questionFormat: item.format,
       expectedAnswer: answer.expectedAnswer,
-      answerMetadata: answer.answerMetadata,
+      answerMetadata: {
+        ...answer.answerMetadata,
+        ...(releaseEvidence.success ? { releaseEvidence: releaseEvidence.data } : {}),
+      },
       maxPoints: item.maxPoints,
       negativeMarks: item.negativeMarks,
       timeLimitSec: item.timeLimitSec ?? null,

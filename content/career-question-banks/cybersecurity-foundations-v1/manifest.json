@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "sourceKey": "octamy-original:cybersecurity-foundations:v1",
+  "name": "Octamy Cybersecurity Foundations Bank v1",
+  "publisher": "Octamy",
+  "datasetVersion": "1.0.0",
+  "description": "Eighty original, vendor-neutral cybersecurity foundation questions mapped to current primary guidance. This is a private release candidate, not approved or published content.",
+  "sourceUrl": "https://doi.org/10.6028/NIST.CSWP.29",
+  "retrievedAt": "2026-07-18T00:00:00.000Z",
+  "license": {
+    "identifier": "Proprietary-Octamy-Original-1.0",
+    "name": "Octamy original-content rights",
+    "url": "https://octamy.com/terms-of-service",
+    "rightsBasis": "owned",
+    "commercialUseAllowed": true,
+    "derivativesAllowed": true,
+    "shareAlikeObligation": "none",
+    "attributionText": "Octamy original Cybersecurity Foundations assessment content",
+    "evidenceReference": "octamy-cybersecurity-foundations-v1:source-controlled-original-draft"
+  },
+  "provenance": {
+    "acquisitionMethod": "first_party",
+    "originalFormat": "JSONL",
+    "chainOfTitle": "Every prompt, option, answer and explanation is original Octamy wording created for this bank; cited standards and public guidance establish the tested behavior and were not copied as assessment questions.",
+    "notes": "AI-assisted drafting and automated validation do not constitute factual approval. Import only to a private inactive bank and require a different named human cybersecurity reviewer to approve every exact item version."
+  }
+}

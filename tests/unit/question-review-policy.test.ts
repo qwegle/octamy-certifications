@@ -4,8 +4,10 @@ import {
   governanceForHumanQuestion,
   governanceForImportedQuestion,
   governanceForQuestionReview,
+  isIndependentQuestionReviewer,
   isQuestionAssessmentEligible,
   parseImportGenerationSource,
+  requiresIndependentQuestionReview,
 } from "../../server/lib/question-review-policy";
 
 const now = new Date("2026-07-14T13:00:00.000Z");
@@ -62,6 +64,15 @@ describe("question review governance", () => {
       reviewedBy: 9,
       reviewedAt: now,
     });
+  });
+
+  it("requires independent review for every first-party assessment bank", () => {
+    expect(requiresIndependentQuestionReview({ ownerType: "admin", bankPurpose: "certification" })).toBe(true);
+    expect(requiresIndependentQuestionReview({ ownerType: "admin", bankPurpose: "practice" })).toBe(true);
+    expect(requiresIndependentQuestionReview({ ownerType: "creator", bankPurpose: "practice" })).toBe(false);
+    expect(isIndependentQuestionReviewer(7, 8)).toBe(true);
+    expect(isIndependentQuestionReviewer(7, 7)).toBe(false);
+    expect(isIndependentQuestionReviewer(null, 8)).toBe(false);
   });
 
   it("exposes the exact scheduled-assessment eligibility predicate", () => {

@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "sourceKey": "octamy-original:typescript-application-development-skills:v1",
+  "name": "Octamy TypeScript Application Development Skills Bank v1",
+  "publisher": "Octamy",
+  "datasetVersion": "1.0.0",
+  "description": "Eighty original TypeScript application-development certification questions aligned to TypeScript 5.6.3 and the official TypeScript Handbook snapshot dated 2026-07-18.",
+  "sourceUrl": "https://www.typescriptlang.org/docs/handbook/intro.html",
+  "retrievedAt": "2026-07-18T00:00:00.000Z",
+  "license": {
+    "identifier": "Proprietary-Octamy-Original-1.0",
+    "name": "Octamy original-content rights",
+    "url": "https://octamy.com/terms-of-service",
+    "rightsBasis": "owned",
+    "commercialUseAllowed": true,
+    "derivativesAllowed": true,
+    "shareAlikeObligation": "none",
+    "attributionText": "Octamy original TypeScript application-development assessment content",
+    "evidenceReference": "octamy-typescript-application-development-skills-v1:source-controlled-authored-items"
+  },
+  "provenance": {
+    "acquisitionMethod": "first_party",
+    "originalFormat": "JSONL",
+    "chainOfTitle": "Every prompt, option, answer and explanation is original first-party Octamy content; official TypeScript documentation is cited only as factual evidence and its assessment wording is not copied.",
+    "notes": "Registration and validation do not approve or publish this bank. A named independent TypeScript subject-matter reviewer must review every exact item version before activation."
+  }
+}

@@ -134,6 +134,33 @@ describe("question-pack item normalization", () => {
     expect(second.value.sourceRecordHash).not.toBe(first.value.sourceRecordHash);
   });
 
+  it("preserves valid assessment release evidence in answer metadata", () => {
+    const item = {
+      ...numericItem,
+      metadata: {
+        releaseEvidence: {
+          syllabusVersion: "OCT-MATH-2026.1",
+          objectiveCode: "MATH-ADD-01",
+          answerValidation: {
+            status: "verified",
+            method: "independent_calculation",
+            reference: "Recalculated independently: 2 + 2 = 4.",
+          },
+          distractorReview: {
+            status: "verified",
+            note: "Each distractor represents a distinct arithmetic error.",
+          },
+        },
+      },
+    };
+
+    const normalized = normalizeQuestionPackItem(item);
+    expect(normalized.ok).toBe(true);
+    if (normalized.ok) {
+      expect(normalized.value.answerMetadata?.releaseEvidence).toEqual(item.metadata.releaseEvidence);
+    }
+  });
+
   it.each([
     [{ ...numericItem, format: "mcq_single" }, "requires a single_choice answer"],
     [{ ...numericItem, answer: { kind: "numeric", value: "not-a-number", tolerance: 0 } }, "must be finite"],

@@ -23,11 +23,18 @@ import {
   governanceForHumanQuestion,
   governanceForImportedQuestion,
   governanceForQuestionReview,
+  isIndependentQuestionReviewer,
   parseImportGenerationSource,
+  requiresIndependentQuestionReview,
   type QuestionGenerationSource,
   type QuestionReviewStatus,
 } from "../lib/question-review-policy";
 import { neutralizeSpreadsheetCell } from "../lib/csv-safety";
+import {
+  assessmentReleaseEvidenceFromCsvRow,
+  assessmentReleaseEvidenceFromMetadata,
+  type AssessmentReleaseEvidence,
+} from "../lib/assessment-content-acceptance";
 import crypto from "node:crypto";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
@@ -152,6 +159,7 @@ function questionInsertValues(
     expectedAnswer: data.expectedAnswer ?? null,
     tags: data.tags ?? [],
     explanation: data.explanation ?? null,
+    answerMetadata: data.answerMetadata ?? null,
     contentHash: data.contentHash ?? questionContentHash(data),
     reviewStatus: data.reviewStatus ?? "draft",
     generationSource: data.generationSource ?? "human",
@@ -554,16 +562,18 @@ const questionPatchSchema = z.object(questionFields).partial().refine(
 const questionReviewSchema = z.object({
   status: z.enum(["approved", "rejected"]),
   expectedVersion: z.number().int().positive(),
-  note: z.string().trim().max(500).optional(),
-}).strict().superRefine((value, ctx) => {
-  if (value.status === "rejected" && (!value.note || value.note.length < 3)) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      path: ["note"],
-      message: "Add a short rejection reason",
-    });
-  }
-});
+  note: z.string().trim().min(20, "Record an item-specific review note of at least 20 characters").max(500),
+}).strict();
+
+const releaseEvidenceMutationSchema = z.object({
+  expectedVersion: z.number().int().positive(),
+  changeNote: z.string().trim().min(10).max(500),
+  syllabusVersion: z.string().trim().min(3).max(160),
+  objectiveCode: z.string().trim().min(2).max(160),
+  answerValidationMethod: z.enum(["authoritative_reference", "primary_source", "independent_calculation"]),
+  answerValidationReference: z.string().trim().min(8).max(2_000),
+  distractorReviewNote: z.string().trim().min(10).max(2_000),
+}).strict();
 
 function normalizeQuestion(data: z.infer<typeof questionCreateSchema>) {
   if (data.questionFormat === "true_false") {
@@ -608,7 +618,7 @@ router.post("/:id/questions", requireAuth, withCtx, async (req: AuthedRequest, r
     maxQuestions = getCreatorLimits(creatorRow?.plan).maxQuestionsPerBank;
   }
 
-  const needsIndependentReview = bank.ownerType === "admin" && bank.bankPurpose === "certification";
+  const needsIndependentReview = requiresIndependentQuestionReview(bank);
   const values = {
     ...normalizeQuestion(parsed.data),
     ...(needsIndependentReview
@@ -692,6 +702,78 @@ router.patch("/:id/questions/:qid", requireAuth, withCtx, async (req: AuthedRequ
   res.json(updated);
 });
 
+router.patch("/:id/questions/:qid/release-evidence", requireAuth, withCtx, async (req: AuthedRequest, res) => {
+  const bankId = positiveId(req.params.id);
+  const questionId = positiveId(req.params.qid);
+  if (!bankId || !questionId) return res.status(400).json({ message: "Invalid bank or question id" });
+  const bank = await storage.getQuestionBank(bankId);
+  if (!bank) return res.status(404).json({ message: "Bank not found" });
+  if (!canEditBank(req.ctx!, bank)) return res.status(403).json({ message: "Forbidden" });
+
+  const parsed = releaseEvidenceMutationSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ message: "Check the release evidence", errors: parsed.error.flatten() });
+  }
+  const [existing] = await db.select().from(questions).where(and(
+    eq(questions.id, questionId),
+    eq(questions.bankId, bankId),
+  ));
+  if (!existing) return res.status(404).json({ message: "Question not found in this bank" });
+  if (existing.reviewStatus === "retired") {
+    return res.status(409).json({ message: "Retired questions are immutable audit records.", code: "QUESTION_RETIRED" });
+  }
+  if (existing.version !== parsed.data.expectedVersion) {
+    return res.status(409).json({
+      message: "This question changed after you opened it. Reload before recording evidence.",
+      code: "QUESTION_VERSION_CONFLICT",
+      currentVersion: existing.version,
+    });
+  }
+  const parsedEvidence = assessmentReleaseEvidenceFromCsvRow(parsed.data);
+  if (!parsedEvidence.ok || !parsedEvidence.evidence) {
+    return res.status(400).json({
+      message: parsedEvidence.ok ? "Complete the release evidence" : parsedEvidence.error,
+      code: "INVALID_ASSESSMENT_RELEASE_EVIDENCE",
+    });
+  }
+  const priorMetadata = existing.answerMetadata && typeof existing.answerMetadata === "object"
+    ? existing.answerMetadata as Record<string, unknown>
+    : {};
+  const updated = await storage.updateQuestionWithVersioning(
+    questionId,
+    {
+      answerMetadata: { ...priorMetadata, releaseEvidence: parsedEvidence.evidence },
+      ...governanceAfterQuestionEdit(),
+    },
+    req.ctx!.user.id,
+    `Release evidence changed: ${parsed.data.changeNote}`,
+    parsed.data.expectedVersion,
+  );
+  if (!updated) {
+    return res.status(409).json({
+      message: "This question changed while evidence was being saved. Reload and try again.",
+      code: "QUESTION_VERSION_CONFLICT",
+    });
+  }
+  await audit({
+    action: "question.release_evidence.updated",
+    userId: req.ctx!.user.id,
+    actorRole: req.ctx!.user.isAdmin ? "admin" : bank.ownerType,
+    resourceType: "question",
+    resourceId: questionId,
+    metadata: {
+      bankId,
+      objectiveCode: parsedEvidence.evidence.objectiveCode,
+      syllabusVersion: parsedEvidence.evidence.syllabusVersion,
+      previousVersion: existing.version,
+      version: updated.version,
+      approvalInvalidated: existing.reviewStatus === "approved" || existing.isActive,
+    },
+    req,
+  });
+  res.json(updated);
+});
+
 router.post("/:id/questions/:qid/review", requireAuth, withCtx, async (req: AuthedRequest, res) => {
   const bankId = positiveId(req.params.id);
   const questionId = positiveId(req.params.qid);
@@ -728,6 +810,7 @@ router.post("/:id/questions/:qid/review", requireAuth, withCtx, async (req: Auth
     });
   }
 
+  let releaseEvidence: AssessmentReleaseEvidence | null = null;
   if (parsedReview.data.status === "approved") {
     const reviewable = questionCreateSchema.safeParse(existing);
     if (!reviewable.success) {
@@ -737,10 +820,10 @@ router.post("/:id/questions/:qid/review", requireAuth, withCtx, async (req: Auth
         errors: reviewable.error.flatten(),
       });
     }
-    if (bank.ownerType === "admin" && bank.bankPurpose === "certification") {
-      if (existing.createdBy === req.ctx!.user.id) {
+    if (requiresIndependentQuestionReview(bank)) {
+      if (!isIndependentQuestionReviewer(existing.createdBy, req.ctx!.user.id)) {
         return res.status(409).json({
-          message: "Octamy certification questions require a reviewer other than the author.",
+          message: "Octamy assessment questions require an attributable reviewer other than the author.",
           code: "INDEPENDENT_REVIEW_REQUIRED",
         });
       }
@@ -748,6 +831,13 @@ router.post("/:id/questions/:qid/review", requireAuth, withCtx, async (req: Auth
         return res.status(409).json({
           message: "Add a competency topic, explanation, and content identity before approval.",
           code: "QUESTION_QUALITY_REQUIREMENTS_NOT_MET",
+        });
+      }
+      releaseEvidence = assessmentReleaseEvidenceFromMetadata(existing.answerMetadata);
+      if (!releaseEvidence) {
+        return res.status(409).json({
+          message: "Record syllabus, answer-validation, and distractor-review evidence before approval.",
+          code: "ASSESSMENT_RELEASE_EVIDENCE_REQUIRED",
         });
       }
       if (existing.generationSource !== "human") {
@@ -768,13 +858,41 @@ router.post("/:id/questions/:qid/review", requireAuth, withCtx, async (req: Auth
   }
 
   const reviewerId = req.ctx!.user.id;
+  const priorMetadata = existing.answerMetadata && typeof existing.answerMetadata === "object"
+    ? existing.answerMetadata as Record<string, unknown>
+    : {};
+  const releaseEvidenceWithoutAttestation = releaseEvidence && {
+    syllabusVersion: releaseEvidence.syllabusVersion,
+    objectiveCode: releaseEvidence.objectiveCode,
+    answerValidation: releaseEvidence.answerValidation,
+    distractorReview: releaseEvidence.distractorReview,
+  };
+  const reviewedMetadata = releaseEvidenceWithoutAttestation
+    ? {
+      ...priorMetadata,
+      releaseEvidence: parsedReview.data.status === "approved"
+        ? {
+          ...releaseEvidenceWithoutAttestation,
+          reviewAttestation: {
+            status: "attested" as const,
+            note: parsedReview.data.note,
+            contentHash: existing.contentHash!,
+            contentVersion: existing.version,
+            decisionVersion: existing.version + 1,
+            reviewerId,
+          },
+        }
+        : releaseEvidenceWithoutAttestation,
+    }
+    : priorMetadata;
   const updated = await storage.updateQuestionWithVersioning(
     questionId,
-    { ...governanceForQuestionReview(parsedReview.data.status, reviewerId, new Date()) },
+    {
+      ...governanceForQuestionReview(parsedReview.data.status, reviewerId, new Date()),
+      answerMetadata: reviewedMetadata,
+    },
     reviewerId,
-    parsedReview.data.note
-      ? `Review ${parsedReview.data.status}: ${parsedReview.data.note}`
-      : `Review ${parsedReview.data.status}`,
+    `Review ${parsedReview.data.status}: ${parsedReview.data.note}`,
     parsedReview.data.expectedVersion,
   );
   if (!updated) {
@@ -794,7 +912,10 @@ router.post("/:id/questions/:qid/review", requireAuth, withCtx, async (req: Auth
       bankId,
       decision: parsedReview.data.status,
       generationSource: existing.generationSource,
+      contentHash: existing.contentHash,
+      contentVersion: existing.version,
       version: updated?.version,
+      attestationNote: parsedReview.data.note,
     },
     req,
   });
@@ -840,6 +961,7 @@ interface ParsedRow {
   difficulty: string;
   tags: string[];
   explanation: string | null;
+  answerMetadata: { releaseEvidence: AssessmentReleaseEvidence } | null;
   generationSource: Exclude<QuestionGenerationSource, "human">;
   reviewStatus: QuestionReviewStatus;
   isActive: boolean;
@@ -890,6 +1012,8 @@ export function normalizeRow(raw: Record<string, any>): { ok: true; row: ParsedR
   if (!generationSource) {
     return { ok: false, error: "generationSource must be 'ai_draft', 'imported', or blank" };
   }
+  const releaseEvidence = assessmentReleaseEvidenceFromCsvRow(raw);
+  if (!releaseEvidence.ok) return { ok: false, error: releaseEvidence.error };
 
   const candidate = questionCreateSchema.safeParse({
     question,
@@ -925,6 +1049,7 @@ export function normalizeRow(raw: Record<string, any>): { ok: true; row: ParsedR
       difficulty: normalized.difficulty,
       tags: normalized.tags,
       explanation: normalized.explanation ?? null,
+      answerMetadata: releaseEvidence.evidence ? { releaseEvidence: releaseEvidence.evidence } : null,
       ...governanceForImportedQuestion(generationSource),
     },
   };
@@ -1002,7 +1127,9 @@ router.post("/:id/questions/import", requireAuth, withCtx, upload.single("file")
     const errors: Array<{ row: number; message: string }> = [];
     raw.forEach((r, i) => {
       const result = normalizeRow(r);
-      if (result.ok) valid.push(result.row);
+      if (result.ok && requiresIndependentQuestionReview(bank) && !result.row.answerMetadata?.releaseEvidence) {
+        errors.push({ row: i + 1, message: "First-party assessment imports require syllabus and answer-review evidence columns" });
+      } else if (result.ok) valid.push(result.row);
       else errors.push({ row: i + 1, message: result.error });
     });
 
@@ -1133,6 +1260,11 @@ router.get("/:id/questions/export", requireAuth, withCtx, async (req: AuthedRequ
           difficulty: question.difficulty,
           tags: Array.isArray(question.tags) ? (question.tags as string[]).join(",") : "",
           explanation: question.explanation ?? "",
+          syllabusVersion: (question.answerMetadata as any)?.releaseEvidence?.syllabusVersion ?? "",
+          objectiveCode: (question.answerMetadata as any)?.releaseEvidence?.objectiveCode ?? "",
+          answerValidationMethod: (question.answerMetadata as any)?.releaseEvidence?.answerValidation?.method ?? "",
+          answerValidationReference: (question.answerMetadata as any)?.releaseEvidence?.answerValidation?.reference ?? "",
+          distractorReviewNote: (question.answerMetadata as any)?.releaseEvidence?.distractorReview?.note ?? "",
           reviewStatus: question.reviewStatus,
           generationSource: question.generationSource,
           createdBy: question.createdBy ?? "",

@@ -3967,17 +3967,16 @@ export class DatabaseStorage implements IStorage {
         changeNote: changeNote?.trim() || null,
         changedBy: changedBy ?? null,
       });
-      if (lockedCourse.ownerType !== "admin") {
-        // A third-party blueprint change is a material content change. Return
-        // it to explicit admin review in the same transaction as the new
-        // immutable blueprint revision.
-        await tx.update(courses).set({
-          isActive: false,
-          reviewStatus: lockedCourse.visibility === "private" ? "draft" : "pending",
-          subscriptionEligible: false,
-          resellerEligible: false,
-        }).where(eq(courses.id, courseId));
-      }
+      // Every blueprint revision changes the exact pool being approved,
+      // including first-party assessments. Invalidate the course decision in
+      // the same transaction as the immutable revision so an earlier approval
+      // can never be reused for a different blueprint.
+      await tx.update(courses).set({
+        isActive: false,
+        reviewStatus: "pending",
+        subscriptionEligible: false,
+        resellerEligible: false,
+      }).where(eq(courses.id, courseId));
       return inserted;
     });
   }
