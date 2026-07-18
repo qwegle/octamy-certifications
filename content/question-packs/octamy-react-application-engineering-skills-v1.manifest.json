@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "sourceKey": "octamy-original:react-application-engineering-skills:v1",
+  "name": "Octamy React Application Engineering Skills Bank v1",
+  "publisher": "Octamy",
+  "datasetVersion": "1.0.0",
+  "description": "Eighty original React application-engineering certification questions aligned to React 19.2 and the official react.dev documentation snapshot dated 2026-07-19.",
+  "sourceUrl": "https://react.dev/",
+  "retrievedAt": "2026-07-19T00:00:00.000Z",
+  "license": {
+    "identifier": "Proprietary-Octamy-Original-1.0",
+    "name": "Octamy original-content rights",
+    "url": "https://octamy.com/terms-of-service",
+    "rightsBasis": "owned",
+    "commercialUseAllowed": true,
+    "derivativesAllowed": true,
+    "shareAlikeObligation": "none",
+    "attributionText": "Octamy original React application-engineering assessment content",
+    "evidenceReference": "octamy-react-application-engineering-skills-v1:source-controlled-authored-items"
+  },
+  "provenance": {
+    "acquisitionMethod": "first_party",
+    "originalFormat": "JSONL",
+    "chainOfTitle": "Every prompt, option, answer and explanation is original first-party Octamy content; official React documentation is cited only as factual evidence and its assessment wording is not copied.",
+    "notes": "Registration and validation do not approve or publish this bank. A named independent React subject-matter reviewer must review every exact item version before activation."
+  }
+}
