@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { AlertTriangle, CheckCircle2, Edit, Link2, Plus, Search, Trash2, EyeOff } from "lucide-react";
 
 type AssessmentPurpose = "certification" | "practice";
+type AssessmentPurposeFilter = AssessmentPurpose | "all";
 type Assessment = {
   id: number;
   title: string;
@@ -25,22 +26,59 @@ type Assessment = {
   isActive: boolean;
   visibility: string;
   reviewStatus: string;
+  useBlueprintEngine: boolean;
   questionCount: number;
   approvedQuestionInventory: number;
   requiredQuestionInventory: number;
+  undersuppliedRuleCount: number;
   bankCount: number;
   bankNames: string[];
   difficultyRules: string[];
   category?: { id: number; name: string; slug: string };
 };
-type AssessmentPage = { items: Assessment[]; pagination: { page: number; pageSize: number; total: number; totalPages: number } };
+type AssessmentPage = {
+  items: Assessment[];
+  pagination: { page: number; pageSize: number; total: number; totalPages: number };
+  summary: { total: number; certification: number; practice: number; published: number; inReview: number };
+};
 type Category = { id: number; name: string; slug?: string; isActive?: boolean };
 
-const blankForm = { title: "", description: "", categoryId: "", duration: "30", passingScore: "60", visibility: "private" };
+function isPublishReady(item: Assessment): boolean {
+  return item.useBlueprintEngine
+    && Number(item.bankCount || 0) > 0
+    && Number(item.questionCount || 0) > 0
+    && Number(item.undersuppliedRuleCount || 0) === 0
+    && Number(item.approvedQuestionInventory || 0) >= Number(item.requiredQuestionInventory || 0);
+}
+
+function publishReadinessMessage(item: Assessment): string {
+  if (!item.useBlueprintEngine) return "The reviewed question-bank engine is not enabled.";
+  if (Number(item.bankCount || 0) === 0 || Number(item.questionCount || 0) === 0) {
+    return "Add at least one question-bank blueprint rule.";
+  }
+  if (Number(item.undersuppliedRuleCount || 0) > 0) {
+    const count = Number(item.undersuppliedRuleCount);
+    return `${count} blueprint rule${count === 1 ? "" : "s"} lack the required reviewed rotation inventory.`;
+  }
+  if (Number(item.approvedQuestionInventory || 0) < Number(item.requiredQuestionInventory || 0)) {
+    return `${Number(item.requiredQuestionInventory || 0).toLocaleString()} active, reviewed, runtime-compatible questions are required.`;
+  }
+  return "Ready for publication.";
+}
+
+const blankForm = {
+  title: "",
+  description: "",
+  categoryId: "",
+  duration: "30",
+  passingScore: "60",
+  visibility: "private",
+  assessmentPurpose: "certification" as AssessmentPurpose,
+};
 
 export function AdminAssessmentsManagement() {
   const { toast } = useToast();
-  const [purpose, setPurpose] = useState<AssessmentPurpose>("certification");
+  const [purpose, setPurpose] = useState<AssessmentPurposeFilter>("all");
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Set<number>>(new Set());
@@ -60,10 +98,11 @@ export function AdminAssessmentsManagement() {
   const pagination = query.data?.pagination;
   const allSelected = items.length > 0 && items.every((item) => selected.has(item.id));
   const selectedLabel = useMemo(() => `${selected.size} selected`, [selected.size]);
-  const purposeLabel = purpose === "certification" ? "career certification" : "practice exam";
+  const purposeLabel = purpose === "all" ? "assessment" : purpose === "certification" ? "career certification" : "practice exam";
 
   const save = useMutation({
     mutationFn: async () => {
+      const assessmentPurpose = form.assessmentPurpose;
       const common = {
         title: form.title,
         description: form.description,
@@ -71,15 +110,15 @@ export function AdminAssessmentsManagement() {
         duration: Number(form.duration),
         passingScore: Number(form.passingScore),
         visibility: form.visibility,
-        assessmentPurpose: purpose,
-        certificationMode: purpose === "practice" ? "none" : "octamy",
-        subscriptionEligible: purpose === "practice",
+        assessmentPurpose,
+        certificationMode: assessmentPurpose === "practice" ? "none" : "octamy",
+        subscriptionEligible: assessmentPurpose === "practice",
       };
       if (editing) return (await apiRequest("PUT", `/api/admin/courses/${editing.id}`, common)).json();
       return (await apiRequest("POST", "/api/admin/courses", {
         ...common,
         productType: "assessment",
-        price: purpose === "practice" ? 0 : 99,
+        price: assessmentPurpose === "practice" ? 0 : 99,
         contentPrice: null,
         originalPrice: null,
         isOnSale: false,
@@ -117,12 +156,16 @@ export function AdminAssessmentsManagement() {
     onError: (error: Error) => { if (error.message !== "Deletion cancelled") toast({ title: "Bulk action failed", description: error.message, variant: "destructive" }); },
   });
 
-  const switchPurpose = (next: AssessmentPurpose) => {
+  const switchPurpose = (next: AssessmentPurposeFilter) => {
     setPurpose(next);
     setPage(1);
     setSelected(new Set());
   };
-  const openCreate = () => { setEditing(null); setForm(blankForm); setFormOpen(true); };
+  const openCreate = () => {
+    setEditing(null);
+    setForm({ ...blankForm, assessmentPurpose: purpose === "all" ? "certification" : purpose });
+    setFormOpen(true);
+  };
   const openEdit = (item: Assessment) => {
     setEditing(item);
     setForm({
@@ -132,6 +175,7 @@ export function AdminAssessmentsManagement() {
       duration: String(item.duration || 30),
       passingScore: String(item.passingScore || 60),
       visibility: item.visibility || "private",
+      assessmentPurpose: item.assessmentPurpose,
     });
     setFormOpen(true);
   };
@@ -143,9 +187,19 @@ export function AdminAssessmentsManagement() {
           <CardTitle>Assessment catalogue</CardTitle>
           <CardDescription>Career certifications are recruiter-relevant credentials. Practice exams are subscription-only preparation and do not appear in recruiter evidence.</CardDescription>
         </div>
-        <Button onClick={openCreate}><Plus className="mr-2 h-4 w-4" />New {purpose === "certification" ? "certification" : "practice exam"}</Button>
+        <Button onClick={openCreate}><Plus className="mr-2 h-4 w-4" />New {purposeLabel}</Button>
+      </div>
+      <div className="grid gap-3 pt-4 sm:grid-cols-2 xl:grid-cols-5">
+        {[
+          ["All records", query.data?.summary?.total ?? 0],
+          ["Published", query.data?.summary?.published ?? 0],
+          ["In review", query.data?.summary?.inReview ?? 0],
+          ["Career", query.data?.summary?.certification ?? 0],
+          ["Practice", query.data?.summary?.practice ?? 0],
+        ].map(([label, value]) => <div key={String(label)} className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3"><div className="text-xs font-semibold uppercase tracking-wide text-slate-500">{label}</div><div className="mt-1 text-xl font-black text-slate-950">{Number(value).toLocaleString()}</div></div>)}
       </div>
       <div className="mt-4 flex flex-wrap items-center gap-2">
+        <Button size="sm" variant={purpose === "all" ? "default" : "outline"} onClick={() => switchPurpose("all")}>All assessments</Button>
         <Button size="sm" variant={purpose === "certification" ? "default" : "outline"} onClick={() => switchPurpose("certification")}>Career certifications</Button>
         <Button size="sm" variant={purpose === "practice" ? "default" : "outline"} onClick={() => switchPurpose("practice")}>Practice exams</Button>
       </div>
@@ -171,13 +225,14 @@ export function AdminAssessmentsManagement() {
                 <TableCell><div className="font-semibold">{item.title}</div><div className="text-xs text-slate-500">/{item.slug}</div><Badge variant="outline" className="mt-1 capitalize">{item.assessmentPurpose}</Badge></TableCell>
                 <TableCell>{item.category?.name || "Uncategorised"}</TableCell>
                 <TableCell>
-                  <div className="flex items-center gap-2"><span className="font-semibold">{Number(item.approvedQuestionInventory || 0).toLocaleString()}</span><span className="text-xs text-slate-500">approved</span></div>
+                  <div className="flex items-center gap-2"><span className="font-semibold">{Number(item.approvedQuestionInventory || 0).toLocaleString()}</span><span className="text-xs text-slate-500">publishable</span></div>
                   <div className="text-xs text-slate-500">Draw {Number(item.questionCount || 0).toLocaleString()} · {item.bankCount || 0} bank(s)</div>
-                  {Number(item.approvedQuestionInventory || 0) >= Number(item.requiredQuestionInventory || 0)
+                  {isPublishReady(item)
                     ? <Badge className="mt-1 bg-emerald-100 text-emerald-800 hover:bg-emerald-100">Ready</Badge>
-                    : <Badge variant="outline" className="mt-1 border-amber-300 bg-amber-50 text-amber-800"><AlertTriangle className="mr-1 h-3 w-3" />Needs {Number(item.requiredQuestionInventory || 0).toLocaleString()}+</Badge>}
+                    : <Badge variant="outline" className="mt-1 border-amber-300 bg-amber-50 text-amber-800"><AlertTriangle className="mr-1 h-3 w-3" />Not ready</Badge>}
+                  <div className={`mt-1 max-w-64 text-xs ${isPublishReady(item) ? "text-emerald-800" : "text-amber-800"}`}>{publishReadinessMessage(item)}</div>
                 </TableCell>
-                <TableCell><Badge variant={item.isActive && item.visibility === "public" && item.reviewStatus === "approved" ? "default" : "secondary"}>{item.isActive ? "Published" : `${item.reviewStatus} · ${item.visibility}`}</Badge></TableCell>
+                <TableCell><Badge variant={item.isActive && item.visibility === "public" && item.reviewStatus === "approved" ? "default" : "secondary"}>{item.isActive && item.visibility === "public" && item.reviewStatus === "approved" ? "Published" : `${item.reviewStatus} · ${item.visibility}`}</Badge></TableCell>
                 <TableCell><div className="flex justify-end gap-2"><Button size="sm" variant="outline" onClick={() => openEdit(item)}><Edit className="mr-1 h-4 w-4" />Edit</Button><Button asChild size="sm" variant="outline"><Link href={`/admin/courses/${item.id}/blueprint`}><Link2 className="mr-1 h-4 w-4" />Assign questions</Link></Button></div></TableCell>
               </TableRow>)}
               {!items.length && <TableRow><TableCell colSpan={6} className="py-12 text-center text-slate-500">No {purposeLabel}s found.</TableCell></TableRow>}
@@ -193,6 +248,7 @@ export function AdminAssessmentsManagement() {
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="sm:col-span-2"><Label>Title</Label><Input value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} /></div>
           <div className="sm:col-span-2"><Label>Description</Label><Textarea value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} /></div>
+          <div><Label>Purpose</Label><select disabled={Boolean(editing)} className="h-10 w-full rounded-md border bg-white px-3 text-sm disabled:bg-slate-100" value={form.assessmentPurpose} onChange={(event) => setForm({ ...form, assessmentPurpose: event.target.value as AssessmentPurpose })}><option value="certification">Career certification</option><option value="practice">Practice exam</option></select></div>
           <div><Label>Category</Label><select className="h-10 w-full rounded-md border bg-white px-3 text-sm" value={form.categoryId} onChange={(event) => setForm({ ...form, categoryId: event.target.value })}><option value="">Select category</option>{categoriesQuery.data?.filter((item) => item.isActive !== false).map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}</select></div>
           <div><Label>Visibility</Label><select className="h-10 w-full rounded-md border bg-white px-3 text-sm" value={form.visibility} onChange={(event) => setForm({ ...form, visibility: event.target.value })}><option value="private">Private</option><option value="unlisted">Unlisted</option><option value="public">Public</option></select></div>
           <div><Label>Duration (minutes)</Label><Input type="number" min="1" value={form.duration} onChange={(event) => setForm({ ...form, duration: event.target.value })} /></div>

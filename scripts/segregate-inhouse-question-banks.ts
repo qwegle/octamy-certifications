@@ -115,6 +115,7 @@ export async function segregateInhouseQuestionBanks(options: {
         await client.query(`
           UPDATE question_banks SET
             name = $2, description = $3, bank_kind = 'assessment_pool', status = 'active',
+            bank_purpose = 'practice',
             subject = $4, exam_family = $5, grade_band = $6, syllabus_version = 'v1',
             tags = $7::json, updated_at = now()
           WHERE id = $1
@@ -123,11 +124,11 @@ export async function segregateInhouseQuestionBanks(options: {
         const bankResult = await client.query<{ id: number }>(`
           INSERT INTO question_banks (
             slug, name, description, owner_type, owner_id, visibility,
-            bank_kind, status, subject, exam_family, grade_band, syllabus_version,
+            bank_kind, status, bank_purpose, subject, exam_family, grade_band, syllabus_version,
             language, tags, question_count, created_by, created_at, updated_at
           ) VALUES (
             $1, $2, $3, 'admin', NULL, 'private',
-            'assessment_pool', 'active', $4, $5, $6, 'v1',
+            'assessment_pool', 'active', 'practice', $4, $5, $6, 'v1',
             'en', $7::json, 0, NULL, now(), now()
           ) RETURNING id
         `, [poolSlug, ...bankValues]);

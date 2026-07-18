@@ -43,7 +43,12 @@ export const assessmentCatalogQuerySchema = z.object({
   featured: z.enum(["true", "false"]).transform((value) => value === "true").optional(),
 }).strict();
 
-export function catalogCertificationLabel(ownerType: "admin" | "creator", mode: string) {
+export function catalogCertificationLabel(
+  ownerType: "admin" | "creator",
+  mode: string,
+  purpose: AssessmentPurpose = "certification",
+) {
+  if (purpose === "practice") return "Practice only";
   if (ownerType === "admin") return "Octamy-certified";
   if (mode === "octamy_creator") return "Octamy + creator certified";
   return "Creator-issued · verified on Octamy";
@@ -231,9 +236,9 @@ async function assessmentCatalog(req: Request, res: Response, ownerType: "admin"
       items: items.map((item) => ({
         ...item,
         creator: ownerType === "creator" ? item.creator : null,
-        origin: ownerType === "admin" ? "octamy" : "creator",
-        originLabel: ownerType === "admin" ? "Octamy in-house" : "Creator marketplace",
-        certificationLabel: catalogCertificationLabel(ownerType, item.certificationMode),
+        origin: purpose === "practice" ? "practice" : ownerType === "admin" ? "octamy" : "creator",
+        originLabel: purpose === "practice" ? "Octamy practice" : ownerType === "admin" ? "Octamy in-house" : "Creator marketplace",
+        certificationLabel: catalogCertificationLabel(ownerType, item.certificationMode, purpose),
         canonicalPath: purpose === "practice" ? publicPracticePath(item.slug) : publicAssessmentPath(item.slug),
         audienceBands: audienceRows
           .filter((row) => row.courseId === item.id)

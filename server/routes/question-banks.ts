@@ -1,4 +1,5 @@
 import { Router, Request, Response, NextFunction } from "express";
+import { once } from "node:events";
 import jwt from "jsonwebtoken";
 import multer from "multer";
 import Papa from "papaparse";
@@ -7,7 +8,7 @@ import { z } from "zod";
 import { storage } from "../storage";
 import { db } from "../db";
 import { courseQuestionBlueprint, creators, questionBanks, questionPackImportRuns, questions, questionTopics } from "@shared/schema";
-import { eq, and, count, sql, inArray } from "drizzle-orm";
+import { eq, and, count, sql, inArray, isNotNull, desc, lt } from "drizzle-orm";
 import { audit } from "../lib/audit";
 import {
   canCreateBankFor,
@@ -300,6 +301,12 @@ router.get("/blueprint-options", requireAuth, withCtx, async (req: AuthedRequest
     inArray(questions.bankId, bankIds),
     eq(questions.isActive, true),
     eq(questions.reviewStatus, "approved"),
+    isNotNull(questions.reviewedBy),
+    isNotNull(questions.reviewedAt),
+    sql`${questions.questionFormat} IN ('mcq_single', 'true_false')`,
+    sql`json_typeof(${questions.options}) = 'array'`,
+    sql`${questions.correctAnswer} >= 0`,
+    sql`${questions.correctAnswer} < json_array_length(${questions.options})`,
   )).groupBy(questions.bankId, questions.topicId, questions.difficulty);
   res.json(banks.map((bank) => ({
     ...bank,
@@ -317,16 +324,14 @@ router.get("/:id", requireAuth, withCtx, async (req: AuthedRequest, res) => {
   if (!canViewBank(req.ctx!, bank)) return res.status(403).json({ message: "Forbidden" });
   const topics = await storage.listQuestionTopics(id);
   const [inventory] = await db.select({
-    questionCount: count(),
-    approvedActive: sql<number>`count(*) filter (where ${questions.reviewStatus} = 'approved' and ${questions.isActive} = true)`,
-    easyCount: sql<number>`count(*) filter (where ${questions.difficulty} = 'easy' and ${questions.reviewStatus} = 'approved' and ${questions.isActive} = true)`,
-    mediumCount: sql<number>`count(*) filter (where ${questions.difficulty} = 'medium' and ${questions.reviewStatus} = 'approved' and ${questions.isActive} = true)`,
-    hardCount: sql<number>`count(*) filter (where ${questions.difficulty} = 'hard' and ${questions.reviewStatus} = 'approved' and ${questions.isActive} = true)`,
+    questionCount: sql<number>`count(*) filter (where ${questions.reviewStatus} <> 'retired')`,
+    approvedActive: sql<number>`count(*) filter (where ${questions.reviewStatus} = 'approved' and ${questions.isActive} = true and ${questions.reviewedBy} is not null and ${questions.reviewedAt} is not null and ${questions.questionFormat} in ('mcq_single', 'true_false') and json_typeof(${questions.options}) = 'array' and ${questions.correctAnswer} >= 0 and ${questions.correctAnswer} < json_array_length(${questions.options}))`,
+    easyCount: sql<number>`count(*) filter (where ${questions.difficulty} = 'easy' and ${questions.reviewStatus} = 'approved' and ${questions.isActive} = true and ${questions.reviewedBy} is not null and ${questions.reviewedAt} is not null and ${questions.questionFormat} in ('mcq_single', 'true_false') and json_typeof(${questions.options}) = 'array' and ${questions.correctAnswer} >= 0 and ${questions.correctAnswer} < json_array_length(${questions.options}))`,
+    mediumCount: sql<number>`count(*) filter (where ${questions.difficulty} = 'medium' and ${questions.reviewStatus} = 'approved' and ${questions.isActive} = true and ${questions.reviewedBy} is not null and ${questions.reviewedAt} is not null and ${questions.questionFormat} in ('mcq_single', 'true_false') and json_typeof(${questions.options}) = 'array' and ${questions.correctAnswer} >= 0 and ${questions.correctAnswer} < json_array_length(${questions.options}))`,
+    hardCount: sql<number>`count(*) filter (where ${questions.difficulty} = 'hard' and ${questions.reviewStatus} = 'approved' and ${questions.isActive} = true and ${questions.reviewedBy} is not null and ${questions.reviewedAt} is not null and ${questions.questionFormat} in ('mcq_single', 'true_false') and json_typeof(${questions.options}) = 'array' and ${questions.correctAnswer} >= 0 and ${questions.correctAnswer} < json_array_length(${questions.options}))`,
     draftCount: sql<number>`count(*) filter (where ${questions.reviewStatus} in ('draft', 'pending'))`,
-  }).from(questions).where(and(
-    eq(questions.bankId, id),
-    sql`${questions.reviewStatus} <> 'retired'`,
-  ));
+    retiredCount: sql<number>`count(*) filter (where ${questions.reviewStatus} = 'retired')`,
+  }).from(questions).where(eq(questions.bankId, id));
   res.json({
     ...bank,
     topics,
@@ -337,6 +342,7 @@ router.get("/:id", requireAuth, withCtx, async (req: AuthedRequest, res) => {
       medium: Number(inventory.mediumCount),
       hard: Number(inventory.hardCount),
       draft: Number(inventory.draftCount),
+      retired: Number(inventory.retiredCount),
     },
     canEdit: canEditBank(req.ctx!, bank),
   });
@@ -351,13 +357,34 @@ router.patch("/:id", requireAuth, withCtx, async (req: AuthedRequest, res) => {
   const parsed = updateBankSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ message: "Check the bank details", errors: parsed.error.flatten() });
   const data = { ...parsed.data };
+  if (data.bankPurpose && data.bankPurpose !== bank.bankPurpose) {
+    const [{ blueprintUses }] = await db.select({ blueprintUses: count() })
+      .from(courseQuestionBlueprint)
+      .where(eq(courseQuestionBlueprint.bankId, id));
+    if (Number(blueprintUses) > 0) {
+      return res.status(409).json({
+        message: "Remove this bank from every assessment blueprint before changing its purpose.",
+        code: "QUESTION_BANK_PURPOSE_IN_USE",
+      });
+    }
+  }
   if (data.slug) data.slug = slugify(data.slug);
   if (data.slug && data.slug !== bank.slug) {
     const collision = await storage.getQuestionBankBySlug(bank.ownerType, bank.ownerId, data.slug);
     if (collision && collision.id !== bank.id) return res.status(409).json({ message: "A bank with this slug already exists in the workspace" });
   }
-  const updated = await storage.updateQuestionBank(id, data);
-  res.json(updated);
+  try {
+    const updated = await storage.updateQuestionBank(id, data);
+    res.json(updated);
+  } catch (error) {
+    if ((error as { code?: string }).code === "QUESTION_BANK_PURPOSE_IN_USE") {
+      return res.status(409).json({
+        message: error instanceof Error ? error.message : "Question bank purpose is in use",
+        code: "QUESTION_BANK_PURPOSE_IN_USE",
+      });
+    }
+    throw error;
+  }
 });
 
 router.delete("/:id", requireAuth, withCtx, async (req: AuthedRequest, res) => {
@@ -629,6 +656,12 @@ router.patch("/:id/questions/:qid", requireAuth, withCtx, async (req: AuthedRequ
   const patch = questionPatchSchema.safeParse(rest);
   if (!patch.success) return res.status(400).json({ message: "Check the question details", errors: patch.error.flatten() });
   const [existing] = await db.select().from(questions).where(and(eq(questions.id, questionId), eq(questions.bankId, bankId)));
+  if (existing?.reviewStatus === "retired") {
+    return res.status(409).json({
+      message: "Retired questions are immutable audit records.",
+      code: "QUESTION_RETIRED",
+    });
+  }
   const merged = questionCreateSchema.safeParse({ ...existing, ...patch.data });
   if (!merged.success) return res.status(400).json({ message: "Check the question details", errors: merged.error.flatten() });
   if (merged.data.topicId && !(await topicBelongsToBank(merged.data.topicId, bankId))) {
@@ -681,6 +714,12 @@ router.post("/:id/questions/:qid/review", requireAuth, withCtx, async (req: Auth
     eq(questions.bankId, bankId),
   ));
   if (!existing) return res.status(404).json({ message: "Question not found in this bank" });
+  if (existing.reviewStatus === "retired") {
+    return res.status(409).json({
+      message: "Retired questions cannot be approved again; create a new reviewed version instead.",
+      code: "QUESTION_RETIRED",
+    });
+  }
   if (existing.version !== parsedReview.data.expectedVersion) {
     return res.status(409).json({
       message: "This question changed after you opened it. Reload the latest version before reviewing.",
@@ -770,7 +809,17 @@ router.delete("/:id/questions/:qid", requireAuth, withCtx, async (req: AuthedReq
   const bank = await storage.getQuestionBank(bankId);
   if (!bank) return res.status(404).json({ message: "Bank not found" });
   if (!canEditBank(req.ctx!, bank)) return res.status(403).json({ message: "Forbidden" });
-  if (!(await questionBelongsToBank(questionId, bankId))) return res.status(404).json({ message: "Question not found in this bank" });
+  const [existing] = await db.select({ reviewStatus: questions.reviewStatus }).from(questions).where(and(
+    eq(questions.id, questionId),
+    eq(questions.bankId, bankId),
+  ));
+  if (!existing) return res.status(404).json({ message: "Question not found in this bank" });
+  if (existing.reviewStatus === "retired") {
+    return res.status(409).json({
+      message: "Retired questions are retained as immutable audit records.",
+      code: "QUESTION_RETIRED",
+    });
+  }
   await storage.deleteBankQuestion(questionId, req.ctx!.user.id);
   res.status(204).end();
 });
@@ -1035,45 +1084,80 @@ router.post("/:id/questions/import", requireAuth, withCtx, upload.single("file")
 });
 
 router.get("/:id/questions/export", requireAuth, withCtx, async (req: AuthedRequest, res) => {
-  const id = Number(req.params.id);
-  const bank = await storage.getQuestionBank(id);
-  if (!bank) return res.status(404).json({ message: "Bank not found" });
-  if (!canViewBank(req.ctx!, bank)) return res.status(403).json({ message: "Forbidden" });
-  const all = await storage.listQuestionsByBank(id, { page: 1, perPage: 10000 });
-  const topics = await storage.listQuestionTopics(id);
-  const topicMap = new Map(topics.map((t) => [t.id, t.name]));
-  const rows = all.items.map((q) => {
-    const opts = (q.options as string[]) || [];
-    const fmt = q.questionFormat || "mcq_single";
-    let correct = "";
-    if (fmt === "mcq_single") correct = "ABCD"[q.correctAnswer] || "";
-    else if (fmt === "mcq_multi") correct = q.expectedAnswer
-      ? q.expectedAnswer.split(",").map((i: string) => "ABCD"[Number(i)] || "").filter(Boolean).join(",")
-      : "";
-    else correct = q.expectedAnswer ?? "";
-    return {
-      topic: q.topicId ? topicMap.get(q.topicId) ?? "" : "",
-      question: q.question,
-      format: fmt,
-      optionA: opts[0] ?? "",
-      optionB: opts[1] ?? "",
-      optionC: opts[2] ?? "",
-      optionD: opts[3] ?? "",
-      correctAnswer: correct,
-      marks: q.maxPoints,
-      negativeMarks: q.negativeMarks ?? 0,
-      timeLimitSec: q.timeLimitSec ?? "",
-      difficulty: q.difficulty,
-      tags: Array.isArray(q.tags) ? (q.tags as string[]).join(",") : "",
-      explanation: q.explanation ?? "",
-    };
-  });
-  const csv = Papa.unparse(rows.map((row) => Object.fromEntries(
-    Object.entries(row).map(([key, value]) => [key, neutralizeSpreadsheetCell(value)]),
-  )));
-  res.setHeader("Content-Type", "text/csv");
-  res.setHeader("Content-Disposition", `attachment; filename="bank-${id}-questions.csv"`);
-  res.send(csv);
+  try {
+    const id = Number(req.params.id);
+    const bank = await storage.getQuestionBank(id);
+    if (!bank) return res.status(404).json({ message: "Bank not found" });
+    if (!canViewBank(req.ctx!, bank)) return res.status(403).json({ message: "Forbidden" });
+    const topics = await storage.listQuestionTopics(id);
+    const topicMap = new Map(topics.map((topic) => [topic.id, topic.name]));
+
+    res.setHeader("Content-Type", "text/csv; charset=utf-8");
+    res.setHeader("Content-Disposition", `attachment; filename="bank-${id}-questions.csv"`);
+    res.flushHeaders();
+
+    let beforeId: number | null = null;
+    let firstBatch = true;
+    const batchSize = 2_000;
+    while (!res.destroyed) {
+      const conditions = [eq(questions.bankId, id)];
+      if (beforeId != null) conditions.push(lt(questions.id, beforeId));
+      const batch = await db.select().from(questions)
+        .where(and(...conditions))
+        .orderBy(desc(questions.id))
+        .limit(batchSize);
+      if (!batch.length) break;
+
+      const rows = batch.map((question) => {
+        const options = Array.isArray(question.options) ? question.options as string[] : [];
+        const format = question.questionFormat || "mcq_single";
+        let correctAnswer = "";
+        if (format === "mcq_single") correctAnswer = "ABCD"[question.correctAnswer] || "";
+        else if (format === "mcq_multi") correctAnswer = question.expectedAnswer
+          ? question.expectedAnswer.split(",").map((index) => "ABCD"[Number(index)] || "").filter(Boolean).join(",")
+          : "";
+        else correctAnswer = question.expectedAnswer ?? "";
+        const row = {
+          id: question.id,
+          topic: question.topicId ? topicMap.get(question.topicId) ?? "" : "",
+          question: question.question,
+          format,
+          optionA: options[0] ?? "",
+          optionB: options[1] ?? "",
+          optionC: options[2] ?? "",
+          optionD: options[3] ?? "",
+          correctAnswer,
+          marks: question.maxPoints,
+          negativeMarks: question.negativeMarks ?? 0,
+          timeLimitSec: question.timeLimitSec ?? "",
+          difficulty: question.difficulty,
+          tags: Array.isArray(question.tags) ? (question.tags as string[]).join(",") : "",
+          explanation: question.explanation ?? "",
+          reviewStatus: question.reviewStatus,
+          generationSource: question.generationSource,
+          createdBy: question.createdBy ?? "",
+          reviewedBy: question.reviewedBy ?? "",
+          reviewedAt: question.reviewedAt?.toISOString() ?? "",
+          version: question.version,
+        };
+        return Object.fromEntries(
+          Object.entries(row).map(([key, value]) => [key, neutralizeSpreadsheetCell(value)]),
+        );
+      });
+      const csv = Papa.unparse(rows, { header: firstBatch });
+      const chunk = `${firstBatch ? "" : "\n"}${csv}`;
+      firstBatch = false;
+      if (!res.write(chunk)) await once(res, "drain");
+      beforeId = batch[batch.length - 1].id;
+    }
+    if (!res.destroyed) res.end();
+  } catch (error) {
+    console.error("question export failed:", error);
+    if (!res.headersSent) {
+      return res.status(500).json({ message: "Question export failed" });
+    }
+    res.destroy(error instanceof Error ? error : undefined);
+  }
 });
 
 // ── Question versions ──────────────────────────────────────────────────────
@@ -1113,6 +1197,7 @@ courseBlueprintRouter.get("/:courseId/blueprint", requireAuth, withCtx, async (r
 courseBlueprintRouter.put("/:courseId/blueprint", requireAuth, withCtx, async (req: AuthedRequest, res) => {
   const ctx = req.ctx!;
   const courseId = Number(req.params.courseId);
+  if (!Number.isInteger(courseId) || courseId <= 0) return res.status(400).json({ message: "Invalid course id" });
   const course = await storage.getCourse(courseId);
   if (!course) return res.status(404).json({ message: "Course not found" });
   // Edit gate: admin, OR creator owns, OR institute member of owner.

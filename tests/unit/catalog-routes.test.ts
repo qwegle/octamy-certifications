@@ -37,6 +37,7 @@ describe("assessment catalogue contract", () => {
     expect(catalogCertificationLabel("admin", "octamy")).toBe("Octamy-certified");
     expect(catalogCertificationLabel("creator", "creator")).toBe("Creator-issued · verified on Octamy");
     expect(catalogCertificationLabel("creator", "octamy_creator")).toBe("Octamy + creator certified");
+    expect(catalogCertificationLabel("admin", "none", "practice")).toBe("Practice only");
   });
 
   it("keeps category and assessment slugs on distinct canonical routes", () => {

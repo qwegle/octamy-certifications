@@ -9,7 +9,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { Readable } from 'node:stream';
 import { execRows } from '../lib/db-exec';
-import { eq, and, desc, isNull, sql } from 'drizzle-orm';
+import { eq, and, desc, isNull, isNotNull, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import crypto from 'crypto';
 import bcrypt from 'bcrypt';
@@ -1527,6 +1527,8 @@ router.post('/exam-instances', authenticateToken, async (req: any, res: Response
         COUNT(*) FILTER (
           WHERE is_active = true
             AND review_status = 'approved'
+            AND reviewed_by IS NOT NULL
+            AND reviewed_at IS NOT NULL
             AND question_format IN ('mcq_single', 'true_false')
             AND max_points > 0
             AND negative_marks BETWEEN 0 AND max_points
@@ -1537,6 +1539,8 @@ router.post('/exam-instances', authenticateToken, async (req: any, res: Response
         COUNT(*) FILTER (
           WHERE is_active = true
             AND review_status = 'approved'
+            AND reviewed_by IS NOT NULL
+            AND reviewed_at IS NOT NULL
             AND question_format IN ('mcq_single', 'true_false')
             AND NOT (
               max_points > 0
@@ -1549,6 +1553,8 @@ router.post('/exam-instances', authenticateToken, async (req: any, res: Response
         COUNT(*) FILTER (
           WHERE is_active = true
             AND review_status = 'approved'
+            AND reviewed_by IS NOT NULL
+            AND reviewed_at IS NOT NULL
             AND question_format NOT IN ('mcq_single', 'true_false')
         )::int AS unsupported
       FROM questions WHERE bank_id = ${d.bankId}
@@ -1956,12 +1962,17 @@ router.patch('/exam-instances/:id', authenticateToken, async (req: any, res: Res
     if (nextReviewReleaseAt && nextEnd && new Date(nextReviewReleaseAt) < new Date(nextEnd)) {
       return res.status(400).json({ message: 'Review release time cannot be before the exam closes' });
     }
-    if (d.bankId) {
+    const nextBankId = d.bankId === undefined ? ownership.inst.bankId : d.bankId;
+    const nextQuestionCount = d.questionCount ?? ownership.inst.questionCount;
+    if (nextStatus === 'live' || d.bankId !== undefined || d.questionCount !== undefined) {
+      if (!nextBankId) {
+        return res.status(400).json({ message: 'Choose a reviewed question bank before publishing this exam.' });
+      }
       const [bank] = await db.select({
         id: questionBanks.id,
         ownerType: questionBanks.ownerType,
         ownerId: questionBanks.ownerId,
-      }).from(questionBanks).where(eq(questionBanks.id, d.bankId));
+      }).from(questionBanks).where(eq(questionBanks.id, nextBankId));
       if (!bank) return res.status(400).json({ message: 'Question bank not found' });
       const canUseBank = canAttachQuestionBank(
         { ownerType: ownership.inst.ownerType, ownerId: ownership.inst.ownerId },
@@ -1973,6 +1984,8 @@ router.patch('/exam-instances/:id', authenticateToken, async (req: any, res: Res
         SELECT COUNT(*) FILTER (
           WHERE is_active = true
             AND review_status = 'approved'
+            AND reviewed_by IS NOT NULL
+            AND reviewed_at IS NOT NULL
             AND question_format IN ('mcq_single', 'true_false')
             AND max_points > 0
             AND negative_marks BETWEEN 0 AND max_points
@@ -1980,36 +1993,15 @@ router.patch('/exam-instances/:id', authenticateToken, async (req: any, res: Res
             AND correct_answer >= 0
             AND correct_answer < json_array_length(options)
         )::int AS supported
-        FROM questions WHERE bank_id = ${d.bankId}
+        FROM questions WHERE bank_id = ${nextBankId}
       `) as any as Array<{ supported: number }>;
       if ((runnableBank?.supported ?? 0) === 0) {
-        return res.status(400).json({ message: 'Choose a bank with at least one active single-choice or true/false question.' });
+        return res.status(400).json({ message: 'Choose a bank with at least one reviewed runnable single-choice or true/false question.' });
       }
-      const nextQuestionCount = d.questionCount ?? ownership.inst.questionCount;
       if (nextQuestionCount > runnableBank.supported) {
         return res.status(400).json({
-          message: `This bank has only ${runnableBank.supported} valid runnable question${runnableBank.supported === 1 ? '' : 's'}`,
+          message: `This bank has only ${runnableBank.supported} reviewed runnable question${runnableBank.supported === 1 ? '' : 's'}`,
           availableQuestionCount: runnableBank.supported,
-        });
-      }
-    } else if (d.questionCount !== undefined && ownership.inst.bankId) {
-      const [runnableBank] = await execRows(sql`
-        SELECT COUNT(*) FILTER (
-          WHERE is_active = true
-            AND review_status = 'approved'
-            AND question_format IN ('mcq_single', 'true_false')
-            AND max_points > 0
-            AND negative_marks BETWEEN 0 AND max_points
-            AND json_typeof(options) = 'array'
-            AND correct_answer >= 0
-            AND correct_answer < json_array_length(options)
-        )::int AS supported
-        FROM questions WHERE bank_id = ${ownership.inst.bankId}
-      `) as any as Array<{ supported: number }>;
-      if (d.questionCount > (runnableBank?.supported ?? 0)) {
-        return res.status(400).json({
-          message: `This bank has only ${runnableBank?.supported ?? 0} valid runnable questions`,
-          availableQuestionCount: runnableBank?.supported ?? 0,
         });
       }
     }
@@ -2649,6 +2641,8 @@ router.post('/x/:code/start', examStartLimiter, optionalAuth, async (req: Reques
         eq(questions.bankId, inst.bankId!),
         eq(questions.isActive, true),
         eq(questions.reviewStatus, 'approved'),
+        isNotNull(questions.reviewedBy),
+        isNotNull(questions.reviewedAt),
         sql`${questions.questionFormat} IN ('mcq_single', 'true_false')`,
         sql`${questions.maxPoints} > 0`,
         sql`${questions.negativeMarks} BETWEEN 0 AND ${questions.maxPoints}`,
@@ -2683,6 +2677,8 @@ router.post('/x/:code/start', examStartLimiter, optionalAuth, async (req: Reques
         eq(questions.bankId, inst.bankId!),
         eq(questions.isActive, true),
         eq(questions.reviewStatus, 'approved'),
+        isNotNull(questions.reviewedBy),
+        isNotNull(questions.reviewedAt),
         sql`NOT (
           ${questions.questionFormat} IN ('mcq_single', 'true_false')
           AND ${questions.maxPoints} > 0

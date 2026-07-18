@@ -28,6 +28,8 @@ type BankItem = {
   gradeBand?: string | null;
   syllabusVersion?: string | null;
   questionCount: number;
+  totalQuestionCount: number;
+  retiredQuestionCount: number;
   topicCount: number;
   easyCount: number;
   mediumCount: number;
@@ -39,7 +41,9 @@ type BankItem = {
 interface BankPage {
   items: BankItem[];
   pagination: { page: number; pageSize: number; total: number; totalPages: number };
+  summary: { total: number; certification: number; practice: number; active: number; draft: number; archived: number };
 }
+type BankPurposeFilter = BankItem["bankPurpose"] | "all";
 
 const emptyForm = {
   name: "",
@@ -61,9 +65,9 @@ function kindLabel(kind: BankItem["bankKind"]) {
 export function AdminQuestionBanksManagement() {
   const { toast } = useToast();
   const [page, setPage] = useState(1);
-  const [purpose, setPurpose] = useState<BankItem["bankPurpose"]>("certification");
+  const [purpose, setPurpose] = useState<BankPurposeFilter>("all");
   const [search, setSearch] = useState("");
-  const [status, setStatus] = useState("current");
+  const [status, setStatus] = useState("all");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<BankItem | null>(null);
   const [selected, setSelected] = useState<Set<number>>(new Set());
@@ -127,7 +131,11 @@ export function AdminQuestionBanksManagement() {
     },
     onError: (error: Error) => { if (error.message !== "Cancelled") toast({ title: "Bulk update failed", description: error.message, variant: "destructive" }); },
   });
-  const openCreate = () => { setEditing(null); setForm({ ...emptyForm, bankPurpose: purpose }); setDialogOpen(true); };
+  const openCreate = () => {
+    setEditing(null);
+    setForm({ ...emptyForm, bankPurpose: purpose === "all" ? "certification" : purpose });
+    setDialogOpen(true);
+  };
   const openEdit = (bank: BankItem) => {
     setEditing(bank);
     setForm({
@@ -146,10 +154,11 @@ export function AdminQuestionBanksManagement() {
   };
 
   return <div className="space-y-4">
-    <div className="grid gap-3 sm:grid-cols-3">
-      <Card className="border-slate-200 shadow-sm"><CardContent className="p-4"><p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Banks in view</p><p className="mt-1 text-2xl font-black text-slate-950">{pagination?.total.toLocaleString() || 0}</p></CardContent></Card>
-      <Card className="border-slate-200 shadow-sm"><CardContent className="p-4"><p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Questions on page</p><p className="mt-1 text-2xl font-black text-slate-950">{pageTotals.questions.toLocaleString()}</p></CardContent></Card>
-      <Card className="border-slate-200 shadow-sm"><CardContent className="p-4"><p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Assessment links</p><p className="mt-1 text-2xl font-black text-slate-950">{pageTotals.assessments.toLocaleString()}</p></CardContent></Card>
+    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <Card className="border-slate-200 shadow-sm"><CardContent className="p-4"><p className="text-xs font-semibold uppercase tracking-wider text-slate-500">All bank records</p><p className="mt-1 text-2xl font-black text-slate-950">{Number(query.data?.summary?.total || 0).toLocaleString()}</p><p className="mt-1 text-xs text-slate-500">{pagination?.total.toLocaleString() || 0} match the current filters</p></CardContent></Card>
+      <Card className="border-slate-200 shadow-sm"><CardContent className="p-4"><p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Lifecycle</p><p className="mt-1 text-lg font-black text-slate-950">{Number(query.data?.summary?.active || 0).toLocaleString()} active</p><p className="mt-1 text-xs text-slate-500">{Number(query.data?.summary?.draft || 0).toLocaleString()} draft · {Number(query.data?.summary?.archived || 0).toLocaleString()} archived</p></CardContent></Card>
+      <Card className="border-slate-200 shadow-sm"><CardContent className="p-4"><p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Publishable on page</p><p className="mt-1 text-2xl font-black text-slate-950">{pageTotals.questions.toLocaleString()}</p><p className="mt-1 text-xs text-slate-500">Active, approved, reviewed, runtime-compatible questions</p></CardContent></Card>
+      <Card className="border-slate-200 shadow-sm"><CardContent className="p-4"><p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Assessment links</p><p className="mt-1 text-2xl font-black text-slate-950">{pageTotals.assessments.toLocaleString()}</p><p className="mt-1 text-xs text-slate-500">Across banks on this page</p></CardContent></Card>
     </div>
 
     <Card className="border-slate-200 shadow-sm">
@@ -159,12 +168,13 @@ export function AdminQuestionBanksManagement() {
           <Button onClick={openCreate} className="shrink-0"><Plus className="mr-1 h-4 w-4" />New bank</Button>
         </div>
         <div className="flex flex-wrap gap-2">
+          <Button size="sm" variant={purpose === "all" ? "default" : "outline"} onClick={() => { setPurpose("all"); setPage(1); setSelected(new Set()); }}>All banks</Button>
           <Button size="sm" variant={purpose === "certification" ? "default" : "outline"} onClick={() => { setPurpose("certification"); setPage(1); setSelected(new Set()); setForm((current) => ({ ...current, bankPurpose: "certification" })); }}>Certification banks</Button>
           <Button size="sm" variant={purpose === "practice" ? "default" : "outline"} onClick={() => { setPurpose("practice"); setPage(1); setSelected(new Set()); setForm((current) => ({ ...current, bankPurpose: "practice" })); }}>Practice banks</Button>
         </div>
         <div className="grid gap-2 md:grid-cols-[minmax(0,1fr)_12rem]">
           <div className="relative"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" /><Input value={search} onChange={(event) => { setSearch(event.target.value); setPage(1); }} placeholder="Search bank name or slug" className="pl-9" /></div>
-          <select aria-label="Filter banks by status" className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm" value={status} onChange={(event) => { setStatus(event.target.value); setPage(1); setSelected(new Set()); }}><option value="current">Current banks</option><option value="active">Active</option><option value="draft">Draft</option><option value="archived">Archived</option><option value="all">All statuses</option></select>
+          <select aria-label="Filter banks by status" className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm" value={status} onChange={(event) => { setStatus(event.target.value); setPage(1); setSelected(new Set()); }}><option value="all">All lifecycle states</option><option value="current">Current banks</option><option value="active">Active</option><option value="draft">Draft</option><option value="archived">Archived</option></select>
         </div>
         <div className="flex min-h-10 flex-wrap items-center gap-2 rounded-xl bg-slate-50 px-3 py-2">
           <Badge variant="secondary">{selected.size} selected</Badge>
@@ -175,12 +185,12 @@ export function AdminQuestionBanksManagement() {
       </CardHeader>
       <CardContent>
         {query.isLoading ? <div className="py-12 text-center text-sm text-slate-500">Loading question banks…</div> : query.isError ? <div className="rounded-xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">Question banks could not be loaded. <Button size="sm" variant="outline" className="ml-2" onClick={() => query.refetch()}>Retry</Button></div> : <>
-          <div className="overflow-x-auto rounded-xl border border-slate-200"><Table><TableHeader><TableRow><TableHead className="w-10"><input aria-label="Select page" type="checkbox" checked={allSelected} onChange={() => setSelected(allSelected ? new Set() : new Set(items.map((item) => item.id)))} /></TableHead><TableHead>Bank</TableHead><TableHead>Classification</TableHead><TableHead>Approved inventory</TableHead><TableHead>Usage</TableHead><TableHead>State</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader><TableBody>
+          <div className="overflow-x-auto rounded-xl border border-slate-200"><Table><TableHeader><TableRow><TableHead className="w-10"><input aria-label="Select page" type="checkbox" checked={allSelected} onChange={() => setSelected(allSelected ? new Set() : new Set(items.map((item) => item.id)))} /></TableHead><TableHead>Bank</TableHead><TableHead>Classification</TableHead><TableHead>Publishable inventory</TableHead><TableHead>Usage</TableHead><TableHead>State</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader><TableBody>
             {items.map((bank) => <TableRow key={bank.id}>
               <TableCell><input aria-label={`Select ${bank.name}`} type="checkbox" checked={selected.has(bank.id)} onChange={() => setSelected((current) => { const next = new Set(current); next.has(bank.id) ? next.delete(bank.id) : next.add(bank.id); return next; })} /></TableCell>
               <TableCell><div className="flex min-w-72 items-start gap-3"><div className="rounded-lg bg-slate-100 p-2"><Database className="h-4 w-4 text-slate-600" /></div><div><div className="font-semibold text-slate-950">{bank.name}</div><div className="text-xs text-slate-500">{bank.slug}</div><div className="mt-1 line-clamp-2 max-w-lg text-xs text-slate-500">{bank.description || "No description"}</div></div></div></TableCell>
               <TableCell><Badge variant="outline">{kindLabel(bank.bankKind)}</Badge><Badge variant="secondary" className="ml-1 capitalize">{bank.bankPurpose}</Badge><div className="mt-1 text-xs text-slate-600">{[bank.examFamily, bank.subject, bank.gradeBand].filter(Boolean).join(" · ") || "General"}</div>{bank.syllabusVersion && <div className="text-xs text-slate-500">{bank.syllabusVersion}</div>}</TableCell>
-              <TableCell><div className="font-semibold text-slate-950">{Number(bank.questionCount).toLocaleString()}</div><div className="mt-1 flex flex-wrap gap-1 text-[11px]"><span className="rounded-full bg-emerald-50 px-2 py-0.5 text-emerald-800">E {Number(bank.easyCount).toLocaleString()}</span><span className="rounded-full bg-blue-50 px-2 py-0.5 text-blue-800">M {Number(bank.mediumCount).toLocaleString()}</span><span className="rounded-full bg-violet-50 px-2 py-0.5 text-violet-800">H {Number(bank.hardCount).toLocaleString()}</span></div></TableCell>
+              <TableCell><div className="font-semibold text-slate-950">{Number(bank.questionCount).toLocaleString()} publishable</div><div className="text-xs text-slate-500">{Number(bank.totalQuestionCount).toLocaleString()} current · {Number(bank.retiredQuestionCount).toLocaleString()} retired</div><div className="mt-1 flex flex-wrap gap-1 text-[11px]"><span className="rounded-full bg-emerald-50 px-2 py-0.5 text-emerald-800">E {Number(bank.easyCount).toLocaleString()}</span><span className="rounded-full bg-blue-50 px-2 py-0.5 text-blue-800">M {Number(bank.mediumCount).toLocaleString()}</span><span className="rounded-full bg-violet-50 px-2 py-0.5 text-violet-800">H {Number(bank.hardCount).toLocaleString()}</span></div></TableCell>
               <TableCell><span className="font-semibold">{Number(bank.assessmentCount).toLocaleString()}</span><div className="text-xs text-slate-500">assessments</div><div className="text-xs text-slate-500">{Number(bank.topicCount).toLocaleString()} topics</div></TableCell>
               <TableCell><Badge variant={bank.status === "active" ? "default" : "secondary"} className="capitalize">{bank.status}</Badge><div className="mt-1 text-xs capitalize text-slate-500">{bank.visibility}</div></TableCell>
               <TableCell><div className="flex justify-end gap-1"><Button asChild size="sm" variant="outline"><Link href={`/admin/question-banks/${bank.id}`}><FolderCog className="mr-1 h-4 w-4" />Manage and review</Link></Button><Button size="icon" variant="ghost" aria-label={`Edit ${bank.name}`} onClick={() => openEdit(bank)}><Edit className="h-4 w-4" /></Button></div></TableCell>

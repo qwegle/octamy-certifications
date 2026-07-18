@@ -36,7 +36,7 @@ import {
   questions as questionsTable,
   questionPackImportRuns,
 } from "@shared/schema";
-import { desc, and, eq, not, sql, or, ilike, count, inArray } from "drizzle-orm";
+import { desc, and, eq, not, sql, or, ilike, count, inArray, isNotNull } from "drizzle-orm";
 import { db, pool } from "./db";
 import { audit } from "./lib/audit";
 import { LearningPathController } from "./controllers/learningPathController";
@@ -116,6 +116,12 @@ import {
   publicExamSubmissionTiming,
 } from "./lib/public-exam-attempt";
 import { requiredQuestionInventory } from "./lib/assessment-bank-readiness";
+import {
+  AssessmentPublishReadinessError,
+  assertAssessmentPublishReadiness,
+  type AssessmentPublishCourseState,
+  unpublishPublishedAssessmentsUsingBanks,
+} from "./lib/assessment-publish-readiness";
 import {
   RETIRED_AI_INTERVIEW_PATHS,
   retiredAiInterviewHandler,
@@ -1397,6 +1403,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!course || !course.isActive || course.visibility !== "public" || course.reviewStatus !== "approved" || course.ownerType === "institute") {
         return res.status(404).json({ message: "Course not found" });
       }
+      if (course.productType === "assessment" && !course.useBlueprintEngine) {
+        return res.status(409).json({
+          message: "This assessment is still being prepared in its reviewed question-bank blueprint.",
+          code: "ASSESSMENT_BANK_NOT_READY",
+        });
+      }
       res.json(course);
     } catch (error) {
       console.error("Error fetching course:", error);
@@ -1472,11 +1484,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
             code: "ASSESSMENT_BANK_NOT_READY",
           });
         }
+        const [{ mismatchedBanks }] = await db.select({ mismatchedBanks: count() })
+          .from(courseQuestionBlueprint)
+          .innerJoin(
+            questionBanksTable,
+            eq(questionBanksTable.id, courseQuestionBlueprint.bankId),
+          )
+          .where(and(
+            eq(courseQuestionBlueprint.courseId, courseId),
+            sql`(
+              ${questionBanksTable.bankPurpose} IS DISTINCT FROM ${purpose}
+              OR ${questionBanksTable.status} <> 'active'
+            )`,
+          ));
+        if (Number(mismatchedBanks) > 0) {
+          return res.status(409).json({
+            message: "This assessment has an inactive or purpose-incompatible question bank.",
+            code: "ASSESSMENT_BANK_NOT_READY",
+          });
+        }
         for (const rule of blueprint) {
           const filters = [
             eq(questionsTable.bankId, rule.bankId),
             eq(questionsTable.isActive, true),
             eq(questionsTable.reviewStatus, "approved"),
+            isNotNull(questionsTable.reviewedBy),
+            isNotNull(questionsTable.reviewedAt),
             sql`${questionsTable.questionFormat} IN ('mcq_single', 'true_false')`,
             sql`json_typeof(${questionsTable.options}) = 'array'`,
             sql`${questionsTable.correctAnswer} >= 0`,
@@ -1504,10 +1537,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
             inArray(questionsTable.bankId, bankIds),
             eq(questionsTable.isActive, true),
             eq(questionsTable.reviewStatus, "approved"),
+            isNotNull(questionsTable.reviewedBy),
+            isNotNull(questionsTable.reviewedAt),
             sql`${questionsTable.questionFormat} IN ('mcq_single', 'true_false')`,
             sql`json_typeof(${questionsTable.options}) = 'array'`,
             sql`${questionsTable.correctAnswer} >= 0`,
             sql`${questionsTable.correctAnswer} < json_array_length(${questionsTable.options})`,
+            sql`EXISTS (
+              SELECT 1
+              FROM ${courseQuestionBlueprint} scoped_rule
+              WHERE scoped_rule.course_id = ${courseId}
+                AND scoped_rule.bank_id = ${questionsTable.bankId}
+                AND (scoped_rule.topic_id IS NULL OR scoped_rule.topic_id = ${questionsTable.topicId})
+                AND (scoped_rule.difficulty = 'mixed' OR scoped_rule.difficulty = ${questionsTable.difficulty})
+            )`,
           ));
         const required = requiredQuestionInventory(
           purpose,
@@ -1588,15 +1631,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
         {},
       );
       const sessionStartedAt = new Date();
-      const sessionTiming = await saveQuestionMapping(finalSessionId, correctMap, courseId, {
-        questionSnapshot: questionsWithShuffledOptions,
-        createdAt: sessionStartedAt,
-        evidenceConsentAt: sessionStartedAt,
-        evidenceConsentVersion: PUBLIC_EXAM_EVIDENCE_CONSENT_VERSION,
-        userId: req.user?.userId ?? null,
-        // Retain a short recovery window after the authoritative deadline. The
-        // submission route still rejects answer payloads after deadline grace.
-        ttlMs: Math.max(1, course.duration) * 60_000 + 15 * 60_000,
+      const sessionTiming = await db.transaction(async (tx) => {
+        if (course.productType === "assessment") {
+          // Lock content before the course to match the question-withdrawal
+          // lock order. Either the attempt snapshots content that is valid now,
+          // or it waits for withdrawal and fails closed.
+          const selectedIds = questionsWithShuffledOptions.map((question) => question.id);
+          const lockedQuestions = await tx.select({ id: questionsTable.id })
+            .from(questionsTable)
+            .where(and(
+              inArray(questionsTable.id, selectedIds),
+              eq(questionsTable.isActive, true),
+              eq(questionsTable.reviewStatus, "approved"),
+              isNotNull(questionsTable.reviewedBy),
+              isNotNull(questionsTable.reviewedAt),
+              sql`${questionsTable.questionFormat} IN ('mcq_single', 'true_false')`,
+              sql`json_typeof(${questionsTable.options}) = 'array'`,
+              sql`${questionsTable.correctAnswer} >= 0`,
+              sql`${questionsTable.correctAnswer} < json_array_length(${questionsTable.options})`,
+            ))
+            .orderBy(questionsTable.id)
+            .for("share");
+          if (lockedQuestions.length !== selectedIds.length) {
+            throw new AssessmentPublishReadinessError(
+              "This assessment's reviewed question pool changed before the attempt could start.",
+            );
+          }
+          const [lockedCourse] = await tx.select({
+            isActive: coursesTable.isActive,
+            visibility: coursesTable.visibility,
+            reviewStatus: coursesTable.reviewStatus,
+            useBlueprintEngine: coursesTable.useBlueprintEngine,
+          }).from(coursesTable)
+            .where(eq(coursesTable.id, courseId))
+            .for("share");
+          if (
+            !lockedCourse?.isActive
+            || lockedCourse.visibility !== "public"
+            || lockedCourse.reviewStatus !== "approved"
+            || !lockedCourse.useBlueprintEngine
+          ) {
+            throw new AssessmentPublishReadinessError(
+              "This assessment is no longer available for a new attempt.",
+            );
+          }
+        }
+        return saveQuestionMapping(finalSessionId, correctMap, courseId, {
+          questionSnapshot: questionsWithShuffledOptions,
+          createdAt: sessionStartedAt,
+          evidenceConsentAt: sessionStartedAt,
+          evidenceConsentVersion: PUBLIC_EXAM_EVIDENCE_CONSENT_VERSION,
+          userId: req.user?.userId ?? null,
+          // Retain a short recovery window after the authoritative deadline. The
+          // submission route still rejects answer payloads after deadline grace.
+          ttlMs: Math.max(1, course.duration) * 60_000 + 15 * 60_000,
+        });
       });
 
       // Remove correct answers from response
@@ -1623,6 +1712,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(409).json({
           message: "This assessment's reviewed question pool is not ready yet.",
           code: "ASSESSMENT_QUESTION_POOL_NOT_READY",
+        });
+      }
+      if (error instanceof AssessmentPublishReadinessError) {
+        return res.status(409).json({
+          message: error.message,
+          code: error.code,
         });
       }
       res.status(500).json({ message: "Failed to fetch questions" });
@@ -3676,6 +3771,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         const slug = await uniqueAdminCourseSlug(parsed.data.slug || parsed.data.title);
         const governed = buildAdminOwnedCourseCreate(parsed.data, slug);
+        await assertAssessmentPublishReadiness({
+          courseId: null,
+          previous: null,
+          next: governed as AssessmentPublishCourseState,
+        });
         const course = await storage.createCourseAdmin(governed);
         await audit({
           action: "admin.course.created",
@@ -3694,10 +3794,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
         res.status(201).json(course);
       } catch (error) {
-        console.error("Error creating course:", error);
+        if (error instanceof AssessmentPublishReadinessError) {
+          return res.status(409).json({
+            message: error.message,
+            code: error.code,
+            readiness: error.readiness,
+          });
+        }
         if (error instanceof AdminCourseGovernanceError) {
           return res.status(409).json({ message: error.message });
         }
+        console.error("Error creating course:", error);
         res.status(500).json({ message: "Failed to create course" });
       }
     }
@@ -3733,6 +3840,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (parsed.data.title && !parsed.data.slug) {
           governed.slug = await uniqueAdminCourseSlug(parsed.data.title, courseId);
         }
+        await assertAssessmentPublishReadiness({
+          courseId,
+          previous: existing as AssessmentPublishCourseState,
+          next: { ...existing, ...governed } as AssessmentPublishCourseState,
+        });
         const course = await storage.updateCourseAdmin(courseId, governed);
         if (!course) return res.status(404).json({ message: "Course not found" });
 
@@ -3754,10 +3866,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         res.json(course);
       } catch (error) {
-        console.error("Error updating course:", error);
+        if (error instanceof AssessmentPublishReadinessError) {
+          return res.status(409).json({
+            message: error.message,
+            code: error.code,
+            readiness: error.readiness,
+          });
+        }
         if (error instanceof AdminCourseGovernanceError) {
           return res.status(409).json({ message: error.message });
         }
+        console.error("Error updating course:", error);
         res.status(500).json({ message: "Failed to update course" });
       }
     }
@@ -3785,6 +3904,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (!existing) return res.status(404).json({ message: "Course not found" });
 
         const governed = buildThirdPartyCourseReview(existing, parsed.data);
+        await assertAssessmentPublishReadiness({
+          courseId,
+          previous: existing as AssessmentPublishCourseState,
+          next: { ...existing, ...governed } as AssessmentPublishCourseState,
+        });
         const course = await storage.updateCourseAdmin(courseId, governed);
         if (!course) return res.status(404).json({ message: "Course not found" });
 
@@ -3805,10 +3929,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
         res.json(course);
       } catch (error) {
-        console.error("Error reviewing course:", error);
+        if (error instanceof AssessmentPublishReadinessError) {
+          return res.status(409).json({
+            message: error.message,
+            code: error.code,
+            readiness: error.readiness,
+          });
+        }
         if (error instanceof AdminCourseGovernanceError) {
           return res.status(409).json({ message: error.message });
         }
+        console.error("Error reviewing course:", error);
         res.status(500).json({ message: "Failed to review course" });
       }
     },
@@ -5202,12 +5333,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const page = Math.max(1, parseInt(String(req.query.page || "1"), 10) || 1);
         const pageSize = Math.min(100, Math.max(1, parseInt(String(req.query.pageSize || "50"), 10) || 50));
         const search = String(req.query.search || "").trim();
-        const purpose = String(req.query.purpose || "certification") === "practice" ? "practice" : "certification";
+        const requestedPurpose = String(req.query.purpose || "all");
+        if (!["all", "certification", "practice"].includes(requestedPurpose)) {
+          return res.status(400).json({ message: "Choose all, certification, or practice assessments" });
+        }
         const conditions = [eq(coursesTable.ownerType, "admin"), eq(coursesTable.productType, "assessment")];
-        conditions.push(eq(coursesTable.assessmentPurpose, purpose));
+        if (requestedPurpose !== "all") {
+          conditions.push(eq(coursesTable.assessmentPurpose, requestedPurpose));
+        }
         if (search) conditions.push(or(ilike(coursesTable.title, `%${search}%`), ilike(coursesTable.slug, `%${search}%`))!);
         const where = and(...conditions)!;
         const [{ total }] = await db.select({ total: count() }).from(coursesTable).where(where);
+        const [summary] = await db.select({
+          total: count(),
+          certification: sql<number>`count(*) filter (where ${coursesTable.assessmentPurpose} = 'certification')`,
+          practice: sql<number>`count(*) filter (where ${coursesTable.assessmentPurpose} = 'practice')`,
+          published: sql<number>`count(*) filter (where ${coursesTable.isActive} = true and ${coursesTable.visibility} = 'public' and ${coursesTable.reviewStatus} = 'approved')`,
+          inReview: sql<number>`count(*) filter (where not (${coursesTable.isActive} = true and ${coursesTable.visibility} = 'public' and ${coursesTable.reviewStatus} = 'approved'))`,
+        }).from(coursesTable).where(and(
+          eq(coursesTable.ownerType, "admin"),
+          eq(coursesTable.productType, "assessment"),
+        ));
         const items = await db.select({
           id: coursesTable.id, title: coursesTable.title, slug: coursesTable.slug,
           description: coursesTable.description, duration: coursesTable.duration,
@@ -5215,16 +5361,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
           passingScore: coursesTable.passingScore,
           isActive: coursesTable.isActive, visibility: coursesTable.visibility,
           reviewStatus: coursesTable.reviewStatus, certificationMode: coursesTable.certificationMode,
+          useBlueprintEngine: coursesTable.useBlueprintEngine,
           category: { id: categoriesTable.id, name: categoriesTable.name, slug: categoriesTable.slug },
           questionCount: sql<number>`COALESCE((select sum(question_count) from course_question_blueprint where course_id = ${coursesTable.id}), (select count(*) from questions where questions.course_id = ${coursesTable.id}), 0)`,
-          approvedQuestionInventory: sql<number>`(select count(distinct q.id) from course_question_blueprint blueprint inner join questions q on q.bank_id = blueprint.bank_id where blueprint.course_id = ${coursesTable.id} and q.is_active = true and q.review_status = 'approved')`,
+          approvedQuestionInventory: sql<number>`(
+            select count(distinct q.id)
+            from course_question_blueprint blueprint
+            inner join questions q on q.bank_id = blueprint.bank_id
+              and (blueprint.topic_id is null or q.topic_id = blueprint.topic_id)
+              and (blueprint.difficulty = 'mixed' or q.difficulty = blueprint.difficulty)
+            inner join question_banks blueprint_bank on blueprint_bank.id = blueprint.bank_id
+              and blueprint_bank.bank_purpose = ${coursesTable.assessmentPurpose}
+              and blueprint_bank.status = 'active'
+            where blueprint.course_id = ${coursesTable.id}
+              and q.is_active = true
+              and q.review_status = 'approved'
+              and q.reviewed_by is not null
+              and q.reviewed_at is not null
+              and q.question_format in ('mcq_single', 'true_false')
+              and json_typeof(q.options) = 'array'
+              and q.correct_answer >= 0
+              and q.correct_answer < json_array_length(q.options)
+          )`,
           requiredQuestionInventory: sql<number>`GREATEST(CASE WHEN ${coursesTable.assessmentPurpose} = 'practice' THEN 200 ELSE 80 END, COALESCE((select sum(question_count) from course_question_blueprint where course_id = ${coursesTable.id}), 0) * CASE WHEN ${coursesTable.assessmentPurpose} = 'practice' THEN 5 ELSE 4 END)`,
+          undersuppliedRuleCount: sql<number>`(
+            select count(*)
+            from course_question_blueprint blueprint
+            where blueprint.course_id = ${coursesTable.id}
+              and (
+                not exists (
+                  select 1 from question_banks blueprint_bank
+                  where blueprint_bank.id = blueprint.bank_id
+                    and blueprint_bank.bank_purpose = ${coursesTable.assessmentPurpose}
+                    and blueprint_bank.status = 'active'
+                )
+                or (
+                  select count(*)
+                  from questions q
+                  where q.bank_id = blueprint.bank_id
+                    and (blueprint.topic_id is null or q.topic_id = blueprint.topic_id)
+                    and q.is_active = true
+                    and q.review_status = 'approved'
+                    and q.reviewed_by is not null
+                    and q.reviewed_at is not null
+                    and q.question_format in ('mcq_single', 'true_false')
+                    and json_typeof(q.options) = 'array'
+                    and q.correct_answer >= 0
+                    and q.correct_answer < json_array_length(q.options)
+                    and (blueprint.difficulty = 'mixed' or q.difficulty = blueprint.difficulty)
+                ) < blueprint.question_count
+                  * case when ${coursesTable.assessmentPurpose} = 'practice' then 5 else 4 end
+              )
+          )`,
           bankCount: sql<number>`(select count(distinct bank_id) from course_question_blueprint where course_id = ${coursesTable.id})`,
           bankNames: sql<string[]>`COALESCE((select array_agg(distinct bank.name order by bank.name) from course_question_blueprint blueprint inner join question_banks bank on bank.id = blueprint.bank_id where blueprint.course_id = ${coursesTable.id}), ARRAY[]::text[])`,
           difficultyRules: sql<string[]>`COALESCE((select array_agg(distinct difficulty order by difficulty) from course_question_blueprint where course_id = ${coursesTable.id}), ARRAY[]::text[])`,
         }).from(coursesTable).leftJoin(categoriesTable, eq(categoriesTable.id, coursesTable.categoryId))
           .where(where).orderBy(desc(coursesTable.createdAt)).limit(pageSize).offset((page - 1) * pageSize);
-        res.json({ items, pagination: { page, pageSize, total: Number(total), totalPages: Math.max(1, Math.ceil(Number(total) / pageSize)) } });
+        res.json({
+          items,
+          pagination: { page, pageSize, total: Number(total), totalPages: Math.max(1, Math.ceil(Number(total) / pageSize)) },
+          summary: {
+            total: Number(summary?.total || 0),
+            certification: Number(summary?.certification || 0),
+            practice: Number(summary?.practice || 0),
+            published: Number(summary?.published || 0),
+            inReview: Number(summary?.inReview || 0),
+          },
+        });
       } catch (error) {
         console.error("Error fetching admin assessments:", error);
         res.status(500).json({ message: "Failed to fetch assessments" });
@@ -5240,15 +5444,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const page = Math.max(1, parseInt(String(req.query.page || "1"), 10) || 1);
         const pageSize = Math.min(100, Math.max(1, parseInt(String(req.query.pageSize || "25"), 10) || 25));
         const search = String(req.query.search || "").trim();
-        const status = String(req.query.status || "current");
-        const purpose = String(req.query.purpose || "certification") === "practice" ? "practice" : "certification";
+        const status = String(req.query.status || "all");
+        const requestedPurpose = String(req.query.purpose || "all");
+        if (!["all", "certification", "practice"].includes(requestedPurpose)) {
+          return res.status(400).json({ message: "Choose all, certification, or practice question banks" });
+        }
+        if (!["all", "current", "active", "draft", "archived"].includes(status)) {
+          return res.status(400).json({ message: "Choose a valid question-bank lifecycle state" });
+        }
         const filters = [];
-        filters.push(eq(questionBanksTable.bankPurpose, purpose));
+        if (requestedPurpose !== "all") {
+          filters.push(eq(questionBanksTable.bankPurpose, requestedPurpose));
+        }
         if (status === "current") filters.push(not(eq(questionBanksTable.status, "archived")));
         else if (status !== "all") filters.push(eq(questionBanksTable.status, status));
         if (search) filters.push(or(ilike(questionBanksTable.name, `%${search}%`), ilike(questionBanksTable.slug, `%${search}%`))!);
         const where = filters.length ? and(...filters)! : undefined;
         const [{ total }] = await db.select({ total: count() }).from(questionBanksTable).where(where);
+        const [summary] = await db.select({
+          total: count(),
+          certification: sql<number>`count(*) filter (where ${questionBanksTable.bankPurpose} = 'certification')`,
+          practice: sql<number>`count(*) filter (where ${questionBanksTable.bankPurpose} = 'practice')`,
+          active: sql<number>`count(*) filter (where ${questionBanksTable.status} = 'active')`,
+          draft: sql<number>`count(*) filter (where ${questionBanksTable.status} = 'draft')`,
+          archived: sql<number>`count(*) filter (where ${questionBanksTable.status} = 'archived')`,
+        }).from(questionBanksTable);
         const items = await db.select({
           id: questionBanksTable.id,
           name: questionBanksTable.name,
@@ -5263,15 +5483,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
           examFamily: questionBanksTable.examFamily,
           gradeBand: questionBanksTable.gradeBand,
           syllabusVersion: questionBanksTable.syllabusVersion,
-          questionCount: questionBanksTable.questionCount,
+          questionCount: sql<number>`(
+            select count(*)
+            from questions
+            where bank_id = ${questionBanksTable.id}
+              and review_status = 'approved'
+              and is_active = true
+              and reviewed_by is not null
+              and reviewed_at is not null
+              and question_format in ('mcq_single', 'true_false')
+              and json_typeof(options) = 'array'
+              and correct_answer >= 0
+              and correct_answer < json_array_length(options)
+          )`,
+          totalQuestionCount: sql<number>`(select count(*) from questions where bank_id = ${questionBanksTable.id} and review_status <> 'retired')`,
+          retiredQuestionCount: sql<number>`(select count(*) from questions where bank_id = ${questionBanksTable.id} and review_status = 'retired')`,
           topicCount: sql<number>`(select count(*) from question_topics where bank_id = ${questionBanksTable.id})`,
-          easyCount: sql<number>`(select count(*) from questions where bank_id = ${questionBanksTable.id} and difficulty = 'easy' and review_status = 'approved' and is_active = true)`,
-          mediumCount: sql<number>`(select count(*) from questions where bank_id = ${questionBanksTable.id} and difficulty = 'medium' and review_status = 'approved' and is_active = true)`,
-          hardCount: sql<number>`(select count(*) from questions where bank_id = ${questionBanksTable.id} and difficulty = 'hard' and review_status = 'approved' and is_active = true)`,
+          easyCount: sql<number>`(select count(*) from questions where bank_id = ${questionBanksTable.id} and difficulty = 'easy' and review_status = 'approved' and is_active = true and reviewed_by is not null and reviewed_at is not null and question_format in ('mcq_single', 'true_false') and json_typeof(options) = 'array' and correct_answer >= 0 and correct_answer < json_array_length(options))`,
+          mediumCount: sql<number>`(select count(*) from questions where bank_id = ${questionBanksTable.id} and difficulty = 'medium' and review_status = 'approved' and is_active = true and reviewed_by is not null and reviewed_at is not null and question_format in ('mcq_single', 'true_false') and json_typeof(options) = 'array' and correct_answer >= 0 and correct_answer < json_array_length(options))`,
+          hardCount: sql<number>`(select count(*) from questions where bank_id = ${questionBanksTable.id} and difficulty = 'hard' and review_status = 'approved' and is_active = true and reviewed_by is not null and reviewed_at is not null and question_format in ('mcq_single', 'true_false') and json_typeof(options) = 'array' and correct_answer >= 0 and correct_answer < json_array_length(options))`,
           assessmentCount: sql<number>`(select count(distinct course_id) from course_question_blueprint where bank_id = ${questionBanksTable.id})`,
           updatedAt: questionBanksTable.updatedAt,
         }).from(questionBanksTable).where(where).orderBy(desc(questionBanksTable.questionCount), desc(questionBanksTable.updatedAt)).limit(pageSize).offset((page - 1) * pageSize);
-        res.json({ items, pagination: { page, pageSize, total: Number(total), totalPages: Math.max(1, Math.ceil(Number(total) / pageSize)) } });
+        res.json({
+          items,
+          pagination: { page, pageSize, total: Number(total), totalPages: Math.max(1, Math.ceil(Number(total) / pageSize)) },
+          summary: {
+            total: Number(summary?.total || 0),
+            certification: Number(summary?.certification || 0),
+            practice: Number(summary?.practice || 0),
+            active: Number(summary?.active || 0),
+            draft: Number(summary?.draft || 0),
+            archived: Number(summary?.archived || 0),
+          },
+        });
       } catch (error) {
         console.error("Error fetching admin question banks:", error);
         res.status(500).json({ message: "Failed to fetch question banks" });
@@ -5297,37 +5542,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.json({ action: "delete", affected: ids.length });
         }
         if (parsed.data.action === "publish") {
-          const result = await db.execute(sql`
-            UPDATE courses c SET is_active = true, visibility = 'public', review_status = 'approved',
-              certification_mode = CASE WHEN c.assessment_purpose = 'practice' THEN 'none' ELSE 'octamy' END,
-              use_blueprint_engine = true,
-              subscription_eligible = CASE WHEN c.assessment_purpose = 'practice' THEN true ELSE false END
-            WHERE c.id IN (${sql.join(ids.map((id) => sql`${id}`), sql`,`)})
-              AND c.owner_type = 'admin' AND c.product_type = 'assessment'
-              AND EXISTS (SELECT 1 FROM course_question_blueprint b WHERE b.course_id = c.id)
-              AND NOT EXISTS (
-                SELECT 1 FROM course_question_blueprint b
-                WHERE b.course_id = c.id AND (
-                  SELECT count(*) FROM questions q
-                  WHERE q.bank_id = b.bank_id
+          const result = await db.transaction(async (tx) => {
+            // Lock target courses before evaluating inventory. Question
+            // mutations unpublish through these same rows, preventing a stale
+            // concurrent publish from winning after content is withdrawn.
+            await tx.select({ id: coursesTable.id })
+              .from(coursesTable)
+              .where(inArray(coursesTable.id, ids))
+              .orderBy(coursesTable.id)
+              .for("update");
+            return tx.execute(sql`
+              UPDATE courses c SET is_active = true, visibility = 'public', review_status = 'approved',
+                certification_mode = CASE WHEN c.assessment_purpose = 'practice' THEN 'none' ELSE 'octamy' END,
+                use_blueprint_engine = true,
+                subscription_eligible = CASE WHEN c.assessment_purpose = 'practice' THEN true ELSE false END
+              WHERE c.id IN (${sql.join(ids.map((id) => sql`${id}`), sql`,`)})
+                AND c.owner_type = 'admin' AND c.product_type = 'assessment'
+                AND EXISTS (SELECT 1 FROM course_question_blueprint b WHERE b.course_id = c.id)
+                AND NOT EXISTS (
+                  SELECT 1
+                  FROM course_question_blueprint b
+                  LEFT JOIN question_banks bank ON bank.id = b.bank_id
+                  WHERE b.course_id = c.id
+                    AND (
+                      bank.bank_purpose IS DISTINCT FROM c.assessment_purpose
+                      OR bank.status IS DISTINCT FROM 'active'
+                    )
+                )
+                AND NOT EXISTS (
+                  SELECT 1 FROM course_question_blueprint b
+                  WHERE b.course_id = c.id AND (
+                    SELECT count(*) FROM questions q
+                    WHERE q.bank_id = b.bank_id
+                      AND (b.topic_id IS NULL OR q.topic_id = b.topic_id)
+                      AND q.is_active = true AND q.review_status = 'approved'
+                      AND q.reviewed_by IS NOT NULL
+                      AND q.reviewed_at IS NOT NULL
+                      AND q.question_format IN ('mcq_single', 'true_false')
+                      AND json_typeof(q.options) = 'array'
+                      AND q.correct_answer >= 0
+                      AND q.correct_answer < json_array_length(q.options)
+                      AND (b.difficulty = 'mixed' OR q.difficulty = b.difficulty)
+                  ) < b.question_count * CASE WHEN c.assessment_purpose = 'practice' THEN 5 ELSE 4 END
+                )
+                AND (
+                  SELECT count(DISTINCT q.id)
+                  FROM course_question_blueprint b
+                  INNER JOIN questions q ON q.bank_id = b.bank_id
                     AND (b.topic_id IS NULL OR q.topic_id = b.topic_id)
-                    AND q.is_active = true AND q.review_status = 'approved'
                     AND (b.difficulty = 'mixed' OR q.difficulty = b.difficulty)
-                ) < b.question_count * CASE WHEN c.assessment_purpose = 'practice' THEN 5 ELSE 4 END
-              )
-              AND (
-                SELECT count(DISTINCT q.id)
-                FROM course_question_blueprint b
-                INNER JOIN questions q ON q.bank_id = b.bank_id
-                WHERE b.course_id = c.id
-                  AND q.is_active = true AND q.review_status = 'approved'
-              ) >= GREATEST(
-                CASE WHEN c.assessment_purpose = 'practice' THEN 200 ELSE 80 END,
-                COALESCE((SELECT sum(b.question_count) FROM course_question_blueprint b WHERE b.course_id = c.id), 0)
-                  * CASE WHEN c.assessment_purpose = 'practice' THEN 5 ELSE 4 END
-              )
-            RETURNING c.id
-          `);
+                  WHERE b.course_id = c.id
+                    AND q.is_active = true AND q.review_status = 'approved'
+                    AND q.reviewed_by IS NOT NULL
+                    AND q.reviewed_at IS NOT NULL
+                    AND q.question_format IN ('mcq_single', 'true_false')
+                    AND json_typeof(q.options) = 'array'
+                    AND q.correct_answer >= 0
+                    AND q.correct_answer < json_array_length(q.options)
+                ) >= GREATEST(
+                  CASE WHEN c.assessment_purpose = 'practice' THEN 200 ELSE 80 END,
+                  COALESCE((SELECT sum(b.question_count) FROM course_question_blueprint b WHERE b.course_id = c.id), 0)
+                    * CASE WHEN c.assessment_purpose = 'practice' THEN 5 ELSE 4 END
+                )
+              RETURNING c.id
+            `);
+          });
           return res.json({ action: "publish", affected: result.rowCount || 0, skipped: ids.length - (result.rowCount || 0) });
         }
         const result = await db.execute(sql`
@@ -5360,20 +5639,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         const ids = Array.from(new Set(parsed.data.ids));
         const status = parsed.data.action === "activate" ? "active" : parsed.data.action;
-        const result = await db.execute(sql`
-          UPDATE question_banks bank SET status = ${status}, updated_at = now()
-          WHERE bank.id IN (${sql.join(ids.map((id) => sql`${id}`), sql`,`)})
-            AND (
-              ${status} <> 'archived'
-              OR NOT EXISTS (
-                SELECT 1 FROM course_question_blueprint blueprint
-                INNER JOIN courses course ON course.id = blueprint.course_id
-                WHERE blueprint.bank_id = bank.id
-                  AND course.is_active = true AND course.visibility = 'public'
-              )
+        const result = await db.transaction(async (tx) => {
+          await tx.select({ id: questionBanksTable.id })
+            .from(questionBanksTable)
+            .where(inArray(questionBanksTable.id, ids))
+            .orderBy(questionBanksTable.id)
+            .for("update");
+          await tx.execute(sql`
+            SELECT course.id
+            FROM courses course
+            WHERE EXISTS (
+              SELECT 1 FROM course_question_blueprint blueprint
+              WHERE blueprint.course_id = course.id
+                AND blueprint.bank_id IN (${sql.join(ids.map((id) => sql`${id}`), sql`,`)})
             )
-          RETURNING bank.id
-        `);
+            ORDER BY course.id
+            FOR UPDATE
+          `);
+          return tx.execute(sql`
+            UPDATE question_banks bank SET status = ${status}, updated_at = now()
+            WHERE bank.id IN (${sql.join(ids.map((id) => sql`${id}`), sql`,`)})
+              AND (
+                ${status} = 'active'
+                OR NOT EXISTS (
+                  SELECT 1 FROM course_question_blueprint blueprint
+                  INNER JOIN courses course ON course.id = blueprint.course_id
+                  WHERE blueprint.bank_id = bank.id
+                    AND course.is_active = true AND course.visibility = 'public'
+                )
+              )
+            RETURNING bank.id
+          `);
+        });
         res.json({ action: parsed.data.action, affected: result.rowCount || 0, skipped: ids.length - (result.rowCount || 0) });
       } catch (error) {
         console.error("Question-bank bulk action failed:", error);
@@ -5391,10 +5688,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const parsed = z.object({ action: z.literal("deactivate"), confirmation: z.string() }).strict().safeParse(req.body);
         if (!Number.isInteger(bankId) || bankId <= 0 || !parsed.success) return res.status(400).json({ message: "Invalid bulk review request" });
         if (parsed.data.confirmation !== "DEACTIVATE") return res.status(400).json({ message: "Type DEACTIVATE to confirm" });
-        const result = await db.execute(sql`
-          UPDATE questions SET is_active = false, updated_at = now()
-          WHERE bank_id = ${bankId} AND is_active = true
-        `);
+        const result = await db.transaction(async (tx) => {
+          const updated = await tx.execute(sql`
+            UPDATE questions SET is_active = false, updated_at = now()
+            WHERE bank_id = ${bankId} AND is_active = true
+          `);
+          if (Number(updated.rowCount || 0) > 0) {
+            await unpublishPublishedAssessmentsUsingBanks(tx, [bankId]);
+          }
+          return updated;
+        });
         res.json({ action: "deactivate", affected: result.rowCount || 0 });
       } catch (error) {
         console.error("Question-bank bulk review failed:", error);
@@ -5448,9 +5751,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
         syllabusVersion: z.string().trim().max(120).nullable().optional(),
       }).strict().safeParse(req.body);
       if (!Number.isInteger(id) || id <= 0 || !parsed.success) return res.status(400).json({ message: "Invalid bank update" });
-      const row = await storage.updateQuestionBank(id, parsed.data);
-      if (!row) return res.status(404).json({ message: "Question bank not found" });
-      res.json(row);
+      const existing = await storage.getQuestionBank(id);
+      if (!existing) return res.status(404).json({ message: "Question bank not found" });
+      if (
+        (parsed.data.bankPurpose && parsed.data.bankPurpose !== existing.bankPurpose)
+        || (parsed.data.status && parsed.data.status !== "active")
+      ) {
+        const [usage] = await db.select({
+          total: count(),
+          live: sql<number>`count(*) filter (where ${coursesTable.isActive} = true and ${coursesTable.visibility} = 'public' and ${coursesTable.reviewStatus} = 'approved')`,
+        }).from(courseQuestionBlueprint)
+          .innerJoin(coursesTable, eq(coursesTable.id, courseQuestionBlueprint.courseId))
+          .where(eq(courseQuestionBlueprint.bankId, id));
+        if (parsed.data.bankPurpose && parsed.data.bankPurpose !== existing.bankPurpose && Number(usage?.total || 0) > 0) {
+          return res.status(409).json({
+            message: "Remove this bank from every assessment blueprint before changing its purpose.",
+            code: "QUESTION_BANK_PURPOSE_IN_USE",
+          });
+        }
+        if (parsed.data.status && parsed.data.status !== "active" && Number(usage?.live || 0) > 0) {
+          return res.status(409).json({
+            message: "Unpublish linked assessments before moving this question bank out of active status.",
+            code: "QUESTION_BANK_LIVE_ASSESSMENT_IN_USE",
+          });
+        }
+      }
+      try {
+        const row = await storage.updateQuestionBank(id, parsed.data);
+        res.json(row);
+      } catch (error) {
+        if ((error as { code?: string }).code === "QUESTION_BANK_PURPOSE_IN_USE") {
+          return res.status(409).json({
+            message: error instanceof Error ? error.message : "Question bank purpose is in use",
+            code: "QUESTION_BANK_PURPOSE_IN_USE",
+          });
+        }
+        throw error;
+      }
     },
   );
 
@@ -5500,7 +5837,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     authenticateAdminToken,
     async (req: AuthenticatedRequest, res: Response) => {
       try {
-        const questionData = req.body;
+        const {
+          bankId: _bankId,
+          topicId: _topicId,
+          generationSource: _generationSource,
+          reviewStatus: _reviewStatus,
+          reviewedBy: _reviewedBy,
+          reviewedAt: _reviewedAt,
+          ...questionData
+        } = req.body || {};
 
         // Validate required fields
         if (
@@ -5539,6 +5884,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (isNaN(questionId)) {
           return res.status(400).json({ message: "Invalid question ID" });
         }
+        const [existing] = await db.select({ bankId: questionsTable.bankId })
+          .from(questionsTable)
+          .where(eq(questionsTable.id, questionId));
+        if (!existing) return res.status(404).json({ message: "Question not found" });
+        if (existing.bankId != null) {
+          return res.status(409).json({
+            message: "Bank questions must be edited and reviewed through Question Banks.",
+            code: "QUESTION_BANK_GOVERNANCE_REQUIRED",
+          });
+        }
 
         const reviewerId = Number(req.user?.userId);
         const {
@@ -5575,6 +5930,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const questionId = parseInt(req.params.id);
         if (isNaN(questionId)) {
           return res.status(400).json({ message: "Invalid question ID" });
+        }
+        const [existing] = await db.select({ bankId: questionsTable.bankId })
+          .from(questionsTable)
+          .where(eq(questionsTable.id, questionId));
+        if (!existing) return res.status(404).json({ message: "Question not found" });
+        if (existing.bankId != null) {
+          return res.status(409).json({
+            message: "Bank questions must be retired through Question Banks so their review history is preserved.",
+            code: "QUESTION_BANK_GOVERNANCE_REQUIRED",
+          });
         }
 
         const reviewerId = Number(req.user?.userId);

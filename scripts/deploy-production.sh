@@ -152,6 +152,12 @@ APP_DIR="$APP_DIR" ADOPT_EXISTING_SCHEMA="$ADOPT_EXISTING_SCHEMA" node scripts/a
 log "Applying pending database migrations"
 npm run db:migrate
 
+log "Dry-running the source-controlled Interview Studio catalog"
+npm run interviews:sync-catalog
+
+log "Applying the source-controlled Interview Studio catalog"
+npm run interviews:sync-catalog -- --apply --confirm INTERVIEW_STUDIO
+
 if [[ "$SEGREGATE_INHOUSE_QUESTIONS" == "1" ]]; then
   log "Dry-running enterprise in-house question-pool segregation"
   npm run questions:segregate-inhouse -- --operator "deploy-${NEW_SHA:0:12}"

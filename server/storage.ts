@@ -107,7 +107,16 @@ import {
   type RatingAggregate,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, count, sql, or, asc, ilike, gte, gt, lte, isNull, notInArray } from "drizzle-orm";
+import { eq, and, desc, count, sql, or, asc, ilike, gte, gt, lte, isNull, isNotNull, notInArray } from "drizzle-orm";
+import {
+  isPublishableAssessmentQuestion,
+  isPublishedAssessment,
+} from "./lib/assessment-bank-readiness";
+import {
+  assertAssessmentPublishReadiness,
+  type AssessmentPublishCourseState,
+  unpublishPublishedAssessmentsUsingBanks,
+} from "./lib/assessment-publish-readiness";
 
 export const RECRUITER_ACCESS_COSTS = {
   profile_view: 1,
@@ -1306,6 +1315,7 @@ export class DatabaseStorage implements IStorage {
       console.log('getQuestionsForAdmin called with:', { courseId, search });
 
       const conditions = and(
+          isNull(questions.bankId),
           courseId ? eq(questions.courseId, courseId) : undefined,
           search ? ilike(questions.question, `%${search}%`) : undefined,
         );
@@ -2528,11 +2538,26 @@ export class DatabaseStorage implements IStorage {
 
   // Update course (admin)
   async updateCourseAdmin(id: number, updates: Partial<InsertCourse>) {
-    const [course] = await db.update(courses)
-      .set(updates)
-      .where(eq(courses.id, id))
-      .returning();
-    return course;
+    return db.transaction(async (tx) => {
+      // Serialize publication with question mutations. Question retirement
+      // unpublishes linked courses through this same locked row, so a
+      // concurrent publish cannot commit using a stale readiness snapshot.
+      const [existing] = await tx.select().from(courses)
+        .where(eq(courses.id, id))
+        .for("update");
+      if (!existing) return undefined;
+      await assertAssessmentPublishReadiness({
+        courseId: id,
+        previous: existing as AssessmentPublishCourseState,
+        next: { ...existing, ...updates } as AssessmentPublishCourseState,
+        executor: tx,
+      });
+      const [course] = await tx.update(courses)
+        .set(updates)
+        .where(eq(courses.id, id))
+        .returning();
+      return course;
+    });
   }
 
   // Delete course (admin)
@@ -2559,7 +2584,7 @@ export class DatabaseStorage implements IStorage {
   async updateQuestionAdmin(id: number, updates: Partial<InsertQuestion>) {
     const [question] = await db.update(questions)
       .set(updates as Partial<typeof questions.$inferInsert>)
-      .where(eq(questions.id, id))
+      .where(and(eq(questions.id, id), isNull(questions.bankId)))
       .returning();
     return question;
   }
@@ -2568,7 +2593,7 @@ export class DatabaseStorage implements IStorage {
   async deleteQuestionAdmin(id: number, retiredBy?: number) {
     return db.transaction(async (tx) => {
       const [existing] = await tx.select().from(questions)
-        .where(eq(questions.id, id))
+        .where(and(eq(questions.id, id), isNull(questions.bankId)))
         .for("update");
       if (!existing) return undefined;
       const [lineage] = await tx.select({ id: questionProvenance.id })
@@ -3569,15 +3594,37 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateQuestionBank(id: number, data: Partial<InsertQuestionBank>): Promise<QuestionBank | undefined> {
-    const [row] = await db
-      .update(questionBanks)
-      .set({
-        ...(data as Partial<typeof questionBanks.$inferInsert>),
-        updatedAt: new Date(),
-      })
-      .where(eq(questionBanks.id, id))
-      .returning();
-    return row || undefined;
+    return db.transaction(async (tx) => {
+      const [existing] = await tx.select().from(questionBanks)
+        .where(eq(questionBanks.id, id))
+        .for("update");
+      if (!existing) return undefined;
+
+      if (data.bankPurpose && data.bankPurpose !== existing.bankPurpose) {
+        const [{ blueprintUses }] = await tx.select({ blueprintUses: count() })
+          .from(courseQuestionBlueprint)
+          .where(eq(courseQuestionBlueprint.bankId, id));
+        if (Number(blueprintUses) > 0) {
+          throw Object.assign(
+            new Error("Remove this bank from every assessment blueprint before changing its purpose."),
+            { code: "QUESTION_BANK_PURPOSE_IN_USE" },
+          );
+        }
+      }
+
+      const [row] = await tx
+        .update(questionBanks)
+        .set({
+          ...(data as Partial<typeof questionBanks.$inferInsert>),
+          updatedAt: new Date(),
+        })
+        .where(eq(questionBanks.id, id))
+        .returning();
+      if (data.status && data.status !== "active") {
+        await unpublishPublishedAssessmentsUsingBanks(tx, [id]);
+      }
+      return row || undefined;
+    });
   }
 
   async deleteQuestionBank(id: number): Promise<void> {
@@ -3671,6 +3718,14 @@ export class DatabaseStorage implements IStorage {
         .set({ ...data, version: nextVersion, updatedAt: new Date() } as any)
         .where(eq(questions.id, id))
         .returning();
+      if (
+        existing.bankId
+        && isPublishableAssessmentQuestion(existing)
+        && row
+        && !isPublishableAssessmentQuestion(row)
+      ) {
+        await unpublishPublishedAssessmentsUsingBanks(tx, [existing.bankId]);
+      }
       return row || undefined;
     });
   }
@@ -3713,6 +3768,9 @@ export class DatabaseStorage implements IStorage {
         await tx.update(questionBanks)
           .set({ questionCount: sql`GREATEST(${questionBanks.questionCount} - 1, 0)`, updatedAt: new Date() })
           .where(eq(questionBanks.id, existing.bankId));
+      }
+      if (existing.bankId && isPublishableAssessmentQuestion(existing)) {
+        await unpublishPublishedAssessmentsUsingBanks(tx, [existing.bankId]);
       }
     });
   }
@@ -3758,7 +3816,6 @@ export class DatabaseStorage implements IStorage {
     const perPage = Math.min(200, Math.max(1, opts.perPage ?? 25));
     const where: any[] = [
       eq(questions.bankId, bankId),
-      sql`${questions.reviewStatus} <> 'retired'`,
     ];
     if (opts.topicId) where.push(eq(questions.topicId, opts.topicId));
     if (opts.format) where.push(eq(questions.questionFormat, opts.format));
@@ -3786,7 +3843,43 @@ export class DatabaseStorage implements IStorage {
     changeNote?: string,
   ): Promise<CourseBlueprintItem[]> {
     return db.transaction(async (tx) => {
+      const lockedBanks = new Map<number, {
+        id: number;
+        status: string;
+        bankPurpose: string;
+      }>();
+      for (const bankId of Array.from(new Set(items.map((item) => item.bankId))).sort((left, right) => left - right)) {
+        const [bank] = await tx.select({
+          id: questionBanks.id,
+          status: questionBanks.status,
+          bankPurpose: questionBanks.bankPurpose,
+        }).from(questionBanks)
+          .where(eq(questionBanks.id, bankId))
+          .for("share");
+        if (!bank) throw new Error(`Question bank ${bankId} does not exist`);
+        lockedBanks.set(bankId, bank);
+      }
       await tx.execute(sql`SELECT pg_advisory_xact_lock(7310, ${courseId})`);
+      const [lockedCourse] = await tx.select({
+        id: courses.id,
+        ownerType: courses.ownerType,
+        productType: courses.productType,
+        assessmentPurpose: courses.assessmentPurpose,
+        visibility: courses.visibility,
+        reviewStatus: courses.reviewStatus,
+        isActive: courses.isActive,
+      }).from(courses)
+        .where(eq(courses.id, courseId))
+        .for("update");
+      if (!lockedCourse) throw new Error("Course does not exist");
+      if (lockedCourse.productType !== "assessment") {
+        throw new Error("Question-bank blueprints can only be assigned to assessments");
+      }
+      if (isPublishedAssessment(lockedCourse)) {
+        throw new Error(
+          "Unpublish this assessment before changing its question blueprint, then publish it again after readiness is rechecked",
+        );
+      }
 
       const normalized = items.map((item, index) => ({
         ...item,
@@ -3800,11 +3893,14 @@ export class DatabaseStorage implements IStorage {
       const scopes = new Map<string, Set<string>>();
 
       for (const item of normalized) {
-        const [bank] = await tx.select({ id: questionBanks.id, status: questionBanks.status })
-          .from(questionBanks)
-          .where(eq(questionBanks.id, item.bankId));
+        const bank = lockedBanks.get(item.bankId);
         if (!bank) throw new Error(`Question bank ${item.bankId} does not exist`);
         if (bank.status === "archived") throw new Error(`Question bank ${item.bankId} is archived and cannot be assigned`);
+        if (bank.bankPurpose !== lockedCourse.assessmentPurpose) {
+          throw new Error(
+            `${bank.bankPurpose === "practice" ? "Practice" : "Certification"} bank ${item.bankId} cannot be assigned to a ${lockedCourse.assessmentPurpose} assessment`,
+          );
+        }
 
         if (item.topicId) {
           const [topic] = await tx.select({ id: questionTopics.id })
@@ -3828,6 +3924,8 @@ export class DatabaseStorage implements IStorage {
           eq(questions.bankId, item.bankId),
           eq(questions.isActive, true),
           eq(questions.reviewStatus, "approved"),
+          isNotNull(questions.reviewedBy),
+          isNotNull(questions.reviewedAt),
           sql`${questions.questionFormat} IN ('mcq_single', 'true_false')`,
           sql`json_typeof(${questions.options}) = 'array'`,
           sql`${questions.correctAnswer} >= 0`,
@@ -3869,6 +3967,17 @@ export class DatabaseStorage implements IStorage {
         changeNote: changeNote?.trim() || null,
         changedBy: changedBy ?? null,
       });
+      if (lockedCourse.ownerType !== "admin") {
+        // A third-party blueprint change is a material content change. Return
+        // it to explicit admin review in the same transaction as the new
+        // immutable blueprint revision.
+        await tx.update(courses).set({
+          isActive: false,
+          reviewStatus: lockedCourse.visibility === "private" ? "draft" : "pending",
+          subscriptionEligible: false,
+          resellerEligible: false,
+        }).where(eq(courses.id, courseId));
+      }
       return inserted;
     });
   }
@@ -3883,6 +3992,8 @@ export class DatabaseStorage implements IStorage {
         eq(questions.bankId, item.bankId),
         eq(questions.isActive, true),
         eq(questions.reviewStatus, "approved"),
+        isNotNull(questions.reviewedBy),
+        isNotNull(questions.reviewedAt),
         sql`${questions.questionFormat} IN ('mcq_single', 'true_false')`,
         sql`json_typeof(${questions.options}) = 'array'`,
         sql`${questions.correctAnswer} >= 0`,

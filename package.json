@@ -20,6 +20,7 @@
     "questions:verify-integration": "tsx scripts/verify-question-pack-integration.ts",
     "questions:segregate-inhouse": "tsx scripts/run-segregate-inhouse-question-banks.ts",
     "assessments:sync-inhouse": "tsx scripts/sync-inhouse-assessment-catalog.ts",
+    "interviews:sync-catalog": "tsx scripts/sync-interview-studio-catalog.ts",
     "certifications:seed-career": "node scripts/seed-career-certification-catalog.mjs",
     "admin:bootstrap-local": "tsx scripts/bootstrap-local-admin.ts",
     "test": "jest --passWithNoTests"

@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 import 'dotenv/config';
-import crypto from 'node:crypto';
 import pg from 'pg';
 
 const { Client } = pg;
@@ -93,34 +92,6 @@ function topicSlug(value) {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 }
 
-function questionTemplates(title, slug) {
-  const domain = title.replace(/ Foundations| Readiness| for Work/g, '');
-  return [
-    [`Which outcome best shows practical readiness in ${domain}?`, ['Memorising vendor slogans', 'Applying core concepts to a realistic work scenario', 'Skipping security and governance review', 'Using only undocumented shortcuts'], 1, 'easy'],
-    [`A team is adopting ${domain}. What should be validated first?`, ['The business goal and operating constraints', 'Only the visual branding', 'The longest possible tool list', 'A random implementation copied without context'], 0, 'easy'],
-    [`Which risk is most common when teams implement ${domain} without governance?`, ['Clear accountability', 'Better documentation', 'Misconfiguration, poor controls or inconsistent process', 'Improved auditability by default'], 2, 'medium'],
-    [`What makes an assessment answer job-relevant for ${domain}?`, ['It connects a concept to an operational decision', 'It repeats a definition only', 'It avoids trade-offs', 'It ignores user or business impact'], 0, 'medium'],
-    [`When troubleshooting a ${domain} workflow, what is the strongest first step?`, ['Change multiple variables at once', 'Define the expected state and inspect evidence', 'Delete the environment immediately', 'Assume the user is wrong'], 1, 'medium'],
-    [`Which practice improves enterprise adoption of ${domain}?`, ['Role-based access and documented ownership', 'Shared admin passwords', 'No change history', 'Unreviewed production changes'], 0, 'medium'],
-    [`A candidate claims ${domain} experience. Which signal is strongest?`, ['A verified scenario-based score with answer evidence', 'Only a generic résumé keyword', 'A copied certificate image', 'A social media post'], 0, 'easy'],
-    [`Which metric is usually most useful after deploying ${domain} changes?`, ['A vanity count unrelated to users', 'Operational outcome tied to the original goal', 'Number of meetings held', 'Tool popularity ranking'], 1, 'medium'],
-    [`What should be documented before scaling ${domain}?`, ['Decision rationale, ownership, controls and rollback path', 'Only the launch date', 'Nothing if it works once', 'A private note no team can access'], 0, 'hard'],
-    [`Why should Octamy separate practice exams from ${domain} certifications?`, ['To avoid confusing preparation with recruiter-visible evidence', 'To hide results from learners', 'To remove answer review', 'To make all exams offline'], 0, 'easy'],
-  ].map(([question, options, correctAnswer, difficulty], index) => ({
-    question,
-    options,
-    correctAnswer,
-    difficulty,
-    explanation: `This checks whether the learner can apply ${domain} knowledge in a practical workplace context.`,
-    tags: [slug, 'career-certification', domain.toLowerCase().replace(/[^a-z0-9]+/g, '-')],
-    index,
-  }));
-}
-
-function hashQuestion(bankSlug, question) {
-  return crypto.createHash('sha256').update(`${bankSlug}:${question}`).digest('hex');
-}
-
 async function upsertCategory(client, [slug, name, description, icon, sortOrder], parentId = null) {
   const result = await client.query(`
     INSERT INTO categories (slug, name, description, icon, parent_id, kind, is_active, sort_order, meta_title, meta_description, updated_at)
@@ -159,7 +130,7 @@ async function main() {
 
     let courseCount = 0;
     let bankCount = 0;
-    let questionCount = 0;
+    let retiredQuestionCount = 0;
     for (const [slug, title, categorySlug, description, level, duration, passingScore, price] of assessments) {
       const categoryId = categoryIds.get(categorySlug);
       const course = await client.query(`
@@ -230,67 +201,45 @@ async function main() {
       const bankId = bank.rows[0].id;
       bankCount += 1;
 
-      await client.query(`
+      const retired = await client.query(`
         UPDATE questions SET is_active = false, review_status = 'retired', reviewed_by = null,
           reviewed_at = null, updated_at = now()
         WHERE bank_id = $1 AND created_by IS NULL AND reviewed_by IS NULL
-          AND generation_source = 'human'
+          AND review_status NOT IN ('approved', 'retired')
           AND (
-            question LIKE 'Which outcome best shows practical readiness in %'
-            OR question LIKE 'A team is adopting %. What should be validated first?'
-            OR question LIKE 'Which risk is most common when teams implement % without governance?'
-            OR question LIKE 'What makes an assessment answer job-relevant for %?'
-            OR question LIKE 'When troubleshooting a % workflow, what is the strongest first step?'
-            OR question LIKE 'Which practice improves enterprise adoption of %?'
-            OR question LIKE 'A candidate claims % experience. Which signal is strongest?'
-            OR question LIKE 'Which metric is usually most useful after deploying % changes?'
-            OR question LIKE 'What should be documented before scaling %?'
-            OR question LIKE 'Why should Octamy separate practice exams from % certifications?'
+            answer_metadata->>'source' = 'career-catalog-starter'
+            OR (
+              answer_metadata IS NULL
+              AND generation_source = 'imported'
+              AND tags::jsonb @> '["career-certification"]'::jsonb
+              AND explanation LIKE
+                'This checks whether the learner can apply % knowledge in a practical workplace context.'
+              AND (
+                question LIKE 'Which outcome best shows practical readiness in %'
+                OR question LIKE 'A team is adopting %. What should be validated first?'
+                OR question LIKE 'Which risk is most common when teams implement % without governance?'
+                OR question LIKE 'What makes an assessment answer job-relevant for %?'
+                OR question LIKE 'When troubleshooting a % workflow, what is the strongest first step?'
+                OR question LIKE 'Which practice improves enterprise adoption of %?'
+                OR question LIKE 'A candidate claims % experience. Which signal is strongest?'
+                OR question LIKE 'Which metric is usually most useful after deploying % changes?'
+                OR question LIKE 'What should be documented before scaling %?'
+                OR question LIKE 'Why should Octamy separate practice exams from % certifications?'
+              )
+            )
           )
       `, [bankId]);
+      retiredQuestionCount += retired.rowCount || 0;
 
-      const topicIds = [];
       for (const [topicIndex, topicName] of (competencyTopics[categorySlug] || []).entries()) {
-        const topic = await client.query(`
+        await client.query(`
           INSERT INTO question_topics (bank_id, name, slug, sort_order, updated_at)
           VALUES ($1, $2, $3, $4, now())
           ON CONFLICT (bank_id, slug) DO UPDATE SET name = EXCLUDED.name, sort_order = EXCLUDED.sort_order, updated_at = now()
-          RETURNING id
         `, [bankId, topicName, topicSlug(topicName), topicIndex + 1]);
-        topicIds.push(topic.rows[0].id);
       }
 
-      const templates = questionTemplates(title, slug);
-      for (const item of templates) {
-        const topicId = topicIds[item.index % topicIds.length] || null;
-        await client.query(`
-          INSERT INTO questions (
-            course_id, bank_id, topic_id, question, options, correct_answer, is_active, question_type,
-            max_points, difficulty, question_format, negative_marks, tags, explanation,
-            content_hash, review_status, generation_source, reviewed_at, answer_metadata, version
-          )
-          VALUES (null, $1, $2, $3, $4::json, $5, false, 'multiple_choice',
-            100, $6, 'mcq_single', 0, $7::json, $8, $9, 'pending', 'imported', null,
-            '{"source":"career-catalog-starter","reviewRequired":true}'::jsonb, 1)
-          ON CONFLICT (bank_id, content_hash) WHERE bank_id IS NOT NULL AND content_hash IS NOT NULL
-          DO UPDATE SET
-            options = EXCLUDED.options,
-            correct_answer = EXCLUDED.correct_answer,
-            topic_id = EXCLUDED.topic_id,
-            is_active = false,
-            difficulty = EXCLUDED.difficulty,
-            tags = EXCLUDED.tags,
-            explanation = EXCLUDED.explanation,
-            review_status = 'pending',
-            generation_source = 'imported',
-            reviewed_by = null,
-            reviewed_at = null,
-            updated_at = now()
-        `, [bankId, topicId, item.question, JSON.stringify(item.options), item.correctAnswer, item.difficulty, JSON.stringify(item.tags), item.explanation, hashQuestion(bankSlug, item.question)]);
-        questionCount += 1;
-      }
-
-      await client.query(`UPDATE question_banks SET question_count = (SELECT count(*) FROM questions WHERE bank_id = $1), updated_at = now() WHERE id = $1`, [bankId]);
+      await client.query(`UPDATE question_banks SET question_count = (SELECT count(*) FROM questions WHERE bank_id = $1 AND review_status <> 'retired'), updated_at = now() WHERE id = $1`, [bankId]);
       const [{ approved_count: approvedCount }] = (await client.query(`
         SELECT count(*)::int AS approved_count FROM questions
         WHERE bank_id = $1 AND is_active = true AND review_status = 'approved'
@@ -313,7 +262,15 @@ async function main() {
     } else {
       await client.query('ROLLBACK');
     }
-    console.log(JSON.stringify({ mode: APPLY ? 'applied' : 'dry_run', operator: OPERATOR, categories: rootCategories.length, courses: courseCount, banks: bankCount, questions: questionCount }, null, 2));
+    console.log(JSON.stringify({
+      mode: APPLY ? 'applied' : 'dry_run',
+      operator: OPERATOR,
+      categories: rootCategories.length,
+      courses: courseCount,
+      banks: bankCount,
+      generatedQuestions: 0,
+      retiredPlaceholderQuestions: retiredQuestionCount,
+    }, null, 2));
   } catch (error) {
     await client.query('ROLLBACK').catch(() => undefined);
     throw error;

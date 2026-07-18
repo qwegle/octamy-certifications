@@ -72,7 +72,7 @@ const FORMATS = [
 
 interface BankResponse extends QuestionBank {
   topics: QuestionTopic[];
-  inventory: { approvedActive: number; easy: number; medium: number; hard: number; draft: number };
+  inventory: { approvedActive: number; easy: number; medium: number; hard: number; draft: number; retired: number };
   canEdit: boolean;
 }
 
@@ -375,8 +375,8 @@ export default function QuestionBankDetail() {
           </div>
         </div>
 
-        <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
-          {[{ label: "Approved", value: bank.inventory.approvedActive }, { label: "Easy", value: bank.inventory.easy }, { label: "Medium", value: bank.inventory.medium }, { label: "Hard", value: bank.inventory.hard }, { label: "Needs review", value: bank.inventory.draft }].map((item) => (
+        <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
+          {[{ label: "Publishable", value: bank.inventory.approvedActive }, { label: "Easy", value: bank.inventory.easy }, { label: "Medium", value: bank.inventory.medium }, { label: "Hard", value: bank.inventory.hard }, { label: "Needs review", value: bank.inventory.draft }, { label: "Retired", value: bank.inventory.retired }].map((item) => (
             <Card key={item.label}><CardContent className="p-3"><p className="text-xs font-semibold uppercase tracking-wider text-slate-500">{item.label}</p><p className="mt-1 text-xl font-black tabular-nums text-slate-950">{Number(item.value).toLocaleString()}</p></CardContent></Card>
           ))}
         </div>
@@ -467,7 +467,7 @@ export default function QuestionBankDetail() {
                 </div>
                 <div>
                   <Label htmlFor="question-review-filter" className="sr-only">Filter by review status</Label>
-                  <Select value={reviewFilter || "all"} onValueChange={(value) => { setReviewFilter(value === "all" ? "" : value); setPage(1); }}><SelectTrigger id="question-review-filter"><SelectValue placeholder="All review states" /></SelectTrigger><SelectContent><SelectItem value="all">All review states</SelectItem><SelectItem value="approved">Approved</SelectItem><SelectItem value="pending">Pending</SelectItem><SelectItem value="draft">Draft</SelectItem><SelectItem value="rejected">Rejected</SelectItem></SelectContent></Select>
+                  <Select value={reviewFilter || "all"} onValueChange={(value) => { setReviewFilter(value === "all" ? "" : value); setPage(1); }}><SelectTrigger id="question-review-filter"><SelectValue placeholder="All review states" /></SelectTrigger><SelectContent><SelectItem value="all">All review states</SelectItem><SelectItem value="approved">Approved</SelectItem><SelectItem value="pending">Pending</SelectItem><SelectItem value="draft">Draft</SelectItem><SelectItem value="rejected">Rejected</SelectItem><SelectItem value="retired">Retired history</SelectItem></SelectContent></Select>
                 </div>
               </CardContent>
             </Card>
@@ -504,7 +504,7 @@ export default function QuestionBankDetail() {
                           type="button"
                           className="min-w-0 flex-1 p-4 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-slate-900"
                           onClick={() => setEditing(q)}
-                          aria-label={`${canEdit ? "Edit" : "View"} question: ${q.question}`}
+                          aria-label={`${canEdit && q.reviewStatus !== "retired" ? "Edit" : "View"} question: ${q.question}`}
                         >
                           <span className="line-clamp-2 block text-sm font-medium text-slate-900">{q.question}</span>
                           <span className="mt-2 flex flex-wrap items-center gap-2">
@@ -529,13 +529,13 @@ export default function QuestionBankDetail() {
                           <Button
                             size="icon"
                             variant="ghost"
-                            aria-label={`${canEdit ? "Edit" : "View"} question: ${q.question}`}
-                            title={canEdit ? "Edit question" : "View question"}
+                            aria-label={`${canEdit && q.reviewStatus !== "retired" ? "Edit" : "View"} question: ${q.question}`}
+                            title={canEdit && q.reviewStatus !== "retired" ? "Edit question" : "View question"}
                             onClick={() => setEditing(q)}
                           >
-                            {canEdit ? <Pencil className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            {canEdit && q.reviewStatus !== "retired" ? <Pencil className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                           </Button>
-                          {canEdit && (
+                          {canEdit && q.reviewStatus !== "retired" && (
                             <Button
                               size="icon"
                               variant="ghost"
@@ -685,6 +685,7 @@ function QuestionEditor({ bankId, topics, question, canEdit, onClose, onSave, sa
   const opts: string[] = Array.isArray(q.options) ? q.options : [];
   const editorId = `question-editor-${q.id || "new"}`;
   const isDirty = useMemo(() => JSON.stringify(q) !== JSON.stringify(question), [q, question]);
+  const canModify = canEdit && q.reviewStatus !== "retired";
 
   const versionsQuery = useQuery<QuestionVersion[]>({
     queryKey: [`/api/question-banks/${bankId}/questions/${q.id}/versions`],
@@ -701,10 +702,10 @@ function QuestionEditor({ bankId, topics, question, canEdit, onClose, onSave, sa
       <SheetContent className="w-full sm:max-w-xl overflow-y-auto">
         <SheetHeader>
           <SheetTitle>
-            {q.id ? `${canEdit ? "Edit" : "View"} question (v${q.version})` : "New question"}
+            {q.id ? `${canModify ? "Edit" : "View"} question (v${q.version})` : "New question"}
           </SheetTitle>
           <SheetDescription>
-            {canEdit
+            {canModify
               ? "Define the prompt, answer key, scoring, and review metadata."
               : "Review the prompt, answer key, scoring, and version history."}
           </SheetDescription>
@@ -714,7 +715,7 @@ function QuestionEditor({ bankId, topics, question, canEdit, onClose, onSave, sa
           className="mt-4 space-y-4"
           onSubmit={(event) => {
             event.preventDefault();
-            if (canEdit && q.question?.trim()) onSave(q);
+            if (canModify && q.question?.trim()) onSave(q);
           }}
         >
           {q.id ? (
@@ -749,7 +750,7 @@ function QuestionEditor({ bankId, topics, question, canEdit, onClose, onSave, sa
                   {q.reviewedBy ? ` · reviewer #${q.reviewedBy}` : ""}
                 </p>
               )}
-              {canEdit && (
+              {canModify && (
                 <div className="mt-3">
                   <Label htmlFor={`${editorId}-review-note`}>Review note (optional for approval; required for rejection)</Label>
                   <Textarea
@@ -775,7 +776,7 @@ function QuestionEditor({ bankId, topics, question, canEdit, onClose, onSave, sa
           )}
           <div>
             <Label htmlFor={`${editorId}-format`}>Format</Label>
-            <Select value={q.questionFormat} onValueChange={(v) => setQ({ ...q, questionFormat: v })} disabled={!canEdit}>
+            <Select value={q.questionFormat} onValueChange={(v) => setQ({ ...q, questionFormat: v })} disabled={!canModify}>
               <SelectTrigger id={`${editorId}-format`}><SelectValue /></SelectTrigger>
               <SelectContent>
                 {FORMATS.map((f) => (<SelectItem key={f.value} value={f.value}>{f.label}</SelectItem>))}
@@ -787,7 +788,7 @@ function QuestionEditor({ bankId, topics, question, canEdit, onClose, onSave, sa
             <Select
               value={q.topicId ? String(q.topicId) : "none"}
               onValueChange={(v) => setQ({ ...q, topicId: v === "none" ? null : Number(v) })}
-              disabled={!canEdit}
+              disabled={!canModify}
             >
               <SelectTrigger id={`${editorId}-topic`}><SelectValue placeholder="No topic" /></SelectTrigger>
               <SelectContent>
@@ -806,7 +807,7 @@ function QuestionEditor({ bankId, topics, question, canEdit, onClose, onSave, sa
               value={q.question}
               onChange={(e) => setQ({ ...q, question: e.target.value })}
               rows={3}
-              disabled={!canEdit}
+              disabled={!canModify}
             />
           </div>
           {isMcq && (
@@ -837,7 +838,7 @@ function QuestionEditor({ bankId, topics, question, canEdit, onClose, onSave, sa
                         setQ({ ...q, expectedAnswer: next.join(","), correctAnswer: next[0] ?? 0 });
                       }
                     }}
-                    disabled={!canEdit}
+                    disabled={!canModify}
                   />
                   <Label htmlFor={`${editorId}-option-${i}`} className="sr-only">
                     Option {"ABCD"[i]}
@@ -853,7 +854,7 @@ function QuestionEditor({ bankId, topics, question, canEdit, onClose, onSave, sa
                       setQ({ ...q, options: next });
                     }}
                     placeholder={`Option ${"ABCD"[i]}`}
-                    disabled={!canEdit}
+                    disabled={!canModify}
                   />
                 </div>
               ))}
@@ -862,7 +863,7 @@ function QuestionEditor({ bankId, topics, question, canEdit, onClose, onSave, sa
           {q.questionFormat === "true_false" && (
             <div>
               <Label htmlFor={`${editorId}-true-false-answer`}>Correct answer</Label>
-              <Select value={q.expectedAnswer ?? "true"} onValueChange={(v) => setQ({ ...q, expectedAnswer: v, correctAnswer: v === "true" ? 1 : 0 })} disabled={!canEdit}>
+              <Select value={q.expectedAnswer ?? "true"} onValueChange={(v) => setQ({ ...q, expectedAnswer: v, correctAnswer: v === "true" ? 1 : 0 })} disabled={!canModify}>
                 <SelectTrigger id={`${editorId}-true-false-answer`}><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="true">True</SelectItem>
@@ -880,7 +881,7 @@ function QuestionEditor({ bankId, topics, question, canEdit, onClose, onSave, sa
                 value={q.expectedAnswer ?? ""}
                 onChange={(e) => setQ({ ...q, expectedAnswer: e.target.value })}
                 rows={3}
-                disabled={!canEdit}
+                disabled={!canModify}
               />
             </div>
           )}
@@ -893,22 +894,22 @@ function QuestionEditor({ bankId, topics, question, canEdit, onClose, onSave, sa
                 value={q.codeLanguage ?? ""}
                 onChange={(e) => setQ({ ...q, codeLanguage: e.target.value })}
                 placeholder="e.g. python"
-                disabled={!canEdit}
+                disabled={!canModify}
               />
             </div>
           )}
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
               <Label htmlFor={`${editorId}-marks`}>Marks</Label>
-              <Input id={`${editorId}-marks`} name="marks" type="number" min="0" step="0.25" value={q.maxPoints ?? 1} onChange={(e) => setQ({ ...q, maxPoints: Number(e.target.value) })} disabled={!canEdit} />
+              <Input id={`${editorId}-marks`} name="marks" type="number" min="0" step="0.25" value={q.maxPoints ?? 1} onChange={(e) => setQ({ ...q, maxPoints: Number(e.target.value) })} disabled={!canModify} />
             </div>
             <div>
               <Label htmlFor={`${editorId}-negative-marks`}>Negative marks</Label>
-              <Input id={`${editorId}-negative-marks`} name="negativeMarks" type="number" min="0" step="0.25" value={q.negativeMarks ?? 0} onChange={(e) => setQ({ ...q, negativeMarks: Number(e.target.value) })} disabled={!canEdit} />
+              <Input id={`${editorId}-negative-marks`} name="negativeMarks" type="number" min="0" step="0.25" value={q.negativeMarks ?? 0} onChange={(e) => setQ({ ...q, negativeMarks: Number(e.target.value) })} disabled={!canModify} />
             </div>
             <div>
               <Label htmlFor={`${editorId}-difficulty`}>Difficulty</Label>
-              <Select value={q.difficulty} onValueChange={(v) => setQ({ ...q, difficulty: v })} disabled={!canEdit}>
+              <Select value={q.difficulty} onValueChange={(v) => setQ({ ...q, difficulty: v })} disabled={!canModify}>
                 <SelectTrigger id={`${editorId}-difficulty`}><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="easy">Easy</SelectItem>
@@ -919,12 +920,12 @@ function QuestionEditor({ bankId, topics, question, canEdit, onClose, onSave, sa
             </div>
             <div>
               <Label htmlFor={`${editorId}-time-limit`}>Time limit (seconds)</Label>
-              <Input id={`${editorId}-time-limit`} name="timeLimit" type="number" min="1" value={q.timeLimitSec ?? ""} onChange={(e) => setQ({ ...q, timeLimitSec: e.target.value ? Number(e.target.value) : null })} disabled={!canEdit} />
+              <Input id={`${editorId}-time-limit`} name="timeLimit" type="number" min="1" value={q.timeLimitSec ?? ""} onChange={(e) => setQ({ ...q, timeLimitSec: e.target.value ? Number(e.target.value) : null })} disabled={!canModify} />
             </div>
           </div>
           <div>
             <Label htmlFor={`${editorId}-explanation`}>Explanation (optional)</Label>
-            <Textarea id={`${editorId}-explanation`} name="explanation" value={q.explanation ?? ""} onChange={(e) => setQ({ ...q, explanation: e.target.value })} rows={2} disabled={!canEdit} />
+            <Textarea id={`${editorId}-explanation`} name="explanation" value={q.explanation ?? ""} onChange={(e) => setQ({ ...q, explanation: e.target.value })} rows={2} disabled={!canModify} />
           </div>
 
           {q.id ? (
@@ -956,8 +957,8 @@ function QuestionEditor({ bankId, topics, question, canEdit, onClose, onSave, sa
           ) : null}
 
           <div className="sticky bottom-0 flex flex-wrap justify-end gap-2 border-t bg-white py-4">
-            <Button type="button" variant="ghost" onClick={onClose}>{canEdit ? "Cancel" : "Close"}</Button>
-            {canEdit && q.id && q.reviewStatus !== "rejected" && (
+            <Button type="button" variant="ghost" onClick={onClose}>{canModify ? "Cancel" : "Close"}</Button>
+            {canModify && q.id && q.reviewStatus !== "rejected" && (
               <Button
                 type="button"
                 variant="outline"
@@ -968,7 +969,7 @@ function QuestionEditor({ bankId, topics, question, canEdit, onClose, onSave, sa
                 <XCircle className="h-4 w-4" /> Reject
               </Button>
             )}
-            {canEdit && q.id && q.reviewStatus !== "approved" && (
+            {canModify && q.id && q.reviewStatus !== "approved" && (
               <Button
                 type="button"
                 className="bg-emerald-700 hover:bg-emerald-800"
@@ -978,7 +979,7 @@ function QuestionEditor({ bankId, topics, question, canEdit, onClose, onSave, sa
                 <CheckCircle2 className="h-4 w-4" /> {reviewing ? "Saving review…" : "Approve version"}
               </Button>
             )}
-            {canEdit && (
+            {canModify && (
               <Button type="submit" disabled={saving || reviewing || !q.question?.trim()}>
                 {saving ? "Saving…" : "Save question"}
               </Button>
