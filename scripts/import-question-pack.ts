@@ -197,7 +197,12 @@ async function ensureTopics(
 
 type BatchRow = NormalizedQuestionPackItem & { topicSlug: string; topicId: number };
 
-async function importBatch(client: Client, context: ImportContext, rows: BatchRow[]) {
+async function importBatch(
+  client: Client,
+  context: ImportContext,
+  rows: BatchRow[],
+  authorUserId: number | null,
+) {
   await client.query("BEGIN");
   try {
     await client.query("SELECT pg_advisory_xact_lock(7304, $1)", [context.bankId]);
@@ -253,13 +258,13 @@ async function importBatch(client: Client, context: ImportContext, rows: BatchRo
            is_active, question_type, question_format, expected_answer,
            answer_metadata, max_points, negative_marks, time_limit_sec,
            difficulty, tags, explanation, content_hash,
-           review_status, generation_source, reviewed_by, reviewed_at
+           review_status, generation_source, created_by, reviewed_by, reviewed_at
          )
          SELECT NULL, $1, x.topic_id, x.question, x.options::json, x.correct_answer,
                 false, 'multiple_choice', x.question_format, x.expected_answer,
                 x.answer_metadata, x.max_points, x.negative_marks, x.time_limit_sec,
                 x.difficulty, x.tags::json, x.explanation, x.content_hash,
-                'pending', 'imported', NULL, NULL
+                'pending', 'imported', $3, NULL, NULL
            FROM jsonb_to_recordset($2::jsonb) AS x(
              topic_id integer, question text, options jsonb, correct_answer integer,
              question_format text, expected_answer text, answer_metadata jsonb,
@@ -270,7 +275,7 @@ async function importBatch(client: Client, context: ImportContext, rows: BatchRo
            WHERE bank_id IS NOT NULL AND content_hash IS NOT NULL
          DO NOTHING
          RETURNING id, content_hash`,
-        [context.bankId, JSON.stringify(questionPayload)],
+        [context.bankId, JSON.stringify(questionPayload), authorUserId],
       );
 
     const questionRows = contentHashes.length === 0
@@ -389,6 +394,7 @@ export async function importQuestionPack(options: {
   sourceKey: string;
   bankSlug: string;
   operator: string;
+  authorUserId?: number;
   batchSize?: number;
   maxRows?: number;
   commit?: boolean;
@@ -398,6 +404,7 @@ export async function importQuestionPack(options: {
   const batchSize = options.batchSize ?? DEFAULT_QUESTION_PACK_BATCH_SIZE;
   const maxRows = options.maxRows ?? MAX_QUESTION_PACK_ROWS;
   const operator = options.operator.trim();
+  const authorUserId = options.authorUserId ?? null;
   if (!Number.isInteger(batchSize) || batchSize < 1 || batchSize > MAX_QUESTION_PACK_BATCH_SIZE) {
     throw new Error(`batchSize must be between 1 and ${MAX_QUESTION_PACK_BATCH_SIZE}`);
   }
@@ -406,6 +413,9 @@ export async function importQuestionPack(options: {
   }
   if (operator.length < 3 || operator.length > 200) {
     throw new Error("operator must identify the importer in 3-200 characters");
+  }
+  if (authorUserId != null && (!Number.isInteger(authorUserId) || authorUserId < 1)) {
+    throw new Error("authorUserId must identify an existing user");
   }
 
   const validation = await validateQuestionPack(inputPath, maxRows);
@@ -431,6 +441,13 @@ export async function importQuestionPack(options: {
   let lockedRunId: number | undefined;
   await client.connect();
   try {
+    if (authorUserId != null) {
+      const author = await client.query<{ id: number }>(
+        "SELECT id FROM users WHERE id = $1",
+        [authorUserId],
+      );
+      if (!author.rows[0]) throw new Error(`Question author user was not found: ${authorUserId}`);
+    }
     const loaded = await loadImportContext(client, {
       sourceKey: options.sourceKey,
       bankSlug: options.bankSlug,
@@ -468,11 +485,11 @@ export async function importQuestionPack(options: {
       if (!topicId) throw new Error(`Topic was not materialized: ${topicSlug}`);
       batch.push({ ...normalized.value, topicSlug, topicId });
       if (batch.length >= batchSize) {
-        await importBatch(client, context, batch);
+        await importBatch(client, context, batch, authorUserId);
         batch = [];
       }
     }
-    if (batch.length > 0) await importBatch(client, context, batch);
+    if (batch.length > 0) await importBatch(client, context, batch, authorUserId);
     if (context.processedRows !== validation.totalRows) {
       throw new Error(`Import stopped at ${context.processedRows}/${validation.totalRows} rows`);
     }
@@ -524,6 +541,7 @@ async function main() {
       source: { type: "string" },
       bank: { type: "string" },
       operator: { type: "string" },
+      "author-user-id": { type: "string" },
       "batch-size": { type: "string", default: String(DEFAULT_QUESTION_PACK_BATCH_SIZE) },
       "max-rows": { type: "string", default: String(MAX_QUESTION_PACK_ROWS) },
       commit: { type: "boolean", default: false },
@@ -543,6 +561,7 @@ async function main() {
     sourceKey: values.source,
     bankSlug: values.bank,
     operator: values.operator,
+    authorUserId: values["author-user-id"] == null ? undefined : Number(values["author-user-id"]),
     batchSize: Number(values["batch-size"]),
     maxRows: Number(values["max-rows"]),
     commit: values.commit,

@@ -53,7 +53,7 @@ Primary reference families are the official TypeScript Handbook, module/declarat
 ```sh
 npx tsx scripts/generate-typescript-application-development-skills-v1.ts /tmp/octamy-typescript-application-development-skills-v1.jsonl
 cmp /tmp/octamy-typescript-application-development-skills-v1.jsonl content/question-packs/octamy-typescript-application-development-skills-v1.jsonl
-npx tsx scripts/import-question-pack.ts --file content/question-packs/octamy-typescript-application-development-skills-v1.jsonl --source octamy-original:typescript-application-development-skills:v1 --bank typescript-application-development-skills-bank-v1 --operator release-reviewer
+npx tsx scripts/import-question-pack.ts --file content/question-packs/octamy-typescript-application-development-skills-v1.jsonl --source octamy-original:typescript-application-development-skills:v1 --bank typescript-application-development-skills-bank-v1 --operator release-reviewer --author-user-id 1
 npm test -- --runInBand tests/unit/typescript-application-development-skills-v1.test.ts
 ```
 
