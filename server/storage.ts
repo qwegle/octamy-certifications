@@ -112,6 +112,7 @@ import {
   isPublishableAssessmentQuestion,
   isPublishedAssessment,
 } from "./lib/assessment-bank-readiness";
+import { assessmentRuntimeReviewEligibilitySql } from "./lib/question-review-policy";
 import {
   assertAssessmentPublishReadiness,
   type AssessmentPublishCourseState,
@@ -3991,8 +3992,7 @@ export class DatabaseStorage implements IStorage {
         eq(questions.bankId, item.bankId),
         eq(questions.isActive, true),
         eq(questions.reviewStatus, "approved"),
-        isNotNull(questions.reviewedBy),
-        isNotNull(questions.reviewedAt),
+        assessmentRuntimeReviewEligibilitySql(),
         sql`${questions.questionFormat} IN ('mcq_single', 'true_false')`,
         sql`json_typeof(${questions.options}) = 'array'`,
         sql`${questions.correctAnswer} >= 0`,

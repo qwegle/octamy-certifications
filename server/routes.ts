@@ -59,6 +59,7 @@ import crypto from "node:crypto";
 import apiRoutes from "./routes/index";
 import certificateRoutes from "./routes/certificateRoutes";
 import questionBanksRouter, { courseBlueprintRouter } from "./routes/question-banks";
+import { assessmentRuntimeReviewEligibilitySql } from "./lib/question-review-policy";
 import { emailService } from "./utils/emailService";
 import { generateCertificateHTML } from "./utils/newCertificateGenerator";
 import { Readable } from "stream";
@@ -1508,8 +1509,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             eq(questionsTable.bankId, rule.bankId),
             eq(questionsTable.isActive, true),
             eq(questionsTable.reviewStatus, "approved"),
-            isNotNull(questionsTable.reviewedBy),
-            isNotNull(questionsTable.reviewedAt),
+            assessmentRuntimeReviewEligibilitySql(),
             sql`${questionsTable.questionFormat} IN ('mcq_single', 'true_false')`,
             sql`json_typeof(${questionsTable.options}) = 'array'`,
             sql`${questionsTable.correctAnswer} >= 0`,
@@ -1537,8 +1537,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             inArray(questionsTable.bankId, bankIds),
             eq(questionsTable.isActive, true),
             eq(questionsTable.reviewStatus, "approved"),
-            isNotNull(questionsTable.reviewedBy),
-            isNotNull(questionsTable.reviewedAt),
+            assessmentRuntimeReviewEligibilitySql(),
             sql`${questionsTable.questionFormat} IN ('mcq_single', 'true_false')`,
             sql`json_typeof(${questionsTable.options}) = 'array'`,
             sql`${questionsTable.correctAnswer} >= 0`,
@@ -1643,8 +1642,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               inArray(questionsTable.id, selectedIds),
               eq(questionsTable.isActive, true),
               eq(questionsTable.reviewStatus, "approved"),
-              isNotNull(questionsTable.reviewedBy),
-              isNotNull(questionsTable.reviewedAt),
+              assessmentRuntimeReviewEligibilitySql(),
               sql`${questionsTable.questionFormat} IN ('mcq_single', 'true_false')`,
               sql`json_typeof(${questionsTable.options}) = 'array'`,
               sql`${questionsTable.correctAnswer} >= 0`,

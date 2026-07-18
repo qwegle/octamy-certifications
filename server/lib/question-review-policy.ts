@@ -1,3 +1,10 @@
+import { sql } from "drizzle-orm";
+import {
+  questionPackSources,
+  questionProvenance,
+  questions,
+} from "@shared/schema";
+
 export type QuestionGenerationSource = "human" | "ai_draft" | "imported";
 export type QuestionReviewStatus = "draft" | "pending" | "approved" | "rejected" | "retired";
 
@@ -100,4 +107,26 @@ export function isQuestionAssessmentEligible(question: {
   reviewStatus: string;
 }): boolean {
   return question.isActive && question.reviewStatus === "approved";
+}
+
+/**
+ * The original quantitative practice catalogue was restored after an accidental
+ * production-wide retirement stopped Practice Pass availability. Its immutable
+ * source provenance predates attributable per-item reviewer fields. Keep this
+ * recovery exception tied to that one verified source; all new content must use
+ * the normal independent-review path.
+ */
+export function assessmentRuntimeReviewEligibilitySql() {
+  return sql`(
+    (${questions.reviewedBy} IS NOT NULL AND ${questions.reviewedAt} IS NOT NULL)
+    OR EXISTS (
+      SELECT 1
+      FROM ${questionProvenance} runtime_provenance
+      INNER JOIN ${questionPackSources} runtime_source
+        ON runtime_source.id = runtime_provenance.source_id
+      WHERE runtime_provenance.question_id = ${questions.id}
+        AND runtime_source.source_key = 'octamy-original:quant-science:v1'
+        AND runtime_source.rights_review_status = 'verified'
+    )
+  )`;
 }
