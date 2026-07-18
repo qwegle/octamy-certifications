@@ -179,8 +179,8 @@ export default function CategoryPage({ mode = "certification" }: { mode?: "certi
           ) : items.length === 0 ? (
             <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-12 text-center">
               <BookOpenCheck className="mx-auto h-10 w-10 text-slate-400" />
-              <h2 className="mt-4 text-xl font-bold">No matching {isPractice ? "practice exams" : "certifications"} yet</h2>
-              <p className="mt-2 text-sm text-slate-600">Try a broader search or explore a related subcategory.</p>
+              <h2 className="mt-4 text-xl font-bold">{search ? `No ${isPractice ? "practice exams" : "certifications"} match this search` : `No published ${isPractice ? "practice exams" : "certification exams"} in this path`}</h2>
+              <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-600">{search ? "Try a broader search or clear the search term." : "Question banks that have not passed syllabus, answer and independent reviewer checks stay private until they are genuinely ready."}</p>
             </div>
           ) : (
             <>
