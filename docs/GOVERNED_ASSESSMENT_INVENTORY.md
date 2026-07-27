@@ -108,3 +108,48 @@ on a review document, ticket, filename, generated content, or operator claim.
 A future reviewed migration and guarded single-assessment release workflow must
 store attributable evidence before the inventory can treat those gates as
 represented. This tool deliberately does not create that migration or evidence.
+
+## Operator runbook: candidate pack to publishable assessment
+
+Verified state on 2026-07-27 in the development snapshot: 100,040 stored
+questions, **0 approved**, and no active/public assessment. Nothing in
+`content/` is approved by virtue of being committed. Every step below is
+explicitly attributable, defaults to dry-run, and refuses to self-approve.
+
+Run from the checkout with `DATABASE_URL` pointing at the target database.
+
+```bash
+# 1. Register exact rights evidence for the pack's source (rights reviewer).
+npm run questions:register-source -- \
+  --manifest content/career-question-banks/<pack>/manifest.json \
+  --evidence-file <local-rights-proof-file> \
+  --acquiring-entity "<legal entity>" \
+  --operator "<rights reviewer name>" --confirm-rights
+
+# 2. Plan the import; omit --commit to mutate nothing.
+npm run questions:import -- \
+  --file content/career-question-banks/<pack>/questions.jsonl \
+  --source <registered-source-key> --bank <admin-bank-slug> \
+  --operator "<import operator>" --author-user-id <author user id>
+# Re-run with --commit once the plan is accepted. Imported items stay
+# pending and inactive; import never approves or publishes.
+
+# 3. Record attributable independent review. The reviewer must be a human
+#    who read each item, and must not be the author. Each decision carries
+#    the exact content hash, expected version, and an item-specific note.
+npm run questions:review -- \
+  --source <registered-source-key> --bank <admin-bank-slug> \
+  --decisions <reviewer-decisions.jsonl> \
+  --reviewer-user-id <reviewer user id> \
+  --operator "<content reviewer name>" --apply --confirm-reviewed
+```
+
+Only after step 3 approves enough items may an authorized admin activate the
+bank, wire the blueprint quotas, and publish the assessment through the
+governed admin workflow. Publication is still refused while any strict
+release blocker remains, and `scripts/deploy-production.sh` fails the release
+when a published assessment has blockers.
+
+Do not generate reviewer decisions programmatically, reuse the author as
+reviewer, or edit `content/` review metadata to make the gate pass. Doing so
+produces an unreviewed exam that only appears approved.
