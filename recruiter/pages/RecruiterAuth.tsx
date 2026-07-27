@@ -79,10 +79,10 @@ export default function RecruiterAuth() {
       <AuthShell
         eyebrow="Evidence-led hiring"
         title="Move from candidate claims to inspectable skill evidence."
-        description="Search opted-in candidates, inspect assessment and credential history, and use credits only for protected access actions."
+        description="Search opted-in candidates, unlock protected profile data, and inspect only the evidence a learner explicitly grants to your company."
         highlights={[
           'Consent-aware candidate discovery',
-          'Live credential and assessment evidence',
+          'Expiring learner-selected evidence grants',
           'Company verification before protected access',
         ]}
       >

@@ -209,7 +209,7 @@ export function AdminAssessmentsManagement() {
           <Input className="pl-9" placeholder={`Search ${purposeLabel}s`} value={search} onChange={(event) => { setSearch(event.target.value); setPage(1); }} />
         </div>
         <Badge variant="secondary">{selectedLabel}</Badge>
-        <Button size="sm" disabled={!selected.size || bulk.isPending} onClick={() => bulk.mutate("publish")}><CheckCircle2 className="mr-1 h-4 w-4" />Publish</Button>
+        <Button size="sm" variant="outline" disabled title="Publish assessments individually after full content and rights review"><CheckCircle2 className="mr-1 h-4 w-4" />Individual review required</Button>
         <Button size="sm" variant="outline" disabled={!selected.size || bulk.isPending} onClick={() => bulk.mutate("unpublish")}><EyeOff className="mr-1 h-4 w-4" />Unpublish</Button>
         <Button size="sm" variant="outline" className="text-red-700" disabled={!selected.size || bulk.isPending} onClick={() => bulk.mutate("delete")}><Trash2 className="mr-1 h-4 w-4" />Delete</Button>
       </div>

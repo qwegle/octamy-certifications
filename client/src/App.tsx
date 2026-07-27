@@ -1,11 +1,11 @@
 import { Redirect, Route, Switch, useParams, useSearch } from "wouter";
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { MotionConfig } from "framer-motion";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AuthProvider } from "./lib/auth.tsx";
+import { AuthProvider, useAuth } from "./lib/auth.tsx";
 import { SellerAuthProvider } from "./lib/sellerAuth";
 import { HelmetProvider } from 'react-helmet-async';
 const Landing = lazy(() => import("@/pages/landing-new"));
@@ -15,7 +15,6 @@ const Certificate = lazy(() => import("@/pages/certificate"));
 const Dashboard = lazy(() => import("@/pages/dashboard"));
 const Admin = lazy(() => import("@/pages/admin"));
 const Verification = lazy(() => import("@/pages/verification"));
-const Auth = lazy(() => import("@/pages/auth"));
 const Login = lazy(() => import("@/pages/login"));
 const Register = lazy(() => import("@/pages/register"));
 const CreatorDashboard = lazy(() => import("@/pages/creator-dashboard"));
@@ -70,25 +69,20 @@ const SellerAuth = lazy(() => import("@/pages/seller-auth"));
 const SellerDashboard = lazy(() => import("@/pages/seller-dashboard"));
 const PaymentSuccess = lazy(() => import("@/pages/payment-success"));
 const PaymentFailed = lazy(() => import("@/pages/payment-failed"));
-const DemoCertificate = lazy(() => import("@/pages/demo-certificate"));
-const DemoBusinessCertificate = lazy(() => import("@/pages/demo-business-certificate"));
-const DemoInternshipCertificate = lazy(() => import("@/pages/demo-internship-certificate"));
-const BusinessCertificates = lazy(() => import("@/pages/business-certificates"));
 const InternshipForm = lazy(() => import("@/pages/internship-form"));
 const ProfileEdit = lazy(() => import("@/pages/profile-edit"));
 const Verify = lazy(() => import("@/pages/verify"));
 const EvidencePassport = lazy(() => import("@/pages/evidence-passport"));
+const EvidenceSharing = lazy(() => import("@/pages/evidence-sharing"));
 const Preferences = lazy(() => import("@/pages/preferences"));
 const Progress = lazy(() => import("@/pages/progress"));
 const InterviewStudio = lazy(() => import("@/pages/interview-studio"));
-const EnhancedCheckout = lazy(() => import("@/pages/EnhancedCheckout"));
 const Courses = lazy(() => import("@/pages/courses"));
 const Assessments = lazy(() => import("@/pages/assessments"));
 const Practice = lazy(() => import("@/pages/practice"));
 const CreatorAssessments = lazy(() => import("@/pages/creator-assessments"));
 const CourseLearning = lazy(() => import("@/pages/course-learning"));
 const VirtualInternships = lazy(() => import("@/pages/virtual-internships"));
-const BusinessCertificationsPage = lazy(() => import("@/pages/business-certifications"));
 const LearningPaths = lazy(() => import("@/pages/learning-paths"));
 const SponsorPage = lazy(() => import("@/pages/sponsor"));
 const AdminLogin = lazy(() => import("@/pages/admin-login"));
@@ -96,6 +90,7 @@ const AdminDashboard = lazy(() => import("@/pages/admin-dashboard"));
 const AdminApprovals = lazy(() => import("@/pages/admin-approvals"));
 const TempExamResults = lazy(() => import("@/pages/TempExamResults"));
 const PaymentTemp = lazy(() => import("@/pages/PaymentTemp"));
+const CashfreeCheckout = lazy(() => import("@/pages/cashfree-checkout"));
 const Contact = lazy(() => import("@/pages/contact"));
 // Recruiter Portal Components
 import { 
@@ -111,7 +106,6 @@ import {
   RecruiterSettings,
   RecruiterProtectedRoute
 } from "../../recruiter";
-import InternShipPayment from "./pages/offlinInternshipPayment.tsx";
 import {
   ASSESSMENT_HUB_PATH,
   publicAssessmentCategoryPath,
@@ -142,17 +136,29 @@ function LegacyAssessmentHubRedirect() {
   return <Redirect to={`${ASSESSMENT_HUB_PATH}${search ? `?${search}` : ""}`} replace />;
 }
 
+function LegacyAuthRedirect() {
+  const search = useSearch();
+  const mode = new URLSearchParams(search).get("mode");
+  return <Redirect to={mode === "register" ? "/register" : "/login"} replace />;
+}
+
+function LogoutRoute() {
+  const { logout } = useAuth();
+  useEffect(() => { logout(); }, []);
+  return <Redirect to="/login" replace />;
+}
+
 function Router() {
   return (
     <Suspense fallback={<QBLoader />}>
     <Switch>
       <Route path="/" component={Landing} />
-      <Route path="/auth" component={Auth} />
+      <Route path="/auth" component={LegacyAuthRedirect} />
       <Route path="/login" component={Login} />
       <Route path="/register" component={Register} />
       <Route path="/forgot-password" component={ForgotPassword} />
       <Route path="/reset-password/:token" component={ResetPassword} />
-      <Route path="/logout" component={Auth} />
+      <Route path="/logout" component={LogoutRoute} />
 
       {/* Role-prefixed canonical auth — all unified Login / Register */}
       <Route path="/partners/login" component={SellerAuth} />
@@ -190,10 +196,10 @@ function Router() {
       <Route path="/learn/:slug" component={CourseLearning} />
       <Route path="/skill-verification" component={LegacyAssessmentHubRedirect} />
       <Route path="/virtual-internships" component={VirtualInternships} />
-      <Route path="/business-certifications" component={BusinessCertificationsPage} />
+      <Route path="/business-certifications">{() => <Redirect to="/get-certified?category=business" replace />}</Route>
       <Route path="/learning-paths" component={LearningPaths} />
       <Route path="/sponsor" component={SponsorPage} />
-      <Route path="/intern-payment" component={InternShipPayment} />
+      <Route path="/intern-payment">{() => <Redirect to="/virtual-internships" replace />}</Route>
       <Route path="/qwegle/login" component={AdminLogin} />
       <Route path="/admin/login" component={AdminLogin} />
       <Route path="/qwegle/benefits" component={AdminDashboard} />
@@ -207,7 +213,8 @@ function Router() {
       <Route path="/exam/:slug">{() => <LegacyAssessmentRedirect />}</Route>
       <Route path="/exam-results-temp/:tempExamId" component={TempExamResults} />
       <Route path="/payment" component={PaymentTemp} />
-      <Route path="/checkout/:courseId" component={EnhancedCheckout} />
+      <Route path="/payment/cashfree/checkout/" component={CashfreeCheckout} />
+      <Route path="/checkout/:courseId">{() => <Redirect to="/get-certified" replace />}</Route>
       <Route path="/payment/success" component={PaymentSuccess} />
       <Route path="/payment/failure" component={PaymentFailed} />
       <Route path="/payment/:certificateId" component={Payment} />
@@ -255,6 +262,7 @@ function Router() {
       <Route path="/qwegle" component={AdminDashboard} />
       <Route path="/verify" component={Verify} />
       <Route path="/verify/:certificateId" component={Verify} />
+      <Route path="/evidence-sharing" component={EvidenceSharing} />
       <Route path="/evidence/:token" component={EvidencePassport} />
       <Route path="/certificates/:certificateId" component={Certificate} />
       <Route path="/help-center" component={HelpCenter} />
@@ -277,11 +285,7 @@ function Router() {
       <Route path="/partner-dashboard" component={SellerDashboard} />
       <Route path="/payment-success" component={PaymentSuccess} />
       <Route path="/payment-failed" component={PaymentFailed} />
-      <Route path="/demo-certificate" component={DemoCertificate} />
-      <Route path="/demo-business-certificate" component={DemoBusinessCertificate} />
-      <Route path="/business-demo" component={DemoBusinessCertificate} />
-      <Route path="/demo-internship-certificate" component={DemoInternshipCertificate} />
-      <Route path="/business-certificates" component={BusinessCertificates} />
+      <Route path="/business-certificates">{() => <Redirect to="/institutes" replace />}</Route>
       <Route path="/internship/:slug" component={InternshipForm} />
       <Route path="/contact" component={Contact} />
       <Route path="/profile-edit" component={ProfileEdit} />

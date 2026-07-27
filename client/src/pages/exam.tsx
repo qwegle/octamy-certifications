@@ -7,7 +7,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { apiRequest } from '@/lib/queryClient';
+import { ApiError, apiRequest } from '@/lib/queryClient';
 import { useAuth } from '@/lib/auth.tsx';
 import Header from '@/components/header';
 import { certificationDisplayTitle } from '@/components/certification-card';
@@ -16,6 +16,7 @@ import { ExamStructuredData } from '@/components/seo-structured-data';
 import { SEO } from '@/components/seo';
 import { FullscreenExitGuard, QuestionNavigator, SubmitExamDialog } from '@/components/exam-session-controls';
 import { publicAssessmentCategoryPath, publicAssessmentPath, publicPracticeCategoryPath, publicPracticePath } from '@shared/public-assessment-routes';
+import { practiceAccountPath, practicePricingPath } from '@/lib/practice-purchase-intent';
 import { AlertTriangle, Award, CheckCircle2, ChevronLeft, ChevronRight, Clock3, FileQuestion, Flag, RotateCcw, Save, Send, ShieldCheck, TicketCheck, WifiOff } from 'lucide-react';
 
 interface ExamQuestion {
@@ -101,6 +102,11 @@ export default function Exam() {
     email: user?.email || ''
   });
 
+  useEffect(() => {
+    if (!user || examStarted) return;
+    setUserInfo({ name: user.name || '', email: user.email || '' });
+  }, [examStarted, user]);
+
   const practicePage = location === "/practice" || location.startsWith("/practice/");
   const detailEndpoint = practicePage ? "/api/practice-assessments" : "/api/assessments";
   const { data: course, isLoading: courseLoading, error: courseError } = useQuery<PublicAssessment>({
@@ -109,6 +115,17 @@ export default function Exam() {
     retry: false,
     queryFn: async () => (await apiRequest("GET", `${detailEndpoint}/${encodeURIComponent(String(slug || ""))}`)).json(),
   });
+  const { data: subscriptionData, isLoading: subscriptionLoading } = useQuery<{
+    learner: { plan: string; renewsAt: string | null; status: string } | null;
+  }>({
+    queryKey: ['/api/me/subscription'],
+    enabled: course?.assessmentPurpose === 'practice' && !!user,
+    retry: false,
+  });
+  const hasPracticeAccess = subscriptionData?.learner?.plan === 'all_access'
+    && subscriptionData.learner.status === 'active'
+    && !!subscriptionData.learner.renewsAt
+    && Date.parse(subscriptionData.learner.renewsAt) > Date.now();
 
   // Preserve old indexed links while keeping preparation content out of the
   // recruiter-facing certification namespace.
@@ -132,9 +149,10 @@ export default function Exam() {
   } = useQuery<ExamQuestionsPayload>({
     queryKey: [`/api/courses/${course?.id}/questions`, examStarted],
     queryFn: async () => {
-      // Always generate a fresh session for each exam attempt
-      const newSessionId = `session_${Date.now()}_${Math.random()}`;
-      const response = await apiRequest('POST', `/api/courses/${course?.id}/questions`, { sessionId: newSessionId, evidenceConsent: true });
+      // The server creates and owns the authoritative attempt session ID.
+      const response = await apiRequest('POST', `/api/courses/${course?.id}/questions`, {
+        evidenceConsent: course?.assessmentPurpose !== 'practice',
+      });
       return response.json();
     },
     enabled: !!course?.id && examStarted && !restoredQuestionsData,
@@ -209,9 +227,10 @@ export default function Exam() {
     };
   }, []);
 
-  // Anti-cheating: Monitor tab/window focus
+  // Certification-only browser integrity evidence. Practice is deliberately
+  // non-proctored and must not block ordinary browser or accessibility actions.
   useEffect(() => {
-    if (!examStarted) return;
+    if (!examStarted || course?.assessmentPurpose === "practice") return;
 
     const handleVisibilityChange = () => {
       if (document.hidden && isWindowFocused) {
@@ -295,7 +314,7 @@ export default function Exam() {
       document.removeEventListener('copy', handlePasteOrCopy);
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
     };
-  }, [examStarted, isWindowFocused, toast]);
+  }, [course?.assessmentPurpose, examStarted, isWindowFocused, toast]);
 
   const submitExamMutation = useMutation({
     mutationFn: async (examData: any) => {
@@ -320,33 +339,23 @@ export default function Exam() {
         });
       }
     },
-    onError: async (error: any) => {
+    onError: (error: unknown) => {
       submissionRequestedRef.current = false;
       examEndingRef.current = false;
-      try {
-        const errorData = await error.json();
-        if (errorData.code === 'SESSION_EXPIRED') {
-          toast({
-            title: "Session Expired",
-            description: "Your exam session has expired. Please start the exam again.",
-            variant: "destructive",
-          });
-          // Reload the page to restart the exam
-          window.location.reload();
-        } else {
-          toast({
-            title: "Error",
-            description: errorData.message || "Failed to submit exam. Please try again.",
-            variant: "destructive",
-          });
-        }
-      } catch {
+      if (error instanceof ApiError && error.code === 'SESSION_EXPIRED') {
         toast({
-          title: "Error",
-          description: "Failed to submit exam. Please try again.",
+          title: "Session Expired",
+          description: "Your exam session has expired. Please start the exam again.",
           variant: "destructive",
         });
+        window.location.reload();
+        return;
       }
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to submit exam. Please try again.",
+        variant: "destructive",
+      });
     },
   });
 
@@ -377,7 +386,11 @@ export default function Exam() {
 
   const startExam = async () => {
     if (course?.assessmentPurpose === "practice" && !user) {
-      setLocation(`/login?next=${encodeURIComponent(location)}`);
+      setLocation(practiceAccountPath('login', { next: location }));
+      return;
+    }
+    if (course?.assessmentPurpose === "practice" && !hasPracticeAccess) {
+      setLocation(practicePricingPath({ next: location }));
       return;
     }
     if (!userInfo.name || !userInfo.email) {
@@ -388,11 +401,11 @@ export default function Exam() {
       });
       return;
     }
-    if (!integrityConsent) {
+    if (course?.assessmentPurpose !== "practice" && !integrityConsent) {
       toast({ title: "Consent required", description: "Review and accept the browser integrity evidence notice before starting." });
       return;
     }
-    if (!(await enterFullscreen())) return;
+    if (course?.assessmentPurpose !== "practice" && !(await enterFullscreen())) return;
     
     // Reset state for fresh exam attempt
     setSessionId('');
@@ -417,11 +430,15 @@ export default function Exam() {
 
   const resumeSavedExam = async () => {
     if (!savedDraft || savedDraft.expiresAt <= Date.now()) return;
-    if (!integrityConsent) {
+    if (course?.assessmentPurpose === 'practice' && !hasPracticeAccess) {
+      setLocation(practicePricingPath({ next: location }));
+      return;
+    }
+    if (course?.assessmentPurpose !== "practice" && !integrityConsent) {
       toast({ title: "Consent required", description: "Review and accept the browser integrity evidence notice before resuming." });
       return;
     }
-    if (!(await enterFullscreen())) return;
+    if (course?.assessmentPurpose !== "practice" && !(await enterFullscreen())) return;
     setRestoredQuestionsData({
       questions: savedDraft.questions,
       sessionId: savedDraft.sessionId,
@@ -468,8 +485,8 @@ export default function Exam() {
     setSubmitDialogOpen(false);
     const timeTaken = Math.floor((Date.now() - examStartTime) / 1000);
     
-    // Anti-cheating: Check for excessive tab switching
-    if (tabSwitches > 5) {
+    // Certification-only browser integrity review.
+    if (course?.assessmentPurpose !== "practice" && tabSwitches > 5) {
       toast({
         title: "Attempt flagged for review",
         description: "Multiple tab changes were recorded and will be included in the assessment evidence.",
@@ -483,7 +500,7 @@ export default function Exam() {
       userName: userInfo.name,
       userEmail: userInfo.email,
       sessionId,
-      tabSwitches,
+      tabSwitches: course?.assessmentPurpose === "practice" ? 0 : tabSwitches,
     });
   };
 
@@ -566,19 +583,25 @@ export default function Exam() {
               <Card className="overflow-hidden rounded-[1.75rem] border-slate-200 shadow-xl shadow-slate-900/10">
                 <div className="border-b border-slate-100 bg-gradient-to-br from-violet-50 to-sky-50 p-6">
                   <p className="text-xs font-black uppercase tracking-[0.14em] text-violet-800">Start when you are ready</p>
-                  <div className="mt-3 flex items-end justify-between gap-4"><div><p className="text-2xl font-black text-slate-950">{isPractice ? "Included in Practice Pass" : "Free exam attempt"}</p><p className="mt-1 text-sm text-slate-600">{isPractice ? "₹299/month unlocks unlimited practice exams." : `Activate the credential for ₹${course.price} only after passing.`}</p></div><CheckCircle2 className="h-8 w-8 shrink-0 text-emerald-600" /></div>
+                  <div className="mt-3 flex items-end justify-between gap-4"><div><p className="text-2xl font-black text-slate-950">{isPractice ? "Included in Practice Pass" : "Free exam attempt"}</p><p className="mt-1 text-sm text-slate-600">{isPractice ? "Choose 30-day or 365-day access to reviewed Practice exams." : `Activate the credential for ₹${course.price} only after passing.`}</p></div><CheckCircle2 className="h-8 w-8 shrink-0 text-emerald-600" /></div>
                 </div>
                 <CardContent className="space-y-5 p-6">
-                  {!user && <div className="space-y-4"><div><Label htmlFor="name" className="font-bold">Full name</Label><input id="name" type="text" autoComplete="name" value={userInfo.name} onChange={(e) => setUserInfo(prev => ({ ...prev, name: e.target.value }))} className="mt-1.5 h-11 w-full rounded-xl border border-slate-300 px-3 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-100" placeholder="As it should appear on your credential" /></div><div><Label htmlFor="email" className="font-bold">Email address</Label><input id="email" type="email" autoComplete="email" value={userInfo.email} onChange={(e) => setUserInfo(prev => ({ ...prev, email: e.target.value }))} className="mt-1.5 h-11 w-full rounded-xl border border-slate-300 px-3 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-100" placeholder="For result recovery" /></div></div>}
+                  {!user && !isPractice && <div className="space-y-4"><div><Label htmlFor="name" className="font-bold">Full name</Label><input id="name" type="text" autoComplete="name" value={userInfo.name} onChange={(e) => setUserInfo(prev => ({ ...prev, name: e.target.value }))} className="mt-1.5 h-11 w-full rounded-xl border border-slate-300 px-3 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-100" placeholder="As it should appear on your credential" /></div><div><Label htmlFor="email" className="font-bold">Email address</Label><input id="email" type="email" autoComplete="email" value={userInfo.email} onChange={(e) => setUserInfo(prev => ({ ...prev, email: e.target.value }))} className="mt-1.5 h-11 w-full rounded-xl border border-slate-300 px-3 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-100" placeholder="For result recovery" /></div></div>}
 
-                  <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                  {user && <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4"><p className="text-xs font-black uppercase tracking-wide text-emerald-800">Signed-in learner</p><p className="mt-1 font-bold text-slate-950">{user.name}</p><p className="text-sm text-slate-600">{user.email}</p><p className="mt-2 text-xs text-emerald-800">Your account identity will be used automatically for this attempt.</p></div>}
+
+                  {user && isPractice && !subscriptionLoading && !hasPracticeAccess && <div className="rounded-2xl border border-violet-200 bg-violet-50 p-4"><p className="font-black text-slate-950">Practice Pass required</p><p className="mt-1 text-sm leading-6 text-slate-600">Review 30-day or 365-day access. Your account details are already attached, so they will not be requested again.</p><Button type="button" className="mt-4 w-full" onClick={() => setLocation(practicePricingPath({ next: location }))}>Review Practice Pass</Button></div>}
+
+                  {!user && isPractice && <div className="rounded-2xl border border-violet-200 bg-violet-50 p-4"><p className="font-black text-slate-950">Create an account to use Practice Pass</p><p className="mt-1 text-sm leading-6 text-slate-600">An account keeps your access, attempts and saved progress together. Registration is free; you review the pass before payment.</p><div className="mt-4 grid gap-2 sm:grid-cols-2"><Button type="button" onClick={() => setLocation(practiceAccountPath('register', { next: location }))}>Create free account</Button><Button type="button" variant="outline" onClick={() => setLocation(practiceAccountPath('login', { next: location }))}>Sign in</Button></div></div>}
+
+                  {!isPractice && <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
                     <input type="checkbox" checked={integrityConsent} onChange={(event) => setIntegrityConsent(event.target.checked)} className="mt-1 h-4 w-4 shrink-0 rounded border-slate-300 accent-violet-700" />
                     <span className="text-xs leading-5 text-slate-600"><strong className="block text-sm text-slate-900">Browser integrity evidence consent</strong>I understand that fullscreen changes, tab/window focus changes, and the occurrence of copy or paste attempts are recorded for assessment integrity. Octamy does not capture screen contents, webcam, microphone, audio, or keystrokes in this exam.</span>
-                  </label>
+                  </label>}
 
-                  {savedDraft && <div className="rounded-2xl border border-sky-200 bg-sky-50 p-4"><div className="flex items-start gap-3"><RotateCcw className="mt-0.5 h-5 w-5 text-sky-700" /><div className="min-w-0 flex-1"><h2 className="font-bold text-slate-950">Saved attempt found</h2><p className="mt-1 text-sm leading-5 text-slate-600">{Object.keys(savedDraft.answers).length} of {savedDraft.questions.length} answers saved on this device.</p><div className="mt-3 flex flex-wrap gap-2"><Button size="sm" onClick={resumeSavedExam} disabled={!integrityConsent}>Resume exam</Button><Button size="sm" variant="ghost" onClick={discardSavedExam}>Discard</Button></div></div></div></div>}
+                  {savedDraft && <div className="rounded-2xl border border-sky-200 bg-sky-50 p-4"><div className="flex items-start gap-3"><RotateCcw className="mt-0.5 h-5 w-5 text-sky-700" /><div className="min-w-0 flex-1"><h2 className="font-bold text-slate-950">Saved attempt found</h2><p className="mt-1 text-sm leading-5 text-slate-600">{Object.keys(savedDraft.answers).length} of {savedDraft.questions.length} answers saved on this device.</p><div className="mt-3 flex flex-wrap gap-2"><Button size="sm" onClick={resumeSavedExam} disabled={!isPractice && !integrityConsent}>Resume exam</Button><Button size="sm" variant="ghost" onClick={discardSavedExam}>Discard</Button></div></div></div></div>}
 
-                  {!savedDraft && <Button onClick={startExam} className="h-12 w-full rounded-full text-base font-black" disabled={!userInfo.name || !userInfo.email || !integrityConsent}>{isPractice ? "Start practice exam" : "Start certification exam"}</Button>}
+                  {!savedDraft && (user || !isPractice) && (!isPractice || hasPracticeAccess) && <Button onClick={startExam} className="h-12 w-full rounded-full text-base font-black" disabled={!userInfo.name || !userInfo.email || (!isPractice && !integrityConsent)}>{isPractice ? "Start practice exam" : "Start certification exam"}</Button>}
                   <ul className="space-y-2.5 border-t border-slate-100 pt-5 text-xs leading-5 text-slate-600"><li className="flex gap-2"><CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-600" />Answers autosave on this device during interruptions.</li><li className="flex gap-2"><CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-600" />Your score and answer review appear after submission.</li><li className="flex gap-2"><TicketCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-violet-600" />{isPractice ? "Practice attempts are not shared as recruiter credentials." : "Direct payment, coupon, or institute voucher can fund activation."}</li></ul>
                 </CardContent>
               </Card>
@@ -586,7 +609,7 @@ export default function Exam() {
           </div>
 
           <section className="mt-8 grid gap-4 rounded-[1.75rem] border border-slate-200 bg-white p-6 sm:grid-cols-3 sm:p-8" aria-labelledby="certification-process-title">
-            <div className="sm:col-span-3"><h2 id="certification-process-title" className="text-xl font-black">How this certification works</h2><p className="mt-1 text-sm text-slate-600">A transparent result first. Credential activation is your choice after passing.</p></div>
+            <div className="sm:col-span-3"><h2 id="certification-process-title" className="text-xl font-black">{isPractice ? "How this practice exam works" : "How this certification works"}</h2><p className="mt-1 text-sm text-slate-600">{isPractice ? "A private timed rehearsal with answer review and no credential issuance." : "A transparent result first. Credential activation is your choice after passing."}</p></div>
             {[{ step: "01", title: "Take the exam", copy: "Stay in this tab and complete the timed questions." }, { step: "02", title: "Review your result", copy: "See the score and the published answer review." }, { step: "03", title: isPractice ? "Repeat and improve" : "Activate the credential", copy: isPractice ? "Practice stays separate from recruiter credentials." : "Pay directly, use a coupon, or redeem an institute voucher." }].map((item) => <div key={item.step} className="rounded-2xl bg-slate-50 p-5"><span className="text-xs font-black text-violet-700">{item.step}</span><h3 className="mt-2 font-black text-slate-950">{item.title}</h3><p className="mt-1 text-sm leading-6 text-slate-600">{item.copy}</p></div>)}
           </section>
         </main>
@@ -615,17 +638,24 @@ export default function Exam() {
     );
   }
 
-  if (questionsLoading || questions.length === 0) {
+  if (questionsLoading) {
     return (
-    <div className="min-h-screen bg-cream-deep">
-      <SEO title={`${course.title} assessment session`} description={metaDescription} path={canonicalPath} noIndex />
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <Card className="border-cream-deep shadow-sm">
-            <CardContent className="text-center py-12">
-              <p>Loading exam questions...</p>
-            </CardContent>
-          </Card>
-        </div>
+      <div className="min-h-screen bg-cream-deep">
+        <SEO title={`${course.title} assessment session`} description={metaDescription} path={canonicalPath} noIndex />
+        <main className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
+          <Card className="border-cream-deep shadow-sm"><CardContent className="py-12 text-center" role="status"><span className="mx-auto block h-8 w-8 animate-spin rounded-full border-2 border-slate-300 border-t-slate-900" aria-hidden="true" /><p className="mt-4">Preparing the reviewed question set…</p></CardContent></Card>
+        </main>
+      </div>
+    );
+  }
+
+  if (questions.length === 0) {
+    return (
+      <div className="min-h-screen bg-cream-deep">
+        <SEO title={`${course.title} assessment unavailable`} description={metaDescription} path={canonicalPath} noIndex />
+        <main className="mx-auto max-w-xl px-4 py-16 text-center sm:px-6">
+          <Card className="border-amber-200 shadow-sm"><CardContent className="py-12"><AlertTriangle className="mx-auto h-9 w-9 text-amber-600" aria-hidden="true" /><h1 className="mt-4 text-2xl font-black text-slate-950">No release-ready questions are available</h1><p className="mt-3 leading-7 text-slate-600">This assessment cannot start until its governed question pool meets publication requirements. No placeholder questions will be used.</p><div className="mt-6 flex flex-wrap justify-center gap-3"><Button type="button" onClick={() => void refetchQuestions()}>Check again</Button><Button type="button" variant="outline" onClick={() => setExamStarted(false)}>Back to assessment</Button></div></CardContent></Card>
+        </main>
       </div>
     );
   }
@@ -637,7 +667,15 @@ export default function Exam() {
     <div className="min-h-screen bg-cream-soft">
       <SEO title={`${course.title} assessment session`} description={metaDescription} path={canonicalPath} noIndex />
       <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-8 lg:px-8">
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-950 px-4 py-3 text-white shadow-sm"><div><p className="text-xs font-black uppercase tracking-[0.14em] text-violet-300">Proctored assessment</p><p className="mt-0.5 text-sm text-slate-300">Navigation, focus, fullscreen exits, and clipboard actions are monitored.</p></div>{fullscreenActive ? <span className="inline-flex items-center gap-2 rounded-full bg-emerald-400/15 px-3 py-1.5 text-xs font-bold text-emerald-200"><ShieldCheck className="h-4 w-4" />Fullscreen active</span> : <Button type="button" size="sm" variant="secondary" onClick={() => void enterFullscreen()}>Return to fullscreen</Button>}</div>
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-950 px-4 py-3 text-white shadow-sm">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.14em] text-violet-300">{isPractice ? "Private timed practice" : "Proctored assessment"}</p>
+            <p className="mt-0.5 text-sm text-slate-300">{isPractice ? "No fullscreen, clipboard, or focus monitoring. This attempt does not issue recruiter evidence." : "Navigation, focus, fullscreen exits, and clipboard actions are monitored."}</p>
+          </div>
+          {!isPractice && (fullscreenActive
+            ? <span className="inline-flex items-center gap-2 rounded-full bg-emerald-400/15 px-3 py-1.5 text-xs font-bold text-emerald-200"><ShieldCheck className="h-4 w-4" />Fullscreen active</span>
+            : <Button type="button" size="sm" variant="secondary" onClick={() => void enterFullscreen()}>Return to fullscreen</Button>)}
+        </div>
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_260px] lg:items-start">
           <Card className="overflow-hidden border-slate-200 shadow-sm">
             <CardHeader className="border-b border-slate-100 bg-white">
@@ -657,7 +695,7 @@ export default function Exam() {
                 {!isOnline && <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-amber-900"><WifiOff className="h-3.5 w-3.5" />Offline — keep this tab open; answers will remain available</span>}
               </div>
 
-              {tabSwitches > 0 && (
+              {!isPractice && tabSwitches > 0 && (
                 <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
                   <div className="flex items-start">
                     <AlertTriangle className="mr-2 mt-0.5 h-5 w-5 shrink-0 text-amber-700" />
@@ -741,13 +779,13 @@ export default function Exam() {
         submitting={submitExamMutation.isPending}
         onConfirm={handleSubmit}
       />
-      <FullscreenExitGuard
+      {!isPractice && <FullscreenExitGuard
         open={!fullscreenActive && !examEndingRef.current && !submitExamMutation.isPending}
         returningToFullscreen={returningToFullscreen}
         submitting={submitExamMutation.isPending}
         onReturnToFullscreen={() => void returnToFullscreen()}
         onSubmit={handleSubmit}
-      />
+      />}
     </div>
   );
 }

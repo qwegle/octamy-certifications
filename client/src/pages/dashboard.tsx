@@ -707,6 +707,12 @@ export default function Dashboard() {
                         </Link>
                       </Button>
                     ) : null}
+                    <Button asChild variant="outline" className="mt-3 w-full">
+                      <Link href="/evidence-sharing">
+                        <UserRoundCheck className="h-4 w-4" aria-hidden="true" />
+                        Manage recruiter access
+                      </Link>
+                    </Button>
                   </>
                 )}
               </CardContent>

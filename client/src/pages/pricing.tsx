@@ -7,7 +7,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Check, CheckCircle2, Loader2, ShieldCheck } from 'lucide-react';
 import { useAuth } from '@/lib/auth.tsx';
-import { apiRequest } from '@/lib/queryClient';
+import { ApiError, apiRequest } from '@/lib/queryClient';
+import {
+  normalizePracticePassCycle,
+  practiceAccountPath,
+  PRACTICE_PASS_PLAN,
+} from '@/lib/practice-purchase-intent';
 import { useToast } from '@/hooks/use-toast';
 
 type Cycle = 'monthly' | 'yearly';
@@ -20,21 +25,24 @@ function discounted(monthly: number, cycle: Cycle): string {
 }
 
 export default function Pricing() {
-  const [cycle, setCycle] = useState<Cycle>('monthly');
+  const [cycle, setCycle] = useState<Cycle>(() => normalizePracticePassCycle(
+    typeof window === 'undefined' ? null : new URLSearchParams(window.location.search).get('cycle'),
+  ));
   const [submitting, setSubmitting] = useState<string | null>(null);
   const { user, token } = useAuth();
   const [location, setLocation] = useLocation();
   const { toast } = useToast();
 
   const selected = useMemo(() => {
-    const allowed: Record<'creator' | 'institute', string[]> = {
+    const allowed: Record<'learner' | 'creator' | 'institute', string[]> = {
+      learner: [PRACTICE_PASS_PLAN],
       creator: ['free', 'pro', 'premium'],
       institute: ['starter', 'growth'],
     };
     const params = new URLSearchParams(typeof window === 'undefined' ? '' : window.location.search);
     const role = params.get('role');
     const plan = params.get('selected');
-    if ((role === 'creator' || role === 'institute') && plan && allowed[role].includes(plan)) {
+    if ((role === 'learner' || role === 'creator' || role === 'institute') && plan && allowed[role].includes(plan)) {
       return { role, plan, welcome: params.get('welcome') === '1' } as const;
     }
 
@@ -58,7 +66,11 @@ export default function Pricing() {
 
   async function subscribe(ownerType: 'learner' | 'creator' | 'institute', plan: string, registerRole: string) {
     if (!user || !token) {
-      setLocation(`/register?role=${registerRole}&plan=${plan}`);
+      if (ownerType === 'learner' && plan === PRACTICE_PASS_PLAN) {
+        setLocation(practiceAccountPath('register', { cycle, next: '/practice' }));
+      } else {
+        setLocation(`/register?role=${registerRole}&plan=${encodeURIComponent(plan)}&cycle=${cycle}`);
+      }
       return;
     }
     const requestKey = `${ownerType}:${plan}`;
@@ -71,6 +83,17 @@ export default function Pricing() {
         toast({ title: 'Plan activated', description: `You're on ${plan.toUpperCase()} now.` });
         setLocation(ownerType === 'learner' ? '/dashboard' : `/${ownerType}/dashboard`);
         return;
+      }
+      if (data.orderId) {
+        try {
+          localStorage.setItem('octamy.pendingSubscriptionOrder', JSON.stringify({
+            orderId: data.orderId,
+            ownerType,
+            plan,
+            next: ownerType === 'learner' ? '/practice' : `/${ownerType}/dashboard`,
+            createdAt: Date.now(),
+          }));
+        } catch {}
       }
       if (data.paymentLink) {
         window.location.href = data.paymentLink;
@@ -101,13 +124,37 @@ export default function Pricing() {
         return;
       }
       toast({ title: 'Checkout started', description: 'Awaiting payment provider response.' });
-    } catch (e: any) {
-      if (String(e?.message || '').toLowerCase().includes('profile')) {
+    } catch (e: unknown) {
+      if (e instanceof ApiError && e.code === 'PRACTICE_INVENTORY_UNAVAILABLE') {
+        toast({
+          title: 'Practice Pass is not on sale yet',
+          description: 'No deeply reviewed Practice exam is currently release-ready. No order was created.',
+          variant: 'destructive',
+        });
+        return;
+      }
+      if (e instanceof ApiError && e.code === 'SUBSCRIPTION_CHECKOUT_PENDING') {
+        toast({
+          title: 'Checkout already pending',
+          description: 'Finish or allow the existing checkout to expire before starting another order.',
+        });
+        return;
+      }
+      if (e instanceof ApiError && e.code === 'SUBSCRIPTION_ALREADY_ACTIVE') {
+        toast({ title: 'Practice Pass already active', description: 'Your account already has active Practice access.' });
+        setLocation('/practice');
+        return;
+      }
+      if (String(e instanceof Error ? e.message : '').toLowerCase().includes('profile')) {
         toast({ title: 'Complete your workspace first', description: `Add the required ${ownerType} details, then your plan selection will continue.` });
         setLocation(`/register?role=${ownerType}&plan=${plan}&mode=add`);
         return;
       }
-      toast({ title: 'Could not start checkout', description: e.message, variant: 'destructive' });
+      toast({
+        title: 'Could not start checkout',
+        description: e instanceof Error ? e.message : 'Please try again.',
+        variant: 'destructive',
+      });
     } finally {
       setSubmitting(null);
     }
@@ -117,7 +164,7 @@ export default function Pricing() {
     <div className="min-h-screen bg-cream-soft flex flex-col">
       <SEO
         title="Pricing"
-        description="Transparent pricing for learners, creators, institutes and recruiters on Octamy, including ₹299 Practice Pass for unlimited non-recruiter practice exams."
+        description="Transparent pricing for learners, creators, institutes and recruiters on Octamy, including fixed-term Practice Pass access for reviewed practice exams."
         path="/pricing"
       />
       <Header />
@@ -164,7 +211,7 @@ export default function Pricing() {
                 <div>
                   <p className="text-xs font-bold uppercase tracking-[0.16em] text-emerald-800">{selected.welcome ? 'Workspace created' : 'Saved plan selection'}</p>
                   <h2 id="selected-plan-title" className="mt-1 text-xl font-bold text-slate-950">
-                    {selected.role === 'creator' ? 'Creator' : 'Institute'} {selected.plan.charAt(0).toUpperCase() + selected.plan.slice(1)} is ready to review.
+                    {selected.role === 'learner' ? 'Practice Pass' : selected.role === 'creator' ? 'Creator' : 'Institute'} {selected.role === 'learner' ? (cycle === 'yearly' ? '365-day access' : '30-day access') : selected.plan.charAt(0).toUpperCase() + selected.plan.slice(1)} is ready to review.
                   </h2>
                   <p className="mt-1 text-sm text-slate-600">Confirm the billing cycle, then continue securely. You will see the amount before payment.</p>
                 </div>
@@ -175,7 +222,7 @@ export default function Pricing() {
                 className="shrink-0"
               >
                 {submitting === `${selected.role}:${selected.plan}` ? <Loader2 className="animate-spin" /> : null}
-                Continue with {selected.plan.charAt(0).toUpperCase() + selected.plan.slice(1)}
+                Continue with {selected.role === 'learner' ? 'Practice Pass' : selected.plan.charAt(0).toUpperCase() + selected.plan.slice(1)}
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </div>
@@ -199,8 +246,8 @@ export default function Pricing() {
               />
               <Tier
                 name="Practice Pass"
-                price={discounted(299, cycle)}
-                meta="Unlimited practice exams"
+                price={cycle === 'yearly' ? '₹2,990 / 365 days' : '₹299 / 30 days'}
+                meta="Fixed-term access to reviewed Practice exams"
                 highlight
                 busy={submitting === 'learner:all_access'}
                 features={[
@@ -281,7 +328,7 @@ export default function Pricing() {
                 name="Explore"
                 price="₹1,000"
                 meta="100 credits"
-                features={['Candidate filters', 'Saved searches', 'Credential evidence']}
+                features={['Candidate filters', 'Saved searches', 'Learner-granted credential evidence']}
                 cta={{ label: 'Start recruiting', href: '/recruiter/register' }}
               />
               <Tier
@@ -289,7 +336,7 @@ export default function Pricing() {
                 price="₹4,500"
                 meta="500 credits · save 10%"
                 highlight
-                features={['Protected profile access', 'CV downloads', 'Assessment records']}
+                features={['Protected profile access', 'CV downloads', 'Learner-selected evidence grants']}
                 cta={{ label: 'Start recruiting', href: '/recruiter/register' }}
               />
               <Tier

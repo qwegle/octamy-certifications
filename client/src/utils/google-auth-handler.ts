@@ -2,12 +2,7 @@ import { useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { useToast } from '@/hooks/use-toast';
 import { safeInternalReturnTo } from '@/lib/navigation-safety';
-
-function getOAuthParams() {
-  const query = new URLSearchParams(window.location.search);
-  const fragment = new URLSearchParams(window.location.hash.replace(/^#/, ''));
-  return fragment.has('token') ? fragment : query;
-}
+import { getOAuthParams } from './google-oauth-params';
 
 function decodeJwtPayload(token: string) {
   const encoded = token.split('.')[1];
@@ -94,7 +89,7 @@ export function useGoogleAuthHandler() {
   const { toast } = useToast();
 
   useEffect(() => {
-    const urlParams = getOAuthParams();
+    const urlParams = getOAuthParams(window.location.search, window.location.hash);
     const token = urlParams.get('token');
     const success = urlParams.get('success');
     const error = urlParams.get('error');
@@ -172,7 +167,7 @@ export function useSellerGoogleAuthHandler() {
   const { toast } = useToast();
 
   useEffect(() => {
-    const urlParams = getOAuthParams();
+    const urlParams = getOAuthParams(window.location.search, window.location.hash);
     const token = urlParams.get('token');
     const success = urlParams.get('success');
     const error = urlParams.get('error');

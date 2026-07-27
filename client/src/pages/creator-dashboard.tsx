@@ -151,14 +151,3 @@ function StatCard({
     </Card>
   );
 }
-
-function PanelComingSoon({ title, body }: { title: string; body: string }) {
-  return (
-    <Card className="border-cream-deep mt-4">
-      <CardContent className="py-12 text-center">
-        <h3 className="text-lg font-medium text-slate-900">{title}</h3>
-        <p className="text-sm text-slate-600 mt-2 max-w-md mx-auto">{body}</p>
-      </CardContent>
-    </Card>
-  );
-}

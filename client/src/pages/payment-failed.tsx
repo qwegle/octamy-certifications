@@ -9,18 +9,15 @@ export default function PaymentFailed() {
   const [transactionId, setTransactionId] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [certificateId, setCertificateId] = useState<string>('');
-  const [courseId, setCourseId] = useState<string>('');
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const txnid = urlParams.get('txnid');
     const error = urlParams.get('error');
     const certId = urlParams.get('certificateId');
-    const course = urlParams.get('courseId');
     
     if (txnid) setTransactionId(txnid);
     if (certId) setCertificateId(certId);
-    if (course) setCourseId(course);
     
     if (error) {
       switch (error) {
@@ -73,10 +70,8 @@ export default function PaymentFailed() {
               onClick={() => {
                 if (certificateId) {
                   setLocation(`/payment/${certificateId}`);
-                } else if (courseId) {
-                  setLocation(`/checkout/${courseId}`);
                 } else {
-                  setLocation('/courses');
+                  setLocation('/get-certified');
                 }
               }}
             >
@@ -105,8 +100,7 @@ export default function PaymentFailed() {
 
           <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg">
             <p className="text-sm text-red-700 dark:text-red-300 text-center">
-              Don't worry! No charges have been made to your account. 
-              You can try the payment again or contact our support team for assistance.
+              Octamy fulfills a purchase only after server-side provider confirmation. If your bank shows a pending debit, wait for its final status or contact support with the transaction ID before retrying.
             </p>
           </div>
         </CardContent>

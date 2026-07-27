@@ -56,93 +56,57 @@ const PREMIUM_CATEGORY_SLUGS: string[] = (
   .map((s: string) => s.trim().toLowerCase())
   .filter(Boolean);
 
-// ---------- Recent / sample certifications ----------
-const SAMPLE_CERTS = [
-  { name: "Aarav Shah",   company: "Sample credential", course: "Python Developer",           badge: "Gold",     score: 86, color: "from-amber-500 to-amber-700" },
-  { name: "Priya Iyer",   company: "Sample credential", course: "Generative AI Foundations",  badge: "Platinum", score: 92, color: "from-slate-900 to-slate-700" },
-  { name: "Rahul Verma",  company: "Sample credential", course: "AWS Cloud Practitioner",     badge: "Silver",   score: 74, color: "from-slate-500 to-slate-700" },
-  { name: "Ananya Reddy", company: "Sample credential", course: "Cybersecurity Analyst",      badge: "Gold",     score: 81, color: "from-amber-500 to-amber-700" },
-  { name: "Vikram Singh", company: "Sample credential", course: "Full-Stack JavaScript",      badge: "Platinum", score: 95, color: "from-slate-900 to-slate-700" },
-  { name: "Meera Nair",   company: "Sample credential", course: "Data Science Essentials",    badge: "Silver",   score: 71, color: "from-slate-500 to-slate-700" },
-];
-
+// ---------- Recent verified certifications ----------
 function CertificateSlider() {
-  const { data: liveCerts = [] } = useQuery<any[]>({
+  const { data: liveCerts = [], isLoading, error, refetch } = useQuery<any[]>({
     queryKey: ["/api/recent-certificates"],
   });
 
-  const showLive = liveCerts.length > 0;
-  const items = showLive ? liveCerts : SAMPLE_CERTS;
-
   return (
-    <section className="bg-cream-deep py-12 sm:py-20 border-y border-cream-deep">
-      <div className="max-w-7xl mx-auto px-6">
-        <Reveal as="div" className="text-center max-w-2xl mx-auto mb-10">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-            {showLive ? "Live proof" : "Sample credentials"}
-          </p>
-          <h3 className="mt-3 text-3xl sm:text-4xl font-bold text-slate-900">
-            {showLive ? "Recent certifications" : "What an Octamy credential looks like"}
-          </h3>
-          <p className="text-slate-600 mt-3">
-            {showLive
-              ? "Real candidates earning verified credentials."
-              : "A passed assessment can become an activated, publicly checkable credential when the learner chooses."}
-          </p>
+    <section className="border-y border-cream-deep bg-cream-deep py-12 sm:py-20" aria-labelledby="recent-certifications-title">
+      <div className="mx-auto max-w-7xl px-6">
+        <Reveal as="div" className="mx-auto mb-10 max-w-2xl text-center">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Live proof</p>
+          <h3 id="recent-certifications-title" className="mt-3 text-3xl font-bold text-slate-900 sm:text-4xl">Recent verified certifications</h3>
+          <p className="mt-3 text-slate-600">Only activated credentials returned by Octamy appear here. Scores remain private in this public feed.</p>
         </Reveal>
 
-        <Stagger className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3 sm:grid sm:grid-cols-2 sm:overflow-visible sm:pb-0 lg:grid-cols-3">
-          {items.slice(0, 6).map((cert, idx) => (
-            <StaggerItem key={`${cert.name}-${idx}`} className="min-w-[86%] snap-start sm:min-w-0">
-              <motion.div
-                whileHover={{ y: -4 }}
-                transition={{ type: "spring", stiffness: 220, damping: 18 }}
-                className="group h-full overflow-hidden rounded-2xl border border-cream-deep bg-cream-soft shadow-sm hover:shadow-xl"
-              >
-                {/* Mini certificate preview */}
-                <div className={`relative h-32 bg-gradient-to-br ${cert.color || "from-slate-900 to-slate-700"} text-white p-5 flex flex-col justify-between overflow-hidden`}>
-                  <div aria-hidden className="absolute inset-0 bg-grid-white opacity-30" />
-                  <div className="relative flex items-center justify-between">
-                    <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/80">Octamy Certified</span>
-                    <Award className="h-5 w-5 text-white/90" />
+        {isLoading ? (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" role="status" aria-label="Loading recent certifications">
+            {[0, 1, 2].map((item) => <div key={item} className="h-64 animate-pulse rounded-2xl bg-slate-200" aria-hidden="true" />)}
+          </div>
+        ) : error ? (
+          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-8 text-center" role="alert">
+            <p className="font-semibold text-amber-950">Recent certifications could not be loaded.</p>
+            <p className="mt-2 text-sm text-amber-900">No placeholder records are shown when the live feed is unavailable.</p>
+            <Button type="button" variant="outline" className="mt-4" onClick={() => void refetch()}>Try again</Button>
+          </div>
+        ) : liveCerts.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center">
+            <ShieldCheck className="mx-auto h-9 w-9 text-slate-400" aria-hidden="true" />
+            <h4 className="mt-4 text-lg font-semibold text-slate-950">No public certifications to show yet</h4>
+            <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-600">Credentials appear only after a learner passes, activates the credential, and allows it to be publicly discoverable.</p>
+            <Button asChild className="mt-5 rounded-full bg-slate-900 px-6 text-white hover:bg-black"><Link href="/get-certified">Browse governed assessments <ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
+          </div>
+        ) : (
+          <Stagger className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3 sm:grid sm:grid-cols-2 sm:overflow-visible sm:pb-0 lg:grid-cols-3">
+            {liveCerts.slice(0, 6).map((cert, idx) => (
+              <StaggerItem key={`${cert.certificateId || cert.id || cert.name}-${idx}`} className="min-w-[86%] snap-start sm:min-w-0">
+                <motion.div whileHover={{ y: -4 }} transition={{ type: "spring", stiffness: 220, damping: 18 }} className="group h-full overflow-hidden rounded-2xl border border-cream-deep bg-cream-soft shadow-sm hover:shadow-xl">
+                  <div className={`relative flex h-32 flex-col justify-between overflow-hidden bg-gradient-to-br ${cert.color || "from-slate-900 to-slate-700"} p-5 text-white`}>
+                    <div aria-hidden className="absolute inset-0 bg-grid-white opacity-30" />
+                    <div className="relative flex items-center justify-between"><span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/80">Octamy Certified</span><Award className="h-5 w-5 text-white/90" aria-hidden="true" /></div>
+                    <div className="relative"><p className="text-[10px] uppercase tracking-wider text-white/60">Awarded to</p><p className="truncate text-lg font-bold leading-tight">{cert.name}</p></div>
                   </div>
-                  <div className="relative">
-                    <p className="text-[10px] uppercase tracking-wider text-white/60">Awarded to</p>
-                    <p className="text-lg font-bold leading-tight truncate">{cert.name}</p>
+                  <div className="p-5">
+                    <p className="text-sm text-slate-500">Certified in</p><p className="truncate font-semibold text-slate-900">{cert.course}</p>
+                    <div className="mt-3 flex items-center justify-between"><Badge variant="outline" className="border-slate-300 text-[11px] text-slate-700">{cert.badge} Badge</Badge><span className="text-xs font-medium text-slate-600">Score private</span></div>
+                    <div className="mt-3 flex items-center gap-2 text-[11px] text-slate-500"><ShieldCheck className="h-3.5 w-3.5 text-emerald-600" aria-hidden="true" />Publicly checkable · {cert.company || "Octamy.com"}</div>
                   </div>
-                </div>
-                <div className="p-5">
-                  <p className="text-sm text-slate-500">Certified in</p>
-                  <p className="font-semibold text-slate-900 truncate">{cert.course}</p>
-                  <div className="mt-3 flex items-center justify-between">
-                    <Badge variant="outline" className="border-slate-300 text-slate-700 text-[11px]">
-                      {cert.badge} Badge
-                    </Badge>
-                    <span className="text-xs font-medium text-slate-600 tabular-nums">
-                      {showLive ? "Score: ••%" : `Score: ${cert.score}%`}
-                    </span>
-                  </div>
-                  <div className="mt-3 flex items-center gap-2 text-[11px] text-slate-500">
-                    <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
-                    Publicly checkable · {cert.company || "Octamy.com"}
-                  </div>
-                </div>
-              </motion.div>
-            </StaggerItem>
-          ))}
-        </Stagger>
-
-        {!showLive && (
-          <Reveal as="div" className="mt-8 text-center">
-            <p className="text-xs text-slate-500 italic">
-              Sample preview · Live certificates appear here once candidates pass their first exam.
-            </p>
-            <Button asChild className="mt-4 bg-slate-900 hover:bg-black text-white rounded-full px-6">
-              <Link href="/get-certified">
-                Take a free assessment <ArrowRight className="ml-2 w-4 h-4" />
-              </Link>
-            </Button>
-          </Reveal>
+                </motion.div>
+              </StaggerItem>
+            ))}
+          </Stagger>
         )}
       </div>
     </section>

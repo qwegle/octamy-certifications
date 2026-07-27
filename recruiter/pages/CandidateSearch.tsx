@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
-import { apiRequest } from '@/lib/queryClient';
+import { ApiError, apiRequest } from '@/lib/queryClient';
 import RecruiterLayout from '../components/RecruiterLayout';
 import InterviewEvidenceNotice from '../components/InterviewEvidenceNotice';
 import { useRecruiterAuth } from '../auth/RecruiterAuthProvider';
@@ -18,9 +18,7 @@ import {
   Eye,
   Download,
   MapPin,
-  Calendar,
   Briefcase,
-  Award,
   RefreshCw,
   ChevronDown,
   ChevronUp,
@@ -32,14 +30,12 @@ import {
 } from 'lucide-react';
 
 interface SearchFilters {
-  technology: string[];
   location: string;
   experience: { min: number | ''; max: number | '' };
   noticePeriod: string;
   workType: string[];
   availability: string;
   skills: string[];
-  category: string[];
   minScore: number;
   hasCertificates: boolean;
 }
@@ -51,27 +47,14 @@ interface Candidate {
   experience: number;
   currentRole: string;
   skills: string[];
-  certificates: Array<{
-    id: number;
-    courseTitle: string;
-    score: number;
-    badge: string;
-  }>;
   hasResume: boolean;
   access: { profile: boolean; cv: boolean };
-  lastActive: string;
 }
 
 type CreditCosts = { profile_view: number; cv_download: number };
 
-const TECHNOLOGIES = [
-  'JavaScript', 'Python', 'React', 'Node.js', 'Java', 'C++', 'Angular',
-  'Vue.js', 'TypeScript', 'Go', 'Rust', 'PHP', 'Ruby', 'Swift', 'Kotlin'
-];
-
 const WORK_TYPES = ['Remote', 'On-site', 'Hybrid'];
 const NOTICE_PERIODS = ['Immediate', '15 days', '30 days', '60 days', '90 days'];
-const CATEGORIES = ['AI', 'Development', 'Business', 'Data Science', 'DevOps'];
 
 export default function CandidateSearch() {
   const { toast } = useToast();
@@ -90,14 +73,12 @@ export default function CandidateSearch() {
     const savedSkills = (params.get('skills') || '').split(',').map((skill) => skill.trim()).filter(Boolean);
     const savedMinScore = Number(params.get('minScore'));
     return {
-      technology: [],
       location: '',
       experience: { min: '', max: '' },
       noticePeriod: '',
       workType: [],
       availability: '',
       skills: savedSkills,
-      category: [],
       minScore: Number.isFinite(savedMinScore) ? Math.min(100, Math.max(0, savedMinScore)) : 0,
       hasCertificates: false,
     };
@@ -107,44 +88,20 @@ export default function CandidateSearch() {
     setLoading(true);
     setSearchError(null);
     try {
-      const response = await fetch('/api/recruiter/search', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('recruiterToken')}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          filters,
-          page,
-          limit: 10,
-        })
-      });
-
-      if (response.ok) {
-        const searchData = await response.json();
-        
-        setCandidates(searchData.candidates || []);
-        setTotalResults(searchData.total || searchData.candidates?.length || 0);
-        setCurrentPage(page);
-        if (searchData.creditCosts) setCreditCosts(searchData.creditCosts);
-        return;
-      } else {
-        const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
-        console.error('Search API error:', errorData);
-        
-        setSearchError(errorData.message || 'Candidate search is temporarily unavailable.');
-        setCandidates([]);
-        setTotalResults(0);
-        setCurrentPage(1);
-        return;
-      }
-      
+      const response = await apiRequest('POST', '/api/recruiter/search', { filters, page, limit: 10 });
+      const searchData = await response.json();
+      setCandidates(Array.isArray(searchData.candidates) ? searchData.candidates : []);
+      setTotalResults(Number(searchData.total) || 0);
+      setCurrentPage(page);
+      if (searchData.creditCosts) setCreditCosts(searchData.creditCosts);
     } catch (error) {
-      console.error('Search Error Details:', error);
       setCandidates([]);
       setTotalResults(0);
-      
-      setSearchError('We could not reach candidate search. Check your connection and retry.');
+      setSearchError(error instanceof ApiError && error.status === 401
+        ? 'Your recruiter session is not authorized. Sign in again before searching.'
+        : error instanceof ApiError && error.status === 403
+          ? error.message
+          : error instanceof Error ? error.message : 'We could not reach candidate search. Check your connection and retry.');
     } finally {
       setLoading(false);
     }
@@ -228,7 +185,7 @@ export default function CandidateSearch() {
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-sky-700">Consent-gated talent evidence</p>
             <h1 className="mt-2 text-3xl font-bold text-gray-900">Search candidates</h1>
             <p className="text-gray-600 mt-2 max-w-2xl">
-              Every result has learner consent and at least one paid, active, unexpired Octamy credential.
+              Results meet discovery eligibility: learner opt-in and at least one current paid credential. Exact credential and Practice details remain hidden until that learner creates an explicit, expiring evidence grant for your company.
             </p>
           </div>
           <Button
@@ -270,7 +227,7 @@ export default function CandidateSearch() {
         <InterviewEvidenceNotice compact />
 
         {searchError ? (
-          <Card className="border-amber-200 bg-amber-50/70">
+          <Card className="border-amber-200 bg-amber-50/70" role="alert">
             <CardContent className="flex flex-col gap-3 p-4 text-sm text-amber-950 sm:flex-row sm:items-center sm:justify-between">
               <span className="flex items-center gap-2"><AlertCircle className="h-4 w-4" />{searchError}</span>
               <Button size="sm" variant="outline" onClick={() => searchCandidates(currentPage)}>Retry search</Button>
@@ -291,17 +248,17 @@ export default function CandidateSearch() {
               {/* Search Bar */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label>Location</Label>
-                  <Input
+                  <Label htmlFor="candidate-location">Location</Label>
+                  <Input id="candidate-location"
                     placeholder="City, State, Country"
                     value={filters.location}
                     onChange={(e) => updateFilter('location', e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Notice Period</Label>
+                  <Label htmlFor="candidate-notice-period">Notice Period</Label>
                   <Select value={filters.noticePeriod} onValueChange={(value) => updateFilter('noticePeriod', value)}>
-                    <SelectTrigger>
+                    <SelectTrigger id="candidate-notice-period">
                       <SelectValue placeholder="Select notice period" />
                     </SelectTrigger>
                     <SelectContent>
@@ -314,8 +271,8 @@ export default function CandidateSearch() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Minimum Score</Label>
-                  <Input
+                  <Label htmlFor="candidate-min-score">Minimum eligible credential score</Label>
+                  <Input id="candidate-min-score"
                     type="number"
                     min="0"
                     max="100"
@@ -356,34 +313,16 @@ export default function CandidateSearch() {
                 </div>
               </div>
 
-              {/* Technologies */}
               <div className="space-y-2">
-                <Label>Technologies</Label>
-                <div className="flex flex-wrap gap-2 mb-2">
-                  {filters.technology.map((tech) => (
-                    <Badge key={tech} variant="secondary" className="cursor-pointer">
-                      {tech}
-                      <button
-                        onClick={() => removeArrayFilter('technology', tech)}
-                        className="ml-2 text-gray-500 hover:text-gray-700"
-                      >
-                        ×
-                      </button>
-                    </Badge>
-                  ))}
-                </div>
-                <Select onValueChange={(value) => addArrayFilter('technology', value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Add technology" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {TECHNOLOGIES.filter(tech => !filters.technology.includes(tech)).map((tech) => (
-                      <SelectItem key={tech} value={tech}>
-                        {tech}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Label htmlFor="candidate-skills">Candidate-provided skills</Label>
+                <Input
+                  id="candidate-skills"
+                  value={filters.skills.join(', ')}
+                  onChange={(event) => updateFilter('skills', event.target.value.split(',').map((value) => value.trim()).filter(Boolean))}
+                  placeholder="React, TypeScript, AWS"
+                  aria-describedby="candidate-skills-help"
+                />
+                <p id="candidate-skills-help" className="text-xs text-slate-500">Enter comma-separated skills. Results match profile skills; this field does not assert credential evidence.</p>
               </div>
 
               {/* Work Type */}
@@ -409,36 +348,6 @@ export default function CandidateSearch() {
                 </div>
               </div>
 
-              {/* Categories */}
-              <div className="space-y-2">
-                <Label>Categories</Label>
-                <div className="flex flex-wrap gap-2 mb-2">
-                  {filters.category.map((cat) => (
-                    <Badge key={cat} variant="secondary" className="cursor-pointer">
-                      {cat}
-                      <button
-                        onClick={() => removeArrayFilter('category', cat)}
-                        className="ml-2 text-gray-500 hover:text-gray-700"
-                      >
-                        ×
-                      </button>
-                    </Badge>
-                  ))}
-                </div>
-                <Select onValueChange={(value) => addArrayFilter('category', value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Add category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {CATEGORIES.filter(cat => !filters.category.includes(cat)).map((cat) => (
-                      <SelectItem key={cat} value={cat}>
-                        {cat}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
               {/* Additional Filters */}
               <div className="flex flex-wrap items-center gap-6">
                 <div className="flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-800">
@@ -455,15 +364,13 @@ export default function CandidateSearch() {
                   variant="outline"
                   onClick={() => {
                     setFilters({
-                      technology: [],
-                      location: '',
+                                      location: '',
                       experience: { min: '', max: '' },
                       noticePeriod: '',
                       workType: [],
                       availability: '',
                       skills: [],
-                      category: [],
-                      minScore: 0,
+                                      minScore: 0,
                       hasCertificates: false,
                     });
                   }}
@@ -486,7 +393,7 @@ export default function CandidateSearch() {
 
           {loading ? (
             <div className="flex items-center justify-center py-12">
-              <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full" />
+              <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full" aria-hidden="true" /><span className="sr-only">Searching candidates</span>
             </div>
           ) : candidates.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-slate-300 bg-white text-center py-12">
@@ -513,7 +420,7 @@ export default function CandidateSearch() {
                         <div className="mb-3 flex flex-wrap items-center gap-3">
                           <h3 className="text-xl font-semibold text-gray-900">{candidate.name}</h3>
                           <Badge variant="outline">{candidate.experience || 0} years exp</Badge>
-                          <Badge className="border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-50"><ShieldCheck className="mr-1 h-3 w-3" />Consent + evidence eligible</Badge>
+                          <Badge className="border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-50"><ShieldCheck className="mr-1 h-3 w-3" />Discovery eligible · details grant-gated</Badge>
                         </div>
                         
                         <div className="space-y-2 mb-4">
@@ -524,10 +431,6 @@ export default function CandidateSearch() {
                           <div className="flex items-center space-x-2 text-gray-600">
                             <MapPin className="h-4 w-4" />
                             <span>{candidate.location || 'Location not provided'}</span>
-                          </div>
-                          <div className="flex items-center space-x-2 text-gray-600">
-                            <Calendar className="h-4 w-4" />
-                            <span>Last active: {candidate.lastActive ? new Date(candidate.lastActive).toLocaleDateString() : 'Not available'}</span>
                           </div>
                         </div>
 
@@ -548,19 +451,8 @@ export default function CandidateSearch() {
                           </div>
                         </div>
 
-                        {/* Recruiter-visible credential evidence */}
-                        <div className="mb-4">
-                          <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3">
-                            <Label className="text-sm font-medium flex items-center space-x-1">
-                              <Award className="h-4 w-4" />
-                              <span>Current credential evidence</span>
-                            </Label>
-                            {candidate.certificates.slice(0, 2).map((cert) => (
-                              <div key={cert.id} className="text-sm text-gray-600 mt-1">
-                                {cert.courseTitle} · {cert.score}% · {cert.badge}
-                              </div>
-                            ))}
-                          </div>
+                        <div className="mb-4 rounded-xl border border-slate-200 bg-slate-50/60 p-3 text-sm text-slate-600">
+                          Discovery eligibility is confirmed without disclosing credential titles, scores, badges, or Practice activity. Unlocking the profile does not unlock evidence; the learner must grant selected evidence separately.
                         </div>
                       </div>
 

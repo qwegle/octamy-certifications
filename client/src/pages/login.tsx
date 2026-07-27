@@ -143,7 +143,9 @@ export default function Login() {
       : variant === 'recruiter'
         ? '/recruiter/register'
         : variant === 'default'
-          ? '/register'
+          ? next
+            ? `/register?role=learner&next=${encodeURIComponent(next)}`
+            : '/register'
           : `/register?role=${variant}`;
 
   return (

@@ -19,7 +19,7 @@ export default function Accessibility() {
 
       <h2>Known limitations</h2>
       <ul>
-        <li>Some legacy course-detail pages may have insufficient colour contrast.</li>
+        <li>Some dense administration tables and third-party checkout surfaces are still being audited for keyboard flow, zoom, and contrast.</li>
         <li>Certain interactive charts have not yet been audited for screen-reader compatibility.</li>
       </ul>
 

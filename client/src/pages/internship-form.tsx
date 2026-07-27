@@ -425,7 +425,7 @@ export default function InternshipFormPage() {
               <h4 className="font-semibold mb-4">Programs</h4>
               <ul className="space-y-2 text-gray-400">
                 <li><Link href="/" className="hover:text-white">Virtual Internships</Link></li>
-                <li><Link href="/business-certificates" className="hover:text-white">Business Certificates</Link></li>
+                <li><Link href="/institutes" className="hover:text-white">Institute solutions</Link></li>
                 <li><Link href="/partners" className="hover:text-white">Partner Program</Link></li>
               </ul>
             </div>
@@ -438,7 +438,7 @@ export default function InternshipFormPage() {
             </div>
             <div>
               <h4 className="font-semibold mb-4">Connect</h4>
-              <p className="text-gray-400 mb-4">ISO Certified by Octamy Solutions Private Limited</p>
+              <p className="text-gray-400 mb-4">Assessment and credential status can be verified through Octamy.</p>
             </div>
           </div>
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">

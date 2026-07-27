@@ -12,6 +12,11 @@ import { apiRequest, queryClient } from '@/lib/queryClient';
 import { AuthShell } from '@/components/auth-shell';
 import { ArrowRight, Building2, Briefcase, GraduationCap, ShieldCheck, Sparkles } from 'lucide-react';
 import { safeInternalReturnTo } from '@/lib/navigation-safety';
+import {
+  normalizePracticePassCycle,
+  practicePricingPath,
+  PRACTICE_PASS_PLAN,
+} from '@/lib/practice-purchase-intent';
 
 type Role = 'learner' | 'creator' | 'institute' | 'recruiter';
 
@@ -46,8 +51,12 @@ export default function Register() {
   }, [query]);
   const selectedPlan = useMemo(() => {
     const plan = query?.get('plan')?.trim().toLowerCase();
-    return plan && /^[a-z0-9-]{2,24}$/.test(plan) ? plan : null;
+    return plan && /^[a-z0-9_-]{2,24}$/.test(plan) ? plan : null;
   }, [query]);
+  const selectedCycle = useMemo(
+    () => normalizePracticePassCycle(query?.get('cycle')),
+    [query],
+  );
   const next = useMemo(() => safeInternalReturnTo(query?.get('next')), [query]);
   const emailHint = useMemo(() => {
     const value = query?.get('email')?.trim().toLowerCase() || '';
@@ -196,13 +205,16 @@ export default function Register() {
       } catch {}
 
       const hasPaidPlan =
+        (role === 'learner' && selectedPlan === PRACTICE_PASS_PLAN) ||
         (role === 'creator' && ['pro', 'premium'].includes(selectedPlan || '')) ||
         (role === 'institute' && ['starter', 'growth'].includes(selectedPlan || ''));
       if (hasPaidPlan && selectedPlan) {
         try {
-          localStorage.setItem('octamy.pendingPlan', JSON.stringify({ role, plan: selectedPlan, at: Date.now() }));
+          localStorage.setItem('octamy.pendingPlan', JSON.stringify({ role, plan: selectedPlan, cycle: selectedCycle, at: Date.now() }));
         } catch {}
-        dest = `/pricing?role=${role}&selected=${encodeURIComponent(selectedPlan)}&welcome=1`;
+        dest = role === 'learner'
+          ? practicePricingPath({ cycle: selectedCycle, next: next || '/practice', welcome: true })
+          : `/pricing?role=${role}&selected=${encodeURIComponent(selectedPlan)}&cycle=${selectedCycle}&welcome=1`;
       }
 
       await queryClient.invalidateQueries({ queryKey: ['/api/me/roles'] });
@@ -279,7 +291,14 @@ export default function Register() {
             <span className="shrink-0 rounded-full bg-emerald-50 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-emerald-700">{selectedPlan ? `${selectedPlan} selected` : ROLES.find((item) => item.id === role)?.plan}</span>
           </div>
 
-          {!isWorkspaceSetup && <GoogleAuthButton type="user" isLoading={isLoading} hideWhenUnavailable className="mb-5" intent={{ mode: 'register', role: role === 'recruiter' ? 'learner' : role, plan: selectedPlan }} />}
+          {!isWorkspaceSetup && <GoogleAuthButton type="user" isLoading={isLoading} hideWhenUnavailable className="mb-5" intent={{
+            mode: 'register',
+            role: role === 'recruiter' ? 'learner' : role,
+            plan: selectedPlan,
+            returnTo: role === 'learner' && selectedPlan === PRACTICE_PASS_PLAN
+              ? practicePricingPath({ cycle: selectedCycle, next: next || '/practice', welcome: true })
+              : next,
+          }} />}
 
           <form onSubmit={handleSubmit} className="grid gap-4 sm:grid-cols-2">
             {role === 'institute' && (

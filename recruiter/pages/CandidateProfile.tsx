@@ -26,12 +26,33 @@ import {
 
 interface Certificate {
   id: number;
+  certificateId?: string;
   courseTitle: string;
   score: number;
   badge: string;
   issuedAt: string;
+  expiresAt?: string;
+  issuedBy?: string;
   difficulty?: string;
   category?: string;
+}
+
+interface PracticeSummary {
+  id: number;
+  courseTitle: string;
+  score: number;
+  totalQuestions: number;
+  durationSeconds: number;
+  passed: boolean;
+  mastered: boolean;
+  completedAt: string;
+}
+
+interface SelectedEvidence {
+  grant: { id: string; purpose: string; jobReference: string | null; grantedAt: string; expiresAt: string };
+  certifications: Certificate[];
+  practiceSummaries: PracticeSummary[];
+  policyVersion: string;
 }
 
 interface CandidateProfile {
@@ -44,11 +65,9 @@ interface CandidateProfile {
   skills: string[];
   certificates: Certificate[];
   profileViews: number;
-  lastActive: string;
   profileCompleteness?: number;
   averageScore: number;
   dedicationScore: number;
-  technicalStrength: string[];
   careerGoals?: string;
   availability?: string;
   noticePeriod?: string;
@@ -61,6 +80,10 @@ interface CandidateProfile {
 export default function CandidateProfile() {
   const [, params] = useRoute('/recruiter/profile/:id');
   const [candidate, setCandidate] = useState<CandidateProfile | null>(null);
+  const [selectedEvidence, setSelectedEvidence] = useState<SelectedEvidence | null>(null);
+  const [evidenceLoading, setEvidenceLoading] = useState(true);
+  const [evidenceError, setEvidenceError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const { updateRecruiter } = useRecruiterAuth();
@@ -75,6 +98,9 @@ export default function CandidateProfile() {
 
   const fetchCandidateProfile = async (id: string) => {
     setLoading(true);
+    setLoadError(null);
+    setEvidenceLoading(true);
+    setEvidenceError(null);
     try {
       // Try to fetch from dedicated recruiter endpoint first
       let response = await fetch(`/api/recruiter/candidate/${id}`, {
@@ -98,7 +124,28 @@ export default function CandidateProfile() {
       } = profileData;
       void retiredPrototypeInterviews;
       void retiredPrototypeAccess;
-      const certs = Array.isArray(profileData.certificates) ? profileData.certificates : [];
+      let certs: Certificate[] = [];
+      let grantedEvidence: SelectedEvidence | null = null;
+      try {
+        const grantsResponse = await apiRequest('GET', `/api/recruiter/selected-candidates/${encodeURIComponent(id)}/evidence-grants`);
+        const grantData = await grantsResponse.json();
+        const activeGrant = Array.isArray(grantData.grants) ? grantData.grants[0] : null;
+        if (activeGrant?.id) {
+          const evidenceResponse = await apiRequest('GET', `/api/recruiter/selected-candidates/${encodeURIComponent(id)}/evidence/${encodeURIComponent(activeGrant.id)}`);
+          const rawEvidence = await evidenceResponse.json() as SelectedEvidence;
+          grantedEvidence = {
+            ...rawEvidence,
+            certifications: Array.isArray(rawEvidence.certifications) ? rawEvidence.certifications : [],
+            practiceSummaries: Array.isArray(rawEvidence.practiceSummaries) ? rawEvidence.practiceSummaries : [],
+          };
+          certs = grantedEvidence.certifications;
+        }
+      } catch (evidenceFailure) {
+        setEvidenceError(evidenceFailure instanceof Error ? evidenceFailure.message : 'Selected evidence could not be checked.');
+      } finally {
+        setEvidenceLoading(false);
+      }
+      setSelectedEvidence(grantedEvidence);
       setCandidate({
         ...recruiterVisibleProfile,
         location: profileData.location || 'Location not provided',
@@ -108,97 +155,23 @@ export default function CandidateProfile() {
         certificates: certs,
         averageScore: calculateAverageScore(certs),
         dedicationScore: Number(profileData.profileCompleteness || 0),
-        technicalStrength: getTechnicalStrengths(certs),
       });
     } catch (error) {
-      console.error('Error fetching candidate profile:', error);
+      setLoadError(error instanceof Error ? error.message : 'Failed to load candidate profile');
       toast({
         title: 'Profile unavailable',
         description: error instanceof Error ? error.message : 'Failed to load candidate profile',
       });
     } finally {
       setLoading(false);
+      setEvidenceLoading(false);
     }
-  };
-
-  const extractSkillsFromCertificates = (certs: any[]) => {
-    const skillMap: Record<string, string[]> = {
-      'data science': ['Python', 'Machine Learning', 'Statistics', 'Pandas'],
-      'react': ['React', 'JavaScript', 'TypeScript', 'Node.js'],
-      'python': ['Python', 'Django', 'Flask', 'Data Analysis'],
-      'javascript': ['JavaScript', 'React', 'Node.js', 'Express'],
-      'ai': ['Python', 'TensorFlow', 'Machine Learning', 'Deep Learning'],
-      'business': ['Strategy', 'Analytics', 'Management', 'Leadership']
-    };
-    
-    const skills = new Set<string>();
-    certs.forEach(cert => {
-      const course = (cert.courseTitle || cert.course || '').toLowerCase();
-      Object.entries(skillMap).forEach(([key, values]) => {
-        if (course.includes(key)) {
-          values.forEach(skill => skills.add(skill));
-        }
-      });
-    });
-    
-    return Array.from(skills).slice(0, 6);
-  };
-
-  const getDifficultyFromScore = (score: number) => {
-    if (score >= 95) return 'Expert';
-    if (score >= 85) return 'Advanced';
-    if (score >= 75) return 'Intermediate';
-    return 'Beginner';
-  };
-
-  const getCategoryFromCourse = (course: string) => {
-    const lowerCourse = course?.toLowerCase() || '';
-    if (lowerCourse.includes('data')) return 'Data Science';
-    if (lowerCourse.includes('business')) return 'Business';
-    if (lowerCourse.includes('ai')) return 'Artificial Intelligence';
-    if (lowerCourse.includes('react') || lowerCourse.includes('javascript')) return 'Web Development';
-    return 'Technology';
   };
 
   const calculateAverageScore = (certs: any[]) => {
     if (certs.length === 0) return 0;
     const total = certs.reduce((sum, cert) => sum + (cert.score || 0), 0);
     return Math.round(total / certs.length);
-  };
-
-  const calculateDedicationScore = (certs: any[]) => {
-    // Calculate based on number of certificates, scores, and consistency
-    const certCount = certs.length;
-    const avgScore = calculateAverageScore(certs);
-    const recentActivity = certs.filter(cert => {
-      const issueDate = new Date(cert.issuedAt || cert.createdAt);
-      const monthsAgo = (Date.now() - issueDate.getTime()) / (1000 * 60 * 60 * 24 * 30);
-      return monthsAgo <= 6;
-    }).length;
-    
-    // Weighted scoring: 40% avg score, 30% cert count, 30% recent activity
-    const score = (avgScore * 0.4) + (Math.min(certCount * 10, 30) * 0.3) + (recentActivity * 10 * 0.3);
-    return Math.min(Math.round(score), 100);
-  };
-
-  const getTechnicalStrengths = (certs: any[]) => {
-    const strengths = [];
-    const categories = certs.map(cert => getCategoryFromCourse(cert.courseTitle || cert.course || ''));
-    const uniqueCategories = Array.from(new Set(categories));
-    
-    if (uniqueCategories.includes('Data Science')) strengths.push('Data Analysis');
-    if (uniqueCategories.includes('Web Development')) strengths.push('Frontend Development');
-    if (uniqueCategories.includes('Artificial Intelligence')) strengths.push('AI/ML');
-    if (uniqueCategories.includes('Business')) strengths.push('Business Strategy');
-    
-    return strengths.slice(0, 3);
-  };
-
-  const getScoreColor = (score = 0) => {
-    if (score >= 90) return 'text-green-600';
-    if (score >= 80) return 'text-blue-600';
-    if (score >= 70) return 'text-yellow-600';
-    return 'text-gray-600';
   };
 
   const getBadgeColor = (badge: string) => {
@@ -237,8 +210,9 @@ export default function CandidateProfile() {
     return (
       <RecruiterLayout><div className="flex min-h-64 items-center justify-center">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Candidate Not Found</h2>
-          <p className="text-gray-600">The candidate profile you're looking for doesn't exist.</p>
+          <h2 className="mb-2 text-xl font-semibold text-gray-900">Candidate profile unavailable</h2>
+          <p className="text-gray-600">{loadError || 'This profile is not available to your recruiter workspace.'}</p>
+          <Button type="button" variant="outline" className="mt-4" onClick={() => candidateId && void fetchCandidateProfile(candidateId)}>Try again</Button>
         </div>
       </div></RecruiterLayout>
     );
@@ -294,42 +268,36 @@ export default function CandidateProfile() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Analytics & Stats */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Performance Overview */}
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <BarChart3 className="h-5 w-5 mr-2" />
-                  Performance Analytics
-                </CardTitle>
-              </CardHeader>
+              <CardHeader><CardTitle className="flex items-center"><BarChart3 className="mr-2 h-5 w-5" aria-hidden="true" />Profile and granted evidence summary</CardTitle></CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-blue-600">{candidate.averageScore}%</div>
-                    <div className="text-sm text-gray-500">Avg Score</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-green-600">{candidate.certificates.length}</div>
-                    <div className="text-sm text-gray-500">Certificates</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-orange-600">{candidate.dedicationScore}%</div>
-                    <div className="text-sm text-gray-500">Profile complete</div>
-                  </div>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                  <div><p className="text-sm text-slate-500">Profile complete</p><p className="mt-1 text-2xl font-bold text-slate-950">{candidate.dedicationScore}%</p></div>
+                  <div><p className="text-sm text-slate-500">Granted certifications</p><p className="mt-1 text-2xl font-bold text-slate-950">{selectedEvidence ? candidate.certificates.length : '—'}</p></div>
+                  <div><p className="text-sm text-slate-500">Granted certification average</p><p className="mt-1 text-2xl font-bold text-slate-950">{selectedEvidence && candidate.certificates.length ? `${candidate.averageScore}%` : '—'}</p></div>
                 </div>
-                
-                <div className="mt-6">
-                  <h4 className="font-medium mb-3">Evidence areas</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {(candidate.technicalStrength || []).length > 0
-                      ? candidate.technicalStrength.map((strength) => <Badge key={strength} variant="secondary">{strength}</Badge>)
-                      : <span className="text-sm text-gray-500">No category-level evidence available yet.</span>}
-                  </div>
-                </div>
+                <p className="mt-4 text-xs leading-5 text-slate-500">Profile completeness comes from candidate-provided fields. Certification figures appear only when covered by the active learner grant shown below.</p>
               </CardContent>
             </Card>
 
             <InterviewEvidenceNotice compact />
+
+            {evidenceLoading ? (
+              <Card><CardContent className="py-6 text-sm text-slate-600" role="status">Checking learner evidence grants…</CardContent></Card>
+            ) : evidenceError ? (
+              <Card className="border-amber-200 bg-amber-50" role="alert"><CardContent className="py-6"><p className="text-sm text-amber-950">Evidence authorization could not be checked: {evidenceError}</p><Button type="button" size="sm" variant="outline" className="mt-3" onClick={() => void fetchCandidateProfile(String(candidate.id))}>Retry authorization check</Button></CardContent></Card>
+            ) : selectedEvidence ? (
+              <Card className="border-emerald-200 bg-emerald-50/60">
+                <CardHeader><CardTitle className="flex items-center"><Eye className="mr-2 h-5 w-5" aria-hidden="true" />Learner-authorized evidence</CardTitle></CardHeader>
+                <CardContent>
+                  <p className="text-sm text-emerald-950"><strong>Purpose:</strong> {selectedEvidence.grant.purpose}</p>
+                  {selectedEvidence.grant.jobReference && <p className="mt-1 text-sm text-emerald-900"><strong>Job reference:</strong> {selectedEvidence.grant.jobReference}</p>}
+                  <p className="mt-2 text-xs text-emerald-800">Access expires {new Date(selectedEvidence.grant.expiresAt).toLocaleString()}. Every read is logged for the learner.</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="border-dashed border-slate-300"><CardContent className="py-6 text-sm text-slate-600">This learner has not granted your company access to selected evidence. Profile unlock does not disclose certification or Practice activity.</CardContent></Card>
+            )}
 
             <Card>
                   <CardHeader>
@@ -344,8 +312,8 @@ export default function CandidateProfile() {
                         <div className="rounded-xl border border-dashed border-slate-300 py-8 text-center text-sm text-slate-500">
                           No current credential evidence is available for this candidate.
                         </div>
-                      ) : candidate.certificates.map((cert, index) => (
-                        <div key={index} className="border rounded-lg p-4">
+                      ) : candidate.certificates.map((cert) => (
+                        <div key={cert.id} className="border rounded-lg p-4">
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
                               <h4 className="font-medium text-gray-900">{cert.courseTitle}</h4>
@@ -353,18 +321,11 @@ export default function CandidateProfile() {
                                 <Badge className={getBadgeColor(cert.badge)}>
                                   {cert.badge}
                                 </Badge>
-                                <span className={`font-semibold ${getScoreColor(cert.score)}`}>
-                                  {cert.score}% Score
-                                </span>
-                                <span className="text-sm text-gray-500">
-                                  {cert.difficulty}
-                                </span>
+                                <span className="font-semibold text-slate-900">Score: {cert.score}%</span>
                               </div>
                               <div className="flex items-center mt-2 text-sm text-gray-500">
                                 <Calendar className="h-4 w-4 mr-1" />
                                 {new Date(cert.issuedAt).toLocaleDateString()}
-                                <span className="mx-2">•</span>
-                                <span>{cert.category}</span>
                               </div>
                             </div>
                             <Trophy className={`h-6 w-6 ${cert.score >= 90 ? 'text-yellow-500' : 'text-gray-400'}`} />
@@ -374,9 +335,33 @@ export default function CandidateProfile() {
                     </div>
                   </CardContent>
             </Card>
-          </div>
 
-          {/* Right Column - Quick Info & Actions */}
+            {selectedEvidence && selectedEvidence.practiceSummaries.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <BarChart3 className="mr-2 h-5 w-5" />
+                    Selected Practice summaries ({selectedEvidence.practiceSummaries.length})
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <p className="text-xs text-slate-500">Practice is non-proctored and is not certification evidence. Answers and raw activity are not shared.</p>
+                  {selectedEvidence.practiceSummaries.map((summary) => (
+                    <div key={summary.id} className="rounded-lg border p-4">
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <h4 className="font-medium text-gray-900">{summary.courseTitle}</h4>
+                          <p className="mt-1 text-sm text-gray-600">{summary.score}% · {summary.totalQuestions} questions · {Math.max(1, Math.round(summary.durationSeconds / 60))} minute(s)</p>
+                          <p className="mt-1 text-xs text-gray-500">Completed {new Date(summary.completedAt).toLocaleString()}</p>
+                        </div>
+                        <Badge variant="secondary">{summary.mastered ? "Mastered" : summary.passed ? "Passed" : "Completed"}</Badge>
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
+          </div>
           <div className="space-y-6">
             {/* Contact & Availability */}
             <Card>
@@ -403,10 +388,6 @@ export default function CandidateProfile() {
                   <label className="text-sm text-gray-500">Expected Salary</label>
                   <p className="font-medium">{candidate.expectedSalary}</p>
                 </div>
-                <div>
-                  <label className="text-sm text-gray-500">Last Active</label>
-                  <p className="font-medium">{candidate.lastActive ? new Date(candidate.lastActive).toLocaleString() : 'Not available'}</p>
-                </div>
               </CardContent>
             </Card>
 
@@ -420,11 +401,9 @@ export default function CandidateProfile() {
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-2">
-                  {(candidate.skills || []).map((skill, index) => (
-                    <Badge key={index} variant="secondary">
-                      {skill}
-                    </Badge>
-                  ))}
+                  {(candidate.skills || []).length > 0 ? candidate.skills.map((skill) => (
+                    <Badge key={skill} variant="secondary">{skill}</Badge>
+                  )) : <p className="text-sm text-slate-500">No candidate-provided skills are available.</p>}
                 </div>
               </CardContent>
             </Card>

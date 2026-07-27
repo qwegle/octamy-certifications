@@ -120,7 +120,6 @@ type BlueprintItem = {
   starterCode?: string;
   allowedLanguages: string[];
   sampleTestCases: TestCase[];
-  hiddenTestCount: number;
 };
 
 type StudioTemplate = {
@@ -134,6 +133,9 @@ type StudioTemplate = {
   difficulty: string;
   durationMinutes: number;
   availableModes: string[];
+  itemCount: number;
+  codingCount: number;
+  includesCoding: boolean;
   blueprint: {
     rubricVersion?: string;
     items: BlueprintItem[];
@@ -253,7 +255,6 @@ function normalizeItem(value: unknown, index: number): BlueprintItem {
     starterCode: asString(item.starterCode || item.scaffold),
     allowedLanguages: languages.length ? languages : ["javascript"],
     sampleTestCases: tests,
-    hiddenTestCount: asNumber(asRecord(item.testCaseSummary).hiddenCount, 0),
   };
 }
 
@@ -273,6 +274,9 @@ function normalizeTemplate(value: unknown, index: number): StudioTemplate {
     availableModes: asArray(template.availableModes || template.modes || template.supportedModes || blueprint.allowedModes)
       .map((mode) => asString(mode))
       .filter(Boolean),
+    itemCount: asNumber(template.itemCount || blueprint.itemCount, asArray(blueprint.items || template.items).length),
+    codingCount: asNumber(template.codingCount || blueprint.codingCount, asArray(blueprint.items || template.items).filter((item) => isCodingItem(normalizeItem(item, 0))).length),
+    includesCoding: asBoolean(template.includesCoding, asBoolean(blueprint.includesCoding, asArray(blueprint.items || template.items).some((item) => isCodingItem(normalizeItem(item, 0))))),
     blueprint: {
       rubricVersion: asString(blueprint.rubricVersion),
       items: asArray(blueprint.items || template.items).map(normalizeItem),
@@ -402,10 +406,9 @@ export default function InterviewStudio() {
     consentVersion: "unavailable",
   });
   const [privacyUnderstood, setPrivacyUnderstood] = useState(false);
-  const [actionBusy, setActionBusy] = useState<"create" | "start" | "submit" | "delete" | null>(null);
+  const [actionBusy, setActionBusy] = useState<"create" | "start" | "reveal" | "submit" | "delete" | null>(null);
   const [submitDialogOpen, setSubmitDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(0);
   const [drafts, setDrafts] = useState<Record<string, ResponseDraft>>({});
   const draftsRef = useRef(drafts);
   const [pendingKeys, setPendingKeys] = useState<Set<string>>(new Set());
@@ -454,8 +457,12 @@ export default function InterviewStudio() {
     }, 0);
   }, [session]);
   const items = sessionTemplate.blueprint.items;
-  const currentItem = items[currentIndex];
-  const hasCoding = items.some(isCodingItem);
+  const navigation = asRecord(session.navigation);
+  const currentIndex = asNumber(navigation.currentIndex, 0);
+  const navigationCursor = asString(navigation.cursor);
+  const totalItemCount = asNumber(navigation.totalItems, sessionTemplate.itemCount || items.length);
+  const currentItem = items[0];
+  const hasCoding = sessionTemplate.includesCoding || items.some(isCodingItem);
 
   const sessionStatus = asString(session.status, "draft").toLowerCase();
   const isDraftSession = ["created", "draft", "ready", "pending"].includes(sessionStatus);
@@ -566,7 +573,7 @@ export default function InterviewStudio() {
   }, [postEvent]);
 
   useEffect(() => {
-    if (!sessionId || !items.length || initializedSessionRef.current === sessionId) return;
+    if (!sessionId || !items.length || initializedSessionRef.current === `${sessionId}:${items.length}`) return;
     const responseValue = session.responses || session.answers || {};
     const responseArray = Array.isArray(responseValue) ? responseValue : Object.values(asRecord(responseValue));
     const responseByKey = new Map<string, JsonRecord>();
@@ -595,11 +602,11 @@ export default function InterviewStudio() {
     });
     setDrafts(initialDrafts);
     setPendingKeys(backupPending);
-    initializedSessionRef.current = sessionId;
+    initializedSessionRef.current = `${sessionId}:${items.length}`;
   }, [items, session.answers, session.responses, sessionId]);
 
   useEffect(() => {
-    if (!sessionId || initializedSessionRef.current !== sessionId) return;
+    if (!sessionId || !initializedSessionRef.current.startsWith(`${sessionId}:`)) return;
     try {
       localStorage.setItem(studioBackupKey(sessionId), JSON.stringify({
         version: 1,
@@ -647,6 +654,7 @@ export default function InterviewStudio() {
         responseText: draft.responseText,
         code: draft.code,
         language: draft.language,
+        navigationCursor,
         timeSpentSeconds: draft.timeSpentSeconds,
       });
       if (draftsRef.current[itemKey]?.updatedAt === savedVersion) {
@@ -663,7 +671,7 @@ export default function InterviewStudio() {
     } finally {
       savingKeysRef.current.delete(itemKey);
     }
-  }, [sessionId]);
+  }, [navigationCursor, sessionId]);
 
   useEffect(() => {
     if (!currentItem || !pendingKeys.has(currentItem.key) || !isOnline || !isActiveSession) return;
@@ -842,11 +850,26 @@ export default function InterviewStudio() {
   };
 
   const navigateItem = async (index: number) => {
-    if (voiceStatus === "recording" || !currentItem) return;
+    if (voiceStatus === "recording" || !currentItem || actionBusy === "reveal" || index !== currentIndex + 1) return;
     if (pendingKeysRef.current.has(currentItem.key) && navigator.onLine) {
       await saveItem(currentItem.key).catch(() => undefined);
     }
-    setCurrentIndex(Math.max(0, Math.min(index, items.length - 1)));
+    const cursor = asString(navigation.cursor);
+    if (!cursor || !sessionId) return;
+    setActionBusy("reveal");
+    try {
+      const response = await apiRequest("POST", `/api/interview-studio/sessions/${sessionId}/items/next`, { cursor });
+      const payload = normalizeSessionPayload(await response.json());
+      queryClient.setQueryData([`/api/interview-studio/sessions/${sessionId}`], payload);
+    } catch (error) {
+      toast({
+        title: "Next prompt could not be opened",
+        description: error instanceof Error ? error.message : "Save the current response and try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setActionBusy(null);
+    }
   };
 
   const uploadVoiceAnswer = useCallback(async (blob: Blob, itemKey: string) => {
@@ -856,6 +879,7 @@ export default function InterviewStudio() {
       const formData = new FormData();
       const extension = blob.type.includes("ogg") ? "ogg" : blob.type.includes("mp4") ? "m4a" : "webm";
       formData.append("audio", blob, `answer-${itemKey}.${extension}`);
+      formData.append("navigationCursor", navigationCursor);
       const response = await fetch(`/api/interview-studio/sessions/${sessionId}/transcribe/${encodeURIComponent(itemKey)}`, {
         method: "POST",
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
@@ -881,7 +905,7 @@ export default function InterviewStudio() {
     } finally {
       voiceChunksRef.current = [];
     }
-  }, [sessionId, toast, token, updateDraft]);
+  }, [navigationCursor, sessionId, toast, token, updateDraft]);
 
   const stopVoiceRecording = useCallback(() => {
     window.clearTimeout(voiceTimeoutRef.current);
@@ -938,6 +962,7 @@ export default function InterviewStudio() {
         itemKey: currentItem.key,
         code: draft.code,
         language: draft.language,
+        navigationCursor,
       });
       const payload = await response.json();
       setRunResults((current) => ({ ...current, [currentItem.key]: payload }));
@@ -1130,7 +1155,6 @@ export default function InterviewStudio() {
           ) : templates.length ? (
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               {templates.map((template) => {
-                const codingCount = template.blueprint.items.filter(isCodingItem).length;
                 return (
                   <Card key={`${template.id}-${template.version}`} className="flex h-full flex-col overflow-hidden border-slate-200 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md">
                     <CardHeader className="space-y-4 pb-4">
@@ -1153,8 +1177,8 @@ export default function InterviewStudio() {
                         ))}
                       </div>
                       <div className="mt-5 grid grid-cols-3 gap-2 border-y border-slate-100 py-4 text-center">
-                        <div><p className="text-sm font-semibold text-slate-900">{template.blueprint.items.length}</p><p className="text-[11px] text-slate-500">Prompts</p></div>
-                        <div><p className="text-sm font-semibold text-slate-900">{codingCount}</p><p className="text-[11px] text-slate-500">Code tasks</p></div>
+                        <div><p className="text-sm font-semibold text-slate-900">{template.itemCount}</p><p className="text-[11px] text-slate-500">Prompts</p></div>
+                        <div><p className="text-sm font-semibold text-slate-900">{template.codingCount}</p><p className="text-[11px] text-slate-500">Code tasks</p></div>
                         <div><p className="text-sm font-semibold text-slate-900">{template.durationMinutes}m</p><p className="text-[11px] text-slate-500">Duration</p></div>
                       </div>
                       <Button
@@ -1208,7 +1232,7 @@ export default function InterviewStudio() {
             <div className="space-y-5 px-5 py-5 sm:px-6">
               <div className="rounded-xl bg-slate-50 p-4 ring-1 ring-slate-200">
                 <p className="font-semibold text-slate-900">{selectedTemplate?.title}</p>
-                <p className="mt-1 text-sm text-slate-600">{selectedTemplate?.durationMinutes} minutes · {selectedTemplate?.blueprint.items.length} prompts · Practice mode</p>
+                <p className="mt-1 text-sm text-slate-600">{selectedTemplate?.durationMinutes} minutes · {selectedTemplate?.itemCount} prompts · Practice mode</p>
               </div>
 
               <div className="space-y-3">
@@ -1240,11 +1264,11 @@ export default function InterviewStudio() {
                 <ConsentOption
                   id="consent-screen"
                   checked={consent.screen}
-                  disabled={!selectedTemplate?.blueprint.items.some(isCodingItem)}
+                  disabled={!selectedTemplate?.includesCoding}
                   onChange={(checked) => setConsent((current) => ({ ...current, screen: checked }))}
                   icon={MonitorUp}
                   title="Screen-share readiness"
-                  description={selectedTemplate?.blueprint.items.some(isCodingItem) ? "Optionally share a screen during coding practice. The screen is not recorded or uploaded." : "This practice does not include a coding task, so screen sharing stays off."}
+                  description={selectedTemplate?.includesCoding ? "Optionally share a screen during coding practice. The screen is not recorded or uploaded." : "This practice does not include a coding task, so screen sharing stays off."}
                 />
               </div>
 
@@ -1293,7 +1317,7 @@ export default function InterviewStudio() {
             <Card className="overflow-hidden border-slate-200 shadow-sm">
               <CardHeader className="border-b border-slate-100 bg-white">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                  <div><p className="text-xs font-semibold uppercase tracking-[0.12em] text-violet-700">Private practice</p><CardTitle className="mt-1 text-2xl">{sessionTemplate.title}</CardTitle><p className="mt-2 text-sm text-slate-600">{sessionTemplate.targetRole} · {sessionTemplate.durationMinutes} minutes · {items.length} prompts</p></div>
+                  <div><p className="text-xs font-semibold uppercase tracking-[0.12em] text-violet-700">Private practice</p><CardTitle className="mt-1 text-2xl">{sessionTemplate.title}</CardTitle><p className="mt-2 text-sm text-slate-600">{sessionTemplate.targetRole} · {sessionTemplate.durationMinutes} minutes · {totalItemCount} prompts</p></div>
                   <Badge variant="outline" className="w-fit border-emerald-200 bg-emerald-50 text-emerald-700">Not recruiter-visible</Badge>
                 </div>
               </CardHeader>
@@ -1345,12 +1369,12 @@ export default function InterviewStudio() {
             <Card className="border-slate-200 shadow-sm">
               <CardHeader><CardTitle className="text-base">Before you begin</CardTitle></CardHeader>
               <CardContent className="space-y-3 pt-0">
-                <ChecklistRow complete label={`${items.length} prompts loaded`} />
+                <ChecklistRow complete label={`${totalItemCount} prompts will be revealed one at a time`} />
                 <ChecklistRow complete={isOnline} label={isOnline ? "Network connected" : "Offline backup active"} />
                 <ChecklistRow complete={!sessionConsent.camera || cameraStatus === "active"} label={sessionConsent.camera ? "Camera checked" : "Camera not selected"} muted={!sessionConsent.camera} />
                 <ChecklistRow complete={!sessionConsent.microphone || microphoneActive} label={sessionConsent.microphone ? "Microphone checked" : "Microphone not selected"} muted={!sessionConsent.microphone} />
                 <ChecklistRow complete={!sessionConsent.screen || screenStatus === "active"} label={sessionConsent.screen ? "Screen share checked" : "Screen not selected"} muted={!sessionConsent.screen} />
-                <Button className="mt-3 w-full" disabled={actionBusy === "start" || !isOnline || items.length === 0} onClick={startSession}>{actionBusy === "start" ? <Loader2 className="animate-spin" /> : <Play />}Start practice</Button>
+                <Button className="mt-3 w-full" disabled={actionBusy === "start" || !isOnline || totalItemCount === 0} onClick={startSession}>{actionBusy === "start" ? <Loader2 className="animate-spin" /> : <Play />}Start practice</Button>
                 <p className="text-center text-[11px] leading-4 text-slate-500">Starting confirms the consent choices recorded for this session.</p>
               </CardContent>
             </Card>
@@ -1399,7 +1423,7 @@ export default function InterviewStudio() {
           ) : null}
 
           <div className="grid gap-4 sm:grid-cols-3">
-            <MetricCard label="Prompts" value={String(items.length)} helper="Versioned blueprint" icon={FileText} />
+            <MetricCard label="Prompts" value={String(totalItemCount)} helper="Server-sequenced session" icon={FileText} />
             <MetricCard label="Answered" value={String(items.filter((item) => hasMeaningfulResponse(item, drafts[item.key])).length || asNumber(session.answeredCount, 0))} helper="Submitted responses" icon={CheckCircle2} />
             <MetricCard label="Visibility" value="Private" helper="Not shared with recruiters" icon={LockKeyhole} />
           </div>
@@ -1472,14 +1496,14 @@ export default function InterviewStudio() {
         <div className="grid gap-5 xl:grid-cols-[260px_minmax(0,1fr)_260px]">
           <aside className="order-2 xl:order-1">
             <Card className="border-slate-200 shadow-sm xl:sticky xl:top-40">
-              <CardHeader className="pb-3"><div className="flex items-center justify-between"><CardTitle className="text-base">Questions</CardTitle><span className="text-xs font-medium text-slate-500">{answeredCount}/{items.length} answered</span></div></CardHeader>
+              <CardHeader className="pb-3"><div className="flex items-center justify-between"><CardTitle className="text-base">Questions</CardTitle><span className="text-xs font-medium text-slate-500">{answeredCount}/{totalItemCount} answered</span></div></CardHeader>
               <CardContent className="pt-0">
                 <div className="grid grid-cols-5 gap-2 sm:grid-cols-8 xl:grid-cols-4" role="navigation" aria-label="Interview question navigator">
-                  {items.map((item, index) => {
+                  {items.map((item) => {
                     const answer = drafts[item.key];
                     const answered = hasMeaningfulResponse(item, answer);
-                    const active = index === currentIndex;
-                    return <button key={item.key} type="button" disabled={voiceStatus === "recording"} onClick={() => void navigateItem(index)} aria-label={`Question ${index + 1}${answered ? ", answered" : ""}`} aria-current={active ? "step" : undefined} className={cn("grid h-11 min-w-11 place-items-center rounded-xl border text-sm font-semibold outline-none transition focus-visible:ring-2 focus-visible:ring-slate-900", active ? "border-slate-950 bg-slate-950 text-white" : answered ? "border-emerald-200 bg-emerald-50 text-emerald-800 hover:border-emerald-300" : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50")}>{index + 1}</button>;
+                    const active = true;
+                    return <button key={item.key} type="button" disabled aria-label={`Question ${currentIndex + 1}${answered ? ", answered" : ""}`} aria-current={active ? "step" : undefined} className={cn("grid h-11 min-w-11 place-items-center rounded-xl border text-sm font-semibold outline-none transition focus-visible:ring-2 focus-visible:ring-slate-900", active ? "border-slate-950 bg-slate-950 text-white" : answered ? "border-emerald-200 bg-emerald-50 text-emerald-800 hover:border-emerald-300" : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50")}>{currentIndex + 1}</button>;
                   })}
                 </div>
                 <div className="mt-4 flex items-center gap-4 text-[11px] text-slate-500"><span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-emerald-500" />Answered</span><span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-slate-300" />Not answered</span></div>
@@ -1491,7 +1515,7 @@ export default function InterviewStudio() {
             {currentItem ? (
               <Card className="overflow-hidden border-slate-200 shadow-sm">
                 <CardHeader className="border-b border-slate-100 bg-white pb-5">
-                  <div className="flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-2"><Badge variant="outline" className={isCodingItem(currentItem) ? "border-blue-200 bg-blue-50 text-blue-700" : "border-violet-200 bg-violet-50 text-violet-700"}>{isCodingItem(currentItem) ? <><Code2 className="mr-1 h-3 w-3" />Hands-on task</> : <><Bot className="mr-1 h-3 w-3" />Interview prompt</>}</Badge><span className="text-xs font-medium text-slate-500">Question {currentIndex + 1} of {items.length}</span></div>{currentItem.timeLimitSeconds && <span className="text-xs text-slate-500">Suggested: {Math.ceil(currentItem.timeLimitSeconds / 60)} min</span>}</div>
+                  <div className="flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-2"><Badge variant="outline" className={isCodingItem(currentItem) ? "border-blue-200 bg-blue-50 text-blue-700" : "border-violet-200 bg-violet-50 text-violet-700"}>{isCodingItem(currentItem) ? <><Code2 className="mr-1 h-3 w-3" />Hands-on task</> : <><Bot className="mr-1 h-3 w-3" />Interview prompt</>}</Badge><span className="text-xs font-medium text-slate-500">Question {currentIndex + 1} of {totalItemCount}</span></div>{currentItem.timeLimitSeconds && <span className="text-xs text-slate-500">Suggested: {Math.ceil(currentItem.timeLimitSeconds / 60)} min</span>}</div>
                   <CardTitle className="mt-4 text-xl leading-7 sm:text-2xl">{currentItem.title}</CardTitle>
                   <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-700">{currentItem.prompt}</p>
                   {currentItem.description && <p className="mt-3 rounded-xl bg-slate-50 p-3 text-xs leading-5 text-slate-600">{currentItem.description}</p>}
@@ -1505,7 +1529,7 @@ export default function InterviewStudio() {
                       </div>
                       <div><Label htmlFor={`code-${currentItem.key}`} className="text-sm font-semibold">Your solution</Label><Textarea id={`code-${currentItem.key}`} spellCheck={false} autoCapitalize="off" autoCorrect="off" value={draft?.code || ""} onChange={(event) => updateDraft(currentItem.key, { code: event.target.value })} className="mt-2 min-h-[340px] resize-y rounded-xl border-slate-300 bg-slate-950 p-4 font-mono text-[13px] leading-6 text-slate-100 caret-white focus-visible:ring-blue-500" aria-describedby={`code-help-${currentItem.key}`} /><p id={`code-help-${currentItem.key}`} className="mt-2 text-xs text-slate-500">Write a complete solution. Sample tests are visible; final evaluation can include hidden tests.</p></div>
 
-                      <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4"><div className="flex items-center justify-between gap-3"><p className="text-sm font-semibold text-slate-900">Visible sample cases</p><span className="text-right text-xs text-slate-500">{currentItem.sampleTestCases.length} visible{currentItem.hiddenTestCount ? ` · ${currentItem.hiddenTestCount} hidden final` : ""}</span></div>{currentItem.sampleTestCases.length ? <div className="mt-3 space-y-3">{currentItem.sampleTestCases.map((test, index) => <div key={test.id || index} className="rounded-xl border border-slate-200 bg-white p-3"><p className="text-xs font-semibold text-slate-800">{test.name || `Sample ${index + 1}`}</p>{test.description && <p className="mt-1 text-xs text-slate-500">{test.description}</p>}<div className="mt-3 grid gap-3 sm:grid-cols-2"><div><p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Input</p><pre className="mt-1 overflow-x-auto whitespace-pre-wrap rounded-lg bg-slate-950 p-2.5 text-xs text-slate-100">{displayTestValue(test.input)}</pre></div><div><p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Expected</p><pre className="mt-1 overflow-x-auto whitespace-pre-wrap rounded-lg bg-slate-950 p-2.5 text-xs text-slate-100">{displayTestValue(test.expectedOutput)}</pre></div></div></div>)}</div> : <p className="mt-3 text-xs leading-5 text-slate-600">This task does not publish sample cases. Your code can still be saved for review.</p>}</div>
+                      <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4"><div className="flex items-center justify-between gap-3"><p className="text-sm font-semibold text-slate-900">Visible sample cases</p><span className="text-right text-xs text-slate-500">{currentItem.sampleTestCases.length} visible</span></div>{currentItem.sampleTestCases.length ? <div className="mt-3 space-y-3">{currentItem.sampleTestCases.map((test, index) => <div key={test.id || index} className="rounded-xl border border-slate-200 bg-white p-3"><p className="text-xs font-semibold text-slate-800">{test.name || `Sample ${index + 1}`}</p>{test.description && <p className="mt-1 text-xs text-slate-500">{test.description}</p>}<div className="mt-3 grid gap-3 sm:grid-cols-2"><div><p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Input</p><pre className="mt-1 overflow-x-auto whitespace-pre-wrap rounded-lg bg-slate-950 p-2.5 text-xs text-slate-100">{displayTestValue(test.input)}</pre></div><div><p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Expected</p><pre className="mt-1 overflow-x-auto whitespace-pre-wrap rounded-lg bg-slate-950 p-2.5 text-xs text-slate-100">{displayTestValue(test.expectedOutput)}</pre></div></div></div>)}</div> : <p className="mt-3 text-xs leading-5 text-slate-600">This task does not publish sample cases. Your code can still be saved for review.</p>}</div>
 
                       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><Button onClick={runSamples} disabled={!status.codeRunnerEnabled || runningItemKey === currentItem.key || !draft?.code.trim() || !isOnline}>{runningItemKey === currentItem.key ? <Loader2 className="animate-spin" /> : <Play />}{status.codeRunnerEnabled ? "Run visible samples" : "Code runner not configured"}</Button><p className="text-xs text-slate-500">Running samples does not submit the interview.</p></div>
 
@@ -1534,7 +1558,7 @@ export default function InterviewStudio() {
                     </>
                   )}
 
-                  <div className="flex flex-col gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:items-center sm:justify-between"><Button variant="outline" disabled={currentIndex === 0 || voiceStatus === "recording"} onClick={() => void navigateItem(currentIndex - 1)}><ArrowLeft />Previous</Button><div className="text-center text-xs text-slate-500">{pendingKeys.has(currentItem.key) ? "Changes pending sync" : "Current answer saved"}</div>{currentIndex < items.length - 1 ? <Button disabled={voiceStatus === "recording"} onClick={() => void navigateItem(currentIndex + 1)}>Next<ArrowRight /></Button> : <Button onClick={() => setSubmitDialogOpen(true)}>Review & submit<Check /></Button>}</div>
+                  <div className="flex flex-col gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:items-center sm:justify-between"><Button variant="outline" disabled><ArrowLeft />Previous unavailable</Button><div className="text-center text-xs text-slate-500">{pendingKeys.has(currentItem.key) ? "Changes pending sync" : "Current answer saved"}</div>{currentIndex < totalItemCount - 1 ? <Button disabled={voiceStatus === "recording" || actionBusy === "reveal" || !hasMeaningfulResponse(currentItem, draft)} onClick={() => void navigateItem(currentIndex + 1)}>{actionBusy === "reveal" ? <Loader2 className="animate-spin" /> : null}Next<ArrowRight /></Button> : <Button onClick={() => setSubmitDialogOpen(true)}>Review & submit<Check /></Button>}</div>
                 </CardContent>
               </Card>
             ) : <Card><CardContent className="py-14 text-center text-sm text-slate-600">This interview blueprint has no questions.</CardContent></Card>}
@@ -1563,8 +1587,8 @@ export default function InterviewStudio() {
 
       <AlertDialog open={submitDialogOpen} onOpenChange={setSubmitDialogOpen}>
         <AlertDialogContent className="rounded-2xl border-slate-200">
-          <AlertDialogHeader><AlertDialogTitle>Submit this practice session?</AlertDialogTitle><AlertDialogDescription className="leading-6">You answered {answeredCount} of {items.length} prompts. Submitted practice stays private. You cannot edit answers after submission.</AlertDialogDescription></AlertDialogHeader>
-          {answeredCount < items.length && <Alert className="border-amber-200 bg-amber-50 text-amber-950"><AlertCircle className="h-4 w-4" /><AlertTitle>Some prompts are unanswered</AlertTitle><AlertDescription>You can submit now, or return and complete them.</AlertDescription></Alert>}
+          <AlertDialogHeader><AlertDialogTitle>Submit this practice session?</AlertDialogTitle><AlertDialogDescription className="leading-6">You answered {answeredCount} of {totalItemCount} prompts. Submitted practice stays private. You cannot edit answers after submission.</AlertDialogDescription></AlertDialogHeader>
+          {answeredCount < totalItemCount && <Alert className="border-amber-200 bg-amber-50 text-amber-950"><AlertCircle className="h-4 w-4" /><AlertTitle>Some prompts are unanswered</AlertTitle><AlertDescription>You can submit now, or return and complete them.</AlertDescription></Alert>}
         {(voiceStatus === "recording" || voiceStatus === "uploading") && <p className="text-sm font-medium text-amber-700">Finish the voice answer and review its transcript before submitting.</p>}
           <AlertDialogFooter><AlertDialogCancel>Keep working</AlertDialogCancel><AlertDialogAction disabled={actionBusy === "submit" || !isOnline || voiceStatus === "recording" || voiceStatus === "uploading"} onClick={(event) => { event.preventDefault(); void submitSession(false); }}>{actionBusy === "submit" && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Submit private practice</AlertDialogAction></AlertDialogFooter>
         </AlertDialogContent>

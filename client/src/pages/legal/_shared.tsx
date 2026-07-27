@@ -3,9 +3,8 @@ import { Link } from "wouter";
 export const COMPANY = {
   legalName: "Octamy Solutions Private Limited",
   brandName: "Octamy",
-  // The following identifiers are populated from environment configuration on
-  // the server-rendered legal pages. Until provided, we display "Available on
-  // request" rather than literal TODO markers in user-facing copy.
+  // Legal identifiers are populated from environment configuration. When an
+  // identifier is absent, the page directs users to the legal contact instead.
   cin: import.meta.env.VITE_COMPANY_CIN || "Available on request — write to legal@octamy.com",
   gstin: import.meta.env.VITE_COMPANY_GSTIN || "Available on request — write to legal@octamy.com",
   registeredAddress:
