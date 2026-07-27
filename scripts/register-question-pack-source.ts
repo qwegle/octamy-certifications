@@ -2,6 +2,7 @@
 
 import "dotenv/config";
 
+import { createHash } from "node:crypto";
 import { constants } from "node:fs";
 import { open } from "node:fs/promises";
 import path from "node:path";
@@ -12,10 +13,37 @@ import { normalizeQuestionPackManifest } from "./lib/question-pack-contract";
 
 const { Client } = pg;
 const MAX_MANIFEST_BYTES = 256 * 1024;
+const MAX_RIGHTS_EVIDENCE_BYTES = 20 * 1024 * 1024;
+
+export async function readRightsEvidence(evidencePathValue: string) {
+  const evidencePath = path.resolve(evidencePathValue);
+  const evidenceHandle = await open(evidencePath, constants.O_RDONLY | constants.O_NOFOLLOW).catch((error) => {
+    if ((error as NodeJS.ErrnoException).code === "ELOOP") {
+      throw new Error("Rights evidence path must not be a symbolic link");
+    }
+    throw error;
+  });
+  try {
+    const stat = await evidenceHandle.stat();
+    if (!stat.isFile() || stat.size < 1 || stat.size > MAX_RIGHTS_EVIDENCE_BYTES) {
+      throw new Error(`Rights evidence must be a non-empty regular local file no larger than ${MAX_RIGHTS_EVIDENCE_BYTES} bytes`);
+    }
+    const bytes = await evidenceHandle.readFile();
+    return {
+      fileName: path.basename(evidencePath),
+      byteLength: bytes.byteLength,
+      sha256: createHash("sha256").update(bytes).digest("hex"),
+    };
+  } finally {
+    await evidenceHandle.close();
+  }
+}
 
 export async function registerQuestionPackSource(options: {
   databaseUrl: string;
   manifestPath: string;
+  evidencePath: string;
+  acquiringEntity: string;
   operator: string;
   confirmRights: boolean;
 }) {
@@ -23,9 +51,14 @@ export async function registerQuestionPackSource(options: {
   if (operator.length < 3 || operator.length > 200) {
     throw new Error("--operator must identify the rights reviewer in 3-200 characters");
   }
+  const acquiringEntity = options.acquiringEntity.trim();
+  if (acquiringEntity.length < 3 || acquiringEntity.length > 240) {
+    throw new Error("--acquiring-entity must name the legal entity holding the asserted rights");
+  }
   if (!options.confirmRights) {
     throw new Error("--confirm-rights is required; source rights must be explicitly reviewed before registration");
   }
+  const rightsEvidence = await readRightsEvidence(options.evidencePath);
 
   const manifestPath = path.resolve(options.manifestPath);
   const manifestHandle = await open(manifestPath, constants.O_RDONLY | constants.O_NOFOLLOW).catch((error) => {
@@ -102,6 +135,12 @@ export async function registerQuestionPackSource(options: {
         JSON.stringify({
           schemaVersion: manifest.schemaVersion,
           ...manifest.provenance,
+          rightsReview: {
+            acquiringEntity,
+            evidenceFileName: rightsEvidence.fileName,
+            evidenceByteLength: rightsEvidence.byteLength,
+            evidenceSha256: rightsEvidence.sha256,
+          },
         }),
         operator,
       ],
@@ -121,8 +160,9 @@ export async function registerQuestionPackSource(options: {
       id: number;
       manifest_sha256: string;
       rights_review_status: string;
+      provenance: Record<string, unknown>;
     }>(
-      `SELECT id, manifest_sha256, rights_review_status
+      `SELECT id, manifest_sha256, rights_review_status, provenance
          FROM question_pack_sources
         WHERE source_key = $1`,
       [manifest.sourceKey],
@@ -136,6 +176,13 @@ export async function registerQuestionPackSource(options: {
     }
     if (row.rights_review_status !== "verified") {
       throw new Error("Existing source rights are not verified; registration cannot silently override a review decision");
+    }
+    const recordedReview = row.provenance?.rightsReview as Record<string, unknown> | undefined;
+    if (recordedReview?.acquiringEntity !== acquiringEntity
+      || recordedReview?.evidenceSha256 !== rightsEvidence.sha256) {
+      throw new Error(
+        "SOURCE_RIGHTS_EVIDENCE_IMMUTABLE: the existing source does not carry the same acquiring entity and evidence hash; use legal review rather than overwriting it",
+      );
     }
     return {
       status: "already_registered" as const,
@@ -153,6 +200,8 @@ async function main() {
   const { values } = parseArgs({
     options: {
       manifest: { type: "string" },
+      "evidence-file": { type: "string" },
+      "acquiring-entity": { type: "string" },
       operator: { type: "string" },
       "confirm-rights": { type: "boolean", default: false },
     },
@@ -160,13 +209,17 @@ async function main() {
   });
   if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL is required");
   if (!values.manifest) throw new Error("--manifest <local-manifest.json> is required");
+  if (!values["evidence-file"]) throw new Error("--evidence-file <local-proof-file> is required");
+  if (!values["acquiring-entity"]) throw new Error("--acquiring-entity <legal-entity-name> is required");
   if (!values.operator) throw new Error("--operator <rights-reviewer> is required");
 
   const result = await registerQuestionPackSource({
     databaseUrl: process.env.DATABASE_URL,
     manifestPath: values.manifest,
+    evidencePath: values["evidence-file"],
+    acquiringEntity: values["acquiring-entity"],
     operator: values.operator,
-    confirmRights: values["confirm-rights"],
+    confirmRights: values["confirm-rights"] === true,
   });
   process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
 }

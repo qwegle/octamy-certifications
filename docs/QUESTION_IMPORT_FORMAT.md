@@ -48,3 +48,45 @@ topic,question,format,optionA,optionB,optionC,optionD,correctAnswer,marks,negati
 - Each invalid row is reported with `{ row, message }`; valid rows still commit.
 - `dryRun=true` returns `{ totalRows, valid, errors, preview }` and inserts nothing.
 - The import respects the bank owner's plan limits — exceeding them returns `402` with `code: PLAN_LIMIT_QUESTIONS`.
+
+## Certification-grade imports (JSONL only)
+
+The CSV/XLSX endpoint above is a convenience intake path for manually reviewed,
+private draft banks. It does **not** create immutable question-pack source,
+import-run, or per-record provenance rows and must not be used to make imported
+certification questions publishable.
+
+Certification and first-party Practice content must use the versioned JSONL
+workflow:
+
+1. Register an immutable source manifest with a separate rights reviewer, the
+   acquiring legal entity, and a local contract/assignment/permission artifact:
+
+   ```sh
+   npm run questions:register-source -- \
+     --manifest content/question-packs/<pack>.manifest.json \
+     --evidence-file /restricted/rights-register/<proof-file> \
+     --acquiring-entity "<exact legal entity>" \
+     --operator "<named rights reviewer>" \
+     --confirm-rights
+   ```
+
+   Only the proof file name, byte length, and SHA-256 are stored in provenance;
+   the proof document itself remains in the restricted rights register. A Git
+   commit, publisher credit, or free-text ownership claim is not sufficient.
+
+2. Validate and import through `scripts/import-question-pack.ts`. Imports remain
+   `pending` and inactive; registration or import never approves or publishes.
+3. Every item intended for release must include
+   `metadata.releaseEvidence` with:
+   - `syllabusVersion`
+   - `objectiveCode`
+   - `answerValidation.status = "verified"`
+   - `answerValidation.method` and `answerValidation.reference`
+   - `distractorReview.status = "verified"` and `distractorReview.note`
+4. A named reviewer distinct from the attributable author must review every
+   exact item version through the normal review service. Activation, blueprint
+   configuration, acceptance checks, and publication are separate guarded acts.
+
+Do not relabel CSV-imported rows as human-authored or use direct SQL to bypass
+provenance and independent-review requirements.

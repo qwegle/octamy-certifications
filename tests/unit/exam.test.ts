@@ -117,20 +117,20 @@ describe('Exam storage contracts', () => {
   describe('Question management', () => {
     it('gets active legacy questions for a course', async () => {
       const questions = await storage.getQuestionsByCourse(
-        testData.testCourse.id,
+        testData.testExamCourse.id,
       );
 
       expect(questions).toHaveLength(2);
       expect(
         questions.every(
-          (question) => question.courseId === testData.testCourse.id,
+          (question) => question.courseId === testData.testExamCourse.id,
         ),
       ).toBe(true);
     });
 
     it('creates a multiple-choice question with structured options', async () => {
       const questionData = {
-        courseId: testData.testCourse.id,
+        courseId: testData.testExamCourse.id,
         question: 'What is the result of 5 + 5?',
         options: ['8', '9', '10', '11'],
         correctAnswer: 2,
@@ -149,7 +149,7 @@ describe('Exam storage contracts', () => {
 
     it('updates an existing question', async () => {
       const [question] = await storage.getQuestionsByCourse(
-        testData.testCourse.id,
+        testData.testExamCourse.id,
       );
 
       const updatedQuestion = await storage.updateQuestion(question.id, {
@@ -163,7 +163,7 @@ describe('Exam storage contracts', () => {
 
     it('excludes inactive questions from an exam question set', async () => {
       await storage.createQuestion({
-        courseId: testData.testCourse.id,
+        courseId: testData.testExamCourse.id,
         question: 'Inactive question',
         options: ['A', 'B'],
         correctAnswer: 0,
@@ -172,7 +172,7 @@ describe('Exam storage contracts', () => {
       });
 
       const questions = await storage.getQuestionsByCourse(
-        testData.testCourse.id,
+        testData.testExamCourse.id,
       );
 
       expect(questions.map((question) => question.question)).not.toContain(

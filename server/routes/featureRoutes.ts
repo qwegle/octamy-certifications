@@ -71,7 +71,7 @@ import {
   scoreScheduledQuestionSnapshots,
   toScheduledQuestionPayload,
 } from '../lib/scheduled-exam-attempt';
-import { createCashfreeOrder } from '../lib/cashfree';
+import { createCashfreeOrder, createCashfreeStatusToken } from '../lib/cashfree';
 import { storage } from '../storage';
 import { emailService } from '../utils/emailService';
 import {
@@ -198,6 +198,14 @@ const examStartLimiter = rateLimit({
     message: 'Too many unsuccessful attempts to start this assessment. Wait before trying again.',
     code: 'EXAM_START_RATE_LIMITED',
   },
+});
+
+const commerceCheckoutLimiter = rateLimit({
+  windowMs: 60_000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: 'Too many checkout attempts. Please wait and try again.' },
 });
 
 // ====================================================================
@@ -430,7 +438,7 @@ router.post('/courses/:id/enrol-free', authenticateToken, async (req: Request, r
   }
 });
 
-router.post('/courses/:id/access-checkout', authenticateToken, async (req: Request, res: Response) => {
+router.post('/courses/:id/access-checkout', authenticateToken, commerceCheckoutLimiter, async (req: Request, res: Response) => {
   try {
     const courseId = Number(req.params.id);
     const [course] = await db.select().from(courses).where(eq(courses.id, courseId));
@@ -471,23 +479,32 @@ router.post('/courses/:id/access-checkout', authenticateToken, async (req: Reque
       cashfreeOrderId: orderId,
       gatewayStatusRaw: { kind: 'course_access', courseId, userId: user.id, sellerCode, ...couponPaymentMetadata(couponQuote) },
     } as any);
-    const baseUrl = `${req.protocol}://${req.get('host')}`;
-    const order = await createCashfreeOrder({
-      orderId,
-      amount: amount.toFixed(2),
-      customerId: `oct_user_${user.id}`,
-      customerName: user.name,
-      customerEmail: user.email,
-      customerPhone: typeof req.body?.phone === 'string' && req.body.phone.trim() ? req.body.phone.trim() : '9999999999',
-      returnUrl: `${baseUrl}/learn/${encodeURIComponent(course.slug)}?order_id=${encodeURIComponent(orderId)}`,
-      notifyUrl: `${baseUrl}/api/webhooks/cashfree`,
-      notes: { kind: 'course_access', paymentDbId: String(payment.id), courseId: String(courseId), userId: String(user.id), sellerCode },
-    });
+    const baseUrl = (process.env.APP_URL || process.env.PUBLIC_URL || `${req.protocol}://${req.get('host')}`).replace(/\/+$/, '');
+    let order;
+    try {
+      order = await createCashfreeOrder({
+        orderId,
+        amount: amount.toFixed(2),
+        customerId: `oct_user_${user.id}`,
+        customerName: user.name,
+        customerEmail: user.email,
+        customerPhone: typeof req.body?.phone === 'string' && req.body.phone.trim() ? req.body.phone.trim() : '9999999999',
+        returnUrl: `${baseUrl}/learn/${encodeURIComponent(course.slug)}?order_id=${encodeURIComponent(orderId)}`,
+        notifyUrl: `${baseUrl}/api/webhooks/cashfree`,
+        notes: { kind: 'course_access', paymentDbId: String(payment.id), courseId: String(courseId), userId: String(user.id), sellerCode },
+      });
+    } catch (providerError) {
+      await storage.updatePayment(payment.id, {
+        status: 'failed',
+        gatewayStatusRaw: { kind: 'course_access', courseId, userId: user.id, sellerCode, ...couponPaymentMetadata(couponQuote), reason: 'provider_order_creation_failed' },
+      } as any).catch(() => undefined);
+      throw providerError;
+    }
     await storage.updatePayment(payment.id, {
       cashfreeOrderId: order.orderId,
       gatewayStatusRaw: { kind: 'course_access', courseId, userId: user.id, sellerCode, ...couponPaymentMetadata(couponQuote), providerOrder: order.raw },
     } as any);
-    res.json({ success: true, gateway: 'cashfree', orderId: order.orderId, paymentSessionId: order.paymentSessionId, paymentLink: order.paymentLink, amount: amount.toFixed(2), discountAmount: couponQuote?.discountAmount || '0.00' });
+    res.json({ success: true, gateway: 'cashfree', orderId: order.orderId, statusToken: createCashfreeStatusToken(order.orderId), paymentSessionId: order.paymentSessionId, paymentLink: order.paymentLink, amount: amount.toFixed(2), discountAmount: couponQuote?.discountAmount || '0.00' });
   } catch (err: any) {
     if (err instanceof CouponError) return res.status(err.statusCode).json({ message: err.message });
     logger.error('course.access.checkout.error', { err });

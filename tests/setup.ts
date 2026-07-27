@@ -106,25 +106,64 @@ export async function setupTestData() {
     price: '99.00',
     level: 'beginner',
     isActive: true,
-    isInternship: false
+    isInternship: false,
+    ownerType: 'admin',
+    visibility: 'public',
+    certificationMode: 'octamy',
+    assessmentPurpose: 'certification',
+    reviewStatus: 'approved',
+    useBlueprintEngine: false,
+  }).returning();
+
+  // Legacy direct-question delivery remains available only for learning courses.
+  // Certification assessments must use the reviewed blueprint engine, so exam
+  // endpoint tests use this separate non-credential fixture.
+  const [testExamCourse] = await testDb.insert(schema.courses).values({
+    title: 'Test Learning Course',
+    description: 'A disposable learning course for direct-question API tests',
+    slug: 'test-learning-course',
+    categoryId: testCategory.id,
+    duration: 60,
+    passingScore: 70,
+    price: '0.00',
+    productType: 'course',
+    level: 'beginner',
+    isActive: true,
+    isInternship: false,
+    ownerType: 'admin',
+    visibility: 'public',
+    certificationMode: 'none',
+    assessmentPurpose: 'certification',
+    reviewStatus: 'approved',
+    useBlueprintEngine: false,
   }).returning();
 
   // Create test questions
   await testDb.insert(schema.questions).values([
     {
-      courseId: testCourse.id,
+      courseId: testExamCourse.id,
       question: 'What is 2 + 2?',
       options: ['3', '4', '5', '6'],
       correctAnswer: 1,
       difficulty: 'easy',
+      questionFormat: 'mcq_single',
+      reviewStatus: 'approved',
+      createdBy: testUser.id,
+      reviewedBy: adminUser.id,
+      reviewedAt: new Date(),
       isActive: true
     },
     {
-      courseId: testCourse.id,
+      courseId: testExamCourse.id,
       question: 'What is the capital of France?',
       options: ['London', 'Berlin', 'Paris', 'Madrid'],
       correctAnswer: 2,
       difficulty: 'easy',
+      questionFormat: 'mcq_single',
+      reviewStatus: 'approved',
+      createdBy: testUser.id,
+      reviewedBy: adminUser.id,
+      reviewedAt: new Date(),
       isActive: true
     }
   ]);
@@ -133,7 +172,8 @@ export async function setupTestData() {
     testCategory,
     testUser,
     adminUser,
-    testCourse
+    testCourse,
+    testExamCourse,
   };
 }
 

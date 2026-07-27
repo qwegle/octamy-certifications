@@ -1,6 +1,7 @@
 import { and, desc, eq, gte, isNull, sql } from "drizzle-orm";
 import {
   certificates,
+  courses,
   payments,
   type Certificate,
   type Course,
@@ -16,6 +17,7 @@ import {
   isCredentialOwnedBy,
   normalizeCredentialEmail,
 } from "./credential-activation-policy";
+import { isCredentialEligibleAssessment } from "./certificate-policy";
 
 export { amountsMatch, isCredentialOwnedBy } from "./credential-activation-policy";
 
@@ -74,6 +76,13 @@ export async function getCredentialActivationContext(
       "This credential's assessment is no longer available",
       409,
       "COURSE_NOT_AVAILABLE",
+    );
+  }
+  if (!isCredentialEligibleAssessment(course)) {
+    throw new CredentialActivationError(
+      "This assessment is not eligible for credential activation",
+      409,
+      "ASSESSMENT_NOT_CREDENTIAL_ELIGIBLE",
     );
   }
   if (
@@ -274,6 +283,7 @@ export async function finalizeCredentialActivation(
       .select()
       .from(payments)
       .where(eq(payments.id, input.paymentId))
+      .for("update")
       .limit(1);
     if (!payment || !payment.certificateId) {
       throw new CredentialActivationError(
@@ -320,6 +330,20 @@ export async function finalizeCredentialActivation(
     }
     if (payment.status === "completed") {
       return { status: "already_completed", certificate, payment };
+    }
+
+    const [course] = await tx
+      .select()
+      .from(courses)
+      .where(eq(courses.id, certificate.courseId))
+      .for("update")
+      .limit(1);
+    if (!course || !isCredentialEligibleAssessment(course)) {
+      throw new CredentialActivationError(
+        "This assessment is no longer eligible for credential activation",
+        409,
+        "ASSESSMENT_NOT_CREDENTIAL_ELIGIBLE",
+      );
     }
 
     if (certificate.isPaid) {

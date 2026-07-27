@@ -114,6 +114,33 @@ describe("assessment bank readiness", () => {
     });
   });
 
+  it("rejects overlapping blueprint scopes that double-count rotation inventory", () => {
+    const result = evaluateAssessmentPublishReadiness({
+      purpose: "certification",
+      useBlueprintEngine: true,
+      // This union meets 4 x the 40-item draw globally, and every rule appears
+      // sufficient in isolation. The first two scopes still share the same 40
+      // easy items, so runtime exclusion cannot provide four rotations for both.
+      approvedInventory: 160,
+      rules: [
+        { bankId: 3, topicId: 9, questionCount: 10, difficulty: "mixed", approvedInventory: 40 },
+        { bankId: 3, topicId: 9, questionCount: 10, difficulty: "easy", approvedInventory: 40 },
+        { bankId: 4, topicId: 12, questionCount: 20, difficulty: "mixed", approvedInventory: 120 },
+      ],
+    });
+
+    expect(result.requiredInventory).toBe(160);
+    expect(result.ready).toBe(false);
+    expect(result.issues).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        code: "BLUEPRINT_RULE_SCOPE_OVERLAP",
+        bankId: 3,
+        topicId: 9,
+        conflictingTopicId: 9,
+      }),
+    ]));
+  });
+
   it("guards activation, public visibility, and approval transitions for assessments only", () => {
     const draft = {
       productType: "assessment",

@@ -50,10 +50,11 @@ trap on_error ERR
 [[ -d "$APP_DIR/.git" ]] || fail "APP_DIR is not a Git checkout: $APP_DIR"
 [[ -f "$ENV_FILE" ]] || fail "Missing production environment file: $ENV_FILE"
 
-for command in git node npm pm2 curl flock; do
+for command in git node npm pm2 curl flock stat; do
   command -v "$command" >/dev/null 2>&1 || fail "Required command is missing: $command"
 done
 
+[[ "$BRANCH" == "main" ]] || fail "Production deployments are restricted to BRANCH=main"
 [[ "$SKIP_BACKUP" == "0" || "$SKIP_BACKUP" == "1" ]] || fail "SKIP_BACKUP must be 0 or 1"
 [[ "$ADOPT_EXISTING_SCHEMA" == "0" || "$ADOPT_EXISTING_SCHEMA" == "1" ]] || fail "ADOPT_EXISTING_SCHEMA must be 0 or 1"
 [[ "$SEGREGATE_INHOUSE_QUESTIONS" == "0" || "$SEGREGATE_INHOUSE_QUESTIONS" == "1" ]] || \
@@ -61,7 +62,7 @@ done
 [[ "$HEALTH_RETRIES" =~ ^[1-9][0-9]*$ ]] || fail "HEALTH_RETRIES must be a positive integer"
 
 if [[ "$SKIP_BACKUP" == "0" ]]; then
-  for command in pg_dump gzip; do
+  for command in pg_dump gzip sha256sum tail grep awk; do
     command -v "$command" >/dev/null 2>&1 || fail \
       "Required backup command is missing: $command (or set SKIP_BACKUP=1 deliberately)"
   done
@@ -75,36 +76,64 @@ flock -n 9 || fail "Another deployment is already running for $APP_DIR"
 
 cd "$APP_DIR"
 
-# .env is maintained by the server operator and must contain shell-compatible
-# KEY=value entries. Export it for Drizzle and PM2; the app also loads it via
-# dotenv on boot.
+# .env is trusted shell input, must not be a symlink, and must be readable only
+# by the dedicated deploy user before it is sourced.
+[[ ! -L "$ENV_FILE" ]] || fail "Production environment file must not be a symlink: $ENV_FILE"
+env_mode="$(stat -c '%a' "$ENV_FILE")"
+[[ "$env_mode" == "600" ]] || fail "Production environment file must have mode 600; found $env_mode"
 set -a
 # shellcheck disable=SC1090
 source "$ENV_FILE"
 set +a
 
+require_real_value() {
+  local name="$1"
+  local value="$2"
+  local minimum="$3"
+  [[ ${#value} -ge $minimum ]] || fail "$name must contain at least $minimum characters"
+  case "$value" in
+    your_*|YOUR_*|*placeholder*|*PLACEHOLDER*|*example*|*EXAMPLE*|*CHANGE_ME*)
+      fail "$name is still a placeholder" ;;
+  esac
+}
+
 [[ "${NODE_ENV:-}" == "production" ]] || fail "NODE_ENV=production is required in $ENV_FILE"
 [[ -n "${DATABASE_URL:-}" ]] || fail "DATABASE_URL is required in $ENV_FILE"
 jwt_secret="${JWT_SECRET:-}"
 session_secret="${SESSION_SECRET:-}"
+payment_status_secret="${PAYMENT_STATUS_SECRET:-}"
 app_url="${APP_URL:-}"
-[[ -n "$jwt_secret" && "$jwt_secret" != "your-secret-key" && ${#jwt_secret} -ge 24 ]] || \
-  fail "JWT_SECRET must be a non-placeholder value of at least 24 characters"
-[[ -n "$session_secret" && ${#session_secret} -ge 24 ]] || \
-  fail "SESSION_SECRET must be at least 24 characters"
+require_real_value "JWT_SECRET" "$jwt_secret" 24
+require_real_value "SESSION_SECRET" "$session_secret" 24
+require_real_value "PAYMENT_STATUS_SECRET" "$payment_status_secret" 24
+[[ "$payment_status_secret" != "$jwt_secret" ]] || fail "PAYMENT_STATUS_SECRET must be distinct from JWT_SECRET"
 [[ "$app_url" =~ ^https://[^[:space:]/]+/?$ ]] || \
   fail "APP_URL must be the canonical HTTPS production origin"
+[[ "${AUTO_APPROVE_PROFILES:-}" == "false" ]] || \
+  fail "AUTO_APPROVE_PROFILES=false is required for governed production onboarding"
+
+payment_gateway="${PAYMENT_DEFAULT_GATEWAY:-cashfree}"
+payment_gateway="${payment_gateway,,}"
+case "$payment_gateway" in
+  cashfree)
+    [[ "${CASHFREE_ENV:-}" == "production" ]] || fail "CASHFREE_ENV=production is required"
+    require_real_value "CASHFREE_APP_ID" "${CASHFREE_APP_ID:-}" 3
+    require_real_value "CASHFREE_SECRET_KEY" "${CASHFREE_SECRET_KEY:-}" 12
+    require_real_value "CASHFREE_WEBHOOK_SECRET" "${CASHFREE_WEBHOOK_SECRET:-}" 12
+    ;;
+  payu)
+    require_real_value "PAYUMONEY_MERCHANT_ID" "${PAYUMONEY_MERCHANT_ID:-}" 2
+    require_real_value "PAYUMONEY_MERCHANT_KEY" "${PAYUMONEY_MERCHANT_KEY:-}" 3
+    require_real_value "PAYUMONEY_SALT" "${PAYUMONEY_SALT:-}" 8
+    ;;
+  *) fail "PAYMENT_DEFAULT_GATEWAY must be cashfree or payu" ;;
+esac
+
 if [[ -n "${GOOGLE_CLIENT_ID:-}" || -n "${GOOGLE_CLIENT_SECRET:-}" ]]; then
   [[ -n "${GOOGLE_CLIENT_ID:-}" && -n "${GOOGLE_CLIENT_SECRET:-}" ]] || \
     fail "GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET must be configured together"
-  case "$GOOGLE_CLIENT_ID" in
-    your_*|YOUR_*|*placeholder*|*PLACEHOLDER*|*example*|*EXAMPLE*)
-      fail "GOOGLE_CLIENT_ID is still a placeholder" ;;
-  esac
-  case "$GOOGLE_CLIENT_SECRET" in
-    your_*|YOUR_*|*placeholder*|*PLACEHOLDER*|*example*|*EXAMPLE*)
-      fail "GOOGLE_CLIENT_SECRET is still a placeholder" ;;
-  esac
+  require_real_value "GOOGLE_CLIENT_ID" "$GOOGLE_CLIENT_ID" 8
+  require_real_value "GOOGLE_CLIENT_SECRET" "$GOOGLE_CLIENT_SECRET" 8
 fi
 
 node_major="$(node -p 'Number(process.versions.node.split(".")[0])')"
@@ -157,6 +186,9 @@ npm run interviews:sync-catalog
 
 log "Applying the source-controlled Interview Studio catalog"
 npm run interviews:sync-catalog -- --apply --confirm INTERVIEW_STUDIO
+
+log "Verifying governed assessments have no unsafe published entries"
+npm run assessments:inventory -- --mode dry-run --format summary --fail-on-unsafe-published
 
 if [[ "$SEGREGATE_INHOUSE_QUESTIONS" == "1" ]]; then
   log "Dry-running enterprise in-house question-pool segregation"

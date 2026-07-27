@@ -2,7 +2,7 @@
 
 ## Overview
 
-Octamy is a multi-tenant EdTech SaaS platform for the complete digital journey **Learn → Validate → Certify → Get recruited**. Learners build a consent-controlled Skill Evidence Passport; creators and institutes publish courses and proctored assessments; verified recruiters discover candidates against inspectable skill evidence rather than self-reported claims.
+Octamy is a multi-tenant EdTech SaaS platform for the complete digital journey **Learn → Validate → Certify → Get recruited**. Learners build a consent-controlled Skill Evidence Passport; creators and institutes publish courses and assessments; KYC-approved recruiters discover opted-in candidates and request selected evidence rather than relying only on self-reported claims.
 
 ## Architecture
 
@@ -11,19 +11,14 @@ The application follows a clean MVC (Model-View-Controller) architecture:
 
 ```
 server/
-├── controllers/         # Business logic handlers
-│   ├── authController.ts
-│   ├── courseController.ts
-│   ├── examController.ts
-│   ├── certificateController.ts
-│   └── paymentController.ts
-├── middleware/          # Authentication and validation
-│   └── auth.ts
-├── models/             # Database models (Drizzle ORM)
-├── routes/             # API route definitions
-│   └── index.ts
-├── utils/              # Utility functions
-└── storage.ts          # Database storage interface
+├── controllers/         # Modular request handlers
+├── middleware/          # Authentication and authorization
+├── routes/              # Domain route modules
+├── lib/                 # Policy, payment, assessment, and security logic
+├── utils/               # Delivery and document utilities
+├── routes.ts            # Legacy/direct routes and composition
+└── storage.ts           # Drizzle-backed storage interface
+shared/schema.ts         # Shared Drizzle schema
 ```
 
 ### Database Schema
@@ -33,7 +28,7 @@ server/
 - **Questions**: Multiple-choice questions with correct answers
 - **Exam Attempts**: User exam submissions with scoring
 - **Certificates**: Generated certificates with verification
-- **Payments**: PayUMoney payment gateway integration
+- **Payments**: Cashfree and PayU reservations, callbacks, status polling, and fulfillment records
 - **Sellers**: Partner/affiliate system with commission tracking
 
 ## Technology Stack
@@ -118,9 +113,9 @@ npm run db:migrate
 npm run dev
 ```
 
-The application is available at the `APP_URL` in `.env` (for the current local
-configuration, `http://localhost:8080`). Development startup seeds only the
-safe baseline catalog when it is absent.
+The application is available at the `APP_URL` in `.env`. Development startup
+runs the baseline seed only when categories are absent and requires a private
+`ADMIN_PASSWORD`; the repository provides no default login password.
 
 ## Development
 
@@ -172,7 +167,7 @@ Point `TEST_DATABASE_URL` at a separate disposable database before running
 ### Core Features
 - **Multi-workspace SaaS**: learner, creator, institute, recruiter, partner, and platform-admin workspaces with role-aware access
 - **Courses and assessments**: video/PDF/text curricula, reusable media, question banks, timed exams, and network-safe attempt recovery
-- **Proctored validation**: consented integrity-event collection, auditable evidence, institute result workspaces, and explicit proctoring limitations
+- **Assessment integrity evidence**: consented, bounded browser events and institute result workspaces; this is not webcam recording, biometric identity proof, AI cheating detection, or a guarantee of misconduct detection
 - **Dual-branded credentials**: Octamy verification plus institute branding, QR verification, and evidence-backed certificate tiers
 - **Recruiter discovery**: verified-company search, explicit learner/institute sharing consent, auditable profile unlocks, and transactional credits
 
@@ -181,14 +176,14 @@ Point `TEST_DATABASE_URL` at a separate disposable database before running
 - **Review-first AI course copilot**: structured course details, learning outcomes, modules, lessons, and assessment ideas for creator and institute workspaces without automatic publishing
 - **Creator/institute commerce**: separate content-access and credential prices, attributable seller codes, earnings, payouts, and configurable platform splits
 - **WordPress-style media library**: upload once, inspect metadata/link details, reuse, and delete owned assets
-- **Digital-only operations**: course delivery, assessments, results, credential issuance, sharing, and verification remain online and traceable
+- **Traceable online workflows**: course delivery, assessments, results, digital credential issuance, sharing, verification, and optional physical-copy requests retain auditable server state
 
 ### Security Features
 - **JWT Authentication**: Secure token-based authentication
 - **Password Hashing**: bcrypt password encryption
 - **OAuth integrity**: short-lived, HttpOnly, same-site state cookies and fragment-based token handoff
 - **Tenant authorization**: owner/admin/teacher/staff permissions enforced by backend ownership checks
-- **Payment integrity**: server-side gateway confirmation, idempotent fulfillment, and credit ledgers
+- **Payment integrity**: provider signature/hash and amount checks; transactional idempotency for credential activation; token-bound, non-fulfilling status reads; and auditable credit ledgers
 - **Operational safeguards**: rate limits, CSP/security headers, audit events, health probes, backup-before-migrate deployment, and PM2 readiness verification
 
 ## Deployment
@@ -211,9 +206,11 @@ The user must also be able to create files in the configured backup directory.
 
 Keep the checkout on `main` with no tracked or untracked working-tree changes.
 Store a trusted, shell-compatible production `.env` in the application
-directory, set its mode to `600`, and at minimum configure `NODE_ENV=production`,
-`DATABASE_URL`, `JWT_SECRET`, and `SESSION_SECRET`. Review `.env.example` for the
-remaining OAuth, payment, media-storage, mail, CORS, and public URL settings.
+directory and set its mode to `600`. The preflight requires `NODE_ENV=production`,
+`DATABASE_URL`, canonical HTTPS `APP_URL`, distinct `JWT_SECRET`, `SESSION_SECRET`
+and `PAYMENT_STATUS_SECRET` values, `AUTO_APPROVE_PROFILES=false`, and the full
+credential set for `PAYMENT_DEFAULT_GATEWAY`. Review `.env.example` for OAuth,
+media-storage, mail, CORS, and optional settings.
 
 From the checkout, run:
 
@@ -225,15 +222,19 @@ APP_DIR="$PWD" ./scripts/deploy-production.sh
 The script acquires a per-checkout lock and refuses a dirty tree, the wrong
 branch, a non-fast-forward Git update, or missing production secrets. It then:
 
-1. fetches the selected remote branch with an explicit ref and fast-forwards;
+1. fetches the configured remote's `main` branch with an explicit ref and fast-forwards;
 2. installs the exact lockfile including build tools, type-checks, and builds;
 3. creates and verifies an atomic, timestamped Postgres dump;
-4. applies all pending Drizzle migrations and prunes development dependencies;
-5. reloads (or creates) the PM2 process with the new environment; and
-6. accepts the release only when `/readyz` reports a working database and the
+4. applies all pending Drizzle migrations, synchronizes the Interview Studio catalog,
+   and runs the read-only governed-assessment release gate;
+5. fails if any active/public/approved assessment has strict release blockers,
+   then prunes development dependencies;
+6. reloads (or creates) the PM2 process with the new environment; and
+7. accepts the release only when `/readyz` reports a working database and the
    exact Git commit just deployed, then saves the PM2 process list.
 
-Useful overrides are `BRANCH`, `REMOTE`, `PM2_APP`, `ENV_FILE`, `BACKUP_DIR`,
+Production deployment is restricted to `main`; setting `BRANCH` to any other
+value fails. Useful overrides are `REMOTE`, `PM2_APP`, `ENV_FILE`, `BACKUP_DIR`,
 `HEALTHCHECK_URL`, and `HEALTH_RETRIES`. `SKIP_BACKUP=1` is an explicit emergency
 escape hatch; use it only when a verified provider snapshot already exists. On
 first server setup, configure PM2 startup persistence separately using the
@@ -285,6 +286,25 @@ Ensure all environment variables are set in production:
 - Cashfree or PayU credentials for the gateway enabled in production
 - SSL certificates for HTTPS
 
+### Governed assessment release state
+
+The deploy pipeline runs `assessments:inventory` in a PostgreSQL read-only,
+repeatable-read transaction with `--fail-on-unsafe-published`. It reports
+blockers without mutating data and fails the release when any assessment is
+simultaneously active, public, approved, and not strict-release-ready.
+Migration `0033_unpublish_audited_blocked_assessments.sql` conservatively moves
+the specifically audited blocked Practice shells to inactive/private/pending;
+it preserves questions, provenance, attempts, payments, and learner records.
+
+Source-controlled packs and review records under `content/question-packs/` are
+release candidates, not proof that production questions are approved. An
+authorized operator must register rights evidence and import a candidate; the
+import remains pending/inactive. Every exact imported item version then needs
+attributable independent review, followed by guarded bank activation,
+blueprint/acceptance checks, and separate publication. Do not describe all
+questions—or a whole pack—as approved merely because files or review notes
+exist in Git.
+
 ### Product differentiation
 
 Octamy's core promise is the **Skill Evidence Passport**: a portable record that
@@ -328,12 +348,12 @@ PORT=8081 APP_URL=http://localhost:8081 npm run dev
 3. Token included in Authorization header for protected routes
 4. Middleware validates token and adds user to request object
 
-### Payment Flow
-1. User initiates payment via `/api/payment/initiate`
-2. PayUMoney form generated with secure hash
-3. User redirected to PayUMoney gateway
-4. Success/failure callbacks handle payment completion
-5. Certificate automatically generated on successful payment
+### Payment flow
+1. The server validates authoritative product/assessment state and reserves a checkout.
+2. Cashfree or PayU opens from server-generated gateway data; Cashfree responses include a short-lived status token.
+3. Browser returns and status polling report local state only and never fulfill an order.
+4. Cashfree fulfillment requires a timestamp-bound signed webhook; PayU requires a valid reverse hash plus matching transaction and amount.
+5. Eligible credential activation completes the credential and payment atomically; duplicate activation is detected.
 
 ### Certificate Generation
 1. User completes exam with passing score

@@ -1,4 +1,6 @@
 import { describe, expect, it } from "@jest/globals";
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import { normalizeQuestionPackItem } from "../../scripts/lib/question-pack-contract";
 import {
   TYPESCRIPT_APPLICATION_DEVELOPMENT_SKILLS_V1,
@@ -33,5 +35,14 @@ describe("TypeScript Application Development Skills v1", () => {
       });
       expect(item.metadata.releaseEvidence.objectiveCode).toMatch(/^TSAD-[A-Z]{2}-\d{2}$/);
     }
+  });
+
+  it("exactly reproduces the committed JSONL artifact", () => {
+    const generated = `${TYPESCRIPT_APPLICATION_DEVELOPMENT_SKILLS_V1.map((item) => JSON.stringify(item)).join("\n")}\n`;
+    const committed = readFileSync(
+      path.resolve("content/question-packs/octamy-typescript-application-development-skills-v1.jsonl"),
+      "utf8",
+    );
+    expect(generated).toBe(committed);
   });
 });

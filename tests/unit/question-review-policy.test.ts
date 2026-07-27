@@ -7,8 +7,10 @@ import {
   isIndependentQuestionReviewer,
   isQuestionAssessmentEligible,
   parseImportGenerationSource,
+  questionReviewSeparationIssues,
   requiresIndependentQuestionReview,
 } from "../../server/lib/question-review-policy";
+import { parseQuestionPackReviewDecision } from "../../scripts/review-question-pack";
 
 const now = new Date("2026-07-14T13:00:00.000Z");
 
@@ -75,6 +77,49 @@ describe("question review governance", () => {
     expect(isIndependentQuestionReviewer(null, 8)).toBe(false);
   });
 
+
+  it("rejects importer, rights-reviewer, and author self-approval identities", () => {
+    expect(questionReviewSeparationIssues({
+      authorUserId: 7,
+      reviewerUserId: 7,
+      reviewerOperator: "Named Import Operator",
+      importOperators: [" named import operator "],
+      rightsReviewerOperator: "Other Rights Reviewer",
+    })).toEqual(expect.arrayContaining([
+      "INDEPENDENT_REVIEW_REQUIRED",
+      "IMPORTER_SELF_REVIEW_FORBIDDEN",
+    ]));
+    expect(questionReviewSeparationIssues({
+      authorUserId: 7,
+      reviewerUserId: 8,
+      reviewerOperator: "Named Rights Reviewer",
+      importOperators: ["Named Import Operator"],
+      rightsReviewerOperator: "named rights reviewer",
+    })).toContain("RIGHTS_REVIEWER_SELF_REVIEW_FORBIDDEN");
+    expect(questionReviewSeparationIssues({
+      authorUserId: 7,
+      reviewerUserId: 8,
+      reviewerOperator: "Independent Content Reviewer",
+      importOperators: ["Named Import Operator"],
+      rightsReviewerOperator: "Named Rights Reviewer",
+    })).toEqual([]);
+  });
+
+  it("requires exact source record, content hash, version, decision, and item-specific note", () => {
+    const valid = {
+      sourceRecordId: "raes-v1-039",
+      contentHash: "a".repeat(64),
+      expectedVersion: 1,
+      decision: "approved" as const,
+      note: "raes-v1-039 independently solved and checked against its primary source.",
+    };
+    expect(parseQuestionPackReviewDecision(valid)).toEqual(valid);
+    expect(() => parseQuestionPackReviewDecision({
+      ...valid,
+      note: "Generic approval note that is not tied to the exact source record.",
+    })).toThrow(/sourceRecordId/);
+    expect(() => parseQuestionPackReviewDecision({ ...valid, contentHash: "not-a-hash" })).toThrow();
+  });
   it("exposes the exact scheduled-assessment eligibility predicate", () => {
     expect(isQuestionAssessmentEligible({ isActive: true, reviewStatus: "approved" })).toBe(true);
     expect(isQuestionAssessmentEligible({ isActive: false, reviewStatus: "approved" })).toBe(false);

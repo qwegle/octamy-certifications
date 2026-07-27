@@ -107,7 +107,7 @@ import {
   type RatingAggregate,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, count, sql, or, asc, ilike, gte, gt, lte, isNull, isNotNull, notInArray } from "drizzle-orm";
+import { eq, and, desc, count, sql, or, asc, ilike, gte, gt, lte, isNull, isNotNull, not, notInArray } from "drizzle-orm";
 import {
   isPublishableAssessmentQuestion,
   isPublishedAssessment,
@@ -2830,10 +2830,16 @@ export class DatabaseStorage implements IStorage {
     // verified institute must explicitly enable recruiter discovery.
     const hasCurrentEvidence = sql`EXISTS (
       SELECT 1 FROM certificates c
+      INNER JOIN courses credential_course ON credential_course.id = c.course_id
       WHERE c.user_id = ${users.id}
         AND c.is_active = true
         AND c.is_paid = true
         AND c.expires_at > NOW()
+        AND credential_course.product_type = 'assessment'
+        AND credential_course.assessment_purpose = 'certification'
+        AND credential_course.certification_mode <> 'none'
+        AND credential_course.is_active = true
+        AND credential_course.review_status = 'approved'
     )`;
     const institutePolicyAllowsDiscovery = sql`(
       NOT EXISTS (
@@ -2883,15 +2889,9 @@ export class DatabaseStorage implements IStorage {
       // must fail closed instead of surfacing old prototype data.
       conditions.push(sql`false`);
     }
-    const minScore = Number(safeFilters.minScore);
-    if (Number.isFinite(minScore) && minScore > 0) {
-      conditions.push(sql`EXISTS (
-        SELECT 1 FROM certificates c
-        WHERE c.user_id = ${users.id}
-          AND c.is_active = true AND c.is_paid = true AND c.expires_at > NOW()
-          AND c.score >= ${Math.min(100, minScore)}
-      )`);
-    }
+    // Credential scores are selected evidence. Applying a pre-grant score
+    // filter would let recruiters infer a learner's score through repeated
+    // searches even though the response itself omits credentials.
 
     const whereClause = and(...conditions);
     const allCandidates = await db.select({
@@ -2906,7 +2906,6 @@ export class DatabaseStorage implements IStorage {
       workType: users.workType,
       category: users.category,
       profileCompleteness: users.profileCompleteness,
-      lastActive: users.lastActive,
       hasResume: sql<boolean>`${users.resume} IS NOT NULL AND btrim(${users.resume}) <> ''`.as('has_resume'),
       interviewCount: sql<number>`0::int`.as('interview_count'),
       profileUnlocked: sql<boolean>`EXISTS (
@@ -2924,37 +2923,21 @@ export class DatabaseStorage implements IStorage {
       interviewUnlocked: sql<boolean>`false`.as('interview_unlocked'),
     }).from(users)
       .where(whereClause)
-      .orderBy(desc(users.lastActive))
+      .orderBy(desc(users.profileCompleteness), asc(users.id))
       .limit(safeLimit)
       .offset(offset);
 
-    const candidatesWithDetails = await Promise.all(allCandidates.map(async (candidate) => {
-      const certs = await db.select({
-        id: certificates.id,
-        certificateId: certificates.certificateId,
-        courseTitle: certificates.courseTitle,
-        score: certificates.score,
-        badge: certificates.badge,
-        expiresAt: certificates.expiresAt,
-      }).from(certificates)
-        .where(and(
-          eq(certificates.userId, candidate.id),
-          eq(certificates.isActive, true),
-          eq(certificates.isPaid, true),
-          gt(certificates.expiresAt, new Date()),
-        ))
-        .orderBy(desc(certificates.issuedAt))
-        .limit(3);
-
-      return {
-        ...candidate,
-        certificates: certs,
-        access: {
-          profile: candidate.profileUnlocked,
-          cv: candidate.cvUnlocked,
-          interview: candidate.interviewUnlocked,
-        },
-      };
+    // profileVisibility authorizes discovery only. Exact credential summaries
+    // require a live candidate_evidence_grant for this recruiter and purpose.
+    const candidatesWithDetails = allCandidates.map((candidate) => ({
+      ...candidate,
+      certificates: [],
+      evidenceGrantRequired: true,
+      access: {
+        profile: candidate.profileUnlocked,
+        cv: candidate.cvUnlocked,
+        interview: candidate.interviewUnlocked,
+      },
     }));
 
     const totalResult = await db.select({ count: sql`count(*)` }).from(users).where(whereClause);
@@ -2992,7 +2975,6 @@ export class DatabaseStorage implements IStorage {
       portfolioUrl: users.portfolioUrl,
       bio: users.bio,
       careerGoals: users.careerGoals,
-      lastActive: users.lastActive,
       profileCompleteness: users.profileCompleteness,
       hasResume: sql<boolean>`${users.resume} IS NOT NULL AND btrim(${users.resume}) <> ''`.as('has_resume'),
     }).from(users).where(and(
@@ -3001,8 +2983,14 @@ export class DatabaseStorage implements IStorage {
       eq(users.isAdmin, false),
       sql`EXISTS (
         SELECT 1 FROM certificates c
+        INNER JOIN courses credential_course ON credential_course.id = c.course_id
         WHERE c.user_id = ${users.id}
           AND c.is_active = true AND c.is_paid = true AND c.expires_at > NOW()
+          AND credential_course.product_type = 'assessment'
+          AND credential_course.assessment_purpose = 'certification'
+          AND credential_course.certification_mode <> 'none'
+          AND credential_course.is_active = true
+          AND credential_course.review_status = 'approved'
       )`,
       sql`(
         NOT EXISTS (
@@ -3023,23 +3011,8 @@ export class DatabaseStorage implements IStorage {
 
     if (candidate.length === 0) return null;
 
-    const certs = await db.select({
-      id: certificates.id,
-      courseTitle: certificates.courseTitle,
-      score: certificates.score,
-      badge: certificates.badge,
-      issuedAt: certificates.issuedAt,
-      expiresAt: certificates.expiresAt,
-      certificateId: certificates.certificateId,
-    }).from(certificates)
-      .where(and(
-        eq(certificates.userId, candidateId),
-        eq(certificates.isActive, true),
-        eq(certificates.isPaid, true),
-        gt(certificates.expiresAt, new Date()),
-      ))
-      .orderBy(desc(certificates.issuedAt));
-
+    // The profile unlock covers contact/profile data, not credentials. Selected
+    // credential and practice summaries are served only by the grant endpoint.
     const [cvAccess] = await db.select({ id: profileAccessLogs.id })
       .from(profileAccessLogs)
       .where(and(
@@ -3051,7 +3024,8 @@ export class DatabaseStorage implements IStorage {
 
     return {
       ...candidate[0],
-      certificates: certs,
+      certificates: [],
+      evidenceGrantRequired: true,
       interviews: [],
       cvAccessUnlocked: Boolean(cvAccess),
       interviewAccessUnlocked: false,
@@ -3100,10 +3074,16 @@ export class DatabaseStorage implements IStorage {
           AND u.profile_visibility = true
           AND EXISTS (
             SELECT 1 FROM certificates c
+            INNER JOIN courses credential_course ON credential_course.id = c.course_id
             WHERE c.user_id = u.id
               AND c.is_active = true
               AND c.is_paid = true
               AND c.expires_at > NOW()
+              AND credential_course.product_type = 'assessment'
+              AND credential_course.assessment_purpose = 'certification'
+              AND credential_course.certification_mode <> 'none'
+              AND credential_course.is_active = true
+              AND credential_course.review_status = 'approved'
           )
           AND (
             NOT EXISTS (

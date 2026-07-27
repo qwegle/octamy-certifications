@@ -29,17 +29,25 @@ app.set("trust proxy", 1);
 app.disable("x-powered-by");
 
 // CORS: explicit allowlist; same-origin SPA always works, cross-origin must be listed.
-const CORS_ORIGINS = (process.env.CORS_ORIGIN || "")
-  .split(",")
-  .map((s) => s.trim())
-  .filter(Boolean);
+const APP_ORIGIN = (() => {
+  try {
+    return process.env.APP_URL ? new URL(process.env.APP_URL).origin : "";
+  } catch {
+    return "";
+  }
+})();
+const CORS_ORIGINS = Array.from(new Set([
+  APP_ORIGIN,
+  ...(process.env.CORS_ORIGIN || "").split(",").map((s) => s.trim()),
+].filter(Boolean)));
 app.use(
   cors({
     origin: (origin, cb) => {
-      // Same-origin / curl / server-to-server: no Origin header → allow.
+      // curl / server-to-server requests carry no Origin header. Browser
+      // origins must match APP_URL or the explicit cross-origin allowlist.
       if (!origin) return cb(null, true);
-      if (CORS_ORIGINS.length === 0) return cb(null, true); // dev convenience
       if (CORS_ORIGINS.includes(origin)) return cb(null, true);
+      if (process.env.NODE_ENV !== "production" && CORS_ORIGINS.length === 0) return cb(null, true);
       return cb(new Error("Not allowed by CORS"));
     },
     credentials: true,
@@ -50,7 +58,10 @@ app.use(
 app.use((req, res, next) => {
   // Force HTTPS in production
   if (process.env.NODE_ENV === 'production' && req.header('x-forwarded-proto') !== 'https') {
-    return res.redirect(`https://${req.header('host')}${req.url}`);
+    if (!APP_ORIGIN || !APP_ORIGIN.startsWith('https://')) {
+      return res.status(500).json({ message: 'Secure application origin is not configured' });
+    }
+    return res.redirect(308, `${APP_ORIGIN}${req.originalUrl}`);
   }
 
   // Security headers
@@ -68,8 +79,15 @@ app.use((req, res, next) => {
   const interviewCapturePolicy = isInterviewStudioDocument
     ? 'camera=(self), microphone=(self), display-capture=(self)'
     : 'camera=(), microphone=(), display-capture=()';
-  res.setHeader('Permissions-Policy', `${interviewCapturePolicy}, geolocation=(), payment=(self "https://secure.payu.in" "https://api.cashfree.com" "https://sandbox.cashfree.com")`);
-  res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' https://secure.payu.in https://test.payu.in https://accounts.google.com https://sdk.cashfree.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' blob: https:; frame-src 'self' https://secure.payu.in https://test.payu.in https://accounts.google.com https://api.cashfree.com https://sandbox.cashfree.com; connect-src 'self' https://secure.payu.in https://test.payu.in https://accounts.google.com https://api.cashfree.com https://sandbox.cashfree.com;");
+  const isCashfreeFallbackDocument = req.path === '/cashfree-checkout';
+  const paymentPolicy = isCashfreeFallbackDocument
+    ? 'payment=(self "https://api.cashfree.com" "https://sandbox.cashfree.com")'
+    : 'payment=(self "https://secure.payu.in" "https://api.cashfree.com" "https://sandbox.cashfree.com")';
+  res.setHeader('Permissions-Policy', `${interviewCapturePolicy}, geolocation=(), ${paymentPolicy}`);
+  const contentSecurityPolicy = isCashfreeFallbackDocument
+    ? "default-src 'self'; script-src 'self' 'unsafe-inline' https://sdk.cashfree.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://api.cashfree.com https://sandbox.cashfree.com; frame-src https://api.cashfree.com https://sandbox.cashfree.com; object-src 'none'; base-uri 'self'; frame-ancestors 'self';"
+    : "default-src 'self'; script-src 'self' 'unsafe-inline' https://secure.payu.in https://test.payu.in https://accounts.google.com https://sdk.cashfree.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' blob: https:; frame-src 'self' https://secure.payu.in https://test.payu.in https://accounts.google.com https://api.cashfree.com https://sandbox.cashfree.com; connect-src 'self' https://secure.payu.in https://test.payu.in https://accounts.google.com https://api.cashfree.com https://sandbox.cashfree.com; object-src 'none'; base-uri 'self'; frame-ancestors 'self';";
+  res.setHeader('Content-Security-Policy', contentSecurityPolicy);
 
   next();
 });

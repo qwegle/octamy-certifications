@@ -151,8 +151,24 @@ export class PayUMoneyService {
     const hashString = `${this.config.salt}|${status}||||||${udf5}|${udf4}|${udf3}|${udf2}|${udf1}|${email}|${firstname}|${productinfo}|${amount}|${txnid}|${this.config.merchantKey}`;
     
     const calculatedHash = crypto.createHash('sha512').update(hashString).digest('hex');
-    
-    return calculatedHash === hash;
+    const providedHash = typeof hash === 'string' && /^[a-fA-F0-9]{128}$/.test(hash)
+      ? Buffer.from(hash, 'hex')
+      : null;
+    const expectedHash = Buffer.from(calculatedHash, 'hex');
+
+    return providedHash !== null &&
+      providedHash.length === expectedHash.length &&
+      crypto.timingSafeEqual(expectedHash, providedHash);
+  }
+
+  /** Escape untrusted values before placing them in an HTML attribute. */
+  private escapeHtmlAttribute(value: unknown): string {
+    return String(value)
+      .replace(/&/g, '&amp;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
   }
 
   /**
@@ -199,11 +215,11 @@ export class PayUMoneyService {
 
     // Generate HTML form
     const formFields = Object.entries(fields)
-      .map(([key, value]) => `<input type="hidden" name="${key}" value="${value}" />`)
+      .map(([key, value]) => `<input type="hidden" name="${this.escapeHtmlAttribute(key)}" value="${this.escapeHtmlAttribute(value)}" />`)
       .join('\n');
 
     const html = `
-      <form method="POST" action="${this.config.baseUrl}" id="payuform">
+      <form method="POST" action="${this.escapeHtmlAttribute(this.config.baseUrl)}" id="payuform">
         ${formFields}
       </form>
       <script>

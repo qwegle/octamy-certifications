@@ -13,35 +13,72 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 60
+    env:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/octamy_test
+      TEST_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/octamy_test
+      JWT_SECRET: test-jwt-secret-at-least-32-characters-long
+      SESSION_SECRET: test-session-secret-at-least-32-characters
+      PAYMENT_STATUS_SECRET: test-payment-status-secret-at-least-32-chars
+      MIGRATION_BASE_REF: ${{ github.event.pull_request.base.sha || github.event.before }}
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: octamy_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d octamy_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
+          cache-dependency-path: |
+            package-lock.json
+            mobile/package-lock.json
 
-      - name: Install dependencies
+      - name: Install root dependencies
         run: npm ci --no-audit --no-fund
 
-      - name: Type-check (advisory — see TYPECHECK_DEBT.md)
-        run: npm run check || echo "::warning::TypeScript errors present; tracked as baseline debt."
+      - name: Verify append-only migration files and journal
+        run: node scripts/validate-migrations.mjs --static-only --base-ref "$MIGRATION_BASE_REF"
 
-      - name: Build (client + server bundle)
+      - name: Apply migrations to disposable CI database
+        run: npm run db:migrate
+
+      - name: Type-check
+        run: npm run check
+
+      - name: Build client and server
         env:
           NODE_ENV: production
         run: npm run build
 
-      - name: Tests
-        env:
-          NODE_ENV: test
-          JWT_SECRET: test-secret-please-change-in-production-32+chars
-        # Tests require a Postgres DB; until CI provisions one, treat absence
-        # as advisory rather than failing the build.
-        continue-on-error: true
-        run: npm test -- --ci --reporters=default --runInBand --passWithNoTests
+      - name: Root tests
+        run: npx --no-install jest --ci --reporters=default --runInBand
 
-      - name: Audit (high+ only, advisory)
-        run: npm audit --audit-level=high || true
+      - name: Install mobile dependencies
+        run: npm ci --prefix mobile --no-audit --no-fund
+
+      - name: Mobile type-check
+        run: npm run typecheck --prefix mobile
+
+      - name: Mobile tests
+        run: npm test --prefix mobile -- --ci
+
+      - name: Audit high-severity production dependencies (advisory)
+        run: npm audit --omit=dev --audit-level=high || true

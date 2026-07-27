@@ -1,3 +1,5 @@
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 import { describe, expect, it } from "@jest/globals";
 import {
   aggregateInterviewScores,
@@ -13,6 +15,7 @@ import {
 import {
   INTERVIEW_STUDIO_BLUEPRINT_SCHEMA_VERSION,
   INTERVIEW_STUDIO_JAVASCRIPT_RUNTIME,
+  sanitizeInterviewStudioItemForCandidate,
 } from "../../shared/interview-studio";
 
 const validBlueprint = {
@@ -81,6 +84,25 @@ describe("Interview Studio policy", () => {
     expect(JSON.stringify(client)).not.toContain("case.hidden-one");
     expect(JSON.stringify(client)).not.toContain("-2 0 4");
     expect(JSON.stringify(client)).not.toContain("Negative values");
+  });
+
+  it("allowlists candidate item fields without rubrics, case weights, or hidden-test metadata", () => {
+    const item = sanitizeInterviewStudioItemForCandidate(validBlueprint.items[0]);
+    const serialized = JSON.stringify(item);
+
+    expect(item.kind).toBe("coding");
+    if (item.kind !== "coding") throw new Error("expected coding item");
+    expect(item.testCases).toEqual([{
+      key: "case.public-one",
+      title: "Visible example",
+      visibility: "public",
+      input: "1 2 3\n",
+      expectedOutput: "2 4 6\n",
+    }]);
+    expect(serialized).not.toContain("rubric");
+    expect(serialized).not.toContain("weight");
+    expect(serialized).not.toContain("hidden");
+    expect(serialized).not.toContain("case.hidden-one");
   });
 
   it("keeps practice sessions private and validates strict consent snapshots", () => {
@@ -197,5 +219,15 @@ describe("Interview Studio policy", () => {
     expect(ready.practiceReady).toBe(true);
     expect(ready.verifiedReady).toBe(true);
     expect(ready.issues).toEqual([]);
+  });
+
+  it("returns only the current prompt and requires its saved response before next", async () => {
+    const route = await readFile(path.join(process.cwd(), "server/routes/interviewStudioRoutes.ts"), "utf8");
+    expect(route).toContain("itemIndex === cursor.currentIndex");
+    expect(route).toContain("[sanitizeInterviewStudioItemForCandidate(blueprint.items[currentIndex])]");
+    expect(route).not.toContain("blueprint.items.slice(0, currentIndex + 1)");
+    const nextRoute = route.slice(route.indexOf('router.post("/interview-studio/sessions/:sessionId/items/next"'), route.indexOf('router.put("/interview-studio/sessions/:sessionId/responses/:itemKey"'));
+    expect(nextRoute).toContain("savedCurrentResponse");
+    expect(nextRoute).toContain("INTERVIEW_CURRENT_RESPONSE_REQUIRED");
   });
 });

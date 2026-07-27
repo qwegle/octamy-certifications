@@ -85,9 +85,12 @@ describe('Course storage contracts', () => {
     it('returns active public courses with their category', async () => {
       const courses = await storage.getCourses();
 
-      expect(courses).toHaveLength(1);
-      expect(courses[0].id).toBe(testData.testCourse.id);
-      expect(courses[0].category.id).toBe(testData.testCategory.id);
+      const seeded = courses.find((course) => course.id === testData.testCourse.id);
+      expect(courses.map((course) => course.slug).sort()).toEqual([
+        testData.testCourse.slug,
+        testData.testExamCourse.slug,
+      ].sort());
+      expect(seeded?.category.id).toBe(testData.testCategory.id);
     });
 
     it('gets an active public course by slug', async () => {
@@ -128,9 +131,10 @@ describe('Course storage contracts', () => {
 
       const publicCourses = await storage.getCourses();
 
-      expect(publicCourses.map((course) => course.slug)).toEqual([
+      expect(publicCourses.map((course) => course.slug).sort()).toEqual([
         testData.testCourse.slug,
-      ]);
+        testData.testExamCourse.slug,
+      ].sort());
       await expect(
         storage.getCourseBySlug('private-course'),
       ).resolves.toBeUndefined();

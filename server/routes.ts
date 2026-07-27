@@ -28,6 +28,15 @@ import {
   subscriptions,
   splitPayouts,
   courseEntitlements,
+  payments as paymentsTable,
+  certificates as certificatesTable,
+  couponRedemptions,
+  discountCoupons,
+  sellers as sellersTable,
+  sales as salesTable,
+  referralClicks,
+  creditTransactions,
+  sponsors as sponsorsTable,
   categories as categoriesTable,
   courses as coursesTable,
   courseQuestionBlueprint,
@@ -43,9 +52,11 @@ import { LearningPathController } from "./controllers/learningPathController";
 import { payuMoneyService } from "./payumoney";
 import {
   createCashfreeOrder,
-  fetchCashfreeOrderStatus,
+  createCashfreeStatusToken,
   getDefaultPaymentGateway,
   normalizeCashfreePaymentStatus,
+  publicPaymentStatus,
+  verifyCashfreeStatusToken,
   verifyCashfreeWebhookSignature,
 } from "./lib/cashfree";
 import {
@@ -55,6 +66,7 @@ import {
 } from "./utils";
 import { v2 as cloudinary } from "cloudinary";
 import multer from "multer";
+import rateLimit from "express-rate-limit";
 import crypto from "node:crypto";
 import apiRoutes from "./routes/index";
 import certificateRoutes from "./routes/certificateRoutes";
@@ -86,6 +98,7 @@ import {
   isCredentialActivationPayment,
   reserveCredentialActivationPayment,
 } from "./lib/credential-activation";
+import { isCredentialEligibleAssessment } from "./lib/certificate-policy";
 import {
   CouponError,
   couponPaymentMetadata,
@@ -153,6 +166,28 @@ interface SellerAuthenticatedRequest extends Request {
   };
 }
 
+
+const cashfreeStatusLimiter = rateLimit({
+  windowMs: 60_000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: "Too many payment status checks. Please wait and try again." },
+});
+const paymentCheckoutLimiter = rateLimit({
+  windowMs: 60_000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: "Too many checkout attempts. Please wait and try again." },
+});
+const publicExamStartLimiter = rateLimit({
+  windowMs: 15 * 60_000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: "Too many exam starts. Please wait before trying again." },
+});
 const JWT_SECRET = process.env.JWT_SECRET!;
 
 function boundedPercent(value: string | null | undefined, fallback: number) {
@@ -347,6 +382,326 @@ async function ensureRevenueSplits(input: {
   });
 }
 
+/** Transaction-scoped fulfillment helpers. Keep every durable effect of a
+ * successful certificate payment in the same transaction as the locked local
+ * payment reservation. */
+async function ensureRevenueSplitsInTransaction(tx: any, input: {
+  paymentId: number;
+  courseId: number;
+  certificateAmount: string | number;
+  gatewayOrderId?: string | null;
+  sellerCode?: string | null;
+}) {
+  const [existing] = await tx.select({ id: splitPayouts.id }).from(splitPayouts)
+    .where(eq(splitPayouts.paymentId, input.paymentId)).limit(1);
+  if (existing) return;
+
+  const [course] = await tx.select().from(coursesTable)
+    .where(eq(coursesTable.id, input.courseId)).limit(1);
+  if (!course) throw new Error(`Cannot allocate payment ${input.paymentId}: course not found`);
+  const baseAmount = Math.max(0, Number(input.certificateAmount));
+  if (!Number.isFinite(baseAmount) || baseAmount <= 0) return;
+
+  const ownerType = course.ownerType === "creator" || course.ownerType === "institute"
+    ? course.ownerType
+    : null;
+  const ownerPercent = ownerType === "creator"
+    ? boundedPercent(process.env.CREATOR_REVENUE_SHARE_PERCENT, 80)
+    : ownerType === "institute"
+      ? boundedPercent(process.env.INSTITUTE_REVENUE_SHARE_PERCENT, 80)
+      : 0;
+  const ownerAmount = ownerType && course.ownerId
+    ? Math.round(baseAmount * ownerPercent) / 100
+    : 0;
+
+  let sellerId: number | null = null;
+  let sellerAmount = 0;
+  if (input.sellerCode) {
+    const [seller] = await tx.select().from(sellersTable)
+      .where(eq(sellersTable.referralCode, input.sellerCode)).limit(1);
+    if (seller?.isApproved) {
+      sellerId = seller.id;
+      sellerAmount = Math.round(baseAmount * boundedPercent(seller.commissionRate, 10)) / 100;
+    }
+  }
+
+  const cappedOwner = Math.min(ownerAmount, baseAmount);
+  const cappedSeller = Math.min(sellerAmount, Math.max(0, baseAmount - cappedOwner));
+  const platformAmount = Math.max(0, Math.round((baseAmount - cappedOwner - cappedSeller) * 100) / 100);
+  const values: Array<typeof splitPayouts.$inferInsert> = [];
+  if (ownerType && course.ownerId && cappedOwner > 0) values.push({
+    paymentId: input.paymentId,
+    cashfreeOrderId: input.gatewayOrderId ?? null,
+    beneficiaryType: ownerType,
+    beneficiaryId: course.ownerId,
+    amount: cappedOwner.toFixed(2),
+    status: "settled",
+  });
+  if (sellerId && cappedSeller > 0) values.push({
+    paymentId: input.paymentId,
+    cashfreeOrderId: input.gatewayOrderId ?? null,
+    beneficiaryType: "seller",
+    beneficiaryId: sellerId,
+    amount: cappedSeller.toFixed(2),
+    status: "settled",
+  });
+  if (platformAmount > 0) values.push({
+    paymentId: input.paymentId,
+    cashfreeOrderId: input.gatewayOrderId ?? null,
+    beneficiaryType: "platform",
+    beneficiaryId: null,
+    amount: platformAmount.toFixed(2),
+    status: "settled",
+  });
+  if (values.length) await tx.insert(splitPayouts).values(values);
+}
+
+async function recordCouponRedemptionInTransaction(tx: any, payment: any, userEmail: string) {
+  const coupon = activationMetadata(payment.gatewayStatusRaw).coupon as Record<string, unknown> | undefined;
+  const couponId = Number(coupon?.id);
+  const courseId = Number(payment.courseId);
+  const originalAmount = Number(coupon?.originalAmount);
+  const discountAmount = Number(coupon?.discountAmount);
+  const finalAmount = Number(coupon?.finalAmount);
+  if (
+    !Number.isInteger(couponId) || couponId <= 0 ||
+    !Number.isInteger(courseId) || courseId <= 0 ||
+    !Number.isFinite(originalAmount) || !Number.isFinite(discountAmount) || !Number.isFinite(finalAmount) ||
+    originalAmount < 0 || discountAmount < 0 || finalAmount < 0 ||
+    Math.abs(originalAmount - discountAmount - finalAmount) > 0.009
+  ) return;
+  const [created] = await tx.insert(couponRedemptions).values({
+    couponId,
+    userId: payment.userId || null,
+    userEmail: userEmail.trim().toLowerCase(),
+    courseId,
+    paymentId: payment.id,
+    externalKey: `payment:${payment.id}`,
+    originalAmount: originalAmount.toFixed(2),
+    discountAmount: discountAmount.toFixed(2),
+    finalAmount: finalAmount.toFixed(2),
+  }).onConflictDoNothing({ target: couponRedemptions.externalKey }).returning({ id: couponRedemptions.id });
+  if (created) await tx.update(discountCoupons).set({
+    redemptionCount: sql`${discountCoupons.redemptionCount} + 1`,
+    updatedAt: new Date(),
+  }).where(eq(discountCoupons.id, couponId));
+}
+
+async function recordSellerCommissionInTransaction(tx: any, input: {
+  paymentId: number;
+  sellerCode: string;
+  courseId: number;
+  certificateId: number;
+  userId: number | null;
+  amount: string | number;
+}) {
+  if (!input.sellerCode) return;
+  const [seller] = await tx.select().from(sellersTable)
+    .where(eq(sellersTable.referralCode, input.sellerCode)).limit(1);
+  if (!seller?.isApproved) return;
+  const amount = Number(input.amount);
+  const commission = amount * boundedPercent(seller.commissionRate, 10) / 100;
+  const [created] = await tx.insert(salesTable).values({
+    sellerId: seller.id,
+    courseId: input.courseId,
+    certificateId: input.certificateId,
+    amount: amount.toFixed(2),
+    commission: commission.toFixed(2),
+    referralCode: input.sellerCode,
+    status: "completed",
+  }).onConflictDoNothing({ target: salesTable.certificateId }).returning({ id: salesTable.id });
+  if (!created) return;
+  await tx.update(sellersTable).set({
+    totalEarnings: sql`coalesce(${sellersTable.totalEarnings}::numeric, 0) + ${commission}`,
+  }).where(eq(sellersTable.id, seller.id));
+  if (input.userId) await tx.update(referralClicks).set({
+    converted: true,
+    conversionDate: new Date(),
+    userId: input.userId,
+  }).where(and(
+    eq(referralClicks.referralCode, input.sellerCode),
+    eq(referralClicks.courseId, input.courseId),
+    eq(referralClicks.converted, false),
+  ));
+}
+
+async function finalizePaidExamCertificate(input: {
+  paymentId: number;
+  transactionId: string;
+  providerPaymentId: string;
+  gateway: "cashfree" | "payumoney";
+  gatewayStatusRaw: Record<string, unknown>;
+  examData: any;
+  sellerCode: string;
+}) {
+  return db.transaction(async (tx) => {
+    await tx.execute(sql`SELECT pg_advisory_xact_lock(7201, ${input.paymentId})`);
+    const [payment] = await tx.select().from(paymentsTable)
+      .where(eq(paymentsTable.id, input.paymentId)).for("update").limit(1);
+    if (!payment || payment.transactionId !== input.transactionId) {
+      throw new Error("Payment reservation mismatch");
+    }
+    if (payment.status === "completed" && payment.certificateId) {
+      const [certificate] = await tx.select().from(certificatesTable)
+        .where(eq(certificatesTable.id, payment.certificateId)).limit(1);
+      if (certificate) return { status: "already_completed" as const, certificate, payment };
+    }
+    if (
+      payment.courseId !== input.examData.courseId ||
+      !input.examData.passed ||
+      !payment.courseId
+    ) throw new Error("Payment assessment mismatch");
+    const [course] = await tx.select().from(coursesTable)
+      .where(eq(coursesTable.id, payment.courseId)).for("update").limit(1);
+    if (!course || !isCredentialEligibleAssessment(course)) {
+      throw new Error("Assessment is not credential eligible");
+    }
+
+    let [examAttempt] = input.examData.sessionId
+      ? await tx.select().from(examAttemptsTable)
+          .where(eq(examAttemptsTable.sessionId, input.examData.sessionId)).limit(1)
+      : [];
+    if (!examAttempt) [examAttempt] = await tx.insert(examAttemptsTable).values({
+      userId: input.examData.userId,
+      courseId: input.examData.courseId,
+      userEmail: input.examData.userEmail,
+      userName: input.examData.userName,
+      score: input.examData.score,
+      totalQuestions: input.examData.totalQuestions,
+      answers: input.examData.answers,
+      timeTaken: input.examData.timeTaken,
+      passed: input.examData.passed,
+      mastered: input.examData.mastered,
+      sessionId: input.examData.sessionId,
+      ipAddress: input.examData.ipAddress,
+      userAgent: input.examData.userAgent,
+      tabSwitches: input.examData.tabSwitches,
+    }).returning();
+
+    let [certificate] = await tx.select().from(certificatesTable)
+      .where(eq(certificatesTable.examAttemptId, examAttempt.id)).limit(1);
+    if (!certificate) [certificate] = await tx.insert(certificatesTable).values({
+      certificateId: `OCT-${new Date().getFullYear()}-${String(input.examData.course.title).replace(/\s+/g, "").toUpperCase().slice(0, 3)}-${crypto.randomUUID()}`,
+      examAttemptId: examAttempt.id,
+      userId: input.examData.userId,
+      courseId: input.examData.courseId,
+      userEmail: input.examData.userEmail,
+      userName: input.examData.userName,
+      score: input.examData.score,
+      courseTitle: input.examData.course.title,
+      badge: getBadgeFromScore(input.examData.score),
+      certificateNumber: generateCertificateNumber(),
+      expiresAt: calculateExpiryDate(),
+      isPaid: true,
+      paymentId: input.providerPaymentId,
+    }).returning();
+
+    const mergedGatewayStatus = {
+      ...activationMetadata(payment.gatewayStatusRaw),
+      ...input.gatewayStatusRaw,
+    };
+    const [completedPayment] = await tx.update(paymentsTable).set({
+      status: "completed",
+      gateway: input.gateway,
+      paymentMethod: input.gateway,
+      certificateId: certificate.id,
+      cashfreeOrderId: input.gateway === "cashfree" ? input.transactionId : payment.cashfreeOrderId,
+      cashfreePaymentId: input.gateway === "cashfree" ? input.providerPaymentId : payment.cashfreePaymentId,
+      razorpayOrderId: input.gateway === "payumoney" ? input.transactionId : payment.razorpayOrderId,
+      razorpayPaymentId: input.gateway === "payumoney" ? input.providerPaymentId : payment.razorpayPaymentId,
+      gatewayStatusRaw: mergedGatewayStatus,
+    }).where(eq(paymentsTable.id, payment.id)).returning();
+
+    await recordCouponRedemptionInTransaction(tx, payment, input.examData.userEmail);
+    await ensureRevenueSplitsInTransaction(tx, {
+      paymentId: payment.id,
+      courseId: payment.courseId,
+      certificateAmount: payment.certificateAmount,
+      gatewayOrderId: input.transactionId,
+      sellerCode: input.sellerCode,
+    });
+    await recordSellerCommissionInTransaction(tx, {
+      paymentId: payment.id,
+      sellerCode: input.sellerCode,
+      courseId: payment.courseId,
+      certificateId: certificate.id,
+      userId: payment.userId,
+      amount: payment.certificateAmount,
+    });
+    return { status: "completed" as const, certificate, payment: completedPayment };
+  });
+}
+
+async function fulfillRecruiterCreditPayment(input: {
+  paymentId: number;
+  orderId: string;
+  providerPaymentId: string;
+  providerPayload: Record<string, unknown>;
+}) {
+  return db.transaction(async (tx) => {
+    await tx.execute(sql`SELECT pg_advisory_xact_lock(7402, ${input.paymentId})`);
+    const [payment] = await tx.select().from(paymentsTable)
+      .where(eq(paymentsTable.id, input.paymentId)).for("update").limit(1);
+    if (!payment || payment.transactionId !== input.orderId) throw new Error("Recruiter payment reservation mismatch");
+    const metadata = activationMetadata(payment.gatewayStatusRaw);
+    const recruiterId = Number(metadata.recruiterId);
+    const credits = Number(metadata.credits);
+    if (metadata.kind !== "recruiter_credits" || !Number.isInteger(recruiterId) || !Number.isInteger(credits) || credits <= 0) {
+      throw new Error("Invalid recruiter credit reservation");
+    }
+    if (payment.status === "completed") return { status: "already_completed" as const };
+    const [recruiter] = await tx.update(recruitersTable).set({
+      creditsBalance: sql`${recruitersTable.creditsBalance} + ${credits}`,
+      updatedAt: new Date(),
+    }).where(and(eq(recruitersTable.id, recruiterId), eq(recruitersTable.isActive, true))).returning();
+    if (!recruiter) throw new Error("Recruiter account is not active");
+    await tx.insert(creditTransactions).values({
+      recruiterId,
+      type: "purchase",
+      amount: credits.toFixed(2),
+      description: `Credit purchase - Payment ID: ${input.orderId}`,
+      externalReference: input.orderId,
+      balanceAfter: recruiter.creditsBalance,
+    });
+    await tx.update(paymentsTable).set({
+      status: "completed",
+      gateway: "cashfree",
+      paymentMethod: "cashfree",
+      cashfreeOrderId: input.orderId,
+      cashfreePaymentId: input.providerPaymentId,
+      gatewayStatusRaw: { ...metadata, providerWebhook: input.providerPayload },
+    }).where(eq(paymentsTable.id, payment.id));
+    return { status: "credits_activated" as const };
+  });
+}
+
+async function updateVerifiedSponsorPayment(responseData: Record<string, any>, outcome: "success" | "failed") {
+  const sponsorId = Number(responseData.udf1);
+  if (!Number.isInteger(sponsorId) || sponsorId <= 0 || typeof responseData.txnid !== "string") {
+    throw new Error("Invalid sponsor payment reservation");
+  }
+  return db.transaction(async (tx) => {
+    await tx.execute(sql`SELECT pg_advisory_xact_lock(7501, ${sponsorId})`);
+    const [sponsor] = await tx.select().from(sponsorsTable)
+      .where(eq(sponsorsTable.id, sponsorId)).for("update").limit(1);
+    if (
+      !sponsor ||
+      sponsor.transactionId !== responseData.txnid ||
+      !amountsMatch(sponsor.amount, responseData.amount)
+    ) throw new Error("Sponsor payment reservation mismatch");
+    if (sponsor.paymentStatus === "success") return sponsor;
+    const [updated] = await tx.update(sponsorsTable).set({
+      paymentStatus: outcome,
+      updatedAt: new Date(),
+    }).where(and(
+      eq(sponsorsTable.id, sponsor.id),
+      eq(sponsorsTable.transactionId, responseData.txnid),
+      eq(sponsorsTable.paymentStatus, "pending"),
+    )).returning();
+    return updated || sponsor;
+  });
+}
+
 // Middleware to verify JWT token
 const authenticateAdminToken = (
   req: AuthenticatedRequest,
@@ -361,6 +716,7 @@ const authenticateAdminToken = (
   }
 
   try {
+
     const decoded = jwt.verify(token, JWT_SECRET) as any;
     // Check for either isAdmin flag or role === 'admin'
     if (!decoded.isAdmin && decoded.role !== "admin") {
@@ -1444,15 +1800,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Exam routes
-  app.post("/api/courses/:id/questions", optionalAuth, async (req: AuthenticatedRequest, res: Response) => {
+  app.post("/api/courses/:id/questions", publicExamStartLimiter, optionalAuth, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const evidenceConsent = z.object({ evidenceConsent: z.literal(true) }).safeParse(req.body);
-      if (!evidenceConsent.success) {
-        return res.status(400).json({
-          message: "Confirm the disclosed browser-integrity evidence policy before starting the exam.",
-          code: "EVIDENCE_CONSENT_REQUIRED",
-        });
-      }
       const courseId = Number(req.params.id);
       if (!Number.isInteger(courseId) || courseId <= 0) {
         return res.status(400).json({ message: "Invalid course ID" });
@@ -1461,7 +1810,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!course || !course.isActive || course.visibility !== "public" || course.reviewStatus !== "approved" || course.ownerType === "institute") {
         return res.status(404).json({ message: "Course not found" });
       }
-      if (course.assessmentPurpose === "practice") {
+      const isPracticeAssessment = course.assessmentPurpose === "practice";
+      if (!isPracticeAssessment) {
+        const evidenceConsent = z.object({ evidenceConsent: z.literal(true) }).safeParse(req.body);
+        if (!evidenceConsent.success) {
+          return res.status(400).json({
+            message: "Confirm the disclosed browser-integrity evidence policy before starting the exam.",
+            code: "EVIDENCE_CONSENT_REQUIRED",
+          });
+        }
+      }
+      if (isPracticeAssessment) {
         if (!req.user?.userId) {
           return res.status(401).json({
             message: "Sign in and activate Practice Pass to start this practice exam",
@@ -1471,7 +1830,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const subscription = await getActiveLearnerPracticeSubscription(req.user.userId);
         if (!subscription) {
           return res.status(402).json({
-            message: "Practice exams require Practice Pass at ₹299/month",
+            message: "Practice exams require an active Practice Pass",
             code: "PRACTICE_SUBSCRIPTION_REQUIRED",
           });
         }
@@ -1677,8 +2036,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return saveQuestionMapping(finalSessionId, correctMap, courseId, {
           questionSnapshot: questionsWithShuffledOptions,
           createdAt: sessionStartedAt,
-          evidenceConsentAt: sessionStartedAt,
-          evidenceConsentVersion: PUBLIC_EXAM_EVIDENCE_CONSENT_VERSION,
+          evidenceConsentAt: isPracticeAssessment ? undefined : sessionStartedAt,
+          evidenceConsentVersion: isPracticeAssessment ? undefined : PUBLIC_EXAM_EVIDENCE_CONSENT_VERSION,
           userId: req.user?.userId ?? null,
           // Retain a short recovery window after the authoritative deadline. The
           // submission route still rejects answer payloads after deadline grace.
@@ -1698,8 +2057,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sessionId: finalSessionId,
         startedAt: sessionTiming.createdAt.toISOString(),
         deadlineAt: publicExamDeadline(sessionTiming.createdAt, course.duration).toISOString(),
-        proctorMode: "browser_evidence",
-        evidenceConsentVersion: PUBLIC_EXAM_EVIDENCE_CONSENT_VERSION,
+        proctorMode: isPracticeAssessment ? "none" : "browser_evidence",
+        evidenceConsentVersion: isPracticeAssessment ? null : PUBLIC_EXAM_EVIDENCE_CONSENT_VERSION,
       });
     } catch (error) {
       console.error("Error fetching questions:", error);
@@ -1829,7 +2188,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const subscription = await getActiveLearnerPracticeSubscription(req.user.userId);
           if (!subscription) {
             return res.status(402).json({
-              message: "Practice exams require Practice Pass at ₹299/month",
+              message: "Practice exams require an active Practice Pass",
               code: "PRACTICE_SUBSCRIPTION_REQUIRED",
             });
           }
@@ -2103,7 +2462,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         selectedAddress?.phoneNumber ||
         payload.userPhone ||
         "9999999999";
-      const baseUrl = `${req.protocol}://${req.get("host")}`;
+      const baseUrl = (process.env.APP_URL || `${req.protocol}://${req.get("host")}`).replace(/\/+$/, "");
       const defaultGateway = getDefaultPaymentGateway();
 
       if (defaultGateway === "cashfree") {
@@ -2161,6 +2520,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             currency: payment.currency,
             paymentSessionId: order.paymentSessionId,
             paymentLink: order.paymentLink,
+            statusToken: createCashfreeStatusToken(order.orderId),
           });
         } catch (cashfreeError) {
           const metadata = activationMetadata(payment.gatewayStatusRaw);
@@ -2268,6 +2628,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!course) {
       throw new Error("Course not found");
     }
+    if (!isCredentialEligibleAssessment(course)) {
+      throw new CredentialActivationError(
+        "Practice and unavailable assessments cannot create credential payment orders",
+        409,
+        "ASSESSMENT_NOT_CREDENTIAL_ELIGIBLE",
+      );
+    }
 
     const includesPhysicalCopy = Boolean(payload.includesPhysicalCopy);
     const couponQuote = payload.couponCode?.trim()
@@ -2304,24 +2671,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
       },
     } as any);
 
-    const baseUrl = `${req.protocol}://${req.get("host")}`;
-    const order = await createCashfreeOrder({
-      orderId,
-      amount: totalAmount,
-      customerId: `oct_user_${examData.userId || "guest"}`,
-      customerName: examData.userName || "Octamy User",
-      customerEmail: examData.userEmail,
-      customerPhone: payload.userPhone || "9999999999",
-      returnUrl: `${baseUrl}/payment-success?order_id=${orderId}`,
-      notifyUrl: `${baseUrl}/api/webhooks/cashfree`,
-      notes: {
-        paymentDbId: String(payment.id),
-        courseId: String(examData.courseId),
-        tempExamId: payload.tempExamId,
-        sellerCode: payload.sellerCode || "",
-        userId: examData.userId ? String(examData.userId) : "",
-      },
-    });
+    const baseUrl = (process.env.APP_URL || `${req.protocol}://${req.get("host")}`).replace(/\/+$/, "");
+    let order;
+    try {
+      order = await createCashfreeOrder({
+        orderId,
+        amount: totalAmount,
+        customerId: `oct_user_${examData.userId || "guest"}`,
+        customerName: examData.userName || "Octamy User",
+        customerEmail: examData.userEmail,
+        customerPhone: payload.userPhone || "9999999999",
+        returnUrl: `${baseUrl}/payment-success?order_id=${orderId}`,
+        notifyUrl: `${baseUrl}/api/webhooks/cashfree`,
+        notes: {
+          paymentDbId: String(payment.id),
+          courseId: String(examData.courseId),
+          tempExamId: payload.tempExamId,
+          sellerCode: payload.sellerCode || "",
+          userId: examData.userId ? String(examData.userId) : "",
+        },
+      });
+    } catch (providerError) {
+      const paymentMetadata = (payment.gatewayStatusRaw || {}) as Record<string, unknown>;
+      await storage.updatePayment(payment.id, {
+        status: "failed",
+        gatewayStatusRaw: { ...paymentMetadata, reason: "provider_order_creation_failed" },
+      } as any).catch(() => undefined);
+      throw providerError;
+    }
 
     const paymentMetadata = (payment.gatewayStatusRaw || {}) as Record<string, unknown>;
     await storage.updatePayment(payment.id, {
@@ -2334,6 +2711,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       orderId: order.orderId,
       paymentSessionId: order.paymentSessionId,
       paymentLink: order.paymentLink,
+      statusToken: createCashfreeStatusToken(order.orderId),
       amount: totalAmount,
     };
   };
@@ -2341,6 +2719,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize payment (Cashfree default, PayU fallback) - PAYMENT-FIRST APPROACH
   app.post(
     "/api/payment/initiate",
+    paymentCheckoutLimiter,
     optionalAuth,
     async (req: AuthenticatedRequest, res: Response) => {
       if (req.body?.certificateId) {
@@ -2380,8 +2759,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
               amount: order.amount,
               paymentSessionId: order.paymentSessionId,
               paymentLink: order.paymentLink,
+              statusToken: order.statusToken,
             });
           } catch (cashfreeError) {
+            if (cashfreeError instanceof CredentialActivationError) {
+              return res.status(cashfreeError.statusCode).json({ message: cashfreeError.message, code: cashfreeError.code });
+            }
             if (cashfreeError instanceof PendingExamAccessError) {
               return res.status(cashfreeError.statusCode).json({ message: cashfreeError.message });
             }
@@ -2441,6 +2824,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (!course) {
           return res.status(404).json({ message: "Course not found" });
         }
+        if (!isCredentialEligibleAssessment(course)) {
+          return res.status(409).json({
+            message: "Practice and unavailable assessments cannot create credential payment orders",
+            code: "ASSESSMENT_NOT_CREDENTIAL_ELIGIBLE",
+          });
+        }
 
         const couponQuote = typeof couponCode === "string" && couponCode.trim()
           ? await resolveCouponQuote({
@@ -2495,7 +2884,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           },
         });
 
-        const baseUrl = `${req.protocol}://${req.get("host")}`;
+        const baseUrl = (process.env.APP_URL || `${req.protocol}://${req.get("host")}`).replace(/\/+$/, "");
 
         const paymentData = {
           txnid,
@@ -2535,6 +2924,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post(
     "/api/payments/cashfree/create-order",
+    paymentCheckoutLimiter,
     optionalAuth,
     async (req: AuthenticatedRequest, res: Response) => {
       try {
@@ -2566,10 +2956,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           orderId: order.orderId,
           paymentSessionId: order.paymentSessionId,
           paymentLink: order.paymentLink,
+          statusToken: order.statusToken,
           amount: order.amount,
           currency: "INR",
         });
       } catch (error: any) {
+        if (error instanceof CredentialActivationError) {
+          return res.status(error.statusCode).json({ message: error.message, code: error.code });
+        }
         if (error instanceof PendingExamAccessError) {
           return res.status(error.statusCode).json({ message: error.message });
         }
@@ -2582,24 +2976,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
-  app.get("/api/payments/cashfree/:orderId/status", async (req: Request, res: Response) => {
+  app.get("/api/payments/cashfree/:orderId/status", cashfreeStatusLimiter, async (req: Request, res: Response) => {
+    res.setHeader("Cache-Control", "private, no-store, max-age=0");
+    res.setHeader("Pragma", "no-cache");
     try {
-      const orderId = req.params.orderId;
-      if (!orderId) {
-        return res.status(400).json({ message: "orderId is required" });
+      const parsed = z.object({
+        orderId: z.string().regex(/^[A-Za-z0-9_-]{8,180}$/),
+        token: z.string().min(40).max(800),
+      }).safeParse({ orderId: req.params.orderId, token: req.query.token });
+      if (!parsed.success || verifyCashfreeStatusToken(parsed.data.token) !== parsed.data.orderId) {
+        return res.status(404).json({ message: "Payment order not found" });
       }
-      const [localPayment, providerStatus] = await Promise.all([
-        storage.getPaymentByTransactionId(orderId),
-        fetchCashfreeOrderStatus(orderId),
-      ]);
-      res.json({
-        orderId,
-        localStatus: localPayment?.status || null,
-        providerStatus,
+      const localPayment = await storage.getPaymentByTransactionId(parsed.data.orderId);
+      if (!localPayment) return res.status(404).json({ message: "Payment order not found" });
+      return res.json({
+        orderId: parsed.data.orderId,
+        localStatus: publicPaymentStatus(localPayment.status),
       });
     } catch (error: any) {
       console.error("Error fetching Cashfree order status:", error);
-      res.status(500).json({ message: error.message || "Failed to fetch status" });
+      return res.status(500).json({ message: "Failed to fetch payment status" });
     }
   });
 
@@ -2642,35 +3038,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .where(eq(subscriptions.cashfreeOrderId, orderId));
         if (subscription) {
           if (status === 'success') {
+            const providerAmount = payload?.data?.order?.order_amount
+              ?? payload?.data?.payment?.payment_amount
+              ?? payload?.order_amount;
+            const providerCurrency = String(
+              payload?.data?.order?.order_currency
+              ?? payload?.data?.payment?.payment_currency
+              ?? payload?.order_currency
+              ?? '',
+            ).toUpperCase();
+            if (!amountsMatch(subscription.amount, providerAmount) || providerCurrency !== 'INR') {
+              await db.update(subscriptions)
+                .set({ status: 'past_due', updatedAt: new Date() })
+                .where(and(eq(subscriptions.id, subscription.id), eq(subscriptions.status, 'pending')));
+              await audit({
+                action: 'subscription.payment_mismatch',
+                status: 'failure',
+                actorRole: 'system',
+                resourceType: 'subscription',
+                resourceId: String(subscription.id),
+                req,
+                metadata: { orderId, expectedAmount: subscription.amount, providerAmount, providerCurrency },
+              });
+              return res.status(200).json({ ok: true, status: 'subscription_payment_mismatch' });
+            }
             const { activatePlan } = await import('./routes/dashboardRoutes');
-            await activatePlan(
+            const result = await activatePlan(
               subscription.ownerType as 'learner' | 'creator' | 'institute' | 'recruiter',
               subscription.ownerId,
               subscription.plan,
               orderId,
             );
-            return res.status(200).json({ ok: true, status: 'subscription_activated' });
+            return res.status(200).json({ ok: true, status: result.status });
           }
           if (status === 'failed') {
             await db.update(subscriptions)
               .set({ status: 'past_due', updatedAt: new Date() })
-              .where(eq(subscriptions.id, subscription.id));
+              .where(and(eq(subscriptions.id, subscription.id), eq(subscriptions.status, 'pending')));
           }
           return res.status(200).json({ ok: true, status: `subscription_${status}` });
-        }
-        // Subscription orders aren't tracked in payments table — handle separately.
-        const orderNote = payload?.data?.order?.order_note || payload?.data?.order_note || {};
-        if (orderNote && orderNote.kind === 'subscription' && status === 'success') {
-          try {
-            const { activatePlan } = await import('./routes/dashboardRoutes');
-            await activatePlan(orderNote.ownerType, Number(orderNote.ownerId), orderNote.plan, orderId);
-            audit({ action: 'subscription.activated', actorRole: 'system', resourceType: 'subscription', resourceId: orderId, req, metadata: { ownerType: orderNote.ownerType, ownerId: orderNote.ownerId, plan: orderNote.plan } });
-            return res.status(200).json({ ok: true, status: 'subscription_activated' });
-          } catch (subErr) {
-            console.error('Subscription activation failed', subErr);
-            audit({ action: 'subscription.activate_failed', status: 'failure', actorRole: 'system', resourceType: 'subscription', resourceId: orderId, req, metadata: { error: String(subErr) } });
-            return res.status(200).json({ ok: true, status: 'subscription_failed' });
-          }
         }
         console.warn("Cashfree webhook for unknown order:", orderId);
         return res.status(200).json({ ok: true, ignored: "unknown_order" });
@@ -2687,6 +3093,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       } else if (rawOrderNote && typeof rawOrderNote === "object") {
         orderNote = rawOrderNote;
+      }
+
+      if (payment.status === "completed") {
+        return res.status(200).json({ ok: true, status: "already_completed" });
       }
 
       if (status === "failed") {
@@ -2732,6 +3142,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
           metadata: { expected: payment.amount, received: verifiedProviderAmount ?? null, orderId },
         });
         return res.status(200).json({ ok: true, status: "failed_amount_verification" });
+      }
+
+      if (meta.kind === "recruiter_credits") {
+        const providerCurrency = String(
+          payload?.data?.order?.order_currency ??
+          payload?.data?.payment?.payment_currency ??
+          payload?.order_currency ?? "",
+        ).toUpperCase();
+        if (providerCurrency !== "INR") {
+          await db.update(paymentsTable).set({
+            status: "failed",
+            gatewayStatusRaw: { ...meta, providerWebhook: payload, reason: "verified_gateway_currency_mismatch" },
+          }).where(and(eq(paymentsTable.id, payment.id), eq(paymentsTable.status, "pending")));
+          return res.status(200).json({ ok: true, status: "failed_currency_verification" });
+        }
+        const outcome = await fulfillRecruiterCreditPayment({
+          paymentId: payment.id,
+          orderId,
+          providerPaymentId: cashfreePaymentId || orderId,
+          providerPayload: payload,
+        });
+        return res.status(200).json({ ok: true, status: outcome.status });
       }
 
       // Idempotency for duplicate success webhooks.
@@ -2894,92 +3326,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(200).json({ ok: true, status: "failed_exam_missing" });
       }
 
-      const examAttempt = await storage.createExamAttempt({
-        userId: examData.userId,
-        courseId: examData.courseId,
-        userEmail: examData.userEmail,
-        userName: examData.userName,
-        score: examData.score,
-        totalQuestions: examData.totalQuestions,
-        answers: examData.answers,
-        timeTaken: examData.timeTaken,
-        passed: examData.passed,
-        mastered: examData.mastered,
-        sessionId: examData.sessionId,
-        ipAddress: examData.ipAddress,
-        userAgent: examData.userAgent,
-        tabSwitches: examData.tabSwitches,
-      });
+      const credentialCourse = await storage.getCourse(examData.courseId);
+      if (!examData.passed || !credentialCourse || !isCredentialEligibleAssessment(credentialCourse)) {
+        await storage.updatePayment(payment.id, {
+          status: "failed",
+          gatewayStatusRaw: { ...(payload || {}), reason: "assessment_not_credential_eligible" },
+        } as any);
+        return res.status(200).json({ ok: true, status: "failed_assessment_ineligible" });
+      }
 
-      const certificateId = `OCT-${new Date().getFullYear()}-${examData.course.title
-        .replace(/\s+/g, "")
-        .toUpperCase()
-        .slice(0, 3)}-${Date.now()}`;
-      const badge = getBadgeFromScore(examData.score);
-      const certificateNumber = generateCertificateNumber();
-      const certificate = await storage.createCertificate({
-        certificateId,
-        examAttemptId: examAttempt.id,
-        userId: examData.userId,
-        courseId: examData.courseId,
-        userEmail: examData.userEmail,
-        userName: examData.userName,
-        score: examData.score,
-        courseTitle: examData.course.title,
-        badge,
-        certificateNumber,
-        expiresAt: calculateExpiryDate(),
-        isPaid: true,
-        paymentId: cashfreePaymentId || orderId,
-      });
-
-      await storage.updatePayment(payment.id, {
-        status: "completed",
-        paymentMethod: "cashfree",
-        gateway: "cashfree",
-        certificateId: certificate.id,
-        cashfreeOrderId: orderId,
-        cashfreePaymentId: cashfreePaymentId || null,
-        gatewayStatusRaw: payload,
-      } as any);
-
-      await recordCouponRedemption({
-        payment,
-        userEmail: examData.userEmail,
-      });
-
-      await ensureRevenueSplits({
+      const fulfillment = await finalizePaidExamCertificate({
         paymentId: payment.id,
-        courseId,
-        certificateAmount: payment.certificateAmount,
-        gatewayOrderId: orderId,
+        transactionId: orderId,
+        providerPaymentId: cashfreePaymentId || orderId,
+        gateway: "cashfree",
+        gatewayStatusRaw: { providerWebhook: payload },
+        examData,
         sellerCode,
       });
+      const certificate = fulfillment.certificate;
 
       await deletePendingExam(tempExamId).catch(() => {});
 
-      if (sellerCode) {
-        const seller = await storage.getSellerByReferralCode(sellerCode);
-        if (seller && seller.isApproved) {
-          const actualPaymentAmount = parseFloat(payment.certificateAmount);
-          const commissionAmount = (actualPaymentAmount * parseFloat(seller.commissionRate)) / 100;
-          await storage.createSale({
-            sellerId: seller.id,
-            courseId,
-            certificateId: certificate.id,
-            amount: actualPaymentAmount.toString(),
-            commission: commissionAmount.toString(),
-            referralCode: sellerCode,
-            status: "completed",
-          });
-          if (userId) {
-            await storage.updateReferralConversion(sellerCode, courseId, userId);
-          }
-          await storage.incrementSellerEarnings(seller.id, commissionAmount);
-        }
-      }
-
-      if (userId) {
+      if (userId && fulfillment.status === "completed") {
         await storage.createNotification({
           userId,
           title: "Certificate Payment Successful",
@@ -2993,7 +3362,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      return res.status(200).json({ ok: true, status: "completed" });
+      return res.status(200).json({ ok: true, status: fulfillment.status });
     } catch (error: any) {
       console.error("Cashfree webhook processing error:", error);
       return res.status(500).json({ message: "Webhook processing failed" });
@@ -3227,166 +3596,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
           );
         }
 
-        // CRITICAL: NOW CREATE EXAM ATTEMPT AND CERTIFICATE AFTER SUCCESSFUL PAYMENT
+        const credentialCourse = await storage.getCourse(examData.courseId);
+        if (!examData.passed || !credentialCourse || !isCredentialEligibleAssessment(credentialCourse)) {
+          await storage.updatePayment(payment.id, {
+            status: "failed",
+            gatewayStatusRaw: { ...(payment.gatewayStatusRaw as Record<string, unknown> || {}), reason: "assessment_not_credential_eligible" },
+          } as any);
+          return res.redirect(
+            `${req.protocol}://${req.get("host")}/payment-failed?error=assessment_not_credential_eligible&courseId=${courseId}`,
+          );
+        }
 
-        // 1. Create the exam attempt in the database
-        const examAttempt = await storage.createExamAttempt({
-          userId: examData.userId,
-          courseId: examData.courseId,
-          userEmail: examData.userEmail,
-          userName: examData.userName,
-          score: examData.score,
-          totalQuestions: examData.totalQuestions,
-          answers: examData.answers,
-          timeTaken: examData.timeTaken,
-          passed: examData.passed,
-          mastered: examData.mastered,
-          sessionId: examData.sessionId,
-          ipAddress: examData.ipAddress,
-          userAgent: examData.userAgent,
-          tabSwitches: examData.tabSwitches,
-        });
-
-        // 2. Generate certificate ID and create certificate
-        const certificateId = `OCT-${new Date().getFullYear()}-${examData.course.title
-          .replace(/\s+/g, "")
-          .toUpperCase()
-          .slice(0, 3)}-${Date.now()}`;
-        const badge = getBadgeFromScore(examData.score);
-        const certificateNumber = generateCertificateNumber();
-
-        const certificate = await storage.createCertificate({
-          certificateId,
-          examAttemptId: examAttempt.id,
-          userId: examData.userId,
-          courseId: examData.courseId,
-          userEmail: examData.userEmail,
-          userName: examData.userName,
-          score: examData.score,
-          courseTitle: examData.course.title,
-          badge,
-          certificateNumber,
-          expiresAt: calculateExpiryDate(),
-          isPaid: true, // Immediately mark as paid since payment is successful
-          paymentId: responseData.mihpayid,
-        });
-
-        // 3. Update payment record with certificate ID
-        await storage.updatePayment(payment.id, {
-          status: "completed",
-          gateway: "payumoney",
-          paymentMethod: "payumoney",
-          certificateId: certificate.id,
-          razorpayPaymentId: responseData.mihpayid,
-          razorpayOrderId: responseData.txnid,
-        });
-
-        await recordCouponRedemption({
-          payment,
-          userEmail: examData.userEmail,
-        });
-
-        await ensureRevenueSplits({
+        const fulfillment = await finalizePaidExamCertificate({
           paymentId: payment.id,
-          courseId,
-          certificateAmount: payment.certificateAmount,
-          gatewayOrderId: responseData.txnid,
+          transactionId: responseData.txnid,
+          providerPaymentId: String(responseData.mihpayid || responseData.txnid),
+          gateway: "payumoney",
+          gatewayStatusRaw: {
+            providerStatus: responseData.status,
+            providerUnmappedStatus: responseData.unmappedstatus,
+            providerTransactionId: responseData.txnid,
+            providerPaymentId: responseData.mihpayid,
+          },
+          examData,
           sellerCode,
         });
+        const certificate = fulfillment.certificate;
 
-        // 4. Clean up persisted exam data
         await deletePendingExam(tempExamId).catch(() => {});
 
-        // 5. Handle seller commission if applicable
-        if (sellerCode) {
-          console.log(`Processing commission for seller code: ${sellerCode}`);
-          const seller = await storage.getSellerByReferralCode(sellerCode);
-          console.log(
-            `Seller found:`,
-            seller
-              ? `ID: ${seller.id}, Approved: ${seller.isApproved}`
-              : "Not found"
-          );
-
-          if (seller && seller.isApproved) {
-            const course = await storage.getCourse(courseId);
-            if (course) {
-              // Use actual payment amount (not course price) for commission calculation
-              const actualPaymentAmount = parseFloat(payment.certificateAmount);
-              const commissionAmount =
-                (actualPaymentAmount * parseFloat(seller.commissionRate)) / 100;
-              console.log(
-                `Creating sale record: Commission ${commissionAmount} for course ${course.title} (actual payment: ${actualPaymentAmount})`
-              );
-
-              await storage.createSale({
-                sellerId: seller.id,
-                courseId: courseId,
-                certificateId: certificate.id,
-                amount: actualPaymentAmount.toString(),
-                commission: commissionAmount.toString(),
-                referralCode: sellerCode,
-                status: "completed",
-              });
-
-              // Update referral conversion
-              if (userId) {
-                await storage.updateReferralConversion(
-                  sellerCode,
-                  courseId,
-                  userId
-                );
-              }
-
-              // Atomic increment to avoid read-modify-write race
-              await storage.incrementSellerEarnings(seller.id, commissionAmount);
-            }
-          } else {
-            console.log(
-              `Seller not found or not approved for code: ${sellerCode}`
-            );
+        if (userId && fulfillment.status === "completed") {
+          try {
+            await storage.createNotification({
+              userId,
+              title: "Certificate Payment Successful",
+              type: "payment_success",
+              message: `Your payment for certificate ${certificate.certificateId} has been processed successfully. You can now download your certificate.`,
+              data: {
+                certificateId: certificate.certificateId,
+                actionUrl: `/certificates/${certificate.certificateId}`,
+                priority: "high",
+              },
+            });
+          } catch (notificationError) {
+            console.error("Error with post-payment notification:", notificationError);
           }
-        } else {
-          console.log("No seller code provided in payment");
         }
 
-        // 6. Handle notifications for registered users
-        try {
-          const course = await storage.getCourse(courseId);
-
-          if (course) {
-            // Send notification for registered users
-            if (userId) {
-              const user = await storage.getUser(userId);
-              if (user) {
-                await storage.createNotification({
-                  userId: userId,
-                  title: "Certificate Payment Successful",
-                  type: "payment_success",
-                  message: `Your payment for certificate ${certificate.certificateId} has been processed successfully. You can now download your certificate.`,
-                  data: {
-                    certificateId: certificate.certificateId,
-                    actionUrl: `/certificates/${certificate.certificateId}`,
-                    priority: "high",
-                  },
-                });
-              }
-            }
-
-            console.log(
-              `Certificate created successfully: ${certificate.certificateId}`
-            );
-          }
-        } catch (emailError) {
-          console.error("Error with post-payment processing:", emailError);
-          // Don't fail the entire payment flow if email fails
-        }
-
-        // Redirect to payment success page with certificate ID and transaction ID
-        res.redirect(
-          `${req.protocol}://${req.get("host")}/payment-success?txnid=${
-            responseData.txnid
-          }&certificateId=${certificate.certificateId}`
+        return res.redirect(
+          `${req.protocol}://${req.get("host")}/payment-success?txnid=${encodeURIComponent(
+            responseData.txnid,
+          )}&certificateId=${encodeURIComponent(certificate.certificateId)}`,
         );
       } else {
         const courseId = parseInt(responseData.udf1);
@@ -3483,24 +3743,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get(
     "/api/payment/status/:transactionId",
+    cashfreeStatusLimiter,
     async (req: Request, res: Response) => {
+      res.setHeader("Cache-Control", "private, no-store, max-age=0");
+      res.setHeader("Pragma", "no-cache");
       try {
-        const { transactionId } = req.params;
-        const payment = await storage.getPaymentByTransactionId(transactionId);
-
-        if (!payment) {
+        const parsed = z.object({
+          transactionId: z.string().regex(/^[A-Za-z0-9_-]{8,180}$/),
+          token: z.string().min(40).max(800),
+        }).safeParse({ transactionId: req.params.transactionId, token: req.query.token });
+        if (!parsed.success || verifyCashfreeStatusToken(parsed.data.token) !== parsed.data.transactionId) {
           return res.status(404).json({ message: "Payment not found" });
         }
+        const payment = await storage.getPaymentByTransactionId(parsed.data.transactionId);
+        if (!payment) return res.status(404).json({ message: "Payment not found" });
 
-        res.json({
-          status: payment.status,
+        return res.json({
+          status: publicPaymentStatus(payment.status),
           amount: payment.amount,
           transactionId: payment.transactionId,
           createdAt: payment.createdAt,
         });
       } catch (error) {
         console.error("Error fetching payment status:", error);
-        res.status(500).json({ message: "Failed to fetch payment status" });
+        return res.status(500).json({ message: "Failed to fetch payment status" });
       }
     }
   );
@@ -3594,12 +3860,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (status === "success") {
           const sponsorId = parseInt(responseData.udf1);
 
-          // Update sponsor payment status
-          await storage.updateSponsorPaymentStatus(
-            sponsorId,
-            "success",
-            responseData.txnid
-          );
+          await updateVerifiedSponsorPayment(responseData, "success");
 
           res.redirect(
             `${req.protocol}://${req.get("host")}/sponsor?success=true&txnid=${
@@ -3607,12 +3868,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }`
           );
         } else {
-          const sponsorId = parseInt(responseData.udf1);
-          await storage.updateSponsorPaymentStatus(
-            sponsorId,
-            "failed",
-            responseData.txnid
-          );
+          await updateVerifiedSponsorPayment(responseData, "failed");
 
           res.redirect(
             `${req.protocol}://${req.get(
@@ -3635,13 +3891,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     async (req: Request, res: Response) => {
       try {
         const responseData = req.body;
-        const sponsorId = parseInt(responseData.udf1);
-
-        await storage.updateSponsorPaymentStatus(
-          sponsorId,
-          "failed",
-          responseData.txnid
-        );
+        if (!payuMoneyService.verifyHash(responseData)) {
+          console.error("Invalid payment hash for sponsor failure callback");
+          return res.redirect(
+            `${req.protocol}://${req.get("host")}/sponsor?error=invalid_hash`,
+          );
+        }
+        await updateVerifiedSponsorPayment(responseData, "failed");
 
         res.redirect(
           `${req.protocol}://${req.get(
@@ -5542,74 +5798,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           for (const id of ids) await storage.deleteCourseAdmin(id);
           return res.json({ action: "delete", affected: ids.length });
         }
-        if (parsed.data.action === "publish") {
-          const result = await db.transaction(async (tx) => {
-            // Lock target courses before evaluating inventory. Question
-            // mutations unpublish through these same rows, preventing a stale
-            // concurrent publish from winning after content is withdrawn.
-            await tx.select({ id: coursesTable.id })
-              .from(coursesTable)
-              .where(inArray(coursesTable.id, ids))
-              .orderBy(coursesTable.id)
-              .for("update");
-            return tx.execute(sql`
-              UPDATE courses c SET is_active = true, visibility = 'public', review_status = 'approved',
-                certification_mode = CASE WHEN c.assessment_purpose = 'practice' THEN 'none' ELSE 'octamy' END,
-                use_blueprint_engine = true,
-                subscription_eligible = CASE WHEN c.assessment_purpose = 'practice' THEN true ELSE false END
-              WHERE c.id IN (${sql.join(ids.map((id) => sql`${id}`), sql`,`)})
-                AND c.owner_type = 'admin' AND c.product_type = 'assessment'
-                AND EXISTS (SELECT 1 FROM course_question_blueprint b WHERE b.course_id = c.id)
-                AND NOT EXISTS (
-                  SELECT 1
-                  FROM course_question_blueprint b
-                  LEFT JOIN question_banks bank ON bank.id = b.bank_id
-                  WHERE b.course_id = c.id
-                    AND (
-                      bank.bank_purpose IS DISTINCT FROM c.assessment_purpose
-                      OR bank.status IS DISTINCT FROM 'active'
-                    )
-                )
-                AND NOT EXISTS (
-                  SELECT 1 FROM course_question_blueprint b
-                  WHERE b.course_id = c.id AND (
-                    SELECT count(*) FROM questions q
-                    WHERE q.bank_id = b.bank_id
-                      AND (b.topic_id IS NULL OR q.topic_id = b.topic_id)
-                      AND q.is_active = true AND q.review_status = 'approved'
-                      AND q.reviewed_by IS NOT NULL
-                      AND q.reviewed_at IS NOT NULL
-                      AND q.question_format IN ('mcq_single', 'true_false')
-                      AND json_typeof(q.options) = 'array'
-                      AND q.correct_answer >= 0
-                      AND q.correct_answer < json_array_length(q.options)
-                      AND (b.difficulty = 'mixed' OR q.difficulty = b.difficulty)
-                  ) < b.question_count * CASE WHEN c.assessment_purpose = 'practice' THEN 5 ELSE 4 END
-                )
-                AND (
-                  SELECT count(DISTINCT q.id)
-                  FROM course_question_blueprint b
-                  INNER JOIN questions q ON q.bank_id = b.bank_id
-                    AND (b.topic_id IS NULL OR q.topic_id = b.topic_id)
-                    AND (b.difficulty = 'mixed' OR q.difficulty = b.difficulty)
-                  WHERE b.course_id = c.id
-                    AND q.is_active = true AND q.review_status = 'approved'
-                    AND q.reviewed_by IS NOT NULL
-                    AND q.reviewed_at IS NOT NULL
-                    AND q.question_format IN ('mcq_single', 'true_false')
-                    AND json_typeof(q.options) = 'array'
-                    AND q.correct_answer >= 0
-                    AND q.correct_answer < json_array_length(q.options)
-                ) >= GREATEST(
-                  CASE WHEN c.assessment_purpose = 'practice' THEN 200 ELSE 80 END,
-                  COALESCE((SELECT sum(b.question_count) FROM course_question_blueprint b WHERE b.course_id = c.id), 0)
-                    * CASE WHEN c.assessment_purpose = 'practice' THEN 5 ELSE 4 END
-                )
-              RETURNING c.id
-            `);
-          });
-          return res.json({ action: "publish", affected: result.rowCount || 0, skipped: ids.length - (result.rowCount || 0) });
-        }
+        if (parsed.data.action === "publish") { return res.status(409).json({ message: "Bulk publication is disabled. Review and publish each assessment through its guarded release workflow.", code: "BULK_ASSESSMENT_PUBLISH_DISABLED", }); }
         const result = await db.execute(sql`
           UPDATE courses SET is_active = false, visibility = 'private', subscription_eligible = false
           WHERE id IN (${sql.join(ids.map((id) => sql`${id}`), sql`,`)})

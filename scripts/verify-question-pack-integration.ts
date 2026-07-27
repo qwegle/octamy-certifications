@@ -2,7 +2,7 @@
 
 import "dotenv/config";
 
-import { readFile, readdir, rm } from "node:fs/promises";
+import { readFile, readdir, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import process from "node:process";
@@ -37,6 +37,12 @@ async function main() {
     mkdtemp(path.join(os.tmpdir(), "octamy-pack-integration-"))
   ));
   const packPath = path.join(packDirectory, "questions.jsonl");
+  const rightsEvidencePath = path.join(packDirectory, "synthetic-rights-evidence.txt");
+  await writeFile(
+    rightsEvidencePath,
+    "Synthetic integration-test evidence only; not valid for production rights registration.\n",
+    "utf8",
+  );
 
   await control.connect();
   try {
@@ -63,6 +69,8 @@ async function main() {
     await registerQuestionPackSource({
       databaseUrl,
       manifestPath: path.resolve("content/question-packs/octamy-original-quant-science-v1.manifest.json"),
+      evidencePath: rightsEvidencePath,
+      acquiringEntity: "Octamy integration test fixture",
       operator: "Octamy integration verifier",
       confirmRights: true,
     });

@@ -18,8 +18,9 @@ import {
   INTERVIEW_STUDIO_JAVASCRIPT_RUNTIME,
   canonicalizeInterviewStudioBlueprint,
   interviewStudioBlueprintSchema,
-  sanitizeInterviewStudioBlueprintForClient,
+  sanitizeInterviewStudioItemForCandidate,
   sanitizeInterviewStudioTestRunForClient,
+  summarizeInterviewStudioBlueprintForCatalog,
   type InterviewStudioBlueprint,
 } from "@shared/interview-studio";
 import { audit } from "../lib/audit";
@@ -81,11 +82,16 @@ const createSessionBodySchema = z.object({
   message: "Choose an interview template",
 });
 
+const revealNextItemBodySchema = z.object({
+  cursor: z.string().trim().min(20).max(2_000),
+}).strict();
+
 const responseBodySchema = z.object({
   responseText: z.string().max(MAX_RESPONSE_CHARACTERS).optional(),
   answerText: z.string().max(MAX_RESPONSE_CHARACTERS).optional(),
   code: z.string().optional(),
   language: z.literal("javascript").optional(),
+  navigationCursor: z.string().trim().min(20).max(2_000),
   timeSpentSeconds: z.number().int().min(0).max(86_400).optional(),
 }).strict().superRefine((value, context) => {
   const code = value.code ?? "";
@@ -106,6 +112,7 @@ const runSamplesBodySchema = z.object({
   itemKey: z.string().trim().min(3).max(120),
   code: z.string(),
   language: z.literal("javascript"),
+  navigationCursor: z.string().trim().min(20).max(2_000),
 }).strict().superRefine((value, context) => {
   if (!value.code.trim()) {
     context.addIssue({ code: z.ZodIssueCode.custom, path: ["code"], message: "Add a solution before running tests" });
@@ -247,11 +254,120 @@ async function loadOwnedSession(sessionId: string, userId: number) {
   return session;
 }
 
-async function sessionPayload(session: typeof interviewStudioSessions.$inferSelect) {
+type InterviewNavigationCursor = {
+  sessionId: string;
+  userId: number;
+  currentIndex: number;
+};
+
+function navigationSecret(): string {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) throw Object.assign(new Error("Interview navigation signing is unavailable"), { status: 503 });
+  return secret;
+}
+
+function signNavigationCursor(value: InterviewNavigationCursor): string {
+  const payload = Buffer.from(JSON.stringify(value), "utf8").toString("base64url");
+  const signature = crypto.createHmac("sha256", navigationSecret()).update(payload).digest("base64url");
+  return `${payload}.${signature}`;
+}
+
+function verifyNavigationCursor(raw: string): InterviewNavigationCursor | null {
+  const [payload, signature, extra] = raw.split(".");
+  if (!payload || !signature || extra) return null;
+  const expected = crypto.createHmac("sha256", navigationSecret()).update(payload).digest();
+  let received: Buffer;
+  try {
+    received = Buffer.from(signature, "base64url");
+  } catch {
+    return null;
+  }
+  if (received.length !== expected.length || !crypto.timingSafeEqual(received, expected)) return null;
+  try {
+    const parsed = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as Partial<InterviewNavigationCursor>;
+    if (typeof parsed.sessionId !== "string" || !Number.isInteger(parsed.userId) || !Number.isInteger(parsed.currentIndex)) return null;
+    return parsed as InterviewNavigationCursor;
+  } catch {
+    return null;
+  }
+}
+
+function navigationCursorAllowsItem(input: {
+  rawCursor: string;
+  sessionId: string;
+  userId: number;
+  blueprint: InterviewStudioBlueprint;
+  itemKey: string;
+}): boolean {
+  const cursor = verifyNavigationCursor(input.rawCursor);
+  const itemIndex = input.blueprint.items.findIndex((item) => item.key === input.itemKey);
+  return Boolean(
+    cursor
+    && cursor.sessionId === input.sessionId
+    && cursor.userId === input.userId
+    && itemIndex >= 0
+    && itemIndex === cursor.currentIndex
+    && cursor.currentIndex < input.blueprint.items.length,
+  );
+}
+
+function candidateItemEvaluation(value: typeof interviewStudioResponses.$inferSelect.evaluation) {
+  if (!value) return null;
+  return {
+    status: value.status,
+    score: value.score,
+    strengths: value.strengths,
+    improvementAreas: value.improvementAreas,
+    followUpQuestions: value.followUpQuestions,
+    evaluatedAt: value.evaluatedAt,
+  };
+}
+
+function candidateOverallEvaluation(value: typeof interviewStudioSessions.$inferSelect.evaluation) {
+  if (!value) return null;
+  return {
+    status: value.status,
+    score: value.score,
+    competencyEvidence: value.competencyEvidence,
+    summary: value.summary,
+    strengths: value.strengths,
+    improvementAreas: value.improvementAreas,
+    humanReviewReasons: value.humanReviewReasons,
+    evaluatedAt: value.evaluatedAt,
+  };
+}
+
+async function sessionPayload(
+  session: typeof interviewStudioSessions.$inferSelect,
+  requestedCurrentIndex?: number,
+) {
   const responses = await db.select().from(interviewStudioResponses)
     .where(eq(interviewStudioResponses.sessionId, session.id))
     .orderBy(interviewStudioResponses.id);
   const blueprint = asBlueprint(session.blueprintSnapshot, session.blueprintHash);
+  const responseIndexes = responses
+    .map((response) => blueprint.items.findIndex((item) => item.key === response.itemKey))
+    .filter((index) => index >= 0);
+  const derivedIndex = session.status === "in_progress"
+    ? responseIndexes.length ? Math.max(...responseIndexes) : 0
+    : responseIndexes.length
+      ? Math.max(...responseIndexes)
+      : -1;
+  const currentIndex = requestedCurrentIndex == null
+    ? derivedIndex
+    : Math.max(-1, Math.min(requestedCurrentIndex, blueprint.items.length - 1));
+  const active = session.status === "in_progress";
+  const beforeDeadline = Boolean(session.serverDeadlineAt && Date.now() <= session.serverDeadlineAt.getTime());
+  const currentItemKey = currentIndex >= 0 ? blueprint.items[currentIndex]?.key : undefined;
+  const currentResponseSaved = Boolean(currentItemKey && responses.some((response) => response.itemKey === currentItemKey));
+  const canRevealNext = active
+    && beforeDeadline
+    && currentResponseSaved
+    && currentIndex >= 0
+    && currentIndex < blueprint.items.length - 1;
+  const visibleItems = currentIndex >= 0 && blueprint.items[currentIndex]
+    ? [sanitizeInterviewStudioItemForCandidate(blueprint.items[currentIndex])]
+    : [];
   return {
     id: session.id,
     templateId: session.templateId,
@@ -259,7 +375,27 @@ async function sessionPayload(session: typeof interviewStudioSessions.$inferSele
     templateVersion: session.templateVersion,
     mode: session.mode,
     status: session.status,
-    blueprint: sanitizeInterviewStudioBlueprintForClient(blueprint),
+    blueprint: {
+      title: blueprint.title,
+      summary: blueprint.summary,
+      role: blueprint.role,
+      level: blueprint.level,
+      skills: blueprint.skills,
+      estimatedDurationMinutes: blueprint.estimatedDurationMinutes,
+      itemCount: blueprint.items.length,
+      codingCount: blueprint.items.filter((item) => item.kind === "coding").length,
+      includesCoding: blueprint.items.some((item) => item.kind === "coding"),
+      items: visibleItems,
+    },
+    navigation: {
+      currentIndex: currentIndex >= 0 ? currentIndex : null,
+      revealedCount: currentIndex >= 0 ? currentIndex + 1 : 0,
+      totalItems: blueprint.items.length,
+      canRevealNext,
+      cursor: active && currentIndex >= 0
+        ? signNavigationCursor({ sessionId: session.id, userId: session.userId, currentIndex })
+        : null,
+    },
     consent: session.consentSnapshot,
     permissions: session.permissionSnapshot,
     deadlineAt: session.serverDeadlineAt,
@@ -270,28 +406,28 @@ async function sessionPayload(session: typeof interviewStudioSessions.$inferSele
     retentionUntil: session.retentionUntil,
     overallScore: session.overallScore,
     evaluationStatus: session.evaluationStatus,
-    evaluation: session.evaluation,
+    evaluation: candidateOverallEvaluation(session.evaluation),
     recruiterSharingEnabled: false,
-    responses: responses.map((response) => ({
-      id: response.id,
-      itemKey: response.itemKey,
-      itemKind: response.itemKind,
-      responseText: response.answerText,
-      answerText: response.answerText,
-      code: response.code,
-      language: response.language,
-      timeSpentSeconds: response.timeSpentSeconds,
-      sampleTestResult: response.sampleTestResult
+    responses: responses.map((response) => {
+      const publicSampleResult = response.sampleTestResult
         ? sanitizeInterviewStudioTestRunForClient(response.sampleTestResult)
-        : null,
-      finalTestResult: response.finalTestResult
-        ? sanitizeInterviewStudioTestRunForClient(response.finalTestResult)
-        : null,
-      evaluationStatus: response.evaluationStatus,
-      evaluation: response.evaluation,
-      isFinal: response.isFinal,
-      updatedAt: response.updatedAt,
-    })),
+        : null;
+      if (publicSampleResult) delete (publicSampleResult as { hidden?: unknown }).hidden;
+      return {
+        itemKey: response.itemKey,
+        itemKind: response.itemKind,
+        responseText: response.answerText,
+        answerText: response.answerText,
+        code: response.code,
+        language: response.language,
+        timeSpentSeconds: response.timeSpentSeconds,
+        sampleTestResult: publicSampleResult,
+        evaluationStatus: response.evaluationStatus,
+        evaluation: candidateItemEvaluation(response.evaluation),
+        isFinal: response.isFinal,
+        updatedAt: response.updatedAt,
+      };
+    }),
   };
 }
 
@@ -355,7 +491,7 @@ router.get("/interview-studio/templates", authenticateToken, asyncHandler(async 
       difficulty: blueprint.level,
       durationMinutes: blueprint.estimatedDurationMinutes,
       availableModes: template.supportedModes.filter((mode) => mode === "practice" || readiness.verifiedEnabled),
-      blueprint: sanitizeInterviewStudioBlueprintForClient(blueprint),
+      ...summarizeInterviewStudioBlueprintForCatalog(blueprint),
     };
   });
   res.setHeader("Cache-Control", "private, no-store");
@@ -531,7 +667,47 @@ router.post("/interview-studio/sessions/:sessionId/start", authenticateToken, wr
     return res.status(409).json({ message: "This interview could not be started" });
   }
   await appendSessionEvent({ sessionId: session.id, userId: req.user!.userId, type: "session_started" });
-  res.json(await sessionPayload(started));
+  res.json(await sessionPayload(started, 0));
+}));
+
+router.post("/interview-studio/sessions/:sessionId/items/next", authenticateToken, writeLimiter, asyncHandler(async (req, res) => {
+  const parsed = revealNextItemBodySchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ message: "A valid interview navigation cursor is required" });
+  const session = await loadOwnedSession(req.params.sessionId, req.user!.userId);
+  if (!session) return res.status(404).json({ message: "Interview session not found" });
+  if (session.status !== "in_progress") {
+    return res.status(409).json({ message: "This interview is not accepting navigation changes", code: "INTERVIEW_INVALID_STATE" });
+  }
+  if (!session.serverDeadlineAt || Date.now() > session.serverDeadlineAt.getTime()) {
+    return res.status(409).json({ message: "The interview timer has ended. Submit your saved responses.", code: "INTERVIEW_DEADLINE_PASSED" });
+  }
+  const cursor = verifyNavigationCursor(parsed.data.cursor);
+  if (!cursor
+    || cursor.sessionId !== session.id
+    || cursor.userId !== req.user!.userId
+    || cursor.currentIndex < 0) {
+    return res.status(409).json({ message: "Refresh this interview before continuing", code: "INTERVIEW_NAVIGATION_STALE" });
+  }
+  const blueprint = asBlueprint(session.blueprintSnapshot, session.blueprintHash);
+  if (cursor.currentIndex >= blueprint.items.length - 1) {
+    return res.status(409).json({ message: "There are no more interview prompts", code: "INTERVIEW_NO_NEXT_ITEM" });
+  }
+  const currentItem = blueprint.items[cursor.currentIndex];
+  const [savedCurrentResponse] = await db.select({ id: interviewStudioResponses.id })
+    .from(interviewStudioResponses)
+    .where(and(
+      eq(interviewStudioResponses.sessionId, session.id),
+      eq(interviewStudioResponses.itemKey, currentItem.key),
+    ))
+    .limit(1);
+  if (!savedCurrentResponse) {
+    return res.status(409).json({
+      message: "Save a response to the current prompt before opening the next one",
+      code: "INTERVIEW_CURRENT_RESPONSE_REQUIRED",
+    });
+  }
+  res.setHeader("Cache-Control", "private, no-store");
+  res.json(await sessionPayload(session, cursor.currentIndex + 1));
 }));
 
 router.put("/interview-studio/sessions/:sessionId/responses/:itemKey", authenticateToken, writeLimiter, asyncHandler(async (req, res) => {
@@ -546,6 +722,15 @@ router.put("/interview-studio/sessions/:sessionId/responses/:itemKey", authentic
   const blueprint = asBlueprint(session.blueprintSnapshot, session.blueprintHash);
   const item = findBlueprintItem(blueprint, req.params.itemKey);
   if (!item) return res.status(404).json({ message: "Interview item not found" });
+  if (!navigationCursorAllowsItem({
+    rawCursor: parsed.data.navigationCursor,
+    sessionId: session.id,
+    userId: req.user!.userId,
+    blueprint,
+    itemKey: item.key,
+  })) {
+    return res.status(409).json({ message: "Open this prompt through the interview navigator before responding", code: "INTERVIEW_ITEM_NOT_REVEALED" });
+  }
 
   const answerText = safeResponseText(parsed.data);
   const code = parsed.data.code?.trim() || "";
@@ -673,6 +858,15 @@ router.post("/interview-studio/sessions/:sessionId/run-samples", authenticateTok
   const blueprint = asBlueprint(session.blueprintSnapshot, session.blueprintHash);
   const item = findBlueprintItem(blueprint, parsed.data.itemKey);
   if (!item || item.kind !== "coding") return res.status(404).json({ message: "Coding challenge not found" });
+  if (!navigationCursorAllowsItem({
+    rawCursor: parsed.data.navigationCursor,
+    sessionId: session.id,
+    userId: req.user!.userId,
+    blueprint,
+    itemKey: item.key,
+  })) {
+    return res.status(409).json({ message: "Open this challenge through the interview navigator before running it", code: "INTERVIEW_ITEM_NOT_REVEALED" });
+  }
   if (!isCodeRunnerEnabled(process.env)) {
     return res.status(503).json({ message: "The isolated code runner is not configured yet. Your code can still be saved.", code: "CODE_RUNNER_DISABLED" });
   }
@@ -715,6 +909,7 @@ router.post("/interview-studio/sessions/:sessionId/run-samples", authenticateTok
       payload: { itemKey: item.key, scope: "public" },
     });
     const clientResult = sanitizeInterviewStudioTestRunForClient(result);
+    delete (clientResult as { hidden?: unknown }).hidden;
     res.json({ ...clientResult, result: clientResult, responseId: saved.id });
   } catch (error) {
     logger.warn("interview_studio.sample_run_failed", { sessionId: session.id, userId: req.user!.userId, error });
@@ -912,6 +1107,16 @@ router.post(
         const blueprint = asBlueprint(session.blueprintSnapshot, session.blueprintHash);
         const item = findBlueprintItem(blueprint, req.params.itemKey);
         if (!item || item.kind !== "structured_response") return res.status(404).json({ message: "Structured interview prompt not found" });
+        const navigationCursor = typeof req.body?.navigationCursor === "string" ? req.body.navigationCursor : "";
+        if (!navigationCursorAllowsItem({
+          rawCursor: navigationCursor,
+          sessionId: session.id,
+          userId: req.user!.userId,
+          blueprint,
+          itemKey: item.key,
+        })) {
+          return res.status(409).json({ message: "Open this prompt through the interview navigator before transcribing", code: "INTERVIEW_ITEM_NOT_REVEALED" });
+        }
         if (!audioSignatureMatches(file.path, file.mimetype)) {
           return res.status(400).json({ message: "The recorded file did not match its audio format" });
         }

@@ -39,13 +39,30 @@ import {
   users,
 } from '@shared/schema';
 import { storage } from '../storage';
-import { createCashfreeOrder } from '../lib/cashfree';
+import { createCashfreeOrder, createCashfreeStatusToken } from '../lib/cashfree';
 import { z } from 'zod';
+import rateLimit from 'express-rate-limit';
 import crypto from 'node:crypto';
 import { authenticateRecruiterToken } from './recruiterRoutes';
 import { audit } from '../lib/audit';
+import { assertAssessmentPublishReadiness } from '../lib/assessment-publish-readiness';
 
 const router = Router();
+
+const subscriptionCheckoutLimiter = rateLimit({
+  windowMs: 60_000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: 'Too many subscription checkout attempts. Please wait and try again.' },
+});
+const subscriptionStatusLimiter = rateLimit({
+  windowMs: 60_000,
+  max: 60,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: 'Too many subscription status checks. Please wait and try again.' },
+});
 
 // ---------- helpers ----------
 function makeSlug(s: string) {
@@ -987,6 +1004,25 @@ router.get('/user/exam-history', authenticateToken, async (req: any, res: Respon
 // SUBSCRIPTIONS — checkout (creates Cashfree order tagged kind=subscription)
 // =================================================================
 
+async function hasReleaseReadyPracticeInventory(): Promise<boolean> {
+  const candidates = await db.select().from(courses).where(and(
+    eq(courses.productType, 'assessment'),
+    eq(courses.assessmentPurpose, 'practice'),
+    eq(courses.isActive, true),
+    eq(courses.visibility, 'public'),
+    eq(courses.reviewStatus, 'approved'),
+  ));
+  for (const course of candidates) {
+    try {
+      await assertAssessmentPublishReadiness({ courseId: course.id, previous: null, next: course });
+      return true;
+    } catch {
+      // A stale public flag is not sellable inventory. Try another candidate.
+    }
+  }
+  return false;
+}
+
 const SUB_PLANS: Record<string, Record<string, { amount: number; cycle: 'monthly' | 'yearly' }>> = {
   learner: {
     // Internal plan key kept for backward compatibility; product copy is Practice Pass.
@@ -1003,13 +1039,19 @@ const SUB_PLANS: Record<string, Record<string, { amount: number; cycle: 'monthly
   },
 };
 
-router.post('/subscriptions/checkout', authenticateToken, async (req: any, res: Response) => {
+router.post('/subscriptions/checkout', authenticateToken, subscriptionCheckoutLimiter, async (req: any, res: Response) => {
   try {
     const { ownerType, plan, cycle = 'monthly' } = req.body || {};
     if (!ownerType || !plan) return res.status(400).json({ message: 'ownerType and plan required' });
     if (cycle !== 'monthly' && cycle !== 'yearly') return res.status(400).json({ message: 'Invalid billing cycle' });
     const planRow = SUB_PLANS[ownerType]?.[plan];
     if (!planRow) return res.status(400).json({ message: 'Unknown plan' });
+    if (ownerType === 'learner' && plan === 'all_access' && !(await hasReleaseReadyPracticeInventory())) {
+      return res.status(409).json({
+        message: 'Practice Pass is not on sale while the reviewed Practice catalogue is unavailable.',
+        code: 'PRACTICE_INVENTORY_UNAVAILABLE',
+      });
+    }
     const chargeAmount = cycle === 'yearly' ? planRow.amount * 10 : planRow.amount;
 
     let ownerId: number | null = null;
@@ -1039,42 +1081,80 @@ router.post('/subscriptions/checkout', authenticateToken, async (req: any, res: 
     const baseUrl = (process.env.APP_URL || process.env.PUBLIC_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
     const customer = await storage.getUser(req.user.userId);
     const orderId = `SUB_${crypto.randomUUID()}`;
-    const order = await createCashfreeOrder({
-      orderId,
-      amount: chargeAmount.toFixed(2),
-      customerId: `oct_user_${req.user.userId}`,
-      customerEmail: req.user.email,
-      customerName: customer?.name || req.user.email.split('@')[0],
-      customerPhone: customer?.phone || '9999999999',
-      returnUrl: `${baseUrl}/billing/return?ownerType=${ownerType}&plan=${plan}`,
-      notifyUrl: `${baseUrl}/api/webhooks/cashfree`,
-      notes: {
-        kind: 'subscription',
+    const reservation = await db.transaction(async (tx) => {
+      await tx.execute(sql`SELECT pg_advisory_xact_lock(7201, ${req.user.userId})`);
+      const [active] = await tx.select({ id: subscriptions.id }).from(subscriptions).where(and(
+        eq(subscriptions.ownerType, ownerType),
+        eq(subscriptions.ownerId, ownerId!),
+        eq(subscriptions.plan, plan),
+        eq(subscriptions.status, 'active'),
+        sql`${subscriptions.renewsAt} > NOW()`,
+      )).limit(1);
+      if (active) return { kind: 'active' as const };
+      const [pending] = await tx.select({ id: subscriptions.id, orderId: subscriptions.cashfreeOrderId }).from(subscriptions).where(and(
+        eq(subscriptions.ownerType, ownerType),
+        eq(subscriptions.ownerId, ownerId!),
+        eq(subscriptions.plan, plan),
+        eq(subscriptions.status, 'pending'),
+        sql`${subscriptions.createdAt} > NOW() - INTERVAL '30 minutes'`,
+      )).orderBy(desc(subscriptions.createdAt)).limit(1);
+      if (pending) return { kind: 'pending' as const, orderId: pending.orderId };
+      const [subscription] = await tx.insert(subscriptions).values({
         ownerType,
-        ownerId: String(ownerId),
-        userId: String(req.user.userId),
+        ownerId: ownerId!,
+        userId: req.user.userId,
         plan,
+        status: 'pending',
+        amount: chargeAmount.toFixed(2),
+        currency: 'INR',
         cycle,
-      },
+        cashfreeOrderId: orderId,
+      }).returning();
+      return { kind: 'created' as const, subscription };
     });
+    if (reservation.kind === 'active') {
+      return res.status(409).json({ message: 'This plan is already active', code: 'SUBSCRIPTION_ALREADY_ACTIVE' });
+    }
+    if (reservation.kind === 'pending') {
+      if (!reservation.orderId) throw new Error('PENDING_SUBSCRIPTION_ORDER_ID_MISSING');
+      return res.status(409).json({
+        message: 'A checkout for this plan is already awaiting confirmation.',
+        code: 'SUBSCRIPTION_CHECKOUT_PENDING',
+        orderId: reservation.orderId,
+        statusToken: createCashfreeStatusToken(reservation.orderId),
+      });
+    }
 
-    const [sub] = await db.insert(subscriptions).values({
-      ownerType,
-      ownerId: ownerId!,
-      userId: req.user.userId,
-      plan,
-      status: 'pending',
-      amount: String(chargeAmount),
-      cycle,
-      cashfreeOrderId: order.orderId,
-    }).returning();
+    let order;
+    try {
+      order = await createCashfreeOrder({
+        orderId,
+        amount: chargeAmount.toFixed(2),
+        customerId: `oct_user_${req.user.userId}`,
+        customerEmail: req.user.email,
+        customerName: customer?.name || req.user.email.split('@')[0],
+        customerPhone: customer?.phone || '9999999999',
+        returnUrl: `${baseUrl}/billing/return?orderId=${encodeURIComponent(orderId)}&ownerType=${encodeURIComponent(ownerType)}&plan=${encodeURIComponent(plan)}&next=${encodeURIComponent(ownerType === 'learner' ? '/practice' : `/${ownerType}/dashboard`)}`,
+        notifyUrl: `${baseUrl}/api/webhooks/cashfree`,
+        notes: {
+          kind: 'subscription',
+          subscriptionId: String(reservation.subscription.id),
+        },
+      });
+    } catch (providerError) {
+      await db.update(subscriptions).set({ status: 'cancelled', updatedAt: new Date() })
+        .where(and(eq(subscriptions.id, reservation.subscription.id), eq(subscriptions.status, 'pending')));
+      throw providerError;
+    }
 
     res.json({
-      orderId: order.orderId,
+      orderId,
+      statusToken: createCashfreeStatusToken(orderId),
       paymentSessionId: order.paymentSessionId,
       paymentLink: order.paymentLink,
-      subscriptionId: sub.id,
+      subscriptionId: reservation.subscription.id,
       amount: chargeAmount,
+      currency: 'INR',
     });
   } catch (err: any) {
     console.error('POST /subscriptions/checkout', err);
@@ -1090,33 +1170,73 @@ export async function activatePlan(
   cashfreeOrderId: string | null,
   requestedCycle: 'monthly' | 'yearly' = 'monthly',
 ) {
-  let cycle = requestedCycle;
-  if (cashfreeOrderId) {
-    const [subscription] = await db.select({ cycle: subscriptions.cycle })
-      .from(subscriptions)
-      .where(eq(subscriptions.cashfreeOrderId, cashfreeOrderId));
-    if (subscription?.cycle === 'yearly') cycle = 'yearly';
+  const applyWorkspacePlan = async (executor: any, renewsAt: Date) => {
+    if (ownerType === 'creator') {
+      await executor.update(creators).set({ plan, planRenewsAt: renewsAt }).where(eq(creators.id, ownerId));
+    } else if (ownerType === 'institute') {
+      await executor.update(institutes).set({ plan, planRenewsAt: renewsAt }).where(eq(institutes.id, ownerId));
+    } else if (ownerType === 'recruiter') {
+      await executor.update(recruiters).set({ plan, planRenewsAt: renewsAt }).where(eq(recruiters.id, ownerId));
+    }
+  };
+
+  if (!cashfreeOrderId) {
+    const durationDays = requestedCycle === 'yearly' ? 365 : 30;
+    const renewsAt = new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000);
+    await applyWorkspacePlan(db, renewsAt);
+    return { status: 'activated' as const, renewsAt };
   }
-  const durationDays = cycle === 'yearly' ? 365 : 30;
-  const renewsAt = new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000);
-  if (ownerType === 'learner') {
-    // Learner plan state lives in the immutable subscription row; unlike
-    // workspace plans it never mutates a user role/profile record.
-  } else if (ownerType === 'creator') {
-    await db.update(creators).set({ plan, planRenewsAt: renewsAt }).where(eq(creators.id, ownerId));
-  } else if (ownerType === 'institute') {
-    await db.update(institutes).set({ plan, planRenewsAt: renewsAt }).where(eq(institutes.id, ownerId));
-  } else if (ownerType === 'recruiter') {
-    await db.update(recruiters).set({ plan, planRenewsAt: renewsAt }).where(eq(recruiters.id, ownerId));
-  }
-  if (cashfreeOrderId) {
-    await db.update(subscriptions).set({
+
+  return db.transaction(async (tx) => {
+    const [subscription] = await tx.select().from(subscriptions)
+      .where(eq(subscriptions.cashfreeOrderId, cashfreeOrderId))
+      .for('update')
+      .limit(1);
+    if (!subscription) throw new Error('SUBSCRIPTION_RESERVATION_NOT_FOUND');
+    if (subscription.ownerType !== ownerType || subscription.ownerId !== ownerId || subscription.plan !== plan) {
+      throw new Error('SUBSCRIPTION_RESERVATION_MISMATCH');
+    }
+    if (subscription.status === 'active') {
+      return { status: 'already_fulfilled' as const, renewsAt: subscription.renewsAt };
+    }
+    if (subscription.status !== 'pending') throw new Error('SUBSCRIPTION_NOT_PENDING');
+
+    const cycle: 'monthly' | 'yearly' = subscription.cycle === 'yearly' ? 'yearly' : 'monthly';
+    const durationDays = cycle === 'yearly' ? 365 : 30;
+    const startsAt = new Date();
+    const renewsAt = new Date(startsAt.getTime() + durationDays * 24 * 60 * 60 * 1000);
+    await applyWorkspacePlan(tx, renewsAt);
+    await tx.update(subscriptions).set({
       status: 'active',
-      startsAt: new Date(),
+      startsAt,
       renewsAt,
-    }).where(eq(subscriptions.cashfreeOrderId, cashfreeOrderId));
-  }
+      updatedAt: startsAt,
+    }).where(and(eq(subscriptions.id, subscription.id), eq(subscriptions.status, 'pending')));
+    return { status: 'activated' as const, renewsAt };
+  });
 }
+
+router.get('/subscriptions/orders/:orderId/status', authenticateToken, subscriptionStatusLimiter, async (req: any, res: Response) => {
+  res.setHeader('Cache-Control', 'private, no-store, max-age=0');
+  res.setHeader('Pragma', 'no-cache');
+  const orderId = String(req.params.orderId || '').trim();
+  if (!/^SUB_[0-9a-f-]{36}$/i.test(orderId)) {
+    return res.status(400).json({ message: 'Invalid subscription order', code: 'INVALID_SUBSCRIPTION_ORDER' });
+  }
+  const [subscription] = await db.select({
+    orderId: subscriptions.cashfreeOrderId,
+    status: subscriptions.status,
+    plan: subscriptions.plan,
+    ownerType: subscriptions.ownerType,
+    startsAt: subscriptions.startsAt,
+    renewsAt: subscriptions.renewsAt,
+  }).from(subscriptions).where(and(
+    eq(subscriptions.cashfreeOrderId, orderId),
+    eq(subscriptions.userId, req.user.userId),
+  )).limit(1);
+  if (!subscription) return res.status(404).json({ message: 'Subscription order not found' });
+  return res.json(subscription);
+});
 
 router.get('/me/subscription', authenticateToken, async (req: any, res: Response) => {
   try {

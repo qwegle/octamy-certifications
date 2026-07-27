@@ -1,238 +1,61 @@
-# Octamy Platform - Quick Start Guide
+# Octamy quick start
 
-## 🚀 Get Started in 5 Minutes
+## Web platform
 
-### Prerequisites
-- Node.js 20+ installed
-- PostgreSQL running locally
-- Git installed
+Requirements: Node.js 20+, PostgreSQL, npm, and Git.
 
-### 1. Clone and Install
 ```bash
-git clone <your-repository-url>
-cd octamy-platform
-npm install
-```
-
-### 2. Database Setup
-```bash
-# Create database
-createdb octamy_dev
-
-# Or using PostgreSQL console:
-psql -U postgres
-CREATE DATABASE octamy_dev;
-\q
-```
-
-### 3. Environment Setup
-```bash
-# Copy environment template
+git clone <repository-url>
+cd octamy-certifications
+npm ci
 cp .env.example .env
-
-# Edit .env with your database credentials
-nano .env
 ```
 
-**Required .env variables:**
-```env
-DATABASE_URL="postgresql://postgres:password@localhost:5432/octamy_dev"
-JWT_SECRET="your-32-character-secret-key-here"
-SESSION_SECRET="your-32-character-session-secret"
-```
+Create the development database named in `DATABASE_URL`. Replace every secret placeholder in `.env`; on a fresh database, set a strong, private `ADMIN_PASSWORD` (12+ characters) because development startup creates the configured admin without any default password.
 
-### 4. Initialize Database
 ```bash
-# Push schema and seed data
-npm run db:push
-npm run seed:comprehensive
-```
-
-### 5. Start Development
-```bash
+npm run db:migrate
 npm run dev
 ```
 
-Visit: http://localhost:5000
+Open the exact `APP_URL` configured in `.env`. Health probes are `GET /healthz` and `GET /readyz` (not `/api/health`). Development startup seeds the baseline catalog only when categories are absent.
 
-## 📱 Quick Mobile App Setup
+Authentication is real database authentication. Register through the UI or `POST /api/auth/register` using a unique email and a password of 8–128 characters containing letters and at least one number or symbol. Login succeeds only for an existing account with the matching password. No demo, partner, test, or admin password is published by this repository.
 
-### 1. Navigate to Mobile Directory
+For a local-only admin, choose private values in `.env`, then run:
+
 ```bash
-cd octamy-mobile/OctamyMobile
+npm run admin:bootstrap-local
 ```
 
-### 2. Install Mobile Dependencies
-```bash
-npm install
-```
+The command refuses production and non-local database hosts.
 
-### 3. Start Mobile Development
+## Current mobile app
+
+`octamy-mobile/` is retired. The supported Expo SDK 57 learner app is `mobile/`:
+
 ```bash
+cd mobile
+npm ci
+cp .env.example .env
+# Set EXPO_PUBLIC_API_URL to the server origin, without /api.
 npm start
 ```
 
-### 4. Preview Options
-- **Expo Go**: Install Expo Go app and scan QR code
-- **iOS Simulator**: Press `i` in terminal
-- **Android Emulator**: Press `a` in terminal
-- **Web**: Press `w` in terminal
+Use a development/EAS build for SQLCipher, camera, microphone, and complete native validation; Expo Go is not the release runtime. See `mobile/README.md` and `mobile/docs/API-CONTRACT.md` for capabilities and backend limitations.
 
-## 🔑 Default Credentials
+## Validate
 
-### Admin Access
-- **Email**: admin@octamy.com
-- **Password**: admin123
-- **URL**: http://localhost:5000/admin
-
-### Partner Access
-- **Email**: partner@octamy.com  
-- **Password**: password
-- **URL**: http://localhost:5000/seller-auth
-
-### Test User
-- Register a new account or login with any email/password combination
-
-## 📋 Common Commands
-
-### Development
 ```bash
-npm run dev          # Start full application
-npm run server       # Backend only
-npm run client       # Frontend only
+npm run check
+npm run build
+# TEST_DATABASE_URL must name a separate disposable database:
+npm test
+
+cd mobile
+npm run typecheck
+npm test
+npx expo-doctor
 ```
 
-### Database
-```bash
-npm run db:push      # Apply schema changes
-npm run db:studio    # Database GUI
-npm run seed         # Basic seed data
-npm run seed:comprehensive  # Full demo data
-```
-
-### Production
-```bash
-npm run build        # Build for production
-npm start           # Start production server
-```
-
-## 🛠️ Troubleshooting
-
-### Port Already in Use
-```bash
-# Kill process on port 5000
-lsof -i :5000
-kill -9 <PID>
-
-# Or use different port
-PORT=3000 npm run dev
-```
-
-### Database Connection Issues
-```bash
-# Check PostgreSQL status
-brew services list | grep postgresql  # macOS
-sudo systemctl status postgresql      # Linux
-
-# Test connection
-psql -U postgres -d octamy_dev
-```
-
-### Import Errors (Local Development)
-If you encounter `import.meta.url` errors:
-```bash
-# Create local vite config
-cp vite.config.ts vite.config.local.ts
-
-# Edit vite.config.local.ts and change:
-define: {
-  'import.meta.url': '"file://" + __filename'
-}
-
-# Run with local config
-npm run dev -- --config vite.config.local.ts
-```
-
-## 📚 API Testing
-
-### Test Endpoints
-```bash
-# Health check
-curl http://localhost:5000/api/health
-
-# Get courses
-curl http://localhost:5000/api/courses
-
-# Register user
-curl -X POST http://localhost:5000/api/register \
-  -H "Content-Type: application/json" \
-  -d '{"email":"test@example.com","password":"password123","firstName":"Test","lastName":"User"}'
-```
-
-## 🔄 Development Workflow
-
-### Making Changes
-1. Create feature branch: `git checkout -b feature/name`
-2. Make changes and test locally
-3. Run type check: `npm run type-check`
-4. Commit: `git commit -m "feat: description"`
-5. Push: `git push origin feature/name`
-
-### Database Changes
-1. Modify `shared/schema.ts`
-2. Push changes: `npm run db:push`
-3. Update seed data if needed: `npm run seed`
-4. Test changes: `npm run dev`
-
-## 📱 Mobile Development
-
-### API Configuration
-Update `octamy-mobile/OctamyMobile/src/constants/api.ts`:
-```typescript
-export const API_BASE_URL = 'http://localhost:5000/api';
-```
-
-### Testing Mobile Features
-- **Authentication**: Register/login with web credentials
-- **Courses**: Browse same courses as web version
-- **Exams**: Take timed exams with auto-submit
-- **Certificates**: View and share certificates
-- **Offline**: Test airplane mode functionality
-
-## 🚀 Production Deployment
-
-### Quick Deploy to Replit
-1. Push code to GitHub
-2. Import to Replit
-3. Set environment variables
-4. Deploy using Replit Deployments
-
-### Environment Variables (Production)
-```env
-NODE_ENV=production
-DATABASE_URL=<production-database-url>
-JWT_SECRET=<secure-production-secret>
-PAYUMONEY_MERCHANT_ID=<live-merchant-id>
-PAYUMONEY_MERCHANT_KEY=<live-merchant-key>
-PAYUMONEY_SALT=<live-salt>
-```
-
-## 📞 Support
-
-- **Documentation**: See `LOCAL_SETUP.md` for detailed setup
-- **Mobile Guide**: See `octamy-mobile/MOBILE_PREVIEW.md`
-- **Advanced Features**: See `PHASE_5_DOCUMENTATION.md`
-- **Issues**: Create GitHub issue with error details
-
-## ✅ Verification Checklist
-
-After setup, verify these work:
-- [ ] Web app loads at http://localhost:5000
-- [ ] Admin login works
-- [ ] Course browsing works  
-- [ ] Exam submission works
-- [ ] Certificate generation works
-- [ ] Mobile app connects to local API
-- [ ] Database queries execute successfully
-
-Ready to develop! 🎉
+Tests never fall back to the development `DATABASE_URL` for destructive database suites. Paid flows additionally require configured sandbox gateway credentials. Production deployments must use `scripts/deploy-production.sh`; see `DEPLOYMENT.md`.

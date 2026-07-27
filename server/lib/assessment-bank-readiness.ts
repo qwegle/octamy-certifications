@@ -80,6 +80,15 @@ export type AssessmentPublishReadinessIssue =
       available: number;
     }
   | {
+      code: "BLUEPRINT_RULE_SCOPE_OVERLAP";
+      message: string;
+      bankId: number;
+      topicId: number | null;
+      difficulty: string;
+      conflictingTopicId: number | null;
+      conflictingDifficulty: string;
+    }
+  | {
       code: "ASSESSMENT_INVENTORY_INCOMPLETE";
       message: string;
       required: number;
@@ -125,6 +134,30 @@ export function evaluateAssessmentPublishReadiness(
   }
 
   const rotationMultiplier = questionInventoryRotationMultiplier(input.purpose);
+  for (let leftIndex = 0; leftIndex < input.rules.length; leftIndex += 1) {
+    const left = input.rules[leftIndex];
+    for (let rightIndex = leftIndex + 1; rightIndex < input.rules.length; rightIndex += 1) {
+      const right = input.rules[rightIndex];
+      if (left.bankId !== right.bankId) continue;
+      const topicsOverlap = left.topicId == null
+        || right.topicId == null
+        || left.topicId === right.topicId;
+      const difficultiesOverlap = left.difficulty === "mixed"
+        || right.difficulty === "mixed"
+        || left.difficulty === right.difficulty;
+      if (!topicsOverlap || !difficultiesOverlap) continue;
+      issues.push({
+        code: "BLUEPRINT_RULE_SCOPE_OVERLAP",
+        message: `Question bank ${left.bankId} has overlapping blueprint scopes (${left.topicId ?? "all topics"}/${left.difficulty} and ${right.topicId ?? "all topics"}/${right.difficulty}); distinct rotation inventory cannot be proven.`,
+        bankId: left.bankId,
+        topicId: left.topicId,
+        difficulty: left.difficulty,
+        conflictingTopicId: right.topicId,
+        conflictingDifficulty: right.difficulty,
+      });
+    }
+  }
+
   for (const rule of input.rules) {
     const required = Math.max(0, Math.trunc(rule.questionCount)) * rotationMultiplier;
     const available = Math.max(0, Math.trunc(rule.approvedInventory));

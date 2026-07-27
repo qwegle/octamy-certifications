@@ -1226,6 +1226,82 @@ export const certificates = pgTable("certificates", {
   deliveredAt: timestamp("delivered_at"),
 });
 
+// Recruiter evidence disclosure is separate from global discovery. A learner
+// selects exact evidence for one recruiter, one stated purpose, and a bounded
+// period; profileVisibility is intentionally not part of this authorization.
+export const candidateEvidenceGrants = pgTable("candidate_evidence_grants", {
+  id: text("id").primaryKey(),
+  learnerUserId: integer("learner_user_id").references(() => users.id, { onDelete: "restrict" }).notNull(),
+  targetRecruiterId: integer("target_recruiter_id").references(() => recruiters.id, { onDelete: "restrict" }).notNull(),
+  sourceProfileAccessLogId: integer("source_profile_access_log_id").references(() => profileAccessLogs.id, { onDelete: "restrict" }).notNull(),
+  purpose: text("purpose").notNull(),
+  jobReference: text("job_reference"),
+  consentVersion: text("consent_version").notNull(),
+  grantedAt: timestamp("granted_at", { withTimezone: true }).defaultNow().notNull(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  revokedAt: timestamp("revoked_at", { withTimezone: true }),
+  revocationReason: text("revocation_reason"),
+  creationRequestId: text("creation_request_id").notNull(),
+  version: integer("version").default(1).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => ({
+  byLearner: index("candidate_evidence_grants_learner_idx").on(t.learnerUserId, t.grantedAt),
+  byRecruiterLearner: index("candidate_evidence_grants_recruiter_learner_idx")
+    .on(t.targetRecruiterId, t.learnerUserId, t.expiresAt)
+    .where(sql`${t.revokedAt} IS NULL`),
+  validId: check("candidate_evidence_grants_id_check", sql`${t.id} ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'`),
+  validPurpose: check("candidate_evidence_grants_purpose_check", sql`length(btrim(${t.purpose})) BETWEEN 3 AND 500`),
+  validJobReference: check("candidate_evidence_grants_job_reference_check", sql`${t.jobReference} IS NULL OR length(btrim(${t.jobReference})) BETWEEN 1 AND 200`),
+  validConsent: check("candidate_evidence_grants_consent_check", sql`${t.consentVersion} = 'candidate-evidence-consent.v1'`),
+  validExpiry: check("candidate_evidence_grants_expiry_check", sql`${t.expiresAt} > ${t.grantedAt} AND ${t.expiresAt} <= ${t.grantedAt} + interval '30 days'`),
+  validRevocation: check("candidate_evidence_grants_revocation_check", sql`${t.revokedAt} IS NULL OR ${t.revokedAt} >= ${t.grantedAt}`),
+  validVersion: check("candidate_evidence_grants_version_check", sql`${t.version} >= 1`),
+}));
+
+export const candidateEvidenceGrantCertificates = pgTable("candidate_evidence_grant_certificates", {
+  grantId: text("grant_id").references(() => candidateEvidenceGrants.id, { onDelete: "restrict" }).notNull(),
+  certificateId: integer("certificate_id").references(() => certificates.id, { onDelete: "restrict" }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => ({
+  uniqueGrantCertificate: unique("candidate_evidence_grant_certificates_unique").on(t.grantId, t.certificateId),
+  byCertificate: index("candidate_evidence_grant_certificates_certificate_idx").on(t.certificateId, t.grantId),
+}));
+
+export const candidateEvidenceGrantPracticeSummaries = pgTable("candidate_evidence_grant_practice_summaries", {
+  grantId: text("grant_id").references(() => candidateEvidenceGrants.id, { onDelete: "restrict" }).notNull(),
+  examAttemptId: integer("exam_attempt_id").references(() => examAttempts.id, { onDelete: "restrict" }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => ({
+  uniqueGrantAttempt: unique("candidate_evidence_grant_practice_summaries_unique").on(t.grantId, t.examAttemptId),
+  byAttempt: index("candidate_evidence_grant_practice_summaries_attempt_idx").on(t.examAttemptId, t.grantId),
+}));
+
+export const candidateEvidenceAccessEvents = pgTable("candidate_evidence_access_events", {
+  id: serial("id").primaryKey(),
+  grantId: text("grant_id").references(() => candidateEvidenceGrants.id, { onDelete: "restrict" }).notNull(),
+  learnerUserId: integer("learner_user_id").references(() => users.id, { onDelete: "restrict" }).notNull(),
+  recruiterId: integer("recruiter_id").references(() => recruiters.id, { onDelete: "restrict" }).notNull(),
+  action: text("action").notNull(),
+  scopes: text("scopes").array().notNull(),
+  selectedCertificateIds: integer("selected_certificate_ids").array().notNull(),
+  selectedPracticeSummaryIds: integer("selected_practice_summary_ids").array().notNull(),
+  requestId: text("request_id").notNull(),
+  policyVersion: text("policy_version").notNull(),
+  occurredAt: timestamp("occurred_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => ({
+  byLearnerTime: index("candidate_evidence_access_events_learner_time_idx").on(t.learnerUserId, t.occurredAt, t.id),
+  byGrantTime: index("candidate_evidence_access_events_grant_time_idx").on(t.grantId, t.occurredAt, t.id),
+  validAction: check("candidate_evidence_access_events_action_check", sql`${t.action} = 'evidence_disclosed'`),
+  validPolicy: check("candidate_evidence_access_events_policy_check", sql`${t.policyVersion} = 'candidate-evidence-policy.v1'`),
+  validScopes: check("candidate_evidence_access_events_scopes_check", sql`${t.scopes} <@ ARRAY['certification','practice_summary']::text[]`),
+}));
+
+export type CandidateEvidenceGrant = typeof candidateEvidenceGrants.$inferSelect;
+export type InsertCandidateEvidenceGrant = typeof candidateEvidenceGrants.$inferInsert;
+export type CandidateEvidenceGrantCertificate = typeof candidateEvidenceGrantCertificates.$inferSelect;
+export type CandidateEvidenceGrantPracticeSummary = typeof candidateEvidenceGrantPracticeSummaries.$inferSelect;
+export type CandidateEvidenceAccessEvent = typeof candidateEvidenceAccessEvents.$inferSelect;
+
 // Immutable audit of subscription-funded benefits. `externalKey` is the
 // pending/scheduled attempt identity, making redemption idempotent even when a
 // browser retries after a lost response.

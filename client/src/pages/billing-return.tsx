@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { apiRequest } from '@/lib/queryClient';
 import { useAuth } from '@/lib/auth.tsx';
 import { SEO } from '@/components/seo';
+import { safeInternalReturnTo } from '@/lib/navigation-safety';
 
 type OwnerType = 'learner' | 'creator' | 'institute' | 'recruiter';
 
@@ -15,6 +16,8 @@ export default function BillingReturn() {
   const query = useMemo(() => new URLSearchParams(window.location.search), []);
   const ownerType = query.get('ownerType') as OwnerType | null;
   const expectedPlan = query.get('plan');
+  const orderId = query.get('orderId');
+  const next = safeInternalReturnTo(query.get('next'));
   const [state, setState] = useState<'checking' | 'active' | 'pending' | 'error'>('checking');
 
   const dashboard = ownerType === 'learner'
@@ -32,8 +35,8 @@ export default function BillingReturn() {
   }, [isLoading, setLocation, token, user]);
 
   useEffect(() => {
-    if (!user || !token || !ownerType || !expectedPlan) {
-      if (!isLoading && (!ownerType || !expectedPlan)) setState('error');
+    if (!user || !token || !ownerType || !expectedPlan || !orderId) {
+      if (!isLoading && (!ownerType || !expectedPlan || !orderId)) setState('error');
       return;
     }
 
@@ -41,11 +44,19 @@ export default function BillingReturn() {
     let attempt = 0;
     const check = async () => {
       try {
-        const response = await apiRequest('GET', '/api/me/subscription');
+        const response = await apiRequest('GET', `/api/subscriptions/orders/${encodeURIComponent(orderId)}/status`);
         const data = await response.json();
-        if (!response.ok) throw new Error(data?.message || 'Unable to verify the subscription');
-        if (data?.[ownerType]?.plan === expectedPlan) {
+        if (data?.ownerType !== ownerType || data?.plan !== expectedPlan) {
+          if (!stopped) setState('error');
+          return;
+        }
+        if (data.status === 'active') {
+          try { localStorage.removeItem('octamy.pendingSubscriptionOrder'); } catch {}
           if (!stopped) setState('active');
+          return;
+        }
+        if (data.status === 'past_due' || data.status === 'cancelled') {
+          if (!stopped) setState('error');
           return;
         }
         attempt += 1;
@@ -60,7 +71,7 @@ export default function BillingReturn() {
     };
     check();
     return () => { stopped = true; };
-  }, [expectedPlan, isLoading, ownerType, token, user]);
+  }, [expectedPlan, isLoading, orderId, ownerType, token, user]);
 
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-16 grid place-items-center">
@@ -85,7 +96,7 @@ export default function BillingReturn() {
           </p>
           <div className="mt-7 flex flex-col-reverse gap-2 sm:flex-row sm:justify-center">
             <Button asChild variant="outline"><Link href="/contact">Contact support</Link></Button>
-            <Button asChild className="bg-slate-950 text-white"><Link href={dashboard}>Go to dashboard</Link></Button>
+            <Button asChild className="bg-slate-950 text-white"><Link href={state === 'active' && next ? next : dashboard}>{state === 'active' && next ? 'Continue' : 'Go to dashboard'}</Link></Button>
           </div>
         </CardContent>
       </Card>

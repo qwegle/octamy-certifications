@@ -3,6 +3,7 @@
 import "dotenv/config";
 
 import { createHash } from "node:crypto";
+import { execFileSync } from "node:child_process";
 import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
@@ -13,14 +14,21 @@ import { migrate } from "drizzle-orm/node-postgres/migrator";
 import pg from "pg";
 
 const { Pool } = pg;
-const databaseUrl = process.env.DATABASE_URL;
+const appDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const migrationsFolder = path.join(appDir, "migrations");
 
+// Fail before opening a database connection if the on-disk release violates
+// ordering, immutable hashes, or reviewed destructive-SQL policy.
+execFileSync(process.execPath, [path.join(appDir, "scripts", "validate-migrations.mjs"), "--static-only"], {
+  cwd: appDir,
+  env: process.env,
+  stdio: "inherit",
+});
+
+const databaseUrl = process.env.DATABASE_URL;
 if (!databaseUrl) {
   throw new Error("DATABASE_URL is required to apply migrations");
 }
-
-const appDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const migrationsFolder = path.join(appDir, "migrations");
 const pool = new Pool({ connectionString: databaseUrl, max: 2 });
 const lockClient = await pool.connect();
 const lockId = "5065497136023550";

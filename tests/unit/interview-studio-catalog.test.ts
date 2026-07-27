@@ -5,6 +5,7 @@ import {
 } from "../../server/content/interview-studio-catalog";
 import {
   interviewStudioBlueprintSchema,
+  summarizeInterviewStudioBlueprintForCatalog,
   type InterviewStudioBlueprint,
 } from "../../shared/interview-studio";
 
@@ -78,6 +79,16 @@ describe("Interview Studio source catalog", () => {
       expect(new Set(blueprint.items.map((item) => item.competency)))
         .toEqual(new Set(blueprint.skills));
     }
+  });
+
+  it("summarizes catalog templates without exposing prompts or evaluator material", () => {
+    const summary = summarizeInterviewStudioBlueprintForCatalog(FRONTEND_ENGINEER_FOUNDATIONS_V2);
+    expect(summary).toEqual({
+      itemCount: FRONTEND_ENGINEER_FOUNDATIONS_V2.items.length,
+      codingCount: codingItems(FRONTEND_ENGINEER_FOUNDATIONS_V2).length,
+      includesCoding: true,
+    });
+    expect(JSON.stringify(summary)).not.toMatch(/prompt|rubric|starterCode|testCases|expectedOutput/);
   });
 
   it("keeps public examples and protected hidden cases in every coding task", () => {

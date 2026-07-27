@@ -322,6 +322,87 @@ export type InterviewStudioMode = z.infer<typeof interviewStudioModeSchema>;
 export type InterviewStudioOwnerType = z.infer<typeof interviewStudioOwnerTypeSchema>;
 export type InterviewStudioTemplateState = z.infer<typeof interviewStudioTemplateStateSchema>;
 export type InterviewStudioSessionStatus = z.infer<typeof interviewStudioSessionStatusSchema>;
+
+/** Candidate-facing prompt fields. Evaluation criteria and test weights are intentionally absent. */
+const interviewStudioCandidateItemBaseSchema = z.object({
+  key: stableKeySchema,
+  title: z.string().trim().min(3).max(160),
+  competency: z.string().trim().min(2).max(120),
+  timeLimitSeconds: z.number().int().min(30).max(7_200),
+  instructions: z.string().trim().min(10).max(8_000),
+});
+
+export const interviewStudioCandidateStructuredItemSchema = interviewStudioCandidateItemBaseSchema.extend({
+  kind: z.literal("structured_response"),
+  prompt: z.string().trim().min(10).max(8_000),
+  responseFormat: z.enum(["text", "text_or_transient_voice"]),
+  minimumWords: z.number().int().min(0).max(2_000),
+  maximumWords: z.number().int().min(20).max(4_000),
+}).strict();
+
+export const interviewStudioCandidatePublicTestCaseSchema = z.object({
+  key: stableKeySchema,
+  title: z.string().trim().min(2).max(120),
+  visibility: z.literal("public"),
+  input: z.string().max(100_000),
+  expectedOutput: z.string().max(100_000),
+}).strict();
+
+export const interviewStudioCandidateCodingItemSchema = interviewStudioCandidateItemBaseSchema.extend({
+  kind: z.literal("coding"),
+  language: z.literal("javascript"),
+  runtime: z.literal(INTERVIEW_STUDIO_JAVASCRIPT_RUNTIME),
+  interface: z.literal("stdin_stdout"),
+  problemStatement: z.string().trim().min(20).max(20_000),
+  starterCode: z.string().max(100_000),
+  constraints: z.array(z.string().trim().min(1).max(500)).max(30),
+  testCases: z.array(interviewStudioCandidatePublicTestCaseSchema).max(20),
+}).strict();
+
+export const interviewStudioCandidateItemSchema = z.discriminatedUnion("kind", [
+  interviewStudioCandidateStructuredItemSchema,
+  interviewStudioCandidateCodingItemSchema,
+]);
+
+export type InterviewStudioCandidateItem = z.infer<typeof interviewStudioCandidateItemSchema>;
+
+/**
+ * Builds one candidate-visible item by allowlist. Rubrics, hidden cases, case
+ * weights, evaluator metadata, and every sibling prompt remain server-side.
+ */
+export function sanitizeInterviewStudioItemForCandidate(input: unknown): InterviewStudioCandidateItem {
+  const item = interviewStudioBlueprintItemSchema.parse(input);
+  const base = {
+    key: item.key,
+    title: item.title,
+    competency: item.competency,
+    timeLimitSeconds: item.timeLimitSeconds,
+    instructions: item.instructions,
+  };
+  if (item.kind === "structured_response") {
+    return interviewStudioCandidateStructuredItemSchema.parse({
+      ...base,
+      kind: item.kind,
+      prompt: item.prompt,
+      responseFormat: item.responseFormat,
+      minimumWords: item.minimumWords,
+      maximumWords: item.maximumWords,
+    });
+  }
+  return interviewStudioCandidateCodingItemSchema.parse({
+    ...base,
+    kind: item.kind,
+    language: item.language,
+    runtime: item.runtime,
+    interface: item.interface,
+    problemStatement: item.problemStatement,
+    starterCode: item.starterCode,
+    constraints: item.constraints,
+    testCases: item.testCases
+      .filter((testCase) => testCase.visibility === "public")
+      .map(({ key, title, visibility, input, expectedOutput }) => ({ key, title, visibility, input, expectedOutput })),
+  });
+}
 export type InterviewStudioEvaluationStatus = z.infer<typeof interviewStudioEvaluationStatusSchema>;
 export type InterviewStudioConsentSnapshot = z.infer<typeof interviewStudioConsentSnapshotSchema>;
 export type InterviewStudioPermissionSnapshot = z.infer<typeof interviewStudioPermissionSnapshotSchema>;
@@ -375,6 +456,23 @@ export function sanitizeInterviewStudioBlueprintForClient(input: unknown): Clien
         },
       };
     }),
+  };
+}
+
+export type InterviewStudioCatalogSummary = {
+  itemCount: number;
+  codingCount: number;
+  includesCoding: boolean;
+};
+
+/** Public template-list metadata; deliberately excludes all candidate and evaluator content. */
+export function summarizeInterviewStudioBlueprintForCatalog(input: unknown): InterviewStudioCatalogSummary {
+  const blueprint = interviewStudioBlueprintSchema.parse(input);
+  const codingCount = blueprint.items.filter((item) => item.kind === "coding").length;
+  return {
+    itemCount: blueprint.items.length,
+    codingCount,
+    includesCoding: codingCount > 0,
   };
 }
 

@@ -5,13 +5,13 @@ import pg from 'pg';
 const { Client } = pg;
 
 const APPLY = process.argv.includes('--apply');
-const CONFIRM = process.argv.includes('--confirm') && process.argv.includes('CAREER');
+const CONFIRM = process.argv.includes('--confirm') && process.argv.includes('CAREER_SHELLS_ONLY');
 const OPERATOR = process.argv.includes('--operator')
   ? process.argv[process.argv.indexOf('--operator') + 1]
   : 'career-catalog-seed';
 
 if (APPLY && !CONFIRM) {
-  throw new Error('Use --apply --confirm CAREER to write career certification catalog changes');
+  throw new Error('Use --apply --confirm CAREER_SHELLS_ONLY to create missing private certification shells');
 }
 if (!process.env.DATABASE_URL) throw new Error('DATABASE_URL is required');
 
@@ -117,6 +117,7 @@ async function main() {
   await client.connect();
   try {
     await client.query('BEGIN');
+    await client.query("SELECT pg_advisory_xact_lock(5065497136023552::bigint)");
     const rootIdResult = await client.query(`SELECT id FROM categories WHERE slug = 'tech-certifications'`);
     let rootId = rootIdResult.rows[0]?.id;
     if (!rootId) {
@@ -130,9 +131,26 @@ async function main() {
 
     let courseCount = 0;
     let bankCount = 0;
-    let retiredQuestionCount = 0;
+    let protectedExistingCount = 0;
     for (const [slug, title, categorySlug, description, level, duration, passingScore, price] of assessments) {
       const categoryId = categoryIds.get(categorySlug);
+      const existingCourse = await client.query(`
+        SELECT id, owner_type, owner_id, product_type, assessment_purpose
+        FROM courses
+        WHERE slug = $1
+        FOR UPDATE
+      `, [slug]);
+      if (existingCourse.rows[0]) {
+        const existing = existingCourse.rows[0];
+        if (existing.owner_type !== 'admin'
+          || existing.owner_id !== null
+          || existing.product_type !== 'assessment'
+          || existing.assessment_purpose !== 'certification') {
+          throw new Error(`CAREER_SHELL_OWNERSHIP_CONFLICT: ${slug} is not an admin certification assessment`);
+        }
+        protectedExistingCount += 1;
+        continue;
+      }
       const course = await client.query(`
         INSERT INTO courses (
           title, description, slug, category_id, duration, passing_score, price,
@@ -142,28 +160,8 @@ async function main() {
           meta_title, meta_description, featured_at
         )
         VALUES ($1, $2, $3, $4, $5, $6, $7::numeric, 'assessment', $8, false, false, 'admin', null,
-          'private', 'en', 'octamy', 'certification', 'pending', 'immediate', false, true, true,
+          'private', 'en', 'octamy', 'certification', 'pending', 'immediate', false, false, true,
           $9, $10, null)
-        ON CONFLICT (slug) DO UPDATE SET
-          title = EXCLUDED.title,
-          description = EXCLUDED.description,
-          category_id = EXCLUDED.category_id,
-          duration = EXCLUDED.duration,
-          passing_score = EXCLUDED.passing_score,
-          price = EXCLUDED.price,
-          product_type = 'assessment',
-          level = EXCLUDED.level,
-          owner_type = 'admin',
-          owner_id = null,
-          certification_mode = 'octamy',
-          assessment_purpose = 'certification',
-          default_review_policy = 'immediate',
-          subscription_eligible = false,
-          reseller_eligible = true,
-          use_blueprint_engine = true,
-          meta_title = EXCLUDED.meta_title,
-          meta_description = EXCLUDED.meta_description,
-          featured_at = courses.featured_at
         RETURNING id
       `, [title, description, slug, categoryId, duration, passingScore, price.toFixed(2), level, `${title} | Octamy Certification`, description]);
       const courseId = course.rows[0].id;
@@ -180,16 +178,10 @@ async function main() {
         WHERE owner_type = 'admin' AND owner_id IS NULL AND slug = $1
         ORDER BY id ASC LIMIT 1
       `, [bankSlug]);
-      const bank = existingBank.rows[0]
-        ? await client.query(`
-          UPDATE question_banks SET
-            name = $2, description = $3, visibility = 'private', bank_purpose = 'certification',
-            bank_kind = 'assessment_pool', status = 'draft', subject = $4,
-            exam_family = 'career-certification', syllabus_version = '2026 v1', language = 'en',
-            tags = $5::json, updated_at = now()
-          WHERE id = $1 RETURNING id
-        `, [existingBank.rows[0].id, `${title} Bank`, `Original Octamy starter bank for ${title}.`, title, JSON.stringify(['career-certification', categorySlug, slug])])
-        : await client.query(`
+      if (existingBank.rows[0]) {
+        throw new Error(`CAREER_BANK_ORPHAN_CONFLICT: ${bankSlug} exists without its catalog shell`);
+      }
+      const bank = await client.query(`
         INSERT INTO question_banks (
           slug, name, description, owner_type, owner_id, visibility, bank_purpose, bank_kind,
           status, subject, exam_family, syllabus_version, language, tags, question_count, updated_at
@@ -201,36 +193,6 @@ async function main() {
       const bankId = bank.rows[0].id;
       bankCount += 1;
 
-      const retired = await client.query(`
-        UPDATE questions SET is_active = false, review_status = 'retired', reviewed_by = null,
-          reviewed_at = null, updated_at = now()
-        WHERE bank_id = $1 AND created_by IS NULL AND reviewed_by IS NULL
-          AND review_status NOT IN ('approved', 'retired')
-          AND (
-            answer_metadata->>'source' = 'career-catalog-starter'
-            OR (
-              answer_metadata IS NULL
-              AND generation_source = 'imported'
-              AND tags::jsonb @> '["career-certification"]'::jsonb
-              AND explanation LIKE
-                'This checks whether the learner can apply % knowledge in a practical workplace context.'
-              AND (
-                question LIKE 'Which outcome best shows practical readiness in %'
-                OR question LIKE 'A team is adopting %. What should be validated first?'
-                OR question LIKE 'Which risk is most common when teams implement % without governance?'
-                OR question LIKE 'What makes an assessment answer job-relevant for %?'
-                OR question LIKE 'When troubleshooting a % workflow, what is the strongest first step?'
-                OR question LIKE 'Which practice improves enterprise adoption of %?'
-                OR question LIKE 'A candidate claims % experience. Which signal is strongest?'
-                OR question LIKE 'Which metric is usually most useful after deploying % changes?'
-                OR question LIKE 'What should be documented before scaling %?'
-                OR question LIKE 'Why should Octamy separate practice exams from % certifications?'
-              )
-            )
-          )
-      `, [bankId]);
-      retiredQuestionCount += retired.rowCount || 0;
-
       for (const [topicIndex, topicName] of (competencyTopics[categorySlug] || []).entries()) {
         await client.query(`
           INSERT INTO question_topics (bank_id, name, slug, sort_order, updated_at)
@@ -239,22 +201,8 @@ async function main() {
         `, [bankId, topicName, topicSlug(topicName), topicIndex + 1]);
       }
 
-      await client.query(`UPDATE question_banks SET question_count = (SELECT count(*) FROM questions WHERE bank_id = $1 AND review_status <> 'retired'), updated_at = now() WHERE id = $1`, [bankId]);
-      const [{ approved_count: approvedCount }] = (await client.query(`
-        SELECT count(*)::int AS approved_count FROM questions
-        WHERE bank_id = $1 AND is_active = true AND review_status = 'approved'
-      `, [bankId])).rows;
-      if (Number(approvedCount) < 80) {
-        await client.query(`
-          UPDATE courses SET is_active = false, visibility = 'private', review_status = 'pending', featured_at = null
-          WHERE id = $1 AND assessment_purpose = 'certification'
-        `, [courseId]);
-      }
-      await client.query(`
-        INSERT INTO course_question_blueprint (course_id, bank_id, topic_id, question_count, difficulty, marks_per_question, negative_marks, sort_order)
-        SELECT $1, $2, null, 10, 'mixed', 1, 0, 1
-        WHERE NOT EXISTS (SELECT 1 FROM course_question_blueprint WHERE course_id = $1)
-      `, [courseId, bankId]);
+      // Intentionally do not create a generic blueprint. A versioned bank's
+      // reviewed topic distribution must be approved through guarded services.
     }
 
     if (APPLY) {
@@ -269,7 +217,8 @@ async function main() {
       courses: courseCount,
       banks: bankCount,
       generatedQuestions: 0,
-      retiredPlaceholderQuestions: retiredQuestionCount,
+      protectedExistingShells: protectedExistingCount,
+      releaseState: 'private-inactive-pending-without-blueprint',
     }, null, 2));
   } catch (error) {
     await client.query('ROLLBACK').catch(() => undefined);

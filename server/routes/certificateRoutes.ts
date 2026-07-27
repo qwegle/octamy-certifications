@@ -1,14 +1,13 @@
 import { Router } from 'express';
 import type { RequestHandler } from 'express';
 import { CertificateController } from '../controllers/certificateController';
-import { authenticateToken, optionalAuth } from '../middleware/auth';
+import { authenticateToken } from '../middleware/auth';
 
 const router = Router();
 const requireUser = authenticateToken as RequestHandler;
-const allowAnonymous = optionalAuth as RequestHandler;
 
 // Certificate routes
-router.post('/create', allowAnonymous, CertificateController.createCertificate as RequestHandler);
+router.post('/create', requireUser, CertificateController.createCertificate as RequestHandler);
 // Specific collection/action routes must precede the generic /:id matcher.
 router.get('/user/certificates', requireUser, CertificateController.getUserCertificates as RequestHandler);
 router.get('/verify/:id', CertificateController.verifyCertificate as RequestHandler);

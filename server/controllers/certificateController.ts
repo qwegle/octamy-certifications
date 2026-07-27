@@ -8,6 +8,7 @@ import {
   CredentialActivationError,
   getCredentialActivationContext,
 } from '../lib/credential-activation';
+import { isCredentialEligibleAssessment } from '../lib/certificate-policy';
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -52,6 +53,12 @@ export class CertificateController {
       const course = await storage.getCourse(examAttempt.courseId);
       if (!course) {
         return res.status(404).json({ message: "Course not found" });
+      }
+      if (!isCredentialEligibleAssessment(course)) {
+        return res.status(409).json({
+          message: "This assessment is not eligible to issue a credential",
+          code: "ASSESSMENT_NOT_CREDENTIAL_ELIGIBLE",
+        });
       }
 
       // Check if user passed

@@ -1,9 +1,11 @@
 import crypto from "node:crypto";
 import { Router, type Request, type Response } from "express";
+import rateLimit from "express-rate-limit";
 import { and, desc, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "../db";
 import { audit } from "../lib/audit";
+import { isCredentialEligibleAssessment } from "../lib/certificate-policy";
 import {
   authenticateToken,
   optionalAuth,
@@ -30,6 +32,21 @@ import {
 } from "@shared/schema";
 
 const router = Router();
+
+const voucherRedeemLimiter = rateLimit({
+  windowMs: 15 * 60_000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: "Too many voucher redemption attempts. Please wait and try again." },
+});
+const couponQuoteLimiter = rateLimit({
+  windowMs: 60_000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: "Too many coupon checks. Please wait and try again." },
+});
 
 const normalizedCode = (value: string) => value.trim().toUpperCase().replace(/\s+/g, "");
 const hashCode = (value: string) => crypto.createHash("sha256").update(normalizedCode(value)).digest("hex");
@@ -336,7 +353,7 @@ const voucherRedeemSchema = z.object({
   code: z.string().trim().min(16).max(80),
 }).strict();
 
-router.post("/certification-vouchers/redeem", optionalAuth, async (req: Request, res: Response) => {
+router.post("/certification-vouchers/redeem", voucherRedeemLimiter, optionalAuth, async (req: Request, res: Response) => {
   const parsed = voucherRedeemSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ message: "Use a valid certification result and voucher code" });
   const digest = hashCode(parsed.data.code);
@@ -385,7 +402,9 @@ router.post("/certification-vouchers/redeem", optionalAuth, async (req: Request,
       const effectiveUserId = pending.userId || req.user?.userId || null;
       if (row.voucher.assignedUserId && row.voucher.assignedUserId !== effectiveUserId) return { kind: "login_required" as const };
       const [course] = await tx.select().from(courses).where(eq(courses.id, pending.courseId));
-      if (!course || course.ownerType !== "admin" || course.productType !== "assessment" || course.certificationMode !== "octamy" || !course.isActive || course.reviewStatus !== "approved") return { kind: "course_ineligible" as const };
+      if (!course || course.ownerType !== "admin" || !isCredentialEligibleAssessment(course)) {
+        return { kind: "course_ineligible" as const };
+      }
 
       const [attempt] = await tx.insert(examAttempts).values({
         userId: effectiveUserId,
@@ -619,7 +638,7 @@ router.patch("/admin/coupons/:id/status", authenticateToken, requireAdmin, async
   res.json(updated);
 });
 
-router.post("/coupons/quote", optionalAuth, async (req: Request, res: Response) => {
+router.post("/coupons/quote", couponQuoteLimiter, optionalAuth, async (req: Request, res: Response) => {
   const parsed = z.object({ code: z.string().trim().min(5).max(40), courseId: z.coerce.number().int().positive() }).strict().safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ message: "Use a valid coupon and certification" });
   try {

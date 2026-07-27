@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, beforeAll } from '@jest/globals';
+import { describe, it, expect, beforeEach, beforeAll, jest } from '@jest/globals';
 import request from 'supertest';
 import express, { type Express } from 'express';
 import { and, eq } from 'drizzle-orm';
@@ -280,7 +280,7 @@ describe('API Integration Tests', () => {
         .send({ permissions: { camera: true, microphone: false, screen: true } });
     }
 
-    it('requires authentication and redacts every hidden test detail from template and session payloads', async () => {
+    it('requires authentication and reveals only the current allowlisted candidate item', async () => {
       await request(app)
         .get('/api/interview-studio/templates')
         .expect(401);
@@ -292,35 +292,96 @@ describe('API Integration Tests', () => {
 
       expect(templatesResponse.headers['cache-control']).toContain('no-store');
       expect(templatesResponse.body.items).toHaveLength(1);
-      const codingItem = templatesResponse.body.items[0].blueprint.items.find(
-        (item: { key: string }) => item.key === 'coding.sum',
-      );
-      expect(codingItem.testCases).toEqual([
-        expect.objectContaining({
-          key: 'public.basic',
-          visibility: 'public',
-          input: '2 3\n',
-          expectedOutput: '5\n',
-        }),
-      ]);
-      expect(codingItem.testCaseSummary).toEqual({ publicCount: 1, hiddenCount: 1, totalCount: 2 });
+      expect(templatesResponse.body.items[0]).toMatchObject({ itemCount: 2, codingCount: 1, includesCoding: true });
+      expect(templatesResponse.body.items[0]).not.toHaveProperty('blueprint');
 
       const created = await createPracticeSession().expect(201);
       expect(created.body.status).toBe('ready');
       expect(created.body.deadlineAt).toBeNull();
-      const serializedCreation = JSON.stringify(created.body);
-      expect(serializedCreation).not.toContain('hidden.negative-secret');
-      expect(serializedCreation).not.toContain('Never expose this hidden title');
-      expect(serializedCreation).not.toContain('-17 4');
-      expect(serializedCreation).not.toContain('-13');
+      expect(created.body.blueprint.items).toEqual([]);
+      expect(created.body.blueprint.itemCount).toBe(2);
+      expect(created.body.navigation).toMatchObject({ currentIndex: null, revealedCount: 0, totalItems: 2, canRevealNext: false, cursor: null });
 
-      const resumed = await request(app)
-        .get(`/api/interview-studio/sessions/${created.body.id}`)
+      const started = await startPracticeSession(created.body.id).expect(200);
+      expect(started.body.blueprint.items).toHaveLength(1);
+      expect(started.body.blueprint.items[0]).toMatchObject({ key: 'communication.answer', kind: 'structured_response' });
+      expect(started.body.navigation).toMatchObject({ currentIndex: 0, revealedCount: 1, totalItems: 2, canRevealNext: false });
+      const firstPayload = JSON.stringify(started.body);
+      expect(firstPayload).not.toContain('coding.sum');
+      expect(firstPayload).not.toContain('rubric');
+      expect(firstPayload).not.toContain('weight');
+
+      await request(app)
+        .post(`/api/interview-studio/sessions/${created.body.id}/items/next`)
         .set('Authorization', `Bearer ${userToken}`)
+        .send({ cursor: started.body.navigation.cursor })
+        .expect(409)
+        .expect((response) => expect(response.body.code).toBe('INTERVIEW_CURRENT_RESPONSE_REQUIRED'));
+
+      await request(app)
+        .put(`/api/interview-studio/sessions/${created.body.id}/responses/communication.answer`)
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({ answerText: 'I used a measurable decision process and verified the outcome.', navigationCursor: started.body.navigation.cursor })
         .expect(200);
-      expect(JSON.stringify(resumed.body)).not.toContain('hidden.negative-secret');
-      expect(resumed.body.blueprint.items.find((item: { key: string }) => item.key === 'coding.sum').testCaseSummary)
-        .toEqual({ publicCount: 1, hiddenCount: 1, totalCount: 2 });
+
+      await request(app)
+        .post(`/api/interview-studio/sessions/${created.body.id}/items/next`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ cursor: started.body.navigation.cursor })
+        .expect(404);
+
+      const revealed = await request(app)
+        .post(`/api/interview-studio/sessions/${created.body.id}/items/next`)
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({ cursor: started.body.navigation.cursor })
+        .expect(200);
+      expect(revealed.body.blueprint.items).toHaveLength(1);
+      const codingItem = revealed.body.blueprint.items[0];
+      expect(codingItem).toMatchObject({ key: 'coding.sum', kind: 'coding' });
+      expect(codingItem.testCases).toEqual([{
+        key: 'public.basic',
+        title: 'Public basic case',
+        visibility: 'public',
+        input: '2 3\n',
+        expectedOutput: '5\n',
+      }]);
+      expect(revealed.body.navigation).toMatchObject({ currentIndex: 1, revealedCount: 2, totalItems: 2, canRevealNext: false });
+      const serializedReveal = JSON.stringify(revealed.body);
+      expect(serializedReveal).not.toContain('hidden.negative-secret');
+      expect(serializedReveal).not.toContain('Never expose this hidden title');
+      expect(serializedReveal).not.toContain('-17 4');
+      expect(serializedReveal).not.toContain('-13');
+      expect(serializedReveal).not.toContain('rubric');
+      expect(serializedReveal).not.toContain('weight');
+      expect(serializedReveal).not.toContain('finalTestResult');
+
+      await request(app)
+        .post(`/api/interview-studio/sessions/${created.body.id}/items/next`)
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({ cursor: `${started.body.navigation.cursor}tampered` })
+        .expect(409);
+    });
+
+    it('rejects prompt reveal outside active ownership and server deadline', async () => {
+      const created = await createPracticeSession().expect(201);
+      await request(app)
+        .post(`/api/interview-studio/sessions/${created.body.id}/items/next`)
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({ cursor: 'not-a-valid-navigation-cursor' })
+        .expect(409);
+
+      const started = await startPracticeSession(created.body.id).expect(200);
+      const deadlineClock = jest.spyOn(Date, 'now').mockReturnValue(new Date(started.body.deadlineAt).getTime() + 1_000);
+      try {
+        const expired = await request(app)
+          .post(`/api/interview-studio/sessions/${created.body.id}/items/next`)
+          .set('Authorization', `Bearer ${userToken}`)
+          .send({ cursor: started.body.navigation.cursor })
+          .expect(409);
+        expect(expired.body.code).toBe('INTERVIEW_DEADLINE_PASSED');
+      } finally {
+        deadlineClock.mockRestore();
+      }
     });
 
     it('enforces learner ownership, server timing, autosave shape, and structured-response word limits', async () => {
@@ -342,18 +403,25 @@ describe('API Integration Tests', () => {
         screen: { required: true, state: 'granted' },
       });
 
+      const unrevealed = await request(app)
+        .put(`/api/interview-studio/sessions/${sessionId}/responses/coding.sum`)
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({ code: 'console.log(5);', language: 'javascript', navigationCursor: started.body.navigation.cursor })
+        .expect(409);
+      expect(unrevealed.body.code).toBe('INTERVIEW_ITEM_NOT_REVEALED');
+
       const tooManyWords = Array.from({ length: 21 }, (_value, index) => `word${index}`).join(' ');
       const rejected = await request(app)
         .put(`/api/interview-studio/sessions/${sessionId}/responses/communication.answer`)
         .set('Authorization', `Bearer ${userToken}`)
-        .send({ answerText: tooManyWords, timeSpentSeconds: 12 })
+        .send({ answerText: tooManyWords, navigationCursor: started.body.navigation.cursor, timeSpentSeconds: 12 })
         .expect(422);
       expect(rejected.body.code).toBe('INTERVIEW_RESPONSE_WORD_LIMIT');
 
       const saved = await request(app)
         .put(`/api/interview-studio/sessions/${sessionId}/responses/communication.answer`)
         .set('Authorization', `Bearer ${userToken}`)
-        .send({ answerText: 'I chose composition to isolate state and make behavior easier to test.', timeSpentSeconds: 37 })
+        .send({ answerText: 'I chose composition to isolate state and make behavior easier to test.', navigationCursor: started.body.navigation.cursor, timeSpentSeconds: 37 })
         .expect(200);
       expect(saved.body.saved).toBe(true);
       expect(saved.body.response).toMatchObject({
@@ -365,7 +433,7 @@ describe('API Integration Tests', () => {
       await request(app)
         .put(`/api/interview-studio/sessions/${sessionId}/responses/communication.answer`)
         .set('Authorization', `Bearer ${adminToken}`)
-        .send({ answerText: 'An unauthorized replacement.' })
+        .send({ answerText: 'An unauthorized replacement.', navigationCursor: started.body.navigation.cursor })
         .expect(404);
 
       const resumed = await request(app)
@@ -430,11 +498,11 @@ describe('API Integration Tests', () => {
     it('returns 202 and atomically persists one evaluation job, one usage charge, and immutable submission state', async () => {
       const created = await createPracticeSession().expect(201);
       const sessionId = created.body.id as string;
-      await startPracticeSession(sessionId).expect(200);
+      const started = await startPracticeSession(sessionId).expect(200);
       await request(app)
         .put(`/api/interview-studio/sessions/${sessionId}/responses/communication.answer`)
         .set('Authorization', `Bearer ${userToken}`)
-        .send({ answerText: 'I used an explicit interface and verified the behavior with focused tests.', timeSpentSeconds: 42 })
+        .send({ answerText: 'I used an explicit interface and verified the behavior with focused tests.', navigationCursor: started.body.navigation.cursor, timeSpentSeconds: 42 })
         .expect(200);
 
       const submitted = await request(app)
@@ -477,7 +545,7 @@ describe('API Integration Tests', () => {
       await request(app)
         .put(`/api/interview-studio/sessions/${sessionId}/responses/communication.answer`)
         .set('Authorization', `Bearer ${userToken}`)
-        .send({ answerText: 'This late replacement must be rejected.' })
+        .send({ answerText: 'This late replacement must be rejected.', navigationCursor: started.body.navigation.cursor })
         .expect(409);
     });
 
@@ -505,7 +573,7 @@ describe('API Integration Tests', () => {
   describe('Exam Endpoints', () => {
     it('requires explicit browser-evidence consent before issuing an exam session', async () => {
       const response = await request(app)
-        .post(`/api/courses/${testData.testCourse.id}/questions`)
+        .post(`/api/courses/${testData.testExamCourse.id}/questions`)
         .send({})
         .expect(400);
 
@@ -514,7 +582,7 @@ describe('API Integration Tests', () => {
 
     it('POST /api/courses/:id/questions should create exam session', async () => {
       const response = await request(app)
-        .post(`/api/courses/${testData.testCourse.id}/questions`)
+        .post(`/api/courses/${testData.testExamCourse.id}/questions`)
         .send({ evidenceConsent: true })
         .expect(200);
 
@@ -526,7 +594,7 @@ describe('API Integration Tests', () => {
     it('POST /api/exam/submit should submit exam answers', async () => {
       // First start exam
       const startResponse = await request(app)
-        .post(`/api/courses/${testData.testCourse.id}/questions`)
+        .post(`/api/courses/${testData.testExamCourse.id}/questions`)
         .set('Authorization', `Bearer ${userToken}`)
         .send({ evidenceConsent: true })
         .expect(200);
@@ -539,7 +607,7 @@ describe('API Integration Tests', () => {
       await request(app)
         .post('/api/exam/submit')
         .send({
-          courseId: testData.testCourse.id,
+          courseId: testData.testExamCourse.id,
           sessionId,
           answers,
           userEmail: testData.testUser.email,
@@ -551,7 +619,7 @@ describe('API Integration Tests', () => {
         .post('/api/exam/submit')
         .set('Authorization', `Bearer ${userToken}`)
         .send({
-          courseId: testData.testCourse.id,
+          courseId: testData.testExamCourse.id,
           sessionId,
           answers,
           timeTaken: Math.max(questions.length, 1),
@@ -568,7 +636,7 @@ describe('API Integration Tests', () => {
         .post('/api/exam/submit')
         .set('Authorization', `Bearer ${userToken}`)
         .send({
-          courseId: testData.testCourse.id,
+          courseId: testData.testExamCourse.id,
           sessionId,
           answers,
           // This deliberately differs: the server must replay the immutable
@@ -616,7 +684,7 @@ describe('API Integration Tests', () => {
         passingScore: 75,
         price: '199.00',
         level: 'intermediate',
-        isActive: true,
+        isActive: false,
         isInternship: false
       };
 

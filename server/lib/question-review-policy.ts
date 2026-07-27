@@ -1,9 +1,5 @@
 import { sql } from "drizzle-orm";
-import {
-  questionPackSources,
-  questionProvenance,
-  questions,
-} from "@shared/schema";
+import { questions } from "@shared/schema";
 
 export type QuestionGenerationSource = "human" | "ai_draft" | "imported";
 export type QuestionReviewStatus = "draft" | "pending" | "approved" | "rejected" | "retired";
@@ -37,6 +33,57 @@ export function isIndependentQuestionReviewer(
 }
 
 /** Manual editor submission is itself an explicit human authoring decision. */
+
+export type QuestionReviewSeparationInput = {
+  authorUserId: number | null | undefined;
+  reviewerUserId: number | null | undefined;
+  reviewerOperator: string;
+  importOperators: readonly string[];
+  rightsReviewerOperator?: string | null;
+};
+
+export type QuestionReviewSeparationIssue =
+  | "ATTRIBUTABLE_AUTHOR_REQUIRED"
+  | "ATTRIBUTABLE_REVIEWER_REQUIRED"
+  | "INDEPENDENT_REVIEW_REQUIRED"
+  | "IMPORTER_SELF_REVIEW_FORBIDDEN"
+  | "RIGHTS_REVIEWER_SELF_REVIEW_FORBIDDEN";
+
+function normalizedOperatorIdentity(value: string | null | undefined): string {
+  return String(value ?? "").normalize("NFKC").trim().toLocaleLowerCase("en");
+}
+
+/**
+ * Batch tooling must enforce the same human separation as the interactive
+ * review route. Free-text operator labels are not treated as user identities;
+ * they are an additional fail-closed collision check alongside user IDs.
+ */
+export function questionReviewSeparationIssues(
+  input: QuestionReviewSeparationInput,
+): QuestionReviewSeparationIssue[] {
+  const issues: QuestionReviewSeparationIssue[] = [];
+  if (input.authorUserId == null) issues.push("ATTRIBUTABLE_AUTHOR_REQUIRED");
+  if (input.reviewerUserId == null) issues.push("ATTRIBUTABLE_REVIEWER_REQUIRED");
+  if (input.authorUserId != null
+    && input.reviewerUserId != null
+    && input.authorUserId === input.reviewerUserId) {
+    issues.push("INDEPENDENT_REVIEW_REQUIRED");
+  }
+
+  const reviewer = normalizedOperatorIdentity(input.reviewerOperator);
+  if (!reviewer) issues.push("ATTRIBUTABLE_REVIEWER_REQUIRED");
+  if (reviewer && input.importOperators.some((operator) => (
+    normalizedOperatorIdentity(operator) === reviewer
+  ))) {
+    issues.push("IMPORTER_SELF_REVIEW_FORBIDDEN");
+  }
+  if (reviewer
+    && normalizedOperatorIdentity(input.rightsReviewerOperator)
+    && normalizedOperatorIdentity(input.rightsReviewerOperator) === reviewer) {
+    issues.push("RIGHTS_REVIEWER_SELF_REVIEW_FORBIDDEN");
+  }
+  return Array.from(new Set(issues));
+}
 export function governanceForHumanQuestion(
   reviewerId: number,
   reviewedAt: Date,
@@ -110,23 +157,13 @@ export function isQuestionAssessmentEligible(question: {
 }
 
 /**
- * The original quantitative practice catalogue was restored after an accidental
- * production-wide retirement stopped Practice Pass availability. Its immutable
- * source provenance predates attributable per-item reviewer fields. Keep this
- * recovery exception tied to that one verified source; all new content must use
- * the normal independent-review path.
+ * Runtime selection requires attributable review for every exact item version.
+ * Rights/provenance verification establishes permission to use a source; it
+ * does not establish answer correctness or pedagogical approval.
  */
 export function assessmentRuntimeReviewEligibilitySql() {
   return sql`(
-    (${questions.reviewedBy} IS NOT NULL AND ${questions.reviewedAt} IS NOT NULL)
-    OR EXISTS (
-      SELECT 1
-      FROM ${questionProvenance} runtime_provenance
-      INNER JOIN ${questionPackSources} runtime_source
-        ON runtime_source.id = runtime_provenance.source_id
-      WHERE runtime_provenance.question_id = ${questions.id}
-        AND runtime_source.source_key = 'octamy-original:quant-science:v1'
-        AND runtime_source.rights_review_status = 'verified'
-    )
+    ${questions.reviewedBy} IS NOT NULL
+    AND ${questions.reviewedAt} IS NOT NULL
   )`;
 }

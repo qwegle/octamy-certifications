@@ -23,6 +23,7 @@ import catalogRoutes from './catalogRoutes';
 import learnerSubscriptionRoutes from './learnerSubscriptionRoutes';
 import certificationBenefitRoutes from './certificationBenefitRoutes';
 import interviewStudioRoutes from './interviewStudioRoutes';
+import recruiterEvidenceGrantRoutes from './recruiterEvidenceGrantRoutes';
 // Remove sellerRoutes import to prevent conflicts - seller routes are handled directly in main routes.ts
 
 const router = Router();
@@ -56,5 +57,6 @@ router.use('/', interviewStudioRoutes); // Private AI interview practice + gated
 
 // Register recruiter routes
 registerRecruiterRoutes(router);
+router.use('/', recruiterEvidenceGrantRoutes); // Selected, expiring learner evidence grants
 
 export default router;

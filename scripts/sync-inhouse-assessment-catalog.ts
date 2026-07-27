@@ -24,6 +24,7 @@ interface CourseRow {
   owner_type: string;
   owner_id: number | null;
   product_type: string;
+  assessment_purpose: string;
   is_active: boolean;
   review_status: string;
 }
@@ -77,15 +78,56 @@ export async function syncInhouseAssessmentCatalog(options: {
       has_categories: boolean;
       has_audience_bands: boolean;
       has_topic_index: boolean;
+      has_assessment_purpose: boolean;
+      has_bank_purpose: boolean;
     }>(`
       SELECT
         to_regclass('categories') IS NOT NULL AS has_categories,
         to_regclass('audience_bands') IS NOT NULL AS has_audience_bands,
-        to_regclass('question_topics_bank_slug_unique') IS NOT NULL AS has_topic_index
+        to_regclass('question_topics_bank_slug_unique') IS NOT NULL AS has_topic_index,
+        EXISTS (
+          SELECT 1 FROM information_schema.columns
+          WHERE table_schema = current_schema()
+            AND table_name = 'courses'
+            AND column_name = 'assessment_purpose'
+        ) AS has_assessment_purpose,
+        EXISTS (
+          SELECT 1 FROM information_schema.columns
+          WHERE table_schema = current_schema()
+            AND table_name = 'question_banks'
+            AND column_name = 'bank_purpose'
+        ) AS has_bank_purpose
     `);
     const schema = schemaCheck.rows[0];
     if (!schema?.has_categories || !schema.has_audience_bands || !schema.has_topic_index) {
       throw new Error("Migration 0015_inhouse_assessment_catalog must be applied before catalogue synchronization");
+    }
+    if (!schema.has_assessment_purpose || !schema.has_bank_purpose) {
+      throw new Error("Migration 0022_assessment_purpose_split must be applied before catalogue synchronization");
+    }
+
+    const assessmentSlugs = INHOUSE_ASSESSMENTS.map((assessment) => assessment.slug);
+    const existingCourseRows = await client.query<CourseRow>(
+      `SELECT id, slug, owner_type, owner_id, product_type, assessment_purpose, is_active, review_status
+         FROM courses
+        WHERE slug = ANY($1::text[])
+        FOR UPDATE`,
+      [assessmentSlugs],
+    );
+    const existingCoursesBySlug = new Map(existingCourseRows.rows.map((course) => [course.slug, course]));
+    for (const existing of existingCourseRows.rows) {
+      if (existing.owner_type !== "admin"
+        || existing.owner_id !== null
+        || existing.product_type !== "assessment") {
+        throw new Error(
+          `ASSESSMENT_SLUG_OWNERSHIP_CONFLICT: ${existing.slug} belongs to a non-catalogue product or tenant`,
+        );
+      }
+      if (existing.assessment_purpose !== "practice") {
+        throw new Error(
+          `ASSESSMENT_PURPOSE_CONFLICT: ${existing.slug} is not a practice assessment`,
+        );
+      }
     }
 
     const requiredCategorySlugs = Array.from(new Set(
@@ -117,8 +159,8 @@ export async function syncInhouseAssessmentCatalog(options: {
       throw new Error(`Required active audience bands are missing: ${missingBands.join(", ")}`);
     }
 
-    const existingBanks = await client.query<{ id: number }>(
-      `SELECT id
+    const existingBanks = await client.query<{ id: number; bank_purpose: string }>(
+      `SELECT id, bank_purpose
          FROM question_banks
         WHERE owner_type = 'admin' AND owner_id IS NULL AND slug = $1
         ORDER BY id`,
@@ -127,13 +169,18 @@ export async function syncInhouseAssessmentCatalog(options: {
     if (existingBanks.rows.length > 1) {
       throw new Error(`Multiple admin question banks use slug ${INHOUSE_ORIGINAL_BANK.slug}; resolve before syncing`);
     }
+    if (existingBanks.rows[0] && existingBanks.rows[0].bank_purpose !== "practice") {
+      throw new Error(
+        `ASSESSMENT_BANK_PURPOSE_CONFLICT: ${INHOUSE_ORIGINAL_BANK.slug} is not a practice bank`,
+      );
+    }
     let bankId = existingBanks.rows[0]?.id;
     if (!bankId) {
       const insertedBank = await client.query<{ id: number }>(
         `INSERT INTO question_banks (
-           slug, name, description, owner_type, owner_id, visibility, language, tags,
+           slug, name, description, owner_type, owner_id, visibility, bank_purpose, language, tags,
            question_count, created_by, created_at, updated_at
-         ) VALUES ($1, $2, $3, 'admin', NULL, 'private', 'en', $4::json, 0, NULL, now(), now())
+         ) VALUES ($1, $2, $3, 'admin', NULL, 'private', 'practice', 'en', $4::json, 0, NULL, now(), now())
          RETURNING id`,
         [
           INHOUSE_ORIGINAL_BANK.slug,
@@ -148,7 +195,8 @@ export async function syncInhouseAssessmentCatalog(options: {
       // refresh while its publication decision remains an explicit admin act.
       await client.query(
         `UPDATE question_banks
-            SET name = $2, description = $3, tags = $4::json, updated_at = now()
+            SET name = $2, description = $3, tags = $4::json,
+                bank_purpose = 'practice', updated_at = now()
           WHERE id = $1`,
         [
           bankId,
@@ -185,21 +233,7 @@ export async function syncInhouseAssessmentCatalog(options: {
     const emptyBlueprintShells: string[] = [];
 
     for (const assessment of INHOUSE_ASSESSMENTS) {
-      const existingResult = await client.query<CourseRow>(
-        `SELECT id, slug, owner_type, owner_id, product_type, is_active, review_status
-           FROM courses WHERE slug = $1 FOR UPDATE`,
-        [assessment.slug],
-      );
-      const existing = existingResult.rows[0];
-      if (existing && (
-        existing.owner_type !== "admin"
-        || existing.owner_id !== null
-        || existing.product_type !== "assessment"
-      )) {
-        throw new Error(
-          `ASSESSMENT_SLUG_OWNERSHIP_CONFLICT: ${assessment.slug} belongs to a non-catalogue product or tenant`,
-        );
-      }
+      const existing = existingCoursesBySlug.get(assessment.slug);
       if (existing && (existing.is_active || !["draft", "pending"].includes(existing.review_status))) {
         assessmentsSkippedProtected.push({
           slug: assessment.slug,
@@ -221,14 +255,14 @@ export async function syncInhouseAssessmentCatalog(options: {
              title, description, slug, category_id, duration, passing_score, price,
              product_type, content_price, original_price, is_on_sale, sale_end_date,
              level, is_active, is_internship, meta_title, meta_description, thumbnail_url,
-             owner_type, owner_id, visibility, language, certification_mode, review_status,
+             owner_type, owner_id, visibility, language, certification_mode, assessment_purpose, review_status,
              default_review_policy, subscription_eligible, reseller_eligible, featured_at,
              use_blueprint_engine, created_at
            ) VALUES (
              $1, $2, $3, $4, $5, $6, $7,
              'assessment', $7, NULL, false, NULL,
              $8, false, false, $9, $10, NULL,
-             'admin', NULL, 'private', 'en', 'none', 'pending',
+             'admin', NULL, 'private', 'en', 'none', 'practice', 'pending',
              'immediate', false, false, NULL,
              $11, now()
            ) RETURNING id`,
@@ -272,6 +306,7 @@ export async function syncInhouseAssessmentCatalog(options: {
              visibility = 'private',
              language = 'en',
              certification_mode = 'none',
+             assessment_purpose = 'practice',
              review_status = 'pending',
              default_review_policy = 'immediate',
              subscription_eligible = false,

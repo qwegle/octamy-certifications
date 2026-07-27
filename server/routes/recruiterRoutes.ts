@@ -12,6 +12,15 @@ import {
 } from '../storage';
 import { execRows } from '../lib/db-exec';
 import { z } from 'zod';
+import { eq, sql } from 'drizzle-orm';
+import { db } from '../db';
+import { payments } from '@shared/schema';
+import {
+  createCashfreeOrder,
+  createCashfreeStatusToken,
+  publicPaymentStatus,
+  verifyCashfreeStatusToken,
+} from '../lib/cashfree';
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 
@@ -438,8 +447,10 @@ export function registerRecruiterRoutes(app: any) {
     }
   });
 
-  // Purchase Credits — REQUIRES gateway-verified order id; client-supplied amount is ignored.
+  // Purchase Credits — reserve locally before opening Cashfree. Only the signed
+  // Cashfree webhook in routes.ts may fulfill this reservation and credit the wallet.
   app.post('/recruiter/credit-orders', authenticateRecruiterToken, async (req: AuthenticatedRecruiterRequest, res: Response) => {
+    let paymentId: number | null = null;
     try {
       const recruiterId = req.recruiter?.recruiterId;
       if (!recruiterId) return res.status(401).json({ message: 'Unauthorized' });
@@ -453,8 +464,33 @@ export function registerRecruiterRoutes(app: any) {
       if (!recruiter || !recruiter.isActive) return res.status(403).json({ message: 'Recruiter account is not active' });
 
       const orderId = `RC_${recruiterId}_${credits}_${crypto.randomBytes(8).toString('hex')}`;
+      const statusToken = createCashfreeStatusToken(orderId);
+      const [reservation] = await db.transaction(async (tx) => {
+        await tx.execute(sql`SELECT pg_advisory_xact_lock(7401, ${recruiterId})`);
+        return tx.insert(payments).values({
+          userId: null,
+          courseId: null,
+          certificateId: null,
+          transactionId: orderId,
+          gateway: 'cashfree',
+          paymentMethod: 'cashfree',
+          amount: amount.toFixed(2),
+          certificateAmount: amount.toFixed(2),
+          shippingAmount: '0.00',
+          includesPhysicalCopy: false,
+          currency: 'INR',
+          status: 'pending',
+          cashfreeOrderId: orderId,
+          gatewayStatusRaw: {
+            kind: 'recruiter_credits',
+            recruiterId,
+            credits,
+          },
+        }).returning();
+      });
+      paymentId = reservation.id;
+
       const baseUrl = (process.env.APP_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
-      const { createCashfreeOrder } = await import('../lib/cashfree');
       const order = await createCashfreeOrder({
         orderId,
         amount: amount.toFixed(2),
@@ -462,67 +498,82 @@ export function registerRecruiterRoutes(app: any) {
         customerName: `${recruiter.firstName || ''} ${recruiter.lastName || ''}`.trim() || recruiter.companyName || 'Octamy Recruiter',
         customerEmail: recruiter.email,
         customerPhone: recruiter.phone || '9999999999',
-        returnUrl: `${baseUrl}/recruiter/payment-success?order_id=${encodeURIComponent(orderId)}`,
+        returnUrl: `${baseUrl}/recruiter/payment-success?order_id=${encodeURIComponent(orderId)}&status_token=${encodeURIComponent(statusToken)}`,
         notifyUrl: `${baseUrl}/api/webhooks/cashfree`,
-        notes: { kind: 'recruiter_credits', recruiterId: String(recruiterId), credits: String(credits) },
+        notes: {
+          kind: 'recruiter_credits',
+          paymentDbId: String(reservation.id),
+          recruiterId: String(recruiterId),
+          credits: String(credits),
+        },
       });
+
+      await db.update(payments).set({
+        cashfreeOrderId: order.orderId,
+        gatewayStatusRaw: {
+          kind: 'recruiter_credits',
+          recruiterId,
+          credits,
+          providerOrder: order.raw,
+        },
+      }).where(eq(payments.id, reservation.id));
 
       res.json({
         orderId: order.orderId,
         paymentSessionId: order.paymentSessionId,
         paymentLink: order.paymentLink,
+        statusToken,
         amount,
         credits,
       });
     } catch (error: any) {
+      if (paymentId) {
+        await db.update(payments).set({
+          status: 'failed',
+          gatewayStatusRaw: { kind: 'recruiter_credits', reason: 'provider_order_creation_failed' },
+        }).where(eq(payments.id, paymentId)).catch(() => undefined);
+      }
       console.error('Recruiter credit order error:', error?.message);
-      res.status(500).json({ message: error?.message || 'Failed to start credit checkout' });
+      res.status(503).json({ message: error?.message || 'Failed to start credit checkout' });
     }
   });
 
+  // Browser return/status checks are deliberately non-authoritative: they read
+  // allowlisted local state and never poll Cashfree or mutate recruiter credits.
   app.post('/recruiter/purchase-credits', authenticateRecruiterToken, async (req: AuthenticatedRecruiterRequest, res: Response) => {
     try {
       const recruiterId = req.recruiter?.recruiterId;
-      if (!recruiterId) {
-        return res.status(401).json({ message: "Unauthorized" });
+      if (!recruiterId) return res.status(401).json({ message: 'Unauthorized' });
+      const parsed = z.object({
+        orderId: z.string().regex(/^RC_\d+_(?:100|500|1000)_[a-f0-9]{16}$/),
+        statusToken: z.string().min(40).max(800),
+      }).safeParse(req.body);
+      if (!parsed.success || verifyCashfreeStatusToken(parsed.data.statusToken) !== parsed.data.orderId) {
+        return res.status(404).json({ message: 'Payment order not found' });
       }
 
-      const { orderId } = req.body as { orderId?: string };
-      if (!orderId || typeof orderId !== 'string') {
-        return res.status(400).json({ message: "orderId required (must be a paid Cashfree order)" });
+      const [payment] = await db.select().from(payments)
+        .where(eq(payments.transactionId, parsed.data.orderId)).limit(1);
+      const metadata = payment?.gatewayStatusRaw && typeof payment.gatewayStatusRaw === 'object'
+        ? payment.gatewayStatusRaw as Record<string, unknown>
+        : {};
+      if (
+        !payment ||
+        metadata.kind !== 'recruiter_credits' ||
+        Number(metadata.recruiterId) !== recruiterId
+      ) {
+        return res.status(404).json({ message: 'Payment order not found' });
       }
 
-      const orderMatch = /^RC_(\d+)_(100|500|1000)_[a-f0-9]{16}$/.exec(orderId);
-      if (!orderMatch || Number(orderMatch[1]) !== recruiterId) {
-        return res.status(403).json({ message: 'This payment order does not belong to your account' });
-      }
-      const credits = Number(orderMatch[2]);
-      const packagePrices: Record<number, number> = { 100: 1000, 500: 4500, 1000: 8000 };
-
-      // Verify with Cashfree.
-      const { fetchCashfreeOrderStatus } = await import('../lib/cashfree');
-      let payments: any;
-      try {
-        payments = await fetchCashfreeOrderStatus(orderId);
-      } catch (err: any) {
-        return res.status(400).json({ message: `Order verification failed: ${err.message}` });
-      }
-      const paymentList = Array.isArray(payments) ? payments : [];
-      const successful = paymentList.find((p: any) => (p.payment_status || '').toUpperCase() === 'SUCCESS');
-      if (!successful) {
-        return res.status(402).json({ message: 'No successful payment found for this order' });
-      }
-      const verifiedAmount = Number(successful.payment_amount || successful.order_amount || 0);
-      if (!Number.isFinite(verifiedAmount) || Math.abs(verifiedAmount - packagePrices[credits]) > 0.01) {
-        return res.status(400).json({ message: 'Paid amount does not match the selected credit package' });
-      }
-
-      // Credit the server-defined package only after gateway amount verification.
-      const purchaseResult = await storage.purchaseCredits(recruiterId, credits, orderId);
-      res.json(purchaseResult);
+      res.setHeader('Cache-Control', 'private, no-store, max-age=0');
+      return res.json({
+        orderId: payment.transactionId,
+        status: publicPaymentStatus(payment.status),
+        credits: Number(metadata.credits),
+      });
     } catch (error: any) {
-      console.error("Credit purchase error:", error?.message);
-      res.status(500).json({ message: "Failed to purchase credits" });
+      console.error('Credit purchase status error:', error?.message);
+      return res.status(500).json({ message: 'Failed to read credit purchase status' });
     }
   });
 
@@ -726,58 +777,28 @@ export function registerRecruiterRoutes(app: any) {
     }
   });
 
-  // Generate PayUMoney Payment Hash
-  app.post('/recruiter/generate-payment-hash', authenticateRecruiterToken, async (req: AuthenticatedRecruiterRequest, res: Response) => {
-    try {
-      const { key, amount, productinfo, firstname, email, txnid, surl, furl, service_provider } = req.body;
-      
-      const PAYUMONEY_SALT = process.env.PAYUMONEY_SALT || 'eCwWELxi';
-      
-      // Create hash string: key|txnid|amount|productinfo|firstname|email|||||||||||salt
-      const hashString = `${key}|${txnid}|${amount}|${productinfo}|${firstname}|${email}|||||||||||${PAYUMONEY_SALT}`;
-      
-      const hash = crypto.createHash('sha512').update(hashString).digest('hex');
-      
-      res.json({ hash });
-    } catch (error: any) {
-      console.error("Payment hash generation error:", error);
-      res.status(500).json({ message: "Failed to generate payment hash", error: error.message });
-    }
+  // Legacy PayU recruiter payment routes accepted client-priced fields and did
+  // not bind callbacks to a persisted server-side reservation. Keep them
+  // retired; recruiter credit checkout must use the guarded wallet flow.
+  app.post('/recruiter/generate-payment-hash', authenticateRecruiterToken, (_req: AuthenticatedRecruiterRequest, res: Response) => {
+    res.status(410).json({
+      message: 'Legacy recruiter payment checkout is retired. Use the secure recruiter credit wallet checkout.',
+      code: 'LEGACY_RECRUITER_PAYMENT_RETIRED',
+    });
   });
 
-  // Payment Success Handler
-  app.post('/recruiter/payment-success', async (req: Request, res: Response) => {
-    try {
-      const { txnid, amount, status, hash } = req.body;
-      
-      if (status === 'success') {
-        // Extract recruiter ID from transaction ID or use session
-        // For now, let's parse transaction ID format: TXN_timestamp_randomstring
-        // You would normally store this mapping when creating the transaction
-        
-        // Process the successful payment
-        const credits = Math.floor(parseFloat(amount) / 50); // ₹50 per credit
-        
-        // Redirect to success page with parameters
-        res.redirect(`/recruiter/payment-success?txnid=${txnid}&amount=${amount}&credits=${credits}`);
-      } else {
-        res.redirect(`/recruiter/payment-failed?txnid=${txnid}`);
-      }
-    } catch (error: any) {
-      console.error("Payment success handler error:", error);
-      res.redirect('/recruiter/payment-failed');
-    }
+  app.post('/recruiter/payment-success', (_req: Request, res: Response) => {
+    res.status(410).json({
+      message: 'Legacy recruiter payment callbacks are retired.',
+      code: 'LEGACY_RECRUITER_PAYMENT_RETIRED',
+    });
   });
 
-  // Payment Failure Handler  
-  app.post('/recruiter/payment-failed', async (req: Request, res: Response) => {
-    try {
-      const { txnid } = req.body;
-      res.redirect(`/recruiter/payment-failed?txnid=${txnid}`);
-    } catch (error: any) {
-      console.error("Payment failure handler error:", error);
-      res.redirect('/recruiter/payment-failed');
-    }
+  app.post('/recruiter/payment-failed', (_req: Request, res: Response) => {
+    res.status(410).json({
+      message: 'Legacy recruiter payment callbacks are retired.',
+      code: 'LEGACY_RECRUITER_PAYMENT_RETIRED',
+    });
   });
 
   // Legacy interview recordings used permanent provider URLs and only the
@@ -796,6 +817,10 @@ export function registerRecruiterRoutes(app: any) {
     try {
       const recruiterId = req.recruiter?.recruiterId;
       if (!recruiterId) return res.status(401).json({ message: 'Unauthorized' });
+      const recruiter = await storage.getRecruiterById(recruiterId);
+      if (!recruiter?.isActive || recruiter.kycStatus !== 'approved') {
+        return res.status(403).json({ message: 'An active, KYC-approved recruiter workspace is required' });
+      }
       const { sql } = await import('drizzle-orm');
 
       const totals = await execRows(sql`
@@ -817,7 +842,8 @@ export function registerRecruiterRoutes(app: any) {
       `) as Array<{ day: string; accesses: number; credits: number }>;
 
       const recentAccess = await execRows(sql`
-        SELECT pal.id, pal.access_type, pal.credits_used, pal.created_at, u.name AS user_name
+        SELECT pal.id, pal.access_type, pal.credits_used, pal.created_at,
+               CASE WHEN u.profile_visibility = true THEN u.name ELSE NULL END AS user_name
         FROM profile_access_logs pal
         LEFT JOIN users u ON u.id = pal.user_id
         WHERE pal.recruiter_id = ${recruiterId}
