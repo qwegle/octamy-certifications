@@ -6,10 +6,71 @@ import {
 } from "../../server/lib/assessment-content-acceptance";
 import type { AssessmentPurpose } from "../../server/lib/assessment-bank-readiness";
 
-export const GOVERNED_INVENTORY_SCHEMA_VERSION = "octamy.governed-assessment-inventory.v2";
+export const GOVERNED_INVENTORY_SCHEMA_VERSION = "octamy.governed-assessment-inventory.v3";
+
+export type InventoryBlockerSeverity = "SUBSTANTIVE" | "RELEASE_EVIDENCE";
+
+const BLOCKER_SEVERITY_BY_CODE = {
+  ASSESSMENT_ACCESSIBILITY_ACCEPTANCE_NOT_REPRESENTED: "RELEASE_EVIDENCE",
+  BLUEPRINT_REVISION_REQUIRED: "RELEASE_EVIDENCE",
+  IMMUTABLE_RELEASE_BUNDLE_NOT_REPRESENTED: "RELEASE_EVIDENCE",
+  RIGHTS_ROLE_SEPARATION_NOT_VERIFIABLE: "RELEASE_EVIDENCE",
+
+  ANSWER_KEY_INVALID: "SUBSTANTIVE",
+  ANSWER_POSITION_CONCENTRATION: "SUBSTANTIVE",
+  APPROVAL_EVIDENCE_REQUIRED: "SUBSTANTIVE",
+  ASSESSMENT_INVENTORY_INCOMPLETE: "SUBSTANTIVE",
+  ASSESSMENT_PRODUCT_REQUIRED: "SUBSTANTIVE",
+  ASSESSMENT_PURPOSE_INVALID: "SUBSTANTIVE",
+  ASSESSMENT_SYLLABUS_VERSION_REQUIRED: "SUBSTANTIVE",
+  BANK_NOT_ACTIVE: "SUBSTANTIVE",
+  BANK_PURPOSE_MISMATCH: "SUBSTANTIVE",
+  BANK_SYLLABUS_VERSION_REQUIRED: "SUBSTANTIVE",
+  BLUEPRINT_BANK_NOT_FOUND: "SUBSTANTIVE",
+  BLUEPRINT_ENGINE_REQUIRED: "SUBSTANTIVE",
+  BLUEPRINT_REQUIRED: "SUBSTANTIVE",
+  BLUEPRINT_RULE_INVENTORY_INCOMPLETE: "SUBSTANTIVE",
+  BLUEPRINT_RULE_SCOPE_OVERLAP: "SUBSTANTIVE",
+  DIFFICULTY_QUOTA_INCOMPLETE: "SUBSTANTIVE",
+  DISTRACTOR_REVIEW_REQUIRED: "SUBSTANTIVE",
+  DUPLICATE_OPTIONS: "SUBSTANTIVE",
+  DUPLICATE_QUESTION: "SUBSTANTIVE",
+  EXPLANATION_REQUIRED: "SUBSTANTIVE",
+  FACTUAL_ANSWER_VALIDATION_REQUIRED: "SUBSTANTIVE",
+  GOVERNANCE_SCHEMA_INCOMPLETE: "SUBSTANTIVE",
+  INDEPENDENT_REVIEW_REQUIRED: "SUBSTANTIVE",
+  ITEM_REVIEW_ATTESTATION_REQUIRED: "SUBSTANTIVE",
+  OPTIONS_INCOMPLETE: "SUBSTANTIVE",
+  OPTION_MEDIA_ACCESSIBILITY_INVALID: "SUBSTANTIVE",
+  OPTION_MEDIA_ALT_TEXT_REQUIRED: "SUBSTANTIVE",
+  PLACEHOLDER_OR_WEAK_STEM: "SUBSTANTIVE",
+  PROVENANCE_CONTENT_HASH_MISMATCH: "SUBSTANTIVE",
+  QUESTION_IMAGE_ALT_TEXT_REQUIRED: "SUBSTANTIVE",
+  QUESTION_PROVENANCE_REQUIRED: "SUBSTANTIVE",
+  QUESTION_VERSION_HISTORY_REQUIRED: "SUBSTANTIVE",
+  RIGHTS_ROLE_SEPARATION_VIOLATED: "SUBSTANTIVE",
+  SEMANTIC_TEMPLATE_CONCENTRATION: "SUBSTANTIVE",
+  SOURCE_ACQUIRING_ENTITY_REQUIRED: "SUBSTANTIVE",
+  SOURCE_COMMERCIAL_USE_NOT_ALLOWED: "SUBSTANTIVE",
+  SOURCE_DERIVATIVES_NOT_ALLOWED: "SUBSTANTIVE",
+  SOURCE_RIGHTS_EVIDENCE_HASH_REQUIRED: "SUBSTANTIVE",
+  SOURCE_RIGHTS_NOT_VERIFIED: "SUBSTANTIVE",
+  SOURCE_RIGHTS_REVIEW_EVIDENCE_REQUIRED: "SUBSTANTIVE",
+  SYLLABUS_EVIDENCE_REQUIRED: "SUBSTANTIVE",
+  SYLLABUS_VERSION_MISMATCH: "SUBSTANTIVE",
+  TOPIC_REQUIRED: "SUBSTANTIVE",
+  UNSUPPORTED_LIVE_FORMAT: "SUBSTANTIVE",
+} as const satisfies Record<string, InventoryBlockerSeverity>;
+
+export function inventoryBlockerSeverity(code: string): InventoryBlockerSeverity {
+  const severity = (BLOCKER_SEVERITY_BY_CODE as Record<string, InventoryBlockerSeverity>)[code];
+  if (!severity) throw new Error(`UNCLASSIFIED_GOVERNANCE_BLOCKER: ${code}`);
+  return severity;
+}
 
 export type InventoryIssue = {
   severity: "blocker" | "warning";
+  blockerSeverity?: InventoryBlockerSeverity;
   code: string;
   message: string;
   questionId?: number | string;
@@ -147,6 +208,7 @@ export type GovernedAssessmentInventoryResult = {
   releaseReady: boolean;
   runtimePublishReady: boolean;
   unsafePublished: boolean;
+  publishedMissingReleaseEvidence: boolean;
   blueprint: {
     enabled: boolean;
     revisionCount: number;
@@ -171,7 +233,7 @@ function issue(
   message: string,
   context: Partial<Pick<InventoryIssue, "questionId" | "bankId" | "sourceId">> = {},
 ) {
-  issues.push({ severity: "blocker", code, message, ...context });
+  issues.push({ severity: "blocker", blockerSeverity: inventoryBlockerSeverity(code), code, message, ...context });
 }
 
 function rightsReviewRecord(value: unknown): Record<string, unknown> | null {
@@ -312,7 +374,16 @@ function evidenceValidity(input: GovernedAssessmentInventoryInput) {
     && !contentReviewers.has(accessibility.reviewerUserId)
     && !rightsReviewerIds.has(accessibility.reviewerUserId));
 
-  const rightsValid = sourceLinks.size > 0 && Array.from(sourceLinks.values()).every((source) => {
+  const bundleRoleIds = bundle
+    ? [bundle.contentReviewerUserId, bundle.cutScoreApproverUserId, bundle.qaReviewerUserId, bundle.publisherUserId]
+    : [];
+  const rightsRoleViolation = rightsReviews.some((record) => validUserId(record.reviewerUserId)
+    && (authors.has(record.reviewerUserId)
+      || contentReviewers.has(record.reviewerUserId)
+      || record.reviewerUserId === accessibility?.reviewerUserId
+      || bundleRoleIds.includes(record.reviewerUserId)));
+
+  const rightsRecordsValid = sourceLinks.size > 0 && Array.from(sourceLinks.values()).every((source) => {
     const record = rightsReviews.find((candidate) => candidate.sourceId === source.sourceId);
     const sourceReview = rightsReviewRecord(source.sourceProvenance);
     return Boolean(record
@@ -320,11 +391,9 @@ function evidenceValidity(input: GovernedAssessmentInventoryInput) {
       && record.evidenceReference === source.evidenceReference
       && validHash(record.evidenceSha256)
       && record.evidenceSha256 === sourceReview?.evidenceSha256
-      && iso(record.reviewedAt)
-      && !authors.has(record.reviewerUserId)
-      && !contentReviewers.has(record.reviewerUserId)
-      && record.reviewerUserId !== accessibility?.reviewerUserId);
+      && iso(record.reviewedAt));
   });
+  const rightsValid = rightsRecordsValid && !rightsRoleViolation;
 
   let bundleValid = false;
   if (bundle) {
@@ -363,7 +432,7 @@ function evidenceValidity(input: GovernedAssessmentInventoryInput) {
     }
   }
 
-  return { accessibilityValid, rightsValid, bundleValid };
+  return { accessibilityValid, rightsRecordsValid, rightsRoleViolation, rightsValid, bundleValid };
 }
 
 export function assertGovernedInventoryReadOnlyMode(mode: string): asserts mode is "dry-run" {
@@ -395,7 +464,8 @@ export function evaluateGovernedAssessmentInventory(input: GovernedAssessmentInv
   }
 
   const evidence = evidenceValidity(input);
-  if (!evidence.rightsValid) issue(issues, "RIGHTS_ROLE_SEPARATION_NOT_VERIFIABLE", "Every in-scope source requires a current-revision rights-role record whose attributable user is independent from item authorship, content review, and accessibility review and whose evidence hash/reference matches the source register.");
+  if (!evidence.rightsRecordsValid) issue(issues, "RIGHTS_ROLE_SEPARATION_NOT_VERIFIABLE", "Every in-scope source requires a current-revision rights-reviewer record whose attributable user and evidence hash/reference match the source register.");
+  if (evidence.rightsRoleViolation) issue(issues, "RIGHTS_ROLE_SEPARATION_VIOLATED", "A recorded rights reviewer overlaps an item author, content reviewer, accessibility reviewer, cut-score approver, QA reviewer, or publisher role.");
   if (!evidence.accessibilityValid) issue(issues, "ASSESSMENT_ACCESSIBILITY_ACCEPTANCE_NOT_REPRESENTED", "The current blueprint revision requires a hashed assessment-level accessibility acceptance by an attributable independent reviewer.");
   if (!evidence.bundleValid) issue(issues, "IMMUTABLE_RELEASE_BUNDLE_NOT_REPRESENTED", "The current blueprint revision requires a valid immutable bundle for exact content, form simulation, cut-score approval, release QA, publisher sign-off, release commit/time, rollback ownership, and takedown procedure.");
 
@@ -408,12 +478,17 @@ export function evaluateGovernedAssessmentInventory(input: GovernedAssessmentInv
     rules: input.rules.map((rule) => ({ bankId: rule.bankId, topicId: rule.topicId, questionCount: rule.questionCount, difficulty: rule.difficulty })),
     questions: input.questions,
   });
-  issues.push(...contentAcceptance.issues);
+  issues.push(...contentAcceptance.issues.map((found): InventoryIssue => ({
+    ...found,
+    blockerSeverity: found.severity === "blocker" ? inventoryBlockerSeverity(found.code) : undefined,
+  })));
 
   const bankBlockerCodes = new Set(["BLUEPRINT_BANK_NOT_FOUND", "BANK_PURPOSE_MISMATCH", "BANK_NOT_ACTIVE", "BANK_SYLLABUS_VERSION_REQUIRED"]);
   const runtimePublishReady = contentAcceptance.releasable && !issues.some((found) => bankBlockerCodes.has(found.code));
   const releaseReady = issues.every((found) => found.severity !== "blocker");
   const currentlyPublished = input.isActive && input.visibility === "public" && input.reviewStatus === "approved";
+  const hasSubstantiveBlockers = issues.some((found) => found.severity === "blocker" && found.blockerSeverity === "SUBSTANTIVE");
+  const hasReleaseEvidenceBlockers = issues.some((found) => found.severity === "blocker" && found.blockerSeverity === "RELEASE_EVIDENCE");
 
   return {
     id: input.id,
@@ -425,7 +500,8 @@ export function evaluateGovernedAssessmentInventory(input: GovernedAssessmentInv
     status: releaseReady ? "release_ready" : "blocked",
     releaseReady,
     runtimePublishReady,
-    unsafePublished: currentlyPublished && !releaseReady,
+    unsafePublished: currentlyPublished && hasSubstantiveBlockers,
+    publishedMissingReleaseEvidence: currentlyPublished && hasReleaseEvidenceBlockers,
     blueprint: {
       enabled: input.useBlueprintEngine,
       revisionCount: input.blueprintRevisionCount,
@@ -452,6 +528,7 @@ export function evaluateGovernedAssessmentInventory(input: GovernedAssessmentInv
 
 export type GroupedInventoryIssue = {
   severity: "blocker" | "warning";
+  blockerSeverity?: InventoryBlockerSeverity;
   code: string;
   message: string;
   occurrences: number;
@@ -463,8 +540,8 @@ export type GroupedInventoryIssue = {
 export function groupInventoryIssues(issues: readonly InventoryIssue[]): GroupedInventoryIssue[] {
   const grouped = new Map<string, GroupedInventoryIssue>();
   for (const found of issues) {
-    const key = `${found.severity}\u0000${found.code}\u0000${found.message}`;
-    const current = grouped.get(key) ?? { severity: found.severity, code: found.code, message: found.message, occurrences: 0, questionIds: [], bankIds: [], sourceIds: [] };
+    const key = `${found.severity}\u0000${found.blockerSeverity ?? ""}\u0000${found.code}\u0000${found.message}`;
+    const current = grouped.get(key) ?? { severity: found.severity, blockerSeverity: found.blockerSeverity, code: found.code, message: found.message, occurrences: 0, questionIds: [], bankIds: [], sourceIds: [] };
     current.occurrences += 1;
     if (found.questionId != null && !current.questionIds.includes(found.questionId)) current.questionIds.push(found.questionId);
     if (found.bankId != null && !current.bankIds.includes(found.bankId)) current.bankIds.push(found.bankId);

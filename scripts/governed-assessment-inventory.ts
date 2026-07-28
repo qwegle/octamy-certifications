@@ -11,6 +11,7 @@ import {
   assertGovernedInventoryReadOnlyMode,
   evaluateGovernedAssessmentInventory,
   groupInventoryIssues,
+  inventoryBlockerSeverity,
   type GovernedAssessmentInventoryInput,
   type InventoryAccessibilityAcceptance,
   type InventoryBlueprintRule,
@@ -110,10 +111,11 @@ function printSummary(report: any) {
     `Governed assessment inventory (${report.mode})`,
     `Scope: configured database snapshot; production status ${report.dataScope.productionStatus}`,
     `Database: ${report.dataScope.databaseName}; user: ${report.dataScope.databaseUser}; transaction_read_only: ${report.dataScope.transactionReadOnly}`,
-    `Assessments: ${report.summary.assessments}; release-ready: ${report.summary.releaseReady}; blocked: ${report.summary.blocked}; currently published but blocked: ${report.summary.unsafePublished}`,
+    `Assessments: ${report.summary.assessments}; release-ready: ${report.summary.releaseReady}; blocked: ${report.summary.blocked}; published-with-substantive-blockers: ${report.summary.publishedWithSubstantiveBlockers}; published-missing-release-evidence: ${report.summary.publishedMissingReleaseEvidence}`,
+    `WARNING: published-missing-release-evidence=${report.summary.publishedMissingReleaseEvidence} (administrative gaps; non-blocking unless --require-release-evidence is set)`,
   ].join("\n") + "\n");
   for (const assessment of report.assessments) {
-    const codes = assessment.blockers.map((blocker: any) => `${blocker.code}(${blocker.occurrences})`).join(", ");
+    const codes = assessment.blockers.map((blocker: any) => `${blocker.code}[${blocker.blockerSeverity}](${blocker.occurrences})`).join(", ");
     process.stdout.write(`${assessment.status.toUpperCase()} ${assessment.slug}: ${codes || "no blockers"}\n`);
   }
 }
@@ -200,6 +202,7 @@ export async function buildGovernedAssessmentInventory(options: {
           releaseReady: false,
           runtimePublishReady: false,
           unsafePublished: currentlyPublished,
+          publishedMissingReleaseEvidence: false,
           catalogState: canReadPublicationState ? {
             visibility: course.visibility,
             reviewStatus: course.review_status,
@@ -208,6 +211,7 @@ export async function buildGovernedAssessmentInventory(options: {
           } : { assessable: false },
           blockers: [{
             severity: "blocker",
+            blockerSeverity: inventoryBlockerSeverity("GOVERNANCE_SCHEMA_INCOMPLETE"),
             code: "GOVERNANCE_SCHEMA_INCOMPLETE",
             message: gapMessage,
             occurrences: 1,
@@ -247,6 +251,8 @@ export async function buildGovernedAssessmentInventory(options: {
           releaseReady: 0,
           blocked: assessments.length,
           unsafePublished: assessments.filter((assessment) => assessment.unsafePublished).length,
+          publishedWithSubstantiveBlockers: assessments.filter((assessment) => assessment.unsafePublished).length,
+          publishedMissingReleaseEvidence: assessments.filter((assessment) => assessment.publishedMissingReleaseEvidence).length,
         },
         assessments,
       };
@@ -492,6 +498,8 @@ export async function buildGovernedAssessmentInventory(options: {
         releaseReady: assessments.filter((assessment) => assessment.releaseReady).length,
         blocked: assessments.filter((assessment) => !assessment.releaseReady).length,
         unsafePublished: assessments.filter((assessment) => assessment.unsafePublished).length,
+        publishedWithSubstantiveBlockers: assessments.filter((assessment) => assessment.unsafePublished).length,
+        publishedMissingReleaseEvidence: assessments.filter((assessment) => assessment.publishedMissingReleaseEvidence).length,
       },
       assessments,
     };
@@ -503,6 +511,20 @@ export async function buildGovernedAssessmentInventory(options: {
   }
 }
 
+export function governedInventoryGateFailure(
+  summary: { publishedWithSubstantiveBlockers: number; publishedMissingReleaseEvidence: number },
+  options: { failOnUnsafePublished?: boolean; requireReleaseEvidence?: boolean },
+): string | null {
+  if ((options.failOnUnsafePublished || options.requireReleaseEvidence)
+    && summary.publishedWithSubstantiveBlockers > 0) {
+    return `Governance gate failed: ${summary.publishedWithSubstantiveBlockers} published assessment(s) have substantive content or legal blockers`;
+  }
+  if (options.requireReleaseEvidence && summary.publishedMissingReleaseEvidence > 0) {
+    return `Governance gate failed: ${summary.publishedMissingReleaseEvidence} published assessment(s) lack strict administrative release evidence`;
+  }
+  return null;
+}
+
 async function main() {
   const { values } = parseArgs({
     options: {
@@ -510,6 +532,7 @@ async function main() {
       assessment: { type: "string", multiple: true },
       format: { type: "string", default: "json" },
       "fail-on-unsafe-published": { type: "boolean", default: false },
+      "require-release-evidence": { type: "boolean", default: false },
     },
     allowPositionals: false,
     strict: true,
@@ -526,9 +549,11 @@ async function main() {
   });
   if (format === "summary") printSummary(report);
   else process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
-  if (values["fail-on-unsafe-published"] && report.summary.unsafePublished > 0) {
-    throw new Error(`Governance gate failed: ${report.summary.unsafePublished} published assessment(s) have release blockers`);
-  }
+  const gateFailure = governedInventoryGateFailure(report.summary, {
+    failOnUnsafePublished: values["fail-on-unsafe-published"],
+    requireReleaseEvidence: values["require-release-evidence"],
+  });
+  if (gateFailure) throw new Error(gateFailure);
 }
 
 if (/governed-assessment-inventory\.(?:c?js|ts)$/.test(path.basename(process.argv[1] ?? ""))) {

@@ -174,7 +174,8 @@ APP_DIR="$APP_DIR" ADOPT_EXISTING_SCHEMA="$ADOPT_EXISTING_SCHEMA" node scripts/a
 log "Applying pending database migrations"
 npm run db:migrate
 
-log "Verifying governed assessments have no unsafe published entries"
+log "Checking published assessments for substantive content or legal blockers"
+log "Administrative release-evidence gaps are reported below as WARNING and do not fail this deployment"
 npm run assessments:inventory -- --mode dry-run --format summary --fail-on-unsafe-published
 
 # Drizzle and Vite are development dependencies; remove them only after the

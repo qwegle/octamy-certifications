@@ -6,9 +6,11 @@ import {
   governedAssessmentContentManifestSha256,
   governedReleaseBundleSha256,
   groupInventoryIssues,
+  inventoryBlockerSeverity,
   type GovernedAssessmentInventoryInput,
   type InventoryReleaseBundle,
 } from "../../scripts/lib/governed-assessment-inventory";
+import { governedInventoryGateFailure } from "../../scripts/governed-assessment-inventory";
 
 const EVIDENCE_CODES = [
   "RIGHTS_ROLE_SEPARATION_NOT_VERIFIABLE",
@@ -227,6 +229,45 @@ describe("governed assessment inventory", () => {
     expect(codes(acceptedFixture())).toEqual(expect.arrayContaining(EVIDENCE_CODES));
   });
 
+  it("does not mark a published assessment unsafe when only release evidence is missing", () => {
+    const fixture = acceptedFixture();
+    fixture.visibility = "public";
+    fixture.reviewStatus = "approved";
+    fixture.isActive = true;
+    const report = evaluateGovernedAssessmentInventory(fixture);
+
+    expect(report.releaseReady).toBe(false);
+    expect(report.unsafePublished).toBe(false);
+    expect(report.publishedMissingReleaseEvidence).toBe(true);
+    expect(report.issues).toHaveLength(EVIDENCE_CODES.length);
+    expect(report.issues.every((found) => found.blockerSeverity === "RELEASE_EVIDENCE")).toBe(true);
+  });
+
+  it("marks a published assessment unsafe when any substantive blocker exists", () => {
+    const fixture = acceptedFixture();
+    fixture.visibility = "public";
+    fixture.reviewStatus = "approved";
+    fixture.isActive = true;
+    fixture.questions[0].explanation = null;
+    const report = evaluateGovernedAssessmentInventory(fixture);
+
+    expect(report.issues).toEqual(expect.arrayContaining([
+      expect.objectContaining({ code: "EXPLANATION_REQUIRED", blockerSeverity: "SUBSTANTIVE" }),
+    ]));
+    expect(report.unsafePublished).toBe(true);
+  });
+
+  it("makes release-evidence-only publication fail only under the strict CLI option", () => {
+    const summary = { publishedWithSubstantiveBlockers: 0, publishedMissingReleaseEvidence: 1 };
+    expect(governedInventoryGateFailure(summary, { failOnUnsafePublished: true })).toBeNull();
+    expect(governedInventoryGateFailure(summary, { requireReleaseEvidence: true }))
+      .toMatch(/lack strict administrative release evidence/);
+    expect(governedInventoryGateFailure(
+      { publishedWithSubstantiveBlockers: 1, publishedMissingReleaseEvidence: 0 },
+      { requireReleaseEvidence: true },
+    )).toMatch(/substantive content or legal blockers/);
+  });
+
   it("clears the blockers only for complete attributable current-revision evidence", () => {
     const report = evaluateGovernedAssessmentInventory(addCompleteEvidence(acceptedFixture()));
     expect(report.issues).toEqual([]);
@@ -261,15 +302,26 @@ describe("governed assessment inventory", () => {
     bundle.qaReviewerUserId = bundle.contentReviewerUserId;
     const { bundleSha256: _oldHash, ...unsigned } = bundle;
     bundle.bundleSha256 = governedReleaseBundleSha256(unsigned);
-    expect(codes(fixture)).toEqual(expect.arrayContaining(EVIDENCE_CODES));
+    expect(codes(fixture)).toEqual(expect.arrayContaining([
+      "ASSESSMENT_ACCESSIBILITY_ACCEPTANCE_NOT_REPRESENTED",
+      "IMMUTABLE_RELEASE_BUNDLE_NOT_REPRESENTED",
+      "RIGHTS_ROLE_SEPARATION_VIOLATED",
+    ]));
+    expect(evaluateGovernedAssessmentInventory(fixture).issues).toEqual(expect.arrayContaining([
+      expect.objectContaining({ code: "RIGHTS_ROLE_SEPARATION_VIOLATED", blockerSeverity: "SUBSTANTIVE" }),
+    ]));
   });
 
-  it("groups exact affected identifiers without losing occurrences", () => {
+  it("fails closed for an unclassified future blocker code", () => {
+    expect(() => inventoryBlockerSeverity("FUTURE_UNCLASSIFIED_BLOCKER")).toThrow(/UNCLASSIFIED_GOVERNANCE_BLOCKER/);
+  });
+
+  it("groups exact affected identifiers without losing occurrences or classification", () => {
     expect(groupInventoryIssues([
-      { severity: "blocker", code: "RIGHTS", message: "Missing", questionId: 2, bankId: 7, sourceId: 11 },
-      { severity: "blocker", code: "RIGHTS", message: "Missing", questionId: 3, bankId: 7, sourceId: 11 },
+      { severity: "blocker", blockerSeverity: "SUBSTANTIVE", code: "RIGHTS", message: "Missing", questionId: 2, bankId: 7, sourceId: 11 },
+      { severity: "blocker", blockerSeverity: "SUBSTANTIVE", code: "RIGHTS", message: "Missing", questionId: 3, bankId: 7, sourceId: 11 },
     ])).toEqual([{
-      severity: "blocker", code: "RIGHTS", message: "Missing", occurrences: 2,
+      severity: "blocker", blockerSeverity: "SUBSTANTIVE", code: "RIGHTS", message: "Missing", occurrences: 2,
       questionIds: [2, 3], bankIds: [7], sourceIds: [11],
     }]);
   });
