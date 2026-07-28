@@ -1,0 +1,119 @@
+[
+  {
+    "bankId": 33,
+    "topicId": 434,
+    "questionCount": 4,
+    "difficulty": "mixed",
+    "marksPerQuestion": 1,
+    "negativeMarks": 0,
+    "sortOrder": 0
+  },
+  {
+    "bankId": 33,
+    "topicId": 435,
+    "questionCount": 3,
+    "difficulty": "mixed",
+    "marksPerQuestion": 1,
+    "negativeMarks": 0,
+    "sortOrder": 1
+  },
+  {
+    "bankId": 33,
+    "topicId": 436,
+    "questionCount": 3,
+    "difficulty": "mixed",
+    "marksPerQuestion": 1,
+    "negativeMarks": 0,
+    "sortOrder": 2
+  },
+  {
+    "bankId": 33,
+    "topicId": 437,
+    "questionCount": 3,
+    "difficulty": "mixed",
+    "marksPerQuestion": 1,
+    "negativeMarks": 0,
+    "sortOrder": 3
+  },
+  {
+    "bankId": 33,
+    "topicId": 438,
+    "questionCount": 3,
+    "difficulty": "mixed",
+    "marksPerQuestion": 1,
+    "negativeMarks": 0,
+    "sortOrder": 4
+  },
+  {
+    "bankId": 33,
+    "topicId": 439,
+    "questionCount": 3,
+    "difficulty": "mixed",
+    "marksPerQuestion": 1,
+    "negativeMarks": 0,
+    "sortOrder": 5
+  },
+  {
+    "bankId": 33,
+    "topicId": 440,
+    "questionCount": 3,
+    "difficulty": "mixed",
+    "marksPerQuestion": 1,
+    "negativeMarks": 0,
+    "sortOrder": 6
+  },
+  {
+    "bankId": 33,
+    "topicId": 441,
+    "questionCount": 3,
+    "difficulty": "mixed",
+    "marksPerQuestion": 1,
+    "negativeMarks": 0,
+    "sortOrder": 7
+  },
+  {
+    "bankId": 33,
+    "topicId": 442,
+    "questionCount": 3,
+    "difficulty": "mixed",
+    "marksPerQuestion": 1,
+    "negativeMarks": 0,
+    "sortOrder": 8
+  },
+  {
+    "bankId": 33,
+    "topicId": 443,
+    "questionCount": 3,
+    "difficulty": "mixed",
+    "marksPerQuestion": 1,
+    "negativeMarks": 0,
+    "sortOrder": 9
+  },
+  {
+    "bankId": 33,
+    "topicId": 444,
+    "questionCount": 3,
+    "difficulty": "mixed",
+    "marksPerQuestion": 1,
+    "negativeMarks": 0,
+    "sortOrder": 10
+  },
+  {
+    "bankId": 33,
+    "topicId": 445,
+    "questionCount": 3,
+    "difficulty": "mixed",
+    "marksPerQuestion": 1,
+    "negativeMarks": 0,
+    "sortOrder": 11
+  },
+  {
+    "bankId": 33,
+    "topicId": 446,
+    "questionCount": 3,
+    "difficulty": "mixed",
+    "marksPerQuestion": 1,
+    "negativeMarks": 0,
+    "sortOrder": 12
+  }
+]

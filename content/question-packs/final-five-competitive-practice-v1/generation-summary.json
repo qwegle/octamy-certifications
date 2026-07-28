@@ -1,0 +1,545 @@
+{
+  "status": "passed",
+  "packs": [
+    {
+      "slug": "ibps-clerk-quantitative-aptitude-practice",
+      "sourceKey": "first-party-original:ibps-clerk-quantitative-aptitude-practice:v1",
+      "bank": "ibps-clerk-quantitative-aptitude-practice-pool-v1",
+      "title": "IBPS Clerk Quantitative Aptitude Practice",
+      "syllabus": "IBPS CRP Customer Service Associates published Numerical Ability syllabus — original practice mapping v1",
+      "source": "https://www.ibps.in/index.php/clerical-cadre/",
+      "draw": 30,
+      "duration": 35,
+      "count": 200,
+      "rotationDepth": 6.666666666666667,
+      "files": {
+        "questions": "content/question-packs/final-five-competitive-practice-v1/ibps-clerk-quantitative-aptitude-practice/questions.jsonl",
+        "decisions": "content/question-packs/final-five-competitive-practice-v1/ibps-clerk-quantitative-aptitude-practice/decisions.jsonl",
+        "manifest": "content/question-packs/final-five-competitive-practice-v1/ibps-clerk-quantitative-aptitude-practice/manifest.json",
+        "rights": "content/question-packs/final-five-competitive-practice-v1/ibps-clerk-quantitative-aptitude-practice/rights-evidence.txt",
+        "blueprint": "content/question-packs/final-five-competitive-practice-v1/ibps-clerk-quantitative-aptitude-practice/blueprint.json"
+      },
+      "topics": {
+        "fractions-of-quantities": 10,
+        "percentages": 10,
+        "averages": 10,
+        "linear-equations": 10,
+        "perimeter": 10,
+        "area": 10,
+        "area-of-triangles": 10,
+        "unitary-method": 10,
+        "speed-distance-time": 20,
+        "simple-interest": 10,
+        "compound-interest": 9,
+        "profit-and-loss": 9,
+        "discounts": 9,
+        "ratio-and-proportion": 9,
+        "direct-proportion": 9,
+        "factors-and-multiples": 18,
+        "probability": 9,
+        "number-sequences": 9,
+        "powers-and-exponents": 9
+      },
+      "difficulties": {
+        "medium": 171,
+        "easy": 20,
+        "hard": 9
+      },
+      "answerPositions": {
+        "A": 50,
+        "B": 50,
+        "C": 50,
+        "D": 50
+      },
+      "verification": {
+        "formulaChecks": 200,
+        "unitChecks": 200,
+        "sigFigChecks": 200,
+        "exactUniqueStems": 200,
+        "normalizedUniqueStems": 200,
+        "uniqueObjectives": 200,
+        "uniqueHashes": 200,
+        "repositoryValidation": {
+          "inputSha256": "3798a8bc9b88fb4c990ab9c62fd65c7d169e81cfddcd063ff4f53f182aedfc6d",
+          "totalRows": 200,
+          "validRows": 200,
+          "invalidRows": 0,
+          "duplicateSourceRecordIds": 0,
+          "duplicateContentRows": 0,
+          "topics": [
+            {
+              "slug": "fractions-of-quantities",
+              "name": "Fractions of quantities"
+            },
+            {
+              "slug": "percentages",
+              "name": "Percentages"
+            },
+            {
+              "slug": "averages",
+              "name": "Averages"
+            },
+            {
+              "slug": "linear-equations",
+              "name": "Linear equations"
+            },
+            {
+              "slug": "perimeter",
+              "name": "Perimeter"
+            },
+            {
+              "slug": "area",
+              "name": "Area"
+            },
+            {
+              "slug": "area-of-triangles",
+              "name": "Area of triangles"
+            },
+            {
+              "slug": "unitary-method",
+              "name": "Unitary method"
+            },
+            {
+              "slug": "speed-distance-time",
+              "name": "Speed, distance and time"
+            },
+            {
+              "slug": "simple-interest",
+              "name": "Simple interest"
+            },
+            {
+              "slug": "compound-interest",
+              "name": "Compound interest"
+            },
+            {
+              "slug": "profit-and-loss",
+              "name": "Profit and loss"
+            },
+            {
+              "slug": "discounts",
+              "name": "Discounts"
+            },
+            {
+              "slug": "ratio-and-proportion",
+              "name": "Ratio and proportion"
+            },
+            {
+              "slug": "direct-proportion",
+              "name": "Direct proportion"
+            },
+            {
+              "slug": "factors-and-multiples",
+              "name": "Factors and multiples"
+            },
+            {
+              "slug": "probability",
+              "name": "Probability"
+            },
+            {
+              "slug": "number-sequences",
+              "name": "Number sequences"
+            },
+            {
+              "slug": "powers-and-exponents",
+              "name": "Powers and exponents"
+            }
+          ]
+        }
+      },
+      "hashes": {
+        "questions": "3798a8bc9b88fb4c990ab9c62fd65c7d169e81cfddcd063ff4f53f182aedfc6d",
+        "manifest": "21f86c35b8339ba33250ae446adef3c527d424a55eda09cf54b714cf1a59b6e3",
+        "decisions": "116b72194c8f93bdd4bc05f2a7ffba5fea1a32ac2aa797e4a46f221a6c000ba9",
+        "rights": "41ad1060348dd0aa65d7d828ac48ee70adf17e80ebcee8b828e577a72c8534e5"
+      }
+    },
+    {
+      "slug": "jee-main-physics-numerical-practice",
+      "sourceKey": "first-party-original:jee-main-physics-numerical-practice:v1",
+      "bank": "jee-main-physics-numerical-practice-pool-v1",
+      "title": "JEE Main Physics Numerical Practice",
+      "syllabus": "NTA JEE Main published Physics syllabus — original numerical practice mapping v1",
+      "source": "https://jeemain.nta.nic.in/",
+      "draw": 30,
+      "duration": 45,
+      "count": 200,
+      "rotationDepth": 6.666666666666667,
+      "files": {
+        "questions": "content/question-packs/final-five-competitive-practice-v1/jee-main-physics-numerical-practice/questions.jsonl",
+        "decisions": "content/question-packs/final-five-competitive-practice-v1/jee-main-physics-numerical-practice/decisions.jsonl",
+        "manifest": "content/question-packs/final-five-competitive-practice-v1/jee-main-physics-numerical-practice/manifest.json",
+        "rights": "content/question-packs/final-five-competitive-practice-v1/jee-main-physics-numerical-practice/rights-evidence.txt",
+        "blueprint": "content/question-packs/final-five-competitive-practice-v1/jee-main-physics-numerical-practice/blueprint.json"
+      },
+      "topics": {
+        "current-electricity": 19,
+        "force-and-newtons-laws": 19,
+        "mechanical-properties-of-fluids": 18,
+        "momentum": 18,
+        "motion-in-a-straight-line": 18,
+        "oscillations": 18,
+        "properties-of-matter": 18,
+        "speed-distance-time": 18,
+        "thermal-properties": 18,
+        "waves": 18,
+        "work-energy-and-power": 18
+      },
+      "difficulties": {
+        "medium": 91,
+        "hard": 91,
+        "easy": 18
+      },
+      "answerPositions": {
+        "A": 50,
+        "B": 50,
+        "C": 50,
+        "D": 50
+      },
+      "verification": {
+        "formulaChecks": 200,
+        "unitChecks": 200,
+        "sigFigChecks": 200,
+        "exactUniqueStems": 200,
+        "normalizedUniqueStems": 200,
+        "uniqueObjectives": 200,
+        "uniqueHashes": 200,
+        "repositoryValidation": {
+          "inputSha256": "65107756cbc26027e0d1277135a981232a44b34aa800756a8443c0f248c3b375",
+          "totalRows": 200,
+          "validRows": 200,
+          "invalidRows": 0,
+          "duplicateSourceRecordIds": 0,
+          "duplicateContentRows": 0,
+          "topics": [
+            {
+              "slug": "current-electricity",
+              "name": "Current electricity"
+            },
+            {
+              "slug": "force-and-newtons-laws",
+              "name": "Force and Newton's laws"
+            },
+            {
+              "slug": "mechanical-properties-of-fluids",
+              "name": "Mechanical properties of fluids"
+            },
+            {
+              "slug": "momentum",
+              "name": "Momentum"
+            },
+            {
+              "slug": "motion-in-a-straight-line",
+              "name": "Motion in a straight line"
+            },
+            {
+              "slug": "oscillations",
+              "name": "Oscillations"
+            },
+            {
+              "slug": "properties-of-matter",
+              "name": "Properties of matter"
+            },
+            {
+              "slug": "speed-distance-time",
+              "name": "Speed, distance and time"
+            },
+            {
+              "slug": "thermal-properties",
+              "name": "Thermal properties"
+            },
+            {
+              "slug": "waves",
+              "name": "Waves"
+            },
+            {
+              "slug": "work-energy-and-power",
+              "name": "Work, energy and power"
+            }
+          ]
+        }
+      },
+      "hashes": {
+        "questions": "65107756cbc26027e0d1277135a981232a44b34aa800756a8443c0f248c3b375",
+        "manifest": "6af93081b171e678a766f527d80c395f92d03e4a30e9e76379c34b7ab1184247",
+        "decisions": "f11ca3a50c513586f342892f0c46dbb6d43711788742877503eb04b615386d06",
+        "rights": "6074bb350dda2a4c161808206aff8a218118ccc11443cc4f05bd2752cbce2b19"
+      }
+    },
+    {
+      "slug": "jee-main-chemistry-numerical-practice",
+      "sourceKey": "first-party-original:jee-main-chemistry-numerical-practice:v1",
+      "bank": "jee-main-chemistry-numerical-practice-pool-v1",
+      "title": "JEE Main Chemistry Numerical Practice",
+      "syllabus": "NTA JEE Main published Chemistry syllabus — original numerical practice mapping v1",
+      "source": "https://jeemain.nta.nic.in/",
+      "draw": 25,
+      "duration": 40,
+      "count": 200,
+      "rotationDepth": 8,
+      "files": {
+        "questions": "content/question-packs/final-five-competitive-practice-v1/jee-main-chemistry-numerical-practice/questions.jsonl",
+        "decisions": "content/question-packs/final-five-competitive-practice-v1/jee-main-chemistry-numerical-practice/decisions.jsonl",
+        "manifest": "content/question-packs/final-five-competitive-practice-v1/jee-main-chemistry-numerical-practice/manifest.json",
+        "rights": "content/question-packs/final-five-competitive-practice-v1/jee-main-chemistry-numerical-practice/rights-evidence.txt",
+        "blueprint": "content/question-packs/final-five-competitive-practice-v1/jee-main-chemistry-numerical-practice/blueprint.json"
+      },
+      "topics": {
+        "equilibrium-and-ph": 40,
+        "mole-concept": 40,
+        "solutions-and-concentration": 40,
+        "states-of-matter": 40,
+        "stoichiometry": 40
+      },
+      "difficulties": {
+        "hard": 90,
+        "easy": 30,
+        "medium": 80
+      },
+      "answerPositions": {
+        "A": 50,
+        "B": 50,
+        "C": 50,
+        "D": 50
+      },
+      "verification": {
+        "formulaChecks": 200,
+        "unitChecks": 200,
+        "sigFigChecks": 200,
+        "exactUniqueStems": 200,
+        "normalizedUniqueStems": 200,
+        "uniqueObjectives": 200,
+        "uniqueHashes": 200,
+        "repositoryValidation": {
+          "inputSha256": "3f31ac4b2d7804d642d2c9bb95e8a4444d0201bbc95d8ac470b0bc2bc999ecf7",
+          "totalRows": 200,
+          "validRows": 200,
+          "invalidRows": 0,
+          "duplicateSourceRecordIds": 0,
+          "duplicateContentRows": 0,
+          "topics": [
+            {
+              "slug": "equilibrium-and-ph",
+              "name": "Equilibrium and pH"
+            },
+            {
+              "slug": "mole-concept",
+              "name": "Mole concept"
+            },
+            {
+              "slug": "solutions-and-concentration",
+              "name": "Solutions and concentration"
+            },
+            {
+              "slug": "states-of-matter",
+              "name": "States of matter"
+            },
+            {
+              "slug": "stoichiometry",
+              "name": "Stoichiometry"
+            }
+          ]
+        }
+      },
+      "hashes": {
+        "questions": "3f31ac4b2d7804d642d2c9bb95e8a4444d0201bbc95d8ac470b0bc2bc999ecf7",
+        "manifest": "414eeec0d846108a487360358cf56d475bb1ed4670b34b99118f237580a4878a",
+        "decisions": "5c73e711da9d68952b5913994a7ece8f15c43a094674b3f13043ff5f6968970a",
+        "rights": "006fdee4a0bbc2e7f6afa91b3c677348f7ff173f82e7cd92a0c5c5797d8ef98e"
+      }
+    },
+    {
+      "slug": "neet-ug-physics-numerical-practice",
+      "sourceKey": "first-party-original:neet-ug-physics-numerical-practice:v1",
+      "bank": "neet-ug-physics-numerical-practice-pool-v1",
+      "title": "NEET (UG) Physics Numerical Practice",
+      "syllabus": "NTA NEET (UG) published Physics syllabus — original numerical practice mapping v1",
+      "source": "https://neet.nta.nic.in/",
+      "draw": 30,
+      "duration": 45,
+      "count": 200,
+      "rotationDepth": 6.666666666666667,
+      "files": {
+        "questions": "content/question-packs/final-five-competitive-practice-v1/neet-ug-physics-numerical-practice/questions.jsonl",
+        "decisions": "content/question-packs/final-five-competitive-practice-v1/neet-ug-physics-numerical-practice/decisions.jsonl",
+        "manifest": "content/question-packs/final-five-competitive-practice-v1/neet-ug-physics-numerical-practice/manifest.json",
+        "rights": "content/question-packs/final-five-competitive-practice-v1/neet-ug-physics-numerical-practice/rights-evidence.txt",
+        "blueprint": "content/question-packs/final-five-competitive-practice-v1/neet-ug-physics-numerical-practice/blueprint.json"
+      },
+      "topics": {
+        "current-electricity": 19,
+        "force-and-newtons-laws": 19,
+        "mechanical-properties-of-fluids": 18,
+        "momentum": 18,
+        "motion-in-a-straight-line": 18,
+        "oscillations": 18,
+        "properties-of-matter": 18,
+        "speed-distance-time": 18,
+        "thermal-properties": 18,
+        "waves": 18,
+        "work-energy-and-power": 18
+      },
+      "difficulties": {
+        "medium": 91,
+        "hard": 91,
+        "easy": 18
+      },
+      "answerPositions": {
+        "A": 50,
+        "B": 50,
+        "C": 50,
+        "D": 50
+      },
+      "verification": {
+        "formulaChecks": 200,
+        "unitChecks": 200,
+        "sigFigChecks": 200,
+        "exactUniqueStems": 200,
+        "normalizedUniqueStems": 200,
+        "uniqueObjectives": 200,
+        "uniqueHashes": 200,
+        "repositoryValidation": {
+          "inputSha256": "37c0caf230f39aec835baede7cd811dc5edb57994265edeebd2241f3437e42bd",
+          "totalRows": 200,
+          "validRows": 200,
+          "invalidRows": 0,
+          "duplicateSourceRecordIds": 0,
+          "duplicateContentRows": 0,
+          "topics": [
+            {
+              "slug": "current-electricity",
+              "name": "Current electricity"
+            },
+            {
+              "slug": "force-and-newtons-laws",
+              "name": "Force and Newton's laws"
+            },
+            {
+              "slug": "mechanical-properties-of-fluids",
+              "name": "Mechanical properties of fluids"
+            },
+            {
+              "slug": "momentum",
+              "name": "Momentum"
+            },
+            {
+              "slug": "motion-in-a-straight-line",
+              "name": "Motion in a straight line"
+            },
+            {
+              "slug": "oscillations",
+              "name": "Oscillations"
+            },
+            {
+              "slug": "properties-of-matter",
+              "name": "Properties of matter"
+            },
+            {
+              "slug": "speed-distance-time",
+              "name": "Speed, distance and time"
+            },
+            {
+              "slug": "thermal-properties",
+              "name": "Thermal properties"
+            },
+            {
+              "slug": "waves",
+              "name": "Waves"
+            },
+            {
+              "slug": "work-energy-and-power",
+              "name": "Work, energy and power"
+            }
+          ]
+        }
+      },
+      "hashes": {
+        "questions": "37c0caf230f39aec835baede7cd811dc5edb57994265edeebd2241f3437e42bd",
+        "manifest": "3ad765b8b785bbd1058b5f514a66ecd9e9c6edf15ed178afd7d98027c1526e2e",
+        "decisions": "023686c53b96a94bef1e74290fb1f14ecd4b3a822391bdc526a6a56c7752e40b",
+        "rights": "ad4715c878c95aa35b5a6259afc85ad0545c5875a737defb91cd40828413cd03"
+      }
+    },
+    {
+      "slug": "neet-ug-chemistry-numerical-practice",
+      "sourceKey": "first-party-original:neet-ug-chemistry-numerical-practice:v1",
+      "bank": "neet-ug-chemistry-numerical-practice-pool-v1",
+      "title": "NEET (UG) Chemistry Numerical Practice",
+      "syllabus": "NTA NEET (UG) published Chemistry syllabus — original numerical practice mapping v1",
+      "source": "https://neet.nta.nic.in/",
+      "draw": 25,
+      "duration": 40,
+      "count": 200,
+      "rotationDepth": 8,
+      "files": {
+        "questions": "content/question-packs/final-five-competitive-practice-v1/neet-ug-chemistry-numerical-practice/questions.jsonl",
+        "decisions": "content/question-packs/final-five-competitive-practice-v1/neet-ug-chemistry-numerical-practice/decisions.jsonl",
+        "manifest": "content/question-packs/final-five-competitive-practice-v1/neet-ug-chemistry-numerical-practice/manifest.json",
+        "rights": "content/question-packs/final-five-competitive-practice-v1/neet-ug-chemistry-numerical-practice/rights-evidence.txt",
+        "blueprint": "content/question-packs/final-five-competitive-practice-v1/neet-ug-chemistry-numerical-practice/blueprint.json"
+      },
+      "topics": {
+        "equilibrium-and-ph": 40,
+        "mole-concept": 40,
+        "solutions-and-concentration": 40,
+        "states-of-matter": 40,
+        "stoichiometry": 40
+      },
+      "difficulties": {
+        "hard": 90,
+        "easy": 30,
+        "medium": 80
+      },
+      "answerPositions": {
+        "A": 50,
+        "B": 50,
+        "C": 50,
+        "D": 50
+      },
+      "verification": {
+        "formulaChecks": 200,
+        "unitChecks": 200,
+        "sigFigChecks": 200,
+        "exactUniqueStems": 200,
+        "normalizedUniqueStems": 200,
+        "uniqueObjectives": 200,
+        "uniqueHashes": 200,
+        "repositoryValidation": {
+          "inputSha256": "fea697bffa66fadce08dcaab737cdcf0c5bf35d2af59e35e489453b24b16a335",
+          "totalRows": 200,
+          "validRows": 200,
+          "invalidRows": 0,
+          "duplicateSourceRecordIds": 0,
+          "duplicateContentRows": 0,
+          "topics": [
+            {
+              "slug": "equilibrium-and-ph",
+              "name": "Equilibrium and pH"
+            },
+            {
+              "slug": "mole-concept",
+              "name": "Mole concept"
+            },
+            {
+              "slug": "solutions-and-concentration",
+              "name": "Solutions and concentration"
+            },
+            {
+              "slug": "states-of-matter",
+              "name": "States of matter"
+            },
+            {
+              "slug": "stoichiometry",
+              "name": "Stoichiometry"
+            }
+          ]
+        }
+      },
+      "hashes": {
+        "questions": "fea697bffa66fadce08dcaab737cdcf0c5bf35d2af59e35e489453b24b16a335",
+        "manifest": "f0c9d5248431d217f3cac46cef68337011dbe9528841d3ea77c2767e54e85457",
+        "decisions": "68e74abdf339480c22746889247a6b47c2d2b9273f40708cb80e2f36c6245329",
+        "rights": "f0ff592e4f8c224f35135cfda202e556a3be245e0dbc04f31e306797c3c39f02"
+      }
+    }
+  ]
+}

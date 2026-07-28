@@ -1,0 +1,7 @@
+Grade 5 Mathematics Practice original first-party question pack v1
+Recorded: 2026-07-29
+Owner and acquiring entity: Octamy
+Author and item reviewer: Kiro AI under authenticated product-owner instruction
+Items: 200; no copied textbook exercises, examination papers, dumps, or third-party question-bank wording
+Curriculum reference: https://ncert.nic.in/textbook/pdf/eemm1ps.pdf
+Questions SHA-256: b50ccc225d91405fb68fd07ff338454953b3660eca552613d7beb96a9e18c810

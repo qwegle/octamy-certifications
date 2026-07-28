@@ -1,0 +1,8 @@
+Grade 7 Mathematics Practice Question Pack v1
+Generated: 2026-07-29
+Question count: 200
+Ownership basis: original first-party commissioned content.
+Authoring agent: Kiro AI under authenticated Octamy product-owner instruction.
+Curriculum reference: NCERT National Curriculum Framework for School Education 2023 — Mathematics learning standards (https://ncert.nic.in/pdf/NCFSE-2023-August_2023.pdf).
+No third-party question wording, exam dumps, placeholders, or copied exercises were used.
+Question JSONL SHA-256: 2ed6d33cba74f66d33621ec1a520214ffe5a4a600c2fc3502a3b0066810c0ab7

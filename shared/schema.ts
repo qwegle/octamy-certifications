@@ -1272,12 +1272,55 @@ export const assessmentReleaseBundles = pgTable("assessment_release_bundles", {
   `),
 }));
 
+// Immutable void records preserve the original false attribution for audit while
+// preventing ordinary evaluators from accepting it. Role authorization is also
+// an append-only grant/revoke event stream; migration 0036 enforces its policy.
+export const assessmentReleaseEvidenceRevocations = pgTable("assessment_release_evidence_revocations", {
+  id: serial("id").primaryKey(),
+  releaseBundleId: integer("release_bundle_id").references(() => assessmentReleaseBundles.id, { onDelete: "restrict" }),
+  accessibilityAcceptanceId: integer("accessibility_acceptance_id").references(() => assessmentAccessibilityAcceptances.id, { onDelete: "restrict" }),
+  reason: text("reason").notNull(),
+  recordedByUserId: integer("recorded_by_user_id").references(() => users.id, { onDelete: "restrict" }).notNull(),
+  recordedAt: timestamp("recorded_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => ({
+  exactTarget: check("assessment_release_evidence_revocations_exact_target_check", sql`num_nonnulls(${t.releaseBundleId}, ${t.accessibilityAcceptanceId}) = 1`),
+  reason: check("assessment_release_evidence_revocations_reason_check", sql`length(btrim(${t.reason})) BETWEEN 20 AND 1000`),
+  bundleUnique: unique("assessment_release_evidence_revocations_bundle_unique").on(t.releaseBundleId),
+  accessibilityUnique: unique("assessment_release_evidence_revocations_accessibility_unique").on(t.accessibilityAcceptanceId),
+  byRecordedAt: index("assessment_release_evidence_revocations_recorded_at_idx").on(t.recordedAt, t.id),
+}));
+
+export const assessmentReleaseRoleAuthorizations = pgTable("assessment_release_role_authorizations", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id, { onDelete: "restrict" }).notNull(),
+  releaseRole: text("release_role").notNull(),
+  authorizationAction: text("authorization_action").notNull(),
+  supersedesAuthorizationId: integer("supersedes_authorization_id").references(
+    (): AnyPgColumn => assessmentReleaseRoleAuthorizations.id,
+    { onDelete: "restrict" },
+  ),
+  reason: text("reason").notNull(),
+  recordedByUserId: integer("recorded_by_user_id").references(() => users.id, { onDelete: "restrict" }).notNull(),
+  recordedAt: timestamp("recorded_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => ({
+  role: check("assessment_release_role_authorizations_role_check", sql`${t.releaseRole} IN ('release_operator', 'accessibility_reviewer', 'content_reviewer', 'rights_reviewer', 'cut_score_approver', 'qa_reviewer', 'publisher', 'rollback_owner')`),
+  action: check("assessment_release_role_authorizations_action_check", sql`${t.authorizationAction} IN ('grant', 'revoke')`),
+  eventShape: check("assessment_release_role_authorizations_event_shape_check", sql`(${t.authorizationAction} = 'grant' AND ${t.supersedesAuthorizationId} IS NULL) OR (${t.authorizationAction} = 'revoke' AND ${t.supersedesAuthorizationId} IS NOT NULL)`),
+  reason: check("assessment_release_role_authorizations_reason_check", sql`length(btrim(${t.reason})) BETWEEN 20 AND 1000`),
+  supersedesUnique: unique("assessment_release_role_authorizations_supersedes_unique").on(t.supersedesAuthorizationId),
+  current: index("assessment_release_role_authorizations_current_idx").on(t.userId, t.releaseRole, t.authorizationAction, t.id),
+}));
+
 export type AssessmentAccessibilityAcceptance = typeof assessmentAccessibilityAcceptances.$inferSelect;
 export type InsertAssessmentAccessibilityAcceptance = typeof assessmentAccessibilityAcceptances.$inferInsert;
 export type AssessmentRightsRoleReview = typeof assessmentRightsRoleReviews.$inferSelect;
 export type InsertAssessmentRightsRoleReview = typeof assessmentRightsRoleReviews.$inferInsert;
 export type AssessmentReleaseBundle = typeof assessmentReleaseBundles.$inferSelect;
 export type InsertAssessmentReleaseBundle = typeof assessmentReleaseBundles.$inferInsert;
+export type AssessmentReleaseEvidenceRevocation = typeof assessmentReleaseEvidenceRevocations.$inferSelect;
+export type InsertAssessmentReleaseEvidenceRevocation = typeof assessmentReleaseEvidenceRevocations.$inferInsert;
+export type AssessmentReleaseRoleAuthorization = typeof assessmentReleaseRoleAuthorizations.$inferSelect;
+export type InsertAssessmentReleaseRoleAuthorization = typeof assessmentReleaseRoleAuthorizations.$inferInsert;
 
 export const insertQuestionTopicSchema = createInsertSchema(questionTopics).omit({
   id: true,

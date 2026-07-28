@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "sourceKey": "first-party-original:grade-11-physics-numerical-practice:v1",
+  "name": "Grade 11 Physics Numerical Practice Original Numerical Pool v1",
+  "publisher": "Octamy",
+  "datasetVersion": "1.0.0",
+  "description": "Two hundred original, deterministic, unit-checked and independently recalculated numerical items for Grade 11 Physics Numerical Practice.",
+  "sourceUrl": "https://cbseacademic.nic.in/web_material/CurriculumMain26/SrSec/Physics_SrSec_2025-26.pdf",
+  "retrievedAt": "2026-07-28T00:00:00.000Z",
+  "license": {
+    "identifier": "OCTAMY-FIRST-PARTY-OWNED",
+    "name": "First-party owned assessment content",
+    "url": "https://octamy.com/terms-of-service",
+    "rightsBasis": "owned",
+    "commercialUseAllowed": true,
+    "derivativesAllowed": true,
+    "shareAlikeObligation": "none",
+    "attributionText": "Original first-party Grade 11 Physics Numerical Practice numerical practice content.",
+    "evidenceReference": "grade-11-physics-numerical-practice-v1-rights-evidence"
+  },
+  "provenance": {
+    "acquisitionMethod": "first_party",
+    "originalFormat": "JSONL",
+    "chainOfTitle": "Every stem, parameter set, option, answer, worked explanation, and misconception rationale was newly authored for Octamy by Codex AI under the authenticated product owner's instruction. The official CBSE curriculum was used only for syllabus scope and factual reference; no examination paper or third-party bank wording was copied.",
+    "notes": "Review decisions identify Codex AI and do not claim human review. Deterministic dual-expression checks, unit checks, three-significant-figure formatting, and exact plus normalized-stem uniqueness checks run before output."
+  }
+}

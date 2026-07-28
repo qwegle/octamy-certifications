@@ -1,0 +1,8 @@
+IBPS Clerk Quantitative Aptitude Practice Original Practice Pool v1
+Generated: 2026-07-29
+Question count: 200
+Ownership: Octamy first-party commissioned content.
+Author/reviewer representation: Kiro AI; no human-review claim.
+Official syllabus used only for scope: https://www.ibps.in/index.php/clerical-cadre/
+No actual examination paper, recalled question, dump, placeholder, or third-party question-bank wording was used.
+Question JSONL SHA-256: 3798a8bc9b88fb4c990ab9c62fd65c7d169e81cfddcd063ff4f53f182aedfc6d

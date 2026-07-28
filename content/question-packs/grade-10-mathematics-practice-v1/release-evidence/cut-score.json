@@ -1,0 +1,8 @@
+{
+  "assessment": "grade-10-mathematics-practice",
+  "passingScore": 60,
+  "method": "Retain the configured practice mastery threshold after confirming the assessment is formative, one-mark per item, zero negative marks, and has balanced easy/medium/hard rotation. This threshold is not represented as a psychometrically equated high-stakes cut score.",
+  "approverUserId": 5,
+  "accepted": true,
+  "recordedAt": "2026-07-29T00:00:00.000Z"
+}

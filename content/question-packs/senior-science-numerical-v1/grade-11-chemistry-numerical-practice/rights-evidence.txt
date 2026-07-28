@@ -1,0 +1,8 @@
+Grade 11 Chemistry Numerical Practice Original Numerical Pool v1
+Generated: 2026-07-29
+Question count: 200
+Ownership basis: original first-party commissioned content.
+Author/reviewer representation: Codex AI; no human-review claim.
+Authoritative syllabus used only for scope: https://cbseacademic.nic.in/web_material/CurriculumMain26/SrSec/Chemistry_SrSec_2025-26.pdf
+No copied questions, proprietary exam wording, dumps, placeholders, or third-party question-bank material.
+Question JSONL SHA-256: 64e705ad9b6842e7890eacefd5171839732580284e3749514183c7511a3494de

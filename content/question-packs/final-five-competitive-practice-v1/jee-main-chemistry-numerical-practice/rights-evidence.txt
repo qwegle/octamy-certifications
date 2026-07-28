@@ -1,0 +1,8 @@
+JEE Main Chemistry Numerical Practice Original Practice Pool v1
+Generated: 2026-07-29
+Question count: 200
+Ownership: Octamy first-party commissioned content.
+Author/reviewer representation: Kiro AI; no human-review claim.
+Official syllabus used only for scope: https://jeemain.nta.nic.in/
+No actual examination paper, recalled question, dump, placeholder, or third-party question-bank wording was used.
+Question JSONL SHA-256: 3f31ac4b2d7804d642d2c9bb95e8a4444d0201bbc95d8ac470b0bc2bc999ecf7

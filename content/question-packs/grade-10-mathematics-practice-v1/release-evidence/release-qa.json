@@ -1,0 +1,27 @@
+{
+  "assessment": "grade-10-mathematics-practice",
+  "productionState": {
+    "visibility": "public",
+    "reviewStatus": "approved",
+    "isActive": true,
+    "eligibleItems": 200
+  },
+  "packValidation": {
+    "totalRows": 200,
+    "validRows": 200,
+    "invalidRows": 0,
+    "duplicateSourceRecordIds": 0,
+    "duplicateContentRows": 0
+  },
+  "answerKeys": [
+    50,
+    50,
+    50,
+    50
+  ],
+  "liveApiPresent": true,
+  "formSimulationPassed": true,
+  "qaReviewerUserId": 6,
+  "accepted": true,
+  "recordedAt": "2026-07-29T00:00:00.000Z"
+}

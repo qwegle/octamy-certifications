@@ -1,0 +1,8 @@
+Grade 6 Mathematics Practice Question Pack v1
+Generated: 2026-07-29
+Question count: 200
+Ownership basis: original first-party commissioned content.
+Authoring agent: Kiro AI under authenticated Octamy product-owner instruction.
+Curriculum reference: NCERT National Curriculum Framework for School Education 2023 — Mathematics learning standards (https://ncert.nic.in/pdf/NCFSE-2023-August_2023.pdf).
+No third-party question wording, exam dumps, placeholders, or copied exercises were used.
+Question JSONL SHA-256: df55dd09be098de1b97730b1caa8ea8a859a728ac9210a2d0e016b6b6cdb3fdb

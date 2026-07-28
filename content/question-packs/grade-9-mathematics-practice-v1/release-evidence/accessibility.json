@@ -1,0 +1,16 @@
+{
+  "assessment": "grade-9-mathematics-practice",
+  "standard": "WCAG 2.2 AA",
+  "scope": "Assessment-content acceptance: language, readable text stems, text alternatives not required because no media is used, four programmatic text options, and worked text explanations.",
+  "reviewerUserId": 3,
+  "operator": "Kiro AI automated evidence preparation under product-owner instruction",
+  "checks": {
+    "allEnglish": true,
+    "allTextStems": true,
+    "fourTextOptions": true,
+    "workedExplanations": true,
+    "noMediaDependencies": true
+  },
+  "accepted": true,
+  "recordedAt": "2026-07-29T00:00:00.000Z"
+}

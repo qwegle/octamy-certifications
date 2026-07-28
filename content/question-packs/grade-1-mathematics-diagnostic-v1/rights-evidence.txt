@@ -1,0 +1,7 @@
+Grade 1 Mathematics Diagnostic original first-party question pack v1
+Recorded: 2026-07-29
+Owner and acquiring entity: Octamy
+Author and item reviewer: Kiro AI under authenticated product-owner instruction
+Items: 200; no copied textbook exercises, examination papers, dumps, or third-party question-bank wording
+Curriculum reference: https://ncert.nic.in/textbook.php
+Questions SHA-256: 9c386f1976e43c7f30fffb0a8f4a3d91b3954d0830ecfeec6a149a64124fc39f

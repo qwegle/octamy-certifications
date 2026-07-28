@@ -1,0 +1,7 @@
+Grade 2 Mathematics Diagnostic original first-party question pack v1
+Recorded: 2026-07-29
+Owner and acquiring entity: Octamy
+Author and item reviewer: Kiro AI under authenticated product-owner instruction
+Items: 200; no copied textbook exercises, examination papers, dumps, or third-party question-bank wording
+Curriculum reference: https://ncert.nic.in/textbook.php
+Questions SHA-256: 6a5adcb5a981a50d8a3d9b67dbdd68ecd34bb3b2dc7ac8581b3b30fb9f4db30f

@@ -1,0 +1,8 @@
+NEET (UG) Physics Numerical Practice Original Practice Pool v1
+Generated: 2026-07-29
+Question count: 200
+Ownership: Octamy first-party commissioned content.
+Author/reviewer representation: Kiro AI; no human-review claim.
+Official syllabus used only for scope: https://neet.nta.nic.in/
+No actual examination paper, recalled question, dump, placeholder, or third-party question-bank wording was used.
+Question JSONL SHA-256: 37c0caf230f39aec835baede7cd811dc5edb57994265edeebd2241f3437e42bd

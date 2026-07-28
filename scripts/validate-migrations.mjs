@@ -54,6 +54,7 @@ const immutableMigrationHashes = Object.freeze({
   "0033_unpublish_audited_blocked_assessments": "979f7003c0869626cd8da25a6c883477488e1782c6ba12a358b75a703927a05c",
   "0034_database_managed_sale_state": "ec6fc71699725f588694df2f044c0d563447bb9ab178c0c52f09a68205bed35b",
   "0035_governed_assessment_release_evidence": "34470923b08347a592189197916a86dc6f77a07ca83e356154991dc69cbef14a",
+  "0036_void_fabricated_release_evidence": "c4ab69809b5a884da9185aa166af89d0bd160080c2f1d1eadf45ce402707f7a4",
 });
 
 // Exact-hash review records for migrations containing data mutation,
@@ -83,6 +84,7 @@ const destructiveMigrationReviews = Object.freeze({
   "0033_unpublish_audited_blocked_assessments": "exact-slug/state unpublish of audited blocked practice shells; preserves questions, attempts, payments",
   "0034_database_managed_sale_state": "database-triggered sale-state normalization and constraint tightening after bounded reconciliation",
   "0035_governed_assessment_release_evidence": "new cross-role and append-only policy functions on additive release-evidence tables",
+  "0036_void_fabricated_release_evidence": "new append-only void and release-role authorization policy function with forced unvoided evidence visibility",
 });
 
 const mutatingPatterns = Object.freeze([

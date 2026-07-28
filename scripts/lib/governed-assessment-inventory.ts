@@ -6,7 +6,7 @@ import {
 } from "../../server/lib/assessment-content-acceptance";
 import type { AssessmentPurpose } from "../../server/lib/assessment-bank-readiness";
 
-export const GOVERNED_INVENTORY_SCHEMA_VERSION = "octamy.governed-assessment-inventory.v3";
+export const GOVERNED_INVENTORY_SCHEMA_VERSION = "octamy.governed-assessment-inventory.v4";
 
 export type InventoryBlockerSeverity = "SUBSTANTIVE" | "RELEASE_EVIDENCE";
 
@@ -123,6 +123,7 @@ export type InventoryAccessibilityAcceptance = {
   evidenceReference: string;
   evidenceSha256: string;
   acceptedAt: Date | string;
+  voided?: boolean;
 };
 
 export type InventoryRightsRoleReview = {
@@ -158,6 +159,7 @@ export type InventoryReleaseBundle = {
   takedownProcedure: string;
   takedownProcedureSha256: string;
   bundleSha256: string;
+  voided?: boolean;
 };
 
 export type InventoryReleaseEvidence = {
@@ -296,8 +298,9 @@ export function governedAssessmentContentManifestSha256(input: Pick<
 }
 
 function releaseBundleCanonicalValue(bundle: Omit<InventoryReleaseBundle, "bundleSha256">) {
+  const { voided: _voided, ...evidence } = bundle;
   return {
-    ...bundle,
+    ...evidence,
     cutScoreApprovedAt: iso(bundle.cutScoreApprovedAt),
     qaAcceptedAt: iso(bundle.qaAcceptedAt),
     publisherSignedAt: iso(bundle.publisherSignedAt),
@@ -360,9 +363,9 @@ function evidenceValidity(input: GovernedAssessmentInventoryInput) {
     .filter((record) => record.blueprintRevision === revision);
   const rightsReviewerIds = new Set(rightsReviews.map((record) => record.reviewerUserId));
   const accessibility = revision == null ? undefined : input.releaseEvidence.accessibilityAcceptances
-    .find((record) => record.blueprintRevision === revision);
+    .find((record) => record.blueprintRevision === revision && record.voided !== true);
   const bundle = revision == null ? undefined : input.releaseEvidence.releaseBundles
-    .find((record) => record.blueprintRevision === revision);
+    .find((record) => record.blueprintRevision === revision && record.voided !== true);
 
   const accessibilityValid = Boolean(accessibility
     && validUserId(accessibility.reviewerUserId)
@@ -397,7 +400,7 @@ function evidenceValidity(input: GovernedAssessmentInventoryInput) {
 
   let bundleValid = false;
   if (bundle) {
-    const { bundleSha256, ...unsignedBundle } = bundle;
+    const { bundleSha256, voided: _voided, ...unsignedBundle } = bundle;
     const roleIds = [bundle.contentReviewerUserId, bundle.cutScoreApproverUserId, bundle.qaReviewerUserId, bundle.publisherUserId];
     const roleSet = new Set(roleIds);
     const cutApproved = iso(bundle.cutScoreApprovedAt);

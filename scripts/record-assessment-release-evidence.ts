@@ -22,6 +22,63 @@ const EVIDENCE_ONLY_BLOCKERS = new Set([
   "RIGHTS_ROLE_SEPARATION_NOT_VERIFIABLE",
 ]);
 
+export type AssessmentReleaseRole =
+  | "release_operator"
+  | "accessibility_reviewer"
+  | "content_reviewer"
+  | "rights_reviewer"
+  | "cut_score_approver"
+  | "qa_reviewer"
+  | "publisher"
+  | "rollback_owner";
+
+type ReleasePrincipalIds = {
+  operator: number;
+  accessibility: number;
+  content: number;
+  rights: number;
+  cutScore: number;
+  qa: number;
+  publisher: number;
+  rollback: number;
+};
+
+const RELEASE_AUTHORIZATION_ROLES: Record<keyof ReleasePrincipalIds, AssessmentReleaseRole> = {
+  operator: "release_operator",
+  accessibility: "accessibility_reviewer",
+  content: "content_reviewer",
+  rights: "rights_reviewer",
+  cutScore: "cut_score_approver",
+  qa: "qa_reviewer",
+  publisher: "publisher",
+  rollback: "rollback_owner",
+};
+
+const FORBIDDEN_RELEASE_IDENTITY = /(^|[^a-z0-9])(smoke|test|testing|automation|automated|bot|robot|system|service account)([^a-z0-9]|$)|\b(ai|artificial intelligence)\b.*\b(author|authoring|generated|automation)\b|\bassessment authoring\b/i;
+
+export function assertAuthorizedReleasePrincipals(
+  roleIds: ReleasePrincipalIds,
+  users: Array<{ id: number; name: string; email: string }>,
+  activeAuthorizations: Array<{ userId: number; releaseRole: string }>,
+) {
+  if (activeAuthorizations.length === 0) {
+    throw new Error("NO_RELEASE_ROLE_AUTHORIZATIONS: no active release-role grants exist; an administrator must grant roles first");
+  }
+  const usersById = new Map(users.map((user) => [user.id, user]));
+  const grants = new Set(activeAuthorizations.map((grant) => `${grant.userId}:${grant.releaseRole}`));
+  for (const [principal, userId] of Object.entries(roleIds) as Array<[keyof ReleasePrincipalIds, number]>) {
+    const user = usersById.get(userId);
+    if (!user) throw new Error(`RELEASE_PRINCIPAL_NOT_FOUND: ${principal} user ${userId} does not exist`);
+    if (FORBIDDEN_RELEASE_IDENTITY.test(`${user.name} ${user.email}`.normalize("NFKC"))) {
+      throw new Error(`RELEASE_PRINCIPAL_IDENTITY_FORBIDDEN: ${principal} user ${userId} is an automation, AI-authoring, test, or smoke identity`);
+    }
+    const requiredRole = RELEASE_AUTHORIZATION_ROLES[principal];
+    if (!grants.has(`${userId}:${requiredRole}`)) {
+      throw new Error(`RELEASE_ROLE_NOT_AUTHORIZED: ${principal} user ${userId} lacks active ${requiredRole} authorization; grant roles first`);
+    }
+  }
+}
+
 export type RecordAssessmentReleaseEvidenceOptions = {
   databaseUrl: string;
   assessmentSlug: string;
@@ -134,12 +191,30 @@ export async function recordAssessmentReleaseEvidence(options: RecordAssessmentR
     if (options.apply) await client.query("SELECT pg_advisory_xact_lock(7355, $1)", [course.id]);
 
     const distinctIds = Array.from(new Set(Object.values(roleIds)));
-    const users = await client.query<{ id: number; is_admin: boolean }>(
-      `SELECT id, is_admin FROM users WHERE id = ANY($1::int[])`,
+    const users = await client.query<{ id: number; is_admin: boolean; name: string; email: string }>(
+      `SELECT id, is_admin, name, email FROM users WHERE id = ANY($1::int[])`,
       [distinctIds],
     );
     if (users.rows.length !== distinctIds.length) throw new Error("Every operator/reviewer/signatory user ID must exist");
     if (!users.rows.find((user) => user.id === roleIds.operator)?.is_admin) throw new Error("OPERATOR_NOT_AUTHORIZED: --operator-user-id must identify an administrator");
+
+    const authorizationResult = await client.query<{ userId: number; releaseRole: string }>(
+      `SELECT grant_event.user_id AS "userId", grant_event.release_role AS "releaseRole"
+         FROM assessment_release_role_authorizations grant_event
+        WHERE grant_event.authorization_action = 'grant'
+          AND grant_event.user_id = ANY($1::int[])
+          AND NOT EXISTS (
+            SELECT 1 FROM assessment_release_role_authorizations revoke_event
+             WHERE revoke_event.authorization_action = 'revoke'
+               AND revoke_event.supersedes_authorization_id = grant_event.id
+          )`,
+      [distinctIds],
+    );
+    assertAuthorizedReleasePrincipals(
+      roleIds,
+      users.rows.map(({ id, name, email }) => ({ id, name, email })),
+      authorizationResult.rows,
+    );
 
     const rulesResult = await client.query<{
       id: number; bank_id: number; topic_id: number | null; question_count: number; difficulty: string;

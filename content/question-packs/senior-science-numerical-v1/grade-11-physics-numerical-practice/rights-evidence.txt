@@ -1,0 +1,8 @@
+Grade 11 Physics Numerical Practice Original Numerical Pool v1
+Generated: 2026-07-29
+Question count: 200
+Ownership basis: original first-party commissioned content.
+Author/reviewer representation: Codex AI; no human-review claim.
+Authoritative syllabus used only for scope: https://cbseacademic.nic.in/web_material/CurriculumMain26/SrSec/Physics_SrSec_2025-26.pdf
+No copied questions, proprietary exam wording, dumps, placeholders, or third-party question-bank material.
+Question JSONL SHA-256: 332852ffb2da31b8f870dd0ab7ed57d7876e39ef1d0520c79da14a3780ae4f1d

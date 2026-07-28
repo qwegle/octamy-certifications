@@ -145,6 +145,25 @@ commercial/derivative permission gaps are always substantive. The deployment
 value `unsafePublished` is therefore narrower than strict `releaseReady` by
 design; `--require-release-evidence` is available for an explicitly strict run.
 
+Migration `0036_void_fabricated_release_evidence.sql` adds an immutable,
+append-only void record for an exact accessibility acceptance or release bundle.
+The original row and attribution remain intact for incident audit; forced
+row-level policies hide only voided rows from ordinary application and inventory
+reads. The pure evaluator likewise rejects evidence explicitly marked `voided`,
+so the assessment returns to the administrative
+`ASSESSMENT_ACCESSIBILITY_ACCEPTANCE_NOT_REPRESENTED` and/or
+`IMMUTABLE_RELEASE_BUNDLE_NOT_REPRESENTED` state without becoming a substantive
+publication blocker.
+
+The same migration adds append-only `grant`/`revoke` events for the eight named
+release roles. `record-assessment-release-evidence.ts` requires a current exact
+role grant for the operator, accessibility/content/rights reviewers, cut-score
+approver, QA reviewer, publisher, and rollback owner. With no grants it refuses
+and tells the administrator to grant roles first. Test/smoke, automation,
+service/system, and AI or shared assessment-authoring identities are rejected by
+both the CLI and database grant policy. Authorization events and evidence voids
+cannot be updated or deleted.
+
 ## Operator runbook: candidate pack to publishable assessment
 
 Verified state on 2026-07-27 in the development snapshot: 100,040 stored
@@ -371,3 +390,14 @@ npx tsx scripts/register-production-rights-evidence.ts \
 ```
 
 The command is dry-run by default, accepts only unambiguous `octamy-original:*`/owned/Octamy/first-party sources, refuses non-`verified` or conflicting records, and is transactionally idempotent. Accessibility acceptance, rights-role separation, immutable release bundles, and blueprint-revision evidence remain separate release-workstream concerns.
+
+## Production publication/evidence run — 2026-07-29
+
+The production inventory was read through the server-loopback SSH tunnel in a PostgreSQL `REPEATABLE READ READ ONLY` transaction before and after guarded publication work.
+
+- Before: `Assessments: 141; release-ready: 0; blocked: 141; published-with-substantive-blockers: 0; published-missing-release-evidence: 61`
+- `grade-3-arithmetic-time-and-perimeter-practice` was published through `scripts/.tmp-publish-reviewed-assessment.ts`, preserving its topic blueprint. The public API returned assessment ID 53, the exact slug/title, and canonical path `/practice/grade-3-arithmetic-time-and-perimeter-practice`. Its 200-item pack test passed all five checks, including five disjoint representative attempts at production quotas.
+- `data-analytics-sql-bi-foundations` was not published. The same guarded script rolled its transaction back because question 115709 has a 28-character explanation; only 79 of the required 80 items were eligible. A fresh attributable review is required before correcting that exact item version.
+- Release evidence recorded: **0 assessments**. Production has only one administrator and two active institute owners; one owner is explicitly a smoke-test account. The command requires six distinct accessibility/content/rights/cut-score/QA/publisher user IDs, while accessibility and rights must also be independent of every in-scope author/reviewer. No genuine signatory identities or hashed acceptance/form-simulation/cut-score/QA artifacts were fabricated. All 61 assessments in the preceding production table plus the newly published Grade 3 practice remain evidence-blocked.
+- The other P1 school/senior-science assessments remain unpublished: Grade 4–10 Mathematics Practice and Grade 11/12 Physics/Chemistry Numerical Practice. Their dedicated production banks are archived with zero questions, and the documented curriculum review rejects their generic shared blueprints. They require grade-specific current-curriculum packs and named independent item-level review before guarded publication.
+- After: `Assessments: 141; release-ready: 0; blocked: 141; published-with-substantive-blockers: 0; published-missing-release-evidence: 62`

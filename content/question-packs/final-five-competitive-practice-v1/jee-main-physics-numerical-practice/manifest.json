@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "sourceKey": "first-party-original:jee-main-physics-numerical-practice:v1",
+  "name": "JEE Main Physics Numerical Practice Original Practice Pool v1",
+  "publisher": "Octamy",
+  "datasetVersion": "1.0.0",
+  "description": "Two hundred original Octamy-authored items for JEE Main Physics Numerical Practice; these are newly generated practice items and are never recalled, reproduced, or adapted from actual examination papers.",
+  "sourceUrl": "https://jeemain.nta.nic.in/",
+  "retrievedAt": "2026-07-29T00:00:00.000Z",
+  "license": {
+    "identifier": "OCTAMY-FIRST-PARTY-OWNED",
+    "name": "First-party owned assessment content",
+    "url": "https://octamy.com/terms-of-service",
+    "rightsBasis": "owned",
+    "commercialUseAllowed": true,
+    "derivativesAllowed": true,
+    "shareAlikeObligation": "none",
+    "attributionText": "Original first-party JEE Main Physics Numerical Practice practice content.",
+    "evidenceReference": "jee-main-physics-numerical-practice-v1-rights-evidence"
+  },
+  "provenance": {
+    "acquisitionMethod": "first_party",
+    "originalFormat": "JSONL",
+    "chainOfTitle": "Every stem, value set, option, answer, explanation, and misconception rationale was newly authored for Octamy. Existing Octamy-owned deterministic templates supplied calculation structure only. The official syllabus was used only for scope; no actual examination paper, recalled item, coaching bank, dump, or third-party wording was copied.",
+    "notes": "Kiro AI decisions make no human-review claim. Generation enforces independent calculation, units, consistent precision, balanced key positions, and exact plus normalized-stem uniqueness."
+  }
+}

@@ -1,0 +1,7 @@
+Grade 4 Mathematics Practice original first-party question pack v1
+Recorded: 2026-07-29
+Owner and acquiring entity: Octamy
+Author and item reviewer: Kiro AI under authenticated product-owner instruction
+Items: 200; no copied textbook exercises, examination papers, dumps, or third-party question-bank wording
+Curriculum reference: https://ncert.nic.in/textbook/pdf/demm1ps.pdf
+Questions SHA-256: c542c7bf52151e4960e8f9189edd3e2eed69cba4e0aa4bf15f7fff74e3429dd4

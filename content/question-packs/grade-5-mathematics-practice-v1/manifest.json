@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "sourceKey": "octamy-original:grade-5-mathematics-practice:v1",
+  "name": "Grade 5 Mathematics Practice Original Question Pool v1",
+  "publisher": "Octamy",
+  "datasetVersion": "1.0.0",
+  "description": "Two hundred original, grade-specific Grade 5 Mathematics Practice questions across ten explicit topics, each deterministically answer-checked and reviewed for child-appropriate practice.",
+  "sourceUrl": "https://ncert.nic.in/textbook/pdf/eemm1ps.pdf",
+  "retrievedAt": "2026-07-29T00:00:00.000Z",
+  "license": {
+    "identifier": "Proprietary-Octamy-Original-1.0",
+    "name": "Octamy original-content rights",
+    "url": "https://octamy.com/terms-of-service",
+    "rightsBasis": "owned",
+    "commercialUseAllowed": true,
+    "derivativesAllowed": true,
+    "shareAlikeObligation": "none",
+    "attributionText": "Original first-party Octamy content for Grade 5 Mathematics Practice",
+    "evidenceReference": "grade-5-mathematics-practice-v1-authorship-and-review-evidence"
+  },
+  "provenance": {
+    "acquisitionMethod": "first_party",
+    "originalFormat": "JSONL",
+    "chainOfTitle": "Every question, option, answer, distractor, and worked explanation is original first-party Octamy content newly authored by Kiro AI under the authenticated product owner's instruction. The cited NCERT source defines curriculum scope only; no textbook exercise or third-party question wording was copied.",
+    "notes": "All 200 computed answers were independently recalculated in code; item decisions truthfully attribute AI review and do not claim human review."
+  }
+}

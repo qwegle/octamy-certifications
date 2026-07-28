@@ -11,6 +11,7 @@ import {
   type InventoryReleaseBundle,
 } from "../../scripts/lib/governed-assessment-inventory";
 import { governedInventoryGateFailure } from "../../scripts/governed-assessment-inventory";
+import { assertAuthorizedReleasePrincipals } from "../../scripts/record-assessment-release-evidence";
 
 const EVIDENCE_CODES = [
   "RIGHTS_ROLE_SEPARATION_NOT_VERIFIABLE",
@@ -324,5 +325,69 @@ describe("governed assessment inventory", () => {
       severity: "blocker", blockerSeverity: "SUBSTANTIVE", code: "RIGHTS", message: "Missing", occurrences: 2,
       questionIds: [2, 3], bankIds: [7], sourceIds: [11],
     }]);
+  });
+});
+
+
+describe("release evidence revocation and principal authorization", () => {
+  const roleIds = {
+    operator: 1,
+    accessibility: 2,
+    content: 3,
+    rights: 4,
+    cutScore: 5,
+    qa: 6,
+    publisher: 7,
+    rollback: 8,
+  };
+  const roleNames = [
+    "release_operator",
+    "accessibility_reviewer",
+    "content_reviewer",
+    "rights_reviewer",
+    "cut_score_approver",
+    "qa_reviewer",
+    "publisher",
+    "rollback_owner",
+  ];
+  const users = Object.values(roleIds).map((id) => ({
+    id,
+    name: `Named human reviewer ${id}`,
+    email: `reviewer-${id}@example.invalid`,
+  }));
+  const grants = Object.values(roleIds).map((userId, index) => ({
+    userId,
+    releaseRole: roleNames[index],
+  }));
+
+  it("restores missing-release-evidence blockers when current evidence is voided", () => {
+    const fixture = addCompleteEvidence(acceptedFixture());
+    fixture.visibility = "public";
+    fixture.reviewStatus = "approved";
+    fixture.isActive = true;
+    fixture.releaseEvidence.accessibilityAcceptances[0].voided = true;
+    fixture.releaseEvidence.releaseBundles[0].voided = true;
+
+    const report = evaluateGovernedAssessmentInventory(fixture);
+    expect(report.releaseReady).toBe(false);
+    expect(report.unsafePublished).toBe(false);
+    expect(report.publishedMissingReleaseEvidence).toBe(true);
+    expect(report.issues).toEqual(expect.arrayContaining([
+      expect.objectContaining({ code: "ASSESSMENT_ACCESSIBILITY_ACCEPTANCE_NOT_REPRESENTED", blockerSeverity: "RELEASE_EVIDENCE" }),
+      expect.objectContaining({ code: "IMMUTABLE_RELEASE_BUNDLE_NOT_REPRESENTED", blockerSeverity: "RELEASE_EVIDENCE" }),
+    ]));
+  });
+
+  it("requires operators to grant release roles before recording evidence", () => {
+    expect(() => assertAuthorizedReleasePrincipals(roleIds, users, []))
+      .toThrow(/NO_RELEASE_ROLE_AUTHORIZATIONS.*grant roles first/);
+  });
+
+  it("refuses test, smoke, automation, and AI-authoring principals even when granted", () => {
+    const unsafeUsers = users.map((user) => user.id === roleIds.qa
+      ? { ...user, name: "Octamy Assessment Authoring" }
+      : user);
+    expect(() => assertAuthorizedReleasePrincipals(roleIds, unsafeUsers, grants))
+      .toThrow(/RELEASE_PRINCIPAL_IDENTITY_FORBIDDEN.*AI-authoring, test, or smoke/);
   });
 });
