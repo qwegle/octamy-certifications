@@ -1,160 +1,131 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useLocation } from "wouter";
+import { Link } from "wouter";
+import { COMPANY, LegalLayout } from "./legal/_shared";
 
 export default function PrivacyPolicy() {
-  const [, setLocation] = useLocation();
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
-      {/* Header */}
-      <header className="bg-cream-soft dark:bg-gray-900 shadow-sm border-b border-cream-deep dark:border-gray-700">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <Button variant="ghost" onClick={() => setLocation("/")}>
-              <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">Octamy</span>
-            </Button>
-            <Button onClick={() => setLocation("/")}>
-              Back to Home
-            </Button>
-          </div>
-        </div>
-      </header>
+    <LegalLayout title="Privacy Policy" effective="28 July 2026">
+      <p>
+        This policy explains how {COMPANY.legalName} (“Octamy”, “we”, “us”) handles
+        personal data when learners, creators, institutes, recruiters, and visitors
+        use octamy.com or the Octamy mobile application.
+      </p>
 
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-8 max-w-4xl">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Privacy Policy</h1>
-          <p className="text-gray-600 dark:text-gray-300">
-            Last updated: 16 July 2026
-          </p>
-        </div>
+      <h2>1. Data we collect</h2>
+      <ul>
+        <li><strong>Account and profile data:</strong> name, email address, role, password hash, profile details, skills, portfolio links, and your visibility choices.</li>
+        <li><strong>Assessment data:</strong> issued question-set identifiers, answers, scores, timing, attempt history, certificate status, and integrity evidence described before an attempt begins.</li>
+        <li><strong>Creator and institute data:</strong> workspace membership, courses, exams, question banks, cohorts, learner assignments, payouts, and support records.</li>
+        <li><strong>Recruiter data:</strong> account verification, searches, saved profiles, evidence grants, access history, and contact activity.</li>
+        <li><strong>Transaction data:</strong> order, payment status, invoice and refund information. Payment-card or UPI credentials are handled by the payment provider and are not stored by Octamy.</li>
+        <li><strong>Technical data:</strong> IP address, device/browser information, security logs, cookies, session identifiers, crash and performance information.</li>
+        <li><strong>Communications:</strong> support, grievance, deletion, and other messages you send us.</li>
+      </ul>
 
-        <Card>
-          <CardContent className="prose prose-gray dark:prose-invert max-w-none p-8">
-            <section className="mb-8">
-              <h2 className="text-2xl font-semibold mb-4">1. Information We Collect</h2>
-              <p className="mb-4">We collect information you provide directly to us, such as when you:</p>
-              <ul className="list-disc pl-6 mb-4 space-y-2">
-                <li>Create an account and register for our services</li>
-                <li>Take assessments and certification exams</li>
-                <li>Make payments for certificates</li>
-                <li>Contact us for support</li>
-                <li>Apply for virtual internship programs</li>
-              </ul>
-              <p>This information may include your name, email address, payment information, assessment responses, and any other information you choose to provide.</p>
-              <div className="mt-4 rounded-xl border border-indigo-200 bg-indigo-50 p-4 text-sm text-indigo-950">
-                <p className="font-semibold">Scheduled exam evidence</p>
-                <p className="mt-2">
-                  All scheduled exams record consent, answer autosaves, heartbeats and connection interruptions for recovery. If an exam owner enables Browser Evidence, Octamy also records timestamped tab visibility, window focus, fullscreen and paste-occurrence events. Paste contents, clipboard contents, keystrokes, camera, microphone and screen contents are not collected.
-                </p>
-                <p className="mt-2">
-                  The authorised exam owner can review this evidence with the assessment result. These signals do not change a score automatically and are not an automated finding of misconduct.
-                </p>
-              </div>
-              <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-950">
-                <p className="font-semibold">AI Interview Practice</p>
-                <p className="mt-2">
-                  Interview Practice is private by design. Camera, microphone, screen sharing and AI processing are separate choices shown before a session starts. Camera and screen checks stay in your browser and are not recorded in Practice mode. If you choose voice transcription, the short audio response is sent to the OpenAI API, converted to editable text and removed from Octamy&apos;s temporary upload storage after the request. OpenAI&apos;s API data handling and any abuse-monitoring retention remain governed by its configured data controls and processor terms; Octamy does not use these responses to train its own models.
-                </p>
-                <p className="mt-2">
-                  Octamy stores the response text, submitted code, test outcomes and feedback for session recovery until you delete the practice session or its retention period ends. When enabled, code is sent only to Octamy&apos;s separately isolated execution service with networking disabled. We do not score facial appearance, gaze, emotion, accent or other protected or personality characteristics. Practice sessions are never shown to recruiters.
-                </p>
-              </div>
-            </section>
+      <h2>2. Assessment and browser evidence</h2>
+      <p>
+        Timed attempts record consent, answer submission, timing, recovery events, and
+        connection status. When an exam owner enables Browser Evidence, Octamy also
+        records the occurrence and time of tab visibility changes, window focus changes,
+        fullscreen changes, and paste attempts. Mobile exams may record when the Octamy
+        app becomes inactive or enters the background. These signals provide context to
+        an authorised reviewer; they do not alter a score or make an automated finding
+        of misconduct.
+      </p>
+      <p>
+        Browser Evidence does not collect screen contents, clipboard contents,
+        keystrokes, webcam video, microphone audio, or the identity of another app you
+        opened. Practice exams do not create recruiter evidence.
+      </p>
 
-            <section className="mb-8">
-              <h2 className="text-2xl font-semibold mb-4">2. How We Use Your Information</h2>
-              <p className="mb-4">We use the information we collect to:</p>
-              <ul className="list-disc pl-6 mb-4 space-y-2">
-                <li>Provide, maintain, and improve our certification services</li>
-                <li>Process payments and issue certificates</li>
-                <li>Send you service-related communications</li>
-                <li>Respond to your comments and questions</li>
-                <li>Generate and validate certificates</li>
-                <li>Maintain records for internship programs</li>
-                <li>Provide learner-requested interview transcription, test execution, and rubric-based practice feedback</li>
-                <li>Prevent fraud and enhance security</li>
-              </ul>
-            </section>
+      <h2>3. AI Interview Practice and code execution</h2>
+      <p>
+        Interview Practice is private unless you explicitly choose otherwise. Camera,
+        microphone, transcription, and AI processing are disclosed separately before use.
+        Local rehearsal video remains in app-controlled, backup-excluded device storage
+        and is not uploaded by the current mobile flow. If you request transcription or
+        AI feedback, submitted text or audio is processed only to provide that feature.
+        Code submitted for test execution is sent to an isolated execution service with
+        networking disabled. Octamy does not score facial appearance, emotion, gaze,
+        accent, or protected characteristics.
+      </p>
 
-            <section className="mb-8">
-              <h2 className="text-2xl font-semibold mb-4">3. Information Sharing</h2>
-              <p className="mb-4">We do not sell, trade, or otherwise transfer your personal information to third parties except:</p>
-              <ul className="list-disc pl-6 mb-4 space-y-2">
-                <li>With your explicit consent</li>
-                <li>To service providers who assist us in operating our platform</li>
-                <li>To comply with legal obligations</li>
-                <li>To protect our rights and the safety of our users</li>
-              </ul>
-            </section>
+      <h2>4. How and why we use data</h2>
+      <ul>
+        <li>Provide accounts, assessments, courses, practice products, certificates, workspaces, and recruiter features.</li>
+        <li>Save, recover, score, review, and validate legitimate assessment attempts.</li>
+        <li>Process orders, credential activation, subscriptions, vouchers, payouts, refunds, and tax records.</li>
+        <li>Apply the profile, evidence-passport, and recruiter-sharing choices you make.</li>
+        <li>Secure the platform, prevent fraud and abuse, troubleshoot failures, and enforce published rules.</li>
+        <li>Respond to support, legal, privacy, and grievance requests.</li>
+        <li>Meet legal, accounting, regulatory, and dispute-resolution obligations.</li>
+      </ul>
 
-            <section className="mb-8">
-              <h2 className="text-2xl font-semibold mb-4">4. Data Security</h2>
-              <p className="mb-4">
-                We implement appropriate security measures to protect your personal information against unauthorized access, 
-                alteration, disclosure, or destruction. However, no method of transmission over the internet or electronic 
-                storage is 100% secure.
-              </p>
-            </section>
+      <h2>5. When data is shared</h2>
+      <p>We do not sell personal data. We share only what is needed with:</p>
+      <ul>
+        <li>Service providers that host, secure, communicate, process payments, or operate requested AI and code-execution features under appropriate contracts.</li>
+        <li>An institute or exam owner administering an assessment, including its results and disclosed integrity evidence.</li>
+        <li>Recruiters only within your visibility settings or a specific evidence grant you authorise.</li>
+        <li>The public when you make an evidence passport public or when limited certificate details are required for credential verification.</li>
+        <li>Authorities or other parties where required by law, necessary to protect rights and safety, or connected to a lawful corporate transaction.</li>
+      </ul>
 
-            <section className="mb-8">
-              <h2 className="text-2xl font-semibold mb-4">5. Certificate Information</h2>
-              <p className="mb-4">
-                Information on certificates (name, course title, completion date) may be publicly verifiable through our 
-                verification system. This is necessary to maintain the integrity and authenticity of our certification program.
-              </p>
-            </section>
+      <h2>6. Storage and retention</h2>
+      <p>
+        We retain data only as long as reasonably necessary for the service, security,
+        legal, accounting, and dispute purposes for which it was collected. Assessment
+        and credential records may need to be retained to preserve result integrity,
+        prevent duplicate or fraudulent issuance, and keep an issued credential
+        verifiable. Mobile recovery data remains on that device until successful
+        submission, explicit cleanup, sign-out, or uninstall, subject to operating-system
+        storage behaviour. Interview Practice server data follows the retention disclosed
+        in that feature and can be deleted from its session controls.
+      </p>
 
-            <section className="mb-8">
-              <h2 className="text-2xl font-semibold mb-4">6. Your Rights</h2>
-              <p className="mb-4">You have the right to:</p>
-              <ul className="list-disc pl-6 mb-4 space-y-2">
-                <li>Access and update your personal information</li>
-                <li>Delete your account and associated data</li>
-                <li>Opt out of marketing communications</li>
-                <li>Request a copy of your data</li>
-              </ul>
-            </section>
+      <h2>7. Your choices and rights</h2>
+      <p>
+        Depending on applicable law, you may request access, correction, a copy,
+        restriction, withdrawal of consent, or deletion of eligible personal data. You
+        can control recruiter discovery, public evidence-passport visibility, and
+        individual recruiter evidence grants from your profile settings. Withdrawing a
+        choice does not make earlier lawful processing invalid.
+      </p>
+      <p>
+        See the <Link href="/user-deletion">User Deletion Policy</Link> for the request
+        process, verification steps, exclusions, and expected handling.
+      </p>
 
-            <section className="mb-8">
-              <h2 className="text-2xl font-semibold mb-4">7. Cookies and Tracking</h2>
-              <p className="mb-4">
-                We use cookies and similar technologies to enhance your experience, analyze usage patterns, and personalize content. 
-                You can control cookie preferences through your browser settings.
-              </p>
-            </section>
+      <h2>8. Security and international processing</h2>
+      <p>
+        We use access controls, encryption where appropriate, audit records, and
+        operational safeguards designed for the sensitivity of the data. No internet
+        service can guarantee absolute security. Some contracted providers may process
+        data outside your state or country; where required, we use contractual and other
+        lawful safeguards.
+      </p>
 
-            <section className="mb-8">
-              <h2 className="text-2xl font-semibold mb-4">8. Children's Privacy</h2>
-              <p className="mb-4">
-                Our services are not intended for children under 13 years of age. We do not knowingly collect personal 
-                information from children under 13.
-              </p>
-            </section>
+      <h2>9. Children</h2>
+      <p>
+        Octamy is a professional learning and assessment platform and is not directed to
+        children under 13. Institutes assigning the service to minors must have authority
+        to do so and provide any notices or consent required by applicable law.
+      </p>
 
-            <section className="mb-8">
-              <h2 className="text-2xl font-semibold mb-4">9. Changes to This Policy</h2>
-              <p className="mb-4">
-                We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new 
-                Privacy Policy on this page and updating the "Last updated" date.
-              </p>
-            </section>
+      <h2>10. Cookies and updates</h2>
+      <p>
+        We use strictly necessary cookies and local storage for authentication, security,
+        preferences, assessment recovery, and core functionality. See our
+        <Link href="/cookie-policy"> Cookie Policy</Link> for details. We may update this
+        policy as products or legal requirements change; the effective date above shows
+        the current version.
+      </p>
 
-            <section className="mb-8">
-              <h2 className="text-2xl font-semibold mb-4">10. Contact Us</h2>
-              <p className="mb-4">
-                If you have any questions about this Privacy Policy, please contact us at:
-              </p>
-              <div className="bg-cream-deep dark:bg-gray-800 p-4 rounded-lg">
-                <p><strong>Email:</strong> privacy@octamy.com</p>
-                <p><strong>Phone:</strong> +91 9876543210</p>
-                <p><strong>Address:</strong> Octamy Technologies Pvt. Ltd., Bangalore, India</p>
-              </div>
-            </section>
-          </CardContent>
-        </Card>
-      </main>
-    </div>
+      <h2>11. Contact and complaints</h2>
+      <p>
+        Privacy questions can be sent to <a href={`mailto:${COMPANY.dpo.email}`}>{COMPANY.dpo.email}</a>.
+        Complaints can be escalated to {COMPANY.grievanceOfficer.name} at{" "}
+        <a href={`mailto:${COMPANY.grievanceOfficer.email}`}>{COMPANY.grievanceOfficer.email}</a>.
+      </p>
+    </LegalLayout>
   );
 }

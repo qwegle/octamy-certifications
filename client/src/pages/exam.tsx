@@ -16,6 +16,7 @@ import { SEO } from '@/components/seo';
 import { FullscreenExitGuard, QuestionNavigator, SubmitExamDialog } from '@/components/exam-session-controls';
 import { publicAssessmentCategoryPath, publicAssessmentPath, publicPracticeCategoryPath, publicPracticePath } from '@shared/public-assessment-routes';
 import { practicePlansPath, practicePricingPath } from '@/lib/practice-purchase-intent';
+import { shouldEnforceExamFullscreen, supportsBrowserFullscreen } from '@/lib/exam-display-mode';
 import { AlertTriangle, Award, CheckCircle2, ChevronLeft, ChevronRight, Clock3, FileQuestion, Flag, RotateCcw, Save, Send, ShieldCheck, TicketCheck, WifiOff } from 'lucide-react';
 
 interface ExamQuestion {
@@ -90,6 +91,7 @@ export default function Exam() {
   const [isWindowFocused, setIsWindowFocused] = useState(true);
   const [isOnline, setIsOnline] = useState(() => typeof navigator === 'undefined' ? true : navigator.onLine);
   const [fullscreenActive, setFullscreenActive] = useState(false);
+  const [fullscreenEnforced, setFullscreenEnforced] = useState(() => shouldEnforceExamFullscreen());
   const [flaggedQuestionIds, setFlaggedQuestionIds] = useState<Set<number>>(() => new Set());
   const [submitDialogOpen, setSubmitDialogOpen] = useState(false);
   const [returningToFullscreen, setReturningToFullscreen] = useState(false);
@@ -287,7 +289,7 @@ export default function Exam() {
     const handleFullscreenChange = () => {
       const active = Boolean(document.fullscreenElement);
       setFullscreenActive(active);
-      if (!active && !examEndingRef.current) {
+      if (fullscreenEnforced && !active && !examEndingRef.current) {
         setSubmitDialogOpen(false);
         setTabSwitches((previous) => previous + 1);
         toast({ title: "Fullscreen exited", description: "The exit was recorded. Return to fullscreen before continuing." });
@@ -314,7 +316,7 @@ export default function Exam() {
       document.removeEventListener('copy', handlePasteOrCopy);
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
     };
-  }, [course?.assessmentPurpose, examStarted, isWindowFocused, toast]);
+  }, [course?.assessmentPurpose, examStarted, fullscreenEnforced, isWindowFocused, toast]);
 
   const submitExamMutation = useMutation({
     mutationFn: async (examData: any) => {
@@ -360,10 +362,12 @@ export default function Exam() {
   });
 
   const enterFullscreen = async () => {
+    if (!fullscreenEnforced) return true;
     if (document.fullscreenElement) return true;
-    if (!document.documentElement.requestFullscreen) {
-      toast({ title: "Fullscreen unavailable", description: "This browser cannot enter fullscreen. Other browser-integrity events will still be recorded." });
-      return false;
+    if (!supportsBrowserFullscreen()) {
+      setFullscreenEnforced(false);
+      toast({ title: "Mobile exam mode", description: "This browser does not support page fullscreen. The exam will use the full mobile viewport while other integrity signals remain active." });
+      return true;
     }
     try {
       await document.documentElement.requestFullscreen();
@@ -664,15 +668,17 @@ export default function Exam() {
   const currentQuestionIsFlagged = flaggedQuestionIds.has(currentQ.id);
 
   return (
-    <div className="min-h-screen bg-cream-soft">
+    <div className="min-h-screen min-h-[100dvh] bg-cream-soft">
       <SEO title={`${course.title} assessment session`} description={metaDescription} path={canonicalPath} noIndex />
       <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-8 lg:px-8">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-950 px-4 py-3 text-white shadow-sm">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.14em] text-violet-300">{isPractice ? "Private timed practice" : "Proctored assessment"}</p>
-            <p className="mt-0.5 text-sm text-slate-300">{isPractice ? "No fullscreen, clipboard, or focus monitoring. This attempt does not issue recruiter evidence." : "Navigation, focus, fullscreen exits, and clipboard actions are monitored."}</p>
+            <p className="mt-0.5 text-sm text-slate-300">{isPractice ? "No fullscreen, clipboard, or focus monitoring. This attempt does not issue recruiter evidence." : fullscreenEnforced ? "Navigation, focus, fullscreen exits, and clipboard actions are monitored." : "Mobile exam mode is active. Navigation, focus, and clipboard actions are still monitored."}</p>
           </div>
-          {!isPractice && (fullscreenActive
+          {!isPractice && !fullscreenEnforced
+            ? <span className="inline-flex items-center gap-2 rounded-full bg-sky-400/15 px-3 py-1.5 text-xs font-bold text-sky-100"><ShieldCheck className="h-4 w-4" />Mobile exam mode</span>
+            : !isPractice && (fullscreenActive
             ? <span className="inline-flex items-center gap-2 rounded-full bg-emerald-400/15 px-3 py-1.5 text-xs font-bold text-emerald-200"><ShieldCheck className="h-4 w-4" />Fullscreen active</span>
             : <Button type="button" size="sm" variant="secondary" onClick={() => void enterFullscreen()}>Return to fullscreen</Button>)}
         </div>
@@ -779,7 +785,7 @@ export default function Exam() {
         submitting={submitExamMutation.isPending}
         onConfirm={handleSubmit}
       />
-      {!isPractice && <FullscreenExitGuard
+      {!isPractice && fullscreenEnforced && <FullscreenExitGuard
         open={!fullscreenActive && !examEndingRef.current && !submitExamMutation.isPending}
         returningToFullscreen={returningToFullscreen}
         submitting={submitExamMutation.isPending}

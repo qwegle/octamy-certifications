@@ -110,7 +110,7 @@ export default function PrivacyScreen() {
     );
   }, [canMutate, consentMutation]);
 
-  const openWebsitePath = async (path: '/privacy-policy' | '/terms-of-service') => {
+  const openWebsitePath = async (path: '/privacy-policy' | '/terms-of-service' | '/user-deletion') => {
     try {
       await Linking.openURL(`${requireApiUrl()}${path}`);
     } catch {
@@ -251,6 +251,7 @@ export default function PrivacyScreen() {
           <Heading level={2}>Legal & support</Heading>
           <Button label="Open Privacy Policy" onPress={() => void openWebsitePath('/privacy-policy')} variant="secondary" />
           <Button label="Open Terms of Service" onPress={() => void openWebsitePath('/terms-of-service')} variant="secondary" />
+          <Button label="Open User Deletion Policy" onPress={() => void openWebsitePath('/user-deletion')} variant="secondary" />
           <Button label="Email account deletion support" onPress={contactDeletionSupport} variant="secondary" />
           <Text muted variant="small">No automated account-deletion API exists. Email support@octamy.com from this in-app path to start a verified deletion request.</Text>
         </Card>

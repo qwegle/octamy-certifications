@@ -17,6 +17,7 @@ yarn-error.*
 *.p12
 *.key
 *.mobileprovision
+/release-secrets/
 .metro-health-check*
 /ios
 /android

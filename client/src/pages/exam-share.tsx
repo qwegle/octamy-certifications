@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { SEO } from "@/components/seo";
 import { FullscreenExitGuard, QuestionNavigator, SubmitExamDialog } from "@/components/exam-session-controls";
 import { resyncAuthoritativeExamTimer } from "@/lib/exam-timer";
+import { shouldEnforceExamFullscreen, supportsBrowserFullscreen } from "@/lib/exam-display-mode";
 import {
   AlertCircle,
   CheckCircle2,
@@ -202,6 +203,7 @@ export default function ExamShare() {
   );
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [fullscreenEnforced, setFullscreenEnforced] = useState(() => shouldEnforceExamFullscreen());
   const [flaggedQuestionIds, setFlaggedQuestionIds] = useState<Set<number>>(() => new Set());
   const [submitDialogOpen, setSubmitDialogOpen] = useState(false);
   const [returningToFullscreen, setReturningToFullscreen] = useState(false);
@@ -574,8 +576,15 @@ export default function ExamShare() {
   }, []);
 
   const enterFullscreen = async () => {
+    if (!fullscreenEnforced) return true;
     if (document.fullscreenElement) {
       setIsFullscreen(true);
+      return true;
+    }
+    if (!supportsBrowserFullscreen()) {
+      setFullscreenEnforced(false);
+      queueEvent("fullscreen_unavailable", { reason: "browser_unsupported_mobile_mode" });
+      setMessage("Mobile exam mode is active because this browser does not support page fullscreen. Other browser evidence remains active.");
       return true;
     }
     try {
@@ -633,7 +642,7 @@ export default function ExamShare() {
   const currentQuestionIsFlagged = current ? flaggedQuestionIds.has(current.id) : false;
 
   return (
-    <div className="min-h-screen bg-cream-deep px-4 py-8 sm:py-12">
+    <div className="min-h-screen min-h-[100dvh] bg-cream-deep px-3 py-3 sm:px-4 sm:py-12">
       <SEO title={`${inst.title} — Exam`} description="Octamy scheduled assessment" />
       <Card className={`mx-auto w-full border-slate-200 shadow-sm ${phase === "live" ? "max-w-6xl" : "max-w-3xl"}`}>
         <CardHeader className="border-b border-slate-100">
@@ -735,7 +744,8 @@ export default function ExamShare() {
                   <span>Question {currentIdx + 1} of {questions.length} · {answeredCount} answered · {flaggedQuestionIds.size} flagged</span>
                   <div className="flex items-center gap-2">
                     <SyncStatus state={syncState} lastSavedAt={lastSavedAt} />
-                    {isBrowserEvidence && !isFullscreen && <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => void returnToFullscreen()}><Maximize className="mr-1 h-3 w-3" /> Fullscreen</Button>}
+                    {isBrowserEvidence && !fullscreenEnforced && <span className="rounded-full bg-sky-50 px-2.5 py-1 font-semibold text-sky-800">Mobile exam mode</span>}
+                    {isBrowserEvidence && fullscreenEnforced && !isFullscreen && <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => void returnToFullscreen()}><Maximize className="mr-1 h-3 w-3" /> Fullscreen</Button>}
                   </div>
                 </div>
                 {syncState === "offline" && <Notice><WifiOff className="mr-1 inline h-4 w-4" /> You are offline. Answers remain on this device and will sync automatically when the connection returns. The timer continues.</Notice>}
@@ -862,7 +872,7 @@ export default function ExamShare() {
         onConfirm={() => void submitExam()}
       />
       <FullscreenExitGuard
-        open={phase === "live" && isBrowserEvidence && !isFullscreen && !submitting}
+        open={phase === "live" && isBrowserEvidence && fullscreenEnforced && !isFullscreen && !submitting}
         returningToFullscreen={returningToFullscreen}
         submitting={submitting}
         onReturnToFullscreen={() => void returnToFullscreen()}

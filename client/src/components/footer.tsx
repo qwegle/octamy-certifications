@@ -202,6 +202,7 @@ export default function Footer() {
                 <FooterLink to="/trust">Trust & Compliance</FooterLink>
                 <FooterLink to="/privacy-policy">Privacy Policy</FooterLink>
                 <FooterLink to="/terms-of-service">Terms of Service</FooterLink>
+                <FooterLink to="/user-deletion">User Deletion</FooterLink>
                 <FooterLink to="/refund-policy">Refund Policy</FooterLink>
                 <FooterLink to="/cookie-policy">Cookie Policy</FooterLink>
               </ul>

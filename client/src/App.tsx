@@ -54,6 +54,7 @@ const Vision = lazy(() => import("@/pages/vision"));
 const CategoryPage = lazy(() => import("@/pages/category"));
 const PrivacyPolicy = lazy(() => import("@/pages/privacy-policy"));
 const TermsOfService = lazy(() => import("@/pages/terms-of-service"));
+const UserDeletionPolicy = lazy(() => import("@/pages/legal/user-deletion"));
 const TrustPage = lazy(() => import("@/pages/legal/trust"));
 const RefundPolicy = lazy(() => import("@/pages/legal/refund-policy"));
 const CookiePolicy = lazy(() => import("@/pages/legal/cookie-policy"));
@@ -271,6 +272,7 @@ function Router() {
       <Route path="/category/:slug">{() => <LegacyAssessmentRedirect category />}</Route>
       <Route path="/privacy-policy" component={PrivacyPolicy} />
       <Route path="/terms-of-service" component={TermsOfService} />
+      <Route path="/user-deletion" component={UserDeletionPolicy} />
       <Route path="/trust" component={TrustPage} />
       <Route path="/legal" component={TrustPage} />
       <Route path="/compliance" component={TrustPage} />

@@ -16,3 +16,6 @@ uploads/
 
 # Workstation-local Kiro/LSP configuration
 .kiro/
+
+# One-off operational content build/publish scripts and their blueprints
+scripts/.tmp-*
