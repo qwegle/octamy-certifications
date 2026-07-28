@@ -88,10 +88,11 @@ export type AdminCourseUpdateInput = z.infer<typeof adminCourseUpdateSchema>;
 export type AdminCourseReviewInput = z.infer<typeof adminCourseReviewSchema>;
 
 export type GovernedCourse = {
-  title?: string;
-  slug?: string;
   ownerType: string;
   ownerId: number | null;
+  price?: string;
+  originalPrice?: string | null;
+  isOnSale?: boolean;
   productType: string;
   visibility: string;
   certificationMode: string;
@@ -104,37 +105,19 @@ export type GovernedCourse = {
 
 export class AdminCourseGovernanceError extends Error {}
 
-const FIRST_PARTY_GRADE_1_TO_10 = /\bgrade[\s-]*(?:[1-9]|10)\b/i;
-
-function isFirstPartyGradeOneToTenAssessment(course: {
-  title?: string;
-  slug?: string;
-  ownerType: string;
-  productType: string;
-  assessmentPurpose: string;
-}) {
-  return course.ownerType === "admin"
-    && course.productType === "assessment"
-    && course.assessmentPurpose === "practice"
-    && FIRST_PARTY_GRADE_1_TO_10.test(`${course.title || ""} ${course.slug || ""}`);
-}
-
-function assertFirstPartyAssessmentPortfolioScope(
-  course: {
-    title?: string;
-    slug?: string;
-    ownerType: string;
-    productType: string;
-    assessmentPurpose: string;
-  },
-  action: "create" | "publish",
-) {
-  if (!isFirstPartyGradeOneToTenAssessment(course)) return;
-  throw new AdminCourseGovernanceError(
-    action === "create"
-      ? "Grade 1–10 school assessments are outside the first-party Octamy portfolio."
-      : "Grade 1–10 school assessments cannot be published in the first-party Practice catalogue.",
-  );
+function normalizedSalePricing(price: string, originalPrice: string | null) {
+  const current = Number(price);
+  const original = originalPrice == null ? null : Number(originalPrice);
+  if (original != null && original < current) {
+    throw new AdminCourseGovernanceError(
+      "Original/list price cannot be lower than the current sale price",
+    );
+  }
+  return {
+    price,
+    originalPrice,
+    isOnSale: original != null && original > current,
+  };
 }
 
 export function slugifyCourseTitle(value: string) {
@@ -172,20 +155,17 @@ export function buildAdminOwnedCourseCreate(
   input: AdminCourseCreateInput,
   slug: string,
 ) {
+  const pricing = normalizedSalePricing(input.price, input.originalPrice);
   const structural = {
     ownerType: "admin",
     productType: input.productType,
     visibility: input.visibility,
     assessmentPurpose: input.assessmentPurpose,
   };
-  assertFirstPartyAssessmentPortfolioScope({
-    ...structural,
-    title: input.title,
-    slug,
-  }, "create");
   const certificationMode = input.assessmentPurpose === "practice" ? "none" : "octamy";
   return {
     ...input,
+    ...pricing,
     slug,
     contentPrice: input.productType === "assessment" ? null : input.contentPrice,
     ownerType: "admin" as const,
@@ -211,23 +191,21 @@ export function buildGovernedAdminCourseUpdate(
     const productType = input.productType ?? existing.productType;
     const visibility = input.visibility ?? existing.visibility;
     const assessmentPurpose = input.assessmentPurpose ?? existing.assessmentPurpose;
-    const title = input.title ?? existing.title;
-    const slug = input.slug ?? existing.slug;
-    const isActive = input.isActive ?? existing.isActive;
-    if (isActive && visibility === "public") {
-      assertFirstPartyAssessmentPortfolioScope({
-        ownerType: "admin",
-        productType,
-        assessmentPurpose,
-        title,
-        slug,
-      }, "publish");
-    }
     const certificationMode = assessmentPurpose === "practice" ? "none" : "octamy";
     const requestedSubscription = input.subscriptionEligible ?? existing.subscriptionEligible;
     const requestedReseller = input.resellerEligible ?? existing.resellerEligible;
+    const pricingChanged = input.price !== undefined
+      || input.originalPrice !== undefined
+      || input.isOnSale !== undefined;
+    const pricing = pricingChanged
+      ? normalizedSalePricing(
+          input.price ?? existing.price ?? "0.00",
+          input.originalPrice !== undefined ? input.originalPrice : existing.originalPrice ?? null,
+        )
+      : {};
     const updates = {
       ...input,
+      ...pricing,
       contentPrice: productType === "assessment" ? null : input.contentPrice,
       ownerType: "admin" as const,
       ownerId: null,
@@ -267,11 +245,21 @@ export function buildGovernedAdminCourseUpdate(
     resellerEligible: _ignoredReseller,
     ...contentUpdates
   } = input;
+  const pricingChanged = input.price !== undefined
+    || input.originalPrice !== undefined
+    || input.isOnSale !== undefined;
+  const pricing = pricingChanged
+    ? normalizedSalePricing(
+        input.price ?? existing.price ?? "0.00",
+        input.originalPrice !== undefined ? input.originalPrice : existing.originalPrice ?? null,
+      )
+    : {};
 
   // A material edit to third-party content always returns it to review. Admins
   // approve it with the dedicated, audited review endpoint below.
   return {
     ...contentUpdates,
+    ...pricing,
     ownerType: existing.ownerType,
     ownerId: existing.ownerId,
     certificationMode: safeCertification,

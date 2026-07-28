@@ -28,7 +28,7 @@ type CatalogResponse = {
   items: CertificationCardItem[];
   pagination: { page: number; pageSize: number; total: number; totalPages: number };
   facets: {
-    categories: Array<{ id: number; name: string; slug: string; parentId: number | null; kind: string }>;
+    categories: Array<{ id: number; name: string; description: string; slug: string; parentId: number | null; kind: string }>;
     audienceBands: Array<{ id: number; code: string; label: string }>;
     levels: string[];
   };
@@ -39,17 +39,6 @@ const levelLabels: Record<string, string> = {
   intermediate: "Intermediate",
   advanced: "Advanced",
   expert: "Expert",
-};
-
-const familyAccents: Record<string, string> = {
-  ssc: "bg-rose-50 text-rose-800 border-rose-100",
-  neet: "bg-fuchsia-50 text-fuchsia-800 border-fuchsia-100",
-  jee: "bg-indigo-50 text-indigo-800 border-indigo-100",
-  "banking-exams": "bg-emerald-50 text-emerald-800 border-emerald-100",
-  "railway-exams": "bg-sky-50 text-sky-800 border-sky-100",
-  mathematics: "bg-violet-50 text-violet-800 border-violet-100",
-  physics: "bg-blue-50 text-blue-800 border-blue-100",
-  chemistry: "bg-pink-50 text-pink-800 border-pink-100",
 };
 
 export function AssessmentCatalog({ mode }: { mode: CatalogMode }) {
@@ -81,22 +70,8 @@ export function AssessmentCatalog({ mode }: { mode: CatalogMode }) {
   useEffect(() => setSearchInput(search), [search]);
 
   const categoryFacets = data?.facets.categories ?? [];
-  const visibleCategory = (item: { slug: string; parentId: number | null }) => {
-    const belongsToPracticeRoot = (candidate: { slug: string; parentId: number | null } | undefined): boolean => {
-      if (!candidate) return false;
-      if (["competitive-exams", "school-education"].includes(candidate.slug)) return true;
-      return belongsToPracticeRoot(categoryFacets.find((parent) => parent.id === candidate.parentId));
-    };
-    const practiceRoot = belongsToPracticeRoot(item);
-    if (practice) return practiceRoot;
-    if (octamy) return !practiceRoot;
-    return true;
-  };
-  const visibleCategories = categoryFacets.filter(visibleCategory);
-  const rootCategories = visibleCategories.filter((item) => item.parentId == null);
-  const orphanCategories = visibleCategories.filter((item) => item.parentId != null && !visibleCategories.some((candidate) => candidate.id === item.parentId));
-  const competitiveRoot = categoryFacets.find((item) => item.slug === "competitive-exams");
-  const competitiveFamilies = categoryFacets.filter((item) => item.parentId === competitiveRoot?.id && item.kind === "exam_family");
+  const rootCategories = categoryFacets.filter((item) => item.parentId == null);
+  const orphanCategories = categoryFacets.filter((item) => item.parentId != null && !categoryFacets.some((candidate) => candidate.id === item.parentId));
 
   return (
     <div className="min-h-screen bg-[#f7f5f0] text-slate-950">
@@ -114,12 +89,12 @@ export function AssessmentCatalog({ mode }: { mode: CatalogMode }) {
               <Badge className="border border-white/15 bg-white/10 text-violet-200 hover:bg-white/10"><Award className="mr-1.5 h-3.5 w-3.5" />{practice ? "Practice Pass" : octamy ? "Tech and industry certifications" : "Creator-issued credentials"}</Badge>
               <h1 className="mt-6 max-w-3xl text-4xl font-black tracking-[-0.045em] sm:text-6xl">{practice ? "Practice without confusing your career signal." : octamy ? "Get certified for real industry roles." : "Turn expert knowledge into verified achievement."}</h1>
               <p className="mt-5 max-w-2xl text-base leading-7 text-slate-300 sm:text-lg">
-                {practice ? "Government and entrance exams, recruitment tests, company interviews, technical interviews and coding practice live here. They are for learning and repetition, not recruiter-facing Octamy credentials." : octamy ? "Choose a technology or industry certification path, take a governed exam without paying upfront and activate a verifiable credential after passing." : "Every certification shows who authored the exam, who issues the credential and whether Octamy co-certification applies."}
+                {practice ? "Prepare with reviewed learner assessments organised by the live Octamy catalogue. Practice results support learning and repetition but remain separate from recruiter-facing Octamy credentials." : octamy ? "Choose a technology or industry certification path, take a governed exam without paying upfront and activate a verifiable credential after passing." : "Every certification shows who authored the exam, who issues the credential and whether Octamy co-certification applies."}
               </p>
               <form className="mt-8 flex max-w-2xl flex-col gap-2 rounded-2xl bg-white p-2 sm:flex-row" onSubmit={(event) => { event.preventDefault(); updateFilters({ q: searchInput.trim().slice(0, 120), page: 1 }); }}>
                 <div className="relative flex-1">
                   <Search className="pointer-events-none absolute left-4 top-3.5 h-5 w-5 text-slate-400" />
-                  <Input aria-label={practice ? "Search practice exams" : "Search certifications"} value={searchInput} onChange={(event) => setSearchInput(event.target.value)} placeholder={practice ? "Search SSC, banking, coding, interviews..." : "Search software, data, cloud, cybersecurity..."} className="h-12 border-0 bg-white pl-11 text-slate-950 shadow-none focus-visible:ring-0" />
+                  <Input aria-label={practice ? "Search practice exams" : "Search certifications"} value={searchInput} onChange={(event) => setSearchInput(event.target.value)} placeholder={practice ? "Search practice exams or skills..." : "Search certifications or skills..."} className="h-12 border-0 bg-white pl-11 text-slate-950 shadow-none focus-visible:ring-0" />
                 </div>
                 <Button type="submit" size="lg" className="h-12 rounded-xl bg-violet-600 px-7 hover:bg-violet-500">{practice ? "Find practice" : "Find certification"}</Button>
               </form>
@@ -144,12 +119,27 @@ export function AssessmentCatalog({ mode }: { mode: CatalogMode }) {
           </div>
         </section>
 
-        {practice && (
+        {practice && rootCategories.length > 0 && (
           <section className="mx-auto max-w-7xl px-5 pb-8" aria-labelledby="certification-paths-heading">
             <div className="flex items-end justify-between gap-4"><div><p className="text-xs font-black uppercase tracking-[0.14em] text-violet-700">Practice inventory</p><h2 id="certification-paths-heading" className="mt-2 text-2xl font-black tracking-tight sm:text-3xl">Practice exams stay outside hiring credentials.</h2><p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">Use these for preparation and repetition. They are not shared with recruiters as Octamy-certified career evidence.</p></div><Link href="#certification-results" className="hidden text-sm font-bold text-slate-600 hover:text-violet-700 sm:inline-flex">View practice <ArrowRight className="ml-1 h-4 w-4" /></Link></div>
-            <div className="mt-6 grid gap-5 lg:grid-cols-[1.15fr_.85fr]">
-              <div className="min-w-0 rounded-3xl border border-violet-100 bg-violet-50/70 p-5"><div className="flex items-center justify-between"><div><p className="text-xs font-black uppercase tracking-wide text-violet-800">Competitive and recruitment exams</p><h3 className="mt-1 text-xl font-black">Browse by exam family</h3></div><Award className="h-6 w-6 text-violet-700" /></div><div className="mt-4 flex snap-x gap-2 overflow-x-auto pb-1">{competitiveFamilies.length > 0 ? competitiveFamilies.map((family) => <Link key={family.id} href={publicPracticeCategoryPath(family.slug)} className={`min-w-[155px] rounded-2xl border p-3 text-sm font-black shadow-sm hover:-translate-y-0.5 ${familyAccents[family.slug] || "border-white bg-white text-slate-800"}`}>{family.name}<span className="mt-3 flex items-center text-xs font-semibold opacity-70">View practice <ChevronRight className="ml-1 h-3.5 w-3.5" /></span></Link>) : <p className="text-sm leading-6 text-slate-600">Reviewed government, entrance and recruitment exam banks will appear here after release approval.</p>}</div></div>
-              <div className="rounded-3xl border border-sky-100 bg-sky-50/70 p-5"><p className="text-xs font-black uppercase tracking-wide text-sky-800">Career preparation</p><h3 className="mt-1 text-xl font-black">Interview and coding practice</h3><p className="mt-3 text-sm leading-6 text-slate-600">Prepare for company interviews, technical interviews, coding exercises, business roles and virtual internships with assessment-specific question pools.</p><Link href="#certification-results" className="mt-4 inline-flex items-center text-sm font-black text-sky-900">Explore released practice <ArrowRight className="ml-1 h-4 w-4" /></Link></div>
+            <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {rootCategories.map((root) => {
+                const children = categoryFacets.filter((item) => item.parentId === root.id);
+                return (
+                  <article key={root.id} className="rounded-3xl border border-violet-100 bg-white p-5 shadow-sm">
+                    <p className="text-xs font-black uppercase tracking-wide text-violet-700">Practice category</p>
+                    <h3 className="mt-1 text-xl font-black">{root.name}</h3>
+                    {root.description && <p className="mt-2 line-clamp-3 text-sm leading-6 text-slate-600">{root.description}</p>}
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {(children.length > 0 ? children : [root]).map((categoryItem) => (
+                        <Link key={categoryItem.id} href={publicPracticeCategoryPath(categoryItem.slug)} className="inline-flex items-center rounded-full border border-violet-200 bg-violet-50 px-3 py-2 text-xs font-bold text-violet-900 transition hover:border-violet-300 hover:bg-violet-100">
+                          {categoryItem.name}<ChevronRight className="ml-1 h-3.5 w-3.5" />
+                        </Link>
+                      ))}
+                    </div>
+                  </article>
+                );
+              })}
             </div>
           </section>
         )}

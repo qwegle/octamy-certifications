@@ -8,10 +8,6 @@
 #   BRANCH=main PM2_APP=octamy HEALTHCHECK_URL=http://127.0.0.1:5000/readyz \
 #     BACKUP_DIR=/var/backups/octamy bash scripts/deploy-production.sh
 #
-# One-time enterprise question-pool release (the command performs a dry run
-# first and applies only after every question and assessment is validated):
-#   SEGREGATE_INHOUSE_QUESTIONS=1 bash scripts/deploy-production.sh
-#
 # The script never resets local changes or force-pushes. It deploys only a
 # fast-forward of origin/<branch>, and restarts PM2 only after install, typecheck,
 # build, backup, and migrations all succeed.
@@ -27,7 +23,6 @@ ENV_FILE="${ENV_FILE:-$APP_DIR/.env}"
 BACKUP_DIR="${BACKUP_DIR:-/var/backups/octamy}"
 SKIP_BACKUP="${SKIP_BACKUP:-0}"
 ADOPT_EXISTING_SCHEMA="${ADOPT_EXISTING_SCHEMA:-0}"
-SEGREGATE_INHOUSE_QUESTIONS="${SEGREGATE_INHOUSE_QUESTIONS:-0}"
 HEALTH_RETRIES="${HEALTH_RETRIES:-30}"
 PM2_HANDOFF_STARTED=0
 
@@ -57,8 +52,6 @@ done
 [[ "$BRANCH" == "main" ]] || fail "Production deployments are restricted to BRANCH=main"
 [[ "$SKIP_BACKUP" == "0" || "$SKIP_BACKUP" == "1" ]] || fail "SKIP_BACKUP must be 0 or 1"
 [[ "$ADOPT_EXISTING_SCHEMA" == "0" || "$ADOPT_EXISTING_SCHEMA" == "1" ]] || fail "ADOPT_EXISTING_SCHEMA must be 0 or 1"
-[[ "$SEGREGATE_INHOUSE_QUESTIONS" == "0" || "$SEGREGATE_INHOUSE_QUESTIONS" == "1" ]] || \
-  fail "SEGREGATE_INHOUSE_QUESTIONS must be 0 or 1"
 [[ "$HEALTH_RETRIES" =~ ^[1-9][0-9]*$ ]] || fail "HEALTH_RETRIES must be a positive integer"
 
 if [[ "$SKIP_BACKUP" == "0" ]]; then
@@ -181,23 +174,8 @@ APP_DIR="$APP_DIR" ADOPT_EXISTING_SCHEMA="$ADOPT_EXISTING_SCHEMA" node scripts/a
 log "Applying pending database migrations"
 npm run db:migrate
 
-log "Dry-running the source-controlled Interview Studio catalog"
-npm run interviews:sync-catalog
-
-log "Applying the source-controlled Interview Studio catalog"
-npm run interviews:sync-catalog -- --apply --confirm INTERVIEW_STUDIO
-
 log "Verifying governed assessments have no unsafe published entries"
 npm run assessments:inventory -- --mode dry-run --format summary --fail-on-unsafe-published
-
-if [[ "$SEGREGATE_INHOUSE_QUESTIONS" == "1" ]]; then
-  log "Dry-running enterprise in-house question-pool segregation"
-  npm run questions:segregate-inhouse -- --operator "deploy-${NEW_SHA:0:12}"
-
-  log "Applying enterprise in-house question-pool segregation"
-  npm run questions:segregate-inhouse -- \
-    --operator "deploy-${NEW_SHA:0:12}" --apply --confirm SEGREGATE
-fi
 
 # Drizzle and Vite are development dependencies; remove them only after the
 # migration and build have succeeded. They are restored by npm ci next deploy.

@@ -30,7 +30,7 @@ APP_DIR="$PWD" ./scripts/deploy-production.sh
 
 Useful overrides include `REMOTE`, `PM2_APP`, `ENV_FILE`, `BACKUP_DIR`, `HEALTHCHECK_URL`, and `HEALTH_RETRIES`. `SKIP_BACKUP=1` is an explicit emergency escape hatch only when a verified provider snapshot exists. `ADOPT_EXISTING_SCHEMA=1` is a one-time, guarded path for a confirmed legacy Octamy schema; never use it for an unrelated or partial database.
 
-The script locks the checkout, validates secrets and Git state, fast-forwards `main`, installs the lockfile, type-checks, builds, creates and verifies a pre-migration dump, applies committed migrations, synchronizes the source-controlled Interview Studio catalog, and runs the read-only governed-assessment release gate. That gate exits nonzero if any active/public/approved assessment still has strict release blockers. Only then are development dependencies pruned and PM2 reloaded. `/readyz` must report a working database, healthy evaluation queue, and the exact deployed commit before PM2 state is saved.
+The script locks the checkout, validates secrets and Git state, fast-forwards `main`, installs the lockfile, type-checks, builds, creates and verifies a pre-migration dump, applies committed migrations, and runs the read-only governed-assessment release gate. Assessment, taxonomy, question-bank, pricing, and Interview Studio catalog data remain database-managed; deployment never overwrites those records from application files. The gate exits nonzero if any active/public/approved assessment has runtime release blockers. Only then are development dependencies pruned and PM2 reloaded. `/readyz` must report a working database, healthy evaluation queue, and the exact deployed commit before PM2 state is saved.
 
 ## Backup and rollback
 

@@ -225,13 +225,18 @@ branch, a non-fast-forward Git update, or missing production secrets. It then:
 1. fetches the configured remote's `main` branch with an explicit ref and fast-forwards;
 2. installs the exact lockfile including build tools, type-checks, and builds;
 3. creates and verifies an atomic, timestamped Postgres dump;
-4. applies all pending Drizzle migrations, synchronizes the Interview Studio catalog,
-   and runs the read-only governed-assessment release gate;
+4. applies all pending Drizzle migrations and runs the read-only governed-assessment
+   release gate without overwriting database-managed catalog data;
 5. fails if any active/public/approved assessment has strict release blockers,
    then prunes development dependencies;
 6. reloads (or creates) the PM2 process with the new environment; and
 7. accepts the release only when `/readyz` reports a working database and the
    exact Git commit just deployed, then saves the PM2 process list.
+
+Assessment names, categories, subcategories, question banks, pricing, and
+Interview Studio templates are production database records. Historical import
+utilities are not release commands, and production deployment never seeds or
+synchronizes a code-defined catalogue.
 
 Production deployment is restricted to `main`; setting `BRANCH` to any other
 value fails. Useful overrides are `REMOTE`, `PM2_APP`, `ENV_FILE`, `BACKUP_DIR`,

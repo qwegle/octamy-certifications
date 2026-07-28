@@ -107,7 +107,7 @@ async function assessmentCatalog(req: Request, res: Response, ownerType: "admin"
 
   try {
     const filter = parsed.data;
-    const conditions: SQL[] = [
+    const catalogScopeConditions: SQL[] = [
       eq(courses.ownerType, ownerType),
       inArray(courses.productType, [...PUBLIC_ASSESSMENT_PRODUCT_TYPES]),
       eq(courses.assessmentPurpose, purpose),
@@ -116,6 +116,7 @@ async function assessmentCatalog(req: Request, res: Response, ownerType: "admin"
       eq(courses.reviewStatus, "approved"),
       eq(categories.isActive, true),
     ];
+    const conditions: SQL[] = [...catalogScopeConditions];
     if (filter.search) {
       const search = `%${filter.search}%`;
       conditions.push(or(
@@ -156,7 +157,7 @@ async function assessmentCatalog(req: Request, res: Response, ownerType: "admin"
 
     const where = and(...conditions)!;
     const offset = (filter.page - 1) * filter.pageSize;
-    const [items, totalRows, categoryFacets, audienceFacets] = await Promise.all([
+    const [items, totalRows, categoryFacets, audienceFacets, liveCategoryRows] = await Promise.all([
       db.select({
         id: courses.id,
         title: courses.title,
@@ -165,6 +166,8 @@ async function assessmentCatalog(req: Request, res: Response, ownerType: "admin"
         duration: courses.duration,
         passingScore: courses.passingScore,
         price: courses.price,
+        originalPrice: courses.originalPrice,
+        isOnSale: courses.isOnSale,
         level: courses.level,
         language: courses.language,
         thumbnailUrl: courses.thumbnailUrl,
@@ -198,6 +201,7 @@ async function assessmentCatalog(req: Request, res: Response, ownerType: "admin"
       db.select({
         id: categories.id,
         name: categories.name,
+        description: categories.description,
         slug: categories.slug,
         parentId: categories.parentId,
         kind: categories.kind,
@@ -205,16 +209,36 @@ async function assessmentCatalog(req: Request, res: Response, ownerType: "admin"
         .from(categories)
         .where(eq(categories.isActive, true))
         .orderBy(asc(categories.sortOrder), asc(categories.name)),
-      db.select({
+      db.selectDistinct({
         id: audienceBands.id,
         code: audienceBands.code,
         label: audienceBands.label,
         description: audienceBands.description,
+        sortOrder: audienceBands.sortOrder,
       }).from(audienceBands)
-        .where(eq(audienceBands.isActive, true))
+        .innerJoin(courseAudienceBands, eq(courseAudienceBands.audienceBandId, audienceBands.id))
+        .innerJoin(courses, eq(courses.id, courseAudienceBands.courseId))
+        .innerJoin(categories, eq(categories.id, courses.categoryId))
+        .where(and(eq(audienceBands.isActive, true), ...catalogScopeConditions))
         .orderBy(asc(audienceBands.sortOrder)),
+      db.selectDistinct({ categoryId: courses.categoryId })
+        .from(courses)
+        .innerJoin(categories, eq(categories.id, courses.categoryId))
+        .where(and(...catalogScopeConditions)),
     ]);
 
+    const categoryById = new Map(categoryFacets.map((category) => [category.id, category]));
+    const relevantCategoryIds = new Set<number>();
+    for (const row of liveCategoryRows) {
+      let categoryId: number | null = row.categoryId;
+      const visited = new Set<number>();
+      while (categoryId != null && !visited.has(categoryId)) {
+        visited.add(categoryId);
+        relevantCategoryIds.add(categoryId);
+        categoryId = categoryById.get(categoryId)?.parentId ?? null;
+      }
+    }
+    const scopedCategoryFacets = categoryFacets.filter((category) => relevantCategoryIds.has(category.id));
     const courseIds = items.map((item) => item.id);
     const audienceRows = courseIds.length > 0
       ? await db.select({
@@ -251,7 +275,7 @@ async function assessmentCatalog(req: Request, res: Response, ownerType: "admin"
         totalPages: Math.max(1, Math.ceil(total / filter.pageSize)),
       },
       facets: {
-        categories: categoryFacets,
+        categories: scopedCategoryFacets,
         audienceBands: audienceFacets,
         levels: ["novice", "intermediate", "advanced", "expert"],
       },
@@ -381,6 +405,8 @@ router.get("/assessments/:slug", async (req: Request, res: Response) => {
       duration: courses.duration,
       passingScore: courses.passingScore,
       price: courses.price,
+      originalPrice: courses.originalPrice,
+      isOnSale: courses.isOnSale,
       productType: courses.productType,
       level: courses.level,
       language: courses.language,
@@ -451,6 +477,8 @@ router.get("/practice-assessments/:slug", async (req: Request, res: Response) =>
       duration: courses.duration,
       passingScore: courses.passingScore,
       price: courses.price,
+      originalPrice: courses.originalPrice,
+      isOnSale: courses.isOnSale,
       productType: courses.productType,
       level: courses.level,
       language: courses.language,

@@ -10,7 +10,6 @@ import { useToast } from '@/hooks/use-toast';
 import { ApiError, apiRequest } from '@/lib/queryClient';
 import { useAuth } from '@/lib/auth.tsx';
 import Header from '@/components/header';
-import { certificationDisplayTitle } from '@/components/certification-card';
 import ExamTimer from '@/components/exam-timer';
 import { ExamStructuredData } from '@/components/seo-structured-data';
 import { SEO } from '@/components/seo';
@@ -538,7 +537,7 @@ export default function Exam() {
 
   const isPractice = course.assessmentPurpose === "practice";
   const canonicalPath = course.canonicalPath || (isPractice ? publicPracticePath(course.slug) : publicAssessmentPath(course.slug));
-  const displayTitle = isPractice ? course.title : certificationDisplayTitle(course.title);
+  const displayTitle = course.title;
   const seoTitle = isPractice ? (course.metaTitle || `${displayTitle} | Octamy Practice`) : (course.metaTitle || `${displayTitle} | Octamy`)
     .replace(/\bPractice\s*\|\s*Octamy Assessments?\b/gi, "Certification Exam | Octamy")
     .replace(/\bAssessments\b/gi, "Certification Exams")

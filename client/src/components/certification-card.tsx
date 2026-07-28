@@ -32,30 +32,9 @@ const levelLabels: Record<string, string> = {
   expert: "Expert",
 };
 
-const accents: Record<string, string> = {
-  ssc: "from-rose-500 via-orange-500 to-amber-400",
-  "banking-recruitment": "from-emerald-600 via-teal-600 to-cyan-500",
-  "railway-recruitment": "from-cyan-600 via-sky-600 to-blue-600",
-  jee: "from-blue-700 via-indigo-600 to-violet-600",
-  "neet-ug": "from-fuchsia-600 via-pink-600 to-rose-500",
-  mathematics: "from-violet-700 via-indigo-600 to-sky-500",
-  physics: "from-slate-800 via-blue-800 to-cyan-600",
-  chemistry: "from-purple-700 via-fuchsia-600 to-pink-500",
-};
-
-export function certificationDisplayTitle(title: string) {
-  return title
-    .replace(/ Numerical Practice$/i, " Numerical Certification")
-    .replace(/ Mathematics Practice$/i, " Mathematics Certification")
-    .replace(/ Aptitude Practice$/i, " Aptitude Certification")
-    .replace(/ Practice$/i, " Certification Exam")
-    .replace(/ Diagnostic$/i, " Skills Diagnostic");
-}
-
 export function CertificationCard({ item, categoryHref, variant = "certification" }: { item: CertificationCardItem; categoryHref?: string; variant?: "certification" | "practice" }) {
-  const accent = accents[item.category.slug] || "from-slate-800 via-violet-700 to-indigo-600";
   const practice = variant === "practice" || item.assessmentPurpose === "practice";
-  const title = practice ? item.title : certificationDisplayTitle(item.title);
+  const title = item.title;
   const href = item.canonicalPath || (practice ? publicPracticePath(item.slug) : publicAssessmentPath(item.slug));
   const salePrice = Number(item.price);
   const originalPrice = Number(item.originalPrice);
@@ -67,7 +46,7 @@ export function CertificationCard({ item, categoryHref, variant = "certification
   return (
     <article className={`group relative flex h-full flex-col overflow-hidden rounded-[1.4rem] bg-white transition duration-300 hover:-translate-y-1 hover:shadow-xl ${practice ? "border border-violet-200 shadow-[0_12px_40px_-24px_rgba(109,40,217,0.7)] hover:border-violet-300 hover:shadow-violet-900/15" : "border border-slate-200 shadow-sm hover:border-slate-300 hover:shadow-slate-900/10"}`}>
       {practice && <div aria-hidden className="absolute inset-x-0 top-0 z-20 h-1 bg-gradient-to-r from-amber-300 via-violet-500 to-cyan-400" />}
-      <Link href={href} className={`relative block min-h-40 overflow-hidden bg-gradient-to-br ${accent} p-5 text-white`}>
+      <Link href={href} className="relative block min-h-40 overflow-hidden bg-gradient-to-br from-slate-900 via-violet-800 to-indigo-700 p-5 text-white">
         {item.thumbnailUrl && <img src={item.thumbnailUrl} alt="" className="absolute inset-0 h-full w-full object-cover opacity-25 mix-blend-luminosity transition duration-500 group-hover:scale-105" />}
         <div aria-hidden className="absolute -right-10 -top-12 h-36 w-36 rounded-full border-[24px] border-white/10" />
         <div className="relative flex h-full flex-col justify-between">

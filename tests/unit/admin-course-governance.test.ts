@@ -12,6 +12,9 @@ import {
 const adminCourse = {
   ownerType: "admin",
   ownerId: null,
+  price: "99.00",
+  originalPrice: null,
+  isOnSale: false,
   productType: "assessment",
   assessmentPurpose: "certification",
   visibility: "public",
@@ -88,32 +91,23 @@ describe("admin course governance", () => {
     });
   });
 
-  it("rejects new Grade 1–10 first-party practice assessments", () => {
+  it("derives sale state from database pricing values", () => {
     const parsed = adminCourseCreateSchema.parse({
       ...validCreate,
-      title: "Grade 8 Mathematics Practice",
-      assessmentPurpose: "practice",
+      price: "99.00",
+      originalPrice: "199.00",
+      isOnSale: false,
     });
-    expect(() => buildAdminOwnedCourseCreate(parsed, "grade-8-mathematics-practice"))
-      .toThrow("outside the first-party Octamy portfolio");
-  });
+    expect(buildAdminOwnedCourseCreate(parsed, "sale-priced-assessment")).toMatchObject({
+      price: "99.00",
+      originalPrice: "199.00",
+      isOnSale: true,
+    });
 
-  it("keeps quarantined Grade 1–10 shells unpublished while allowing operational unpublish", () => {
-    const gradeShell = {
-      ...adminCourse,
-      title: "Grade 3 Mathematics Practice",
-      slug: "grade-3-mathematics-practice",
-      assessmentPurpose: "practice",
-      visibility: "private",
-    };
-    expect(buildGovernedAdminCourseUpdate(
-      gradeShell,
-      adminCourseUpdateSchema.parse({ isActive: false, visibility: "private" }),
-    )).toMatchObject({ isActive: false, visibility: "private" });
     expect(() => buildGovernedAdminCourseUpdate(
-      gradeShell,
-      adminCourseUpdateSchema.parse({ isActive: true, visibility: "public" }),
-    )).toThrow("cannot be published");
+      adminCourse,
+      adminCourseUpdateSchema.parse({ originalPrice: "49.00" }),
+    )).toThrow("Original/list price cannot be lower");
   });
 
   it("does not mark non-assessment or non-public items as subscription inventory", () => {

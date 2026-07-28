@@ -239,6 +239,13 @@
       "when": 1785175476728,
       "tag": "0033_unpublish_audited_blocked_assessments",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1785225600000,
+      "tag": "0034_database_managed_sale_state",
+      "breakpoints": true
     }
   ]
 }

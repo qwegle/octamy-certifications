@@ -1125,7 +1125,6 @@ const courseSchema = z.object({
   productType: z.enum(["assessment", "video_course", "ebook", "bundle"]),
   contentPrice: z.string().optional(),
   originalPrice: z.string().optional(),
-  isOnSale: z.boolean().default(false),
   level: z.enum(["novice", "intermediate", "advanced", "expert"]),
   visibility: z.enum(["public", "unlisted", "private"]),
   isActive: z.boolean().default(false),
@@ -1169,7 +1168,6 @@ function CourseForm({ course, onCancel, onSuccess }: { course?: any; onCancel: (
       productType: course?.productType || "assessment",
       contentPrice: course?.contentPrice || "",
       originalPrice: course?.originalPrice || "",
-      isOnSale: course?.isOnSale || false,
       level: ["novice", "intermediate", "advanced", "expert"].includes(course?.level) ? course.level : "novice",
       visibility: course?.visibility || "public",
       isActive: course?.isActive === true,
@@ -1193,7 +1191,6 @@ function CourseForm({ course, onCancel, onSuccess }: { course?: any; onCancel: (
         productType: course.productType || "assessment",
         contentPrice: course.contentPrice || "",
         originalPrice: course.originalPrice || "",
-        isOnSale: course.isOnSale || false,
         level: ["novice", "intermediate", "advanced", "expert"].includes(course.level) ? course.level : "novice",
         visibility: course.visibility || "public",
         isActive: course.isActive === true,
@@ -1447,10 +1444,11 @@ function CourseForm({ course, onCancel, onSuccess }: { course?: any; onCancel: (
               name="price"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Price (₹)</FormLabel>
+                  <FormLabel>{form.watch("productType") === "assessment" ? "Credential activation price (₹)" : "Current price (₹)"}</FormLabel>
                   <FormControl>
                     <Input placeholder="99" {...field} />
                   </FormControl>
+                  <FormDescription>This is the amount charged now. If a higher original/list price is entered below, Octamy marks it on sale automatically.</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -1478,11 +1476,11 @@ function CourseForm({ course, onCancel, onSuccess }: { course?: any; onCancel: (
               name="originalPrice"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Original Price (₹)</FormLabel>
+                  <FormLabel>Original/list price (₹)</FormLabel>
                   <FormControl>
                     <Input placeholder="199" {...field} />
                   </FormControl>
-                  <FormDescription>For sale pricing display</FormDescription>
+                  <FormDescription>Optional. It must be higher than the current price to display a strike-through price and savings.</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -1507,23 +1505,7 @@ function CourseForm({ course, onCancel, onSuccess }: { course?: any; onCancel: (
             )}
           />
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <FormField
-              control={form.control}
-              name="isOnSale"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                  <div className="space-y-0.5">
-                    <FormLabel className="text-base">On Sale</FormLabel>
-                    <FormDescription>Mark this course as on sale</FormDescription>
-                  </div>
-                  <FormControl>
-                    <Switch checked={field.value} onCheckedChange={field.onChange} />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <FormField
               control={form.control}
               name="isActive"
