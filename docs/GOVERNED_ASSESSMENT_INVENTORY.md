@@ -88,26 +88,30 @@ pass. `releaseReady` is stricter and implements the full governed program.
 `unsafePublished` means a row is currently active/public/approved while the
 strict inventory still has blockers; it does not mutate that row.
 
-## Fail-closed representation gaps
+## Attributable release evidence
 
-The current schema does **not** represent all evidence required by the scale
-program. Therefore the inventory emits blockers rather than inferring approval:
+Migration `0035_governed_assessment_release_evidence.sql` represents the three
+strict release gates that previously had no storage model. Evidence is bound to
+the exact `(assessment_id, blueprint_revision)` and is append-only; a changed
+blueprint or evidence set requires a new revision rather than an update.
 
-- `RIGHTS_ROLE_SEPARATION_NOT_VERIFIABLE`: source rights reviewers are free-text
-  values, so their separation from attributable item authors/content reviewers
-  cannot be system-verified.
-- `ASSESSMENT_ACCESSIBILITY_ACCEPTANCE_NOT_REPRESENTED`: media alt text exists,
-  but there is no assessment-level accessibility reviewer acceptance record.
-- `IMMUTABLE_RELEASE_BUNDLE_NOT_REPRESENTED`: there is no immutable record for
-  simulated forms, standard setting/cut-score approval, representative attempt
-  QA, publisher sign-off, release commit/time, rollback ownership, and takedown.
+- `RIGHTS_ROLE_SEPARATION_NOT_VERIFIABLE` clears only when every in-scope source
+  has an attributable `assessment_rights_role_reviews` row whose reference and
+  SHA-256 exactly match the source register. The user must differ from item
+  authors, content reviewers, and the accessibility reviewer.
+- `ASSESSMENT_ACCESSIBILITY_ACCEPTANCE_NOT_REPRESENTED` clears only for a
+  current-revision acceptance with an attributable independent reviewer,
+  named standard, exact evidence reference, SHA-256, and acceptance time.
+- `IMMUTABLE_RELEASE_BUNDLE_NOT_REPRESENTED` clears only for a current-revision
+  immutable bundle whose content-manifest digest matches the exact scoped item
+  IDs, versions, content/provenance hashes, and blueprint rules. It also requires
+  hashed form simulation, authoritative cut score and approval, hashed release
+  QA, distinct content/cut-score/QA/publisher users, sign-off timestamps, release
+  commit/time, rollback owner, and a hashed takedown procedure.
 
-Consequently, a row may pass current runtime publication checks while still be
-blocked for governed release. Do not remove or downgrade these blockers based
-on a review document, ticket, filename, generated content, or operator claim.
-A future reviewed migration and guarded single-assessment release workflow must
-store attributable evidence before the inventory can treat those gates as
-represented. This tool deliberately does not create that migration or evidence.
+Partial, stale-revision, self-approved, mismatched, free-text-only, ticket-only,
+or filename-only claims remain blocked. `unsafePublished` is based on strict
+`releaseReady`, not merely the narrower runtime question-bank gate.
 
 ## Operator runbook: candidate pack to publishable assessment
 
@@ -144,7 +148,34 @@ npm run questions:review -- \
   --operator "<content reviewer name>" --apply --confirm-reviewed
 ```
 
-Only after step 3 approves enough items may an authorized admin activate the
+After content, provenance, bank, and blueprint blockers are cleared, record the
+assessment-level evidence. The command refuses substantive blockers, a
+non-admin recording operator, missing users, conflicting immutable evidence,
+and any overlap among accessibility/content/rights/cut-score/QA/publisher IDs.
+It never changes publication state.
+
+```bash
+# 4. Preview only (default):
+npx tsx scripts/record-assessment-release-evidence.ts \
+  --assessment <slug> --operator "<named operator>" --operator-user-id <admin id> \
+  --accessibility-reviewer-user-id <id> --content-reviewer-user-id <id> \
+  --rights-reviewer-user-id <id> --cut-score-approver-user-id <id> \
+  --qa-reviewer-user-id <id> --publisher-user-id <id> --rollback-owner-user-id <id> \
+  --accessibility-standard "WCAG 2.2 AA" \
+  --accessibility-reference <vault-reference> --accessibility-sha256 <sha256> \
+  --form-simulation-reference <vault-reference> --form-simulation-sha256 <sha256> \
+  --cut-score-method "<reviewed method>" \
+  --cut-score-approval-reference <vault-reference> --cut-score-approval-sha256 <sha256> \
+  --release-qa-reference <vault-reference> --release-qa-sha256 <sha256> \
+  --release-commit <git-sha> --takedown-procedure "<reviewed procedure>"
+
+# 5. Repeat the exact command only after review, adding both write guards:
+#    --apply --confirm-release-evidence
+# 6. Independently verify strict readiness:
+npm run --silent assessments:inventory -- --format summary --assessment <slug>
+```
+
+Only after step 6 reports `RELEASE_READY` may an authorized admin publish the
 bank, wire the blueprint quotas, and publish the assessment through the
 governed admin workflow. Publication is still refused while any strict
 release blocker remains, and `scripts/deploy-production.sh` fails the release

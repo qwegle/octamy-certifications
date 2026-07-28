@@ -246,6 +246,13 @@
       "when": 1785225600000,
       "tag": "0034_database_managed_sale_state",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1785240000000,
+      "tag": "0035_governed_assessment_release_evidence",
+      "breakpoints": true
     }
   ]
 }

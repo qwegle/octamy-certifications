@@ -1144,6 +1144,141 @@ export const insertQuestionBankSchema = createInsertSchema(questionBanks).omit({
   createdAt: true,
   updatedAt: true,
 });
+
+// Immutable, attributable evidence for governed assessment release. Every row
+// is bound to an exact blueprint revision; database triggers in migration 0035
+// reject updates/deletes and enforce cross-role separation.
+export const assessmentAccessibilityAcceptances = pgTable("assessment_accessibility_acceptances", {
+  id: serial("id").primaryKey(),
+  assessmentId: integer("assessment_id").notNull(),
+  blueprintRevision: integer("blueprint_revision").notNull(),
+  reviewerUserId: integer("reviewer_user_id").references(() => users.id, { onDelete: "restrict" }).notNull(),
+  standard: text("standard").notNull(),
+  evidenceReference: text("evidence_reference").notNull(),
+  evidenceSha256: text("evidence_sha256").notNull(),
+  acceptedAt: timestamp("accepted_at", { withTimezone: true }).notNull(),
+  operator: text("operator").notNull(),
+  recordedByUserId: integer("recorded_by_user_id").references(() => users.id, { onDelete: "restrict" }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => ({
+  revisionUnique: unique("assessment_accessibility_acceptances_revision_unique").on(t.assessmentId, t.blueprintRevision),
+  revisionReference: foreignKey({
+    columns: [t.assessmentId, t.blueprintRevision],
+    foreignColumns: [courseQuestionBlueprintVersions.courseId, courseQuestionBlueprintVersions.revision],
+    name: "assessment_accessibility_acceptances_revision_fk",
+  }).onDelete("restrict"),
+  byAssessment: index("assessment_accessibility_acceptances_assessment_idx").on(t.assessmentId, t.blueprintRevision, t.acceptedAt),
+  revision: check("assessment_accessibility_acceptances_revision_check", sql`${t.blueprintRevision} >= 1`),
+  standard: check("assessment_accessibility_acceptances_standard_check", sql`length(btrim(${t.standard})) BETWEEN 3 AND 120`),
+  reference: check("assessment_accessibility_acceptances_reference_check", sql`length(btrim(${t.evidenceReference})) BETWEEN 8 AND 500`),
+  hash: check("assessment_accessibility_acceptances_hash_check", sql`${t.evidenceSha256} ~ '^[0-9a-f]{64}$'`),
+  operator: check("assessment_accessibility_acceptances_operator_check", sql`length(btrim(${t.operator})) BETWEEN 3 AND 200`),
+}));
+
+export const assessmentRightsRoleReviews = pgTable("assessment_rights_role_reviews", {
+  id: serial("id").primaryKey(),
+  assessmentId: integer("assessment_id").notNull(),
+  blueprintRevision: integer("blueprint_revision").notNull(),
+  sourceId: integer("source_id").references(() => questionPackSources.id, { onDelete: "restrict" }).notNull(),
+  reviewerUserId: integer("reviewer_user_id").references(() => users.id, { onDelete: "restrict" }).notNull(),
+  evidenceReference: text("evidence_reference").notNull(),
+  evidenceSha256: text("evidence_sha256").notNull(),
+  reviewedAt: timestamp("reviewed_at", { withTimezone: true }).notNull(),
+  operator: text("operator").notNull(),
+  recordedByUserId: integer("recorded_by_user_id").references(() => users.id, { onDelete: "restrict" }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => ({
+  sourceUnique: unique("assessment_rights_role_reviews_source_unique").on(t.assessmentId, t.blueprintRevision, t.sourceId),
+  revisionReference: foreignKey({
+    columns: [t.assessmentId, t.blueprintRevision],
+    foreignColumns: [courseQuestionBlueprintVersions.courseId, courseQuestionBlueprintVersions.revision],
+    name: "assessment_rights_role_reviews_revision_fk",
+  }).onDelete("restrict"),
+  byAssessment: index("assessment_rights_role_reviews_assessment_idx").on(t.assessmentId, t.blueprintRevision, t.sourceId),
+  revision: check("assessment_rights_role_reviews_revision_check", sql`${t.blueprintRevision} >= 1`),
+  reference: check("assessment_rights_role_reviews_reference_check", sql`length(btrim(${t.evidenceReference})) BETWEEN 8 AND 500`),
+  hash: check("assessment_rights_role_reviews_hash_check", sql`${t.evidenceSha256} ~ '^[0-9a-f]{64}$'`),
+  operator: check("assessment_rights_role_reviews_operator_check", sql`length(btrim(${t.operator})) BETWEEN 3 AND 200`),
+}));
+
+export const assessmentReleaseBundles = pgTable("assessment_release_bundles", {
+  id: serial("id").primaryKey(),
+  assessmentId: integer("assessment_id").notNull(),
+  blueprintRevision: integer("blueprint_revision").notNull(),
+  contentManifestSha256: text("content_manifest_sha256").notNull(),
+  formSimulationReference: text("form_simulation_reference").notNull(),
+  formSimulationSha256: text("form_simulation_sha256").notNull(),
+  cutScore: integer("cut_score").notNull(),
+  cutScoreMethod: text("cut_score_method").notNull(),
+  cutScoreApprovalReference: text("cut_score_approval_reference").notNull(),
+  cutScoreApprovalSha256: text("cut_score_approval_sha256").notNull(),
+  cutScoreApproverUserId: integer("cut_score_approver_user_id").references(() => users.id, { onDelete: "restrict" }).notNull(),
+  cutScoreApprovedAt: timestamp("cut_score_approved_at", { withTimezone: true }).notNull(),
+  releaseQaReference: text("release_qa_reference").notNull(),
+  releaseQaSha256: text("release_qa_sha256").notNull(),
+  qaReviewerUserId: integer("qa_reviewer_user_id").references(() => users.id, { onDelete: "restrict" }).notNull(),
+  qaAcceptedAt: timestamp("qa_accepted_at", { withTimezone: true }).notNull(),
+  contentReviewerUserId: integer("content_reviewer_user_id").references(() => users.id, { onDelete: "restrict" }).notNull(),
+  publisherUserId: integer("publisher_user_id").references(() => users.id, { onDelete: "restrict" }).notNull(),
+  publisherSignedAt: timestamp("publisher_signed_at", { withTimezone: true }).notNull(),
+  releaseCommit: text("release_commit").notNull(),
+  releasedAt: timestamp("released_at", { withTimezone: true }).notNull(),
+  rollbackOwnerUserId: integer("rollback_owner_user_id").references(() => users.id, { onDelete: "restrict" }).notNull(),
+  takedownProcedure: text("takedown_procedure").notNull(),
+  takedownProcedureSha256: text("takedown_procedure_sha256").notNull(),
+  bundleSha256: text("bundle_sha256").notNull(),
+  operator: text("operator").notNull(),
+  recordedByUserId: integer("recorded_by_user_id").references(() => users.id, { onDelete: "restrict" }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => ({
+  revisionUnique: unique("assessment_release_bundles_revision_unique").on(t.assessmentId, t.blueprintRevision),
+  revisionReference: foreignKey({
+    columns: [t.assessmentId, t.blueprintRevision],
+    foreignColumns: [courseQuestionBlueprintVersions.courseId, courseQuestionBlueprintVersions.revision],
+    name: "assessment_release_bundles_revision_fk",
+  }).onDelete("restrict"),
+  byAssessment: index("assessment_release_bundles_assessment_idx").on(t.assessmentId, t.blueprintRevision, t.releasedAt),
+  revision: check("assessment_release_bundles_revision_check", sql`${t.blueprintRevision} >= 1`),
+  hashes: check("assessment_release_bundles_hashes_check", sql`
+    ${t.contentManifestSha256} ~ '^[0-9a-f]{64}$'
+    AND ${t.formSimulationSha256} ~ '^[0-9a-f]{64}$'
+    AND ${t.cutScoreApprovalSha256} ~ '^[0-9a-f]{64}$'
+    AND ${t.releaseQaSha256} ~ '^[0-9a-f]{64}$'
+    AND ${t.takedownProcedureSha256} ~ '^[0-9a-f]{64}$'
+    AND ${t.bundleSha256} ~ '^[0-9a-f]{64}$'
+  `),
+  references: check("assessment_release_bundles_references_check", sql`
+    length(btrim(${t.formSimulationReference})) BETWEEN 8 AND 500
+    AND length(btrim(${t.cutScoreApprovalReference})) BETWEEN 8 AND 500
+    AND length(btrim(${t.releaseQaReference})) BETWEEN 8 AND 500
+  `),
+  cutScore: check("assessment_release_bundles_cut_score_check", sql`${t.cutScore} BETWEEN 0 AND 100`),
+  cutScoreMethod: check("assessment_release_bundles_cut_score_method_check", sql`length(btrim(${t.cutScoreMethod})) BETWEEN 3 AND 500`),
+  releaseCommit: check("assessment_release_bundles_commit_check", sql`${t.releaseCommit} ~ '^([0-9a-f]{40}|[0-9a-f]{64})$'`),
+  takedown: check("assessment_release_bundles_takedown_check", sql`length(btrim(${t.takedownProcedure})) BETWEEN 20 AND 4000`),
+  operator: check("assessment_release_bundles_operator_check", sql`length(btrim(${t.operator})) BETWEEN 3 AND 200`),
+  timeOrder: check("assessment_release_bundles_time_order_check", sql`
+    ${t.cutScoreApprovedAt} <= ${t.releasedAt}
+    AND ${t.qaAcceptedAt} <= ${t.releasedAt}
+    AND ${t.publisherSignedAt} <= ${t.releasedAt}
+  `),
+  internalSeparation: check("assessment_release_bundles_internal_separation_check", sql`
+    ${t.contentReviewerUserId} <> ${t.cutScoreApproverUserId}
+    AND ${t.contentReviewerUserId} <> ${t.qaReviewerUserId}
+    AND ${t.contentReviewerUserId} <> ${t.publisherUserId}
+    AND ${t.cutScoreApproverUserId} <> ${t.qaReviewerUserId}
+    AND ${t.cutScoreApproverUserId} <> ${t.publisherUserId}
+    AND ${t.qaReviewerUserId} <> ${t.publisherUserId}
+  `),
+}));
+
+export type AssessmentAccessibilityAcceptance = typeof assessmentAccessibilityAcceptances.$inferSelect;
+export type InsertAssessmentAccessibilityAcceptance = typeof assessmentAccessibilityAcceptances.$inferInsert;
+export type AssessmentRightsRoleReview = typeof assessmentRightsRoleReviews.$inferSelect;
+export type InsertAssessmentRightsRoleReview = typeof assessmentRightsRoleReviews.$inferInsert;
+export type AssessmentReleaseBundle = typeof assessmentReleaseBundles.$inferSelect;
+export type InsertAssessmentReleaseBundle = typeof assessmentReleaseBundles.$inferInsert;
+
 export const insertQuestionTopicSchema = createInsertSchema(questionTopics).omit({
   id: true,
   createdAt: true,
