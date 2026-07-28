@@ -291,6 +291,8 @@ export async function buildGovernedAssessmentInventory(options: {
               AND (blueprint.difficulty = 'mixed' OR blueprint.difficulty = question.difficulty)
          )
         WHERE course.id = ANY($1::int[])
+          AND question.review_status = 'approved'
+          AND question.is_active = true
         ORDER BY course.id, question.id`,
       [courseIds],
     );
@@ -316,6 +318,8 @@ export async function buildGovernedAssessmentInventory(options: {
          INNER JOIN question_provenance provenance ON provenance.question_id = question.id
          INNER JOIN question_pack_sources source ON source.id = provenance.source_id
         WHERE course.id = ANY($1::int[])
+          AND question.review_status = 'approved'
+          AND question.is_active = true
         ORDER BY course.id, question.id, source.id`,
       [courseIds],
     );

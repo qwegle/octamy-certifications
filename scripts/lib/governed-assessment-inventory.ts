@@ -338,7 +338,7 @@ export function evaluateGovernedAssessmentInventory(
     status: releaseReady ? "release_ready" : "blocked",
     releaseReady,
     runtimePublishReady,
-    unsafePublished: currentlyPublished && !releaseReady,
+    unsafePublished: currentlyPublished && !runtimePublishReady,
     blueprint: {
       enabled: input.useBlueprintEngine,
       revisionCount: input.blueprintRevisionCount,
