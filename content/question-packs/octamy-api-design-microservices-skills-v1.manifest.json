@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "sourceKey": "octamy-original:api-design-microservices-skills:v1",
+  "name": "Octamy API Design and Microservices Skills Bank v1",
+  "publisher": "Octamy",
+  "datasetVersion": "1.0.0",
+  "description": "Eighty original API design and microservices certification questions aligned to RFC 9110/9111, OpenAPI 3.1, OWASP API Security 2023, Twelve-Factor App, and Kubernetes documentation snapshot dated 2026-07-28.",
+  "sourceUrl": "https://octamy.com/",
+  "retrievedAt": "2026-07-28T00:00:00.000Z",
+  "license": {
+    "identifier": "Proprietary-Octamy-Original-1.0",
+    "name": "Octamy original-content rights",
+    "url": "https://octamy.com/terms-of-service",
+    "rightsBasis": "owned",
+    "commercialUseAllowed": true,
+    "derivativesAllowed": true,
+    "shareAlikeObligation": "none",
+    "attributionText": "Octamy original API design and microservices assessment content",
+    "evidenceReference": "octamy-api-design-microservices-skills-v1:source-controlled-authored-items"
+  },
+  "provenance": {
+    "acquisitionMethod": "first_party",
+    "originalFormat": "JSONL",
+    "chainOfTitle": "Every prompt, option, answer and explanation is original first-party Octamy content; official standards and product documentation are cited only as factual evidence and assessment wording is not copied.",
+    "notes": "Registration and validation do not approve or publish this bank. A named independent subject-matter reviewer must review every exact item version before activation."
+  }
+}
