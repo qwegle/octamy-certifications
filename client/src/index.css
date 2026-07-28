@@ -3,42 +3,120 @@
 @tailwind utilities;
 
 :root {
-  /* Octamy iOS-cream palette — very light cream */
-  --background: hsl(40, 50%, 98%);
-  --foreground: hsl(0, 0%, 6%);
-  --muted: hsl(40, 38%, 95%);
-  --muted-foreground: hsl(0, 0%, 40%);
-  --popover: hsl(40, 60%, 99%);
-  --popover-foreground: hsl(0, 0%, 6%);
-  --card: hsl(40, 60%, 99.5%);
-  --card-foreground: hsl(0, 0%, 6%);
-  --border: hsl(36, 22%, 84%);
-  --input: hsl(36, 22%, 84%);
-  --primary: hsl(0, 0%, 6%);
-  --primary-foreground: hsl(40, 60%, 99%);
-  --secondary: hsl(40, 38%, 95%);
-  --secondary-foreground: hsl(0, 0%, 9%);
-  --accent: hsl(40, 38%, 95%);
-  --accent-foreground: hsl(0, 0%, 9%);
-  --destructive: hsl(0, 84%, 60%);
-  --destructive-foreground: hsl(0, 0%, 98%);
-  --ring: hsl(0, 0%, 6%);
-  --radius: 1rem;
-  --cream: hsl(40, 50%, 98%);
-  --cream-soft: hsl(40, 60%, 99.5%);
-  --cream-deep: hsl(36, 30%, 88%);
-  --octamy-black: hsl(0, 0%, 0%);
+  /* Warm-neutral semantic palette. Body and muted text meet WCAG AA. */
+  --background: hsl(40, 45%, 98%);
+  --foreground: hsl(24, 10%, 10%);
+  --muted: hsl(38, 28%, 94%);
+  --muted-foreground: hsl(24, 7%, 38%);
+  --popover: hsl(40, 50%, 99.5%);
+  --popover-foreground: hsl(24, 10%, 10%);
+  --card: hsl(40, 50%, 99.5%);
+  --card-foreground: hsl(24, 10%, 10%);
+  --border: hsl(34, 18%, 80%);
+  --input: hsl(34, 18%, 76%);
+  --primary: hsl(24, 10%, 10%);
+  --primary-foreground: hsl(40, 50%, 99%);
+  --secondary: hsl(38, 28%, 93%);
+  --secondary-foreground: hsl(24, 10%, 14%);
+  --accent: hsl(38, 30%, 92%);
+  --accent-foreground: hsl(24, 10%, 12%);
+  --destructive: hsl(0, 72%, 42%);
+  --destructive-foreground: hsl(0, 0%, 100%);
+  --ring: hsl(217, 91%, 46%);
+  --radius: 0.875rem;
+  --control-height: 2.75rem;
+  --shadow-surface: 0 1px 2px hsla(24, 10%, 10%, 0.06), 0 8px 24px -20px hsla(24, 10%, 10%, 0.28);
+  --shadow-raised: 0 12px 32px -18px hsla(24, 10%, 10%, 0.32), 0 2px 8px hsla(24, 10%, 10%, 0.06);
+  --chart-1: hsl(222, 72%, 48%);
+  --chart-2: hsl(158, 64%, 34%);
+  --chart-3: hsl(35, 88%, 45%);
+  --chart-4: hsl(271, 62%, 52%);
+  --chart-5: hsl(350, 68%, 48%);
+  --sidebar-background: hsl(40, 45%, 97%);
+  --sidebar-foreground: hsl(24, 10%, 14%);
+  --sidebar-primary: hsl(24, 10%, 10%);
+  --sidebar-primary-foreground: hsl(40, 50%, 99%);
+  --sidebar-accent: hsl(38, 28%, 92%);
+  --sidebar-accent-foreground: hsl(24, 10%, 12%);
+  --sidebar-border: hsl(34, 18%, 80%);
+  --sidebar-ring: hsl(217, 91%, 46%);
+  --cream: hsl(40, 45%, 98%);
+  --cream-soft: hsl(40, 50%, 99.5%);
+  --cream-deep: hsl(36, 26%, 86%);
+  --octamy-black: hsl(24, 10%, 8%);
   --octamy-white: hsl(0, 0%, 100%);
-  --octamy-gray-50: hsl(0, 0%, 97%);
-  --octamy-gray-100: hsl(0, 0%, 91%);
-  --octamy-gray-200: hsl(0, 0%, 87%);
-  --octamy-gray-300: hsl(0, 0%, 80%);
-  --octamy-gray-400: hsl(0, 0%, 68%);
-  --octamy-gray-500: hsl(0, 0%, 42%);
-  --octamy-gray-600: hsl(0, 0%, 29%);
-  --octamy-gray-700: hsl(0, 0%, 20%);
-  --octamy-gray-800: hsl(0, 0%, 13%);
-  --octamy-gray-900: hsl(0, 0%, 0%);
+  --octamy-gray-50: hsl(36, 20%, 97%);
+  --octamy-gray-100: hsl(34, 16%, 92%);
+  --octamy-gray-200: hsl(34, 13%, 86%);
+  --octamy-gray-300: hsl(32, 10%, 76%);
+  --octamy-gray-400: hsl(28, 7%, 60%);
+  --octamy-gray-500: hsl(24, 7%, 42%);
+  --octamy-gray-600: hsl(24, 8%, 31%);
+  --octamy-gray-700: hsl(24, 9%, 22%);
+  --octamy-gray-800: hsl(24, 10%, 14%);
+  --octamy-gray-900: hsl(24, 10%, 8%);
+}
+
+.dark {
+  --chart-1: hsl(217, 91%, 66%);
+  --chart-2: hsl(158, 64%, 52%);
+  --chart-3: hsl(38, 92%, 58%);
+  --chart-4: hsl(271, 72%, 68%);
+  --chart-5: hsl(350, 78%, 65%);
+  --sidebar-background: hsl(0, 0%, 5%);
+  --sidebar-foreground: hsl(0, 0%, 95%);
+  --sidebar-primary: hsl(0, 0%, 98%);
+  --sidebar-primary-foreground: hsl(0, 0%, 5%);
+  --sidebar-accent: hsl(0, 0%, 13%);
+  --sidebar-accent-foreground: hsl(0, 0%, 98%);
+  --sidebar-border: hsl(0, 0%, 18%);
+  --sidebar-ring: hsl(217, 91%, 66%);
+}
+
+@layer base {
+  html {
+    color-scheme: light;
+    scroll-behavior: smooth;
+  }
+
+  .dark { color-scheme: dark; }
+
+  body {
+    min-width: 320px;
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+
+  h1, h2, h3, h4 {
+    text-wrap: balance;
+  }
+
+  p { text-wrap: pretty; }
+
+  ::selection {
+    background: hsl(217 91% 60% / 0.2);
+    color: var(--foreground);
+  }
+
+  :where(a, button, input, textarea, select, summary, [tabindex]):focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 3px;
+  }
+
+  :where(button, input, textarea, select)[disabled],
+  [aria-disabled="true"] {
+    cursor: not-allowed;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* Certificate Auto-Scroll Animation */

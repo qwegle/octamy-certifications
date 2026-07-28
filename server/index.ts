@@ -230,6 +230,216 @@ app.use((req, res, next) => {
     logger.error("unhandled.route_error", { status, msg: rawMessage, err });
   });
 
+  // A SPA fallback must not turn unknown URLs into indexable HTTP 200 pages.
+  // Keep this after API/redirect routes and before Vite/the production shell.
+  app.use(async (req: Request, res: Response, next: NextFunction) => {
+    if (req.method !== "GET" && req.method !== "HEAD") return next();
+
+    const requestPath = req.path;
+    const isDevelopmentAsset = app.get("env") === "development"
+      && (requestPath.startsWith("/@") || requestPath.startsWith("/src/") || requestPath.startsWith("/node_modules/"));
+    const isStaticAsset = isDevelopmentAsset
+      || requestPath.startsWith("/assets/")
+      || requestPath.startsWith("/uploads/")
+      || path.posix.extname(requestPath) !== "";
+    if (isStaticAsset) return next();
+
+    const routePath = requestPath.replace(/\/+$/, "") || "/";
+    const { isKnownClientRoute, canonicalPublicSlug } = await import("@shared/public-assessment-routes");
+
+    const escapeHtml = (value: string) => value
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+    const sendNotFound = () => {
+      res.set({
+        "Cache-Control": "no-store",
+        "X-Robots-Tag": "noindex, nofollow",
+      });
+      return res.status(404).type("html").send(`<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>Page not found | Octamy</title>
+<style>body{margin:0;background:#f8fafc;color:#0f172a;font:16px/1.6 system-ui,sans-serif}main{max-width:720px;margin:10vh auto;padding:32px}section{background:#fff;border:1px solid #e2e8f0;border-radius:24px;padding:clamp(28px,6vw,56px);box-shadow:0 18px 50px #0f172a12}p{color:#475569}nav{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}a{background:#4f46e5;color:#fff;text-decoration:none;font-weight:700;padding:11px 16px;border-radius:999px}a:nth-child(2){background:#0f172a}a:nth-child(3){background:#fff;color:#334155;border:1px solid #cbd5e1}code{overflow-wrap:anywhere}</style></head>
+<body><main><section><p><strong>404</strong></p><h1>We couldn’t find this page</h1><p>The address <code>${escapeHtml(requestPath)}</code> may be incorrect, or the page may no longer be available.</p>
+<nav aria-label="Live Octamy catalogues"><a href="/get-certified">Browse certifications</a><a href="/practice">Browse practice exams</a><a href="/courses">Browse courses</a></nav></section></main></body></html>`);
+    };
+
+    if (!isKnownClientRoute(routePath)) return sendNotFound();
+
+    // Route-shape matching alone cannot tell whether a public slug exists.
+    // Resolve catalog detail/category routes against the same live database.
+    const publicMatch = routePath.match(/^\/(get-certified|practice)(?:\/(categories))?\/([^/]+)$/);
+    if (publicMatch) {
+      const [, surface, categorySegment, rawSlug] = publicMatch;
+      const slug = canonicalPublicSlug(rawSlug);
+      if (!slug) return sendNotFound();
+      try {
+        const { db } = await import("./db");
+        const { categories, courses } = await import("@shared/schema");
+        const { and, eq, inArray } = await import("drizzle-orm");
+        let found = false;
+        if (categorySegment) {
+          const rows = await db.select({ id: categories.id }).from(categories)
+            .where(and(eq(categories.slug, slug), eq(categories.isActive, true))).limit(1);
+          found = rows.length > 0;
+        } else {
+          const purpose = surface === "practice" ? "practice" : "certification";
+          const rows = await db.select({ id: courses.id }).from(courses)
+            .innerJoin(categories, eq(categories.id, courses.categoryId))
+            .where(and(
+              eq(courses.slug, slug),
+              inArray(courses.productType, ["assessment", "bundle"]),
+              eq(courses.assessmentPurpose, purpose),
+              eq(courses.isActive, true),
+              eq(courses.visibility, "public"),
+              eq(courses.reviewStatus, "approved"),
+              eq(categories.isActive, true),
+            )).limit(1);
+          found = rows.length > 0;
+        }
+        if (!found) return sendNotFound();
+      } catch (error) {
+        // A lookup outage is not evidence that a valid page disappeared, but it
+        // must not fall through as an indexable HTTP 200 soft-404 either.
+        logger.warn("spa.public_route_lookup_failed", { path: routePath, error: String(error) });
+        res.set({
+          "Cache-Control": "no-store",
+          "Retry-After": "60",
+          "X-Robots-Tag": "noindex, nofollow",
+        });
+        return res.status(503).type("html").send("<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"robots\" content=\"noindex,nofollow\"><title>Catalogue temporarily unavailable | Octamy</title></head><body><main><h1>Catalogue temporarily unavailable</h1><p>Please try again shortly.</p><p><a href=\"/get-certified\">Certifications</a> · <a href=\"/practice\">Practice exams</a></p></main></body></html>");
+      }
+    }
+
+    const isCanonicalPublicSurface = routePath === "/get-certified"
+      || routePath.startsWith("/get-certified/")
+      || routePath === "/practice"
+      || routePath.startsWith("/practice/")
+      || routePath === "/courses"
+      || routePath.startsWith("/learn/");
+    if (isCanonicalPublicSurface && requestPath !== routePath) {
+      const queryIndex = req.originalUrl.indexOf("?");
+      const query = queryIndex >= 0 ? req.originalUrl.slice(queryIndex) : "";
+      return res.redirect(308, `${routePath}${query}`);
+    }
+
+    return next();
+  });
+
+  // Supply crawler-visible metadata for public catalogue pages not handled by
+  // the certification detail renderer in serveStatic(). Client Helmet then
+  // takes over with the same canonical URL after hydration.
+  if (app.get("env") !== "development") {
+    app.get([
+      "/get-certified",
+      "/practice",
+      "/practice/categories/:slug",
+      "/practice/:slug",
+    ], async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const [{ readFile }, { canonicalOctamyUrl }] = await Promise.all([
+          import("node:fs/promises"),
+          import("@shared/public-assessment-routes"),
+        ]);
+        const indexPath = path.resolve(import.meta.dirname, "public", "index.html");
+        const html = await readFile(indexPath, "utf8");
+        const baseDescription = "Explore reviewed Octamy assessments with transparent access, scoring, and credential terms.";
+        let title = "Professional Certification Exams | Octamy";
+        let description = "Take a reviewed certification exam free, see your score, and choose credential activation only after passing.";
+        let image = "https://octamy.com/og-image.png";
+        let schemaType = "CollectionPage";
+
+        if (req.path === "/practice") {
+          title = "Practice Exams and Practice Pass | Octamy";
+          description = "Browse reviewed practice exams. Practice Pass access is separate from certification exams and does not issue recruiter credentials.";
+        } else if (req.path.startsWith("/practice/categories/")) {
+          const { db } = await import("./db");
+          const { categories } = await import("@shared/schema");
+          const { and, eq } = await import("drizzle-orm");
+          const [category] = await db.select({
+            name: categories.name,
+            description: categories.description,
+            metaTitle: categories.metaTitle,
+            metaDescription: categories.metaDescription,
+          }).from(categories).where(and(
+            eq(categories.slug, String(req.params.slug || "").toLowerCase()),
+            eq(categories.isActive, true),
+          )).limit(1);
+          if (category) {
+            title = category.metaTitle || `${category.name} Practice Exams | Octamy`;
+            description = category.metaDescription || category.description || `Browse reviewed ${category.name} practice exams on Octamy.`;
+          }
+        } else if (req.path.startsWith("/practice/")) {
+          const { db } = await import("./db");
+          const { categories, courses } = await import("@shared/schema");
+          const { and, eq, inArray } = await import("drizzle-orm");
+          const [course] = await db.select({
+            title: courses.title,
+            description: courses.description,
+            metaTitle: courses.metaTitle,
+            metaDescription: courses.metaDescription,
+            thumbnailUrl: courses.thumbnailUrl,
+          }).from(courses).innerJoin(categories, eq(categories.id, courses.categoryId)).where(and(
+            eq(courses.slug, String(req.params.slug || "").toLowerCase()),
+            inArray(courses.productType, ["assessment", "bundle"]),
+            eq(courses.assessmentPurpose, "practice"),
+            eq(courses.isActive, true),
+            eq(courses.visibility, "public"),
+            eq(courses.reviewStatus, "approved"),
+            eq(categories.isActive, true),
+          )).limit(1);
+          if (course) {
+            title = course.metaTitle || `${course.title} | Octamy Practice`;
+            description = course.metaDescription || course.description || baseDescription;
+            image = course.thumbnailUrl || image;
+            schemaType = "WebPage";
+          }
+        }
+
+        const cleanTitle = /octamy/i.test(title) ? title : `${title} | Octamy`;
+        const cleanDescription = (description || baseDescription).trim().replace(/\s+/g, " ").slice(0, 300);
+        const canonical = canonicalOctamyUrl(req.path);
+        const absoluteImage = image.startsWith("/") ? `https://octamy.com${image}` : image;
+        const escapeHtml = (value: string) => value
+          .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+        const jsonLd = JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": schemaType,
+          name: cleanTitle,
+          description: cleanDescription,
+          url: canonical,
+          isPartOf: { "@type": "WebSite", name: "Octamy", url: "https://octamy.com/" },
+        }).replace(/</g, "\\u003c");
+        const metadata = `<!-- SEO_HEAD -->
+<title data-react-helmet="true">${escapeHtml(cleanTitle)}</title>
+<meta data-react-helmet="true" name="description" content="${escapeHtml(cleanDescription)}" />
+<meta data-react-helmet="true" name="author" content="Octamy Solutions Private Limited" />
+<meta data-react-helmet="true" name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+<link data-react-helmet="true" rel="canonical" href="${escapeHtml(canonical)}" />
+<meta data-react-helmet="true" property="og:site_name" content="Octamy" />
+<meta data-react-helmet="true" property="og:locale" content="en_IN" />
+<meta data-react-helmet="true" property="og:type" content="website" />
+<meta data-react-helmet="true" property="og:title" content="${escapeHtml(cleanTitle)}" />
+<meta data-react-helmet="true" property="og:description" content="${escapeHtml(cleanDescription)}" />
+<meta data-react-helmet="true" property="og:url" content="${escapeHtml(canonical)}" />
+<meta data-react-helmet="true" property="og:image" content="${escapeHtml(absoluteImage)}" />
+<meta data-react-helmet="true" name="twitter:card" content="summary_large_image" />
+<meta data-react-helmet="true" name="twitter:title" content="${escapeHtml(cleanTitle)}" />
+<meta data-react-helmet="true" name="twitter:description" content="${escapeHtml(cleanDescription)}" />
+<meta data-react-helmet="true" name="twitter:image" content="${escapeHtml(absoluteImage)}" />
+<script id="octamy-page-structured-data" type="application/ld+json">${jsonLd}</script>
+<!-- SEO_HEAD_END -->`;
+        const output = html.replace(/<!--\s*SEO_HEAD\s*-->[\s\S]*?<!--\s*SEO_HEAD_END\s*-->/, metadata);
+        return res.status(200).type("html").send(output);
+      } catch (error) {
+        logger.warn("spa.public_metadata_failed", { path: req.path, error: String(error) });
+        return next();
+      }
+    });
+  }
+
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes

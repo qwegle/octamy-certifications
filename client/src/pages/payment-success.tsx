@@ -1,113 +1,98 @@
-import { useEffect, useState } from 'react';
-import { useLocation } from 'wouter';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { CheckCircle, Download, Home, User } from 'lucide-react';
-import { useAuth } from '@/lib/auth.tsx';
+import { useEffect, useState } from "react";
+import { useLocation } from "wouter";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { AlertCircle, CheckCircle, Home, Loader2, ShieldCheck, User } from "lucide-react";
+import { apiRequest } from "@/lib/queryClient";
+
+type ConfirmationState = "verifying" | "completed" | "failed" | "unverified";
 
 export default function PaymentSuccess() {
   const [, setLocation] = useLocation();
-  const { user } = useAuth();
-  const [transactionId, setTransactionId] = useState<string>('');
-  const [certificateId, setCertificateId] = useState<string>('');
+  const [state, setState] = useState<ConfirmationState>("verifying");
 
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const txnid = urlParams.get('txnid');
-    const certId = urlParams.get('certificateId');
-    
-    if (txnid) setTransactionId(txnid);
-    if (certId) setCertificateId(certId);
-  }, []);
+    const params = new URLSearchParams(window.location.search);
+    const orderId = params.get("order_id") || params.get("txnid") || "";
+    const statusToken = params.get("status_token") || "";
+    const tempExamId = params.get("tempExamId") || "";
 
+    if (!orderId || !statusToken) {
+      setState("unverified");
+      return;
+    }
+
+    let cancelled = false;
+    let timer: number | undefined;
+    let attempts = 0;
+    const poll = async () => {
+      try {
+        const cashfree = params.has("order_id");
+        const path = cashfree
+          ? `/api/payments/cashfree/${encodeURIComponent(orderId)}/status?token=${encodeURIComponent(statusToken)}`
+          : `/api/payment/status/${encodeURIComponent(orderId)}?token=${encodeURIComponent(statusToken)}`;
+        const response = await apiRequest("GET", path);
+        const data = await response.json();
+        if (cancelled) return;
+        const localStatus = data.localStatus || data.status;
+        if (localStatus === "completed") {
+          if (tempExamId) {
+            setLocation(`/exam-results-temp/${encodeURIComponent(tempExamId)}`);
+            return;
+          }
+          setState("completed");
+          return;
+        }
+        if (localStatus === "failed") {
+          setState("failed");
+          return;
+        }
+        attempts += 1;
+        if (attempts >= 20) {
+          setState("unverified");
+          return;
+        }
+        timer = window.setTimeout(() => void poll(), 1500);
+      } catch {
+        if (!cancelled) setState("unverified");
+      }
+    };
+    void poll();
+    return () => {
+      cancelled = true;
+      if (timer !== undefined) window.clearTimeout(timer);
+    };
+  }, [setLocation]);
+
+  const completed = state === "completed";
+  const failed = state === "failed";
   return (
-    <div className="min-h-screen bg-cream-deep dark:bg-gray-900 flex items-center justify-center p-4">
-      <Card className="max-w-md w-full">
+    <main className="grid min-h-screen place-items-center bg-slate-50 p-4">
+      <Card className="w-full max-w-lg border-slate-200 bg-white shadow-lg" aria-live="polite">
         <CardHeader className="text-center">
-          <div className="mx-auto w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mb-4">
-            <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
-          </div>
-          <CardTitle className="text-2xl font-bold text-green-600 dark:text-green-400">
-            Payment Successful!
+          <span className={`mx-auto grid h-16 w-16 place-items-center rounded-2xl ${completed ? "bg-emerald-50 text-emerald-700" : failed ? "bg-rose-50 text-rose-700" : "bg-sky-50 text-sky-700"}`}>
+            {completed ? <CheckCircle className="h-8 w-8" aria-hidden="true" /> : failed ? <AlertCircle className="h-8 w-8" aria-hidden="true" /> : state === "verifying" ? <Loader2 className="h-8 w-8 animate-spin" aria-hidden="true" /> : <ShieldCheck className="h-8 w-8" aria-hidden="true" />}
+          </span>
+          <CardTitle className="mt-3 text-2xl text-slate-950">
+            {completed ? "Payment confirmed" : failed ? "Payment was not completed" : state === "verifying" ? "Confirming payment" : "Payment confirmation pending"}
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="text-center">
-            <p className="text-gray-600 dark:text-gray-300 mb-4">
-              Your payment has been processed successfully. Your certificate is now available for download.
-            </p>
-            {transactionId && (
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Transaction ID: <span className="font-mono">{transactionId}</span>
-              </p>
-            )}
-          </div>
-
-          <div className="space-y-3">
-            {user ? (
-              <>
-                <Button
-                  className="w-full"
-                  onClick={() => setLocation('/dashboard')}
-                >
-                  <User className="w-4 h-4 mr-2" />
-                  View My Certificates
-                </Button>
-                {certificateId && (
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => window.open(`/api/certificates/${certificateId}/download`, '_blank')}
-                  >
-                    <Download className="w-4 h-4 mr-2" />
-                    Download Certificate
-                  </Button>
-                )}
-              </>
-            ) : (
-              <div className="text-center">
-                <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
-                  Please check your email for the certificate download link.
-                </p>
-                {certificateId && (
-                  <Button
-                    variant="outline"
-                    className="w-full mb-3"
-                    onClick={() => window.open(`/api/certificates/${certificateId}/download`, '_blank')}
-                  >
-                    <Download className="w-4 h-4 mr-2" />
-                    Download Certificate
-                  </Button>
-                )}
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => setLocation('/auth')}
-                >
-                  <User className="w-4 h-4 mr-2" />
-                  Login to Access Certificate
-                </Button>
-              </div>
-            )}
-            
-            <Button
-              variant="ghost"
-              className="w-full"
-              onClick={() => setLocation('/')}
-            >
-              <Home className="w-4 h-4 mr-2" />
-              Back to Home
-            </Button>
-          </div>
-
-          <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
-            <p className="text-sm text-green-700 dark:text-green-300 text-center">
-              Your certificate is permanently stored and verified on our platform. 
-              You can always re-download it from your dashboard.
-            </p>
+        <CardContent className="space-y-6 text-center">
+          <p className="text-sm leading-6 text-slate-600">
+            {completed
+              ? "Octamy has confirmed the payment on the server. Your credential is available in your learner account."
+              : failed
+                ? "No credential was unlocked. Return to your result or dashboard if you want to try again."
+                : state === "verifying"
+                  ? "Please wait while Octamy verifies the provider callback. This page cannot mark an order paid."
+                  : "We could not confirm this payment yet. Your credential remains locked unless Octamy receives and verifies the provider callback."}
+          </p>
+          <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
+            <Button onClick={() => setLocation("/dashboard")}><User className="mr-2 h-4 w-4" />Open learner dashboard</Button>
+            <Button variant="outline" onClick={() => setLocation("/")}><Home className="mr-2 h-4 w-4" />Back to home</Button>
           </div>
         </CardContent>
       </Card>
-    </div>
+    </main>
   );
 }

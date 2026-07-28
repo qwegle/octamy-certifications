@@ -107,9 +107,9 @@ export default function Footer() {
               <img src={octamyLogoLight} alt="Octamy" className="h-9" />
             </Link>
             <p className="mt-5 text-slate-400 max-w-md leading-relaxed">
-              An assessment-first evidence platform. Take assessments free, pay only
-              after passing if you want the credential, and choose when to share the
-              resulting evidence.
+              Certification and practice stay separate. Your certification score is free;
+              detailed review and an optional credential unlock only after the clearly
+              disclosed assessment-specific payment. Practice Pass never issues a credential.
             </p>
 
             <form onSubmit={onSubscribe} className="mt-7">
@@ -176,10 +176,10 @@ export default function Footer() {
           <FooterColumn title="Platform" className="md:col-span-2">
             <ul className="space-y-2.5">
               <FooterLink to="/get-certified">Certification Assessments</FooterLink>
-              <FooterLink to="/virtual-internships">Virtual Internships</FooterLink>
-              <FooterLink to="/practice">Practice Exams</FooterLink>
-              <FooterLink to="/learning-paths">Learning Paths</FooterLink>
+              <FooterLink to="/practice">Practice Pass</FooterLink>
+              <FooterLink to="/pricing">Pricing</FooterLink>
               <FooterLink to="/verify">Verify Certificate</FooterLink>
+              <FooterLink to="/for-recruiters">For Recruiters</FooterLink>
             </ul>
           </FooterColumn>
 
@@ -188,8 +188,9 @@ export default function Footer() {
             <ul className="space-y-2.5">
               <FooterLink to="/about">About Us</FooterLink>
               <FooterLink to="/vision">Our Vision</FooterLink>
+              <FooterLink to="/creator">For Creators</FooterLink>
+              <FooterLink to="/institute">For Institutes</FooterLink>
               <FooterLink to="/partners">Partner Program</FooterLink>
-              <FooterLink to="/sponsor">Sponsor a Talent</FooterLink>
               <FooterLink to="/contact">Contact</FooterLink>
               <FooterLink to="/help-center">Help Center</FooterLink>
             </ul>

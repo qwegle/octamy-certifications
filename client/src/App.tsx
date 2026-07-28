@@ -46,6 +46,9 @@ const CreatorLanding = lazy(() => import("@/pages/creator-landing"));
 const InstituteLanding = lazy(() => import("@/pages/institute-landing"));
 const RecruiterLanding = lazy(() => import("@/pages/recruiter-landing"));
 const Pricing = lazy(() => import("@/pages/pricing"));
+const PracticePassPricing = lazy(() => import("@/pages/practice-pass-pricing"));
+const CertificationPricing = lazy(() => import("@/pages/certification-pricing"));
+const WorkspacePricing = lazy(() => import("@/pages/workspace-pricing"));
 const BillingReturn = lazy(() => import("@/pages/billing-return"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 const HelpCenter = lazy(() => import("@/pages/help-center"));
@@ -180,6 +183,9 @@ function Router() {
       <Route path="/for-recruiters" component={RecruiterLanding} />
 
       {/* Pricing */}
+      <Route path="/pricing/practice-pass" component={PracticePassPricing} />
+      <Route path="/pricing/certification" component={CertificationPricing} />
+      <Route path="/pricing/workspaces" component={WorkspacePricing} />
       <Route path="/pricing" component={Pricing} />
       <Route path="/billing/return" component={BillingReturn} />
       <Route path="/exams" component={LegacyAssessmentHubRedirect} />

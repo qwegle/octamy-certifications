@@ -83,7 +83,6 @@ import {
   loadPendingExamBySessionId,
   savePendingExam,
   loadPendingExam,
-  deletePendingExam,
   startExamStateCron,
 } from "./utils/examState";
 import { normalizeExamAnswers, scoreExam } from "./utils/examScoring";
@@ -118,6 +117,7 @@ import {
 import {
   PendingExamAccessError,
   assertPendingExamAccess,
+  buildPendingExamResultPayload,
   canAccessPendingExam,
   parseGuestExamIdentity,
   publicPendingCourseSnapshot,
@@ -2356,34 +2356,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(403).json({ message: "This assessment result belongs to another account" });
         }
 
-        // Return exam results for display without database persistence
-        res.json({
-          tempExamId,
-          score: examData.score,
-          passed: examData.passed,
-          correctAnswers: Number.isInteger(examData.correctAnswers)
-            ? examData.correctAnswers
-            : Math.round((examData.score / 100) * examData.totalQuestions),
-          totalQuestions: examData.totalQuestions,
-          course: publicPendingCourseSnapshot(examData.course),
-          assessmentPurpose: examData.assessmentPurpose || examData.course?.assessmentPurpose || "certification",
-          timeTaken: examData.timeTaken,
-          timedOut: Boolean(examData.timedOut),
-          mastered: examData.mastered,
-          isRetake: examData.isRetake,
-          previousBestScore: examData.previousBestScore,
-          review: Array.isArray(examData.review) ? examData.review : [],
-          isGuest: examData.userId == null,
-          maskedEmail: typeof examData.userEmail === "string"
-            ? examData.userEmail.replace(/^(.)(.*)(@.*)$/, (_match: string, first: string, middle: string, domain: string) => `${first}${"*".repeat(Math.min(6, middle.length))}${domain}`)
-            : undefined,
-          resultExpiresAt: examData.resultExpiresAt,
-          recoveryEmailSent: Boolean(examData.recoveryEmailSent),
-          message: examData.passed
-            ? `Congratulations! You passed with ${examData.score}%`
-            : `You scored ${examData.score}%. You need at least ${examData.course.passingScore}% to pass.`,
-          needsPayment: examData.needsPayment !== false,
-        });
+        const assessmentPurpose = examData.assessmentPurpose
+          || examData.course?.assessmentPurpose
+          || "certification";
+        let paidCertificateId: string | null = null;
+        if (assessmentPurpose !== "practice" && typeof examData.sessionId === "string") {
+          const [paidCredential] = await db
+            .select({ certificateId: certificatesTable.certificateId })
+            .from(certificatesTable)
+            .innerJoin(
+              examAttemptsTable,
+              eq(certificatesTable.examAttemptId, examAttemptsTable.id),
+            )
+            .where(and(
+              eq(examAttemptsTable.sessionId, examData.sessionId),
+              eq(certificatesTable.isPaid, true),
+            ))
+            .limit(1);
+          paidCertificateId = paidCredential?.certificateId || null;
+        }
+
+        res.setHeader("Cache-Control", "private, no-store, max-age=0");
+        res.json(buildPendingExamResultPayload(tempExamId, examData, {
+          certificateId: paidCertificateId,
+        }));
       } catch (error) {
         console.error("Error fetching temporary exam results:", error);
         res.status(500).json({ message: "Failed to fetch exam results" });
@@ -2485,7 +2481,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             customerName: context.user.name,
             customerEmail: context.user.email,
             customerPhone,
-            returnUrl: `${baseUrl}/payment-success?order_id=${encodeURIComponent(orderId)}`,
+            returnUrl: `${baseUrl}/payment-success?order_id=${encodeURIComponent(orderId)}&status_token=${encodeURIComponent(createCashfreeStatusToken(orderId))}`,
             notifyUrl: `${baseUrl}/api/webhooks/cashfree`,
             notes: {
               kind: CREDENTIAL_ACTIVATION_KIND,
@@ -2681,7 +2677,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         customerName: examData.userName || "Octamy User",
         customerEmail: examData.userEmail,
         customerPhone: payload.userPhone || "9999999999",
-        returnUrl: `${baseUrl}/payment-success?order_id=${orderId}`,
+        returnUrl: `${baseUrl}/payment-success?order_id=${encodeURIComponent(orderId)}&status_token=${encodeURIComponent(createCashfreeStatusToken(orderId))}&tempExamId=${encodeURIComponent(payload.tempExamId)}`,
         notifyUrl: `${baseUrl}/api/webhooks/cashfree`,
         notes: {
           paymentDbId: String(payment.id),
@@ -3346,8 +3342,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       const certificate = fulfillment.certificate;
 
-      await deletePendingExam(tempExamId).catch(() => {});
-
       if (userId && fulfillment.status === "completed") {
         await storage.createNotification({
           userId,
@@ -3453,10 +3447,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 sellerCode: String(metadata.sellerCode || ""),
               });
             }
+            const completedMetadata = activationMetadata(payment.gatewayStatusRaw);
+            if (!isCredentialActivationPayment(payment) && typeof completedMetadata.tempExamId === "string") {
+              return res.redirect(
+                `${req.protocol}://${req.get("host")}/exam-results-temp/${encodeURIComponent(completedMetadata.tempExamId)}`,
+              );
+            }
             return res.redirect(
-              `${req.protocol}://${req.get(
-                "host"
-              )}/payment-success?certificateId=${existingCert.certificateId}`
+              `${req.protocol}://${req.get("host")}/payment-success?txnid=${encodeURIComponent(responseData.txnid)}&status_token=${encodeURIComponent(createCashfreeStatusToken(responseData.txnid))}&certificateId=${encodeURIComponent(existingCert.certificateId)}`,
             );
           }
         }
@@ -3579,7 +3577,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.redirect(
             `${req.protocol}://${req.get("host")}/payment-success?txnid=${encodeURIComponent(
               responseData.txnid,
-            )}&certificateId=${encodeURIComponent(
+            )}&status_token=${encodeURIComponent(createCashfreeStatusToken(responseData.txnid))}&certificateId=${encodeURIComponent(
               activation.certificate.certificateId,
             )}${duplicateParam}`,
           );
@@ -3623,8 +3621,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
         const certificate = fulfillment.certificate;
 
-        await deletePendingExam(tempExamId).catch(() => {});
-
         if (userId && fulfillment.status === "completed") {
           try {
             await storage.createNotification({
@@ -3644,9 +3640,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
 
         return res.redirect(
-          `${req.protocol}://${req.get("host")}/payment-success?txnid=${encodeURIComponent(
-            responseData.txnid,
-          )}&certificateId=${encodeURIComponent(certificate.certificateId)}`,
+          `${req.protocol}://${req.get("host")}/exam-results-temp/${encodeURIComponent(tempExamId)}`,
         );
       } else {
         const courseId = parseInt(responseData.udf1);

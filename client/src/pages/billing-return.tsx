@@ -28,6 +28,7 @@ export default function BillingReturn() {
     }
   }, [orderId]);
   const continuation = pendingNext || next;
+  const planName = ownerType === 'learner' && expectedPlan === 'all_access' ? 'Practice Pass' : expectedPlan;
   const [state, setState] = useState<'checking' | 'active' | 'pending' | 'error'>('checking');
 
   const dashboard = ownerType === 'learner'
@@ -100,7 +101,9 @@ export default function BillingReturn() {
           </h1>
           <p className="mt-2 text-sm leading-6 text-slate-600">
             {state === 'checking' && 'This usually takes only a few seconds. Keep this page open.'}
-            {state === 'active' && `Your ${expectedPlan} plan is ready to use.`}
+            {state === 'active' && (ownerType === 'learner' && expectedPlan === 'all_access'
+              ? 'Your Practice Pass is ready for practice exams. It does not include a certification credential.'
+              : `Your ${planName} plan is ready to use.`)}
             {state === 'pending' && 'Your payment may still be processing. Your dashboard will update as soon as the provider confirms it.'}
             {state === 'error' && 'No additional payment is required. Check your dashboard or contact support with your payment reference.'}
           </p>

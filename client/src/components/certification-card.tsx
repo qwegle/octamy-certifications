@@ -1,7 +1,30 @@
 import { Link } from "wouter";
-import { ArrowUpRight, Award, Clock3, ShieldCheck, Sparkles } from "lucide-react";
+import {
+  ArrowUpRight,
+  Atom,
+  Award,
+  BrainCircuit,
+  BriefcaseBusiness,
+  Calculator,
+  Clock3,
+  Cloud,
+  Code2,
+  GraduationCap,
+  Languages,
+  Landmark,
+  PackageOpen,
+  ShieldCheck,
+  Sparkles,
+  TicketCheck,
+  type LucideIcon,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  getAssessmentCardPricing,
+  getAssessmentVisualIdentity,
+  type AssessmentIconKey,
+} from "@/lib/assessment-visual-identity";
 import { publicAssessmentPath, publicPracticePath } from "@shared/public-assessment-routes";
 
 export type CertificationCardItem = {
@@ -9,12 +32,13 @@ export type CertificationCardItem = {
   title: string;
   description: string;
   slug: string;
-  duration: number;
-  passingScore: number;
-  price: string;
+  duration?: number | null;
+  passingScore?: number | null;
+  price?: string | null;
   originalPrice?: string | null;
-  level: string;
-  thumbnailUrl: string | null;
+  isOnSale?: boolean;
+  level?: string | null;
+  thumbnailUrl?: string | null;
   subscriptionEligible?: boolean;
   originLabel: string;
   certificationLabel: string;
@@ -32,62 +56,130 @@ const levelLabels: Record<string, string> = {
   expert: "Expert",
 };
 
-export function CertificationCard({ item, categoryHref, variant = "certification" }: { item: CertificationCardItem; categoryHref?: string; variant?: "certification" | "practice" }) {
+const topicIcons: Record<AssessmentIconKey, LucideIcon> = {
+  atom: Atom,
+  brain: BrainCircuit,
+  briefcase: BriefcaseBusiness,
+  calculator: Calculator,
+  cloud: Cloud,
+  code: Code2,
+  containers: PackageOpen,
+  graduation: GraduationCap,
+  language: Languages,
+  landmark: Landmark,
+  security: ShieldCheck,
+};
+
+export function CertificationCard({
+  item,
+  categoryHref,
+  variant = "certification",
+}: {
+  item: CertificationCardItem;
+  categoryHref?: string;
+  variant?: "certification" | "practice";
+}) {
   const practice = variant === "practice" || item.assessmentPurpose === "practice";
-  const title = item.title;
+  const cardKind = practice ? "practice" : "certification";
   const href = item.canonicalPath || (practice ? publicPracticePath(item.slug) : publicAssessmentPath(item.slug));
-  const salePrice = Number(item.price);
-  const originalPrice = Number(item.originalPrice);
-  const hasDiscount = Number.isFinite(salePrice)
-    && Number.isFinite(originalPrice)
-    && originalPrice > salePrice;
-  const savings = hasDiscount ? originalPrice - salePrice : 0;
+  const identity = getAssessmentVisualIdentity({
+    slug: item.slug,
+    title: item.title,
+    category: item.category.name,
+  });
+  const pricing = getAssessmentCardPricing({
+    variant: cardKind,
+    price: item.price,
+    originalPrice: item.originalPrice,
+    isOnSale: item.isOnSale,
+  });
+  const TopicIcon = topicIcons[identity.iconKey];
+  const metadata = [
+    typeof item.duration === "number" ? { icon: Clock3, label: `${item.duration} min` } : null,
+    typeof item.passingScore === "number" ? { icon: ShieldCheck, label: `Pass at ${item.passingScore}%` } : null,
+  ].filter((entry): entry is { icon: LucideIcon; label: string } => entry !== null);
 
   return (
-    <article className={`group relative flex h-full flex-col overflow-hidden rounded-[1.4rem] bg-white transition duration-300 hover:-translate-y-1 hover:shadow-xl ${practice ? "border border-violet-200 shadow-[0_12px_40px_-24px_rgba(109,40,217,0.7)] hover:border-violet-300 hover:shadow-violet-900/15" : "border border-slate-200 shadow-sm hover:border-slate-300 hover:shadow-slate-900/10"}`}>
-      {practice && <div aria-hidden className="absolute inset-x-0 top-0 z-20 h-1 bg-gradient-to-r from-amber-300 via-violet-500 to-cyan-400" />}
-      <Link href={href} className="relative block min-h-40 overflow-hidden bg-gradient-to-br from-slate-900 via-violet-800 to-indigo-700 p-5 text-white">
-        {item.thumbnailUrl && <img src={item.thumbnailUrl} alt="" className="absolute inset-0 h-full w-full object-cover opacity-25 mix-blend-luminosity transition duration-500 group-hover:scale-105" />}
-        <div aria-hidden className="absolute -right-10 -top-12 h-36 w-36 rounded-full border-[24px] border-white/10" />
-        <div className="relative flex h-full flex-col justify-between">
-          <div className="flex flex-nowrap items-start justify-between gap-2">
-            <span className="inline-flex shrink-0 whitespace-nowrap items-center gap-1.5 rounded-full border border-white/20 bg-black/15 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.1em] backdrop-blur-sm"><Award className="h-3 w-3 shrink-0" />{practice ? "Skill practice" : "Octamy certified"}</span>
-            {practice ? <span className="shrink-0 whitespace-nowrap rounded-full border border-amber-200/70 bg-gradient-to-r from-amber-100 to-white px-2.5 py-1 text-[10px] font-black uppercase tracking-normal text-violet-950 shadow-sm">Practice Pass</span> : item.subscriptionEligible && <span className="shrink-0 whitespace-nowrap rounded-full bg-white px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-slate-950">Sponsored</span>}
+    <article
+      data-card-kind={cardKind}
+      className={`group relative flex h-full flex-col overflow-hidden rounded-[1.5rem] transition duration-300 hover:-translate-y-1 ${
+        practice
+          ? "border-2 border-violet-200 bg-violet-50/40 shadow-[0_14px_38px_-25px_rgba(91,33,182,0.65)] hover:border-violet-400 hover:shadow-violet-900/15"
+          : "border border-slate-200 bg-white shadow-[0_14px_38px_-27px_rgba(15,23,42,0.55)] hover:border-slate-400 hover:shadow-slate-900/15"
+      }`}
+    >
+      {practice && <div aria-hidden className="absolute inset-x-6 top-0 z-20 border-t-4 border-dashed border-amber-300" />}
+      <Link href={href} className={`relative block min-h-48 overflow-hidden bg-gradient-to-br p-5 text-white ${identity.headerClass}`}>
+        <div aria-hidden className="absolute -right-12 -top-14 h-40 w-40 rounded-full border-[28px] border-white/10 transition duration-500 group-hover:scale-110" />
+        <div aria-hidden className={`absolute bottom-0 left-0 h-1.5 w-full ${identity.accentClass}`} />
+        <div className="relative flex h-full min-h-36 flex-col justify-between">
+          <div className="flex items-start justify-between gap-2">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-black/20 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.1em] backdrop-blur-sm">
+              {practice ? <TicketCheck className="h-3.5 w-3.5" aria-hidden="true" /> : <Award className="h-3.5 w-3.5" aria-hidden="true" />}
+              {practice ? "Practice exam" : "Certification exam"}
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-xl bg-white/15 px-2.5 py-2 text-xs font-bold backdrop-blur-sm">
+              <TopicIcon className="h-4 w-4" aria-hidden="true" />
+              {identity.topicLabel}
+            </span>
           </div>
-          <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/70">{item.category.name}</p>
-            <h2 className="mt-2 line-clamp-3 text-xl font-black leading-tight tracking-[-0.025em]">{title}</h2>
+          <div className="mt-7 flex items-end gap-3">
+            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl border border-white/20 bg-white/15 shadow-lg backdrop-blur-sm" aria-hidden="true">
+              <TopicIcon className="h-6 w-6" />
+            </span>
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/75">{item.category.name}</p>
+              <h2 className="mt-1 line-clamp-3 text-xl font-black leading-tight tracking-[-0.025em]">{item.title}</h2>
+            </div>
           </div>
         </div>
       </Link>
 
       <div className="flex flex-1 flex-col p-5">
         <div className="flex flex-wrap gap-2">
-          {categoryHref ? <Link href={categoryHref}><Badge variant="outline" className="rounded-full hover:border-violet-300 hover:text-violet-800">{item.category.name}</Badge></Link> : <Badge variant="outline" className="rounded-full">{item.category.name}</Badge>}
-          <Badge variant="outline" className="rounded-full">{levelLabels[item.level] || item.level}</Badge>
+          {categoryHref ? (
+            <Link href={categoryHref}>
+              <Badge variant="outline" className={`rounded-full ${identity.softClass}`}>{item.category.name}</Badge>
+            </Link>
+          ) : (
+            <Badge variant="outline" className={`rounded-full ${identity.softClass}`}>{item.category.name}</Badge>
+          )}
+          {item.level && <Badge variant="outline" className="rounded-full border-slate-200 bg-white">{levelLabels[item.level] || item.level}</Badge>}
         </div>
+
         <p className="mt-3 line-clamp-2 text-sm leading-6 text-slate-600">{item.description}</p>
-        {item.audienceBands?.length ? <div className="mt-3 flex flex-wrap gap-1.5">{item.audienceBands.slice(0, 2).map((band) => <span key={band.id} className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-600">{band.label}</span>)}</div> : null}
-
-        <div className="mt-5 grid grid-cols-2 gap-2 border-y border-slate-100 py-3 text-xs text-slate-600">
-          <span className="flex items-center gap-1.5"><Clock3 className="h-3.5 w-3.5 text-violet-600" />{item.duration} min</span>
-          <span className="flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />Pass at {item.passingScore}%</span>
-        </div>
-
-        <div className="mt-auto flex items-end justify-between gap-3 pt-4">
-          <div>
-            <p className={`flex items-center gap-1 text-xs font-bold ${practice ? "text-violet-800" : "text-emerald-700"}`}><Sparkles className="h-3.5 w-3.5" />{practice ? "Unlimited with Practice Pass" : "Exam attempt is free"}</p>
-            {practice
-              ? <p className="mt-1 text-xs text-slate-500">Practice Pass plans shown before account access</p>
-              : <div className="mt-1 text-xs text-slate-500">
-                  <span>Credential activation ₹{item.price}</span>
-                  {hasDiscount && <><span className="ml-1.5 line-through">₹{originalPrice.toFixed(2)}</span><span className="ml-1.5 font-bold text-emerald-700">Save ₹{savings.toFixed(2)}</span></>}
-                </div>}
+        {item.audienceBands?.length ? (
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {item.audienceBands.slice(0, 2).map((band) => <span key={band.id} className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-600">{band.label}</span>)}
           </div>
-          <Button asChild size="sm" className="rounded-full px-4">
-            <Link href={href} aria-label={`View ${title}`}>{practice ? "Practice" : "View"} <ArrowUpRight className="ml-1 h-3.5 w-3.5" /></Link>
-          </Button>
+        ) : null}
+
+        {metadata.length > 0 && (
+          <div className="mt-5 grid grid-cols-2 gap-2 border-y border-slate-100 py-3 text-xs text-slate-600">
+            {metadata.map(({ icon: Icon, label }) => <span key={label} className="flex items-center gap-1.5"><Icon className="h-3.5 w-3.5 text-violet-600" aria-hidden="true" />{label}</span>)}
+          </div>
+        )}
+
+        <div className={`mt-auto rounded-2xl p-4 ${practice ? "border border-dashed border-violet-300 bg-white" : "border border-emerald-200 bg-emerald-50/70"}`}>
+          <p className={`flex items-center gap-1.5 text-sm font-black ${practice ? "text-violet-900" : "text-emerald-800"}`}>
+            <Sparkles className="h-4 w-4" aria-hidden="true" />{pricing.primaryLabel}
+          </p>
+          <p className="mt-1 text-xs leading-5 text-slate-600">{pricing.supportingLabel}</p>
+          {!practice && pricing.credentialPrice && (
+            <div className="mt-3 flex flex-wrap items-baseline gap-x-2 border-t border-emerald-200 pt-3">
+              <span className="text-[10px] font-black uppercase tracking-[0.11em] text-slate-500">Verified credential</span>
+              <span className="text-xl font-black text-slate-950">{pricing.credentialPrice}</span>
+              {pricing.originalCredentialPrice && <span className="text-sm text-slate-500 line-through">{pricing.originalCredentialPrice}</span>}
+              {pricing.isCredentialOnSale && <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-black uppercase text-rose-700">Credential sale</span>}
+            </div>
+          )}
         </div>
+
+        <Button asChild className={`mt-4 w-full rounded-full ${practice ? "bg-violet-700 hover:bg-violet-800" : "bg-slate-950 hover:bg-slate-800"}`}>
+          <Link href={href} aria-label={`${practice ? "View practice exam" : "Explore free certification exam"}: ${item.title}`}>
+            {practice ? "View practice exam" : "Explore free exam"}<ArrowUpRight className="ml-1.5 h-4 w-4" aria-hidden="true" />
+          </Link>
+        </Button>
       </div>
     </article>
   );

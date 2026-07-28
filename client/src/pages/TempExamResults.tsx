@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle, XCircle, Award, Clock, Target, Loader2, ShieldCheck, Mail, TicketCheck, UserPlus } from "lucide-react";
+import { CheckCircle, XCircle, Award, Clock, Target, Loader2, ShieldCheck, Mail, TicketCheck, UserPlus, LockKeyhole } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/lib/auth.tsx";
@@ -44,7 +44,13 @@ interface TempExamResults {
   mastered: boolean;
   isRetake: boolean;
   previousBestScore: number;
-  review: ReviewItem[];
+  passingThreshold: number;
+  reviewLocked: boolean;
+  review?: ReviewItem[];
+  credential?: {
+    certificateId: string;
+    href: string;
+  };
   isGuest: boolean;
   maskedEmail?: string;
   resultExpiresAt?: string;
@@ -302,7 +308,37 @@ export default function TempExamResults() {
             </Card>
           </div>
 
-          {results.review?.length > 0 && (
+          {results.reviewLocked ? (
+            <Card className="relative mt-6 overflow-hidden border-violet-200 bg-white shadow-lg" role="region" aria-labelledby="locked-review-title" aria-describedby="locked-review-description">
+              <div className="pointer-events-none select-none space-y-3 p-6 opacity-45 blur-[3px]" aria-hidden="true">
+                {[0, 1, 2].map((item) => (
+                  <div key={item} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <div className="h-4 w-3/4 rounded bg-slate-300" />
+                    <div className="mt-4 grid gap-3 sm:grid-cols-2"><div className="h-12 rounded-xl bg-slate-200" /><div className="h-12 rounded-xl bg-slate-200" /></div>
+                  </div>
+                ))}
+              </div>
+              <div className="absolute inset-0 grid place-items-center bg-white/75 p-5 backdrop-blur-[1px]">
+                <div className="max-w-lg rounded-3xl border border-violet-200 bg-white p-6 text-center shadow-xl">
+                  <span className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-violet-100 text-violet-800"><LockKeyhole className="h-6 w-6" aria-hidden="true" /></span>
+                  <h2 id="locked-review-title" className="mt-4 text-xl font-extrabold text-slate-950">Detailed answer review is locked</h2>
+                  <p id="locked-review-description" className="mt-2 text-sm leading-6 text-slate-600">
+                    Your free attempt includes the score and pass/fail result above. Question text, your answers, correct answers, explanations, and the verified certificate are released only after credential payment is confirmed by Octamy.
+                  </p>
+                  {results.passed ? (
+                    <div className="mt-5">
+                      <p className="mb-3 text-sm font-semibold text-slate-800">
+                        Credential activation: {results.course.isOnSale && results.course.originalPrice && <span className="mr-2 text-slate-500 line-through">₹{results.course.originalPrice}</span>}<span className="text-violet-800">₹{results.course.price}</span>
+                      </p>
+                      <Button onClick={handleProceedToPayment} size="lg" className="min-w-56">Unlock review + certificate</Button>
+                    </div>
+                  ) : (
+                    <p className="mt-4 rounded-xl bg-amber-50 p-3 text-sm font-medium text-amber-900">Pass the assessment before credential activation becomes available.</p>
+                  )}
+                </div>
+              </div>
+            </Card>
+          ) : results.review && results.review.length > 0 ? (
             <Card className="mt-6 border-slate-200 shadow-sm">
               <CardHeader>
                 <CardTitle>Answer review</CardTitle>
@@ -322,6 +358,15 @@ export default function TempExamResults() {
                     </div>
                   </details>
                 ))}
+              </CardContent>
+            </Card>
+          ) : null}
+
+          {results.credential && (
+            <Card className="mt-6 overflow-hidden border-emerald-200 bg-emerald-50/70 shadow-sm" role="region" aria-label="Unlocked credential">
+              <CardContent className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
+                <div><p className="flex items-center gap-2 font-extrabold text-emerald-950"><Award className="h-5 w-5" aria-hidden="true" />Review and certificate unlocked</p><p className="mt-1 text-sm text-emerald-900">Payment is confirmed. Your detailed review is above and your verified credential is ready.</p></div>
+                <Button onClick={() => navigate(results.credential!.href)} size="lg" className="bg-emerald-800 hover:bg-emerald-900">View certificate</Button>
               </CardContent>
             </Card>
           )}
@@ -372,43 +417,6 @@ export default function TempExamResults() {
             </Card>
           )}
 
-          {results.passed && results.needsPayment && !(results.course.subscriptionEligible && learnerPlanActive) && (
-            <Card className="mt-6">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Award className="h-5 w-5" />
-                  Get Your Certificate
-                </CardTitle>
-                <CardDescription>
-                  Complete your payment to receive your verified certificate
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                  <div className="text-center sm:text-left">
-                    <div className="text-lg font-semibold">
-                      {results.course.isOnSale && results.course.originalPrice ? (
-                        <div>
-                          <span className="line-through text-muted-foreground mr-2">
-                            ₹{results.course.originalPrice}
-                          </span>
-                          <span className="text-green-600">₹{results.course.price}</span>
-                        </div>
-                      ) : (
-                        <span>₹{results.course.price}</span>
-                      )}
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      Professional Certificate
-                    </p>
-                  </div>
-                  <Button onClick={handleProceedToPayment} size="lg" className="min-w-[200px]">
-                    Proceed to Payment
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
 
           {/* Navigation */}
           <div className="mt-8 text-center space-x-4">

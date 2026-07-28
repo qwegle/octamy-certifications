@@ -77,7 +77,7 @@ export function AssessmentCatalog({ mode }: { mode: CatalogMode }) {
     <div className="min-h-screen bg-[#f7f5f0] text-slate-950">
       <SEO
         title={practice ? "Practice Exams with Octamy" : octamy ? "Get Certified with Octamy" : "Creator certification marketplace"}
-        description={practice ? "Subscription-only practice exams for preparation. Practice scores are not recruiter-facing Octamy credentials." : octamy ? "Choose a technology and industry certification path, take a serious exam free, review every answer and activate a digitally verifiable credential after passing." : "Discover approved creator certification exams with the credential issuer shown clearly."}
+        description={practice ? "Subscription-only practice exams for preparation. Practice scores are not recruiter-facing Octamy credentials." : octamy ? "Choose a technology and industry certification path, take a governed exam free, receive your score, then pay only after passing to unlock the detailed review and verified credential." : "Discover approved creator certification exams with the credential issuer shown clearly."}
         path={practice ? PRACTICE_HUB_PATH : octamy ? ASSESSMENT_HUB_PATH : "/creator-assessments"}
       />
       <Header />
@@ -89,7 +89,7 @@ export function AssessmentCatalog({ mode }: { mode: CatalogMode }) {
               <Badge className="border border-white/15 bg-white/10 text-violet-200 hover:bg-white/10"><Award className="mr-1.5 h-3.5 w-3.5" />{practice ? "Practice Pass" : octamy ? "Tech and industry certifications" : "Creator-issued credentials"}</Badge>
               <h1 className="mt-6 max-w-3xl text-4xl font-black tracking-[-0.045em] sm:text-6xl">{practice ? "Practice without confusing your career signal." : octamy ? "Get certified for real industry roles." : "Turn expert knowledge into verified achievement."}</h1>
               <p className="mt-5 max-w-2xl text-base leading-7 text-slate-300 sm:text-lg">
-                {practice ? "Prepare with reviewed learner assessments organised by the live Octamy catalogue. Practice results support learning and repetition but remain separate from recruiter-facing Octamy credentials." : octamy ? "Choose a technology or industry certification path, take a governed exam without paying upfront and activate a verifiable credential after passing." : "Every certification shows who authored the exam, who issues the credential and whether Octamy co-certification applies."}
+                {practice ? "Prepare with reviewed learner assessments organised by the live Octamy catalogue. Practice results support learning and repetition but remain separate from recruiter-facing Octamy credentials." : octamy ? "Choose a technology or industry certification path, take a governed exam free and receive your score. After passing, payment unlocks the detailed review and verified credential." : "Every certification shows who authored the exam, who issues the credential and whether Octamy co-certification applies."}
               </p>
               <form className="mt-8 flex max-w-2xl flex-col gap-2 rounded-2xl bg-white p-2 sm:flex-row" onSubmit={(event) => { event.preventDefault(); updateFilters({ q: searchInput.trim().slice(0, 120), page: 1 }); }}>
                 <div className="relative flex-1">
@@ -100,7 +100,7 @@ export function AssessmentCatalog({ mode }: { mode: CatalogMode }) {
               </form>
               <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-xs font-semibold text-slate-300">
                 <span className="flex items-center gap-1.5"><ShieldCheck className="h-4 w-4 text-emerald-400" />Server-scored exams</span>
-                <span className="flex items-center gap-1.5"><BookOpenCheck className="h-4 w-4 text-sky-400" />Answer review after submission</span>
+                <span className="flex items-center gap-1.5"><BookOpenCheck className="h-4 w-4 text-sky-400" />{practice ? "Practice review with active access" : "Detailed review after payment"}</span>
                 <span className="flex items-center gap-1.5"><Award className="h-4 w-4 text-violet-400" />Live credential verification</span>
               </div>
             </div>
@@ -110,9 +110,9 @@ export function AssessmentCatalog({ mode }: { mode: CatalogMode }) {
               <div className="mt-5 grid gap-3">
                 {[
                   { number: "01", title: practice ? "Choose practice" : "Choose your path", copy: practice ? "Pick a preparation exam." : "Find a job-relevant skill exam." },
-                  { number: "02", title: practice ? "Use Practice Pass" : "Take the certification exam", copy: practice ? "Active learner subscription is required." : "Your attempt is free and questions rotate." },
-                  { number: "03", title: "Review and improve", copy: "See correct and incorrect answers immediately." },
-                  { number: "04", title: practice ? "Repeat" : "Activate your credential", copy: practice ? "Practice scores stay separate from hiring credentials." : "Pay directly, use a coupon, or redeem an institute voucher." },
+                  { number: "02", title: practice ? "Use Practice Pass" : "Take the exam free", copy: practice ? "Active learner subscription is required." : "Submit to receive your score at no charge." },
+                  { number: "03", title: practice ? "Review and improve" : "Pass, then choose", copy: practice ? "Use the detailed review included with active access." : "Payment unlocks the detailed answer review and verified credential." },
+                  { number: "04", title: practice ? "Repeat" : "Share verified proof", copy: practice ? "Practice scores stay separate from hiring credentials." : "Use live verification after credential activation." },
                 ].map((step) => <div key={step.number} className="flex gap-4 rounded-2xl border border-white/10 bg-white/5 p-4"><span className="text-sm font-black text-violet-300">{step.number}</span><div><p className="font-bold">{step.title}</p><p className="mt-1 text-xs leading-5 text-slate-400">{step.copy}</p></div></div>)}
               </div>
             </div>
@@ -182,7 +182,7 @@ export function AssessmentCatalog({ mode }: { mode: CatalogMode }) {
 
           {data && data.pagination.totalPages > 1 && <nav aria-label={`${practice ? "Practice exam" : "Certification"} catalogue pages`} className="mt-9 flex items-center justify-center gap-3"><Button variant="outline" className="min-h-11 rounded-full" disabled={page <= 1} onClick={() => updateFilters({ page: Math.max(1, page - 1) }, false)}><ChevronLeft className="mr-1 h-4 w-4" />Previous</Button><span className="text-sm font-semibold text-slate-600">Page {page} of {data.pagination.totalPages}</span><Button variant="outline" className="min-h-11 rounded-full" disabled={page >= data.pagination.totalPages} onClick={() => updateFilters({ page: Math.min(data.pagination.totalPages, page + 1) }, false)}>Next<ChevronRight className="ml-1 h-4 w-4" /></Button></nav>}
 
-          {octamy && <div className="mt-12 grid gap-4 rounded-[2rem] bg-violet-100/60 p-6 sm:grid-cols-[1fr_auto] sm:items-center sm:p-8"><div><p className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.14em] text-violet-800"><Sparkles className="h-4 w-4" />A different way to certify</p><h2 className="mt-2 text-2xl font-black tracking-tight">No upfront credential fee. No hidden result.</h2><p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">Take the exam, inspect your answer review and decide whether to activate the credential. Institutes can sponsor learners with controlled vouchers.</p></div><Button asChild className="rounded-full"><Link href="/vision">See how Octamy works <ArrowRight className="ml-2 h-4 w-4" /></Link></Button></div>}
+          {octamy && <div className="mt-12 grid gap-4 rounded-[2rem] bg-violet-100/60 p-6 sm:grid-cols-[1fr_auto] sm:items-center sm:p-8"><div><p className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.14em] text-violet-800"><Sparkles className="h-4 w-4" />A different way to certify</p><h2 className="mt-2 text-2xl font-black tracking-tight">Your score is free. Review and credential come after payment.</h2><p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">Take the exam and receive your score free. If you pass, pay directly or use an institute voucher to unlock the detailed answer review and verified credential.</p></div><Button asChild className="rounded-full"><Link href="/vision">See how Octamy works <ArrowRight className="ml-2 h-4 w-4" /></Link></Button></div>}
           {practice && <div className="mt-12 grid gap-4 rounded-[2rem] bg-slate-100 p-6 sm:grid-cols-[1fr_auto] sm:items-center sm:p-8"><div><p className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.14em] text-slate-700"><Sparkles className="h-4 w-4" />Practice Pass</p><h2 className="mt-2 text-2xl font-black tracking-tight">Choose 30-day or 365-day Practice access.</h2><p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">Select a plan first, then sign in or create one learner account so access, saved progress and attempts remain together.</p></div><Button asChild className="rounded-full"><Link href={practicePlansPath({ next: "/practice" })}>Review Practice Pass <ArrowRight className="ml-2 h-4 w-4" /></Link></Button></div>}
         </section>
       </main>

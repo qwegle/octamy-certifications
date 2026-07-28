@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
 import { ChevronDown, Menu, Search, X } from "lucide-react";
@@ -27,7 +27,6 @@ type RoleFlags = {
 };
 
 const PUBLIC_LINKS = [
-  { href: "/practice", label: "Practice" },
   { href: "/creator", label: "For creators" },
   { href: "/institute", label: "For institutes" },
   { href: "/for-recruiters", label: "For recruiters" },
@@ -44,6 +43,13 @@ const APP_ROUTE_PREFIXES = [
   "/exam", "/x", "/payment", "/checkout", "/certificate", "/internship-payment",
 ];
 
+function focusableElements(container: HTMLElement | null) {
+  if (!container) return [];
+  return Array.from(container.querySelectorAll<HTMLElement>(
+    'a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])',
+  )).filter((element) => element.offsetParent !== null);
+}
+
 export default function Header() {
   const { user, token, logout, isLoading } = useAuth();
   const [location, setLocation] = useLocation();
@@ -51,6 +57,9 @@ export default function Header() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [scrolled, setScrolled] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
+  const mobileDialogRef = useRef<HTMLDivElement>(null);
+  const mobileTriggerRef = useRef<HTMLButtonElement>(null);
   const isAuthenticated = !!user && !!token;
   const isAppRoute = APP_ROUTE_PREFIXES.some((prefix) => location === prefix || location.startsWith(`${prefix}/`)) ||
     /^\/(creator|institute|recruiter)\/(login|register)/.test(location);
@@ -89,15 +98,42 @@ export default function Header() {
   }, [location]);
 
   useEffect(() => {
-    const onKey = (event: KeyboardEvent) => {
+    if (!mobileOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    requestAnimationFrame(() => focusableElements(mobileDialogRef.current)[0]?.focus());
+
+    const onPointerDown = (event: PointerEvent) => {
+      if (!headerRef.current?.contains(event.target as Node)) setMobileOpen(false);
+    };
+    const onKeyDown = (event: globalThis.KeyboardEvent) => {
       if (event.key === "Escape") {
+        event.preventDefault();
         setMobileOpen(false);
-        setSearchOpen(false);
+        requestAnimationFrame(() => mobileTriggerRef.current?.focus());
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const focusable = focusableElements(mobileDialogRef.current);
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
       }
     };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [mobileOpen]);
 
   function submitSearch(event: React.FormEvent) {
     event.preventDefault();
@@ -111,6 +147,7 @@ export default function Header() {
 
   function signOut() {
     logout();
+    setMobileOpen(false);
     setLocation("/");
   }
 
@@ -120,11 +157,11 @@ export default function Header() {
         Skip to main content
       </a>
 
-      <header className="relative z-50 px-3 pt-3 sm:px-5 sm:pt-4">
+      <header ref={headerRef} className="relative z-50 px-3 pt-3 sm:px-5 sm:pt-4">
         <div className={`relative mx-auto max-w-7xl rounded-2xl border px-3 backdrop-blur-xl transition-[background-color,border-color,box-shadow] sm:rounded-full sm:px-5 ${scrolled ? "border-slate-200 bg-white/95 shadow-lg shadow-slate-900/5" : "border-white/80 bg-white/90 shadow-sm shadow-slate-900/5"}`}>
           <div className="flex h-14 min-w-0 items-center justify-between gap-2 sm:h-16 sm:gap-3">
             <Link href="/" aria-label="Octamy home" className="flex min-h-11 shrink-0 items-center rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950">
-              <img src={octamyLogoDark} alt="Octamy home" className="h-6 w-auto max-w-[8.5rem] sm:h-7 sm:max-w-none" />
+              <img src={octamyLogoDark} alt="Octamy" className="h-6 w-auto max-w-[8.5rem] sm:h-7 sm:max-w-none" />
             </Link>
 
             {!isAppRoute && (
@@ -144,8 +181,8 @@ export default function Header() {
 
             <div className="flex items-center gap-1.5">
               {!isAppRoute && (
-                <button type="button" onClick={() => setSearchOpen((open) => !open)} className="hidden h-11 w-11 items-center justify-center rounded-full text-slate-600 hover:bg-slate-100 hover:text-slate-950 md:inline-flex xl:hidden" aria-label="Search certifications" aria-expanded={searchOpen}>
-                  <Search className="h-4 w-4" />
+                <button type="button" onClick={() => setSearchOpen((open) => !open)} className="hidden h-11 w-11 items-center justify-center rounded-full text-slate-600 hover:bg-slate-100 hover:text-slate-950 md:inline-flex xl:hidden" aria-label="Search certifications" aria-expanded={searchOpen} aria-controls="site-assessment-search-desktop">
+                  <Search className="h-4 w-4" aria-hidden="true" />
                 </button>
               )}
 
@@ -182,8 +219,8 @@ export default function Header() {
                 </div>
               )}
 
-              <button type="button" className="inline-flex h-11 w-11 items-center justify-center rounded-full text-slate-700 hover:bg-slate-100 lg:hidden" onClick={() => setMobileOpen((open) => !open)} aria-label={mobileOpen ? "Close navigation" : "Open navigation"} aria-expanded={mobileOpen} aria-controls="public-mobile-navigation">
-                {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              <button ref={mobileTriggerRef} type="button" className="inline-flex h-11 w-11 items-center justify-center rounded-full text-slate-700 hover:bg-slate-100 lg:hidden" onClick={() => setMobileOpen((open) => !open)} aria-label={mobileOpen ? "Close navigation" : "Open navigation"} aria-expanded={mobileOpen} aria-haspopup="dialog" aria-controls="public-mobile-navigation">
+                {mobileOpen ? <X className="h-5 w-5" aria-hidden="true" /> : <Menu className="h-5 w-5" aria-hidden="true" />}
               </button>
             </div>
           </div>
@@ -194,29 +231,29 @@ export default function Header() {
         </div>
 
         {mobileOpen && (
-          <div id="public-mobile-navigation" className="mx-auto mt-2 max-w-7xl overflow-hidden rounded-2xl border border-slate-200 bg-white p-3 shadow-2xl shadow-slate-900/10 sm:rounded-3xl sm:p-4 lg:hidden">
-            {!isAppRoute && <SearchForm id="site-assessment-search-mobile" value={searchQuery} onChange={setSearchQuery} onSubmit={submitSearch} className="mb-3" autoFocus />}
+          <div ref={mobileDialogRef} id="public-mobile-navigation" role="dialog" aria-modal="true" aria-label="Site navigation" className="mx-auto mt-2 max-h-[calc(100dvh-6rem)] max-w-7xl overflow-y-auto overscroll-contain rounded-2xl border border-slate-200 bg-white p-3 shadow-2xl shadow-slate-900/10 sm:rounded-3xl sm:p-4 lg:hidden">
+            {!isAppRoute && <SearchForm id="site-assessment-search-mobile" value={searchQuery} onChange={setSearchQuery} onSubmit={submitSearch} className="mb-3" />}
             {!isAppRoute && <MobileCertificationMenu onNavigate={() => setMobileOpen(false)} />}
-            <nav aria-label="Mobile navigation" className="grid gap-1">
+            <nav aria-label="Mobile navigation" className="mt-2 grid gap-1">
               {!isAppRoute && PUBLIC_LINKS.map((item) => (
-                <Link key={item.href} href={item.href} className="flex min-h-11 items-center rounded-xl px-3 text-sm font-semibold text-slate-700 hover:bg-slate-100 hover:text-slate-950">
+                <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)} className="flex min-h-11 items-center rounded-xl px-3 text-sm font-semibold text-slate-700 hover:bg-slate-100 hover:text-slate-950">
                   {item.label}
                 </Link>
               ))}
-              {!isAppRoute && <Link href="/vision" className="flex min-h-11 items-center rounded-xl px-3 text-sm font-semibold text-slate-700 hover:bg-slate-100">Our vision</Link>}
+              {!isAppRoute && <Link href="/vision" onClick={() => setMobileOpen(false)} className="flex min-h-11 items-center rounded-xl px-3 text-sm font-semibold text-slate-700 hover:bg-slate-100">Our vision</Link>}
             </nav>
 
             <div className="mt-3 grid gap-2 border-t border-slate-200 pt-4">
               {!isAuthenticated ? (
                 <>
-                  <Button asChild variant="outline"><Link href="/login">Sign in</Link></Button>
-                  <Button asChild><Link href="/register">Get started</Link></Button>
+                  <Button asChild variant="outline"><Link href="/login" onClick={() => setMobileOpen(false)}>Sign in</Link></Button>
+                  <Button asChild><Link href="/register" onClick={() => setMobileOpen(false)}>Get started</Link></Button>
                 </>
               ) : (
                 <>
                   {workspaces.map((workspace) => (
                     <Button key={workspace.key} asChild variant={workspace.active ? "default" : "outline"}>
-                      <Link href={workspace.href}>{workspace.label} workspace</Link>
+                      <Link href={workspace.href} onClick={() => setMobileOpen(false)}>{workspace.label} workspace</Link>
                     </Button>
                   ))}
                   <Button type="button" onClick={signOut} variant="ghost">Sign out</Button>

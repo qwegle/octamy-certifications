@@ -1,18 +1,38 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Clock, Users, Star, ChevronRight, Award } from "lucide-react";
+import {
+  Atom,
+  Award,
+  BrainCircuit,
+  BriefcaseBusiness,
+  Calculator,
+  ChevronRight,
+  Clock,
+  Cloud,
+  Code2,
+  GraduationCap,
+  Languages,
+  Landmark,
+  PackageOpen,
+  ShieldCheck,
+  Star,
+  Users,
+  type LucideIcon,
+} from "lucide-react";
 import { Link } from "wouter";
 import type { Course, Category } from "@shared/schema";
+import {
+  getAssessmentCardPricing,
+  getAssessmentVisualIdentity,
+  type AssessmentIconKey,
+} from "@/lib/assessment-visual-identity";
 import { publicAssessmentPath, publicPracticePath } from "@shared/public-assessment-routes";
 
-// Import category images (fallbacks)
 import aiImage from "@/assets/course-images/ai-assessment.jpg";
 import developmentImage from "@/assets/course-images/development-assessment.jpg";
 import businessImage from "@/assets/course-images/business-assessment.jpg";
 import internshipImage from "@/assets/course-images/internship-assessment.jpg";
-
-// Import specific course images
 import businessStrategyImage from "@/assets/course-images/business-strategy-fundamentals.jpg";
 import financialAnalysisImage from "@/assets/course-images/financial-analysis-professional.jpg";
 import leadershipImage from "@/assets/course-images/leadership-management.jpg";
@@ -39,200 +59,126 @@ interface CourseCardProps {
   viewMode?: "grid" | "list";
 }
 
-export default function CourseCard({
-  course,
-  certifiedCount,
-  rating,
-  viewMode = "grid",
-}: CourseCardProps) {
-  const isPractice = course.productType === "assessment" && course.assessmentPurpose === "practice";
-  const courseSlug = course.slug || course.title.toLowerCase()
-    .replace(/[^a-zA-Z0-9\s]/g, '')
-    .replace(/\s+/g, '-');
+const topicIcons: Record<AssessmentIconKey, LucideIcon> = {
+  atom: Atom,
+  brain: BrainCircuit,
+  briefcase: BriefcaseBusiness,
+  calculator: Calculator,
+  cloud: Cloud,
+  code: Code2,
+  containers: PackageOpen,
+  graduation: GraduationCap,
+  language: Languages,
+  landmark: Landmark,
+  security: ShieldCheck,
+};
 
-  // Function to get the appropriate image based on course slug/title
-  const getCourseImage = (courseSlug: string, categoryName: string) => {
-    // First try to match specific course images by slug
-    switch (courseSlug) {
-      case 'business-strategy-fundamentals':
-        return businessStrategyImage;
-      case 'financial-analysis-professional':
-        return financialAnalysisImage;
-      case 'leadership-management':
-        return leadershipImage;
-      case 'digital-marketing-fundamentals':
-        return digitalMarketingImage;
-      case 'business-analytics-internship':
-        return businesAnalyticsInternship;
-      case 'digital-marketing-internship':
-        return digitalMarketingInternship;
-      case 'software-development-internship':
-        return softwareDevelopmentInternship;
-      case 'cybersecurity-internship':
-        return cybersecurityInternship;
-      case 'data-science-internship':
-        return dataScienceInternship;
-      case 'devops-automation-engineer':
-        return devOpsAutomationEngineer;
-      case 'cloud-security-architect':
-        return CloudSecurityArchitect;
-      case 'site-reliability-engineer-pro':
-        return SiteReliabilityEngineerPro;
-      case 'aws-cloud-architect-professional':
-        return AWSCloudArchitectProfessional;
-      case 'react-development-mastery':
-        return reactImage;
-      case 'nodejs-backend-development':
-        return nodejsImage;
-      case 'machine-learning-fundamentals':
-        return mlImage;
-      case 'python-programming-mastery':
-        return pythonImage;
-      case 'cloud-computing-essentials':
-        return cloudImage;
-      default:
-        // Fall back to category-based images
-        switch (categoryName.toLowerCase()) {
-          case 'ai':
-            return aiImage;
-          case 'development':
-            return developmentImage;
-          case 'business':
-            return businessImage;
-          case 'internships':
-            return internshipImage;
-          default:
-            return businessImage;
-        }
-    }
+const courseImages: Record<string, string> = {
+  "business-strategy-fundamentals": businessStrategyImage,
+  "financial-analysis-professional": financialAnalysisImage,
+  "leadership-management": leadershipImage,
+  "digital-marketing-fundamentals": digitalMarketingImage,
+  "business-analytics-internship": businesAnalyticsInternship,
+  "digital-marketing-internship": digitalMarketingInternship,
+  "software-development-internship": softwareDevelopmentInternship,
+  "cybersecurity-internship": cybersecurityInternship,
+  "data-science-internship": dataScienceInternship,
+  "devops-automation-engineer": devOpsAutomationEngineer,
+  "cloud-security-architect": CloudSecurityArchitect,
+  "site-reliability-engineer-pro": SiteReliabilityEngineerPro,
+  "aws-cloud-architect-professional": AWSCloudArchitectProfessional,
+  "react-development-mastery": reactImage,
+  "nodejs-backend-development": nodejsImage,
+  "machine-learning-fundamentals": mlImage,
+  "python-programming-mastery": pythonImage,
+  "cloud-computing-essentials": cloudImage,
+};
+
+function fallbackCourseImage(categoryName: string): string {
+  const fallbacks: Record<string, string> = {
+    ai: aiImage,
+    development: developmentImage,
+    business: businessImage,
+    internships: internshipImage,
   };
+  return fallbacks[categoryName.toLowerCase()] || businessImage;
+}
+
+export default function CourseCard({ course, certifiedCount, rating, viewMode = "grid" }: CourseCardProps) {
+  const isAssessment = course.productType === "assessment";
+  const isPractice = isAssessment && course.assessmentPurpose === "practice";
+  const courseSlug = course.slug || course.title.toLowerCase().replace(/[^a-zA-Z0-9\s]/g, "").replace(/\s+/g, "-");
+  const identity = getAssessmentVisualIdentity({ slug: courseSlug, title: course.title, category: course.category.name });
+  const pricing = getAssessmentCardPricing({
+    variant: isPractice ? "practice" : "certification",
+    price: course.price,
+    originalPrice: course.originalPrice,
+    isOnSale: course.isOnSale,
+  });
+  const TopicIcon = topicIcons[identity.iconKey];
+  const href = isAssessment
+    ? (isPractice ? publicPracticePath(courseSlug) : publicAssessmentPath(courseSlug))
+    : `/learn/${courseSlug}`;
+
   return (
     <Card
-      className={`group relative overflow-hidden border border-slate-200 transition-all duration-300 hover:border-slate-300 hover:shadow-lg ${
-        viewMode === "list" ? "flex flex-col sm:flex-row" : ""
-      }`}
+      data-card-kind={isAssessment ? (isPractice ? "practice" : "certification") : "course"}
+      className={`group relative overflow-hidden transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl ${
+        isPractice ? "border-2 border-violet-200 bg-violet-50/30 hover:border-violet-400" : "border border-slate-200 hover:border-slate-400"
+      } ${viewMode === "list" ? "flex flex-col sm:flex-row" : ""}`}
     >
-      <div className={`${viewMode === "list" ? "w-full sm:w-64 flex-shrink-0" : ""}`}>
-        <div className="aspect-video bg-gradient-to-br from-gray-900 to-black rounded-t-lg relative overflow-hidden">
-          <img 
-            src={course.thumbnailUrl || getCourseImage(courseSlug, course.category.name)}
-            alt={`${course.title} assessment`}
-            className="absolute inset-0 w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-black bg-opacity-40"></div>
-          <div className="absolute top-4 left-4">
-            <Badge
-              variant="secondary"
-              className="bg-white text-black font-bold"
-            >
-              {course.category.name}
-            </Badge>
-          </div>
-          <div className="absolute top-4 right-4 flex gap-2">
-            <Badge
-              variant="outline"
-              className="bg-black text-white border-white"
-            >
-              {course.duration} mins
-            </Badge>
-            {course.isOnSale && (
-              <Badge className="bg-red-600 text-white font-bold shadow-lg">
-                SALE
-              </Badge>
-            )}
-          </div>
+      <div className={viewMode === "list" ? "w-full flex-shrink-0 sm:w-64" : ""}>
+        <div className={`relative aspect-video overflow-hidden ${isAssessment ? `bg-gradient-to-br ${identity.headerClass}` : "bg-slate-950"}`}>
+          {isAssessment ? (
+            <div className="absolute inset-0 flex flex-col justify-between p-5 text-white">
+              <div className="flex items-start justify-between gap-2">
+                <Badge className="border border-white/20 bg-black/20 text-white hover:bg-black/20">{isPractice ? "Practice exam" : "Certification exam"}</Badge>
+                <TopicIcon className="h-7 w-7" aria-hidden="true" />
+              </div>
+              <p className="flex items-center gap-2 text-sm font-bold"><TopicIcon className="h-4 w-4" aria-hidden="true" />{identity.topicLabel}</p>
+            </div>
+          ) : (
+            <>
+              <img src={course.thumbnailUrl || courseImages[courseSlug] || fallbackCourseImage(course.category.name)} alt={`${course.title} course`} className="absolute inset-0 h-full w-full object-cover" />
+              <div className="absolute inset-0 bg-black/40" />
+              <Badge variant="secondary" className="absolute left-4 top-4 bg-white font-bold text-black">{course.category.name}</Badge>
+            </>
+          )}
+          {course.duration != null && <Badge variant="outline" className="absolute right-4 top-4 border-white bg-black/60 text-white">{course.duration} mins</Badge>}
         </div>
       </div>
 
-      <div className={`${viewMode === "list" ? "flex-1" : ""}`}>
+      <div className={viewMode === "list" ? "flex-1" : ""}>
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between gap-2">
-            <CardTitle className="text-lg group-hover:text-blue-600 transition-colors">
-              {course.title}
-            </CardTitle>
-            {typeof rating === 'number' && rating > 0 && (
-              <div className="flex items-center gap-1 text-yellow-500" aria-label={`${rating} out of 5 rating`}>
-                <Star className="h-4 w-4 fill-current" />
-                <span className="text-sm font-medium">{rating.toFixed(1)}</span>
-              </div>
-            )}
+            <CardTitle className="text-lg transition-colors group-hover:text-violet-700">{course.title}</CardTitle>
+            {typeof rating === "number" && rating > 0 && <div className="flex items-center gap-1 text-amber-500" aria-label={`${rating} out of 5 rating`}><Star className="h-4 w-4 fill-current" /><span className="text-sm font-medium">{rating.toFixed(1)}</span></div>}
           </div>
-          <p className="text-sm text-gray-600 line-clamp-2">
-            {course.description}
-          </p>
+          <p className="line-clamp-2 text-sm text-slate-600">{course.description}</p>
         </CardHeader>
 
         <CardContent className="pt-0">
-          <div className="space-y-3">
-            <div className="flex items-center gap-4 text-sm text-gray-600">
-              <div className="flex items-center gap-1">
-                <Clock className="h-4 w-4" />
-                {course.duration} mins
-              </div>
-              {typeof certifiedCount === 'number' && certifiedCount > 0 && (
-                <div className="flex items-center gap-1">
-                  <Users className="h-4 w-4" />
-                  {certifiedCount.toLocaleString()} certified
-                </div>
-              )}
-              <div className="flex items-center gap-1">
-                <Award className="h-4 w-4" />
-                {course.level || "All Levels"}
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                {course.productType !== "assessment" ? (
-                  <div>
-                    <div className="text-2xl font-bold text-black">
-                      {Number(course.contentPrice || 0) === 0 ? "Free" : `₹${course.contentPrice}`}
-                    </div>
-                    <div className="text-xs font-medium text-slate-500">course access</div>
-                  </div>
-                ) : course.isOnSale && course.originalPrice ? (
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-2xl font-bold text-red-600">
-                        ₹{course.price}
-                      </span>
-                      <span className="text-lg text-gray-500 line-through">
-                        ₹{course.originalPrice}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="text-sm text-green-600 font-medium">
-                        Save ₹
-                        {(
-                          parseFloat(course.originalPrice) -
-                          parseFloat(course.price)
-                        ).toFixed(0)}
-                      </div>
-                      <div className="bg-red-100 text-red-800 px-2 py-0.5 rounded text-xs font-semibold">
-                        {Math.round(
-                          ((parseFloat(course.originalPrice) -
-                            parseFloat(course.price)) /
-                            parseFloat(course.originalPrice)) *
-                            100
-                        )}
-                        % OFF
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-2xl font-bold text-black">
-                    ₹{course.price}
-                  </div>
-                )}
-              </div>
-              <Button asChild className="bg-slate-950 text-white hover:bg-slate-800">
-                <Link href={course.productType === "assessment" ? (isPractice ? publicPracticePath(courseSlug) : publicAssessmentPath(courseSlug)) : `/learn/${courseSlug}`}>
-                  {course.productType === "assessment" ? (isPractice ? "Start practice" : "View certification") : "View course"}
-                  <ChevronRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                </Link>
-              </Button>
-            </div>
+          <div className="flex flex-wrap items-center gap-4 text-sm text-slate-600">
+            {course.duration != null && <span className="flex items-center gap-1"><Clock className="h-4 w-4" />{course.duration} mins</span>}
+            {typeof certifiedCount === "number" && certifiedCount > 0 && <span className="flex items-center gap-1"><Users className="h-4 w-4" />{certifiedCount.toLocaleString()} certified</span>}
+            {course.level && <span className="flex items-center gap-1"><Award className="h-4 w-4" />{course.level}</span>}
           </div>
+
+          <div className={`mt-4 rounded-2xl p-3 ${isPractice ? "border border-dashed border-violet-300 bg-violet-50" : isAssessment ? "border border-emerald-200 bg-emerald-50" : "bg-slate-50"}`}>
+            {isAssessment ? (
+              <>
+                <p className={`font-black ${isPractice ? "text-violet-900" : "text-emerald-800"}`}>{pricing.primaryLabel}</p>
+                <p className="mt-1 text-xs leading-5 text-slate-600">{pricing.supportingLabel}</p>
+                {!isPractice && pricing.credentialPrice && <div className="mt-2 flex items-baseline gap-2"><span className="text-xs font-bold text-slate-500">Verified credential</span><span className="text-xl font-black">{pricing.credentialPrice}</span>{pricing.originalCredentialPrice && <span className="text-sm text-slate-500 line-through">{pricing.originalCredentialPrice}</span>}</div>}
+              </>
+            ) : (
+              <><p className="text-2xl font-black">{Number(course.contentPrice || 0) === 0 ? "Free" : `₹${course.contentPrice}`}</p><p className="text-xs font-medium text-slate-500">Course access</p></>
+            )}
+          </div>
+
+          <Button asChild className={`mt-4 w-full ${isPractice ? "bg-violet-700 hover:bg-violet-800" : "bg-slate-950 hover:bg-slate-800"}`}>
+            <Link href={href}>{isAssessment ? (isPractice ? "View practice exam" : "Explore free exam") : "View course"}<ChevronRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" /></Link>
+          </Button>
         </CardContent>
       </div>
     </Card>

@@ -9,10 +9,24 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ["Inter", "SF Pro Text", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "sans-serif"],
+      },
       borderRadius: {
+        xl: "calc(var(--radius) + 4px)",
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+      minHeight: {
+        control: "var(--control-height)",
+      },
+      boxShadow: {
+        surface: "var(--shadow-surface)",
+        raised: "var(--shadow-raised)",
+      },
+      transitionDuration: {
+        180: "180ms",
       },
       colors: {
         background: "var(--background)",
@@ -67,6 +81,9 @@ export default {
         },
       },
       keyframes: {
+        shimmer: {
+          "100%": { transform: "translateX(100%)" },
+        },
         "accordion-down": {
           from: {
             height: "0",
