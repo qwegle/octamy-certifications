@@ -55,6 +55,7 @@ const immutableMigrationHashes = Object.freeze({
   "0034_database_managed_sale_state": "ec6fc71699725f588694df2f044c0d563447bb9ab178c0c52f09a68205bed35b",
   "0035_governed_assessment_release_evidence": "34470923b08347a592189197916a86dc6f77a07ca83e356154991dc69cbef14a",
   "0036_void_fabricated_release_evidence": "c4ab69809b5a884da9185aa166af89d0bd160080c2f1d1eadf45ce402707f7a4",
+  "0037_release_evidence_rls_breaks_backups": "f0314ed982c804ce4eb8b3cc0e1ec8d0981217810f8bacc8a5ca46b9730f5097",
 });
 
 // Exact-hash review records for migrations containing data mutation,
