@@ -10,7 +10,7 @@ import { normalizeQuestionPackItem } from "./lib/question-pack-contract";
 
 const ASSESSMENT_SLUG = "grade-3-mathematics-practice";
 const BANK_SLUG = "grade-3-mathematics-practice-pool-v1";
-const SYLLABUS = "Octamy Grade 3 Arithmetic, Time and Perimeter Practice Blueprint v1";
+const SYLLABUS = "Grade 3 Arithmetic, Time and Perimeter Practice Blueprint v1";
 const EXAM_TITLE = "Grade 3 Arithmetic, Time and Perimeter Practice";
 const SOURCE = "https://ncert.nic.in/textbook/pdf/cemm1ps.pdf";
 const OBJECTIVE_CODES: Record<string, string> = {

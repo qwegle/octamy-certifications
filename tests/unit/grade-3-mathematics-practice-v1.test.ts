@@ -61,7 +61,7 @@ describe("Grade 3 mathematics practice bank v1", () => {
       expect(item.metadata.assessmentSlugs).toEqual(["grade-3-mathematics-practice"]);
       expect(item.exam).toBe("Grade 3 Arithmetic, Time and Perimeter Practice");
       expect(item.metadata.releaseEvidence).toMatchObject({
-        syllabusVersion: "Octamy Grade 3 Arithmetic, Time and Perimeter Practice Blueprint v1",
+        syllabusVersion: "Grade 3 Arithmetic, Time and Perimeter Practice Blueprint v1",
         answerValidation: { status: "verified", method: "independent_calculation" },
         distractorReview: { status: "verified" },
       });
