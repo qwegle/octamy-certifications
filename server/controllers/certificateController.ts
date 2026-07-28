@@ -9,6 +9,7 @@ import {
   getCredentialActivationContext,
 } from '../lib/credential-activation';
 import { isCredentialEligibleAssessment } from '../lib/certificate-policy';
+import { certificateCreationRequestSchema } from '../lib/certificate-issuance-policy';
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -36,7 +37,14 @@ function absoluteAssetUrl(req: Request, value?: string | null) {
 export class CertificateController {
   static async createCertificate(req: AuthenticatedRequest, res: Response) {
     try {
-      const { examAttemptId } = req.body;
+      const parsedRequest = certificateCreationRequestSchema.safeParse(req.body);
+      if (!parsedRequest.success) {
+        return res.status(400).json({
+          message: "A valid exam attempt is required",
+          code: "INVALID_EXAM_ATTEMPT",
+        });
+      }
+      const { examAttemptId } = parsedRequest.data;
       const userId = req.user?.userId;
 
       if (!userId) {

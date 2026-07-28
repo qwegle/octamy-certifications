@@ -175,9 +175,9 @@ export default function Footer() {
           {/* Platform */}
           <FooterColumn title="Platform" className="md:col-span-2">
             <ul className="space-y-2.5">
-              <FooterLink to="/courses">Skill Assessments</FooterLink>
+              <FooterLink to="/get-certified">Certification Assessments</FooterLink>
               <FooterLink to="/virtual-internships">Virtual Internships</FooterLink>
-              <FooterLink to="/business-certifications">Business Certifications</FooterLink>
+              <FooterLink to="/practice">Practice Exams</FooterLink>
               <FooterLink to="/learning-paths">Learning Paths</FooterLink>
               <FooterLink to="/verify">Verify Certificate</FooterLink>
             </ul>

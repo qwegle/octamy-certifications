@@ -83,7 +83,9 @@ export default function PracticeResultScreen() {
         <Text muted>The server reveals correct answers only after submission.</Text>
       </View>
 
-      {result.review.map((item, index) => (
+      {result.review.length === 0 ? (
+        <Banner title="Answer review unavailable" message="The server did not return question-level review for this result. Octamy will not infer answers or correctness." tone="warning" />
+      ) : result.review.map((item, index) => (
         <Card accessibilityLabel={`Question ${index + 1}. ${item.isCorrect ? 'Correct' : 'Incorrect'}.`} key={`${item.questionId}-${index}`}>
           <View style={styles.reviewHeader}>
             <Badge label={`Question ${index + 1}`} />

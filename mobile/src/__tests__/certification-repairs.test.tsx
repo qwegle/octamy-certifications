@@ -220,8 +220,12 @@ describe('certification catalog and exam repairs', () => {
     expect(screen.getByText(/does not lock your device or prevent switching apps/)).toBeTruthy();
 
     await fireEvent.press(screen.getByRole('button', { name: 'Save and leave exam' }));
-    expect(router.back).toHaveBeenCalledTimes(1);
-    expect(saveAttempt).not.toHaveBeenCalled();
+    await waitFor(() => expect(saveAttempt).toHaveBeenCalledWith(expect.objectContaining({
+      answers: { '99': 0 },
+      integrityExitCount: 2,
+      sessionId: 'session-1',
+    })));
+    expect(router.replace).toHaveBeenCalledWith({ pathname: '/certification/[slug]', params: { slug: 'ai-foundations' } });
 
     await act(async () => {
       changeAppState('active');

@@ -149,7 +149,7 @@ export default function InterviewSessionScreen() {
       return <Screen><Heading>Choose an interview</Heading><Text accessibilityLiveRegion="polite">Loading private practice templates…</Text></Screen>;
     }
     if (templatesQuery.isError || statusQuery.isError) {
-      return <Screen><ErrorState description="Connect to load the verified private Interview Studio templates." onRetry={() => { void templatesQuery.refetch(); void statusQuery.refetch(); }} title="Templates unavailable" /></Screen>;
+      return <Screen><ErrorState description="Connect to load the published private Interview Studio templates." onRetry={() => { void templatesQuery.refetch(); void statusQuery.refetch(); }} title="Templates unavailable" /></Screen>;
     }
     return (
       <Screen>
@@ -221,7 +221,7 @@ export default function InterviewSessionScreen() {
         editable={editable}
         hint={currentItem.kind === 'structured_response'
           ? `${wordCount} words · suggested ${currentItem.minimumWords}–${currentItem.maximumWords} words`
-          : 'Only JavaScript is accepted by this verified template.'}
+          : 'Only JavaScript is accepted by this published template.'}
         label={currentItem.kind === 'coding' ? 'Your JavaScript solution' : 'Your typed response for private AI feedback'}
         maxLength={currentItem.kind === 'coding' ? 50_000 : 20_000}
         multiline

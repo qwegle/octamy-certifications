@@ -35,6 +35,19 @@ function detectRoleFromPath(pathname: string): Role | null {
   return null;
 }
 
+function isSelectedPracticePricingPath(value: string | null): value is string {
+  if (!value) return false;
+  try {
+    const parsed = new URL(value, 'https://octamy.invalid');
+    return parsed.origin === 'https://octamy.invalid'
+      && parsed.pathname === '/pricing'
+      && parsed.searchParams.get('role') === 'learner'
+      && parsed.searchParams.get('selected') === PRACTICE_PASS_PLAN;
+  } catch {
+    return false;
+  }
+}
+
 export default function Register() {
   const [location, setLocation] = useLocation();
   const { register, user, token } = useAuth();
@@ -58,6 +71,12 @@ export default function Register() {
     [query],
   );
   const next = useMemo(() => safeInternalReturnTo(query?.get('next')), [query]);
+  const practicePlanDestination = useMemo(
+    () => isSelectedPracticePricingPath(next)
+      ? next
+      : practicePricingPath({ cycle: selectedCycle, next: next || '/practice', welcome: true }),
+    [next, selectedCycle],
+  );
   const emailHint = useMemo(() => {
     const value = query?.get('email')?.trim().toLowerCase() || '';
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? value : '';
@@ -213,7 +232,7 @@ export default function Register() {
           localStorage.setItem('octamy.pendingPlan', JSON.stringify({ role, plan: selectedPlan, cycle: selectedCycle, at: Date.now() }));
         } catch {}
         dest = role === 'learner'
-          ? practicePricingPath({ cycle: selectedCycle, next: next || '/practice', welcome: true })
+          ? practicePlanDestination
           : `/pricing?role=${role}&selected=${encodeURIComponent(selectedPlan)}&cycle=${selectedCycle}&welcome=1`;
       }
 
@@ -296,7 +315,7 @@ export default function Register() {
             role: role === 'recruiter' ? 'learner' : role,
             plan: selectedPlan,
             returnTo: role === 'learner' && selectedPlan === PRACTICE_PASS_PLAN
-              ? practicePricingPath({ cycle: selectedCycle, next: next || '/practice', welcome: true })
+              ? practicePlanDestination
               : next,
           }} />}
 

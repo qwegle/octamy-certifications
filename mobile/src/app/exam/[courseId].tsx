@@ -43,6 +43,7 @@ export default function ExamScreen() {
   const [consented, setConsented] = useState(false);
   const [starting, setStarting] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [leaving, setLeaving] = useState(false);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [reviewing, setReviewing] = useState(false);
   const [remainingSeconds, setRemainingSeconds] = useState(0);
@@ -206,6 +207,22 @@ export default function ExamScreen() {
   const confirmSubmit = () => {
     if (!attempt) return;
     setReviewing(true);
+  };
+
+  const saveAndLeave = async () => {
+    if (!attempt || leaving) return;
+    setLeaving(true);
+    const next = { ...attempt, updatedAt: new Date().toISOString() };
+    setAttempt(next);
+    saveChain.current = saveChain.current.catch(() => undefined).then(() => saveAttempt(next));
+    try {
+      await saveChain.current;
+      router.replace({ pathname: '/certification/[slug]', params: { slug: next.courseSlug } } as Href);
+    } catch {
+      showToast({ message: 'Keep this screen open and try again. The attempt was not safely saved.', title: 'Unable to leave safely', tone: 'error' });
+    } finally {
+      setLeaving(false);
+    }
   };
 
   const discardExpired = () => {
@@ -420,7 +437,7 @@ export default function ExamScreen() {
       </View>
 
       {isExpired ? <Button label="Discard expired attempt" onPress={discardExpired} variant="danger" /> : null}
-      <Button label="Save and leave exam" onPress={() => router.back()} variant="ghost" />
+      <Button disabled={leaving} label={leaving ? 'Saving attempt…' : 'Save and leave exam'} loading={leaving} onPress={() => void saveAndLeave()} variant="ghost" />
     </Screen>
   );
 }

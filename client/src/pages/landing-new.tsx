@@ -264,13 +264,14 @@ export default function Landing() {
     { icon: Users, title: "Enterprise", text: "Bulk assessment and verification support for teams" },
   ];
 
-  // 8-tile featured tracks grid (with course counts)
-  const featuredTracks = categories.slice(0, 8).map((cat) => ({
+  const careerCategoryIds = new Set(filteredCourses.map((course) => course.categoryId));
+  const careerCategories = categories.filter((category) => careerCategoryIds.has(category.id));
+
+  // Only expose tracks backed by live career inventory. The general category
+  // endpoint also contains legacy and practice-only taxonomy nodes.
+  const featuredTracks = careerCategories.slice(0, 8).map((cat) => ({
     ...cat,
-    count: courses.filter((c) =>
-      c.categoryId === cat.id &&
-      (c.productType !== "assessment" || c.assessmentPurpose === "certification")
-    ).length,
+    count: filteredCourses.filter((course) => course.categoryId === cat.id).length,
     Icon: iconForCategory(cat.slug),
     isPremium: PREMIUM_CATEGORY_SLUGS.includes((cat.slug || "").toLowerCase()),
   }));
@@ -383,8 +384,8 @@ export default function Landing() {
                   className="relative z-10 mt-8 flex max-w-xl flex-wrap gap-x-6 gap-y-2 border-t border-white/10 pt-5"
                 >
                   {[
-                    { v: courses.length, s: "", l: "Live exams" },
-                    { v: categories.length, s: "", l: "Skill tracks" },
+                    { v: filteredCourses.length, s: "", l: "Career exams" },
+                    { v: careerCategories.length, s: "", l: "Skill tracks" },
                     { v: 1, s: "", l: "Portable passport" },
                   ].map((s) => (
                     <div key={s.l} className="flex items-baseline gap-1.5">
@@ -613,7 +614,7 @@ export default function Landing() {
                 Live exams
               </p>
               <p className="mt-3 text-5xl font-extrabold tracking-tight text-slate-900 tabular-nums">
-                {courses.length}
+                {filteredCourses.length}
               </p>
               <p className="mt-2 text-sm text-slate-600">
                 Skill assessments available right now.
@@ -624,7 +625,7 @@ export default function Landing() {
                 Career tracks
               </p>
               <p className="mt-3 text-5xl font-extrabold tracking-tight text-slate-900 tabular-nums">
-                {categories.length}
+                {careerCategories.length}
               </p>
               <p className="mt-2 text-sm text-slate-600">
                 Curated categories spanning tech, business and design.
@@ -707,7 +708,7 @@ export default function Landing() {
             }
           </Stagger>
 
-          {categories.length > 8 && (
+          {careerCategories.length > 8 && (
             <Reveal as="div" className="mt-10 text-center">
               <Button
                 asChild
@@ -715,7 +716,7 @@ export default function Landing() {
                   className="border-slate-300 text-slate-700 rounded-full"
                 >
                 <Link href="/get-certified">
-                  View all {categories.length} tracks
+                  View all {careerCategories.length} tracks
                   <ArrowRight className="ml-2 w-4 h-4" />
                 </Link>
               </Button>

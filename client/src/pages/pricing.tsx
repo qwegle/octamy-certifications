@@ -34,6 +34,10 @@ export default function Pricing() {
   const { user, token } = useAuth();
   const [location, setLocation] = useLocation();
   const { toast } = useToast();
+  const requestedNext = useMemo(() => {
+    const params = new URLSearchParams(typeof window === 'undefined' ? '' : window.location.search);
+    return safeInternalReturnTo(params.get('next')) || '/practice';
+  }, [location]);
 
   const selected = useMemo(() => {
     const allowed: Record<'learner' | 'creator' | 'institute', string[]> = {
@@ -74,7 +78,7 @@ export default function Pricing() {
   async function subscribe(ownerType: 'learner' | 'creator' | 'institute', plan: string, registerRole: string) {
     if (!user || !token) {
       if (ownerType === 'learner' && plan === PRACTICE_PASS_PLAN) {
-        setLocation(practicePricingPath({ cycle, next: selected?.next || '/practice' }));
+        setLocation(practicePricingPath({ cycle, next: selected?.next || requestedNext }));
       } else {
         setLocation(`/register?role=${registerRole}&plan=${encodeURIComponent(plan)}&cycle=${cycle}`);
       }
@@ -97,7 +101,7 @@ export default function Pricing() {
             orderId: data.orderId,
             ownerType,
             plan,
-            next: ownerType === 'learner' ? '/practice' : `/${ownerType}/dashboard`,
+            next: ownerType === 'learner' ? (selected?.next || requestedNext) : `/${ownerType}/dashboard`,
             createdAt: Date.now(),
           }));
         } catch {}

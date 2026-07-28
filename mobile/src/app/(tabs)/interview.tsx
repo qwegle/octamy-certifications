@@ -4,7 +4,7 @@ import { type Href, router, useFocusEffect } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
-import { Badge, Banner, Button, Card, ErrorState, Heading, PageHeader, Screen, Text } from '@/components/ui';
+import { Badge, Banner, Button, Card, EmptyState, ErrorState, Heading, PageHeader, Screen, Skeleton, Text } from '@/components/ui';
 import { useSession } from '@/features/auth';
 import { getInterviewSessions, getInterviewStatus, listRecordings } from '@/features/interview';
 import { queryKeys } from '@/lib/query-keys';
@@ -62,8 +62,8 @@ export default function InterviewScreen() {
         <Card tone="marketing">
           <View style={styles.row}>
             <View style={styles.grow}>
-              <Heading level={2}>Skill-specific AI interviews</Heading>
-              <Text muted>Choose a published role-and-skill template, submit typed or code responses, and receive verified private evaluation when the server supports it.</Text>
+              <Heading level={2}>Skill-specific interview practice</Heading>
+              <Text muted>Choose a published role-and-skill template and submit typed or code responses. Private AI feedback appears only when the server reports it is enabled.</Text>
             </View>
             <Badge
               label={statusQuery.data?.aiEvaluationEnabled ? 'AI feedback available' : 'AI feedback unavailable'}
@@ -117,7 +117,14 @@ export default function InterviewScreen() {
         <Button label="Review retention and recordings" onPress={() => router.push(recordingsHref)} variant="secondary" />
       </Card>
 
-      {sessionsQuery.data?.items.length ? (
+      {sessionsQuery.isPending ? (
+        <View accessibilityLabel="Loading private interview sessions" accessibilityRole="progressbar" style={styles.section}>
+          <Heading level={2}>Recent private sessions</Heading>
+          <Card><Skeleton height={22} width="60%" /><Skeleton height={18} width="82%" /><Skeleton height={48} /></Card>
+        </View>
+      ) : sessionsQuery.isError ? (
+        <ErrorState description="Your private Interview Studio sessions could not be loaded." onRetry={() => void sessionsQuery.refetch()} title="Sessions unavailable" />
+      ) : sessionsQuery.data?.items.length ? (
         <View style={styles.section}>
           <Heading level={2}>Recent private sessions</Heading>
           {sessionsQuery.data.items.slice(0, 3).map((session) => (
@@ -137,7 +144,9 @@ export default function InterviewScreen() {
             </Card>
           ))}
         </View>
-      ) : null}
+      ) : (
+        <EmptyState description="Start a private role-and-skill practice session when you are ready." title="No private sessions yet" />
+      )}
     </Screen>
   );
 }

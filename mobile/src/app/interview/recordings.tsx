@@ -84,7 +84,7 @@ export default function InterviewRecordingsScreen() {
     <Screen>
       <Badge label="On-device retention" tone="accent" />
       <Heading>Local recordings</Heading>
-      <Text muted>These videos stay in Octamy’s private app storage and are never uploaded or shared. They remain until you delete them, sign out, or uninstall the app; device backup behavior follows your operating-system settings.</Text>
+      <Text muted>These videos stay in Octamy’s backup-excluded app cache and are never uploaded or shared. They remain until you delete them, sign out, uninstall the app, or the operating system reclaims cache storage.</Text>
       <Banner message="Deleting a video here does not change a server Interview Studio session. Server sessions contain only the text or code you explicitly saved." title="Local and server data are separate" tone="info" />
 
       {error ? <Banner message={error} onDismiss={() => setError(null)} title="Storage issue" tone="error" /> : null}

@@ -18,6 +18,16 @@ export default function BillingReturn() {
   const expectedPlan = query.get('plan');
   const orderId = query.get('orderId');
   const next = safeInternalReturnTo(query.get('next'));
+  const pendingNext = useMemo(() => {
+    try {
+      const pending = JSON.parse(localStorage.getItem('octamy.pendingSubscriptionOrder') || 'null');
+      if (pending?.orderId !== orderId) return null;
+      return safeInternalReturnTo(pending?.next);
+    } catch {
+      return null;
+    }
+  }, [orderId]);
+  const continuation = pendingNext || next;
   const [state, setState] = useState<'checking' | 'active' | 'pending' | 'error'>('checking');
 
   const dashboard = ownerType === 'learner'
@@ -96,7 +106,7 @@ export default function BillingReturn() {
           </p>
           <div className="mt-7 flex flex-col-reverse gap-2 sm:flex-row sm:justify-center">
             <Button asChild variant="outline"><Link href="/contact">Contact support</Link></Button>
-            <Button asChild className="bg-slate-950 text-white"><Link href={state === 'active' && next ? next : dashboard}>{state === 'active' && next ? 'Continue' : 'Go to dashboard'}</Link></Button>
+            <Button asChild className="min-h-11 bg-slate-950 text-white"><Link href={state === 'active' && continuation ? continuation : dashboard}>{state === 'active' && continuation ? 'Continue' : 'Go to dashboard'}</Link></Button>
           </div>
         </CardContent>
       </Card>

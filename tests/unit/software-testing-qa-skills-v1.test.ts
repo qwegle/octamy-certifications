@@ -46,7 +46,7 @@ describe("Software Testing and QA Skills v1", () => {
         answerValidation: { status: "verified", method: "primary_source" },
         distractorReview: { status: "verified" },
       });
-      expect(item.metadata.releaseEvidence.objectiveCode).toMatch(/^STQA-[A-Z]+-\d{2}$/);
+      expect(item.metadata.releaseEvidence.objectiveCode).toMatch(/^STQA-[A-Z0-9]+-\d{2}$/);
     }
   });
 

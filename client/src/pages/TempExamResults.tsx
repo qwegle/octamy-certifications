@@ -26,6 +26,7 @@ interface TempExamResults {
   passed: boolean;
   correctAnswers: number;
   totalQuestions: number;
+  assessmentPurpose?: "certification" | "practice";
   course: {
     id: number;
     slug?: string;
@@ -79,11 +80,16 @@ export default function TempExamResults() {
       const data = await response.json();
       setResults(data);
       if (token) {
-        const subscriptionResponse = await apiRequest("GET", "/api/me/subscription");
-        const subscriptionData = await subscriptionResponse.json();
-        // Internal all_access now represents Practice Pass. It must not issue
-        // recruiter-visible credentials from a result page.
-        setLearnerPlanActive(subscriptionData?.learner?.plan === "credential_access" && subscriptionData?.learner?.status === "active");
+        try {
+          const subscriptionResponse = await apiRequest("GET", "/api/me/subscription");
+          const subscriptionData = await subscriptionResponse.json();
+          // Internal all_access now represents Practice Pass. It must not issue
+          // recruiter-visible credentials from a result page.
+          setLearnerPlanActive(subscriptionData?.learner?.plan === "credential_access" && subscriptionData?.learner?.status === "active");
+        } catch (subscriptionError) {
+          console.warn("Credential entitlement could not be checked:", subscriptionError);
+          setLearnerPlanActive(false);
+        }
       }
     } catch (error) {
       console.error("Error fetching temp results:", error);
@@ -194,7 +200,7 @@ export default function TempExamResults() {
     );
   }
 
-  const isPractice = results.course.assessmentPurpose === "practice" || results.needsPayment === false;
+  const isPractice = results.assessmentPurpose === "practice" || results.course.assessmentPurpose === "practice";
 
   return (
     <div className="min-h-screen bg-[#f5f2ec]">

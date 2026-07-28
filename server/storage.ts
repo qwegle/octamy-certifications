@@ -746,11 +746,33 @@ export class DatabaseStorage implements IStorage {
 
   // Certificate operations
   async createCertificate(insertCertificate: InsertCertificate): Promise<Certificate> {
-    const [certificate] = await db
-      .insert(certificates)
-      .values(insertCertificate)
-      .returning();
-    return certificate;
+    const examAttemptId = insertCertificate.examAttemptId;
+    if (examAttemptId == null) {
+      const [certificate] = await db
+        .insert(certificates)
+        .values(insertCertificate)
+        .returning();
+      return certificate;
+    }
+
+    // Retry-safe credential issuance without requiring a schema migration:
+    // serialize one exam attempt, then return its existing credential if a
+    // browser retry or concurrent request already created it.
+    return db.transaction(async (tx) => {
+      await tx.execute(sql`SELECT pg_advisory_xact_lock(7601, ${examAttemptId})`);
+      const [existing] = await tx
+        .select()
+        .from(certificates)
+        .where(eq(certificates.examAttemptId, examAttemptId))
+        .limit(1);
+      if (existing) return existing;
+
+      const [certificate] = await tx
+        .insert(certificates)
+        .values(insertCertificate)
+        .returning();
+      return certificate;
+    });
   }
 
   async getCertificate(id: number): Promise<Certificate | undefined> {
