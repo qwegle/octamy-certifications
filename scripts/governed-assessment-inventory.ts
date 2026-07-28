@@ -352,6 +352,12 @@ export async function buildGovernedAssessmentInventory(options: {
               acceptance.accepted_at AS "acceptedAt"
          FROM assessment_accessibility_acceptances acceptance
         WHERE acceptance.assessment_id = ANY($1::int[])
+          -- Voided evidence is preserved for audit but must never satisfy a
+          -- release gate. The revocation table is append-only.
+          AND NOT EXISTS (
+            SELECT 1 FROM assessment_release_evidence_revocations revocation
+             WHERE revocation.accessibility_acceptance_id = acceptance.id
+          )
         ORDER BY acceptance.assessment_id, acceptance.blueprint_revision`,
       [courseIds],
     );
@@ -395,6 +401,12 @@ export async function buildGovernedAssessmentInventory(options: {
               bundle.bundle_sha256 AS "bundleSha256"
          FROM assessment_release_bundles bundle
         WHERE bundle.assessment_id = ANY($1::int[])
+          -- Voided bundles remain on record for audit but cannot satisfy the
+          -- release-evidence gate.
+          AND NOT EXISTS (
+            SELECT 1 FROM assessment_release_evidence_revocations revocation
+             WHERE revocation.release_bundle_id = bundle.id
+          )
         ORDER BY bundle.assessment_id, bundle.blueprint_revision`,
       [courseIds],
     );
