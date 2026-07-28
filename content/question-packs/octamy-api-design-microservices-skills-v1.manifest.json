@@ -4,7 +4,7 @@
   "name": "Octamy API Design and Microservices Skills Bank v1",
   "publisher": "Octamy",
   "datasetVersion": "1.0.0",
-  "description": "Eighty original API design and microservices certification questions aligned to RFC 9110/9111, OpenAPI 3.1, OWASP API Security 2023, Twelve-Factor App, and Kubernetes documentation snapshot dated 2026-07-28.",
+  "description": "Eighty original API design and microservices certification questions aligned to RFC 9110/9111, OpenAPI 3.2, OWASP API Security 2023, Twelve-Factor App, and Kubernetes documentation snapshot dated 2026-07-28.",
   "sourceUrl": "https://octamy.com/",
   "retrievedAt": "2026-07-28T00:00:00.000Z",
   "license": {

@@ -42,7 +42,7 @@ describe("API Design and Microservices Skills v1", () => {
       expect(item.options).toHaveLength(4);
       expect(new Set(item.options.map((option) => option.toLowerCase()))).toHaveProperty("size", 4);
       expect(item.metadata.releaseEvidence).toMatchObject({
-        syllabusVersion: "OCT-ADMS-2026.1 (RFC 9110/9111, OpenAPI 3.1, OWASP API Security 2023, Twelve-Factor, Kubernetes docs snapshot 2026-07-28)",
+        syllabusVersion: "OCT-ADMS-2026.1 (HTTP, OpenAPI 3.2, OWASP API 2023, 12-Factor, Kubernetes; 2026-07-28)",
         answerValidation: { status: "verified", method: "primary_source" },
         distractorReview: { status: "verified" },
       });
