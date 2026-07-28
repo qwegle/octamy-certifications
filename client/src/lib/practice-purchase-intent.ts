@@ -23,6 +23,18 @@ export function practicePricingPath(input: {
   return `/pricing?${params.toString()}`;
 }
 
+export function practicePlansPath(input: {
+  cycle?: unknown;
+  next?: string | null;
+} = {}): string {
+  const params = new URLSearchParams({
+    role: "learner",
+    cycle: normalizePracticePassCycle(input.cycle),
+  });
+  params.set("next", safeInternalReturnTo(input.next) || "/practice");
+  return `/pricing?${params.toString()}`;
+}
+
 export function practiceAccountPath(
   mode: "login" | "register",
   input: { cycle?: unknown; next?: string | null } = {},

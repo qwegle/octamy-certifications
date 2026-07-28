@@ -16,7 +16,7 @@ import { ExamStructuredData } from '@/components/seo-structured-data';
 import { SEO } from '@/components/seo';
 import { FullscreenExitGuard, QuestionNavigator, SubmitExamDialog } from '@/components/exam-session-controls';
 import { publicAssessmentCategoryPath, publicAssessmentPath, publicPracticeCategoryPath, publicPracticePath } from '@shared/public-assessment-routes';
-import { practiceAccountPath, practicePricingPath } from '@/lib/practice-purchase-intent';
+import { practicePlansPath, practicePricingPath } from '@/lib/practice-purchase-intent';
 import { AlertTriangle, Award, CheckCircle2, ChevronLeft, ChevronRight, Clock3, FileQuestion, Flag, RotateCcw, Save, Send, ShieldCheck, TicketCheck, WifiOff } from 'lucide-react';
 
 interface ExamQuestion {
@@ -57,6 +57,7 @@ type PublicAssessment = {
   duration: number;
   passingScore: number;
   price: string;
+  originalPrice: string | null;
   productType: "assessment";
   level: string;
   language: string;
@@ -386,7 +387,7 @@ export default function Exam() {
 
   const startExam = async () => {
     if (course?.assessmentPurpose === "practice" && !user) {
-      setLocation(practiceAccountPath('login', { next: location }));
+      setLocation(practicePlansPath({ next: location }));
       return;
     }
     if (course?.assessmentPurpose === "practice" && !hasPracticeAccess) {
@@ -583,7 +584,7 @@ export default function Exam() {
               <Card className="overflow-hidden rounded-[1.75rem] border-slate-200 shadow-xl shadow-slate-900/10">
                 <div className="border-b border-slate-100 bg-gradient-to-br from-violet-50 to-sky-50 p-6">
                   <p className="text-xs font-black uppercase tracking-[0.14em] text-violet-800">Start when you are ready</p>
-                  <div className="mt-3 flex items-end justify-between gap-4"><div><p className="text-2xl font-black text-slate-950">{isPractice ? "Included in Practice Pass" : "Free exam attempt"}</p><p className="mt-1 text-sm text-slate-600">{isPractice ? "Choose 30-day or 365-day access to reviewed Practice exams." : `Activate the credential for ₹${course.price} only after passing.`}</p></div><CheckCircle2 className="h-8 w-8 shrink-0 text-emerald-600" /></div>
+                  <div className="mt-3 flex items-end justify-between gap-4"><div><p className="text-2xl font-black text-slate-950">{isPractice ? "Included in Practice Pass" : "Free exam attempt"}</p><p className="mt-1 text-sm text-slate-600">{isPractice ? "Choose 30-day or 365-day access to reviewed Practice exams." : <>Activate the credential for <strong>₹{course.price}</strong>{Number(course.originalPrice) > Number(course.price) && <><span className="ml-1.5 line-through">₹{Number(course.originalPrice).toFixed(2)}</span><span className="ml-1.5 font-bold text-emerald-700">Save ₹{(Number(course.originalPrice) - Number(course.price)).toFixed(2)}</span></>} only after passing.</>}</p></div><CheckCircle2 className="h-8 w-8 shrink-0 text-emerald-600" /></div>
                 </div>
                 <CardContent className="space-y-5 p-6">
                   {!user && !isPractice && <div className="space-y-4"><div><Label htmlFor="name" className="font-bold">Full name</Label><input id="name" type="text" autoComplete="name" value={userInfo.name} onChange={(e) => setUserInfo(prev => ({ ...prev, name: e.target.value }))} className="mt-1.5 h-11 w-full rounded-xl border border-slate-300 px-3 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-100" placeholder="As it should appear on your credential" /></div><div><Label htmlFor="email" className="font-bold">Email address</Label><input id="email" type="email" autoComplete="email" value={userInfo.email} onChange={(e) => setUserInfo(prev => ({ ...prev, email: e.target.value }))} className="mt-1.5 h-11 w-full rounded-xl border border-slate-300 px-3 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-100" placeholder="For result recovery" /></div></div>}
@@ -592,7 +593,7 @@ export default function Exam() {
 
                   {user && isPractice && !subscriptionLoading && !hasPracticeAccess && <div className="rounded-2xl border border-violet-200 bg-violet-50 p-4"><p className="font-black text-slate-950">Practice Pass required</p><p className="mt-1 text-sm leading-6 text-slate-600">Review 30-day or 365-day access. Your account details are already attached, so they will not be requested again.</p><Button type="button" className="mt-4 w-full" onClick={() => setLocation(practicePricingPath({ next: location }))}>Review Practice Pass</Button></div>}
 
-                  {!user && isPractice && <div className="rounded-2xl border border-violet-200 bg-violet-50 p-4"><p className="font-black text-slate-950">Create an account to use Practice Pass</p><p className="mt-1 text-sm leading-6 text-slate-600">An account keeps your access, attempts and saved progress together. Registration is free; you review the pass before payment.</p><div className="mt-4 grid gap-2 sm:grid-cols-2"><Button type="button" onClick={() => setLocation(practiceAccountPath('register', { next: location }))}>Create free account</Button><Button type="button" variant="outline" onClick={() => setLocation(practiceAccountPath('login', { next: location }))}>Sign in</Button></div></div>}
+                  {!user && isPractice && <div className="rounded-2xl border border-violet-200 bg-violet-50 p-4"><p className="font-black text-slate-950">Review Practice Pass first</p><p className="mt-1 text-sm leading-6 text-slate-600">Choose 30-day or 365-day access first. After selecting a plan, you can sign in or create a learner account.</p><Button type="button" className="mt-4 w-full" onClick={() => setLocation(practicePlansPath({ next: location }))}>View Practice Pass plans</Button></div>}
 
                   {!isPractice && <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
                     <input type="checkbox" checked={integrityConsent} onChange={(event) => setIntegrityConsent(event.target.checked)} className="mt-1 h-4 w-4 shrink-0 rounded border-slate-300 accent-violet-700" />

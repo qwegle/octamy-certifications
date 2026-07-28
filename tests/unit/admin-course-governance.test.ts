@@ -88,6 +88,34 @@ describe("admin course governance", () => {
     });
   });
 
+  it("rejects new Grade 1–10 first-party practice assessments", () => {
+    const parsed = adminCourseCreateSchema.parse({
+      ...validCreate,
+      title: "Grade 8 Mathematics Practice",
+      assessmentPurpose: "practice",
+    });
+    expect(() => buildAdminOwnedCourseCreate(parsed, "grade-8-mathematics-practice"))
+      .toThrow("outside the first-party Octamy portfolio");
+  });
+
+  it("keeps quarantined Grade 1–10 shells unpublished while allowing operational unpublish", () => {
+    const gradeShell = {
+      ...adminCourse,
+      title: "Grade 3 Mathematics Practice",
+      slug: "grade-3-mathematics-practice",
+      assessmentPurpose: "practice",
+      visibility: "private",
+    };
+    expect(buildGovernedAdminCourseUpdate(
+      gradeShell,
+      adminCourseUpdateSchema.parse({ isActive: false, visibility: "private" }),
+    )).toMatchObject({ isActive: false, visibility: "private" });
+    expect(() => buildGovernedAdminCourseUpdate(
+      gradeShell,
+      adminCourseUpdateSchema.parse({ isActive: true, visibility: "public" }),
+    )).toThrow("cannot be published");
+  });
+
   it("does not mark non-assessment or non-public items as subscription inventory", () => {
     const parsed = adminCourseCreateSchema.parse({
       ...validCreate,

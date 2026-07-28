@@ -88,6 +88,8 @@ export type AdminCourseUpdateInput = z.infer<typeof adminCourseUpdateSchema>;
 export type AdminCourseReviewInput = z.infer<typeof adminCourseReviewSchema>;
 
 export type GovernedCourse = {
+  title?: string;
+  slug?: string;
   ownerType: string;
   ownerId: number | null;
   productType: string;
@@ -101,6 +103,39 @@ export type GovernedCourse = {
 };
 
 export class AdminCourseGovernanceError extends Error {}
+
+const FIRST_PARTY_GRADE_1_TO_10 = /\bgrade[\s-]*(?:[1-9]|10)\b/i;
+
+function isFirstPartyGradeOneToTenAssessment(course: {
+  title?: string;
+  slug?: string;
+  ownerType: string;
+  productType: string;
+  assessmentPurpose: string;
+}) {
+  return course.ownerType === "admin"
+    && course.productType === "assessment"
+    && course.assessmentPurpose === "practice"
+    && FIRST_PARTY_GRADE_1_TO_10.test(`${course.title || ""} ${course.slug || ""}`);
+}
+
+function assertFirstPartyAssessmentPortfolioScope(
+  course: {
+    title?: string;
+    slug?: string;
+    ownerType: string;
+    productType: string;
+    assessmentPurpose: string;
+  },
+  action: "create" | "publish",
+) {
+  if (!isFirstPartyGradeOneToTenAssessment(course)) return;
+  throw new AdminCourseGovernanceError(
+    action === "create"
+      ? "Grade 1–10 school assessments are outside the first-party Octamy portfolio."
+      : "Grade 1–10 school assessments cannot be published in the first-party Practice catalogue.",
+  );
+}
 
 export function slugifyCourseTitle(value: string) {
   return value
@@ -143,6 +178,11 @@ export function buildAdminOwnedCourseCreate(
     visibility: input.visibility,
     assessmentPurpose: input.assessmentPurpose,
   };
+  assertFirstPartyAssessmentPortfolioScope({
+    ...structural,
+    title: input.title,
+    slug,
+  }, "create");
   const certificationMode = input.assessmentPurpose === "practice" ? "none" : "octamy";
   return {
     ...input,
@@ -171,6 +211,18 @@ export function buildGovernedAdminCourseUpdate(
     const productType = input.productType ?? existing.productType;
     const visibility = input.visibility ?? existing.visibility;
     const assessmentPurpose = input.assessmentPurpose ?? existing.assessmentPurpose;
+    const title = input.title ?? existing.title;
+    const slug = input.slug ?? existing.slug;
+    const isActive = input.isActive ?? existing.isActive;
+    if (isActive && visibility === "public") {
+      assertFirstPartyAssessmentPortfolioScope({
+        ownerType: "admin",
+        productType,
+        assessmentPurpose,
+        title,
+        slug,
+      }, "publish");
+    }
     const certificationMode = assessmentPurpose === "practice" ? "none" : "octamy";
     const requestedSubscription = input.subscriptionEligible ?? existing.subscriptionEligible;
     const requestedReseller = input.resellerEligible ?? existing.resellerEligible;

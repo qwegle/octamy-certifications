@@ -202,7 +202,7 @@ fi
 # Drizzle and Vite are development dependencies; remove them only after the
 # migration and build have succeeded. They are restored by npm ci next deploy.
 log "Pruning development-only packages"
-npm prune --omit=dev --no-audit --no-fund
+npm prune --omit=dev --no-audit --no-fund --no-package-lock
 
 PM2_HANDOFF_STARTED=1
 if pm2 describe "$PM2_APP" >/dev/null 2>&1; then

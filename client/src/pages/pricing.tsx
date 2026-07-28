@@ -11,8 +11,10 @@ import { ApiError, apiRequest } from '@/lib/queryClient';
 import {
   normalizePracticePassCycle,
   practiceAccountPath,
+  practicePricingPath,
   PRACTICE_PASS_PLAN,
 } from '@/lib/practice-purchase-intent';
+import { safeInternalReturnTo } from '@/lib/navigation-safety';
 import { useToast } from '@/hooks/use-toast';
 
 type Cycle = 'monthly' | 'yearly';
@@ -43,7 +45,12 @@ export default function Pricing() {
     const role = params.get('role');
     const plan = params.get('selected');
     if ((role === 'learner' || role === 'creator' || role === 'institute') && plan && allowed[role].includes(plan)) {
-      return { role, plan, welcome: params.get('welcome') === '1' } as const;
+      return {
+        role,
+        plan,
+        welcome: params.get('welcome') === '1',
+        next: safeInternalReturnTo(params.get('next')) || '/practice',
+      } as const;
     }
 
     try {
@@ -67,7 +74,7 @@ export default function Pricing() {
   async function subscribe(ownerType: 'learner' | 'creator' | 'institute', plan: string, registerRole: string) {
     if (!user || !token) {
       if (ownerType === 'learner' && plan === PRACTICE_PASS_PLAN) {
-        setLocation(practiceAccountPath('register', { cycle, next: '/practice' }));
+        setLocation(practicePricingPath({ cycle, next: selected?.next || '/practice' }));
       } else {
         setLocation(`/register?role=${registerRole}&plan=${encodeURIComponent(plan)}&cycle=${cycle}`);
       }
@@ -169,7 +176,7 @@ export default function Pricing() {
       />
       <Header />
       <main id="main-content" tabIndex={-1} className="flex-1">
-        <section className="relative overflow-hidden py-20 px-4 text-center">
+        <section className="relative overflow-hidden px-4 py-12 text-center sm:py-14">
           <div aria-hidden className="pointer-events-none absolute inset-0 bg-grid-slate [mask-image:radial-gradient(ellipse_at_top,black_40%,transparent_75%)]" />
           <div aria-hidden className="pointer-events-none absolute -top-32 left-1/2 -translate-x-1/2 h-[420px] w-[720px] rounded-full bg-sky-300/25 blur-3xl animate-blob" />
           <div className="relative max-w-3xl mx-auto">
@@ -216,15 +223,20 @@ export default function Pricing() {
                   <p className="mt-1 text-sm text-slate-600">Confirm the billing cycle, then continue securely. You will see the amount before payment.</p>
                 </div>
               </div>
-              <Button
-                onClick={() => subscribe(selected.role, selected.plan, selected.role)}
-                disabled={submitting !== null}
-                className="shrink-0"
-              >
-                {submitting === `${selected.role}:${selected.plan}` ? <Loader2 className="animate-spin" /> : null}
-                Continue with {selected.role === 'learner' ? 'Practice Pass' : selected.plan.charAt(0).toUpperCase() + selected.plan.slice(1)}
-                <ArrowRight className="h-4 w-4" />
-              </Button>
+              {!user && selected.role === 'learner'
+                ? <div className="grid shrink-0 gap-2 sm:grid-cols-2">
+                    <Button asChild><Link href={practiceAccountPath('register', { cycle, next: selected.next })}>Create learner account</Link></Button>
+                    <Button asChild variant="outline"><Link href={practiceAccountPath('login', { cycle, next: selected.next })}>Sign in</Link></Button>
+                  </div>
+                : <Button
+                    onClick={() => subscribe(selected.role, selected.plan, selected.role)}
+                    disabled={submitting !== null}
+                    className="shrink-0"
+                  >
+                    {submitting === `${selected.role}:${selected.plan}` ? <Loader2 className="animate-spin" /> : null}
+                    Continue with {selected.role === 'learner' ? 'Practice Pass' : selected.plan.charAt(0).toUpperCase() + selected.plan.slice(1)}
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>}
             </div>
           </section>
         )}
@@ -252,7 +264,7 @@ export default function Pricing() {
                 busy={submitting === 'learner:all_access'}
                 features={[
                   'Unlimited practice-only exams',
-                  'SSC/NEET/school-style preparation stays separate from recruiter credentials',
+                  'Government, recruitment, interview and coding practice stays separate from recruiter credentials',
                   'Review correct and incorrect answers after each attempt',
                   'Career certifications, creator products, and institute exams stay separately funded',
                 ]}

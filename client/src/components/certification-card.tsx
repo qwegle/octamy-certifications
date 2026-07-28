@@ -12,6 +12,7 @@ export type CertificationCardItem = {
   duration: number;
   passingScore: number;
   price: string;
+  originalPrice?: string | null;
   level: string;
   thumbnailUrl: string | null;
   subscriptionEligible?: boolean;
@@ -56,6 +57,12 @@ export function CertificationCard({ item, categoryHref, variant = "certification
   const practice = variant === "practice" || item.assessmentPurpose === "practice";
   const title = practice ? item.title : certificationDisplayTitle(item.title);
   const href = item.canonicalPath || (practice ? publicPracticePath(item.slug) : publicAssessmentPath(item.slug));
+  const salePrice = Number(item.price);
+  const originalPrice = Number(item.originalPrice);
+  const hasDiscount = Number.isFinite(salePrice)
+    && Number.isFinite(originalPrice)
+    && originalPrice > salePrice;
+  const savings = hasDiscount ? originalPrice - salePrice : 0;
 
   return (
     <article className={`group relative flex h-full flex-col overflow-hidden rounded-[1.4rem] bg-white transition duration-300 hover:-translate-y-1 hover:shadow-xl ${practice ? "border border-violet-200 shadow-[0_12px_40px_-24px_rgba(109,40,217,0.7)] hover:border-violet-300 hover:shadow-violet-900/15" : "border border-slate-200 shadow-sm hover:border-slate-300 hover:shadow-slate-900/10"}`}>
@@ -91,7 +98,12 @@ export function CertificationCard({ item, categoryHref, variant = "certification
         <div className="mt-auto flex items-end justify-between gap-3 pt-4">
           <div>
             <p className={`flex items-center gap-1 text-xs font-bold ${practice ? "text-violet-800" : "text-emerald-700"}`}><Sparkles className="h-3.5 w-3.5" />{practice ? "Unlimited with Practice Pass" : "Exam attempt is free"}</p>
-            <p className="mt-1 text-xs text-slate-500">{practice ? "₹299/month · Learn and improve" : `Credential activation ₹${item.price}`}</p>
+            {practice
+              ? <p className="mt-1 text-xs text-slate-500">Practice Pass plans shown before account access</p>
+              : <div className="mt-1 text-xs text-slate-500">
+                  <span>Credential activation ₹{item.price}</span>
+                  {hasDiscount && <><span className="ml-1.5 line-through">₹{originalPrice.toFixed(2)}</span><span className="ml-1.5 font-bold text-emerald-700">Save ₹{savings.toFixed(2)}</span></>}
+                </div>}
           </div>
           <Button asChild size="sm" className="rounded-full px-4">
             <Link href={href} aria-label={`View ${title}`}>{practice ? "Practice" : "View"} <ArrowUpRight className="ml-1 h-3.5 w-3.5" /></Link>

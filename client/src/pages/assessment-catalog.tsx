@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useLocation, useSearch } from "wouter";
-import { ArrowRight, Award, BookOpenCheck, ChevronLeft, ChevronRight, GraduationCap, Search, ShieldCheck, Sparkles, TicketCheck } from "lucide-react";
+import { ArrowRight, Award, BookOpenCheck, ChevronLeft, ChevronRight, Search, ShieldCheck, Sparkles, TicketCheck } from "lucide-react";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import { CertificationCard, type CertificationCardItem } from "@/components/certification-card";
@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { apiRequest } from "@/lib/queryClient";
-import { practicePricingPath } from "@/lib/practice-purchase-intent";
+import { practicePlansPath } from "@/lib/practice-purchase-intent";
 import {
   buildAssessmentCatalogQuery,
   parseAssessmentCatalogQuery,
@@ -95,9 +95,7 @@ export function AssessmentCatalog({ mode }: { mode: CatalogMode }) {
   const visibleCategories = categoryFacets.filter(visibleCategory);
   const rootCategories = visibleCategories.filter((item) => item.parentId == null);
   const orphanCategories = visibleCategories.filter((item) => item.parentId != null && !visibleCategories.some((candidate) => candidate.id === item.parentId));
-  const schoolRoot = categoryFacets.find((item) => item.slug === "school-education");
   const competitiveRoot = categoryFacets.find((item) => item.slug === "competitive-exams");
-  const schoolSubjects = categoryFacets.filter((item) => item.parentId === schoolRoot?.id && item.kind === "subject");
   const competitiveFamilies = categoryFacets.filter((item) => item.parentId === competitiveRoot?.id && item.kind === "exam_family");
 
   return (
@@ -109,19 +107,19 @@ export function AssessmentCatalog({ mode }: { mode: CatalogMode }) {
       />
       <Header />
       <main id="main-content" tabIndex={-1}>
-        <section className="px-4 pb-10 pt-8 sm:px-5 sm:pb-14 sm:pt-12">
+        <section className="px-4 pb-8 pt-6 sm:px-5 sm:pb-10 sm:pt-8">
           <div className="relative mx-auto grid max-w-7xl overflow-hidden rounded-[2rem] bg-slate-950 text-white shadow-2xl shadow-slate-950/15 lg:grid-cols-[1.1fr_.9fr]">
             <div aria-hidden className="absolute inset-0 bg-[radial-gradient(circle_at_15%_15%,rgba(139,92,246,.32),transparent_35%),radial-gradient(circle_at_90%_80%,rgba(14,165,233,.2),transparent_38%)]" />
             <div className="relative p-7 sm:p-10 lg:p-14">
               <Badge className="border border-white/15 bg-white/10 text-violet-200 hover:bg-white/10"><Award className="mr-1.5 h-3.5 w-3.5" />{practice ? "Practice Pass" : octamy ? "Tech and industry certifications" : "Creator-issued credentials"}</Badge>
               <h1 className="mt-6 max-w-3xl text-4xl font-black tracking-[-0.045em] sm:text-6xl">{practice ? "Practice without confusing your career signal." : octamy ? "Get certified for real industry roles." : "Turn expert knowledge into verified achievement."}</h1>
               <p className="mt-5 max-w-2xl text-base leading-7 text-slate-300 sm:text-lg">
-                {practice ? "SSC, NEET, school and similar preparation exams live here. They are for learning and repetition, not recruiter-facing Octamy credentials." : octamy ? "Choose a technology or industry certification path, take a governed exam without paying upfront and activate a verifiable credential after passing." : "Every certification shows who authored the exam, who issues the credential and whether Octamy co-certification applies."}
+                {practice ? "Government and entrance exams, recruitment tests, company interviews, technical interviews and coding practice live here. They are for learning and repetition, not recruiter-facing Octamy credentials." : octamy ? "Choose a technology or industry certification path, take a governed exam without paying upfront and activate a verifiable credential after passing." : "Every certification shows who authored the exam, who issues the credential and whether Octamy co-certification applies."}
               </p>
               <form className="mt-8 flex max-w-2xl flex-col gap-2 rounded-2xl bg-white p-2 sm:flex-row" onSubmit={(event) => { event.preventDefault(); updateFilters({ q: searchInput.trim().slice(0, 120), page: 1 }); }}>
                 <div className="relative flex-1">
                   <Search className="pointer-events-none absolute left-4 top-3.5 h-5 w-5 text-slate-400" />
-                  <Input aria-label={practice ? "Search practice exams" : "Search certifications"} value={searchInput} onChange={(event) => setSearchInput(event.target.value)} placeholder={practice ? "Search SSC, NEET, mathematics..." : "Search software, data, cloud, cybersecurity..."} className="h-12 border-0 bg-white pl-11 text-slate-950 shadow-none focus-visible:ring-0" />
+                  <Input aria-label={practice ? "Search practice exams" : "Search certifications"} value={searchInput} onChange={(event) => setSearchInput(event.target.value)} placeholder={practice ? "Search SSC, banking, coding, interviews..." : "Search software, data, cloud, cybersecurity..."} className="h-12 border-0 bg-white pl-11 text-slate-950 shadow-none focus-visible:ring-0" />
                 </div>
                 <Button type="submit" size="lg" className="h-12 rounded-xl bg-violet-600 px-7 hover:bg-violet-500">{practice ? "Find practice" : "Find certification"}</Button>
               </form>
@@ -146,12 +144,12 @@ export function AssessmentCatalog({ mode }: { mode: CatalogMode }) {
           </div>
         </section>
 
-        {practice && (schoolSubjects.length > 0 || competitiveFamilies.length > 0) && (
+        {practice && (
           <section className="mx-auto max-w-7xl px-5 pb-8" aria-labelledby="certification-paths-heading">
             <div className="flex items-end justify-between gap-4"><div><p className="text-xs font-black uppercase tracking-[0.14em] text-violet-700">Practice inventory</p><h2 id="certification-paths-heading" className="mt-2 text-2xl font-black tracking-tight sm:text-3xl">Practice exams stay outside hiring credentials.</h2><p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">Use these for preparation and repetition. They are not shared with recruiters as Octamy-certified career evidence.</p></div><Link href="#certification-results" className="hidden text-sm font-bold text-slate-600 hover:text-violet-700 sm:inline-flex">View practice <ArrowRight className="ml-1 h-4 w-4" /></Link></div>
-            <div className="mt-6 grid gap-5 lg:grid-cols-2">
-              <div className="min-w-0 rounded-3xl border border-sky-100 bg-sky-50/70 p-5"><div className="flex items-center justify-between"><div><p className="text-xs font-black uppercase tracking-wide text-sky-800">School practice</p><h3 className="mt-1 text-xl font-black">Optional preparation only</h3></div><GraduationCap className="h-6 w-6 text-sky-700" /></div><div className="mt-4 flex flex-wrap gap-2">{(data?.facets.audienceBands || []).filter((band) => band.code.startsWith("grade_")).map((band) => <Button key={band.id} type="button" size="sm" variant={audience === band.code ? "default" : "outline"} className="rounded-full bg-white" onClick={() => updateFilters({ audience: band.code, category: "school-education", page: 1 })}>{band.label}</Button>)}</div><div className="mt-4 flex snap-x gap-2 overflow-x-auto pb-1">{schoolSubjects.map((item) => <Link key={item.id} href={publicPracticeCategoryPath(item.slug)} className="min-w-[145px] rounded-2xl border border-white bg-white p-3 text-sm font-bold text-slate-800 shadow-sm hover:text-violet-700">{item.name}<ChevronRight className="mt-3 h-4 w-4" /></Link>)}</div></div>
-              <div className="min-w-0 rounded-3xl border border-violet-100 bg-violet-50/70 p-5"><div className="flex items-center justify-between"><div><p className="text-xs font-black uppercase tracking-wide text-violet-800">Aspirant practice</p><h3 className="mt-1 text-xl font-black">Browse by exam family</h3></div><Award className="h-6 w-6 text-violet-700" /></div><div className="mt-4 flex snap-x gap-2 overflow-x-auto pb-1">{competitiveFamilies.map((family) => <Link key={family.id} href={publicPracticeCategoryPath(family.slug)} className={`min-w-[155px] rounded-2xl border p-3 text-sm font-black shadow-sm hover:-translate-y-0.5 ${familyAccents[family.slug] || "border-white bg-white text-slate-800"}`}>{family.name}<span className="mt-3 flex items-center text-xs font-semibold opacity-70">View practice <ChevronRight className="ml-1 h-3.5 w-3.5" /></span></Link>)}</div></div>
+            <div className="mt-6 grid gap-5 lg:grid-cols-[1.15fr_.85fr]">
+              <div className="min-w-0 rounded-3xl border border-violet-100 bg-violet-50/70 p-5"><div className="flex items-center justify-between"><div><p className="text-xs font-black uppercase tracking-wide text-violet-800">Competitive and recruitment exams</p><h3 className="mt-1 text-xl font-black">Browse by exam family</h3></div><Award className="h-6 w-6 text-violet-700" /></div><div className="mt-4 flex snap-x gap-2 overflow-x-auto pb-1">{competitiveFamilies.length > 0 ? competitiveFamilies.map((family) => <Link key={family.id} href={publicPracticeCategoryPath(family.slug)} className={`min-w-[155px] rounded-2xl border p-3 text-sm font-black shadow-sm hover:-translate-y-0.5 ${familyAccents[family.slug] || "border-white bg-white text-slate-800"}`}>{family.name}<span className="mt-3 flex items-center text-xs font-semibold opacity-70">View practice <ChevronRight className="ml-1 h-3.5 w-3.5" /></span></Link>) : <p className="text-sm leading-6 text-slate-600">Reviewed government, entrance and recruitment exam banks will appear here after release approval.</p>}</div></div>
+              <div className="rounded-3xl border border-sky-100 bg-sky-50/70 p-5"><p className="text-xs font-black uppercase tracking-wide text-sky-800">Career preparation</p><h3 className="mt-1 text-xl font-black">Interview and coding practice</h3><p className="mt-3 text-sm leading-6 text-slate-600">Prepare for company interviews, technical interviews, coding exercises, business roles and virtual internships with assessment-specific question pools.</p><Link href="#certification-results" className="mt-4 inline-flex items-center text-sm font-black text-sky-900">Explore released practice <ArrowRight className="ml-1 h-4 w-4" /></Link></div>
             </div>
           </section>
         )}
@@ -195,7 +193,7 @@ export function AssessmentCatalog({ mode }: { mode: CatalogMode }) {
           {data && data.pagination.totalPages > 1 && <nav aria-label="Certification catalogue pages" className="mt-9 flex items-center justify-center gap-3"><Button variant="outline" className="rounded-full" disabled={page <= 1} onClick={() => updateFilters({ page: Math.max(1, page - 1) }, false)}><ChevronLeft className="mr-1 h-4 w-4" />Previous</Button><span className="text-sm font-semibold text-slate-600">Page {page} of {data.pagination.totalPages}</span><Button variant="outline" className="rounded-full" disabled={page >= data.pagination.totalPages} onClick={() => updateFilters({ page: Math.min(data.pagination.totalPages, page + 1) }, false)}>Next<ChevronRight className="ml-1 h-4 w-4" /></Button></nav>}
 
           {octamy && <div className="mt-12 grid gap-4 rounded-[2rem] bg-violet-100/60 p-6 sm:grid-cols-[1fr_auto] sm:items-center sm:p-8"><div><p className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.14em] text-violet-800"><Sparkles className="h-4 w-4" />A different way to certify</p><h2 className="mt-2 text-2xl font-black tracking-tight">No upfront credential fee. No hidden result.</h2><p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">Take the exam, inspect your answer review and decide whether to activate the credential. Institutes can sponsor learners with controlled vouchers.</p></div><Button asChild className="rounded-full"><Link href="/vision">See how Octamy works <ArrowRight className="ml-2 h-4 w-4" /></Link></Button></div>}
-          {practice && <div className="mt-12 grid gap-4 rounded-[2rem] bg-slate-100 p-6 sm:grid-cols-[1fr_auto] sm:items-center sm:p-8"><div><p className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.14em] text-slate-700"><Sparkles className="h-4 w-4" />Practice Pass</p><h2 className="mt-2 text-2xl font-black tracking-tight">Choose 30-day or 365-day Practice access.</h2><p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">Create or use one Octamy account so access, saved progress and attempts remain together. Practice stays separate from career certification.</p></div><Button asChild className="rounded-full"><Link href={practicePricingPath({ next: "/practice" })}>Review Practice Pass <ArrowRight className="ml-2 h-4 w-4" /></Link></Button></div>}
+          {practice && <div className="mt-12 grid gap-4 rounded-[2rem] bg-slate-100 p-6 sm:grid-cols-[1fr_auto] sm:items-center sm:p-8"><div><p className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.14em] text-slate-700"><Sparkles className="h-4 w-4" />Practice Pass</p><h2 className="mt-2 text-2xl font-black tracking-tight">Choose 30-day or 365-day Practice access.</h2><p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">Select a plan first, then sign in or create one learner account so access, saved progress and attempts remain together.</p></div><Button asChild className="rounded-full"><Link href={practicePlansPath({ next: "/practice" })}>Review Practice Pass <ArrowRight className="ml-2 h-4 w-4" /></Link></Button></div>}
         </section>
       </main>
       <Footer />

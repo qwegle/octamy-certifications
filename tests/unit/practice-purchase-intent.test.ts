@@ -2,6 +2,7 @@ import { describe, expect, it } from '@jest/globals';
 import {
   normalizePracticePassCycle,
   practiceAccountPath,
+  practicePlansPath,
   practicePricingPath,
 } from '../../client/src/lib/practice-purchase-intent';
 
@@ -15,6 +16,16 @@ describe('Practice purchase intent', () => {
     expect(url.searchParams.get('cycle')).toBe('yearly');
     expect(url.searchParams.get('next')).toBe('/practice/react');
     expect(url.searchParams.get('welcome')).toBe('1');
+  });
+
+  it('shows plans before marking Practice Pass as selected', () => {
+    const path = practicePlansPath({ cycle: 'yearly', next: '/practice/interview' });
+    const url = new URL(path, 'https://octamy.test');
+    expect(url.pathname).toBe('/pricing');
+    expect(url.searchParams.get('role')).toBe('learner');
+    expect(url.searchParams.get('selected')).toBeNull();
+    expect(url.searchParams.get('cycle')).toBe('yearly');
+    expect(url.searchParams.get('next')).toBe('/practice/interview');
   });
 
   it('preserves the pricing review through registration without auto-charge', () => {
