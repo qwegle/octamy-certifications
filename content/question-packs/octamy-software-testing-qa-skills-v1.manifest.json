@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "sourceKey": "octamy-original:software-testing-qa-skills:v1",
+  "name": "Software Testing and QA Skills Bank v1",
+  "publisher": "Octamy",
+  "datasetVersion": "1.0.0",
+  "description": "One hundred original software testing and QA certification questions aligned to ISTQB CTFL 4.0, OWASP WSTG, WCAG 2.2, Playwright, OpenAPI, and HTTP semantics references snapshot dated 2026-07-28.",
+  "sourceUrl": "https://octamy.com/",
+  "retrievedAt": "2026-07-28T00:00:00.000Z",
+  "license": {
+    "identifier": "Proprietary-Octamy-Original-1.0",
+    "name": "Octamy original-content rights",
+    "url": "https://octamy.com/terms-of-service",
+    "rightsBasis": "owned",
+    "commercialUseAllowed": true,
+    "derivativesAllowed": true,
+    "shareAlikeObligation": "none",
+    "attributionText": "Octamy original software testing and QA assessment content",
+    "evidenceReference": "software-testing-qa-skills-v1:source-controlled-authored-items"
+  },
+  "provenance": {
+    "acquisitionMethod": "first_party",
+    "originalFormat": "JSONL",
+    "chainOfTitle": "Every prompt, option, answer and explanation is original first-party Octamy content; official testing, accessibility, security, API and browser-automation documentation is cited only as factual evidence and assessment wording is not copied.",
+    "notes": "Registration and validation do not approve or publish this bank. A named independent subject-matter reviewer must review every exact item version before activation."
+  }
+}
