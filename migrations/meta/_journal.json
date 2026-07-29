@@ -288,6 +288,27 @@
       "when": 1785315720635,
       "tag": "0040_archive_shells_and_release_roles",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1785326937541,
+      "tag": "0041_single_accountable_officer_release_attestation",
+      "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1785329898417,
+      "tag": "0042_repair_release_attestation_and_snapshot_blueprints",
+      "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1785331448000,
+      "tag": "0043_align_officer_item_authorship_disclosure",
+      "breakpoints": true
     }
   ]
 }

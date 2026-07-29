@@ -1,0 +1,21 @@
+{
+  "assessmentId": 70,
+  "slug": "neet-ug-chemistry-numerical-practice",
+  "blueprintRevision": 1,
+  "passingScore": 60,
+  "formSimulationArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/70-neet-ug-chemistry-numerical-practice/form-simulation.json",
+  "representativeAttemptQaArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/70-neet-ug-chemistry-numerical-practice/representative-attempt-qa.json",
+  "accessibilityAuditArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/70-neet-ug-chemistry-numerical-practice/accessibility-content-audit.json",
+  "cutScoreApprovalReference": "automated-boundary-check:neet-ug-chemistry-numerical-practice:revision-1:score-60",
+  "cutScoreApprovalSha256": "9b00ec708387e594ba49cc7c97557deb786e668a3bcb488851e41605108bda7d",
+  "results": {
+    "forms": 20,
+    "draws": 500,
+    "duplicateSelections": 0,
+    "poolExhaustions": 0,
+    "topicRuleChecks": 100,
+    "representativeAttempts": 60,
+    "auditedItems": 200,
+    "mediaItems": 0
+  }
+}

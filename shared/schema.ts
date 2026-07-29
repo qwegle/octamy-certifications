@@ -1230,6 +1230,9 @@ export const assessmentReleaseBundles = pgTable("assessment_release_bundles", {
   takedownProcedure: text("takedown_procedure").notNull(),
   takedownProcedureSha256: text("takedown_procedure_sha256").notNull(),
   bundleSha256: text("bundle_sha256").notNull(),
+  attestationMode: text("attestation_mode").default("multi_party").notNull(),
+  accountableOfficerUserId: integer("accountable_officer_user_id").references(() => users.id, { onDelete: "restrict" }),
+  singleOfficerAttestation: text("single_officer_attestation"),
   operator: text("operator").notNull(),
   recordedByUserId: integer("recorded_by_user_id").references(() => users.id, { onDelete: "restrict" }).notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
@@ -1265,13 +1268,24 @@ export const assessmentReleaseBundles = pgTable("assessment_release_bundles", {
     AND ${t.qaAcceptedAt} <= ${t.releasedAt}
     AND ${t.publisherSignedAt} <= ${t.releasedAt}
   `),
-  internalSeparation: check("assessment_release_bundles_internal_separation_check", sql`
-    ${t.contentReviewerUserId} <> ${t.cutScoreApproverUserId}
-    AND ${t.contentReviewerUserId} <> ${t.qaReviewerUserId}
-    AND ${t.contentReviewerUserId} <> ${t.publisherUserId}
-    AND ${t.cutScoreApproverUserId} <> ${t.qaReviewerUserId}
-    AND ${t.cutScoreApproverUserId} <> ${t.publisherUserId}
-    AND ${t.qaReviewerUserId} <> ${t.publisherUserId}
+  attestationMode: check("assessment_release_bundles_attestation_mode_check", sql`
+    (${t.attestationMode} = 'multi_party'
+      AND ${t.accountableOfficerUserId} IS NULL
+      AND ${t.singleOfficerAttestation} IS NULL
+      AND ${t.contentReviewerUserId} <> ${t.cutScoreApproverUserId}
+      AND ${t.contentReviewerUserId} <> ${t.qaReviewerUserId}
+      AND ${t.contentReviewerUserId} <> ${t.publisherUserId}
+      AND ${t.cutScoreApproverUserId} <> ${t.qaReviewerUserId}
+      AND ${t.cutScoreApproverUserId} <> ${t.publisherUserId}
+      AND ${t.qaReviewerUserId} <> ${t.publisherUserId})
+    OR (${t.attestationMode} = 'single_accountable_officer'
+      AND ${t.accountableOfficerUserId} IS NOT NULL
+      AND length(btrim(${t.singleOfficerAttestation})) BETWEEN 20 AND 1000
+      AND ${t.contentReviewerUserId} = ${t.accountableOfficerUserId}
+      AND ${t.cutScoreApproverUserId} = ${t.accountableOfficerUserId}
+      AND ${t.qaReviewerUserId} = ${t.accountableOfficerUserId}
+      AND ${t.publisherUserId} = ${t.accountableOfficerUserId}
+      AND ${t.rollbackOwnerUserId} = ${t.accountableOfficerUserId})
   `),
 }));
 

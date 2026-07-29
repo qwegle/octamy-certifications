@@ -1,0 +1,21 @@
+{
+  "assessmentId": 51,
+  "slug": "grade-1-mathematics-diagnostic",
+  "blueprintRevision": 1,
+  "passingScore": 60,
+  "formSimulationArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/51-grade-1-mathematics-diagnostic/form-simulation.json",
+  "representativeAttemptQaArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/51-grade-1-mathematics-diagnostic/representative-attempt-qa.json",
+  "accessibilityAuditArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/51-grade-1-mathematics-diagnostic/accessibility-content-audit.json",
+  "cutScoreApprovalReference": "automated-boundary-check:grade-1-mathematics-diagnostic:revision-1:score-60",
+  "cutScoreApprovalSha256": "608f6e06e38170fa012f720972898f858509c3fc6a91039d8712217cf7979e2b",
+  "results": {
+    "forms": 20,
+    "draws": 400,
+    "duplicateSelections": 0,
+    "poolExhaustions": 0,
+    "topicRuleChecks": 20,
+    "representativeAttempts": 60,
+    "auditedItems": 200,
+    "mediaItems": 0
+  }
+}

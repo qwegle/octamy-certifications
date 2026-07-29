@@ -1,0 +1,21 @@
+{
+  "assessmentId": 67,
+  "slug": "ibps-clerk-quantitative-aptitude-practice",
+  "blueprintRevision": 2,
+  "passingScore": 60,
+  "formSimulationArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/67-ibps-clerk-quantitative-aptitude-practice/form-simulation.json",
+  "representativeAttemptQaArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/67-ibps-clerk-quantitative-aptitude-practice/representative-attempt-qa.json",
+  "accessibilityAuditArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/67-ibps-clerk-quantitative-aptitude-practice/accessibility-content-audit.json",
+  "cutScoreApprovalReference": "automated-boundary-check:ibps-clerk-quantitative-aptitude-practice:revision-2:score-60",
+  "cutScoreApprovalSha256": "d5f642404c7a3aebb872efa21b84629a0e31d1e65ddea5f39ca84d97db745492",
+  "results": {
+    "forms": 20,
+    "draws": 600,
+    "duplicateSelections": 0,
+    "poolExhaustions": 0,
+    "topicRuleChecks": 380,
+    "representativeAttempts": 60,
+    "auditedItems": 200,
+    "mediaItems": 0
+  }
+}

@@ -59,6 +59,9 @@ const immutableMigrationHashes = Object.freeze({
   "0038_archive_audited_certification_shells": "52aca66a2b735cc95588c1fb696d22c45a424d73d9583a36c51dc29bf8640a83",
   "0039_archive_remaining_certification_shells": "5a3f65ce5ebb71c29b280d5f234793903ccddd2ff39ce87bf73568f8578d850e",
   "0040_archive_shells_and_release_roles": "0919e1a3c2be30398a397515697c241860ed86ade6c48e9df559794ea4e5cc19",
+  "0041_single_accountable_officer_release_attestation": "cca2499d373f717862bfa9370cad3670388227b41e6f6f9c3e60b8ef97ebeae2",
+  "0042_repair_release_attestation_and_snapshot_blueprints": "e7f4dd41d351623f2906dc8a965735d920634395b2985bd2945f5ea0c1573bf1",
+  "0043_align_officer_item_authorship_disclosure": "2a7d7e21f2485ed29c56e48fc1f3c2d5c8a250a7076651a48bb3b665d36d7d94",
 });
 
 // Exact-hash review records for migrations containing data mutation,
@@ -92,6 +95,9 @@ const destructiveMigrationReviews = Object.freeze({
   "0038_archive_audited_certification_shells": "additive review-state extension and exact-ID/state/history guarded archival of 14 audited empty certification shells",
   "0039_archive_remaining_certification_shells": "exact-ID/slug/state/history guarded archival of 17 audited empty non-viable certification shells",
   "0040_archive_shells_and_release_roles": "additive immutable shell-rationale and release-role grant/revocation tables with new policy functions",
+  "0041_single_accountable_officer_release_attestation": "additive attestation-mode columns with conditional replacement of six-party separation constraint and role trigger",
+  "0042_repair_release_attestation_and_snapshot_blueprints": "table-scoped release policy function replacement, idempotent trigger reattachment, and append-only snapshots of unchanged published blueprints missing immutable revisions",
+  "0043_align_officer_item_authorship_disclosure": "release policy function replacement permitting disclosed item authorship while retaining independent-review and all release-role guards",
 });
 
 const mutatingPatterns = Object.freeze([
@@ -291,7 +297,15 @@ try {
         EXISTS (
           SELECT 1 FROM information_schema.columns
           WHERE table_schema = $10 AND table_name = 'exam_instance_attempts' AND column_name = 'invitation_id'
-        ) AS invitation_attempt_link
+        ) AS invitation_attempt_link,
+        EXISTS (
+          SELECT 1 FROM information_schema.columns
+          WHERE table_schema = $10 AND table_name = 'assessment_release_bundles' AND column_name = 'attestation_mode'
+        ) AS release_attestation_mode,
+        EXISTS (
+          SELECT 1 FROM information_schema.columns
+          WHERE table_schema = $10 AND table_name = 'assessment_release_bundles' AND column_name = 'accountable_officer_user_id'
+        ) AS accountable_release_officer
     `,
     [
       `${schemaName}.audience_bands`,

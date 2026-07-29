@@ -1,0 +1,21 @@
+{
+  "assessmentId": 279,
+  "slug": "ibps-po-english-language-practice",
+  "blueprintRevision": 1,
+  "passingScore": 60,
+  "formSimulationArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/279-ibps-po-english-language-practice/form-simulation.json",
+  "representativeAttemptQaArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/279-ibps-po-english-language-practice/representative-attempt-qa.json",
+  "accessibilityAuditArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/279-ibps-po-english-language-practice/accessibility-content-audit.json",
+  "cutScoreApprovalReference": "automated-boundary-check:ibps-po-english-language-practice:revision-1:score-60",
+  "cutScoreApprovalSha256": "92fc7067ac74f5a8fb5bf59f82cdacccb9758a55bff4c41aa1141be497cc7084",
+  "results": {
+    "forms": 20,
+    "draws": 600,
+    "duplicateSelections": 0,
+    "poolExhaustions": 0,
+    "topicRuleChecks": 20,
+    "representativeAttempts": 60,
+    "auditedItems": 200,
+    "mediaItems": 0
+  }
+}

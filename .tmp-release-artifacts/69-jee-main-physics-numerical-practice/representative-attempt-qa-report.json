@@ -1,0 +1,697 @@
+{
+  "schemaVersion": "octamy.representative-attempt-qa-report.v1",
+  "assessmentId": 69,
+  "assessmentSlug": "jee-main-physics-numerical-practice",
+  "blueprintRevision": 1,
+  "generatedAt": "2026-07-29T12:34:12.972Z",
+  "runtimePaths": [
+    "DatabaseStorage.materializeBlueprintForAttempt",
+    "normalizeExamAnswers",
+    "scoreExam"
+  ],
+  "disclosureContract": "pre-submission payload contains only id, question, and shuffled options",
+  "representativeAttempts": 60,
+  "formsTested": 20,
+  "attempts": [
+    {
+      "form": 1,
+      "publicQuestionCount": 30,
+      "preSubmissionAnswerKeys": [],
+      "scenarios": [
+        {
+          "name": "all_correct",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 30,
+            "score": 100
+          },
+          "expectedCorrect": 30
+        },
+        {
+          "name": "all_wrong",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 0,
+            "score": 0
+          },
+          "expectedCorrect": 0
+        },
+        {
+          "name": "alternating",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 15,
+            "score": 50
+          },
+          "expectedCorrect": 15
+        }
+      ]
+    },
+    {
+      "form": 2,
+      "publicQuestionCount": 30,
+      "preSubmissionAnswerKeys": [],
+      "scenarios": [
+        {
+          "name": "all_correct",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 30,
+            "score": 100
+          },
+          "expectedCorrect": 30
+        },
+        {
+          "name": "all_wrong",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 0,
+            "score": 0
+          },
+          "expectedCorrect": 0
+        },
+        {
+          "name": "alternating",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 15,
+            "score": 50
+          },
+          "expectedCorrect": 15
+        }
+      ]
+    },
+    {
+      "form": 3,
+      "publicQuestionCount": 30,
+      "preSubmissionAnswerKeys": [],
+      "scenarios": [
+        {
+          "name": "all_correct",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 30,
+            "score": 100
+          },
+          "expectedCorrect": 30
+        },
+        {
+          "name": "all_wrong",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 0,
+            "score": 0
+          },
+          "expectedCorrect": 0
+        },
+        {
+          "name": "alternating",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 15,
+            "score": 50
+          },
+          "expectedCorrect": 15
+        }
+      ]
+    },
+    {
+      "form": 4,
+      "publicQuestionCount": 30,
+      "preSubmissionAnswerKeys": [],
+      "scenarios": [
+        {
+          "name": "all_correct",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 30,
+            "score": 100
+          },
+          "expectedCorrect": 30
+        },
+        {
+          "name": "all_wrong",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 0,
+            "score": 0
+          },
+          "expectedCorrect": 0
+        },
+        {
+          "name": "alternating",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 15,
+            "score": 50
+          },
+          "expectedCorrect": 15
+        }
+      ]
+    },
+    {
+      "form": 5,
+      "publicQuestionCount": 30,
+      "preSubmissionAnswerKeys": [],
+      "scenarios": [
+        {
+          "name": "all_correct",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 30,
+            "score": 100
+          },
+          "expectedCorrect": 30
+        },
+        {
+          "name": "all_wrong",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 0,
+            "score": 0
+          },
+          "expectedCorrect": 0
+        },
+        {
+          "name": "alternating",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 15,
+            "score": 50
+          },
+          "expectedCorrect": 15
+        }
+      ]
+    },
+    {
+      "form": 6,
+      "publicQuestionCount": 30,
+      "preSubmissionAnswerKeys": [],
+      "scenarios": [
+        {
+          "name": "all_correct",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 30,
+            "score": 100
+          },
+          "expectedCorrect": 30
+        },
+        {
+          "name": "all_wrong",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 0,
+            "score": 0
+          },
+          "expectedCorrect": 0
+        },
+        {
+          "name": "alternating",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 15,
+            "score": 50
+          },
+          "expectedCorrect": 15
+        }
+      ]
+    },
+    {
+      "form": 7,
+      "publicQuestionCount": 30,
+      "preSubmissionAnswerKeys": [],
+      "scenarios": [
+        {
+          "name": "all_correct",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 30,
+            "score": 100
+          },
+          "expectedCorrect": 30
+        },
+        {
+          "name": "all_wrong",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 0,
+            "score": 0
+          },
+          "expectedCorrect": 0
+        },
+        {
+          "name": "alternating",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 15,
+            "score": 50
+          },
+          "expectedCorrect": 15
+        }
+      ]
+    },
+    {
+      "form": 8,
+      "publicQuestionCount": 30,
+      "preSubmissionAnswerKeys": [],
+      "scenarios": [
+        {
+          "name": "all_correct",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 30,
+            "score": 100
+          },
+          "expectedCorrect": 30
+        },
+        {
+          "name": "all_wrong",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 0,
+            "score": 0
+          },
+          "expectedCorrect": 0
+        },
+        {
+          "name": "alternating",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 15,
+            "score": 50
+          },
+          "expectedCorrect": 15
+        }
+      ]
+    },
+    {
+      "form": 9,
+      "publicQuestionCount": 30,
+      "preSubmissionAnswerKeys": [],
+      "scenarios": [
+        {
+          "name": "all_correct",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 30,
+            "score": 100
+          },
+          "expectedCorrect": 30
+        },
+        {
+          "name": "all_wrong",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 0,
+            "score": 0
+          },
+          "expectedCorrect": 0
+        },
+        {
+          "name": "alternating",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 15,
+            "score": 50
+          },
+          "expectedCorrect": 15
+        }
+      ]
+    },
+    {
+      "form": 10,
+      "publicQuestionCount": 30,
+      "preSubmissionAnswerKeys": [],
+      "scenarios": [
+        {
+          "name": "all_correct",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 30,
+            "score": 100
+          },
+          "expectedCorrect": 30
+        },
+        {
+          "name": "all_wrong",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 0,
+            "score": 0
+          },
+          "expectedCorrect": 0
+        },
+        {
+          "name": "alternating",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 15,
+            "score": 50
+          },
+          "expectedCorrect": 15
+        }
+      ]
+    },
+    {
+      "form": 11,
+      "publicQuestionCount": 30,
+      "preSubmissionAnswerKeys": [],
+      "scenarios": [
+        {
+          "name": "all_correct",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 30,
+            "score": 100
+          },
+          "expectedCorrect": 30
+        },
+        {
+          "name": "all_wrong",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 0,
+            "score": 0
+          },
+          "expectedCorrect": 0
+        },
+        {
+          "name": "alternating",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 15,
+            "score": 50
+          },
+          "expectedCorrect": 15
+        }
+      ]
+    },
+    {
+      "form": 12,
+      "publicQuestionCount": 30,
+      "preSubmissionAnswerKeys": [],
+      "scenarios": [
+        {
+          "name": "all_correct",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 30,
+            "score": 100
+          },
+          "expectedCorrect": 30
+        },
+        {
+          "name": "all_wrong",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 0,
+            "score": 0
+          },
+          "expectedCorrect": 0
+        },
+        {
+          "name": "alternating",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 15,
+            "score": 50
+          },
+          "expectedCorrect": 15
+        }
+      ]
+    },
+    {
+      "form": 13,
+      "publicQuestionCount": 30,
+      "preSubmissionAnswerKeys": [],
+      "scenarios": [
+        {
+          "name": "all_correct",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 30,
+            "score": 100
+          },
+          "expectedCorrect": 30
+        },
+        {
+          "name": "all_wrong",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 0,
+            "score": 0
+          },
+          "expectedCorrect": 0
+        },
+        {
+          "name": "alternating",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 15,
+            "score": 50
+          },
+          "expectedCorrect": 15
+        }
+      ]
+    },
+    {
+      "form": 14,
+      "publicQuestionCount": 30,
+      "preSubmissionAnswerKeys": [],
+      "scenarios": [
+        {
+          "name": "all_correct",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 30,
+            "score": 100
+          },
+          "expectedCorrect": 30
+        },
+        {
+          "name": "all_wrong",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 0,
+            "score": 0
+          },
+          "expectedCorrect": 0
+        },
+        {
+          "name": "alternating",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 15,
+            "score": 50
+          },
+          "expectedCorrect": 15
+        }
+      ]
+    },
+    {
+      "form": 15,
+      "publicQuestionCount": 30,
+      "preSubmissionAnswerKeys": [],
+      "scenarios": [
+        {
+          "name": "all_correct",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 30,
+            "score": 100
+          },
+          "expectedCorrect": 30
+        },
+        {
+          "name": "all_wrong",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 0,
+            "score": 0
+          },
+          "expectedCorrect": 0
+        },
+        {
+          "name": "alternating",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 15,
+            "score": 50
+          },
+          "expectedCorrect": 15
+        }
+      ]
+    },
+    {
+      "form": 16,
+      "publicQuestionCount": 30,
+      "preSubmissionAnswerKeys": [],
+      "scenarios": [
+        {
+          "name": "all_correct",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 30,
+            "score": 100
+          },
+          "expectedCorrect": 30
+        },
+        {
+          "name": "all_wrong",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 0,
+            "score": 0
+          },
+          "expectedCorrect": 0
+        },
+        {
+          "name": "alternating",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 15,
+            "score": 50
+          },
+          "expectedCorrect": 15
+        }
+      ]
+    },
+    {
+      "form": 17,
+      "publicQuestionCount": 30,
+      "preSubmissionAnswerKeys": [],
+      "scenarios": [
+        {
+          "name": "all_correct",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 30,
+            "score": 100
+          },
+          "expectedCorrect": 30
+        },
+        {
+          "name": "all_wrong",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 0,
+            "score": 0
+          },
+          "expectedCorrect": 0
+        },
+        {
+          "name": "alternating",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 15,
+            "score": 50
+          },
+          "expectedCorrect": 15
+        }
+      ]
+    },
+    {
+      "form": 18,
+      "publicQuestionCount": 30,
+      "preSubmissionAnswerKeys": [],
+      "scenarios": [
+        {
+          "name": "all_correct",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 30,
+            "score": 100
+          },
+          "expectedCorrect": 30
+        },
+        {
+          "name": "all_wrong",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 0,
+            "score": 0
+          },
+          "expectedCorrect": 0
+        },
+        {
+          "name": "alternating",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 15,
+            "score": 50
+          },
+          "expectedCorrect": 15
+        }
+      ]
+    },
+    {
+      "form": 19,
+      "publicQuestionCount": 30,
+      "preSubmissionAnswerKeys": [],
+      "scenarios": [
+        {
+          "name": "all_correct",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 30,
+            "score": 100
+          },
+          "expectedCorrect": 30
+        },
+        {
+          "name": "all_wrong",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 0,
+            "score": 0
+          },
+          "expectedCorrect": 0
+        },
+        {
+          "name": "alternating",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 15,
+            "score": 50
+          },
+          "expectedCorrect": 15
+        }
+      ]
+    },
+    {
+      "form": 20,
+      "publicQuestionCount": 30,
+      "preSubmissionAnswerKeys": [],
+      "scenarios": [
+        {
+          "name": "all_correct",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 30,
+            "score": 100
+          },
+          "expectedCorrect": 30
+        },
+        {
+          "name": "all_wrong",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 0,
+            "score": 0
+          },
+          "expectedCorrect": 0
+        },
+        {
+          "name": "alternating",
+          "actual": {
+            "totalQuestions": 30,
+            "correctAnswers": 15,
+            "score": 50
+          },
+          "expectedCorrect": 15
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,756 @@
+{
+  "schemaVersion": "octamy.practice-release-artifact-manifest.v1",
+  "generatedAt": "2026-07-29T12:39:47.498Z",
+  "expectedAssessments": 41,
+  "passedAssessments": 32,
+  "refusedAssessments": 9,
+  "aggregate": {
+    "forms": 640,
+    "draws": 19100,
+    "duplicateSelections": 0,
+    "poolExhaustions": 0,
+    "topicRuleChecks": 3920,
+    "representativeAttempts": 1920,
+    "auditedItems": 6400,
+    "mediaItems": 0
+  },
+  "assessments": [
+    {
+      "assessmentId": 51,
+      "slug": "grade-1-mathematics-diagnostic",
+      "blueprintRevision": 1,
+      "passingScore": 60,
+      "formSimulationArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/51-grade-1-mathematics-diagnostic/form-simulation.json",
+      "representativeAttemptQaArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/51-grade-1-mathematics-diagnostic/representative-attempt-qa.json",
+      "accessibilityAuditArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/51-grade-1-mathematics-diagnostic/accessibility-content-audit.json",
+      "cutScoreApprovalReference": "automated-boundary-check:grade-1-mathematics-diagnostic:revision-1:score-60",
+      "cutScoreApprovalSha256": "608f6e06e38170fa012f720972898f858509c3fc6a91039d8712217cf7979e2b",
+      "results": {
+        "forms": 20,
+        "draws": 400,
+        "duplicateSelections": 0,
+        "poolExhaustions": 0,
+        "topicRuleChecks": 20,
+        "representativeAttempts": 60,
+        "auditedItems": 200,
+        "mediaItems": 0
+      }
+    },
+    {
+      "assessmentId": 60,
+      "slug": "grade-10-mathematics-practice",
+      "blueprintRevision": 2,
+      "passingScore": 60,
+      "formSimulationArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/60-grade-10-mathematics-practice/form-simulation.json",
+      "representativeAttemptQaArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/60-grade-10-mathematics-practice/representative-attempt-qa.json",
+      "accessibilityAuditArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/60-grade-10-mathematics-practice/accessibility-content-audit.json",
+      "cutScoreApprovalReference": "automated-boundary-check:grade-10-mathematics-practice:revision-2:score-60",
+      "cutScoreApprovalSha256": "cb39bcbfe9417b8fe5991043ea2d89855eb6a465aa1b15c3b410ebd8ae12fa66",
+      "results": {
+        "forms": 20,
+        "draws": 800,
+        "duplicateSelections": 0,
+        "poolExhaustions": 0,
+        "topicRuleChecks": 180,
+        "representativeAttempts": 60,
+        "auditedItems": 200,
+        "mediaItems": 0
+      }
+    },
+    {
+      "assessmentId": 74,
+      "slug": "grade-11-chemistry-numerical-practice",
+      "blueprintRevision": 1,
+      "passingScore": 60,
+      "formSimulationArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/74-grade-11-chemistry-numerical-practice/form-simulation.json",
+      "representativeAttemptQaArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/74-grade-11-chemistry-numerical-practice/representative-attempt-qa.json",
+      "accessibilityAuditArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/74-grade-11-chemistry-numerical-practice/accessibility-content-audit.json",
+      "cutScoreApprovalReference": "automated-boundary-check:grade-11-chemistry-numerical-practice:revision-1:score-60",
+      "cutScoreApprovalSha256": "caaf24132260b243615090d438eba36758745124ea3e08eebde12d8cddc0b2b6",
+      "results": {
+        "forms": 20,
+        "draws": 600,
+        "duplicateSelections": 0,
+        "poolExhaustions": 0,
+        "topicRuleChecks": 100,
+        "representativeAttempts": 60,
+        "auditedItems": 200,
+        "mediaItems": 0
+      }
+    },
+    {
+      "assessmentId": 72,
+      "slug": "grade-11-physics-numerical-practice",
+      "blueprintRevision": 1,
+      "passingScore": 60,
+      "formSimulationArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/72-grade-11-physics-numerical-practice/form-simulation.json",
+      "representativeAttemptQaArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/72-grade-11-physics-numerical-practice/representative-attempt-qa.json",
+      "accessibilityAuditArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/72-grade-11-physics-numerical-practice/accessibility-content-audit.json",
+      "cutScoreApprovalReference": "automated-boundary-check:grade-11-physics-numerical-practice:revision-1:score-60",
+      "cutScoreApprovalSha256": "b39dff06c8ae66ae41b05115d32e1037c06aea36bf8eb66c07a7eeae2fe9397c",
+      "results": {
+        "forms": 20,
+        "draws": 600,
+        "duplicateSelections": 0,
+        "poolExhaustions": 0,
+        "topicRuleChecks": 220,
+        "representativeAttempts": 60,
+        "auditedItems": 200,
+        "mediaItems": 0
+      }
+    },
+    {
+      "assessmentId": 75,
+      "slug": "grade-12-chemistry-numerical-practice",
+      "blueprintRevision": 1,
+      "passingScore": 60,
+      "formSimulationArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/75-grade-12-chemistry-numerical-practice/form-simulation.json",
+      "representativeAttemptQaArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/75-grade-12-chemistry-numerical-practice/representative-attempt-qa.json",
+      "accessibilityAuditArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/75-grade-12-chemistry-numerical-practice/accessibility-content-audit.json",
+      "cutScoreApprovalReference": "automated-boundary-check:grade-12-chemistry-numerical-practice:revision-1:score-60",
+      "cutScoreApprovalSha256": "d96166502ce18b70c737da658e22e966ae5a0995a91ef8ba06fb6b64fcbe6433",
+      "results": {
+        "forms": 20,
+        "draws": 600,
+        "duplicateSelections": 0,
+        "poolExhaustions": 0,
+        "topicRuleChecks": 100,
+        "representativeAttempts": 60,
+        "auditedItems": 200,
+        "mediaItems": 0
+      }
+    },
+    {
+      "assessmentId": 73,
+      "slug": "grade-12-physics-numerical-practice",
+      "blueprintRevision": 1,
+      "passingScore": 60,
+      "formSimulationArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/73-grade-12-physics-numerical-practice/form-simulation.json",
+      "representativeAttemptQaArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/73-grade-12-physics-numerical-practice/representative-attempt-qa.json",
+      "accessibilityAuditArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/73-grade-12-physics-numerical-practice/accessibility-content-audit.json",
+      "cutScoreApprovalReference": "automated-boundary-check:grade-12-physics-numerical-practice:revision-1:score-60",
+      "cutScoreApprovalSha256": "1616dda353553820e45d81da56573c7c2d5e93b36aaf27d2337afaf648f573dd",
+      "results": {
+        "forms": 20,
+        "draws": 600,
+        "duplicateSelections": 0,
+        "poolExhaustions": 0,
+        "topicRuleChecks": 220,
+        "representativeAttempts": 60,
+        "auditedItems": 200,
+        "mediaItems": 0
+      }
+    },
+    {
+      "assessmentId": 52,
+      "slug": "grade-2-mathematics-diagnostic",
+      "blueprintRevision": 1,
+      "passingScore": 60,
+      "formSimulationArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/52-grade-2-mathematics-diagnostic/form-simulation.json",
+      "representativeAttemptQaArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/52-grade-2-mathematics-diagnostic/representative-attempt-qa.json",
+      "accessibilityAuditArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/52-grade-2-mathematics-diagnostic/accessibility-content-audit.json",
+      "cutScoreApprovalReference": "automated-boundary-check:grade-2-mathematics-diagnostic:revision-1:score-60",
+      "cutScoreApprovalSha256": "cbbab872a2231893014af76a12a61c4b00b1daeef5810a099ecdca74c6effa2f",
+      "results": {
+        "forms": 20,
+        "draws": 400,
+        "duplicateSelections": 0,
+        "poolExhaustions": 0,
+        "topicRuleChecks": 20,
+        "representativeAttempts": 60,
+        "auditedItems": 200,
+        "mediaItems": 0
+      }
+    },
+    {
+      "assessmentId": 53,
+      "slug": "grade-3-arithmetic-time-and-perimeter-practice",
+      "blueprintRevision": 2,
+      "passingScore": 60,
+      "formSimulationArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/53-grade-3-arithmetic-time-and-perimeter-practice/form-simulation.json",
+      "representativeAttemptQaArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/53-grade-3-arithmetic-time-and-perimeter-practice/representative-attempt-qa.json",
+      "accessibilityAuditArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/53-grade-3-arithmetic-time-and-perimeter-practice/accessibility-content-audit.json",
+      "cutScoreApprovalReference": "automated-boundary-check:grade-3-arithmetic-time-and-perimeter-practice:revision-2:score-60",
+      "cutScoreApprovalSha256": "ac3f79ceb70c4778a3b08cf1805d1f1bca9950de4496cd8760eb4c530f72edf2",
+      "results": {
+        "forms": 20,
+        "draws": 500,
+        "duplicateSelections": 0,
+        "poolExhaustions": 0,
+        "topicRuleChecks": 160,
+        "representativeAttempts": 60,
+        "auditedItems": 200,
+        "mediaItems": 0
+      }
+    },
+    {
+      "assessmentId": 54,
+      "slug": "grade-4-mathematics-practice",
+      "blueprintRevision": 2,
+      "passingScore": 60,
+      "formSimulationArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/54-grade-4-mathematics-practice/form-simulation.json",
+      "representativeAttemptQaArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/54-grade-4-mathematics-practice/representative-attempt-qa.json",
+      "accessibilityAuditArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/54-grade-4-mathematics-practice/accessibility-content-audit.json",
+      "cutScoreApprovalReference": "automated-boundary-check:grade-4-mathematics-practice:revision-2:score-60",
+      "cutScoreApprovalSha256": "afff6d82b60e014f110dc574dbc194d3700f906972cfc7bdc68c3156274727fb",
+      "results": {
+        "forms": 20,
+        "draws": 600,
+        "duplicateSelections": 0,
+        "poolExhaustions": 0,
+        "topicRuleChecks": 20,
+        "representativeAttempts": 60,
+        "auditedItems": 200,
+        "mediaItems": 0
+      }
+    },
+    {
+      "assessmentId": 55,
+      "slug": "grade-5-mathematics-practice",
+      "blueprintRevision": 2,
+      "passingScore": 60,
+      "formSimulationArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/55-grade-5-mathematics-practice/form-simulation.json",
+      "representativeAttemptQaArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/55-grade-5-mathematics-practice/representative-attempt-qa.json",
+      "accessibilityAuditArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/55-grade-5-mathematics-practice/accessibility-content-audit.json",
+      "cutScoreApprovalReference": "automated-boundary-check:grade-5-mathematics-practice:revision-2:score-60",
+      "cutScoreApprovalSha256": "0b27943fd6f7f488a9186c07c749765b05dd48bc201bb9da7f555229810218ba",
+      "results": {
+        "forms": 20,
+        "draws": 600,
+        "duplicateSelections": 0,
+        "poolExhaustions": 0,
+        "topicRuleChecks": 20,
+        "representativeAttempts": 60,
+        "auditedItems": 200,
+        "mediaItems": 0
+      }
+    },
+    {
+      "assessmentId": 56,
+      "slug": "grade-6-mathematics-practice",
+      "blueprintRevision": 2,
+      "passingScore": 60,
+      "formSimulationArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/56-grade-6-mathematics-practice/form-simulation.json",
+      "representativeAttemptQaArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/56-grade-6-mathematics-practice/representative-attempt-qa.json",
+      "accessibilityAuditArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/56-grade-6-mathematics-practice/accessibility-content-audit.json",
+      "cutScoreApprovalReference": "automated-boundary-check:grade-6-mathematics-practice:revision-2:score-60",
+      "cutScoreApprovalSha256": "790675e1e2c523cf2b079a6bf25bede2dbac82aadb111a93c8999e475fbab666",
+      "results": {
+        "forms": 20,
+        "draws": 700,
+        "duplicateSelections": 0,
+        "poolExhaustions": 0,
+        "topicRuleChecks": 300,
+        "representativeAttempts": 60,
+        "auditedItems": 200,
+        "mediaItems": 0
+      }
+    },
+    {
+      "assessmentId": 57,
+      "slug": "grade-7-mathematics-practice",
+      "blueprintRevision": 2,
+      "passingScore": 60,
+      "formSimulationArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/57-grade-7-mathematics-practice/form-simulation.json",
+      "representativeAttemptQaArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/57-grade-7-mathematics-practice/representative-attempt-qa.json",
+      "accessibilityAuditArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/57-grade-7-mathematics-practice/accessibility-content-audit.json",
+      "cutScoreApprovalReference": "automated-boundary-check:grade-7-mathematics-practice:revision-2:score-60",
+      "cutScoreApprovalSha256": "7aa567273440c2a0d8dd3e8afcb5fba37d07c8aba0bfd17c739370a97ce72294",
+      "results": {
+        "forms": 20,
+        "draws": 800,
+        "duplicateSelections": 0,
+        "poolExhaustions": 0,
+        "topicRuleChecks": 280,
+        "representativeAttempts": 60,
+        "auditedItems": 200,
+        "mediaItems": 0
+      }
+    },
+    {
+      "assessmentId": 58,
+      "slug": "grade-8-mathematics-practice",
+      "blueprintRevision": 2,
+      "passingScore": 60,
+      "formSimulationArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/58-grade-8-mathematics-practice/form-simulation.json",
+      "representativeAttemptQaArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/58-grade-8-mathematics-practice/representative-attempt-qa.json",
+      "accessibilityAuditArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/58-grade-8-mathematics-practice/accessibility-content-audit.json",
+      "cutScoreApprovalReference": "automated-boundary-check:grade-8-mathematics-practice:revision-2:score-60",
+      "cutScoreApprovalSha256": "aba4303912c0403a105a68936b2d49956e4095a706fd2645878be4ebac1c9688",
+      "results": {
+        "forms": 20,
+        "draws": 800,
+        "duplicateSelections": 0,
+        "poolExhaustions": 0,
+        "topicRuleChecks": 260,
+        "representativeAttempts": 60,
+        "auditedItems": 200,
+        "mediaItems": 0
+      }
+    },
+    {
+      "assessmentId": 59,
+      "slug": "grade-9-mathematics-practice",
+      "blueprintRevision": 2,
+      "passingScore": 60,
+      "formSimulationArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/59-grade-9-mathematics-practice/form-simulation.json",
+      "representativeAttemptQaArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/59-grade-9-mathematics-practice/representative-attempt-qa.json",
+      "accessibilityAuditArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/59-grade-9-mathematics-practice/accessibility-content-audit.json",
+      "cutScoreApprovalReference": "automated-boundary-check:grade-9-mathematics-practice:revision-2:score-60",
+      "cutScoreApprovalSha256": "100152d9fd2a65c05acc40f054eea4b7d499093b1b2ccb0453689b09666af3e7",
+      "results": {
+        "forms": 20,
+        "draws": 800,
+        "duplicateSelections": 0,
+        "poolExhaustions": 0,
+        "topicRuleChecks": 180,
+        "representativeAttempts": 60,
+        "auditedItems": 200,
+        "mediaItems": 0
+      }
+    },
+    {
+      "assessmentId": 67,
+      "slug": "ibps-clerk-quantitative-aptitude-practice",
+      "blueprintRevision": 2,
+      "passingScore": 60,
+      "formSimulationArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/67-ibps-clerk-quantitative-aptitude-practice/form-simulation.json",
+      "representativeAttemptQaArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/67-ibps-clerk-quantitative-aptitude-practice/representative-attempt-qa.json",
+      "accessibilityAuditArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/67-ibps-clerk-quantitative-aptitude-practice/accessibility-content-audit.json",
+      "cutScoreApprovalReference": "automated-boundary-check:ibps-clerk-quantitative-aptitude-practice:revision-2:score-60",
+      "cutScoreApprovalSha256": "d5f642404c7a3aebb872efa21b84629a0e31d1e65ddea5f39ca84d97db745492",
+      "results": {
+        "forms": 20,
+        "draws": 600,
+        "duplicateSelections": 0,
+        "poolExhaustions": 0,
+        "topicRuleChecks": 380,
+        "representativeAttempts": 60,
+        "auditedItems": 200,
+        "mediaItems": 0
+      }
+    },
+    {
+      "assessmentId": 279,
+      "slug": "ibps-po-english-language-practice",
+      "blueprintRevision": 1,
+      "passingScore": 60,
+      "formSimulationArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/279-ibps-po-english-language-practice/form-simulation.json",
+      "representativeAttemptQaArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/279-ibps-po-english-language-practice/representative-attempt-qa.json",
+      "accessibilityAuditArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/279-ibps-po-english-language-practice/accessibility-content-audit.json",
+      "cutScoreApprovalReference": "automated-boundary-check:ibps-po-english-language-practice:revision-1:score-60",
+      "cutScoreApprovalSha256": "92fc7067ac74f5a8fb5bf59f82cdacccb9758a55bff4c41aa1141be497cc7084",
+      "results": {
+        "forms": 20,
+        "draws": 600,
+        "duplicateSelections": 0,
+        "poolExhaustions": 0,
+        "topicRuleChecks": 20,
+        "representativeAttempts": 60,
+        "auditedItems": 200,
+        "mediaItems": 0
+      }
+    },
+    {
+      "assessmentId": 66,
+      "slug": "ibps-po-quantitative-aptitude-practice",
+      "blueprintRevision": 2,
+      "passingScore": 60,
+      "formSimulationArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/66-ibps-po-quantitative-aptitude-practice/form-simulation.json",
+      "representativeAttemptQaArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/66-ibps-po-quantitative-aptitude-practice/representative-attempt-qa.json",
+      "accessibilityAuditArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/66-ibps-po-quantitative-aptitude-practice/accessibility-content-audit.json",
+      "cutScoreApprovalReference": "automated-boundary-check:ibps-po-quantitative-aptitude-practice:revision-2:score-60",
+      "cutScoreApprovalSha256": "19adefd1b58d3064c8ddd30bd4cad1f97a293e17420b212889fb23cb53374541",
+      "results": {
+        "forms": 20,
+        "draws": 700,
+        "duplicateSelections": 0,
+        "poolExhaustions": 0,
+        "topicRuleChecks": 20,
+        "representativeAttempts": 60,
+        "auditedItems": 200,
+        "mediaItems": 0
+      }
+    },
+    {
+      "assessmentId": 278,
+      "slug": "ibps-po-reasoning-ability-practice",
+      "blueprintRevision": 1,
+      "passingScore": 60,
+      "formSimulationArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/278-ibps-po-reasoning-ability-practice/form-simulation.json",
+      "representativeAttemptQaArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/278-ibps-po-reasoning-ability-practice/representative-attempt-qa.json",
+      "accessibilityAuditArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/278-ibps-po-reasoning-ability-practice/accessibility-content-audit.json",
+      "cutScoreApprovalReference": "automated-boundary-check:ibps-po-reasoning-ability-practice:revision-1:score-60",
+      "cutScoreApprovalSha256": "ce2cf0742b776b213e51f1d4a962db6c45769fb2c6aff253e892aa7cf3fb9c1b",
+      "results": {
+        "forms": 20,
+        "draws": 700,
+        "duplicateSelections": 0,
+        "poolExhaustions": 0,
+        "topicRuleChecks": 20,
+        "representativeAttempts": 60,
+        "auditedItems": 200,
+        "mediaItems": 0
+      }
+    },
+    {
+      "assessmentId": 71,
+      "slug": "jee-main-chemistry-numerical-practice",
+      "blueprintRevision": 1,
+      "passingScore": 60,
+      "formSimulationArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/71-jee-main-chemistry-numerical-practice/form-simulation.json",
+      "representativeAttemptQaArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/71-jee-main-chemistry-numerical-practice/representative-attempt-qa.json",
+      "accessibilityAuditArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/71-jee-main-chemistry-numerical-practice/accessibility-content-audit.json",
+      "cutScoreApprovalReference": "automated-boundary-check:jee-main-chemistry-numerical-practice:revision-1:score-60",
+      "cutScoreApprovalSha256": "19c2b8bf623b984525579758b129105af6d3e876b561b0bd52bcd5c18f1489e3",
+      "results": {
+        "forms": 20,
+        "draws": 500,
+        "duplicateSelections": 0,
+        "poolExhaustions": 0,
+        "topicRuleChecks": 100,
+        "representativeAttempts": 60,
+        "auditedItems": 200,
+        "mediaItems": 0
+      }
+    },
+    {
+      "assessmentId": 69,
+      "slug": "jee-main-physics-numerical-practice",
+      "blueprintRevision": 1,
+      "passingScore": 60,
+      "formSimulationArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/69-jee-main-physics-numerical-practice/form-simulation.json",
+      "representativeAttemptQaArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/69-jee-main-physics-numerical-practice/representative-attempt-qa.json",
+      "accessibilityAuditArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/69-jee-main-physics-numerical-practice/accessibility-content-audit.json",
+      "cutScoreApprovalReference": "automated-boundary-check:jee-main-physics-numerical-practice:revision-1:score-60",
+      "cutScoreApprovalSha256": "159d94bd80dbe093f1761ab915b70da0ea96c151842fbcbab7447a75905dc824",
+      "results": {
+        "forms": 20,
+        "draws": 600,
+        "duplicateSelections": 0,
+        "poolExhaustions": 0,
+        "topicRuleChecks": 220,
+        "representativeAttempts": 60,
+        "auditedItems": 200,
+        "mediaItems": 0
+      }
+    },
+    {
+      "assessmentId": 70,
+      "slug": "neet-ug-chemistry-numerical-practice",
+      "blueprintRevision": 1,
+      "passingScore": 60,
+      "formSimulationArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/70-neet-ug-chemistry-numerical-practice/form-simulation.json",
+      "representativeAttemptQaArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/70-neet-ug-chemistry-numerical-practice/representative-attempt-qa.json",
+      "accessibilityAuditArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/70-neet-ug-chemistry-numerical-practice/accessibility-content-audit.json",
+      "cutScoreApprovalReference": "automated-boundary-check:neet-ug-chemistry-numerical-practice:revision-1:score-60",
+      "cutScoreApprovalSha256": "9b00ec708387e594ba49cc7c97557deb786e668a3bcb488851e41605108bda7d",
+      "results": {
+        "forms": 20,
+        "draws": 500,
+        "duplicateSelections": 0,
+        "poolExhaustions": 0,
+        "topicRuleChecks": 100,
+        "representativeAttempts": 60,
+        "auditedItems": 200,
+        "mediaItems": 0
+      }
+    },
+    {
+      "assessmentId": 68,
+      "slug": "neet-ug-physics-numerical-practice",
+      "blueprintRevision": 1,
+      "passingScore": 60,
+      "formSimulationArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/68-neet-ug-physics-numerical-practice/form-simulation.json",
+      "representativeAttemptQaArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/68-neet-ug-physics-numerical-practice/representative-attempt-qa.json",
+      "accessibilityAuditArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/68-neet-ug-physics-numerical-practice/accessibility-content-audit.json",
+      "cutScoreApprovalReference": "automated-boundary-check:neet-ug-physics-numerical-practice:revision-1:score-60",
+      "cutScoreApprovalSha256": "1fb253a1cd45ac218d43eabe7b7644bda3b0b91e4486ec562e72a37aa650fcd6",
+      "results": {
+        "forms": 20,
+        "draws": 600,
+        "duplicateSelections": 0,
+        "poolExhaustions": 0,
+        "topicRuleChecks": 220,
+        "representativeAttempts": 60,
+        "auditedItems": 200,
+        "mediaItems": 0
+      }
+    },
+    {
+      "assessmentId": 276,
+      "slug": "rrb-group-d-level-1-cbt-general-awareness-practice",
+      "blueprintRevision": 1,
+      "passingScore": 60,
+      "formSimulationArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/276-rrb-group-d-level-1-cbt-general-awareness-practice/form-simulation.json",
+      "representativeAttemptQaArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/276-rrb-group-d-level-1-cbt-general-awareness-practice/representative-attempt-qa.json",
+      "accessibilityAuditArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/276-rrb-group-d-level-1-cbt-general-awareness-practice/accessibility-content-audit.json",
+      "cutScoreApprovalReference": "automated-boundary-check:rrb-group-d-level-1-cbt-general-awareness-practice:revision-1:score-60",
+      "cutScoreApprovalSha256": "21e0f4914e56268d1d34d0b15e55b32d21601a1b60766b1e8099b99656a4bf01",
+      "results": {
+        "forms": 20,
+        "draws": 400,
+        "duplicateSelections": 0,
+        "poolExhaustions": 0,
+        "topicRuleChecks": 20,
+        "representativeAttempts": 60,
+        "auditedItems": 200,
+        "mediaItems": 0
+      }
+    },
+    {
+      "assessmentId": 275,
+      "slug": "rrb-group-d-level-1-cbt-general-intelligence-reasoning-practice",
+      "blueprintRevision": 1,
+      "passingScore": 60,
+      "formSimulationArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/275-rrb-group-d-level-1-cbt-general-intelligence-reasoning-practice/form-simulation.json",
+      "representativeAttemptQaArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/275-rrb-group-d-level-1-cbt-general-intelligence-reasoning-practice/representative-attempt-qa.json",
+      "accessibilityAuditArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/275-rrb-group-d-level-1-cbt-general-intelligence-reasoning-practice/accessibility-content-audit.json",
+      "cutScoreApprovalReference": "automated-boundary-check:rrb-group-d-level-1-cbt-general-intelligence-reasoning-practice:revision-1:score-60",
+      "cutScoreApprovalSha256": "6ed18d3747df7dac44ac561edc6787ee212b11bcb704618db4b410a9e7573ed1",
+      "results": {
+        "forms": 20,
+        "draws": 600,
+        "duplicateSelections": 0,
+        "poolExhaustions": 0,
+        "topicRuleChecks": 20,
+        "representativeAttempts": 60,
+        "auditedItems": 200,
+        "mediaItems": 0
+      }
+    },
+    {
+      "assessmentId": 277,
+      "slug": "rrb-group-d-level-1-cbt-general-science-practice",
+      "blueprintRevision": 1,
+      "passingScore": 60,
+      "formSimulationArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/277-rrb-group-d-level-1-cbt-general-science-practice/form-simulation.json",
+      "representativeAttemptQaArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/277-rrb-group-d-level-1-cbt-general-science-practice/representative-attempt-qa.json",
+      "accessibilityAuditArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/277-rrb-group-d-level-1-cbt-general-science-practice/accessibility-content-audit.json",
+      "cutScoreApprovalReference": "automated-boundary-check:rrb-group-d-level-1-cbt-general-science-practice:revision-1:score-60",
+      "cutScoreApprovalSha256": "fdf2a4cc388d184738d6f7e90e8f3bbb32d7d11b5a76bfa8277736394e1784a8",
+      "results": {
+        "forms": 20,
+        "draws": 500,
+        "duplicateSelections": 0,
+        "poolExhaustions": 0,
+        "topicRuleChecks": 20,
+        "representativeAttempts": 60,
+        "auditedItems": 200,
+        "mediaItems": 0
+      }
+    },
+    {
+      "assessmentId": 65,
+      "slug": "rrb-group-d-level-1-cbt-mathematics-practice",
+      "blueprintRevision": 2,
+      "passingScore": 60,
+      "formSimulationArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/65-rrb-group-d-level-1-cbt-mathematics-practice/form-simulation.json",
+      "representativeAttemptQaArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/65-rrb-group-d-level-1-cbt-mathematics-practice/representative-attempt-qa.json",
+      "accessibilityAuditArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/65-rrb-group-d-level-1-cbt-mathematics-practice/accessibility-content-audit.json",
+      "cutScoreApprovalReference": "automated-boundary-check:rrb-group-d-level-1-cbt-mathematics-practice:revision-2:score-60",
+      "cutScoreApprovalSha256": "324e21319f26c6698443e2dba86f646f0ee54313a30eb6ce653cc3eb1ab88b8a",
+      "results": {
+        "forms": 20,
+        "draws": 500,
+        "duplicateSelections": 0,
+        "poolExhaustions": 0,
+        "topicRuleChecks": 20,
+        "representativeAttempts": 60,
+        "auditedItems": 200,
+        "mediaItems": 0
+      }
+    },
+    {
+      "assessmentId": 274,
+      "slug": "rrb-ntpc-cbt-1-general-awareness-practice",
+      "blueprintRevision": 1,
+      "passingScore": 60,
+      "formSimulationArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/274-rrb-ntpc-cbt-1-general-awareness-practice/form-simulation.json",
+      "representativeAttemptQaArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/274-rrb-ntpc-cbt-1-general-awareness-practice/representative-attempt-qa.json",
+      "accessibilityAuditArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/274-rrb-ntpc-cbt-1-general-awareness-practice/accessibility-content-audit.json",
+      "cutScoreApprovalReference": "automated-boundary-check:rrb-ntpc-cbt-1-general-awareness-practice:revision-1:score-60",
+      "cutScoreApprovalSha256": "e10ed3aa77ea62bef9316016734e76f27d263668c167c179bed87e129ff896e8",
+      "results": {
+        "forms": 20,
+        "draws": 800,
+        "duplicateSelections": 0,
+        "poolExhaustions": 0,
+        "topicRuleChecks": 20,
+        "representativeAttempts": 60,
+        "auditedItems": 200,
+        "mediaItems": 0
+      }
+    },
+    {
+      "assessmentId": 273,
+      "slug": "rrb-ntpc-cbt-1-general-intelligence-reasoning-practice",
+      "blueprintRevision": 1,
+      "passingScore": 60,
+      "formSimulationArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/273-rrb-ntpc-cbt-1-general-intelligence-reasoning-practice/form-simulation.json",
+      "representativeAttemptQaArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/273-rrb-ntpc-cbt-1-general-intelligence-reasoning-practice/representative-attempt-qa.json",
+      "accessibilityAuditArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/273-rrb-ntpc-cbt-1-general-intelligence-reasoning-practice/accessibility-content-audit.json",
+      "cutScoreApprovalReference": "automated-boundary-check:rrb-ntpc-cbt-1-general-intelligence-reasoning-practice:revision-1:score-60",
+      "cutScoreApprovalSha256": "7c6ac183ab2e7786b10857517b6d8e989c3913e22ea66c25ec19db7ffc05ec65",
+      "results": {
+        "forms": 20,
+        "draws": 600,
+        "duplicateSelections": 0,
+        "poolExhaustions": 0,
+        "topicRuleChecks": 20,
+        "representativeAttempts": 60,
+        "auditedItems": 200,
+        "mediaItems": 0
+      }
+    },
+    {
+      "assessmentId": 64,
+      "slug": "rrb-ntpc-cbt-1-mathematics-practice",
+      "blueprintRevision": 2,
+      "passingScore": 60,
+      "formSimulationArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/64-rrb-ntpc-cbt-1-mathematics-practice/form-simulation.json",
+      "representativeAttemptQaArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/64-rrb-ntpc-cbt-1-mathematics-practice/representative-attempt-qa.json",
+      "accessibilityAuditArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/64-rrb-ntpc-cbt-1-mathematics-practice/accessibility-content-audit.json",
+      "cutScoreApprovalReference": "automated-boundary-check:rrb-ntpc-cbt-1-mathematics-practice:revision-2:score-60",
+      "cutScoreApprovalSha256": "d9bca8fac976963bd16c8428c29b7567d50268dcdc1cd98236a133a8cd125fb6",
+      "results": {
+        "forms": 20,
+        "draws": 600,
+        "duplicateSelections": 0,
+        "poolExhaustions": 0,
+        "topicRuleChecks": 20,
+        "representativeAttempts": 60,
+        "auditedItems": 200,
+        "mediaItems": 0
+      }
+    },
+    {
+      "assessmentId": 61,
+      "slug": "ssc-cgl-tier-1-quantitative-aptitude-practice",
+      "blueprintRevision": 2,
+      "passingScore": 60,
+      "formSimulationArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/61-ssc-cgl-tier-1-quantitative-aptitude-practice/form-simulation.json",
+      "representativeAttemptQaArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/61-ssc-cgl-tier-1-quantitative-aptitude-practice/representative-attempt-qa.json",
+      "accessibilityAuditArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/61-ssc-cgl-tier-1-quantitative-aptitude-practice/accessibility-content-audit.json",
+      "cutScoreApprovalReference": "automated-boundary-check:ssc-cgl-tier-1-quantitative-aptitude-practice:revision-2:score-60",
+      "cutScoreApprovalSha256": "7dcb28eb7ab4b57d53100e08a818700728ab86a3411b50aab6cb01eba80b4c6b",
+      "results": {
+        "forms": 20,
+        "draws": 500,
+        "duplicateSelections": 0,
+        "poolExhaustions": 0,
+        "topicRuleChecks": 300,
+        "representativeAttempts": 60,
+        "auditedItems": 200,
+        "mediaItems": 0
+      }
+    },
+    {
+      "assessmentId": 62,
+      "slug": "ssc-chsl-tier-1-quantitative-aptitude-practice",
+      "blueprintRevision": 2,
+      "passingScore": 60,
+      "formSimulationArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/62-ssc-chsl-tier-1-quantitative-aptitude-practice/form-simulation.json",
+      "representativeAttemptQaArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/62-ssc-chsl-tier-1-quantitative-aptitude-practice/representative-attempt-qa.json",
+      "accessibilityAuditArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/62-ssc-chsl-tier-1-quantitative-aptitude-practice/accessibility-content-audit.json",
+      "cutScoreApprovalReference": "automated-boundary-check:ssc-chsl-tier-1-quantitative-aptitude-practice:revision-2:score-60",
+      "cutScoreApprovalSha256": "0c29172deb93f855a8afda291f3e59a8bf3a1c6d1bb26da53c355197d2782732",
+      "results": {
+        "forms": 20,
+        "draws": 500,
+        "duplicateSelections": 0,
+        "poolExhaustions": 0,
+        "topicRuleChecks": 300,
+        "representativeAttempts": 60,
+        "auditedItems": 200,
+        "mediaItems": 0
+      }
+    },
+    {
+      "assessmentId": 63,
+      "slug": "ssc-mts-numerical-mathematical-ability-practice",
+      "blueprintRevision": 2,
+      "passingScore": 60,
+      "formSimulationArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/63-ssc-mts-numerical-mathematical-ability-practice/form-simulation.json",
+      "representativeAttemptQaArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/63-ssc-mts-numerical-mathematical-ability-practice/representative-attempt-qa.json",
+      "accessibilityAuditArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/63-ssc-mts-numerical-mathematical-ability-practice/accessibility-content-audit.json",
+      "cutScoreApprovalReference": "automated-boundary-check:ssc-mts-numerical-mathematical-ability-practice:revision-2:score-60",
+      "cutScoreApprovalSha256": "1298e952ba45808c0f2c85426ceb9cafac03501002d5a37985ac74dc77531dc8",
+      "results": {
+        "forms": 20,
+        "draws": 500,
+        "duplicateSelections": 0,
+        "poolExhaustions": 0,
+        "topicRuleChecks": 20,
+        "representativeAttempts": 60,
+        "auditedItems": 200,
+        "mediaItems": 0
+      }
+    }
+  ],
+  "refused": [
+    {
+      "assessmentId": 265,
+      "slug": "ssc-cgl-tier-1-english-comprehension-practice",
+      "failures": [
+        "CURRENT_BLUEPRINT_REVISION_MISSING: no immutable course_question_blueprint_versions revision exists, so current-revision artifacts cannot be hash-bound"
+      ]
+    },
+    {
+      "assessmentId": 266,
+      "slug": "ssc-cgl-tier-1-general-awareness-practice",
+      "failures": [
+        "CURRENT_BLUEPRINT_REVISION_MISSING: no immutable course_question_blueprint_versions revision exists, so current-revision artifacts cannot be hash-bound"
+      ]
+    },
+    {
+      "assessmentId": 264,
+      "slug": "ssc-cgl-tier-1-general-intelligence-reasoning-practice",
+      "failures": [
+        "CURRENT_BLUEPRINT_REVISION_MISSING: no immutable course_question_blueprint_versions revision exists, so current-revision artifacts cannot be hash-bound"
+      ]
+    },
+    {
+      "assessmentId": 268,
+      "slug": "ssc-chsl-tier-1-english-language-practice",
+      "failures": [
+        "CURRENT_BLUEPRINT_REVISION_MISSING: no immutable course_question_blueprint_versions revision exists, so current-revision artifacts cannot be hash-bound"
+      ]
+    },
+    {
+      "assessmentId": 269,
+      "slug": "ssc-chsl-tier-1-general-awareness-practice",
+      "failures": [
+        "CURRENT_BLUEPRINT_REVISION_MISSING: no immutable course_question_blueprint_versions revision exists, so current-revision artifacts cannot be hash-bound"
+      ]
+    },
+    {
+      "assessmentId": 267,
+      "slug": "ssc-chsl-tier-1-general-intelligence-practice",
+      "failures": [
+        "CURRENT_BLUEPRINT_REVISION_MISSING: no immutable course_question_blueprint_versions revision exists, so current-revision artifacts cannot be hash-bound"
+      ]
+    },
+    {
+      "assessmentId": 271,
+      "slug": "ssc-mts-english-language-comprehension-practice",
+      "failures": [
+        "CURRENT_BLUEPRINT_REVISION_MISSING: no immutable course_question_blueprint_versions revision exists, so current-revision artifacts cannot be hash-bound"
+      ]
+    },
+    {
+      "assessmentId": 272,
+      "slug": "ssc-mts-general-awareness-practice",
+      "failures": [
+        "CURRENT_BLUEPRINT_REVISION_MISSING: no immutable course_question_blueprint_versions revision exists, so current-revision artifacts cannot be hash-bound"
+      ]
+    },
+    {
+      "assessmentId": 270,
+      "slug": "ssc-mts-reasoning-ability-problem-solving-practice",
+      "failures": [
+        "CURRENT_BLUEPRINT_REVISION_MISSING: no immutable course_question_blueprint_versions revision exists, so current-revision artifacts cannot be hash-bound"
+      ]
+    }
+  ]
+}

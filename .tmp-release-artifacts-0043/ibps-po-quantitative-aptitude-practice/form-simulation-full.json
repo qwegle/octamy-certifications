@@ -1,0 +1,119 @@
+{
+  "schemaVersion": "octamy.form-simulation-result.v1",
+  "generatedAt": "2026-07-29T13:27:28.015Z",
+  "assessmentId": 66,
+  "assessmentSlug": "ibps-po-quantitative-aptitude-practice",
+  "blueprintRevision": 2,
+  "runtimePath": "DatabaseStorage.materializeBlueprintForAttempt",
+  "independentForms": 5,
+  "expectedItemsPerForm": 35,
+  "poolExhaustionChecks": [
+    {
+      "ruleId": 1061,
+      "bankId": 41,
+      "topicId": null,
+      "difficulty": "mixed",
+      "requiredPerForm": 35,
+      "available": 200,
+      "passed": true
+    }
+  ],
+  "forms": [
+    {
+      "formNumber": 1,
+      "questionCount": 35,
+      "expectedQuestionCount": 35,
+      "duplicateQuestionIds": [],
+      "topicCoverage": [
+        {
+          "ruleId": 1061,
+          "bankId": 41,
+          "topicId": null,
+          "difficulty": "mixed",
+          "required": 35,
+          "selected": 35,
+          "matching": 35,
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "formNumber": 2,
+      "questionCount": 35,
+      "expectedQuestionCount": 35,
+      "duplicateQuestionIds": [],
+      "topicCoverage": [
+        {
+          "ruleId": 1061,
+          "bankId": 41,
+          "topicId": null,
+          "difficulty": "mixed",
+          "required": 35,
+          "selected": 35,
+          "matching": 35,
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "formNumber": 3,
+      "questionCount": 35,
+      "expectedQuestionCount": 35,
+      "duplicateQuestionIds": [],
+      "topicCoverage": [
+        {
+          "ruleId": 1061,
+          "bankId": 41,
+          "topicId": null,
+          "difficulty": "mixed",
+          "required": 35,
+          "selected": 35,
+          "matching": 35,
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "formNumber": 4,
+      "questionCount": 35,
+      "expectedQuestionCount": 35,
+      "duplicateQuestionIds": [],
+      "topicCoverage": [
+        {
+          "ruleId": 1061,
+          "bankId": 41,
+          "topicId": null,
+          "difficulty": "mixed",
+          "required": 35,
+          "selected": 35,
+          "matching": 35,
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "formNumber": 5,
+      "questionCount": 35,
+      "expectedQuestionCount": 35,
+      "duplicateQuestionIds": [],
+      "topicCoverage": [
+        {
+          "ruleId": 1061,
+          "bankId": 41,
+          "topicId": null,
+          "difficulty": "mixed",
+          "required": 35,
+          "selected": 35,
+          "matching": 35,
+          "passed": true
+        }
+      ],
+      "passed": true
+    }
+  ],
+  "passed": true
+}

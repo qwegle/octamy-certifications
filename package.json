@@ -80,7 +80,7 @@
     "drizzle-orm": "^0.45.2",
     "drizzle-zod": "^0.7.0",
     "embla-carousel-react": "^8.6.0",
-    "exceljs": "^4.4.0",
+    "exceljs": "4.4.0",
     "express": "^4.21.2",
     "express-rate-limit": "^8.5.1",
     "express-session": "^1.18.1",
@@ -155,6 +155,7 @@
     "bufferutil": "^4.0.8"
   },
   "overrides": {
-    "uuid": "^11.1.1"
+    "brace-expansion": "5.0.8",
+    "uuid": "11.1.1"
   }
 }

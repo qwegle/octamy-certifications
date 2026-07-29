@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "octamy.release-machine-artifact.v1",
+  "artifactType": "accessibility_content_audit",
+  "assessmentId": 54,
+  "blueprintRevision": 2,
+  "generatedAt": "2026-07-29T12:27:32.973Z",
+  "passed": true,
+  "summary": "200 items audited; 0 content accessibility failures",
+  "checks": [
+    {
+      "name": "report_sha256",
+      "passed": true,
+      "detail": "L3EEfIXKHtZzOOVDq7vcQbRbTwAHBggNcF6QYSUiVfw"
+    }
+  ]
+}

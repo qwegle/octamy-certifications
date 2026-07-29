@@ -1,0 +1,21 @@
+{
+  "assessmentId": 68,
+  "slug": "neet-ug-physics-numerical-practice",
+  "blueprintRevision": 1,
+  "passingScore": 60,
+  "formSimulationArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/68-neet-ug-physics-numerical-practice/form-simulation.json",
+  "representativeAttemptQaArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/68-neet-ug-physics-numerical-practice/representative-attempt-qa.json",
+  "accessibilityAuditArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/68-neet-ug-physics-numerical-practice/accessibility-content-audit.json",
+  "cutScoreApprovalReference": "automated-boundary-check:neet-ug-physics-numerical-practice:revision-1:score-60",
+  "cutScoreApprovalSha256": "1fb253a1cd45ac218d43eabe7b7644bda3b0b91e4486ec562e72a37aa650fcd6",
+  "results": {
+    "forms": 20,
+    "draws": 600,
+    "duplicateSelections": 0,
+    "poolExhaustions": 0,
+    "topicRuleChecks": 220,
+    "representativeAttempts": 60,
+    "auditedItems": 200,
+    "mediaItems": 0
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "assessmentId": 65,
+  "slug": "rrb-group-d-level-1-cbt-mathematics-practice",
+  "blueprintRevision": 2,
+  "passingScore": 60,
+  "formSimulationArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/65-rrb-group-d-level-1-cbt-mathematics-practice/form-simulation.json",
+  "representativeAttemptQaArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/65-rrb-group-d-level-1-cbt-mathematics-practice/representative-attempt-qa.json",
+  "accessibilityAuditArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/65-rrb-group-d-level-1-cbt-mathematics-practice/accessibility-content-audit.json",
+  "cutScoreApprovalReference": "automated-boundary-check:rrb-group-d-level-1-cbt-mathematics-practice:revision-2:score-60",
+  "cutScoreApprovalSha256": "324e21319f26c6698443e2dba86f646f0ee54313a30eb6ce653cc3eb1ab88b8a",
+  "results": {
+    "forms": 20,
+    "draws": 500,
+    "duplicateSelections": 0,
+    "poolExhaustions": 0,
+    "topicRuleChecks": 20,
+    "representativeAttempts": 60,
+    "auditedItems": 200,
+    "mediaItems": 0
+  }
+}

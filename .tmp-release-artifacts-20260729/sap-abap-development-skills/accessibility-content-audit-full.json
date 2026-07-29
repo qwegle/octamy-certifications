@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "octamy.accessibility-content-audit-result.v1",
+  "generatedAt": "2026-07-29T12:47:18.868Z",
+  "assessmentId": 184,
+  "assessmentSlug": "sap-abap-development-skills",
+  "blueprintRevision": 1,
+  "methods": [
+    "media alternative text presence",
+    "absence of colour-only references",
+    "absence of position-only references",
+    "normalized option distinctness",
+    "stem readability length 8-2000"
+  ],
+  "counts": {
+    "inspectedItems": 80,
+    "mediaReferences": 0,
+    "missingMediaAltText": 0,
+    "colorOnlyReferences": 0,
+    "positionOnlyReferences": 0,
+    "duplicateOptionSets": 0,
+    "unreadableStems": 0
+  },
+  "findings": [],
+  "passed": true
+}

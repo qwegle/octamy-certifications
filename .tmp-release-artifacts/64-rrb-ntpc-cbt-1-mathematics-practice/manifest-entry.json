@@ -1,0 +1,21 @@
+{
+  "assessmentId": 64,
+  "slug": "rrb-ntpc-cbt-1-mathematics-practice",
+  "blueprintRevision": 2,
+  "passingScore": 60,
+  "formSimulationArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/64-rrb-ntpc-cbt-1-mathematics-practice/form-simulation.json",
+  "representativeAttemptQaArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/64-rrb-ntpc-cbt-1-mathematics-practice/representative-attempt-qa.json",
+  "accessibilityAuditArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/64-rrb-ntpc-cbt-1-mathematics-practice/accessibility-content-audit.json",
+  "cutScoreApprovalReference": "automated-boundary-check:rrb-ntpc-cbt-1-mathematics-practice:revision-2:score-60",
+  "cutScoreApprovalSha256": "d9bca8fac976963bd16c8428c29b7567d50268dcdc1cd98236a133a8cd125fb6",
+  "results": {
+    "forms": 20,
+    "draws": 600,
+    "duplicateSelections": 0,
+    "poolExhaustions": 0,
+    "topicRuleChecks": 20,
+    "representativeAttempts": 60,
+    "auditedItems": 200,
+    "mediaItems": 0
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "passedAssessments": 32,
+  "refusedAssessments": 9,
+  "aggregate": {
+    "forms": 640,
+    "draws": 19100,
+    "duplicateSelections": 0,
+    "poolExhaustions": 0,
+    "topicRuleChecks": 3920,
+    "representativeAttempts": 1920,
+    "auditedItems": 6400,
+    "mediaItems": 0
+  },
+  "refused": [
+    {
+      "assessmentId": 265,
+      "slug": "ssc-cgl-tier-1-english-comprehension-practice",
+      "failures": [
+        "CURRENT_BLUEPRINT_REVISION_MISSING: no immutable course_question_blueprint_versions revision exists, so current-revision artifacts cannot be hash-bound"
+      ]
+    },
+    {
+      "assessmentId": 266,
+      "slug": "ssc-cgl-tier-1-general-awareness-practice",
+      "failures": [
+        "CURRENT_BLUEPRINT_REVISION_MISSING: no immutable course_question_blueprint_versions revision exists, so current-revision artifacts cannot be hash-bound"
+      ]
+    },
+    {
+      "assessmentId": 264,
+      "slug": "ssc-cgl-tier-1-general-intelligence-reasoning-practice",
+      "failures": [
+        "CURRENT_BLUEPRINT_REVISION_MISSING: no immutable course_question_blueprint_versions revision exists, so current-revision artifacts cannot be hash-bound"
+      ]
+    },
+    {
+      "assessmentId": 268,
+      "slug": "ssc-chsl-tier-1-english-language-practice",
+      "failures": [
+        "CURRENT_BLUEPRINT_REVISION_MISSING: no immutable course_question_blueprint_versions revision exists, so current-revision artifacts cannot be hash-bound"
+      ]
+    },
+    {
+      "assessmentId": 269,
+      "slug": "ssc-chsl-tier-1-general-awareness-practice",
+      "failures": [
+        "CURRENT_BLUEPRINT_REVISION_MISSING: no immutable course_question_blueprint_versions revision exists, so current-revision artifacts cannot be hash-bound"
+      ]
+    },
+    {
+      "assessmentId": 267,
+      "slug": "ssc-chsl-tier-1-general-intelligence-practice",
+      "failures": [
+        "CURRENT_BLUEPRINT_REVISION_MISSING: no immutable course_question_blueprint_versions revision exists, so current-revision artifacts cannot be hash-bound"
+      ]
+    },
+    {
+      "assessmentId": 271,
+      "slug": "ssc-mts-english-language-comprehension-practice",
+      "failures": [
+        "CURRENT_BLUEPRINT_REVISION_MISSING: no immutable course_question_blueprint_versions revision exists, so current-revision artifacts cannot be hash-bound"
+      ]
+    },
+    {
+      "assessmentId": 272,
+      "slug": "ssc-mts-general-awareness-practice",
+      "failures": [
+        "CURRENT_BLUEPRINT_REVISION_MISSING: no immutable course_question_blueprint_versions revision exists, so current-revision artifacts cannot be hash-bound"
+      ]
+    },
+    {
+      "assessmentId": 270,
+      "slug": "ssc-mts-reasoning-ability-problem-solving-practice",
+      "failures": [
+        "CURRENT_BLUEPRINT_REVISION_MISSING: no immutable course_question_blueprint_versions revision exists, so current-revision artifacts cannot be hash-bound"
+      ]
+    }
+  ]
+}

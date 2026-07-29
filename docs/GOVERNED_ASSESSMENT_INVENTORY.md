@@ -123,19 +123,22 @@ blueprint or evidence set requires a new revision rather than an update.
   when every in-scope source has an attributable current-revision
   `assessment_rights_role_reviews` row whose reference and SHA-256 exactly
   match the source register.
-- `RIGHTS_ROLE_SEPARATION_VIOLATED` is `SUBSTANTIVE` and is emitted when a
-  recorded rights reviewer actually overlaps item authorship, content review,
-  accessibility, cut-score approval, QA, or publishing. Missing documentation
-  is not represented as a proven legal-role conflict.
+- `RIGHTS_ROLE_SEPARATION_VIOLATED` is `SUBSTANTIVE`. In `multi_party` it
+  covers overlap between the recorded rights reviewer and item authorship,
+  content review, accessibility, cut-score approval, QA, or publishing. In
+  `single_accountable_officer`, disclosed officer authorship is the narrow
+  exception; officer overlap with recorded item review remains a violation.
+  Missing documentation is not represented as a proven legal-role conflict.
 - `ASSESSMENT_ACCESSIBILITY_ACCEPTANCE_NOT_REPRESENTED` clears only for a
-  current-revision acceptance with an attributable independent reviewer,
-  named standard, exact evidence reference, SHA-256, and acceptance time.
+  current-revision acceptance with the attributable reviewer required by the
+  selected mode, named standard, exact evidence reference, SHA-256, and
+  acceptance time.
 - `IMMUTABLE_RELEASE_BUNDLE_NOT_REPRESENTED` clears only for a current-revision
   immutable bundle whose content-manifest digest matches the exact scoped item
   IDs, versions, content/provenance hashes, and blueprint rules. It also requires
   hashed form simulation, authoritative cut score and approval, hashed release
-  QA, distinct content/cut-score/QA/publisher users, sign-off timestamps, release
-  commit/time, rollback owner, and a hashed takedown procedure.
+  QA, valid mode-specific attribution, sign-off timestamps, release commit/time,
+  rollback owner, and a hashed takedown procedure.
 
 Partial, stale-revision, mismatched, free-text-only, ticket-only, or
 filename-only administrative claims remain `RELEASE_EVIDENCE` blockers and keep
@@ -145,6 +148,17 @@ commercial/derivative permission gaps are always substantive. The deployment
 value `unsafePublished` is therefore narrower than strict `releaseReady` by
 design; `--require-release-evidence` is available for an explicitly strict run.
 
+
+### Accountable-officer independence decision
+
+Before inventory v6, the recorder put every scoped `created_by` and `reviewed_by`
+ID into one set, then rejected single-officer evidence whenever the officer (also
+stored as accessibility and rights reviewer) appeared in that set. It therefore
+treated officer-as-author and officer-as-item-reviewer identically. The latter is
+a real integrity failure because it collapses the independent item-review control;
+the former is a small-team release-administration overlap when another real person
+reviewed every exact authored item. The policy below distinguishes them rather
+than deleting the guard.
 Migration `0036_void_fabricated_release_evidence.sql` adds an immutable,
 append-only void record for an exact accessibility acceptance or release bundle.
 The original row and attribution remain intact for incident audit; forced
@@ -167,7 +181,9 @@ Before recording evidence, the platform owner must create ordinary named
 accounts for the actual people responsible for the work (through the normal
 registration/admin workflow), verify their names and email addresses, and note
 their user IDs. Never substitute automation, AI-authoring, test, smoke, shared,
-or service identities. Grant only the role each person genuinely performs:
+or service identities. The evidence recorder additionally denies confirmed
+production non-real user IDs 3, 5, 6, and 7 even if their display text changes.
+Grant only the role each person genuinely performs:
 
 ```bash
 # Preview: this is read-only because --apply is absent.
@@ -182,22 +198,58 @@ npx tsx scripts/grant-assessment-release-role.ts \
 # Optionally bound the appointment with --expires-at <ISO-8601 timestamp>.
 ```
 
-Repeat for each responsible person. The CLI and database reject unsafe account
-names/emails, duplicate active grants, non-admin grantors, and conflicting
-approval roles. For a genuinely small team only, the owner may add
-`--single-officer-exception --single-officer-exception-reason "<20+ character
-justification>"`; the exception is stored on the grant. It is not permission to
-fabricate work or bypass evidence-level independence: whoever signs must have
-genuinely performed that role, and the evidence CLI still requires distinct
-accessibility, content, rights, cut-score, QA, and publisher signatories for one
-assessment.
+For `multi_party`, repeat for each responsible person. The CLI and database
+reject unsafe account names/emails, duplicate active grants, non-admin grantors,
+and conflicting approval roles. Six distinct principals remain mandatory:
+accessibility, content, rights, cut-score, QA, and publisher.
 
-`record-assessment-release-evidence.ts` accepts a principal only when the exact
-role has a current, unexpired grant with no revocation. With no such grants it
-names the missing role and refuses before writing. Test/smoke, automation,
-service/system, and AI or shared assessment-authoring identities remain rejected.
-Authorization rows, revocations, evidence, and evidence voids cannot be updated
-or deleted.
+Migration `0041_single_accountable_officer_release_attestation.sql` adds an
+explicit immutable `attestation_mode` to every release bundle. Existing and new
+six-person evidence is `multi_party`. A small organisation may instead record
+`single_accountable_officer`, naming one real platform administrator who accepts
+release accountability and has a current, unrevoked, unexpired
+`release_operator` grant. The database stores the named officer and a 20–1000
+character attestation; it cannot be presented as independent multi-party review.
+
+Single-officer mode is an accommodation for accountable release administration,
+not evidence that six people reviewed the assessment and not a second independent
+item review. The integrity control is item-level independence: every exact item
+version and content hash must name an author and a different attributable reviewer.
+The accountable officer signs an accountability declaration about the release.
+The officer may therefore also be an in-scope item author only when all those items
+retain different recorded reviewers and the operator explicitly supplies
+`--disclose-officer-item-authorship`. The recorder appends a canonical disclosure
+to both `single_officer_attestation` and the bundle-hashed evidence: the officer
+authored items and **no independent multi-party release review occurred**. The
+evaluator surfaces the overlap, disclosure, and `independentMultiPartyReleaseReview:
+false`.
+
+An officer who is a recorded item reviewer anywhere in the same scope remains
+refused with `SELF_APPROVAL_FORBIDDEN`; allowing that overlap would collapse the
+item-level control the declaration relies on. Collapsed author/reviewer items are
+also refused. Automation, AI-authoring, test, smoke, shared, service, and junk
+identities remain forbidden, as do missing/revoked/expired role grants, malformed
+or stale artifacts, substantive blockers, immutable-evidence conflicts, and
+voided evidence. Officer authorship disclosure does not prove a second opinion,
+six-person review, absence of errors, accessibility conformance beyond the stored
+artifact, or that release administration was independently reviewed.
+
+A bare claim cannot satisfy single-officer mode. The recorder requires three
+local JSON result files: a form simulation, representative-attempt QA, and
+accessibility content audit. Each must use schema
+`octamy.release-machine-artifact.v1`, name its artifact type, assessment ID and
+current blueprint revision, contain a valid generation time, `passed: true`, a
+meaningful summary, and at least one concrete passed check. The CLI stores each
+canonical compact envelope and its own SHA-256 in immutable evidence. The
+evaluator recomputes the hash and rejects an absent, failed, malformed,
+hash-mismatched, wrong-assessment, or stale-revision artifact.
+
+`record-assessment-release-evidence.ts` accepts multi-party principals only when
+each exact role has a current grant. Single-officer mode requires the named
+admin's exact `release_operator` grant. Revocation and expiry remain effective;
+test/smoke, automation, service/system, and AI-authoring identities remain
+rejected. Authorization, evidence, and void rows remain immutable, and voided
+evidence never satisfies either mode.
 
 ## Final non-viable shell disposition
 
@@ -261,11 +313,34 @@ npm run questions:review -- \
   --operator "<content reviewer name>" --apply --confirm-reviewed
 ```
 
+Before producing current-revision machine artifacts, a legacy published assessment
+may need its first immutable blueprint snapshot. The release recorder deliberately
+separates this from attestation so artifacts never bind to a guessed revision.
+Snapshot-only mode is restricted to active/public/approved assessments, requires a
+real admin with a current `release_operator` grant, defaults to a read-only preview,
+and inserts revision 1 from the exact ordered live rules. It does not update any
+blueprint rule or publication field:
+
+```bash
+# Preview, then repeat with both write guards after comparing the assessment ID
+# and planned revision:
+npx tsx scripts/record-assessment-release-evidence.ts \
+  --assessment <slug> --operator "<named owner>" --operator-user-id <admin id> \
+  --record-missing-blueprint-revision-only
+# Add: --apply --confirm-blueprint-revision-snapshot
+```
+
+If a revision already exists, this operation returns `already_recorded`. Empty,
+unpublished, private, pending, missing, unauthorized, and prohibited-identity
+scopes fail closed. Generate the three artifacts only after this snapshot exists.
+
 After content, provenance, bank, and blueprint blockers are cleared, record the
 assessment-level evidence. The command refuses substantive blockers, a
 non-admin recording operator, missing users, conflicting immutable evidence,
-and any overlap among accessibility/content/rights/cut-score/QA/publisher IDs.
-It never changes publication state.
+and any prohibited overlap in `multi_party` mode. It never changes publication
+state. For `single_accountable_officer`, the same admin is deliberately visible
+in every administrative accountability field, while item-level independence
+and all substantive controls remain unchanged.
 
 ```bash
 # 4. Preview only (default):
@@ -280,6 +355,22 @@ npx tsx scripts/record-assessment-release-evidence.ts \
   --cut-score-method "<reviewed method>" \
   --cut-score-approval-reference <vault-reference> --cut-score-approval-sha256 <sha256> \
   --release-qa-reference <vault-reference> --release-qa-sha256 <sha256> \
+  --release-commit <git-sha> --takedown-procedure "<reviewed procedure>"
+
+# Small-organisation alternative (still preview-only): first grant the named
+# admin release_operator, then provide three real current-revision result files.
+npx tsx scripts/record-assessment-release-evidence.ts \
+  --assessment <slug> --operator "<named owner>" --operator-user-id <admin id> \
+  --attestation-mode single_accountable_officer \
+  --accountable-officer-user-id <same admin id> \
+  --single-officer-attestation "I accept accountability for this release and its recorded evidence." \
+  --disclose-officer-item-authorship \
+  --accessibility-standard "WCAG 2.2 AA content audit" \
+  --form-simulation-artifact <form-result.json> \
+  --representative-attempt-qa-artifact <attempt-result.json> \
+  --accessibility-audit-artifact <accessibility-result.json> \
+  --cut-score-method "<documented method>" \
+  --cut-score-approval-reference <vault-reference> --cut-score-approval-sha256 <sha256> \
   --release-commit <git-sha> --takedown-procedure "<reviewed procedure>"
 
 # 5. Repeat the exact command only after review, adding both write guards:

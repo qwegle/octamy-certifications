@@ -1,0 +1,119 @@
+{
+  "schemaVersion": "octamy.form-simulation-result.v1",
+  "generatedAt": "2026-07-29T13:27:50.585Z",
+  "assessmentId": 270,
+  "assessmentSlug": "ssc-mts-reasoning-ability-problem-solving-practice",
+  "blueprintRevision": 1,
+  "runtimePath": "DatabaseStorage.materializeBlueprintForAttempt",
+  "independentForms": 5,
+  "expectedItemsPerForm": 25,
+  "poolExhaustionChecks": [
+    {
+      "ruleId": 1046,
+      "bankId": 157,
+      "topicId": null,
+      "difficulty": "mixed",
+      "requiredPerForm": 25,
+      "available": 200,
+      "passed": true
+    }
+  ],
+  "forms": [
+    {
+      "formNumber": 1,
+      "questionCount": 25,
+      "expectedQuestionCount": 25,
+      "duplicateQuestionIds": [],
+      "topicCoverage": [
+        {
+          "ruleId": 1046,
+          "bankId": 157,
+          "topicId": null,
+          "difficulty": "mixed",
+          "required": 25,
+          "selected": 25,
+          "matching": 25,
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "formNumber": 2,
+      "questionCount": 25,
+      "expectedQuestionCount": 25,
+      "duplicateQuestionIds": [],
+      "topicCoverage": [
+        {
+          "ruleId": 1046,
+          "bankId": 157,
+          "topicId": null,
+          "difficulty": "mixed",
+          "required": 25,
+          "selected": 25,
+          "matching": 25,
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "formNumber": 3,
+      "questionCount": 25,
+      "expectedQuestionCount": 25,
+      "duplicateQuestionIds": [],
+      "topicCoverage": [
+        {
+          "ruleId": 1046,
+          "bankId": 157,
+          "topicId": null,
+          "difficulty": "mixed",
+          "required": 25,
+          "selected": 25,
+          "matching": 25,
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "formNumber": 4,
+      "questionCount": 25,
+      "expectedQuestionCount": 25,
+      "duplicateQuestionIds": [],
+      "topicCoverage": [
+        {
+          "ruleId": 1046,
+          "bankId": 157,
+          "topicId": null,
+          "difficulty": "mixed",
+          "required": 25,
+          "selected": 25,
+          "matching": 25,
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "formNumber": 5,
+      "questionCount": 25,
+      "expectedQuestionCount": 25,
+      "duplicateQuestionIds": [],
+      "topicCoverage": [
+        {
+          "ruleId": 1046,
+          "bankId": 157,
+          "topicId": null,
+          "difficulty": "mixed",
+          "required": 25,
+          "selected": 25,
+          "matching": 25,
+          "passed": true
+        }
+      ],
+      "passed": true
+    }
+  ],
+  "passed": true
+}

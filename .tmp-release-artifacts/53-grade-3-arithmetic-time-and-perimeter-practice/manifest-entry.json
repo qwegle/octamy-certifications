@@ -1,0 +1,21 @@
+{
+  "assessmentId": 53,
+  "slug": "grade-3-arithmetic-time-and-perimeter-practice",
+  "blueprintRevision": 2,
+  "passingScore": 60,
+  "formSimulationArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/53-grade-3-arithmetic-time-and-perimeter-practice/form-simulation.json",
+  "representativeAttemptQaArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/53-grade-3-arithmetic-time-and-perimeter-practice/representative-attempt-qa.json",
+  "accessibilityAuditArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/53-grade-3-arithmetic-time-and-perimeter-practice/accessibility-content-audit.json",
+  "cutScoreApprovalReference": "automated-boundary-check:grade-3-arithmetic-time-and-perimeter-practice:revision-2:score-60",
+  "cutScoreApprovalSha256": "ac3f79ceb70c4778a3b08cf1805d1f1bca9950de4496cd8760eb4c530f72edf2",
+  "results": {
+    "forms": 20,
+    "draws": 500,
+    "duplicateSelections": 0,
+    "poolExhaustions": 0,
+    "topicRuleChecks": 160,
+    "representativeAttempts": 60,
+    "auditedItems": 200,
+    "mediaItems": 0
+  }
+}

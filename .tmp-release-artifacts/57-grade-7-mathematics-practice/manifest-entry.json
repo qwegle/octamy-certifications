@@ -1,0 +1,21 @@
+{
+  "assessmentId": 57,
+  "slug": "grade-7-mathematics-practice",
+  "blueprintRevision": 2,
+  "passingScore": 60,
+  "formSimulationArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/57-grade-7-mathematics-practice/form-simulation.json",
+  "representativeAttemptQaArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/57-grade-7-mathematics-practice/representative-attempt-qa.json",
+  "accessibilityAuditArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/57-grade-7-mathematics-practice/accessibility-content-audit.json",
+  "cutScoreApprovalReference": "automated-boundary-check:grade-7-mathematics-practice:revision-2:score-60",
+  "cutScoreApprovalSha256": "7aa567273440c2a0d8dd3e8afcb5fba37d07c8aba0bfd17c739370a97ce72294",
+  "results": {
+    "forms": 20,
+    "draws": 800,
+    "duplicateSelections": 0,
+    "poolExhaustions": 0,
+    "topicRuleChecks": 280,
+    "representativeAttempts": 60,
+    "auditedItems": 200,
+    "mediaItems": 0
+  }
+}

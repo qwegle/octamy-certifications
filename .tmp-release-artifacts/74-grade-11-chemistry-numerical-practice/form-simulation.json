@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "octamy.release-machine-artifact.v1",
+  "artifactType": "form_simulation",
+  "assessmentId": 74,
+  "blueprintRevision": 1,
+  "generatedAt": "2026-07-29T12:26:04.036Z",
+  "passed": true,
+  "summary": "20 runtime forms; 600 draws; 0 duplicate/exhaustion",
+  "checks": [
+    {
+      "name": "report_sha256",
+      "passed": true,
+      "detail": "hHQjuKm88GwS8xS0dMk5EY5c2Sgp9fldbaPP5WlApY0"
+    }
+  ]
+}

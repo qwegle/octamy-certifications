@@ -1,0 +1,227 @@
+{
+  "schemaVersion": "octamy.representative-attempt-qa-result.v1",
+  "generatedAt": "2026-07-29T13:27:45.873Z",
+  "assessmentId": 265,
+  "assessmentSlug": "ssc-cgl-tier-1-english-comprehension-practice",
+  "blueprintRevision": 1,
+  "runtimeMaterializer": "DatabaseStorage.materializeBlueprintForAttempt",
+  "servingPath": "server/routes.ts option shuffle and answer-key omission",
+  "scoringPath": "server/utils/examScoring.scoreExam",
+  "servedQuestionCount": 25,
+  "configuredPassingScore": 60,
+  "testedScoreLevels": [
+    {
+      "correctCount": 0,
+      "expectedScore": 0,
+      "actualScore": 0,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 1,
+      "expectedScore": 4,
+      "actualScore": 4,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 2,
+      "expectedScore": 8,
+      "actualScore": 8,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 3,
+      "expectedScore": 12,
+      "actualScore": 12,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 4,
+      "expectedScore": 16,
+      "actualScore": 16,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 5,
+      "expectedScore": 20,
+      "actualScore": 20,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 6,
+      "expectedScore": 24,
+      "actualScore": 24,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 7,
+      "expectedScore": 28,
+      "actualScore": 28,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 8,
+      "expectedScore": 32,
+      "actualScore": 32,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 9,
+      "expectedScore": 36,
+      "actualScore": 36,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 10,
+      "expectedScore": 40,
+      "actualScore": 40,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 11,
+      "expectedScore": 44,
+      "actualScore": 44,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 12,
+      "expectedScore": 48,
+      "actualScore": 48,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 13,
+      "expectedScore": 52,
+      "actualScore": 52,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 14,
+      "expectedScore": 56,
+      "actualScore": 56,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 15,
+      "expectedScore": 60,
+      "actualScore": 60,
+      "expectedPassed": true,
+      "actualPassed": true,
+      "passed": true
+    },
+    {
+      "correctCount": 16,
+      "expectedScore": 64,
+      "actualScore": 64,
+      "expectedPassed": true,
+      "actualPassed": true,
+      "passed": true
+    },
+    {
+      "correctCount": 17,
+      "expectedScore": 68,
+      "actualScore": 68,
+      "expectedPassed": true,
+      "actualPassed": true,
+      "passed": true
+    },
+    {
+      "correctCount": 18,
+      "expectedScore": 72,
+      "actualScore": 72,
+      "expectedPassed": true,
+      "actualPassed": true,
+      "passed": true
+    },
+    {
+      "correctCount": 19,
+      "expectedScore": 76,
+      "actualScore": 76,
+      "expectedPassed": true,
+      "actualPassed": true,
+      "passed": true
+    },
+    {
+      "correctCount": 20,
+      "expectedScore": 80,
+      "actualScore": 80,
+      "expectedPassed": true,
+      "actualPassed": true,
+      "passed": true
+    },
+    {
+      "correctCount": 21,
+      "expectedScore": 84,
+      "actualScore": 84,
+      "expectedPassed": true,
+      "actualPassed": true,
+      "passed": true
+    },
+    {
+      "correctCount": 22,
+      "expectedScore": 88,
+      "actualScore": 88,
+      "expectedPassed": true,
+      "actualPassed": true,
+      "passed": true
+    },
+    {
+      "correctCount": 23,
+      "expectedScore": 92,
+      "actualScore": 92,
+      "expectedPassed": true,
+      "actualPassed": true,
+      "passed": true
+    },
+    {
+      "correctCount": 24,
+      "expectedScore": 96,
+      "actualScore": 96,
+      "expectedPassed": true,
+      "actualPassed": true,
+      "passed": true
+    },
+    {
+      "correctCount": 25,
+      "expectedScore": 100,
+      "actualScore": 100,
+      "expectedPassed": true,
+      "actualPassed": true,
+      "passed": true
+    }
+  ],
+  "preSubmissionAnswerKeyExposure": {
+    "leakedKeys": [],
+    "passed": true
+  },
+  "passed": true
+}

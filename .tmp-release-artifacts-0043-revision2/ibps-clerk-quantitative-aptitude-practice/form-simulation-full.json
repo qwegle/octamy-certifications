@@ -1,0 +1,1181 @@
+{
+  "schemaVersion": "octamy.form-simulation-result.v1",
+  "generatedAt": "2026-07-29T13:34:50.935Z",
+  "assessmentId": 67,
+  "assessmentSlug": "ibps-clerk-quantitative-aptitude-practice",
+  "blueprintRevision": 2,
+  "runtimePath": "DatabaseStorage.materializeBlueprintForAttempt",
+  "independentForms": 5,
+  "expectedItemsPerForm": 30,
+  "poolExhaustionChecks": [
+    {
+      "ruleId": 1130,
+      "bankId": 42,
+      "topicId": 579,
+      "difficulty": "mixed",
+      "requiredPerForm": 2,
+      "available": 10,
+      "passed": true
+    },
+    {
+      "ruleId": 1131,
+      "bankId": 42,
+      "topicId": 580,
+      "difficulty": "mixed",
+      "requiredPerForm": 2,
+      "available": 10,
+      "passed": true
+    },
+    {
+      "ruleId": 1132,
+      "bankId": 42,
+      "topicId": 581,
+      "difficulty": "mixed",
+      "requiredPerForm": 2,
+      "available": 10,
+      "passed": true
+    },
+    {
+      "ruleId": 1133,
+      "bankId": 42,
+      "topicId": 582,
+      "difficulty": "mixed",
+      "requiredPerForm": 1,
+      "available": 9,
+      "passed": true
+    },
+    {
+      "ruleId": 1134,
+      "bankId": 42,
+      "topicId": 583,
+      "difficulty": "mixed",
+      "requiredPerForm": 1,
+      "available": 9,
+      "passed": true
+    },
+    {
+      "ruleId": 1135,
+      "bankId": 42,
+      "topicId": 584,
+      "difficulty": "mixed",
+      "requiredPerForm": 1,
+      "available": 9,
+      "passed": true
+    },
+    {
+      "ruleId": 1136,
+      "bankId": 42,
+      "topicId": 585,
+      "difficulty": "mixed",
+      "requiredPerForm": 3,
+      "available": 18,
+      "passed": true
+    },
+    {
+      "ruleId": 1137,
+      "bankId": 42,
+      "topicId": 586,
+      "difficulty": "mixed",
+      "requiredPerForm": 2,
+      "available": 10,
+      "passed": true
+    },
+    {
+      "ruleId": 1138,
+      "bankId": 42,
+      "topicId": 587,
+      "difficulty": "mixed",
+      "requiredPerForm": 2,
+      "available": 10,
+      "passed": true
+    },
+    {
+      "ruleId": 1139,
+      "bankId": 42,
+      "topicId": 588,
+      "difficulty": "mixed",
+      "requiredPerForm": 1,
+      "available": 9,
+      "passed": true
+    },
+    {
+      "ruleId": 1140,
+      "bankId": 42,
+      "topicId": 589,
+      "difficulty": "mixed",
+      "requiredPerForm": 2,
+      "available": 10,
+      "passed": true
+    },
+    {
+      "ruleId": 1141,
+      "bankId": 42,
+      "topicId": 590,
+      "difficulty": "mixed",
+      "requiredPerForm": 2,
+      "available": 10,
+      "passed": true
+    },
+    {
+      "ruleId": 1142,
+      "bankId": 42,
+      "topicId": 591,
+      "difficulty": "mixed",
+      "requiredPerForm": 1,
+      "available": 9,
+      "passed": true
+    },
+    {
+      "ruleId": 1143,
+      "bankId": 42,
+      "topicId": 592,
+      "difficulty": "mixed",
+      "requiredPerForm": 1,
+      "available": 9,
+      "passed": true
+    },
+    {
+      "ruleId": 1144,
+      "bankId": 42,
+      "topicId": 593,
+      "difficulty": "mixed",
+      "requiredPerForm": 1,
+      "available": 9,
+      "passed": true
+    },
+    {
+      "ruleId": 1145,
+      "bankId": 42,
+      "topicId": 594,
+      "difficulty": "mixed",
+      "requiredPerForm": 1,
+      "available": 9,
+      "passed": true
+    },
+    {
+      "ruleId": 1146,
+      "bankId": 42,
+      "topicId": 595,
+      "difficulty": "mixed",
+      "requiredPerForm": 1,
+      "available": 10,
+      "passed": true
+    },
+    {
+      "ruleId": 1147,
+      "bankId": 42,
+      "topicId": 596,
+      "difficulty": "mixed",
+      "requiredPerForm": 3,
+      "available": 20,
+      "passed": true
+    },
+    {
+      "ruleId": 1148,
+      "bankId": 42,
+      "topicId": 597,
+      "difficulty": "mixed",
+      "requiredPerForm": 1,
+      "available": 10,
+      "passed": true
+    }
+  ],
+  "forms": [
+    {
+      "formNumber": 1,
+      "questionCount": 30,
+      "expectedQuestionCount": 30,
+      "duplicateQuestionIds": [],
+      "topicCoverage": [
+        {
+          "ruleId": 1130,
+          "bankId": 42,
+          "topicId": 579,
+          "difficulty": "mixed",
+          "required": 2,
+          "selected": 2,
+          "matching": 2,
+          "passed": true
+        },
+        {
+          "ruleId": 1131,
+          "bankId": 42,
+          "topicId": 580,
+          "difficulty": "mixed",
+          "required": 2,
+          "selected": 2,
+          "matching": 2,
+          "passed": true
+        },
+        {
+          "ruleId": 1132,
+          "bankId": 42,
+          "topicId": 581,
+          "difficulty": "mixed",
+          "required": 2,
+          "selected": 2,
+          "matching": 2,
+          "passed": true
+        },
+        {
+          "ruleId": 1133,
+          "bankId": 42,
+          "topicId": 582,
+          "difficulty": "mixed",
+          "required": 1,
+          "selected": 1,
+          "matching": 1,
+          "passed": true
+        },
+        {
+          "ruleId": 1134,
+          "bankId": 42,
+          "topicId": 583,
+          "difficulty": "mixed",
+          "required": 1,
+          "selected": 1,
+          "matching": 1,
+          "passed": true
+        },
+        {
+          "ruleId": 1135,
+          "bankId": 42,
+          "topicId": 584,
+          "difficulty": "mixed",
+          "required": 1,
+          "selected": 1,
+          "matching": 1,
+          "passed": true
+        },
+        {
+          "ruleId": 1136,
+          "bankId": 42,
+          "topicId": 585,
+          "difficulty": "mixed",
+          "required": 3,
+          "selected": 3,
+          "matching": 3,
+          "passed": true
+        },
+        {
+          "ruleId": 1137,
+          "bankId": 42,
+          "topicId": 586,
+          "difficulty": "mixed",
+          "required": 2,
+          "selected": 2,
+          "matching": 2,
+          "passed": true
+        },
+        {
+          "ruleId": 1138,
+          "bankId": 42,
+          "topicId": 587,
+          "difficulty": "mixed",
+          "required": 2,
+          "selected": 2,
+          "matching": 2,
+          "passed": true
+        },
+        {
+          "ruleId": 1139,
+          "bankId": 42,
+          "topicId": 588,
+          "difficulty": "mixed",
+          "required": 1,
+          "selected": 1,
+          "matching": 1,
+          "passed": true
+        },
+        {
+          "ruleId": 1140,
+          "bankId": 42,
+          "topicId": 589,
+          "difficulty": "mixed",
+          "required": 2,
+          "selected": 2,
+          "matching": 2,
+          "passed": true
+        },
+        {
+          "ruleId": 1141,
+          "bankId": 42,
+          "topicId": 590,
+          "difficulty": "mixed",
+          "required": 2,
+          "selected": 2,
+          "matching": 2,
+          "passed": true
+        },
+        {
+          "ruleId": 1142,
+          "bankId": 42,
+          "topicId": 591,
+          "difficulty": "mixed",
+          "required": 1,
+          "selected": 1,
+          "matching": 1,
+          "passed": true
+        },
+        {
+          "ruleId": 1143,
+          "bankId": 42,
+          "topicId": 592,
+          "difficulty": "mixed",
+          "required": 1,
+          "selected": 1,
+          "matching": 1,
+          "passed": true
+        },
+        {
+          "ruleId": 1144,
+          "bankId": 42,
+          "topicId": 593,
+          "difficulty": "mixed",
+          "required": 1,
+          "selected": 1,
+          "matching": 1,
+          "passed": true
+        },
+        {
+          "ruleId": 1145,
+          "bankId": 42,
+          "topicId": 594,
+          "difficulty": "mixed",
+          "required": 1,
+          "selected": 1,
+          "matching": 1,
+          "passed": true
+        },
+        {
+          "ruleId": 1146,
+          "bankId": 42,
+          "topicId": 595,
+          "difficulty": "mixed",
+          "required": 1,
+          "selected": 1,
+          "matching": 1,
+          "passed": true
+        },
+        {
+          "ruleId": 1147,
+          "bankId": 42,
+          "topicId": 596,
+          "difficulty": "mixed",
+          "required": 3,
+          "selected": 3,
+          "matching": 3,
+          "passed": true
+        },
+        {
+          "ruleId": 1148,
+          "bankId": 42,
+          "topicId": 597,
+          "difficulty": "mixed",
+          "required": 1,
+          "selected": 1,
+          "matching": 1,
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "formNumber": 2,
+      "questionCount": 30,
+      "expectedQuestionCount": 30,
+      "duplicateQuestionIds": [],
+      "topicCoverage": [
+        {
+          "ruleId": 1130,
+          "bankId": 42,
+          "topicId": 579,
+          "difficulty": "mixed",
+          "required": 2,
+          "selected": 2,
+          "matching": 2,
+          "passed": true
+        },
+        {
+          "ruleId": 1131,
+          "bankId": 42,
+          "topicId": 580,
+          "difficulty": "mixed",
+          "required": 2,
+          "selected": 2,
+          "matching": 2,
+          "passed": true
+        },
+        {
+          "ruleId": 1132,
+          "bankId": 42,
+          "topicId": 581,
+          "difficulty": "mixed",
+          "required": 2,
+          "selected": 2,
+          "matching": 2,
+          "passed": true
+        },
+        {
+          "ruleId": 1133,
+          "bankId": 42,
+          "topicId": 582,
+          "difficulty": "mixed",
+          "required": 1,
+          "selected": 1,
+          "matching": 1,
+          "passed": true
+        },
+        {
+          "ruleId": 1134,
+          "bankId": 42,
+          "topicId": 583,
+          "difficulty": "mixed",
+          "required": 1,
+          "selected": 1,
+          "matching": 1,
+          "passed": true
+        },
+        {
+          "ruleId": 1135,
+          "bankId": 42,
+          "topicId": 584,
+          "difficulty": "mixed",
+          "required": 1,
+          "selected": 1,
+          "matching": 1,
+          "passed": true
+        },
+        {
+          "ruleId": 1136,
+          "bankId": 42,
+          "topicId": 585,
+          "difficulty": "mixed",
+          "required": 3,
+          "selected": 3,
+          "matching": 3,
+          "passed": true
+        },
+        {
+          "ruleId": 1137,
+          "bankId": 42,
+          "topicId": 586,
+          "difficulty": "mixed",
+          "required": 2,
+          "selected": 2,
+          "matching": 2,
+          "passed": true
+        },
+        {
+          "ruleId": 1138,
+          "bankId": 42,
+          "topicId": 587,
+          "difficulty": "mixed",
+          "required": 2,
+          "selected": 2,
+          "matching": 2,
+          "passed": true
+        },
+        {
+          "ruleId": 1139,
+          "bankId": 42,
+          "topicId": 588,
+          "difficulty": "mixed",
+          "required": 1,
+          "selected": 1,
+          "matching": 1,
+          "passed": true
+        },
+        {
+          "ruleId": 1140,
+          "bankId": 42,
+          "topicId": 589,
+          "difficulty": "mixed",
+          "required": 2,
+          "selected": 2,
+          "matching": 2,
+          "passed": true
+        },
+        {
+          "ruleId": 1141,
+          "bankId": 42,
+          "topicId": 590,
+          "difficulty": "mixed",
+          "required": 2,
+          "selected": 2,
+          "matching": 2,
+          "passed": true
+        },
+        {
+          "ruleId": 1142,
+          "bankId": 42,
+          "topicId": 591,
+          "difficulty": "mixed",
+          "required": 1,
+          "selected": 1,
+          "matching": 1,
+          "passed": true
+        },
+        {
+          "ruleId": 1143,
+          "bankId": 42,
+          "topicId": 592,
+          "difficulty": "mixed",
+          "required": 1,
+          "selected": 1,
+          "matching": 1,
+          "passed": true
+        },
+        {
+          "ruleId": 1144,
+          "bankId": 42,
+          "topicId": 593,
+          "difficulty": "mixed",
+          "required": 1,
+          "selected": 1,
+          "matching": 1,
+          "passed": true
+        },
+        {
+          "ruleId": 1145,
+          "bankId": 42,
+          "topicId": 594,
+          "difficulty": "mixed",
+          "required": 1,
+          "selected": 1,
+          "matching": 1,
+          "passed": true
+        },
+        {
+          "ruleId": 1146,
+          "bankId": 42,
+          "topicId": 595,
+          "difficulty": "mixed",
+          "required": 1,
+          "selected": 1,
+          "matching": 1,
+          "passed": true
+        },
+        {
+          "ruleId": 1147,
+          "bankId": 42,
+          "topicId": 596,
+          "difficulty": "mixed",
+          "required": 3,
+          "selected": 3,
+          "matching": 3,
+          "passed": true
+        },
+        {
+          "ruleId": 1148,
+          "bankId": 42,
+          "topicId": 597,
+          "difficulty": "mixed",
+          "required": 1,
+          "selected": 1,
+          "matching": 1,
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "formNumber": 3,
+      "questionCount": 30,
+      "expectedQuestionCount": 30,
+      "duplicateQuestionIds": [],
+      "topicCoverage": [
+        {
+          "ruleId": 1130,
+          "bankId": 42,
+          "topicId": 579,
+          "difficulty": "mixed",
+          "required": 2,
+          "selected": 2,
+          "matching": 2,
+          "passed": true
+        },
+        {
+          "ruleId": 1131,
+          "bankId": 42,
+          "topicId": 580,
+          "difficulty": "mixed",
+          "required": 2,
+          "selected": 2,
+          "matching": 2,
+          "passed": true
+        },
+        {
+          "ruleId": 1132,
+          "bankId": 42,
+          "topicId": 581,
+          "difficulty": "mixed",
+          "required": 2,
+          "selected": 2,
+          "matching": 2,
+          "passed": true
+        },
+        {
+          "ruleId": 1133,
+          "bankId": 42,
+          "topicId": 582,
+          "difficulty": "mixed",
+          "required": 1,
+          "selected": 1,
+          "matching": 1,
+          "passed": true
+        },
+        {
+          "ruleId": 1134,
+          "bankId": 42,
+          "topicId": 583,
+          "difficulty": "mixed",
+          "required": 1,
+          "selected": 1,
+          "matching": 1,
+          "passed": true
+        },
+        {
+          "ruleId": 1135,
+          "bankId": 42,
+          "topicId": 584,
+          "difficulty": "mixed",
+          "required": 1,
+          "selected": 1,
+          "matching": 1,
+          "passed": true
+        },
+        {
+          "ruleId": 1136,
+          "bankId": 42,
+          "topicId": 585,
+          "difficulty": "mixed",
+          "required": 3,
+          "selected": 3,
+          "matching": 3,
+          "passed": true
+        },
+        {
+          "ruleId": 1137,
+          "bankId": 42,
+          "topicId": 586,
+          "difficulty": "mixed",
+          "required": 2,
+          "selected": 2,
+          "matching": 2,
+          "passed": true
+        },
+        {
+          "ruleId": 1138,
+          "bankId": 42,
+          "topicId": 587,
+          "difficulty": "mixed",
+          "required": 2,
+          "selected": 2,
+          "matching": 2,
+          "passed": true
+        },
+        {
+          "ruleId": 1139,
+          "bankId": 42,
+          "topicId": 588,
+          "difficulty": "mixed",
+          "required": 1,
+          "selected": 1,
+          "matching": 1,
+          "passed": true
+        },
+        {
+          "ruleId": 1140,
+          "bankId": 42,
+          "topicId": 589,
+          "difficulty": "mixed",
+          "required": 2,
+          "selected": 2,
+          "matching": 2,
+          "passed": true
+        },
+        {
+          "ruleId": 1141,
+          "bankId": 42,
+          "topicId": 590,
+          "difficulty": "mixed",
+          "required": 2,
+          "selected": 2,
+          "matching": 2,
+          "passed": true
+        },
+        {
+          "ruleId": 1142,
+          "bankId": 42,
+          "topicId": 591,
+          "difficulty": "mixed",
+          "required": 1,
+          "selected": 1,
+          "matching": 1,
+          "passed": true
+        },
+        {
+          "ruleId": 1143,
+          "bankId": 42,
+          "topicId": 592,
+          "difficulty": "mixed",
+          "required": 1,
+          "selected": 1,
+          "matching": 1,
+          "passed": true
+        },
+        {
+          "ruleId": 1144,
+          "bankId": 42,
+          "topicId": 593,
+          "difficulty": "mixed",
+          "required": 1,
+          "selected": 1,
+          "matching": 1,
+          "passed": true
+        },
+        {
+          "ruleId": 1145,
+          "bankId": 42,
+          "topicId": 594,
+          "difficulty": "mixed",
+          "required": 1,
+          "selected": 1,
+          "matching": 1,
+          "passed": true
+        },
+        {
+          "ruleId": 1146,
+          "bankId": 42,
+          "topicId": 595,
+          "difficulty": "mixed",
+          "required": 1,
+          "selected": 1,
+          "matching": 1,
+          "passed": true
+        },
+        {
+          "ruleId": 1147,
+          "bankId": 42,
+          "topicId": 596,
+          "difficulty": "mixed",
+          "required": 3,
+          "selected": 3,
+          "matching": 3,
+          "passed": true
+        },
+        {
+          "ruleId": 1148,
+          "bankId": 42,
+          "topicId": 597,
+          "difficulty": "mixed",
+          "required": 1,
+          "selected": 1,
+          "matching": 1,
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "formNumber": 4,
+      "questionCount": 30,
+      "expectedQuestionCount": 30,
+      "duplicateQuestionIds": [],
+      "topicCoverage": [
+        {
+          "ruleId": 1130,
+          "bankId": 42,
+          "topicId": 579,
+          "difficulty": "mixed",
+          "required": 2,
+          "selected": 2,
+          "matching": 2,
+          "passed": true
+        },
+        {
+          "ruleId": 1131,
+          "bankId": 42,
+          "topicId": 580,
+          "difficulty": "mixed",
+          "required": 2,
+          "selected": 2,
+          "matching": 2,
+          "passed": true
+        },
+        {
+          "ruleId": 1132,
+          "bankId": 42,
+          "topicId": 581,
+          "difficulty": "mixed",
+          "required": 2,
+          "selected": 2,
+          "matching": 2,
+          "passed": true
+        },
+        {
+          "ruleId": 1133,
+          "bankId": 42,
+          "topicId": 582,
+          "difficulty": "mixed",
+          "required": 1,
+          "selected": 1,
+          "matching": 1,
+          "passed": true
+        },
+        {
+          "ruleId": 1134,
+          "bankId": 42,
+          "topicId": 583,
+          "difficulty": "mixed",
+          "required": 1,
+          "selected": 1,
+          "matching": 1,
+          "passed": true
+        },
+        {
+          "ruleId": 1135,
+          "bankId": 42,
+          "topicId": 584,
+          "difficulty": "mixed",
+          "required": 1,
+          "selected": 1,
+          "matching": 1,
+          "passed": true
+        },
+        {
+          "ruleId": 1136,
+          "bankId": 42,
+          "topicId": 585,
+          "difficulty": "mixed",
+          "required": 3,
+          "selected": 3,
+          "matching": 3,
+          "passed": true
+        },
+        {
+          "ruleId": 1137,
+          "bankId": 42,
+          "topicId": 586,
+          "difficulty": "mixed",
+          "required": 2,
+          "selected": 2,
+          "matching": 2,
+          "passed": true
+        },
+        {
+          "ruleId": 1138,
+          "bankId": 42,
+          "topicId": 587,
+          "difficulty": "mixed",
+          "required": 2,
+          "selected": 2,
+          "matching": 2,
+          "passed": true
+        },
+        {
+          "ruleId": 1139,
+          "bankId": 42,
+          "topicId": 588,
+          "difficulty": "mixed",
+          "required": 1,
+          "selected": 1,
+          "matching": 1,
+          "passed": true
+        },
+        {
+          "ruleId": 1140,
+          "bankId": 42,
+          "topicId": 589,
+          "difficulty": "mixed",
+          "required": 2,
+          "selected": 2,
+          "matching": 2,
+          "passed": true
+        },
+        {
+          "ruleId": 1141,
+          "bankId": 42,
+          "topicId": 590,
+          "difficulty": "mixed",
+          "required": 2,
+          "selected": 2,
+          "matching": 2,
+          "passed": true
+        },
+        {
+          "ruleId": 1142,
+          "bankId": 42,
+          "topicId": 591,
+          "difficulty": "mixed",
+          "required": 1,
+          "selected": 1,
+          "matching": 1,
+          "passed": true
+        },
+        {
+          "ruleId": 1143,
+          "bankId": 42,
+          "topicId": 592,
+          "difficulty": "mixed",
+          "required": 1,
+          "selected": 1,
+          "matching": 1,
+          "passed": true
+        },
+        {
+          "ruleId": 1144,
+          "bankId": 42,
+          "topicId": 593,
+          "difficulty": "mixed",
+          "required": 1,
+          "selected": 1,
+          "matching": 1,
+          "passed": true
+        },
+        {
+          "ruleId": 1145,
+          "bankId": 42,
+          "topicId": 594,
+          "difficulty": "mixed",
+          "required": 1,
+          "selected": 1,
+          "matching": 1,
+          "passed": true
+        },
+        {
+          "ruleId": 1146,
+          "bankId": 42,
+          "topicId": 595,
+          "difficulty": "mixed",
+          "required": 1,
+          "selected": 1,
+          "matching": 1,
+          "passed": true
+        },
+        {
+          "ruleId": 1147,
+          "bankId": 42,
+          "topicId": 596,
+          "difficulty": "mixed",
+          "required": 3,
+          "selected": 3,
+          "matching": 3,
+          "passed": true
+        },
+        {
+          "ruleId": 1148,
+          "bankId": 42,
+          "topicId": 597,
+          "difficulty": "mixed",
+          "required": 1,
+          "selected": 1,
+          "matching": 1,
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "formNumber": 5,
+      "questionCount": 30,
+      "expectedQuestionCount": 30,
+      "duplicateQuestionIds": [],
+      "topicCoverage": [
+        {
+          "ruleId": 1130,
+          "bankId": 42,
+          "topicId": 579,
+          "difficulty": "mixed",
+          "required": 2,
+          "selected": 2,
+          "matching": 2,
+          "passed": true
+        },
+        {
+          "ruleId": 1131,
+          "bankId": 42,
+          "topicId": 580,
+          "difficulty": "mixed",
+          "required": 2,
+          "selected": 2,
+          "matching": 2,
+          "passed": true
+        },
+        {
+          "ruleId": 1132,
+          "bankId": 42,
+          "topicId": 581,
+          "difficulty": "mixed",
+          "required": 2,
+          "selected": 2,
+          "matching": 2,
+          "passed": true
+        },
+        {
+          "ruleId": 1133,
+          "bankId": 42,
+          "topicId": 582,
+          "difficulty": "mixed",
+          "required": 1,
+          "selected": 1,
+          "matching": 1,
+          "passed": true
+        },
+        {
+          "ruleId": 1134,
+          "bankId": 42,
+          "topicId": 583,
+          "difficulty": "mixed",
+          "required": 1,
+          "selected": 1,
+          "matching": 1,
+          "passed": true
+        },
+        {
+          "ruleId": 1135,
+          "bankId": 42,
+          "topicId": 584,
+          "difficulty": "mixed",
+          "required": 1,
+          "selected": 1,
+          "matching": 1,
+          "passed": true
+        },
+        {
+          "ruleId": 1136,
+          "bankId": 42,
+          "topicId": 585,
+          "difficulty": "mixed",
+          "required": 3,
+          "selected": 3,
+          "matching": 3,
+          "passed": true
+        },
+        {
+          "ruleId": 1137,
+          "bankId": 42,
+          "topicId": 586,
+          "difficulty": "mixed",
+          "required": 2,
+          "selected": 2,
+          "matching": 2,
+          "passed": true
+        },
+        {
+          "ruleId": 1138,
+          "bankId": 42,
+          "topicId": 587,
+          "difficulty": "mixed",
+          "required": 2,
+          "selected": 2,
+          "matching": 2,
+          "passed": true
+        },
+        {
+          "ruleId": 1139,
+          "bankId": 42,
+          "topicId": 588,
+          "difficulty": "mixed",
+          "required": 1,
+          "selected": 1,
+          "matching": 1,
+          "passed": true
+        },
+        {
+          "ruleId": 1140,
+          "bankId": 42,
+          "topicId": 589,
+          "difficulty": "mixed",
+          "required": 2,
+          "selected": 2,
+          "matching": 2,
+          "passed": true
+        },
+        {
+          "ruleId": 1141,
+          "bankId": 42,
+          "topicId": 590,
+          "difficulty": "mixed",
+          "required": 2,
+          "selected": 2,
+          "matching": 2,
+          "passed": true
+        },
+        {
+          "ruleId": 1142,
+          "bankId": 42,
+          "topicId": 591,
+          "difficulty": "mixed",
+          "required": 1,
+          "selected": 1,
+          "matching": 1,
+          "passed": true
+        },
+        {
+          "ruleId": 1143,
+          "bankId": 42,
+          "topicId": 592,
+          "difficulty": "mixed",
+          "required": 1,
+          "selected": 1,
+          "matching": 1,
+          "passed": true
+        },
+        {
+          "ruleId": 1144,
+          "bankId": 42,
+          "topicId": 593,
+          "difficulty": "mixed",
+          "required": 1,
+          "selected": 1,
+          "matching": 1,
+          "passed": true
+        },
+        {
+          "ruleId": 1145,
+          "bankId": 42,
+          "topicId": 594,
+          "difficulty": "mixed",
+          "required": 1,
+          "selected": 1,
+          "matching": 1,
+          "passed": true
+        },
+        {
+          "ruleId": 1146,
+          "bankId": 42,
+          "topicId": 595,
+          "difficulty": "mixed",
+          "required": 1,
+          "selected": 1,
+          "matching": 1,
+          "passed": true
+        },
+        {
+          "ruleId": 1147,
+          "bankId": 42,
+          "topicId": 596,
+          "difficulty": "mixed",
+          "required": 3,
+          "selected": 3,
+          "matching": 3,
+          "passed": true
+        },
+        {
+          "ruleId": 1148,
+          "bankId": 42,
+          "topicId": 597,
+          "difficulty": "mixed",
+          "required": 1,
+          "selected": 1,
+          "matching": 1,
+          "passed": true
+        }
+      ],
+      "passed": true
+    }
+  ],
+  "passed": true
+}

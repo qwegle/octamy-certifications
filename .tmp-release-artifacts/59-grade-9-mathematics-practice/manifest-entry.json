@@ -1,0 +1,21 @@
+{
+  "assessmentId": 59,
+  "slug": "grade-9-mathematics-practice",
+  "blueprintRevision": 2,
+  "passingScore": 60,
+  "formSimulationArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/59-grade-9-mathematics-practice/form-simulation.json",
+  "representativeAttemptQaArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/59-grade-9-mathematics-practice/representative-attempt-qa.json",
+  "accessibilityAuditArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/59-grade-9-mathematics-practice/accessibility-content-audit.json",
+  "cutScoreApprovalReference": "automated-boundary-check:grade-9-mathematics-practice:revision-2:score-60",
+  "cutScoreApprovalSha256": "100152d9fd2a65c05acc40f054eea4b7d499093b1b2ccb0453689b09666af3e7",
+  "results": {
+    "forms": 20,
+    "draws": 800,
+    "duplicateSelections": 0,
+    "poolExhaustions": 0,
+    "topicRuleChecks": 180,
+    "representativeAttempts": 60,
+    "auditedItems": 200,
+    "mediaItems": 0
+  }
+}

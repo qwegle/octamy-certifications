@@ -1,0 +1,5 @@
+
+> rest-express@1.0.0 assessments:inventory
+> tsx scripts/governed-assessment-inventory.ts --mode dry-run --format summary --require-release-evidence
+
+canceling statement due to statement timeout

@@ -1,0 +1,21 @@
+{
+  "assessmentId": 278,
+  "slug": "ibps-po-reasoning-ability-practice",
+  "blueprintRevision": 1,
+  "passingScore": 60,
+  "formSimulationArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/278-ibps-po-reasoning-ability-practice/form-simulation.json",
+  "representativeAttemptQaArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/278-ibps-po-reasoning-ability-practice/representative-attempt-qa.json",
+  "accessibilityAuditArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/278-ibps-po-reasoning-ability-practice/accessibility-content-audit.json",
+  "cutScoreApprovalReference": "automated-boundary-check:ibps-po-reasoning-ability-practice:revision-1:score-60",
+  "cutScoreApprovalSha256": "ce2cf0742b776b213e51f1d4a962db6c45769fb2c6aff253e892aa7cf3fb9c1b",
+  "results": {
+    "forms": 20,
+    "draws": 700,
+    "duplicateSelections": 0,
+    "poolExhaustions": 0,
+    "topicRuleChecks": 20,
+    "representativeAttempts": 60,
+    "auditedItems": 200,
+    "mediaItems": 0
+  }
+}

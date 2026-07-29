@@ -1,0 +1,21 @@
+{
+  "assessmentId": 66,
+  "slug": "ibps-po-quantitative-aptitude-practice",
+  "blueprintRevision": 2,
+  "passingScore": 60,
+  "formSimulationArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/66-ibps-po-quantitative-aptitude-practice/form-simulation.json",
+  "representativeAttemptQaArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/66-ibps-po-quantitative-aptitude-practice/representative-attempt-qa.json",
+  "accessibilityAuditArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/66-ibps-po-quantitative-aptitude-practice/accessibility-content-audit.json",
+  "cutScoreApprovalReference": "automated-boundary-check:ibps-po-quantitative-aptitude-practice:revision-2:score-60",
+  "cutScoreApprovalSha256": "19adefd1b58d3064c8ddd30bd4cad1f97a293e17420b212889fb23cb53374541",
+  "results": {
+    "forms": 20,
+    "draws": 700,
+    "duplicateSelections": 0,
+    "poolExhaustions": 0,
+    "topicRuleChecks": 20,
+    "representativeAttempts": 60,
+    "auditedItems": 200,
+    "mediaItems": 0
+  }
+}

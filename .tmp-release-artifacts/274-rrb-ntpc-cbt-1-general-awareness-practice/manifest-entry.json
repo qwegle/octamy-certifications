@@ -1,0 +1,21 @@
+{
+  "assessmentId": 274,
+  "slug": "rrb-ntpc-cbt-1-general-awareness-practice",
+  "blueprintRevision": 1,
+  "passingScore": 60,
+  "formSimulationArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/274-rrb-ntpc-cbt-1-general-awareness-practice/form-simulation.json",
+  "representativeAttemptQaArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/274-rrb-ntpc-cbt-1-general-awareness-practice/representative-attempt-qa.json",
+  "accessibilityAuditArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/274-rrb-ntpc-cbt-1-general-awareness-practice/accessibility-content-audit.json",
+  "cutScoreApprovalReference": "automated-boundary-check:rrb-ntpc-cbt-1-general-awareness-practice:revision-1:score-60",
+  "cutScoreApprovalSha256": "e10ed3aa77ea62bef9316016734e76f27d263668c167c179bed87e129ff896e8",
+  "results": {
+    "forms": 20,
+    "draws": 800,
+    "duplicateSelections": 0,
+    "poolExhaustions": 0,
+    "topicRuleChecks": 20,
+    "representativeAttempts": 60,
+    "auditedItems": 200,
+    "mediaItems": 0
+  }
+}

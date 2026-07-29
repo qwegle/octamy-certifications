@@ -1,0 +1,21 @@
+{
+  "assessmentId": 61,
+  "slug": "ssc-cgl-tier-1-quantitative-aptitude-practice",
+  "blueprintRevision": 2,
+  "passingScore": 60,
+  "formSimulationArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/61-ssc-cgl-tier-1-quantitative-aptitude-practice/form-simulation.json",
+  "representativeAttemptQaArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/61-ssc-cgl-tier-1-quantitative-aptitude-practice/representative-attempt-qa.json",
+  "accessibilityAuditArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/61-ssc-cgl-tier-1-quantitative-aptitude-practice/accessibility-content-audit.json",
+  "cutScoreApprovalReference": "automated-boundary-check:ssc-cgl-tier-1-quantitative-aptitude-practice:revision-2:score-60",
+  "cutScoreApprovalSha256": "7dcb28eb7ab4b57d53100e08a818700728ab86a3411b50aab6cb01eba80b4c6b",
+  "results": {
+    "forms": 20,
+    "draws": 500,
+    "duplicateSelections": 0,
+    "poolExhaustions": 0,
+    "topicRuleChecks": 300,
+    "representativeAttempts": 60,
+    "auditedItems": 200,
+    "mediaItems": 0
+  }
+}

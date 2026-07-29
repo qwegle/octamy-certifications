@@ -1,0 +1,21 @@
+{
+  "assessmentId": 56,
+  "slug": "grade-6-mathematics-practice",
+  "blueprintRevision": 2,
+  "passingScore": 60,
+  "formSimulationArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/56-grade-6-mathematics-practice/form-simulation.json",
+  "representativeAttemptQaArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/56-grade-6-mathematics-practice/representative-attempt-qa.json",
+  "accessibilityAuditArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/56-grade-6-mathematics-practice/accessibility-content-audit.json",
+  "cutScoreApprovalReference": "automated-boundary-check:grade-6-mathematics-practice:revision-2:score-60",
+  "cutScoreApprovalSha256": "790675e1e2c523cf2b079a6bf25bede2dbac82aadb111a93c8999e475fbab666",
+  "results": {
+    "forms": 20,
+    "draws": 700,
+    "duplicateSelections": 0,
+    "poolExhaustions": 0,
+    "topicRuleChecks": 300,
+    "representativeAttempts": 60,
+    "auditedItems": 200,
+    "mediaItems": 0
+  }
+}

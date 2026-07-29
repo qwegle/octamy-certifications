@@ -45,6 +45,9 @@ export function assertReleaseRoleGrantConflict(
   singleOfficerException: boolean,
   singleOfficerExceptionReason?: string,
 ) {
+  if (singleOfficerException) {
+    throw new Error("LEGACY_SINGLE_OFFICER_EXCEPTION_DISABLED: grant only release_operator to the accountable admin and select single_accountable_officer when recording evidence");
+  }
   const conflicts = currentRoles.filter((role) => role !== requestedRole
     && CONFLICTING_APPROVAL_ROLES.has(role)
     && CONFLICTING_APPROVAL_ROLES.has(requestedRole));

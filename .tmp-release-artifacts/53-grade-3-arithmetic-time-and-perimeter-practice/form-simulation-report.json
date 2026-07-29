@@ -1,0 +1,2998 @@
+{
+  "schemaVersion": "octamy.form-simulation-report.v1",
+  "assessmentId": 53,
+  "assessmentSlug": "grade-3-arithmetic-time-and-perimeter-practice",
+  "blueprintRevision": 2,
+  "generatedAt": "2026-07-29T12:27:24.893Z",
+  "runtimePath": "DatabaseStorage.materializeBlueprintForAttempt",
+  "independentFormCount": 20,
+  "expectedDrawPerForm": 25,
+  "totalDraws": 500,
+  "duplicateSelections": 0,
+  "poolExhaustions": 0,
+  "topicRuleChecks": 160,
+  "rules": [
+    {
+      "id": 1001,
+      "bank_id": 28,
+      "topic_id": 379,
+      "topic_slug": "whole-number-addition",
+      "question_count": 3,
+      "difficulty": "mixed",
+      "sort_order": 0,
+      "available": 25
+    },
+    {
+      "id": 1002,
+      "bank_id": 28,
+      "topic_id": 380,
+      "topic_slug": "whole-number-subtraction",
+      "question_count": 3,
+      "difficulty": "mixed",
+      "sort_order": 1,
+      "available": 25
+    },
+    {
+      "id": 1003,
+      "bank_id": 28,
+      "topic_id": 377,
+      "topic_slug": "multiplication",
+      "question_count": 3,
+      "difficulty": "mixed",
+      "sort_order": 2,
+      "available": 25
+    },
+    {
+      "id": 1004,
+      "bank_id": 28,
+      "topic_id": 373,
+      "topic_slug": "division",
+      "question_count": 4,
+      "difficulty": "mixed",
+      "sort_order": 3,
+      "available": 25
+    },
+    {
+      "id": 1005,
+      "bank_id": 28,
+      "topic_id": 376,
+      "topic_slug": "missing-number-equations",
+      "question_count": 3,
+      "difficulty": "mixed",
+      "sort_order": 4,
+      "available": 25
+    },
+    {
+      "id": 1006,
+      "bank_id": 28,
+      "topic_id": 375,
+      "topic_slug": "fractions-of-quantities",
+      "question_count": 3,
+      "difficulty": "mixed",
+      "sort_order": 5,
+      "available": 25
+    },
+    {
+      "id": 1007,
+      "bank_id": 28,
+      "topic_id": 374,
+      "topic_slug": "elapsed-time",
+      "question_count": 3,
+      "difficulty": "mixed",
+      "sort_order": 6,
+      "available": 25
+    },
+    {
+      "id": 1008,
+      "bank_id": 28,
+      "topic_id": 378,
+      "topic_slug": "perimeter",
+      "question_count": 3,
+      "difficulty": "mixed",
+      "sort_order": 7,
+      "available": 25
+    }
+  ],
+  "forms": [
+    {
+      "run": 1,
+      "count": 25,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1001,
+          "bankId": 28,
+          "topicId": 379,
+          "topicSlug": "whole-number-addition",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108247,
+            108239,
+            108233
+          ]
+        },
+        {
+          "ruleId": 1002,
+          "bankId": 28,
+          "topicId": 380,
+          "topicSlug": "whole-number-subtraction",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108267,
+            108256,
+            108264
+          ]
+        },
+        {
+          "ruleId": 1003,
+          "bankId": 28,
+          "topicId": 377,
+          "topicSlug": "multiplication",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108278,
+            108293,
+            108298
+          ]
+        },
+        {
+          "ruleId": 1004,
+          "bankId": 28,
+          "topicId": 373,
+          "topicSlug": "division",
+          "difficulty": "mixed",
+          "expected": 4,
+          "selected": 4,
+          "availableAtAudit": 25,
+          "unusedCapacity": 21,
+          "exhausted": false,
+          "questionIds": [
+            108315,
+            108322,
+            108307,
+            108304
+          ]
+        },
+        {
+          "ruleId": 1005,
+          "bankId": 28,
+          "topicId": 376,
+          "topicSlug": "missing-number-equations",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108343,
+            108345,
+            108329
+          ]
+        },
+        {
+          "ruleId": 1006,
+          "bankId": 28,
+          "topicId": 375,
+          "topicSlug": "fractions-of-quantities",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108366,
+            108359,
+            108360
+          ]
+        },
+        {
+          "ruleId": 1007,
+          "bankId": 28,
+          "topicId": 374,
+          "topicSlug": "elapsed-time",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108378,
+            108381,
+            108384
+          ]
+        },
+        {
+          "ruleId": 1008,
+          "bankId": 28,
+          "topicId": 378,
+          "topicSlug": "perimeter",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108418,
+            108415,
+            108406
+          ]
+        }
+      ]
+    },
+    {
+      "run": 2,
+      "count": 25,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1001,
+          "bankId": 28,
+          "topicId": 379,
+          "topicSlug": "whole-number-addition",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108233,
+            108247,
+            108240
+          ]
+        },
+        {
+          "ruleId": 1002,
+          "bankId": 28,
+          "topicId": 380,
+          "topicSlug": "whole-number-subtraction",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108274,
+            108275,
+            108254
+          ]
+        },
+        {
+          "ruleId": 1003,
+          "bankId": 28,
+          "topicId": 377,
+          "topicSlug": "multiplication",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108281,
+            108301,
+            108288
+          ]
+        },
+        {
+          "ruleId": 1004,
+          "bankId": 28,
+          "topicId": 373,
+          "topicSlug": "division",
+          "difficulty": "mixed",
+          "expected": 4,
+          "selected": 4,
+          "availableAtAudit": 25,
+          "unusedCapacity": 21,
+          "exhausted": false,
+          "questionIds": [
+            108308,
+            108310,
+            108302,
+            108313
+          ]
+        },
+        {
+          "ruleId": 1005,
+          "bankId": 28,
+          "topicId": 376,
+          "topicSlug": "missing-number-equations",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108331,
+            108342,
+            108349
+          ]
+        },
+        {
+          "ruleId": 1006,
+          "bankId": 28,
+          "topicId": 375,
+          "topicSlug": "fractions-of-quantities",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108376,
+            108373,
+            108372
+          ]
+        },
+        {
+          "ruleId": 1007,
+          "bankId": 28,
+          "topicId": 374,
+          "topicSlug": "elapsed-time",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108386,
+            108392,
+            108400
+          ]
+        },
+        {
+          "ruleId": 1008,
+          "bankId": 28,
+          "topicId": 378,
+          "topicSlug": "perimeter",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108408,
+            108406,
+            108414
+          ]
+        }
+      ]
+    },
+    {
+      "run": 3,
+      "count": 25,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1001,
+          "bankId": 28,
+          "topicId": 379,
+          "topicSlug": "whole-number-addition",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108247,
+            108240,
+            108243
+          ]
+        },
+        {
+          "ruleId": 1002,
+          "bankId": 28,
+          "topicId": 380,
+          "topicSlug": "whole-number-subtraction",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108256,
+            108272,
+            108266
+          ]
+        },
+        {
+          "ruleId": 1003,
+          "bankId": 28,
+          "topicId": 377,
+          "topicSlug": "multiplication",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108301,
+            108286,
+            108288
+          ]
+        },
+        {
+          "ruleId": 1004,
+          "bankId": 28,
+          "topicId": 373,
+          "topicSlug": "division",
+          "difficulty": "mixed",
+          "expected": 4,
+          "selected": 4,
+          "availableAtAudit": 25,
+          "unusedCapacity": 21,
+          "exhausted": false,
+          "questionIds": [
+            108309,
+            108317,
+            108305,
+            108320
+          ]
+        },
+        {
+          "ruleId": 1005,
+          "bankId": 28,
+          "topicId": 376,
+          "topicSlug": "missing-number-equations",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108329,
+            108351,
+            108346
+          ]
+        },
+        {
+          "ruleId": 1006,
+          "bankId": 28,
+          "topicId": 375,
+          "topicSlug": "fractions-of-quantities",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108375,
+            108368,
+            108362
+          ]
+        },
+        {
+          "ruleId": 1007,
+          "bankId": 28,
+          "topicId": 374,
+          "topicSlug": "elapsed-time",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108401,
+            108396,
+            108391
+          ]
+        },
+        {
+          "ruleId": 1008,
+          "bankId": 28,
+          "topicId": 378,
+          "topicSlug": "perimeter",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108410,
+            108420,
+            108421
+          ]
+        }
+      ]
+    },
+    {
+      "run": 4,
+      "count": 25,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1001,
+          "bankId": 28,
+          "topicId": 379,
+          "topicSlug": "whole-number-addition",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108250,
+            108231,
+            108235
+          ]
+        },
+        {
+          "ruleId": 1002,
+          "bankId": 28,
+          "topicId": 380,
+          "topicSlug": "whole-number-subtraction",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108270,
+            108273,
+            108265
+          ]
+        },
+        {
+          "ruleId": 1003,
+          "bankId": 28,
+          "topicId": 377,
+          "topicSlug": "multiplication",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108297,
+            108283,
+            108282
+          ]
+        },
+        {
+          "ruleId": 1004,
+          "bankId": 28,
+          "topicId": 373,
+          "topicSlug": "division",
+          "difficulty": "mixed",
+          "expected": 4,
+          "selected": 4,
+          "availableAtAudit": 25,
+          "unusedCapacity": 21,
+          "exhausted": false,
+          "questionIds": [
+            108303,
+            108326,
+            108325,
+            108317
+          ]
+        },
+        {
+          "ruleId": 1005,
+          "bankId": 28,
+          "topicId": 376,
+          "topicSlug": "missing-number-equations",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108330,
+            108344,
+            108327
+          ]
+        },
+        {
+          "ruleId": 1006,
+          "bankId": 28,
+          "topicId": 375,
+          "topicSlug": "fractions-of-quantities",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108366,
+            108375,
+            108370
+          ]
+        },
+        {
+          "ruleId": 1007,
+          "bankId": 28,
+          "topicId": 374,
+          "topicSlug": "elapsed-time",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108383,
+            108391,
+            108381
+          ]
+        },
+        {
+          "ruleId": 1008,
+          "bankId": 28,
+          "topicId": 378,
+          "topicSlug": "perimeter",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108414,
+            108419,
+            108422
+          ]
+        }
+      ]
+    },
+    {
+      "run": 5,
+      "count": 25,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1001,
+          "bankId": 28,
+          "topicId": 379,
+          "topicSlug": "whole-number-addition",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108237,
+            108241,
+            108249
+          ]
+        },
+        {
+          "ruleId": 1002,
+          "bankId": 28,
+          "topicId": 380,
+          "topicSlug": "whole-number-subtraction",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108276,
+            108255,
+            108275
+          ]
+        },
+        {
+          "ruleId": 1003,
+          "bankId": 28,
+          "topicId": 377,
+          "topicSlug": "multiplication",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108288,
+            108280,
+            108286
+          ]
+        },
+        {
+          "ruleId": 1004,
+          "bankId": 28,
+          "topicId": 373,
+          "topicSlug": "division",
+          "difficulty": "mixed",
+          "expected": 4,
+          "selected": 4,
+          "availableAtAudit": 25,
+          "unusedCapacity": 21,
+          "exhausted": false,
+          "questionIds": [
+            108321,
+            108312,
+            108303,
+            108304
+          ]
+        },
+        {
+          "ruleId": 1005,
+          "bankId": 28,
+          "topicId": 376,
+          "topicSlug": "missing-number-equations",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108348,
+            108327,
+            108328
+          ]
+        },
+        {
+          "ruleId": 1006,
+          "bankId": 28,
+          "topicId": 375,
+          "topicSlug": "fractions-of-quantities",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108357,
+            108373,
+            108354
+          ]
+        },
+        {
+          "ruleId": 1007,
+          "bankId": 28,
+          "topicId": 374,
+          "topicSlug": "elapsed-time",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108379,
+            108380,
+            108383
+          ]
+        },
+        {
+          "ruleId": 1008,
+          "bankId": 28,
+          "topicId": 378,
+          "topicSlug": "perimeter",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108402,
+            108407,
+            108420
+          ]
+        }
+      ]
+    },
+    {
+      "run": 6,
+      "count": 25,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1001,
+          "bankId": 28,
+          "topicId": 379,
+          "topicSlug": "whole-number-addition",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108240,
+            108230,
+            108247
+          ]
+        },
+        {
+          "ruleId": 1002,
+          "bankId": 28,
+          "topicId": 380,
+          "topicSlug": "whole-number-subtraction",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108260,
+            108254,
+            108257
+          ]
+        },
+        {
+          "ruleId": 1003,
+          "bankId": 28,
+          "topicId": 377,
+          "topicSlug": "multiplication",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108285,
+            108284,
+            108279
+          ]
+        },
+        {
+          "ruleId": 1004,
+          "bankId": 28,
+          "topicId": 373,
+          "topicSlug": "division",
+          "difficulty": "mixed",
+          "expected": 4,
+          "selected": 4,
+          "availableAtAudit": 25,
+          "unusedCapacity": 21,
+          "exhausted": false,
+          "questionIds": [
+            108325,
+            108323,
+            108319,
+            108322
+          ]
+        },
+        {
+          "ruleId": 1005,
+          "bankId": 28,
+          "topicId": 376,
+          "topicSlug": "missing-number-equations",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108336,
+            108334,
+            108337
+          ]
+        },
+        {
+          "ruleId": 1006,
+          "bankId": 28,
+          "topicId": 375,
+          "topicSlug": "fractions-of-quantities",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108368,
+            108375,
+            108363
+          ]
+        },
+        {
+          "ruleId": 1007,
+          "bankId": 28,
+          "topicId": 374,
+          "topicSlug": "elapsed-time",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108398,
+            108386,
+            108384
+          ]
+        },
+        {
+          "ruleId": 1008,
+          "bankId": 28,
+          "topicId": 378,
+          "topicSlug": "perimeter",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108424,
+            108402,
+            108417
+          ]
+        }
+      ]
+    },
+    {
+      "run": 7,
+      "count": 25,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1001,
+          "bankId": 28,
+          "topicId": 379,
+          "topicSlug": "whole-number-addition",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108230,
+            108238,
+            108249
+          ]
+        },
+        {
+          "ruleId": 1002,
+          "bankId": 28,
+          "topicId": 380,
+          "topicSlug": "whole-number-subtraction",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108252,
+            108264,
+            108263
+          ]
+        },
+        {
+          "ruleId": 1003,
+          "bankId": 28,
+          "topicId": 377,
+          "topicSlug": "multiplication",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108299,
+            108283,
+            108291
+          ]
+        },
+        {
+          "ruleId": 1004,
+          "bankId": 28,
+          "topicId": 373,
+          "topicSlug": "division",
+          "difficulty": "mixed",
+          "expected": 4,
+          "selected": 4,
+          "availableAtAudit": 25,
+          "unusedCapacity": 21,
+          "exhausted": false,
+          "questionIds": [
+            108305,
+            108326,
+            108303,
+            108319
+          ]
+        },
+        {
+          "ruleId": 1005,
+          "bankId": 28,
+          "topicId": 376,
+          "topicSlug": "missing-number-equations",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108330,
+            108338,
+            108344
+          ]
+        },
+        {
+          "ruleId": 1006,
+          "bankId": 28,
+          "topicId": 375,
+          "topicSlug": "fractions-of-quantities",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108367,
+            108365,
+            108361
+          ]
+        },
+        {
+          "ruleId": 1007,
+          "bankId": 28,
+          "topicId": 374,
+          "topicSlug": "elapsed-time",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108394,
+            108385,
+            108383
+          ]
+        },
+        {
+          "ruleId": 1008,
+          "bankId": 28,
+          "topicId": 378,
+          "topicSlug": "perimeter",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108417,
+            108421,
+            108415
+          ]
+        }
+      ]
+    },
+    {
+      "run": 8,
+      "count": 25,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1001,
+          "bankId": 28,
+          "topicId": 379,
+          "topicSlug": "whole-number-addition",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108248,
+            108236,
+            108251
+          ]
+        },
+        {
+          "ruleId": 1002,
+          "bankId": 28,
+          "topicId": 380,
+          "topicSlug": "whole-number-subtraction",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108269,
+            108275,
+            108254
+          ]
+        },
+        {
+          "ruleId": 1003,
+          "bankId": 28,
+          "topicId": 377,
+          "topicSlug": "multiplication",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108297,
+            108290,
+            108289
+          ]
+        },
+        {
+          "ruleId": 1004,
+          "bankId": 28,
+          "topicId": 373,
+          "topicSlug": "division",
+          "difficulty": "mixed",
+          "expected": 4,
+          "selected": 4,
+          "availableAtAudit": 25,
+          "unusedCapacity": 21,
+          "exhausted": false,
+          "questionIds": [
+            108316,
+            108324,
+            108318,
+            108302
+          ]
+        },
+        {
+          "ruleId": 1005,
+          "bankId": 28,
+          "topicId": 376,
+          "topicSlug": "missing-number-equations",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108333,
+            108328,
+            108347
+          ]
+        },
+        {
+          "ruleId": 1006,
+          "bankId": 28,
+          "topicId": 375,
+          "topicSlug": "fractions-of-quantities",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108375,
+            108362,
+            108366
+          ]
+        },
+        {
+          "ruleId": 1007,
+          "bankId": 28,
+          "topicId": 374,
+          "topicSlug": "elapsed-time",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108390,
+            108389,
+            108382
+          ]
+        },
+        {
+          "ruleId": 1008,
+          "bankId": 28,
+          "topicId": 378,
+          "topicSlug": "perimeter",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108404,
+            108407,
+            108418
+          ]
+        }
+      ]
+    },
+    {
+      "run": 9,
+      "count": 25,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1001,
+          "bankId": 28,
+          "topicId": 379,
+          "topicSlug": "whole-number-addition",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108251,
+            108227,
+            108246
+          ]
+        },
+        {
+          "ruleId": 1002,
+          "bankId": 28,
+          "topicId": 380,
+          "topicSlug": "whole-number-subtraction",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108274,
+            108268,
+            108267
+          ]
+        },
+        {
+          "ruleId": 1003,
+          "bankId": 28,
+          "topicId": 377,
+          "topicSlug": "multiplication",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108284,
+            108277,
+            108294
+          ]
+        },
+        {
+          "ruleId": 1004,
+          "bankId": 28,
+          "topicId": 373,
+          "topicSlug": "division",
+          "difficulty": "mixed",
+          "expected": 4,
+          "selected": 4,
+          "availableAtAudit": 25,
+          "unusedCapacity": 21,
+          "exhausted": false,
+          "questionIds": [
+            108320,
+            108307,
+            108325,
+            108318
+          ]
+        },
+        {
+          "ruleId": 1005,
+          "bankId": 28,
+          "topicId": 376,
+          "topicSlug": "missing-number-equations",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108335,
+            108336,
+            108340
+          ]
+        },
+        {
+          "ruleId": 1006,
+          "bankId": 28,
+          "topicId": 375,
+          "topicSlug": "fractions-of-quantities",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108371,
+            108376,
+            108362
+          ]
+        },
+        {
+          "ruleId": 1007,
+          "bankId": 28,
+          "topicId": 374,
+          "topicSlug": "elapsed-time",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108387,
+            108385,
+            108378
+          ]
+        },
+        {
+          "ruleId": 1008,
+          "bankId": 28,
+          "topicId": 378,
+          "topicSlug": "perimeter",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108414,
+            108416,
+            108418
+          ]
+        }
+      ]
+    },
+    {
+      "run": 10,
+      "count": 25,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1001,
+          "bankId": 28,
+          "topicId": 379,
+          "topicSlug": "whole-number-addition",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108234,
+            108235,
+            108251
+          ]
+        },
+        {
+          "ruleId": 1002,
+          "bankId": 28,
+          "topicId": 380,
+          "topicSlug": "whole-number-subtraction",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108257,
+            108276,
+            108256
+          ]
+        },
+        {
+          "ruleId": 1003,
+          "bankId": 28,
+          "topicId": 377,
+          "topicSlug": "multiplication",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108281,
+            108295,
+            108285
+          ]
+        },
+        {
+          "ruleId": 1004,
+          "bankId": 28,
+          "topicId": 373,
+          "topicSlug": "division",
+          "difficulty": "mixed",
+          "expected": 4,
+          "selected": 4,
+          "availableAtAudit": 25,
+          "unusedCapacity": 21,
+          "exhausted": false,
+          "questionIds": [
+            108324,
+            108312,
+            108311,
+            108317
+          ]
+        },
+        {
+          "ruleId": 1005,
+          "bankId": 28,
+          "topicId": 376,
+          "topicSlug": "missing-number-equations",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108341,
+            108349,
+            108347
+          ]
+        },
+        {
+          "ruleId": 1006,
+          "bankId": 28,
+          "topicId": 375,
+          "topicSlug": "fractions-of-quantities",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108367,
+            108359,
+            108356
+          ]
+        },
+        {
+          "ruleId": 1007,
+          "bankId": 28,
+          "topicId": 374,
+          "topicSlug": "elapsed-time",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108380,
+            108399,
+            108396
+          ]
+        },
+        {
+          "ruleId": 1008,
+          "bankId": 28,
+          "topicId": 378,
+          "topicSlug": "perimeter",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108426,
+            108415,
+            108425
+          ]
+        }
+      ]
+    },
+    {
+      "run": 11,
+      "count": 25,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1001,
+          "bankId": 28,
+          "topicId": 379,
+          "topicSlug": "whole-number-addition",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108242,
+            108229,
+            108243
+          ]
+        },
+        {
+          "ruleId": 1002,
+          "bankId": 28,
+          "topicId": 380,
+          "topicSlug": "whole-number-subtraction",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108261,
+            108269,
+            108263
+          ]
+        },
+        {
+          "ruleId": 1003,
+          "bankId": 28,
+          "topicId": 377,
+          "topicSlug": "multiplication",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108281,
+            108286,
+            108298
+          ]
+        },
+        {
+          "ruleId": 1004,
+          "bankId": 28,
+          "topicId": 373,
+          "topicSlug": "division",
+          "difficulty": "mixed",
+          "expected": 4,
+          "selected": 4,
+          "availableAtAudit": 25,
+          "unusedCapacity": 21,
+          "exhausted": false,
+          "questionIds": [
+            108304,
+            108306,
+            108319,
+            108320
+          ]
+        },
+        {
+          "ruleId": 1005,
+          "bankId": 28,
+          "topicId": 376,
+          "topicSlug": "missing-number-equations",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108338,
+            108329,
+            108349
+          ]
+        },
+        {
+          "ruleId": 1006,
+          "bankId": 28,
+          "topicId": 375,
+          "topicSlug": "fractions-of-quantities",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108372,
+            108367,
+            108376
+          ]
+        },
+        {
+          "ruleId": 1007,
+          "bankId": 28,
+          "topicId": 374,
+          "topicSlug": "elapsed-time",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108395,
+            108390,
+            108397
+          ]
+        },
+        {
+          "ruleId": 1008,
+          "bankId": 28,
+          "topicId": 378,
+          "topicSlug": "perimeter",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108408,
+            108416,
+            108420
+          ]
+        }
+      ]
+    },
+    {
+      "run": 12,
+      "count": 25,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1001,
+          "bankId": 28,
+          "topicId": 379,
+          "topicSlug": "whole-number-addition",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108232,
+            108228,
+            108250
+          ]
+        },
+        {
+          "ruleId": 1002,
+          "bankId": 28,
+          "topicId": 380,
+          "topicSlug": "whole-number-subtraction",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108272,
+            108266,
+            108259
+          ]
+        },
+        {
+          "ruleId": 1003,
+          "bankId": 28,
+          "topicId": 377,
+          "topicSlug": "multiplication",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108296,
+            108290,
+            108283
+          ]
+        },
+        {
+          "ruleId": 1004,
+          "bankId": 28,
+          "topicId": 373,
+          "topicSlug": "division",
+          "difficulty": "mixed",
+          "expected": 4,
+          "selected": 4,
+          "availableAtAudit": 25,
+          "unusedCapacity": 21,
+          "exhausted": false,
+          "questionIds": [
+            108310,
+            108321,
+            108309,
+            108312
+          ]
+        },
+        {
+          "ruleId": 1005,
+          "bankId": 28,
+          "topicId": 376,
+          "topicSlug": "missing-number-equations",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108329,
+            108338,
+            108328
+          ]
+        },
+        {
+          "ruleId": 1006,
+          "bankId": 28,
+          "topicId": 375,
+          "topicSlug": "fractions-of-quantities",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108368,
+            108370,
+            108363
+          ]
+        },
+        {
+          "ruleId": 1007,
+          "bankId": 28,
+          "topicId": 374,
+          "topicSlug": "elapsed-time",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108393,
+            108399,
+            108401
+          ]
+        },
+        {
+          "ruleId": 1008,
+          "bankId": 28,
+          "topicId": 378,
+          "topicSlug": "perimeter",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108402,
+            108414,
+            108418
+          ]
+        }
+      ]
+    },
+    {
+      "run": 13,
+      "count": 25,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1001,
+          "bankId": 28,
+          "topicId": 379,
+          "topicSlug": "whole-number-addition",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108232,
+            108235,
+            108246
+          ]
+        },
+        {
+          "ruleId": 1002,
+          "bankId": 28,
+          "topicId": 380,
+          "topicSlug": "whole-number-subtraction",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108276,
+            108256,
+            108259
+          ]
+        },
+        {
+          "ruleId": 1003,
+          "bankId": 28,
+          "topicId": 377,
+          "topicSlug": "multiplication",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108285,
+            108301,
+            108284
+          ]
+        },
+        {
+          "ruleId": 1004,
+          "bankId": 28,
+          "topicId": 373,
+          "topicSlug": "division",
+          "difficulty": "mixed",
+          "expected": 4,
+          "selected": 4,
+          "availableAtAudit": 25,
+          "unusedCapacity": 21,
+          "exhausted": false,
+          "questionIds": [
+            108325,
+            108321,
+            108324,
+            108308
+          ]
+        },
+        {
+          "ruleId": 1005,
+          "bankId": 28,
+          "topicId": 376,
+          "topicSlug": "missing-number-equations",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108348,
+            108340,
+            108334
+          ]
+        },
+        {
+          "ruleId": 1006,
+          "bankId": 28,
+          "topicId": 375,
+          "topicSlug": "fractions-of-quantities",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108356,
+            108359,
+            108366
+          ]
+        },
+        {
+          "ruleId": 1007,
+          "bankId": 28,
+          "topicId": 374,
+          "topicSlug": "elapsed-time",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108385,
+            108384,
+            108378
+          ]
+        },
+        {
+          "ruleId": 1008,
+          "bankId": 28,
+          "topicId": 378,
+          "topicSlug": "perimeter",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108409,
+            108415,
+            108405
+          ]
+        }
+      ]
+    },
+    {
+      "run": 14,
+      "count": 25,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1001,
+          "bankId": 28,
+          "topicId": 379,
+          "topicSlug": "whole-number-addition",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108247,
+            108239,
+            108249
+          ]
+        },
+        {
+          "ruleId": 1002,
+          "bankId": 28,
+          "topicId": 380,
+          "topicSlug": "whole-number-subtraction",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108270,
+            108265,
+            108260
+          ]
+        },
+        {
+          "ruleId": 1003,
+          "bankId": 28,
+          "topicId": 377,
+          "topicSlug": "multiplication",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108296,
+            108284,
+            108294
+          ]
+        },
+        {
+          "ruleId": 1004,
+          "bankId": 28,
+          "topicId": 373,
+          "topicSlug": "division",
+          "difficulty": "mixed",
+          "expected": 4,
+          "selected": 4,
+          "availableAtAudit": 25,
+          "unusedCapacity": 21,
+          "exhausted": false,
+          "questionIds": [
+            108302,
+            108318,
+            108312,
+            108310
+          ]
+        },
+        {
+          "ruleId": 1005,
+          "bankId": 28,
+          "topicId": 376,
+          "topicSlug": "missing-number-equations",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108332,
+            108346,
+            108339
+          ]
+        },
+        {
+          "ruleId": 1006,
+          "bankId": 28,
+          "topicId": 375,
+          "topicSlug": "fractions-of-quantities",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108353,
+            108371,
+            108369
+          ]
+        },
+        {
+          "ruleId": 1007,
+          "bankId": 28,
+          "topicId": 374,
+          "topicSlug": "elapsed-time",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108383,
+            108385,
+            108378
+          ]
+        },
+        {
+          "ruleId": 1008,
+          "bankId": 28,
+          "topicId": 378,
+          "topicSlug": "perimeter",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108426,
+            108423,
+            108411
+          ]
+        }
+      ]
+    },
+    {
+      "run": 15,
+      "count": 25,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1001,
+          "bankId": 28,
+          "topicId": 379,
+          "topicSlug": "whole-number-addition",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108248,
+            108240,
+            108231
+          ]
+        },
+        {
+          "ruleId": 1002,
+          "bankId": 28,
+          "topicId": 380,
+          "topicSlug": "whole-number-subtraction",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108265,
+            108273,
+            108267
+          ]
+        },
+        {
+          "ruleId": 1003,
+          "bankId": 28,
+          "topicId": 377,
+          "topicSlug": "multiplication",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108300,
+            108298,
+            108286
+          ]
+        },
+        {
+          "ruleId": 1004,
+          "bankId": 28,
+          "topicId": 373,
+          "topicSlug": "division",
+          "difficulty": "mixed",
+          "expected": 4,
+          "selected": 4,
+          "availableAtAudit": 25,
+          "unusedCapacity": 21,
+          "exhausted": false,
+          "questionIds": [
+            108325,
+            108312,
+            108326,
+            108309
+          ]
+        },
+        {
+          "ruleId": 1005,
+          "bankId": 28,
+          "topicId": 376,
+          "topicSlug": "missing-number-equations",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108346,
+            108329,
+            108351
+          ]
+        },
+        {
+          "ruleId": 1006,
+          "bankId": 28,
+          "topicId": 375,
+          "topicSlug": "fractions-of-quantities",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108370,
+            108355,
+            108359
+          ]
+        },
+        {
+          "ruleId": 1007,
+          "bankId": 28,
+          "topicId": 374,
+          "topicSlug": "elapsed-time",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108399,
+            108377,
+            108378
+          ]
+        },
+        {
+          "ruleId": 1008,
+          "bankId": 28,
+          "topicId": 378,
+          "topicSlug": "perimeter",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108420,
+            108416,
+            108413
+          ]
+        }
+      ]
+    },
+    {
+      "run": 16,
+      "count": 25,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1001,
+          "bankId": 28,
+          "topicId": 379,
+          "topicSlug": "whole-number-addition",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108233,
+            108228,
+            108230
+          ]
+        },
+        {
+          "ruleId": 1002,
+          "bankId": 28,
+          "topicId": 380,
+          "topicSlug": "whole-number-subtraction",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108275,
+            108269,
+            108271
+          ]
+        },
+        {
+          "ruleId": 1003,
+          "bankId": 28,
+          "topicId": 377,
+          "topicSlug": "multiplication",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108289,
+            108284,
+            108282
+          ]
+        },
+        {
+          "ruleId": 1004,
+          "bankId": 28,
+          "topicId": 373,
+          "topicSlug": "division",
+          "difficulty": "mixed",
+          "expected": 4,
+          "selected": 4,
+          "availableAtAudit": 25,
+          "unusedCapacity": 21,
+          "exhausted": false,
+          "questionIds": [
+            108317,
+            108308,
+            108309,
+            108324
+          ]
+        },
+        {
+          "ruleId": 1005,
+          "bankId": 28,
+          "topicId": 376,
+          "topicSlug": "missing-number-equations",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108343,
+            108334,
+            108342
+          ]
+        },
+        {
+          "ruleId": 1006,
+          "bankId": 28,
+          "topicId": 375,
+          "topicSlug": "fractions-of-quantities",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108360,
+            108375,
+            108363
+          ]
+        },
+        {
+          "ruleId": 1007,
+          "bankId": 28,
+          "topicId": 374,
+          "topicSlug": "elapsed-time",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108378,
+            108384,
+            108391
+          ]
+        },
+        {
+          "ruleId": 1008,
+          "bankId": 28,
+          "topicId": 378,
+          "topicSlug": "perimeter",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108420,
+            108421,
+            108417
+          ]
+        }
+      ]
+    },
+    {
+      "run": 17,
+      "count": 25,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1001,
+          "bankId": 28,
+          "topicId": 379,
+          "topicSlug": "whole-number-addition",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108229,
+            108227,
+            108249
+          ]
+        },
+        {
+          "ruleId": 1002,
+          "bankId": 28,
+          "topicId": 380,
+          "topicSlug": "whole-number-subtraction",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108266,
+            108272,
+            108252
+          ]
+        },
+        {
+          "ruleId": 1003,
+          "bankId": 28,
+          "topicId": 377,
+          "topicSlug": "multiplication",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108301,
+            108278,
+            108277
+          ]
+        },
+        {
+          "ruleId": 1004,
+          "bankId": 28,
+          "topicId": 373,
+          "topicSlug": "division",
+          "difficulty": "mixed",
+          "expected": 4,
+          "selected": 4,
+          "availableAtAudit": 25,
+          "unusedCapacity": 21,
+          "exhausted": false,
+          "questionIds": [
+            108313,
+            108318,
+            108320,
+            108319
+          ]
+        },
+        {
+          "ruleId": 1005,
+          "bankId": 28,
+          "topicId": 376,
+          "topicSlug": "missing-number-equations",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108328,
+            108334,
+            108345
+          ]
+        },
+        {
+          "ruleId": 1006,
+          "bankId": 28,
+          "topicId": 375,
+          "topicSlug": "fractions-of-quantities",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108358,
+            108366,
+            108364
+          ]
+        },
+        {
+          "ruleId": 1007,
+          "bankId": 28,
+          "topicId": 374,
+          "topicSlug": "elapsed-time",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108377,
+            108378,
+            108388
+          ]
+        },
+        {
+          "ruleId": 1008,
+          "bankId": 28,
+          "topicId": 378,
+          "topicSlug": "perimeter",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108406,
+            108426,
+            108404
+          ]
+        }
+      ]
+    },
+    {
+      "run": 18,
+      "count": 25,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1001,
+          "bankId": 28,
+          "topicId": 379,
+          "topicSlug": "whole-number-addition",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108240,
+            108235,
+            108236
+          ]
+        },
+        {
+          "ruleId": 1002,
+          "bankId": 28,
+          "topicId": 380,
+          "topicSlug": "whole-number-subtraction",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108266,
+            108261,
+            108265
+          ]
+        },
+        {
+          "ruleId": 1003,
+          "bankId": 28,
+          "topicId": 377,
+          "topicSlug": "multiplication",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108290,
+            108295,
+            108283
+          ]
+        },
+        {
+          "ruleId": 1004,
+          "bankId": 28,
+          "topicId": 373,
+          "topicSlug": "division",
+          "difficulty": "mixed",
+          "expected": 4,
+          "selected": 4,
+          "availableAtAudit": 25,
+          "unusedCapacity": 21,
+          "exhausted": false,
+          "questionIds": [
+            108321,
+            108322,
+            108315,
+            108318
+          ]
+        },
+        {
+          "ruleId": 1005,
+          "bankId": 28,
+          "topicId": 376,
+          "topicSlug": "missing-number-equations",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108328,
+            108338,
+            108329
+          ]
+        },
+        {
+          "ruleId": 1006,
+          "bankId": 28,
+          "topicId": 375,
+          "topicSlug": "fractions-of-quantities",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108354,
+            108360,
+            108357
+          ]
+        },
+        {
+          "ruleId": 1007,
+          "bankId": 28,
+          "topicId": 374,
+          "topicSlug": "elapsed-time",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108390,
+            108400,
+            108383
+          ]
+        },
+        {
+          "ruleId": 1008,
+          "bankId": 28,
+          "topicId": 378,
+          "topicSlug": "perimeter",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108424,
+            108422,
+            108425
+          ]
+        }
+      ]
+    },
+    {
+      "run": 19,
+      "count": 25,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1001,
+          "bankId": 28,
+          "topicId": 379,
+          "topicSlug": "whole-number-addition",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108247,
+            108245,
+            108238
+          ]
+        },
+        {
+          "ruleId": 1002,
+          "bankId": 28,
+          "topicId": 380,
+          "topicSlug": "whole-number-subtraction",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108274,
+            108255,
+            108262
+          ]
+        },
+        {
+          "ruleId": 1003,
+          "bankId": 28,
+          "topicId": 377,
+          "topicSlug": "multiplication",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108294,
+            108291,
+            108284
+          ]
+        },
+        {
+          "ruleId": 1004,
+          "bankId": 28,
+          "topicId": 373,
+          "topicSlug": "division",
+          "difficulty": "mixed",
+          "expected": 4,
+          "selected": 4,
+          "availableAtAudit": 25,
+          "unusedCapacity": 21,
+          "exhausted": false,
+          "questionIds": [
+            108326,
+            108302,
+            108318,
+            108320
+          ]
+        },
+        {
+          "ruleId": 1005,
+          "bankId": 28,
+          "topicId": 376,
+          "topicSlug": "missing-number-equations",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108345,
+            108328,
+            108334
+          ]
+        },
+        {
+          "ruleId": 1006,
+          "bankId": 28,
+          "topicId": 375,
+          "topicSlug": "fractions-of-quantities",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108375,
+            108370,
+            108371
+          ]
+        },
+        {
+          "ruleId": 1007,
+          "bankId": 28,
+          "topicId": 374,
+          "topicSlug": "elapsed-time",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108377,
+            108393,
+            108381
+          ]
+        },
+        {
+          "ruleId": 1008,
+          "bankId": 28,
+          "topicId": 378,
+          "topicSlug": "perimeter",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108417,
+            108405,
+            108415
+          ]
+        }
+      ]
+    },
+    {
+      "run": 20,
+      "count": 25,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1001,
+          "bankId": 28,
+          "topicId": 379,
+          "topicSlug": "whole-number-addition",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108237,
+            108242,
+            108238
+          ]
+        },
+        {
+          "ruleId": 1002,
+          "bankId": 28,
+          "topicId": 380,
+          "topicSlug": "whole-number-subtraction",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108259,
+            108261,
+            108254
+          ]
+        },
+        {
+          "ruleId": 1003,
+          "bankId": 28,
+          "topicId": 377,
+          "topicSlug": "multiplication",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108297,
+            108283,
+            108278
+          ]
+        },
+        {
+          "ruleId": 1004,
+          "bankId": 28,
+          "topicId": 373,
+          "topicSlug": "division",
+          "difficulty": "mixed",
+          "expected": 4,
+          "selected": 4,
+          "availableAtAudit": 25,
+          "unusedCapacity": 21,
+          "exhausted": false,
+          "questionIds": [
+            108325,
+            108310,
+            108318,
+            108306
+          ]
+        },
+        {
+          "ruleId": 1005,
+          "bankId": 28,
+          "topicId": 376,
+          "topicSlug": "missing-number-equations",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108341,
+            108342,
+            108336
+          ]
+        },
+        {
+          "ruleId": 1006,
+          "bankId": 28,
+          "topicId": 375,
+          "topicSlug": "fractions-of-quantities",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108355,
+            108365,
+            108376
+          ]
+        },
+        {
+          "ruleId": 1007,
+          "bankId": 28,
+          "topicId": 374,
+          "topicSlug": "elapsed-time",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108379,
+            108400,
+            108391
+          ]
+        },
+        {
+          "ruleId": 1008,
+          "bankId": 28,
+          "topicId": 378,
+          "topicSlug": "perimeter",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 25,
+          "unusedCapacity": 22,
+          "exhausted": false,
+          "questionIds": [
+            108422,
+            108417,
+            108412
+          ]
+        }
+      ]
+    }
+  ]
+}

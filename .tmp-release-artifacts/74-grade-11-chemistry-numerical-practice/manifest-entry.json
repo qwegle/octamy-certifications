@@ -1,0 +1,21 @@
+{
+  "assessmentId": 74,
+  "slug": "grade-11-chemistry-numerical-practice",
+  "blueprintRevision": 1,
+  "passingScore": 60,
+  "formSimulationArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/74-grade-11-chemistry-numerical-practice/form-simulation.json",
+  "representativeAttemptQaArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/74-grade-11-chemistry-numerical-practice/representative-attempt-qa.json",
+  "accessibilityAuditArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/74-grade-11-chemistry-numerical-practice/accessibility-content-audit.json",
+  "cutScoreApprovalReference": "automated-boundary-check:grade-11-chemistry-numerical-practice:revision-1:score-60",
+  "cutScoreApprovalSha256": "caaf24132260b243615090d438eba36758745124ea3e08eebde12d8cddc0b2b6",
+  "results": {
+    "forms": 20,
+    "draws": 600,
+    "duplicateSelections": 0,
+    "poolExhaustions": 0,
+    "topicRuleChecks": 100,
+    "representativeAttempts": 60,
+    "auditedItems": 200,
+    "mediaItems": 0
+  }
+}

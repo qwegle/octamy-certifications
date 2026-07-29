@@ -1,0 +1,5228 @@
+{
+  "schemaVersion": "octamy.form-simulation-report.v1",
+  "assessmentId": 56,
+  "assessmentSlug": "grade-6-mathematics-practice",
+  "blueprintRevision": 2,
+  "generatedAt": "2026-07-29T12:38:38.350Z",
+  "runtimePath": "DatabaseStorage.materializeBlueprintForAttempt",
+  "independentFormCount": 20,
+  "expectedDrawPerForm": 35,
+  "totalDraws": 700,
+  "duplicateSelections": 0,
+  "poolExhaustions": 0,
+  "topicRuleChecks": 300,
+  "rules": [
+    {
+      "id": 1111,
+      "bank_id": 31,
+      "topic_id": 405,
+      "topic_slug": "area",
+      "question_count": 3,
+      "difficulty": "mixed",
+      "sort_order": 0,
+      "available": 20
+    },
+    {
+      "id": 1112,
+      "bank_id": 31,
+      "topic_id": 406,
+      "topic_slug": "area-of-triangles",
+      "question_count": 3,
+      "difficulty": "mixed",
+      "sort_order": 1,
+      "available": 20
+    },
+    {
+      "id": 1113,
+      "bank_id": 31,
+      "topic_id": 407,
+      "topic_slug": "averages",
+      "question_count": 3,
+      "difficulty": "mixed",
+      "sort_order": 2,
+      "available": 20
+    },
+    {
+      "id": 1114,
+      "bank_id": 31,
+      "topic_id": 408,
+      "topic_slug": "direct-proportion",
+      "question_count": 3,
+      "difficulty": "mixed",
+      "sort_order": 3,
+      "available": 20
+    },
+    {
+      "id": 1115,
+      "bank_id": 31,
+      "topic_id": 409,
+      "topic_slug": "division",
+      "question_count": 3,
+      "difficulty": "mixed",
+      "sort_order": 4,
+      "available": 20
+    },
+    {
+      "id": 1116,
+      "bank_id": 31,
+      "topic_id": 410,
+      "topic_slug": "factors-and-multiples",
+      "question_count": 2,
+      "difficulty": "mixed",
+      "sort_order": 5,
+      "available": 10
+    },
+    {
+      "id": 1117,
+      "bank_id": 31,
+      "topic_id": 411,
+      "topic_slug": "fractions-of-quantities",
+      "question_count": 2,
+      "difficulty": "mixed",
+      "sort_order": 6,
+      "available": 10
+    },
+    {
+      "id": 1118,
+      "bank_id": 31,
+      "topic_id": 412,
+      "topic_slug": "linear-equations",
+      "question_count": 2,
+      "difficulty": "mixed",
+      "sort_order": 7,
+      "available": 10
+    },
+    {
+      "id": 1119,
+      "bank_id": 31,
+      "topic_id": 413,
+      "topic_slug": "multiplication",
+      "question_count": 2,
+      "difficulty": "mixed",
+      "sort_order": 8,
+      "available": 10
+    },
+    {
+      "id": 1120,
+      "bank_id": 31,
+      "topic_id": 414,
+      "topic_slug": "number-sequences",
+      "question_count": 2,
+      "difficulty": "mixed",
+      "sort_order": 9,
+      "available": 10
+    },
+    {
+      "id": 1121,
+      "bank_id": 31,
+      "topic_id": 415,
+      "topic_slug": "percentages",
+      "question_count": 2,
+      "difficulty": "mixed",
+      "sort_order": 10,
+      "available": 10
+    },
+    {
+      "id": 1122,
+      "bank_id": 31,
+      "topic_id": 416,
+      "topic_slug": "perimeter",
+      "question_count": 2,
+      "difficulty": "mixed",
+      "sort_order": 11,
+      "available": 10
+    },
+    {
+      "id": 1123,
+      "bank_id": 31,
+      "topic_id": 417,
+      "topic_slug": "powers-and-exponents",
+      "question_count": 2,
+      "difficulty": "mixed",
+      "sort_order": 12,
+      "available": 10
+    },
+    {
+      "id": 1124,
+      "bank_id": 31,
+      "topic_id": 418,
+      "topic_slug": "ratio-and-proportion",
+      "question_count": 2,
+      "difficulty": "mixed",
+      "sort_order": 13,
+      "available": 10
+    },
+    {
+      "id": 1125,
+      "bank_id": 31,
+      "topic_id": 419,
+      "topic_slug": "unitary-method",
+      "question_count": 2,
+      "difficulty": "mixed",
+      "sort_order": 14,
+      "available": 10
+    }
+  ],
+  "forms": [
+    {
+      "run": 1,
+      "count": 35,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1111,
+          "bankId": 31,
+          "topicId": 405,
+          "topicSlug": "area",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116539,
+            116534,
+            116533
+          ]
+        },
+        {
+          "ruleId": 1112,
+          "bankId": 31,
+          "topicId": 406,
+          "topicSlug": "area-of-triangles",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116560,
+            116548,
+            116542
+          ]
+        },
+        {
+          "ruleId": 1113,
+          "bankId": 31,
+          "topicId": 407,
+          "topicSlug": "averages",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116569,
+            116563,
+            116578
+          ]
+        },
+        {
+          "ruleId": 1114,
+          "bankId": 31,
+          "topicId": 408,
+          "topicSlug": "direct-proportion",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116599,
+            116586,
+            116587
+          ]
+        },
+        {
+          "ruleId": 1115,
+          "bankId": 31,
+          "topicId": 409,
+          "topicSlug": "division",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116615,
+            116602,
+            116604
+          ]
+        },
+        {
+          "ruleId": 1116,
+          "bankId": 31,
+          "topicId": 410,
+          "topicSlug": "factors-and-multiples",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116631,
+            116626
+          ]
+        },
+        {
+          "ruleId": 1117,
+          "bankId": 31,
+          "topicId": 411,
+          "topicSlug": "fractions-of-quantities",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116640,
+            116635
+          ]
+        },
+        {
+          "ruleId": 1118,
+          "bankId": 31,
+          "topicId": 412,
+          "topicSlug": "linear-equations",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116651,
+            116644
+          ]
+        },
+        {
+          "ruleId": 1119,
+          "bankId": 31,
+          "topicId": 413,
+          "topicSlug": "multiplication",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116660,
+            116659
+          ]
+        },
+        {
+          "ruleId": 1120,
+          "bankId": 31,
+          "topicId": 414,
+          "topicSlug": "number-sequences",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116670,
+            116662
+          ]
+        },
+        {
+          "ruleId": 1121,
+          "bankId": 31,
+          "topicId": 415,
+          "topicSlug": "percentages",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116679,
+            116678
+          ]
+        },
+        {
+          "ruleId": 1122,
+          "bankId": 31,
+          "topicId": 416,
+          "topicSlug": "perimeter",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116691,
+            116688
+          ]
+        },
+        {
+          "ruleId": 1123,
+          "bankId": 31,
+          "topicId": 417,
+          "topicSlug": "powers-and-exponents",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116701,
+            116697
+          ]
+        },
+        {
+          "ruleId": 1124,
+          "bankId": 31,
+          "topicId": 418,
+          "topicSlug": "ratio-and-proportion",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116711,
+            116705
+          ]
+        },
+        {
+          "ruleId": 1125,
+          "bankId": 31,
+          "topicId": 419,
+          "topicSlug": "unitary-method",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116713,
+            116716
+          ]
+        }
+      ]
+    },
+    {
+      "run": 2,
+      "count": 35,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1111,
+          "bankId": 31,
+          "topicId": 405,
+          "topicSlug": "area",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116532,
+            116526,
+            116541
+          ]
+        },
+        {
+          "ruleId": 1112,
+          "bankId": 31,
+          "topicId": 406,
+          "topicSlug": "area-of-triangles",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116542,
+            116553,
+            116556
+          ]
+        },
+        {
+          "ruleId": 1113,
+          "bankId": 31,
+          "topicId": 407,
+          "topicSlug": "averages",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116571,
+            116574,
+            116580
+          ]
+        },
+        {
+          "ruleId": 1114,
+          "bankId": 31,
+          "topicId": 408,
+          "topicSlug": "direct-proportion",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116601,
+            116593,
+            116589
+          ]
+        },
+        {
+          "ruleId": 1115,
+          "bankId": 31,
+          "topicId": 409,
+          "topicSlug": "division",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116603,
+            116614,
+            116613
+          ]
+        },
+        {
+          "ruleId": 1116,
+          "bankId": 31,
+          "topicId": 410,
+          "topicSlug": "factors-and-multiples",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116628,
+            116627
+          ]
+        },
+        {
+          "ruleId": 1117,
+          "bankId": 31,
+          "topicId": 411,
+          "topicSlug": "fractions-of-quantities",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116635,
+            116634
+          ]
+        },
+        {
+          "ruleId": 1118,
+          "bankId": 31,
+          "topicId": 412,
+          "topicSlug": "linear-equations",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116645,
+            116649
+          ]
+        },
+        {
+          "ruleId": 1119,
+          "bankId": 31,
+          "topicId": 413,
+          "topicSlug": "multiplication",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116658,
+            116652
+          ]
+        },
+        {
+          "ruleId": 1120,
+          "bankId": 31,
+          "topicId": 414,
+          "topicSlug": "number-sequences",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116670,
+            116665
+          ]
+        },
+        {
+          "ruleId": 1121,
+          "bankId": 31,
+          "topicId": 415,
+          "topicSlug": "percentages",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116676,
+            116674
+          ]
+        },
+        {
+          "ruleId": 1122,
+          "bankId": 31,
+          "topicId": 416,
+          "topicSlug": "perimeter",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116685,
+            116691
+          ]
+        },
+        {
+          "ruleId": 1123,
+          "bankId": 31,
+          "topicId": 417,
+          "topicSlug": "powers-and-exponents",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116697,
+            116695
+          ]
+        },
+        {
+          "ruleId": 1124,
+          "bankId": 31,
+          "topicId": 418,
+          "topicSlug": "ratio-and-proportion",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116704,
+            116707
+          ]
+        },
+        {
+          "ruleId": 1125,
+          "bankId": 31,
+          "topicId": 419,
+          "topicSlug": "unitary-method",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116715,
+            116717
+          ]
+        }
+      ]
+    },
+    {
+      "run": 3,
+      "count": 35,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1111,
+          "bankId": 31,
+          "topicId": 405,
+          "topicSlug": "area",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116528,
+            116537,
+            116526
+          ]
+        },
+        {
+          "ruleId": 1112,
+          "bankId": 31,
+          "topicId": 406,
+          "topicSlug": "area-of-triangles",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116558,
+            116561,
+            116560
+          ]
+        },
+        {
+          "ruleId": 1113,
+          "bankId": 31,
+          "topicId": 407,
+          "topicSlug": "averages",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116574,
+            116579,
+            116568
+          ]
+        },
+        {
+          "ruleId": 1114,
+          "bankId": 31,
+          "topicId": 408,
+          "topicSlug": "direct-proportion",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116589,
+            116598,
+            116583
+          ]
+        },
+        {
+          "ruleId": 1115,
+          "bankId": 31,
+          "topicId": 409,
+          "topicSlug": "division",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116602,
+            116605,
+            116606
+          ]
+        },
+        {
+          "ruleId": 1116,
+          "bankId": 31,
+          "topicId": 410,
+          "topicSlug": "factors-and-multiples",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116622,
+            116627
+          ]
+        },
+        {
+          "ruleId": 1117,
+          "bankId": 31,
+          "topicId": 411,
+          "topicSlug": "fractions-of-quantities",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116641,
+            116638
+          ]
+        },
+        {
+          "ruleId": 1118,
+          "bankId": 31,
+          "topicId": 412,
+          "topicSlug": "linear-equations",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116650,
+            116647
+          ]
+        },
+        {
+          "ruleId": 1119,
+          "bankId": 31,
+          "topicId": 413,
+          "topicSlug": "multiplication",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116661,
+            116656
+          ]
+        },
+        {
+          "ruleId": 1120,
+          "bankId": 31,
+          "topicId": 414,
+          "topicSlug": "number-sequences",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116667,
+            116665
+          ]
+        },
+        {
+          "ruleId": 1121,
+          "bankId": 31,
+          "topicId": 415,
+          "topicSlug": "percentages",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116677,
+            116675
+          ]
+        },
+        {
+          "ruleId": 1122,
+          "bankId": 31,
+          "topicId": 416,
+          "topicSlug": "perimeter",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116682,
+            116690
+          ]
+        },
+        {
+          "ruleId": 1123,
+          "bankId": 31,
+          "topicId": 417,
+          "topicSlug": "powers-and-exponents",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116695,
+            116694
+          ]
+        },
+        {
+          "ruleId": 1124,
+          "bankId": 31,
+          "topicId": 418,
+          "topicSlug": "ratio-and-proportion",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116707,
+            116705
+          ]
+        },
+        {
+          "ruleId": 1125,
+          "bankId": 31,
+          "topicId": 419,
+          "topicSlug": "unitary-method",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116716,
+            116721
+          ]
+        }
+      ]
+    },
+    {
+      "run": 4,
+      "count": 35,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1111,
+          "bankId": 31,
+          "topicId": 405,
+          "topicSlug": "area",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116526,
+            116533,
+            116524
+          ]
+        },
+        {
+          "ruleId": 1112,
+          "bankId": 31,
+          "topicId": 406,
+          "topicSlug": "area-of-triangles",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116545,
+            116561,
+            116548
+          ]
+        },
+        {
+          "ruleId": 1113,
+          "bankId": 31,
+          "topicId": 407,
+          "topicSlug": "averages",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116563,
+            116568,
+            116565
+          ]
+        },
+        {
+          "ruleId": 1114,
+          "bankId": 31,
+          "topicId": 408,
+          "topicSlug": "direct-proportion",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116595,
+            116591,
+            116583
+          ]
+        },
+        {
+          "ruleId": 1115,
+          "bankId": 31,
+          "topicId": 409,
+          "topicSlug": "division",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116605,
+            116620,
+            116611
+          ]
+        },
+        {
+          "ruleId": 1116,
+          "bankId": 31,
+          "topicId": 410,
+          "topicSlug": "factors-and-multiples",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116623,
+            116626
+          ]
+        },
+        {
+          "ruleId": 1117,
+          "bankId": 31,
+          "topicId": 411,
+          "topicSlug": "fractions-of-quantities",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116636,
+            116634
+          ]
+        },
+        {
+          "ruleId": 1118,
+          "bankId": 31,
+          "topicId": 412,
+          "topicSlug": "linear-equations",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116651,
+            116644
+          ]
+        },
+        {
+          "ruleId": 1119,
+          "bankId": 31,
+          "topicId": 413,
+          "topicSlug": "multiplication",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116653,
+            116655
+          ]
+        },
+        {
+          "ruleId": 1120,
+          "bankId": 31,
+          "topicId": 414,
+          "topicSlug": "number-sequences",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116666,
+            116669
+          ]
+        },
+        {
+          "ruleId": 1121,
+          "bankId": 31,
+          "topicId": 415,
+          "topicSlug": "percentages",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116676,
+            116680
+          ]
+        },
+        {
+          "ruleId": 1122,
+          "bankId": 31,
+          "topicId": 416,
+          "topicSlug": "perimeter",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116686,
+            116689
+          ]
+        },
+        {
+          "ruleId": 1123,
+          "bankId": 31,
+          "topicId": 417,
+          "topicSlug": "powers-and-exponents",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116696,
+            116700
+          ]
+        },
+        {
+          "ruleId": 1124,
+          "bankId": 31,
+          "topicId": 418,
+          "topicSlug": "ratio-and-proportion",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116706,
+            116710
+          ]
+        },
+        {
+          "ruleId": 1125,
+          "bankId": 31,
+          "topicId": 419,
+          "topicSlug": "unitary-method",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116715,
+            116719
+          ]
+        }
+      ]
+    },
+    {
+      "run": 5,
+      "count": 35,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1111,
+          "bankId": 31,
+          "topicId": 405,
+          "topicSlug": "area",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116531,
+            116530,
+            116532
+          ]
+        },
+        {
+          "ruleId": 1112,
+          "bankId": 31,
+          "topicId": 406,
+          "topicSlug": "area-of-triangles",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116549,
+            116561,
+            116557
+          ]
+        },
+        {
+          "ruleId": 1113,
+          "bankId": 31,
+          "topicId": 407,
+          "topicSlug": "averages",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116565,
+            116573,
+            116575
+          ]
+        },
+        {
+          "ruleId": 1114,
+          "bankId": 31,
+          "topicId": 408,
+          "topicSlug": "direct-proportion",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116601,
+            116593,
+            116598
+          ]
+        },
+        {
+          "ruleId": 1115,
+          "bankId": 31,
+          "topicId": 409,
+          "topicSlug": "division",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116603,
+            116602,
+            116614
+          ]
+        },
+        {
+          "ruleId": 1116,
+          "bankId": 31,
+          "topicId": 410,
+          "topicSlug": "factors-and-multiples",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116623,
+            116627
+          ]
+        },
+        {
+          "ruleId": 1117,
+          "bankId": 31,
+          "topicId": 411,
+          "topicSlug": "fractions-of-quantities",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116634,
+            116636
+          ]
+        },
+        {
+          "ruleId": 1118,
+          "bankId": 31,
+          "topicId": 412,
+          "topicSlug": "linear-equations",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116644,
+            116651
+          ]
+        },
+        {
+          "ruleId": 1119,
+          "bankId": 31,
+          "topicId": 413,
+          "topicSlug": "multiplication",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116659,
+            116655
+          ]
+        },
+        {
+          "ruleId": 1120,
+          "bankId": 31,
+          "topicId": 414,
+          "topicSlug": "number-sequences",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116670,
+            116662
+          ]
+        },
+        {
+          "ruleId": 1121,
+          "bankId": 31,
+          "topicId": 415,
+          "topicSlug": "percentages",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116680,
+            116673
+          ]
+        },
+        {
+          "ruleId": 1122,
+          "bankId": 31,
+          "topicId": 416,
+          "topicSlug": "perimeter",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116688,
+            116687
+          ]
+        },
+        {
+          "ruleId": 1123,
+          "bankId": 31,
+          "topicId": 417,
+          "topicSlug": "powers-and-exponents",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116699,
+            116693
+          ]
+        },
+        {
+          "ruleId": 1124,
+          "bankId": 31,
+          "topicId": 418,
+          "topicSlug": "ratio-and-proportion",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116704,
+            116706
+          ]
+        },
+        {
+          "ruleId": 1125,
+          "bankId": 31,
+          "topicId": 419,
+          "topicSlug": "unitary-method",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116715,
+            116714
+          ]
+        }
+      ]
+    },
+    {
+      "run": 6,
+      "count": 35,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1111,
+          "bankId": 31,
+          "topicId": 405,
+          "topicSlug": "area",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116537,
+            116533,
+            116522
+          ]
+        },
+        {
+          "ruleId": 1112,
+          "bankId": 31,
+          "topicId": 406,
+          "topicSlug": "area-of-triangles",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116552,
+            116551,
+            116549
+          ]
+        },
+        {
+          "ruleId": 1113,
+          "bankId": 31,
+          "topicId": 407,
+          "topicSlug": "averages",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116576,
+            116580,
+            116577
+          ]
+        },
+        {
+          "ruleId": 1114,
+          "bankId": 31,
+          "topicId": 408,
+          "topicSlug": "direct-proportion",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116595,
+            116593,
+            116597
+          ]
+        },
+        {
+          "ruleId": 1115,
+          "bankId": 31,
+          "topicId": 409,
+          "topicSlug": "division",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116614,
+            116612,
+            116621
+          ]
+        },
+        {
+          "ruleId": 1116,
+          "bankId": 31,
+          "topicId": 410,
+          "topicSlug": "factors-and-multiples",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116622,
+            116631
+          ]
+        },
+        {
+          "ruleId": 1117,
+          "bankId": 31,
+          "topicId": 411,
+          "topicSlug": "fractions-of-quantities",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116635,
+            116636
+          ]
+        },
+        {
+          "ruleId": 1118,
+          "bankId": 31,
+          "topicId": 412,
+          "topicSlug": "linear-equations",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116643,
+            116650
+          ]
+        },
+        {
+          "ruleId": 1119,
+          "bankId": 31,
+          "topicId": 413,
+          "topicSlug": "multiplication",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116658,
+            116656
+          ]
+        },
+        {
+          "ruleId": 1120,
+          "bankId": 31,
+          "topicId": 414,
+          "topicSlug": "number-sequences",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116669,
+            116670
+          ]
+        },
+        {
+          "ruleId": 1121,
+          "bankId": 31,
+          "topicId": 415,
+          "topicSlug": "percentages",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116674,
+            116680
+          ]
+        },
+        {
+          "ruleId": 1122,
+          "bankId": 31,
+          "topicId": 416,
+          "topicSlug": "perimeter",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116686,
+            116687
+          ]
+        },
+        {
+          "ruleId": 1123,
+          "bankId": 31,
+          "topicId": 417,
+          "topicSlug": "powers-and-exponents",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116695,
+            116699
+          ]
+        },
+        {
+          "ruleId": 1124,
+          "bankId": 31,
+          "topicId": 418,
+          "topicSlug": "ratio-and-proportion",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116708,
+            116702
+          ]
+        },
+        {
+          "ruleId": 1125,
+          "bankId": 31,
+          "topicId": 419,
+          "topicSlug": "unitary-method",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116712,
+            116713
+          ]
+        }
+      ]
+    },
+    {
+      "run": 7,
+      "count": 35,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1111,
+          "bankId": 31,
+          "topicId": 405,
+          "topicSlug": "area",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116531,
+            116530,
+            116522
+          ]
+        },
+        {
+          "ruleId": 1112,
+          "bankId": 31,
+          "topicId": 406,
+          "topicSlug": "area-of-triangles",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116548,
+            116543,
+            116559
+          ]
+        },
+        {
+          "ruleId": 1113,
+          "bankId": 31,
+          "topicId": 407,
+          "topicSlug": "averages",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116570,
+            116577,
+            116567
+          ]
+        },
+        {
+          "ruleId": 1114,
+          "bankId": 31,
+          "topicId": 408,
+          "topicSlug": "direct-proportion",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116584,
+            116596,
+            116594
+          ]
+        },
+        {
+          "ruleId": 1115,
+          "bankId": 31,
+          "topicId": 409,
+          "topicSlug": "division",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116621,
+            116615,
+            116607
+          ]
+        },
+        {
+          "ruleId": 1116,
+          "bankId": 31,
+          "topicId": 410,
+          "topicSlug": "factors-and-multiples",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116631,
+            116630
+          ]
+        },
+        {
+          "ruleId": 1117,
+          "bankId": 31,
+          "topicId": 411,
+          "topicSlug": "fractions-of-quantities",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116635,
+            116639
+          ]
+        },
+        {
+          "ruleId": 1118,
+          "bankId": 31,
+          "topicId": 412,
+          "topicSlug": "linear-equations",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116648,
+            116649
+          ]
+        },
+        {
+          "ruleId": 1119,
+          "bankId": 31,
+          "topicId": 413,
+          "topicSlug": "multiplication",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116661,
+            116656
+          ]
+        },
+        {
+          "ruleId": 1120,
+          "bankId": 31,
+          "topicId": 414,
+          "topicSlug": "number-sequences",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116666,
+            116669
+          ]
+        },
+        {
+          "ruleId": 1121,
+          "bankId": 31,
+          "topicId": 415,
+          "topicSlug": "percentages",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116680,
+            116673
+          ]
+        },
+        {
+          "ruleId": 1122,
+          "bankId": 31,
+          "topicId": 416,
+          "topicSlug": "perimeter",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116682,
+            116690
+          ]
+        },
+        {
+          "ruleId": 1123,
+          "bankId": 31,
+          "topicId": 417,
+          "topicSlug": "powers-and-exponents",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116701,
+            116699
+          ]
+        },
+        {
+          "ruleId": 1124,
+          "bankId": 31,
+          "topicId": 418,
+          "topicSlug": "ratio-and-proportion",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116709,
+            116702
+          ]
+        },
+        {
+          "ruleId": 1125,
+          "bankId": 31,
+          "topicId": 419,
+          "topicSlug": "unitary-method",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116717,
+            116714
+          ]
+        }
+      ]
+    },
+    {
+      "run": 8,
+      "count": 35,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1111,
+          "bankId": 31,
+          "topicId": 405,
+          "topicSlug": "area",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116541,
+            116525,
+            116535
+          ]
+        },
+        {
+          "ruleId": 1112,
+          "bankId": 31,
+          "topicId": 406,
+          "topicSlug": "area-of-triangles",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116557,
+            116558,
+            116554
+          ]
+        },
+        {
+          "ruleId": 1113,
+          "bankId": 31,
+          "topicId": 407,
+          "topicSlug": "averages",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116567,
+            116579,
+            116570
+          ]
+        },
+        {
+          "ruleId": 1114,
+          "bankId": 31,
+          "topicId": 408,
+          "topicSlug": "direct-proportion",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116597,
+            116600,
+            116587
+          ]
+        },
+        {
+          "ruleId": 1115,
+          "bankId": 31,
+          "topicId": 409,
+          "topicSlug": "division",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116610,
+            116603,
+            116604
+          ]
+        },
+        {
+          "ruleId": 1116,
+          "bankId": 31,
+          "topicId": 410,
+          "topicSlug": "factors-and-multiples",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116625,
+            116627
+          ]
+        },
+        {
+          "ruleId": 1117,
+          "bankId": 31,
+          "topicId": 411,
+          "topicSlug": "fractions-of-quantities",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116636,
+            116637
+          ]
+        },
+        {
+          "ruleId": 1118,
+          "bankId": 31,
+          "topicId": 412,
+          "topicSlug": "linear-equations",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116643,
+            116646
+          ]
+        },
+        {
+          "ruleId": 1119,
+          "bankId": 31,
+          "topicId": 413,
+          "topicSlug": "multiplication",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116660,
+            116653
+          ]
+        },
+        {
+          "ruleId": 1120,
+          "bankId": 31,
+          "topicId": 414,
+          "topicSlug": "number-sequences",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116666,
+            116667
+          ]
+        },
+        {
+          "ruleId": 1121,
+          "bankId": 31,
+          "topicId": 415,
+          "topicSlug": "percentages",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116677,
+            116679
+          ]
+        },
+        {
+          "ruleId": 1122,
+          "bankId": 31,
+          "topicId": 416,
+          "topicSlug": "perimeter",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116686,
+            116690
+          ]
+        },
+        {
+          "ruleId": 1123,
+          "bankId": 31,
+          "topicId": 417,
+          "topicSlug": "powers-and-exponents",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116698,
+            116699
+          ]
+        },
+        {
+          "ruleId": 1124,
+          "bankId": 31,
+          "topicId": 418,
+          "topicSlug": "ratio-and-proportion",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116707,
+            116706
+          ]
+        },
+        {
+          "ruleId": 1125,
+          "bankId": 31,
+          "topicId": 419,
+          "topicSlug": "unitary-method",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116712,
+            116718
+          ]
+        }
+      ]
+    },
+    {
+      "run": 9,
+      "count": 35,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1111,
+          "bankId": 31,
+          "topicId": 405,
+          "topicSlug": "area",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116539,
+            116536,
+            116535
+          ]
+        },
+        {
+          "ruleId": 1112,
+          "bankId": 31,
+          "topicId": 406,
+          "topicSlug": "area-of-triangles",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116561,
+            116543,
+            116560
+          ]
+        },
+        {
+          "ruleId": 1113,
+          "bankId": 31,
+          "topicId": 407,
+          "topicSlug": "averages",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116566,
+            116575,
+            116579
+          ]
+        },
+        {
+          "ruleId": 1114,
+          "bankId": 31,
+          "topicId": 408,
+          "topicSlug": "direct-proportion",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116591,
+            116590,
+            116582
+          ]
+        },
+        {
+          "ruleId": 1115,
+          "bankId": 31,
+          "topicId": 409,
+          "topicSlug": "division",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116602,
+            116606,
+            116613
+          ]
+        },
+        {
+          "ruleId": 1116,
+          "bankId": 31,
+          "topicId": 410,
+          "topicSlug": "factors-and-multiples",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116631,
+            116624
+          ]
+        },
+        {
+          "ruleId": 1117,
+          "bankId": 31,
+          "topicId": 411,
+          "topicSlug": "fractions-of-quantities",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116632,
+            116633
+          ]
+        },
+        {
+          "ruleId": 1118,
+          "bankId": 31,
+          "topicId": 412,
+          "topicSlug": "linear-equations",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116647,
+            116648
+          ]
+        },
+        {
+          "ruleId": 1119,
+          "bankId": 31,
+          "topicId": 413,
+          "topicSlug": "multiplication",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116661,
+            116657
+          ]
+        },
+        {
+          "ruleId": 1120,
+          "bankId": 31,
+          "topicId": 414,
+          "topicSlug": "number-sequences",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116669,
+            116664
+          ]
+        },
+        {
+          "ruleId": 1121,
+          "bankId": 31,
+          "topicId": 415,
+          "topicSlug": "percentages",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116678,
+            116674
+          ]
+        },
+        {
+          "ruleId": 1122,
+          "bankId": 31,
+          "topicId": 416,
+          "topicSlug": "perimeter",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116690,
+            116688
+          ]
+        },
+        {
+          "ruleId": 1123,
+          "bankId": 31,
+          "topicId": 417,
+          "topicSlug": "powers-and-exponents",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116693,
+            116695
+          ]
+        },
+        {
+          "ruleId": 1124,
+          "bankId": 31,
+          "topicId": 418,
+          "topicSlug": "ratio-and-proportion",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116708,
+            116706
+          ]
+        },
+        {
+          "ruleId": 1125,
+          "bankId": 31,
+          "topicId": 419,
+          "topicSlug": "unitary-method",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116712,
+            116716
+          ]
+        }
+      ]
+    },
+    {
+      "run": 10,
+      "count": 35,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1111,
+          "bankId": 31,
+          "topicId": 405,
+          "topicSlug": "area",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116539,
+            116530,
+            116541
+          ]
+        },
+        {
+          "ruleId": 1112,
+          "bankId": 31,
+          "topicId": 406,
+          "topicSlug": "area-of-triangles",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116553,
+            116552,
+            116547
+          ]
+        },
+        {
+          "ruleId": 1113,
+          "bankId": 31,
+          "topicId": 407,
+          "topicSlug": "averages",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116569,
+            116580,
+            116565
+          ]
+        },
+        {
+          "ruleId": 1114,
+          "bankId": 31,
+          "topicId": 408,
+          "topicSlug": "direct-proportion",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116586,
+            116598,
+            116601
+          ]
+        },
+        {
+          "ruleId": 1115,
+          "bankId": 31,
+          "topicId": 409,
+          "topicSlug": "division",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116609,
+            116606,
+            116612
+          ]
+        },
+        {
+          "ruleId": 1116,
+          "bankId": 31,
+          "topicId": 410,
+          "topicSlug": "factors-and-multiples",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116628,
+            116625
+          ]
+        },
+        {
+          "ruleId": 1117,
+          "bankId": 31,
+          "topicId": 411,
+          "topicSlug": "fractions-of-quantities",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116635,
+            116641
+          ]
+        },
+        {
+          "ruleId": 1118,
+          "bankId": 31,
+          "topicId": 412,
+          "topicSlug": "linear-equations",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116651,
+            116646
+          ]
+        },
+        {
+          "ruleId": 1119,
+          "bankId": 31,
+          "topicId": 413,
+          "topicSlug": "multiplication",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116656,
+            116652
+          ]
+        },
+        {
+          "ruleId": 1120,
+          "bankId": 31,
+          "topicId": 414,
+          "topicSlug": "number-sequences",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116671,
+            116668
+          ]
+        },
+        {
+          "ruleId": 1121,
+          "bankId": 31,
+          "topicId": 415,
+          "topicSlug": "percentages",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116681,
+            116678
+          ]
+        },
+        {
+          "ruleId": 1122,
+          "bankId": 31,
+          "topicId": 416,
+          "topicSlug": "perimeter",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116690,
+            116683
+          ]
+        },
+        {
+          "ruleId": 1123,
+          "bankId": 31,
+          "topicId": 417,
+          "topicSlug": "powers-and-exponents",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116696,
+            116692
+          ]
+        },
+        {
+          "ruleId": 1124,
+          "bankId": 31,
+          "topicId": 418,
+          "topicSlug": "ratio-and-proportion",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116703,
+            116710
+          ]
+        },
+        {
+          "ruleId": 1125,
+          "bankId": 31,
+          "topicId": 419,
+          "topicSlug": "unitary-method",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116713,
+            116721
+          ]
+        }
+      ]
+    },
+    {
+      "run": 11,
+      "count": 35,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1111,
+          "bankId": 31,
+          "topicId": 405,
+          "topicSlug": "area",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116523,
+            116531,
+            116539
+          ]
+        },
+        {
+          "ruleId": 1112,
+          "bankId": 31,
+          "topicId": 406,
+          "topicSlug": "area-of-triangles",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116550,
+            116545,
+            116549
+          ]
+        },
+        {
+          "ruleId": 1113,
+          "bankId": 31,
+          "topicId": 407,
+          "topicSlug": "averages",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116576,
+            116574,
+            116571
+          ]
+        },
+        {
+          "ruleId": 1114,
+          "bankId": 31,
+          "topicId": 408,
+          "topicSlug": "direct-proportion",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116590,
+            116600,
+            116585
+          ]
+        },
+        {
+          "ruleId": 1115,
+          "bankId": 31,
+          "topicId": 409,
+          "topicSlug": "division",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116617,
+            116615,
+            116621
+          ]
+        },
+        {
+          "ruleId": 1116,
+          "bankId": 31,
+          "topicId": 410,
+          "topicSlug": "factors-and-multiples",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116630,
+            116623
+          ]
+        },
+        {
+          "ruleId": 1117,
+          "bankId": 31,
+          "topicId": 411,
+          "topicSlug": "fractions-of-quantities",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116640,
+            116639
+          ]
+        },
+        {
+          "ruleId": 1118,
+          "bankId": 31,
+          "topicId": 412,
+          "topicSlug": "linear-equations",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116646,
+            116647
+          ]
+        },
+        {
+          "ruleId": 1119,
+          "bankId": 31,
+          "topicId": 413,
+          "topicSlug": "multiplication",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116656,
+            116660
+          ]
+        },
+        {
+          "ruleId": 1120,
+          "bankId": 31,
+          "topicId": 414,
+          "topicSlug": "number-sequences",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116669,
+            116671
+          ]
+        },
+        {
+          "ruleId": 1121,
+          "bankId": 31,
+          "topicId": 415,
+          "topicSlug": "percentages",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116674,
+            116678
+          ]
+        },
+        {
+          "ruleId": 1122,
+          "bankId": 31,
+          "topicId": 416,
+          "topicSlug": "perimeter",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116682,
+            116687
+          ]
+        },
+        {
+          "ruleId": 1123,
+          "bankId": 31,
+          "topicId": 417,
+          "topicSlug": "powers-and-exponents",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116694,
+            116698
+          ]
+        },
+        {
+          "ruleId": 1124,
+          "bankId": 31,
+          "topicId": 418,
+          "topicSlug": "ratio-and-proportion",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116708,
+            116711
+          ]
+        },
+        {
+          "ruleId": 1125,
+          "bankId": 31,
+          "topicId": 419,
+          "topicSlug": "unitary-method",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116721,
+            116719
+          ]
+        }
+      ]
+    },
+    {
+      "run": 12,
+      "count": 35,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1111,
+          "bankId": 31,
+          "topicId": 405,
+          "topicSlug": "area",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116532,
+            116538,
+            116522
+          ]
+        },
+        {
+          "ruleId": 1112,
+          "bankId": 31,
+          "topicId": 406,
+          "topicSlug": "area-of-triangles",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116545,
+            116558,
+            116554
+          ]
+        },
+        {
+          "ruleId": 1113,
+          "bankId": 31,
+          "topicId": 407,
+          "topicSlug": "averages",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116574,
+            116571,
+            116569
+          ]
+        },
+        {
+          "ruleId": 1114,
+          "bankId": 31,
+          "topicId": 408,
+          "topicSlug": "direct-proportion",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116599,
+            116586,
+            116582
+          ]
+        },
+        {
+          "ruleId": 1115,
+          "bankId": 31,
+          "topicId": 409,
+          "topicSlug": "division",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116607,
+            116610,
+            116603
+          ]
+        },
+        {
+          "ruleId": 1116,
+          "bankId": 31,
+          "topicId": 410,
+          "topicSlug": "factors-and-multiples",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116622,
+            116631
+          ]
+        },
+        {
+          "ruleId": 1117,
+          "bankId": 31,
+          "topicId": 411,
+          "topicSlug": "fractions-of-quantities",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116634,
+            116641
+          ]
+        },
+        {
+          "ruleId": 1118,
+          "bankId": 31,
+          "topicId": 412,
+          "topicSlug": "linear-equations",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116642,
+            116649
+          ]
+        },
+        {
+          "ruleId": 1119,
+          "bankId": 31,
+          "topicId": 413,
+          "topicSlug": "multiplication",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116659,
+            116653
+          ]
+        },
+        {
+          "ruleId": 1120,
+          "bankId": 31,
+          "topicId": 414,
+          "topicSlug": "number-sequences",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116671,
+            116663
+          ]
+        },
+        {
+          "ruleId": 1121,
+          "bankId": 31,
+          "topicId": 415,
+          "topicSlug": "percentages",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116678,
+            116681
+          ]
+        },
+        {
+          "ruleId": 1122,
+          "bankId": 31,
+          "topicId": 416,
+          "topicSlug": "perimeter",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116686,
+            116691
+          ]
+        },
+        {
+          "ruleId": 1123,
+          "bankId": 31,
+          "topicId": 417,
+          "topicSlug": "powers-and-exponents",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116701,
+            116693
+          ]
+        },
+        {
+          "ruleId": 1124,
+          "bankId": 31,
+          "topicId": 418,
+          "topicSlug": "ratio-and-proportion",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116710,
+            116706
+          ]
+        },
+        {
+          "ruleId": 1125,
+          "bankId": 31,
+          "topicId": 419,
+          "topicSlug": "unitary-method",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116714,
+            116713
+          ]
+        }
+      ]
+    },
+    {
+      "run": 13,
+      "count": 35,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1111,
+          "bankId": 31,
+          "topicId": 405,
+          "topicSlug": "area",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116537,
+            116525,
+            116531
+          ]
+        },
+        {
+          "ruleId": 1112,
+          "bankId": 31,
+          "topicId": 406,
+          "topicSlug": "area-of-triangles",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116544,
+            116548,
+            116552
+          ]
+        },
+        {
+          "ruleId": 1113,
+          "bankId": 31,
+          "topicId": 407,
+          "topicSlug": "averages",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116574,
+            116579,
+            116576
+          ]
+        },
+        {
+          "ruleId": 1114,
+          "bankId": 31,
+          "topicId": 408,
+          "topicSlug": "direct-proportion",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116592,
+            116587,
+            116582
+          ]
+        },
+        {
+          "ruleId": 1115,
+          "bankId": 31,
+          "topicId": 409,
+          "topicSlug": "division",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116614,
+            116604,
+            116618
+          ]
+        },
+        {
+          "ruleId": 1116,
+          "bankId": 31,
+          "topicId": 410,
+          "topicSlug": "factors-and-multiples",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116627,
+            116631
+          ]
+        },
+        {
+          "ruleId": 1117,
+          "bankId": 31,
+          "topicId": 411,
+          "topicSlug": "fractions-of-quantities",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116638,
+            116633
+          ]
+        },
+        {
+          "ruleId": 1118,
+          "bankId": 31,
+          "topicId": 412,
+          "topicSlug": "linear-equations",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116648,
+            116646
+          ]
+        },
+        {
+          "ruleId": 1119,
+          "bankId": 31,
+          "topicId": 413,
+          "topicSlug": "multiplication",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116658,
+            116657
+          ]
+        },
+        {
+          "ruleId": 1120,
+          "bankId": 31,
+          "topicId": 414,
+          "topicSlug": "number-sequences",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116665,
+            116663
+          ]
+        },
+        {
+          "ruleId": 1121,
+          "bankId": 31,
+          "topicId": 415,
+          "topicSlug": "percentages",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116680,
+            116679
+          ]
+        },
+        {
+          "ruleId": 1122,
+          "bankId": 31,
+          "topicId": 416,
+          "topicSlug": "perimeter",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116687,
+            116685
+          ]
+        },
+        {
+          "ruleId": 1123,
+          "bankId": 31,
+          "topicId": 417,
+          "topicSlug": "powers-and-exponents",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116697,
+            116692
+          ]
+        },
+        {
+          "ruleId": 1124,
+          "bankId": 31,
+          "topicId": 418,
+          "topicSlug": "ratio-and-proportion",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116703,
+            116704
+          ]
+        },
+        {
+          "ruleId": 1125,
+          "bankId": 31,
+          "topicId": 419,
+          "topicSlug": "unitary-method",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116712,
+            116714
+          ]
+        }
+      ]
+    },
+    {
+      "run": 14,
+      "count": 35,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1111,
+          "bankId": 31,
+          "topicId": 405,
+          "topicSlug": "area",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116539,
+            116538,
+            116528
+          ]
+        },
+        {
+          "ruleId": 1112,
+          "bankId": 31,
+          "topicId": 406,
+          "topicSlug": "area-of-triangles",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116549,
+            116557,
+            116560
+          ]
+        },
+        {
+          "ruleId": 1113,
+          "bankId": 31,
+          "topicId": 407,
+          "topicSlug": "averages",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116574,
+            116565,
+            116576
+          ]
+        },
+        {
+          "ruleId": 1114,
+          "bankId": 31,
+          "topicId": 408,
+          "topicSlug": "direct-proportion",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116594,
+            116599,
+            116600
+          ]
+        },
+        {
+          "ruleId": 1115,
+          "bankId": 31,
+          "topicId": 409,
+          "topicSlug": "division",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116616,
+            116604,
+            116609
+          ]
+        },
+        {
+          "ruleId": 1116,
+          "bankId": 31,
+          "topicId": 410,
+          "topicSlug": "factors-and-multiples",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116624,
+            116629
+          ]
+        },
+        {
+          "ruleId": 1117,
+          "bankId": 31,
+          "topicId": 411,
+          "topicSlug": "fractions-of-quantities",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116633,
+            116635
+          ]
+        },
+        {
+          "ruleId": 1118,
+          "bankId": 31,
+          "topicId": 412,
+          "topicSlug": "linear-equations",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116642,
+            116646
+          ]
+        },
+        {
+          "ruleId": 1119,
+          "bankId": 31,
+          "topicId": 413,
+          "topicSlug": "multiplication",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116661,
+            116654
+          ]
+        },
+        {
+          "ruleId": 1120,
+          "bankId": 31,
+          "topicId": 414,
+          "topicSlug": "number-sequences",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116669,
+            116671
+          ]
+        },
+        {
+          "ruleId": 1121,
+          "bankId": 31,
+          "topicId": 415,
+          "topicSlug": "percentages",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116679,
+            116675
+          ]
+        },
+        {
+          "ruleId": 1122,
+          "bankId": 31,
+          "topicId": 416,
+          "topicSlug": "perimeter",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116690,
+            116684
+          ]
+        },
+        {
+          "ruleId": 1123,
+          "bankId": 31,
+          "topicId": 417,
+          "topicSlug": "powers-and-exponents",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116701,
+            116699
+          ]
+        },
+        {
+          "ruleId": 1124,
+          "bankId": 31,
+          "topicId": 418,
+          "topicSlug": "ratio-and-proportion",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116703,
+            116706
+          ]
+        },
+        {
+          "ruleId": 1125,
+          "bankId": 31,
+          "topicId": 419,
+          "topicSlug": "unitary-method",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116714,
+            116718
+          ]
+        }
+      ]
+    },
+    {
+      "run": 15,
+      "count": 35,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1111,
+          "bankId": 31,
+          "topicId": 405,
+          "topicSlug": "area",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116537,
+            116531,
+            116528
+          ]
+        },
+        {
+          "ruleId": 1112,
+          "bankId": 31,
+          "topicId": 406,
+          "topicSlug": "area-of-triangles",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116561,
+            116554,
+            116557
+          ]
+        },
+        {
+          "ruleId": 1113,
+          "bankId": 31,
+          "topicId": 407,
+          "topicSlug": "averages",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116579,
+            116575,
+            116563
+          ]
+        },
+        {
+          "ruleId": 1114,
+          "bankId": 31,
+          "topicId": 408,
+          "topicSlug": "direct-proportion",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116591,
+            116592,
+            116597
+          ]
+        },
+        {
+          "ruleId": 1115,
+          "bankId": 31,
+          "topicId": 409,
+          "topicSlug": "division",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116620,
+            116608,
+            116607
+          ]
+        },
+        {
+          "ruleId": 1116,
+          "bankId": 31,
+          "topicId": 410,
+          "topicSlug": "factors-and-multiples",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116622,
+            116629
+          ]
+        },
+        {
+          "ruleId": 1117,
+          "bankId": 31,
+          "topicId": 411,
+          "topicSlug": "fractions-of-quantities",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116632,
+            116638
+          ]
+        },
+        {
+          "ruleId": 1118,
+          "bankId": 31,
+          "topicId": 412,
+          "topicSlug": "linear-equations",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116647,
+            116648
+          ]
+        },
+        {
+          "ruleId": 1119,
+          "bankId": 31,
+          "topicId": 413,
+          "topicSlug": "multiplication",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116653,
+            116654
+          ]
+        },
+        {
+          "ruleId": 1120,
+          "bankId": 31,
+          "topicId": 414,
+          "topicSlug": "number-sequences",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116663,
+            116665
+          ]
+        },
+        {
+          "ruleId": 1121,
+          "bankId": 31,
+          "topicId": 415,
+          "topicSlug": "percentages",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116681,
+            116674
+          ]
+        },
+        {
+          "ruleId": 1122,
+          "bankId": 31,
+          "topicId": 416,
+          "topicSlug": "perimeter",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116683,
+            116684
+          ]
+        },
+        {
+          "ruleId": 1123,
+          "bankId": 31,
+          "topicId": 417,
+          "topicSlug": "powers-and-exponents",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116692,
+            116699
+          ]
+        },
+        {
+          "ruleId": 1124,
+          "bankId": 31,
+          "topicId": 418,
+          "topicSlug": "ratio-and-proportion",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116710,
+            116711
+          ]
+        },
+        {
+          "ruleId": 1125,
+          "bankId": 31,
+          "topicId": 419,
+          "topicSlug": "unitary-method",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116715,
+            116719
+          ]
+        }
+      ]
+    },
+    {
+      "run": 16,
+      "count": 35,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1111,
+          "bankId": 31,
+          "topicId": 405,
+          "topicSlug": "area",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116523,
+            116533,
+            116538
+          ]
+        },
+        {
+          "ruleId": 1112,
+          "bankId": 31,
+          "topicId": 406,
+          "topicSlug": "area-of-triangles",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116551,
+            116543,
+            116558
+          ]
+        },
+        {
+          "ruleId": 1113,
+          "bankId": 31,
+          "topicId": 407,
+          "topicSlug": "averages",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116568,
+            116569,
+            116577
+          ]
+        },
+        {
+          "ruleId": 1114,
+          "bankId": 31,
+          "topicId": 408,
+          "topicSlug": "direct-proportion",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116590,
+            116584,
+            116585
+          ]
+        },
+        {
+          "ruleId": 1115,
+          "bankId": 31,
+          "topicId": 409,
+          "topicSlug": "division",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116611,
+            116608,
+            116607
+          ]
+        },
+        {
+          "ruleId": 1116,
+          "bankId": 31,
+          "topicId": 410,
+          "topicSlug": "factors-and-multiples",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116628,
+            116631
+          ]
+        },
+        {
+          "ruleId": 1117,
+          "bankId": 31,
+          "topicId": 411,
+          "topicSlug": "fractions-of-quantities",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116641,
+            116639
+          ]
+        },
+        {
+          "ruleId": 1118,
+          "bankId": 31,
+          "topicId": 412,
+          "topicSlug": "linear-equations",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116642,
+            116643
+          ]
+        },
+        {
+          "ruleId": 1119,
+          "bankId": 31,
+          "topicId": 413,
+          "topicSlug": "multiplication",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116658,
+            116656
+          ]
+        },
+        {
+          "ruleId": 1120,
+          "bankId": 31,
+          "topicId": 414,
+          "topicSlug": "number-sequences",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116669,
+            116662
+          ]
+        },
+        {
+          "ruleId": 1121,
+          "bankId": 31,
+          "topicId": 415,
+          "topicSlug": "percentages",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116674,
+            116680
+          ]
+        },
+        {
+          "ruleId": 1122,
+          "bankId": 31,
+          "topicId": 416,
+          "topicSlug": "perimeter",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116687,
+            116689
+          ]
+        },
+        {
+          "ruleId": 1123,
+          "bankId": 31,
+          "topicId": 417,
+          "topicSlug": "powers-and-exponents",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116693,
+            116697
+          ]
+        },
+        {
+          "ruleId": 1124,
+          "bankId": 31,
+          "topicId": 418,
+          "topicSlug": "ratio-and-proportion",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116702,
+            116708
+          ]
+        },
+        {
+          "ruleId": 1125,
+          "bankId": 31,
+          "topicId": 419,
+          "topicSlug": "unitary-method",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116718,
+            116715
+          ]
+        }
+      ]
+    },
+    {
+      "run": 17,
+      "count": 35,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1111,
+          "bankId": 31,
+          "topicId": 405,
+          "topicSlug": "area",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116536,
+            116535,
+            116531
+          ]
+        },
+        {
+          "ruleId": 1112,
+          "bankId": 31,
+          "topicId": 406,
+          "topicSlug": "area-of-triangles",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116544,
+            116546,
+            116547
+          ]
+        },
+        {
+          "ruleId": 1113,
+          "bankId": 31,
+          "topicId": 407,
+          "topicSlug": "averages",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116568,
+            116570,
+            116577
+          ]
+        },
+        {
+          "ruleId": 1114,
+          "bankId": 31,
+          "topicId": 408,
+          "topicSlug": "direct-proportion",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116592,
+            116588,
+            116593
+          ]
+        },
+        {
+          "ruleId": 1115,
+          "bankId": 31,
+          "topicId": 409,
+          "topicSlug": "division",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116614,
+            116619,
+            116602
+          ]
+        },
+        {
+          "ruleId": 1116,
+          "bankId": 31,
+          "topicId": 410,
+          "topicSlug": "factors-and-multiples",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116622,
+            116623
+          ]
+        },
+        {
+          "ruleId": 1117,
+          "bankId": 31,
+          "topicId": 411,
+          "topicSlug": "fractions-of-quantities",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116637,
+            116638
+          ]
+        },
+        {
+          "ruleId": 1118,
+          "bankId": 31,
+          "topicId": 412,
+          "topicSlug": "linear-equations",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116648,
+            116647
+          ]
+        },
+        {
+          "ruleId": 1119,
+          "bankId": 31,
+          "topicId": 413,
+          "topicSlug": "multiplication",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116656,
+            116657
+          ]
+        },
+        {
+          "ruleId": 1120,
+          "bankId": 31,
+          "topicId": 414,
+          "topicSlug": "number-sequences",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116666,
+            116671
+          ]
+        },
+        {
+          "ruleId": 1121,
+          "bankId": 31,
+          "topicId": 415,
+          "topicSlug": "percentages",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116680,
+            116674
+          ]
+        },
+        {
+          "ruleId": 1122,
+          "bankId": 31,
+          "topicId": 416,
+          "topicSlug": "perimeter",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116691,
+            116687
+          ]
+        },
+        {
+          "ruleId": 1123,
+          "bankId": 31,
+          "topicId": 417,
+          "topicSlug": "powers-and-exponents",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116699,
+            116698
+          ]
+        },
+        {
+          "ruleId": 1124,
+          "bankId": 31,
+          "topicId": 418,
+          "topicSlug": "ratio-and-proportion",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116710,
+            116709
+          ]
+        },
+        {
+          "ruleId": 1125,
+          "bankId": 31,
+          "topicId": 419,
+          "topicSlug": "unitary-method",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116716,
+            116721
+          ]
+        }
+      ]
+    },
+    {
+      "run": 18,
+      "count": 35,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1111,
+          "bankId": 31,
+          "topicId": 405,
+          "topicSlug": "area",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116531,
+            116523,
+            116526
+          ]
+        },
+        {
+          "ruleId": 1112,
+          "bankId": 31,
+          "topicId": 406,
+          "topicSlug": "area-of-triangles",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116554,
+            116542,
+            116546
+          ]
+        },
+        {
+          "ruleId": 1113,
+          "bankId": 31,
+          "topicId": 407,
+          "topicSlug": "averages",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116581,
+            116572,
+            116576
+          ]
+        },
+        {
+          "ruleId": 1114,
+          "bankId": 31,
+          "topicId": 408,
+          "topicSlug": "direct-proportion",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116594,
+            116584,
+            116595
+          ]
+        },
+        {
+          "ruleId": 1115,
+          "bankId": 31,
+          "topicId": 409,
+          "topicSlug": "division",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116611,
+            116606,
+            116621
+          ]
+        },
+        {
+          "ruleId": 1116,
+          "bankId": 31,
+          "topicId": 410,
+          "topicSlug": "factors-and-multiples",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116628,
+            116624
+          ]
+        },
+        {
+          "ruleId": 1117,
+          "bankId": 31,
+          "topicId": 411,
+          "topicSlug": "fractions-of-quantities",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116640,
+            116635
+          ]
+        },
+        {
+          "ruleId": 1118,
+          "bankId": 31,
+          "topicId": 412,
+          "topicSlug": "linear-equations",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116645,
+            116644
+          ]
+        },
+        {
+          "ruleId": 1119,
+          "bankId": 31,
+          "topicId": 413,
+          "topicSlug": "multiplication",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116656,
+            116657
+          ]
+        },
+        {
+          "ruleId": 1120,
+          "bankId": 31,
+          "topicId": 414,
+          "topicSlug": "number-sequences",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116667,
+            116662
+          ]
+        },
+        {
+          "ruleId": 1121,
+          "bankId": 31,
+          "topicId": 415,
+          "topicSlug": "percentages",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116675,
+            116679
+          ]
+        },
+        {
+          "ruleId": 1122,
+          "bankId": 31,
+          "topicId": 416,
+          "topicSlug": "perimeter",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116685,
+            116690
+          ]
+        },
+        {
+          "ruleId": 1123,
+          "bankId": 31,
+          "topicId": 417,
+          "topicSlug": "powers-and-exponents",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116696,
+            116692
+          ]
+        },
+        {
+          "ruleId": 1124,
+          "bankId": 31,
+          "topicId": 418,
+          "topicSlug": "ratio-and-proportion",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116711,
+            116704
+          ]
+        },
+        {
+          "ruleId": 1125,
+          "bankId": 31,
+          "topicId": 419,
+          "topicSlug": "unitary-method",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116714,
+            116719
+          ]
+        }
+      ]
+    },
+    {
+      "run": 19,
+      "count": 35,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1111,
+          "bankId": 31,
+          "topicId": 405,
+          "topicSlug": "area",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116535,
+            116522,
+            116525
+          ]
+        },
+        {
+          "ruleId": 1112,
+          "bankId": 31,
+          "topicId": 406,
+          "topicSlug": "area-of-triangles",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116556,
+            116550,
+            116555
+          ]
+        },
+        {
+          "ruleId": 1113,
+          "bankId": 31,
+          "topicId": 407,
+          "topicSlug": "averages",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116573,
+            116570,
+            116580
+          ]
+        },
+        {
+          "ruleId": 1114,
+          "bankId": 31,
+          "topicId": 408,
+          "topicSlug": "direct-proportion",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116599,
+            116582,
+            116597
+          ]
+        },
+        {
+          "ruleId": 1115,
+          "bankId": 31,
+          "topicId": 409,
+          "topicSlug": "division",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116613,
+            116604,
+            116612
+          ]
+        },
+        {
+          "ruleId": 1116,
+          "bankId": 31,
+          "topicId": 410,
+          "topicSlug": "factors-and-multiples",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116630,
+            116626
+          ]
+        },
+        {
+          "ruleId": 1117,
+          "bankId": 31,
+          "topicId": 411,
+          "topicSlug": "fractions-of-quantities",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116641,
+            116640
+          ]
+        },
+        {
+          "ruleId": 1118,
+          "bankId": 31,
+          "topicId": 412,
+          "topicSlug": "linear-equations",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116650,
+            116646
+          ]
+        },
+        {
+          "ruleId": 1119,
+          "bankId": 31,
+          "topicId": 413,
+          "topicSlug": "multiplication",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116655,
+            116657
+          ]
+        },
+        {
+          "ruleId": 1120,
+          "bankId": 31,
+          "topicId": 414,
+          "topicSlug": "number-sequences",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116671,
+            116665
+          ]
+        },
+        {
+          "ruleId": 1121,
+          "bankId": 31,
+          "topicId": 415,
+          "topicSlug": "percentages",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116677,
+            116672
+          ]
+        },
+        {
+          "ruleId": 1122,
+          "bankId": 31,
+          "topicId": 416,
+          "topicSlug": "perimeter",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116686,
+            116685
+          ]
+        },
+        {
+          "ruleId": 1123,
+          "bankId": 31,
+          "topicId": 417,
+          "topicSlug": "powers-and-exponents",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116696,
+            116700
+          ]
+        },
+        {
+          "ruleId": 1124,
+          "bankId": 31,
+          "topicId": 418,
+          "topicSlug": "ratio-and-proportion",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116711,
+            116708
+          ]
+        },
+        {
+          "ruleId": 1125,
+          "bankId": 31,
+          "topicId": 419,
+          "topicSlug": "unitary-method",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116712,
+            116720
+          ]
+        }
+      ]
+    },
+    {
+      "run": 20,
+      "count": 35,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1111,
+          "bankId": 31,
+          "topicId": 405,
+          "topicSlug": "area",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116527,
+            116531,
+            116530
+          ]
+        },
+        {
+          "ruleId": 1112,
+          "bankId": 31,
+          "topicId": 406,
+          "topicSlug": "area-of-triangles",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116547,
+            116560,
+            116557
+          ]
+        },
+        {
+          "ruleId": 1113,
+          "bankId": 31,
+          "topicId": 407,
+          "topicSlug": "averages",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116567,
+            116569,
+            116573
+          ]
+        },
+        {
+          "ruleId": 1114,
+          "bankId": 31,
+          "topicId": 408,
+          "topicSlug": "direct-proportion",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116585,
+            116583,
+            116599
+          ]
+        },
+        {
+          "ruleId": 1115,
+          "bankId": 31,
+          "topicId": 409,
+          "topicSlug": "division",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 20,
+          "unusedCapacity": 17,
+          "exhausted": false,
+          "questionIds": [
+            116606,
+            116605,
+            116619
+          ]
+        },
+        {
+          "ruleId": 1116,
+          "bankId": 31,
+          "topicId": 410,
+          "topicSlug": "factors-and-multiples",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116626,
+            116627
+          ]
+        },
+        {
+          "ruleId": 1117,
+          "bankId": 31,
+          "topicId": 411,
+          "topicSlug": "fractions-of-quantities",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116633,
+            116641
+          ]
+        },
+        {
+          "ruleId": 1118,
+          "bankId": 31,
+          "topicId": 412,
+          "topicSlug": "linear-equations",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116642,
+            116646
+          ]
+        },
+        {
+          "ruleId": 1119,
+          "bankId": 31,
+          "topicId": 413,
+          "topicSlug": "multiplication",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116656,
+            116661
+          ]
+        },
+        {
+          "ruleId": 1120,
+          "bankId": 31,
+          "topicId": 414,
+          "topicSlug": "number-sequences",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116665,
+            116668
+          ]
+        },
+        {
+          "ruleId": 1121,
+          "bankId": 31,
+          "topicId": 415,
+          "topicSlug": "percentages",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116676,
+            116680
+          ]
+        },
+        {
+          "ruleId": 1122,
+          "bankId": 31,
+          "topicId": 416,
+          "topicSlug": "perimeter",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116687,
+            116691
+          ]
+        },
+        {
+          "ruleId": 1123,
+          "bankId": 31,
+          "topicId": 417,
+          "topicSlug": "powers-and-exponents",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116692,
+            116697
+          ]
+        },
+        {
+          "ruleId": 1124,
+          "bankId": 31,
+          "topicId": 418,
+          "topicSlug": "ratio-and-proportion",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116707,
+            116702
+          ]
+        },
+        {
+          "ruleId": 1125,
+          "bankId": 31,
+          "topicId": 419,
+          "topicSlug": "unitary-method",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 10,
+          "unusedCapacity": 8,
+          "exhausted": false,
+          "questionIds": [
+            116721,
+            116716
+          ]
+        }
+      ]
+    }
+  ]
+}

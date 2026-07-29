@@ -1,0 +1,107 @@
+{
+  "schemaVersion": "octamy.representative-attempt-qa-result.v1",
+  "generatedAt": "2026-07-29T12:42:48.593Z",
+  "assessmentId": 4,
+  "assessmentSlug": "computer-vision",
+  "blueprintRevision": 1,
+  "runtimeMaterializer": "DatabaseStorage.materializeBlueprintForAttempt",
+  "servingPath": "server/routes.ts option shuffle and answer-key omission",
+  "scoringPath": "server/utils/examScoring.scoreExam",
+  "servedQuestionCount": 10,
+  "configuredPassingScore": 85,
+  "testedScoreLevels": [
+    {
+      "correctCount": 0,
+      "expectedScore": 0,
+      "actualScore": 0,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 1,
+      "expectedScore": 10,
+      "actualScore": 10,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 2,
+      "expectedScore": 20,
+      "actualScore": 20,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 3,
+      "expectedScore": 30,
+      "actualScore": 30,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 4,
+      "expectedScore": 40,
+      "actualScore": 40,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 5,
+      "expectedScore": 50,
+      "actualScore": 50,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 6,
+      "expectedScore": 60,
+      "actualScore": 60,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 7,
+      "expectedScore": 70,
+      "actualScore": 70,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 8,
+      "expectedScore": 80,
+      "actualScore": 80,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 9,
+      "expectedScore": 90,
+      "actualScore": 90,
+      "expectedPassed": true,
+      "actualPassed": true,
+      "passed": true
+    },
+    {
+      "correctCount": 10,
+      "expectedScore": 100,
+      "actualScore": 100,
+      "expectedPassed": true,
+      "actualPassed": true,
+      "passed": true
+    }
+  ],
+  "preSubmissionAnswerKeyExposure": {
+    "leakedKeys": [],
+    "passed": true
+  },
+  "passed": true
+}

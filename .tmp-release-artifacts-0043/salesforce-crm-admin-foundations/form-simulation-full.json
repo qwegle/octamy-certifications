@@ -1,0 +1,119 @@
+{
+  "schemaVersion": "octamy.form-simulation-result.v1",
+  "generatedAt": "2026-07-29T13:27:42.078Z",
+  "assessmentId": 98,
+  "assessmentSlug": "salesforce-crm-admin-foundations",
+  "blueprintRevision": 1,
+  "runtimePath": "DatabaseStorage.materializeBlueprintForAttempt",
+  "independentForms": 5,
+  "expectedItemsPerForm": 10,
+  "poolExhaustionChecks": [
+    {
+      "ruleId": 879,
+      "bankId": 73,
+      "topicId": null,
+      "difficulty": "mixed",
+      "requiredPerForm": 10,
+      "available": 80,
+      "passed": true
+    }
+  ],
+  "forms": [
+    {
+      "formNumber": 1,
+      "questionCount": 10,
+      "expectedQuestionCount": 10,
+      "duplicateQuestionIds": [],
+      "topicCoverage": [
+        {
+          "ruleId": 879,
+          "bankId": 73,
+          "topicId": null,
+          "difficulty": "mixed",
+          "required": 10,
+          "selected": 10,
+          "matching": 10,
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "formNumber": 2,
+      "questionCount": 10,
+      "expectedQuestionCount": 10,
+      "duplicateQuestionIds": [],
+      "topicCoverage": [
+        {
+          "ruleId": 879,
+          "bankId": 73,
+          "topicId": null,
+          "difficulty": "mixed",
+          "required": 10,
+          "selected": 10,
+          "matching": 10,
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "formNumber": 3,
+      "questionCount": 10,
+      "expectedQuestionCount": 10,
+      "duplicateQuestionIds": [],
+      "topicCoverage": [
+        {
+          "ruleId": 879,
+          "bankId": 73,
+          "topicId": null,
+          "difficulty": "mixed",
+          "required": 10,
+          "selected": 10,
+          "matching": 10,
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "formNumber": 4,
+      "questionCount": 10,
+      "expectedQuestionCount": 10,
+      "duplicateQuestionIds": [],
+      "topicCoverage": [
+        {
+          "ruleId": 879,
+          "bankId": 73,
+          "topicId": null,
+          "difficulty": "mixed",
+          "required": 10,
+          "selected": 10,
+          "matching": 10,
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "formNumber": 5,
+      "questionCount": 10,
+      "expectedQuestionCount": 10,
+      "duplicateQuestionIds": [],
+      "topicCoverage": [
+        {
+          "ruleId": 879,
+          "bankId": 73,
+          "topicId": null,
+          "difficulty": "mixed",
+          "required": 10,
+          "selected": 10,
+          "matching": 10,
+          "passed": true
+        }
+      ],
+      "passed": true
+    }
+  ],
+  "passed": true
+}

@@ -1,0 +1,5028 @@
+{
+  "schemaVersion": "octamy.form-simulation-report.v1",
+  "assessmentId": 61,
+  "assessmentSlug": "ssc-cgl-tier-1-quantitative-aptitude-practice",
+  "blueprintRevision": 2,
+  "generatedAt": "2026-07-29T12:35:39.426Z",
+  "runtimePath": "DatabaseStorage.materializeBlueprintForAttempt",
+  "independentFormCount": 20,
+  "expectedDrawPerForm": 25,
+  "totalDraws": 500,
+  "duplicateSelections": 0,
+  "poolExhaustions": 0,
+  "topicRuleChecks": 300,
+  "rules": [
+    {
+      "id": 1009,
+      "bank_id": 36,
+      "topic_id": 2084,
+      "topic_slug": "number-systems",
+      "question_count": 2,
+      "difficulty": "mixed",
+      "sort_order": 0,
+      "available": 16
+    },
+    {
+      "id": 1010,
+      "bank_id": 36,
+      "topic_id": 475,
+      "topic_slug": "percentages",
+      "question_count": 2,
+      "difficulty": "mixed",
+      "sort_order": 1,
+      "available": 16
+    },
+    {
+      "id": 1011,
+      "bank_id": 36,
+      "topic_id": 2086,
+      "topic_slug": "ratio-proportion",
+      "question_count": 1,
+      "difficulty": "mixed",
+      "sort_order": 2,
+      "available": 8
+    },
+    {
+      "id": 1012,
+      "bank_id": 36,
+      "topic_id": 467,
+      "topic_slug": "averages",
+      "question_count": 1,
+      "difficulty": "mixed",
+      "sort_order": 3,
+      "available": 8
+    },
+    {
+      "id": 1013,
+      "bank_id": 36,
+      "topic_id": 2088,
+      "topic_slug": "interest",
+      "question_count": 2,
+      "difficulty": "mixed",
+      "sort_order": 4,
+      "available": 16
+    },
+    {
+      "id": 1014,
+      "bank_id": 36,
+      "topic_id": 2089,
+      "topic_slug": "profit-loss-discount",
+      "question_count": 2,
+      "difficulty": "mixed",
+      "sort_order": 5,
+      "available": 16
+    },
+    {
+      "id": 1015,
+      "bank_id": 36,
+      "topic_id": 2090,
+      "topic_slug": "partnership-business",
+      "question_count": 1,
+      "difficulty": "mixed",
+      "sort_order": 6,
+      "available": 8
+    },
+    {
+      "id": 1016,
+      "bank_id": 36,
+      "topic_id": 2091,
+      "topic_slug": "mixture-alligation",
+      "question_count": 1,
+      "difficulty": "mixed",
+      "sort_order": 7,
+      "available": 8
+    },
+    {
+      "id": 1017,
+      "bank_id": 36,
+      "topic_id": 2092,
+      "topic_slug": "time-work",
+      "question_count": 2,
+      "difficulty": "mixed",
+      "sort_order": 8,
+      "available": 16
+    },
+    {
+      "id": 1018,
+      "bank_id": 36,
+      "topic_id": 2093,
+      "topic_slug": "time-distance",
+      "question_count": 2,
+      "difficulty": "mixed",
+      "sort_order": 9,
+      "available": 16
+    },
+    {
+      "id": 1019,
+      "bank_id": 36,
+      "topic_id": 2094,
+      "topic_slug": "algebra",
+      "question_count": 2,
+      "difficulty": "mixed",
+      "sort_order": 10,
+      "available": 16
+    },
+    {
+      "id": 1020,
+      "bank_id": 36,
+      "topic_id": 2095,
+      "topic_slug": "geometry",
+      "question_count": 2,
+      "difficulty": "mixed",
+      "sort_order": 11,
+      "available": 16
+    },
+    {
+      "id": 1021,
+      "bank_id": 36,
+      "topic_id": 2096,
+      "topic_slug": "mensuration",
+      "question_count": 2,
+      "difficulty": "mixed",
+      "sort_order": 12,
+      "available": 16
+    },
+    {
+      "id": 1022,
+      "bank_id": 36,
+      "topic_id": 2097,
+      "topic_slug": "trigonometry",
+      "question_count": 1,
+      "difficulty": "mixed",
+      "sort_order": 13,
+      "available": 8
+    },
+    {
+      "id": 1023,
+      "bank_id": 36,
+      "topic_id": 2098,
+      "topic_slug": "data-interpretation",
+      "question_count": 2,
+      "difficulty": "mixed",
+      "sort_order": 14,
+      "available": 16
+    }
+  ],
+  "forms": [
+    {
+      "run": 1,
+      "count": 25,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1009,
+          "bankId": 36,
+          "topicId": 2084,
+          "topicSlug": "number-systems",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109642,
+            109638
+          ]
+        },
+        {
+          "ruleId": 1010,
+          "bankId": 36,
+          "topicId": 475,
+          "topicSlug": "percentages",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109990,
+            109656
+          ]
+        },
+        {
+          "ruleId": 1011,
+          "bankId": 36,
+          "topicId": 2086,
+          "topicSlug": "ratio-proportion",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109664
+          ]
+        },
+        {
+          "ruleId": 1012,
+          "bankId": 36,
+          "topicId": 467,
+          "topicSlug": "averages",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109672
+          ]
+        },
+        {
+          "ruleId": 1013,
+          "bankId": 36,
+          "topicId": 2088,
+          "topicSlug": "interest",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109683,
+            109684
+          ]
+        },
+        {
+          "ruleId": 1014,
+          "bankId": 36,
+          "topicId": 2089,
+          "topicSlug": "profit-loss-discount",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109700,
+            109703
+          ]
+        },
+        {
+          "ruleId": 1015,
+          "bankId": 36,
+          "topicId": 2090,
+          "topicSlug": "partnership-business",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109708
+          ]
+        },
+        {
+          "ruleId": 1016,
+          "bankId": 36,
+          "topicId": 2091,
+          "topicSlug": "mixture-alligation",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109719
+          ]
+        },
+        {
+          "ruleId": 1017,
+          "bankId": 36,
+          "topicId": 2092,
+          "topicSlug": "time-work",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109728,
+            109732
+          ]
+        },
+        {
+          "ruleId": 1018,
+          "bankId": 36,
+          "topicId": 2093,
+          "topicSlug": "time-distance",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109749,
+            109748
+          ]
+        },
+        {
+          "ruleId": 1019,
+          "bankId": 36,
+          "topicId": 2094,
+          "topicSlug": "algebra",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109766,
+            109769
+          ]
+        },
+        {
+          "ruleId": 1020,
+          "bankId": 36,
+          "topicId": 2095,
+          "topicSlug": "geometry",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109774,
+            109784
+          ]
+        },
+        {
+          "ruleId": 1021,
+          "bankId": 36,
+          "topicId": 2096,
+          "topicSlug": "mensuration",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109797,
+            109787
+          ]
+        },
+        {
+          "ruleId": 1022,
+          "bankId": 36,
+          "topicId": 2097,
+          "topicSlug": "trigonometry",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109809
+          ]
+        },
+        {
+          "ruleId": 1023,
+          "bankId": 36,
+          "topicId": 2098,
+          "topicSlug": "data-interpretation",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109814,
+            109818
+          ]
+        }
+      ]
+    },
+    {
+      "run": 2,
+      "count": 25,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1009,
+          "bankId": 36,
+          "topicId": 2084,
+          "topicSlug": "number-systems",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109988,
+            109642
+          ]
+        },
+        {
+          "ruleId": 1010,
+          "bankId": 36,
+          "topicId": 475,
+          "topicSlug": "percentages",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109657,
+            109653
+          ]
+        },
+        {
+          "ruleId": 1011,
+          "bankId": 36,
+          "topicId": 2086,
+          "topicSlug": "ratio-proportion",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109663
+          ]
+        },
+        {
+          "ruleId": 1012,
+          "bankId": 36,
+          "topicId": 467,
+          "topicSlug": "averages",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109670
+          ]
+        },
+        {
+          "ruleId": 1013,
+          "bankId": 36,
+          "topicId": 2088,
+          "topicSlug": "interest",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109684,
+            109675
+          ]
+        },
+        {
+          "ruleId": 1014,
+          "bankId": 36,
+          "topicId": 2089,
+          "topicSlug": "profit-loss-discount",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109699,
+            109698
+          ]
+        },
+        {
+          "ruleId": 1015,
+          "bankId": 36,
+          "topicId": 2090,
+          "topicSlug": "partnership-business",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109708
+          ]
+        },
+        {
+          "ruleId": 1016,
+          "bankId": 36,
+          "topicId": 2091,
+          "topicSlug": "mixture-alligation",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109715
+          ]
+        },
+        {
+          "ruleId": 1017,
+          "bankId": 36,
+          "topicId": 2092,
+          "topicSlug": "time-work",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109736,
+            109735
+          ]
+        },
+        {
+          "ruleId": 1018,
+          "bankId": 36,
+          "topicId": 2093,
+          "topicSlug": "time-distance",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109741,
+            109750
+          ]
+        },
+        {
+          "ruleId": 1019,
+          "bankId": 36,
+          "topicId": 2094,
+          "topicSlug": "algebra",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109758,
+            109763
+          ]
+        },
+        {
+          "ruleId": 1020,
+          "bankId": 36,
+          "topicId": 2095,
+          "topicSlug": "geometry",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109771,
+            109782
+          ]
+        },
+        {
+          "ruleId": 1021,
+          "bankId": 36,
+          "topicId": 2096,
+          "topicSlug": "mensuration",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109799,
+            109798
+          ]
+        },
+        {
+          "ruleId": 1022,
+          "bankId": 36,
+          "topicId": 2097,
+          "topicSlug": "trigonometry",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109806
+          ]
+        },
+        {
+          "ruleId": 1023,
+          "bankId": 36,
+          "topicId": 2098,
+          "topicSlug": "data-interpretation",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109825,
+            109826
+          ]
+        }
+      ]
+    },
+    {
+      "run": 3,
+      "count": 25,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1009,
+          "bankId": 36,
+          "topicId": 2084,
+          "topicSlug": "number-systems",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109987,
+            109630
+          ]
+        },
+        {
+          "ruleId": 1010,
+          "bankId": 36,
+          "topicId": 475,
+          "topicSlug": "percentages",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109989,
+            109647
+          ]
+        },
+        {
+          "ruleId": 1011,
+          "bankId": 36,
+          "topicId": 2086,
+          "topicSlug": "ratio-proportion",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109660
+          ]
+        },
+        {
+          "ruleId": 1012,
+          "bankId": 36,
+          "topicId": 467,
+          "topicSlug": "averages",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109672
+          ]
+        },
+        {
+          "ruleId": 1013,
+          "bankId": 36,
+          "topicId": 2088,
+          "topicSlug": "interest",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109681,
+            109676
+          ]
+        },
+        {
+          "ruleId": 1014,
+          "bankId": 36,
+          "topicId": 2089,
+          "topicSlug": "profit-loss-discount",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109702,
+            109695
+          ]
+        },
+        {
+          "ruleId": 1015,
+          "bankId": 36,
+          "topicId": 2090,
+          "topicSlug": "partnership-business",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109713
+          ]
+        },
+        {
+          "ruleId": 1016,
+          "bankId": 36,
+          "topicId": 2091,
+          "topicSlug": "mixture-alligation",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109718
+          ]
+        },
+        {
+          "ruleId": 1017,
+          "bankId": 36,
+          "topicId": 2092,
+          "topicSlug": "time-work",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109731,
+            109729
+          ]
+        },
+        {
+          "ruleId": 1018,
+          "bankId": 36,
+          "topicId": 2093,
+          "topicSlug": "time-distance",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109740,
+            109750
+          ]
+        },
+        {
+          "ruleId": 1019,
+          "bankId": 36,
+          "topicId": 2094,
+          "topicSlug": "algebra",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109769,
+            109766
+          ]
+        },
+        {
+          "ruleId": 1020,
+          "bankId": 36,
+          "topicId": 2095,
+          "topicSlug": "geometry",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109783,
+            109786
+          ]
+        },
+        {
+          "ruleId": 1021,
+          "bankId": 36,
+          "topicId": 2096,
+          "topicSlug": "mensuration",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109799,
+            109792
+          ]
+        },
+        {
+          "ruleId": 1022,
+          "bankId": 36,
+          "topicId": 2097,
+          "topicSlug": "trigonometry",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109807
+          ]
+        },
+        {
+          "ruleId": 1023,
+          "bankId": 36,
+          "topicId": 2098,
+          "topicSlug": "data-interpretation",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109825,
+            109819
+          ]
+        }
+      ]
+    },
+    {
+      "run": 4,
+      "count": 25,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1009,
+          "bankId": 36,
+          "topicId": 2084,
+          "topicSlug": "number-systems",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109627,
+            109641
+          ]
+        },
+        {
+          "ruleId": 1010,
+          "bankId": 36,
+          "topicId": 475,
+          "topicSlug": "percentages",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109993,
+            109994
+          ]
+        },
+        {
+          "ruleId": 1011,
+          "bankId": 36,
+          "topicId": 2086,
+          "topicSlug": "ratio-proportion",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109663
+          ]
+        },
+        {
+          "ruleId": 1012,
+          "bankId": 36,
+          "topicId": 467,
+          "topicSlug": "averages",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109673
+          ]
+        },
+        {
+          "ruleId": 1013,
+          "bankId": 36,
+          "topicId": 2088,
+          "topicSlug": "interest",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109677,
+            109680
+          ]
+        },
+        {
+          "ruleId": 1014,
+          "bankId": 36,
+          "topicId": 2089,
+          "topicSlug": "profit-loss-discount",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109694,
+            109706
+          ]
+        },
+        {
+          "ruleId": 1015,
+          "bankId": 36,
+          "topicId": 2090,
+          "topicSlug": "partnership-business",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109713
+          ]
+        },
+        {
+          "ruleId": 1016,
+          "bankId": 36,
+          "topicId": 2091,
+          "topicSlug": "mixture-alligation",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109717
+          ]
+        },
+        {
+          "ruleId": 1017,
+          "bankId": 36,
+          "topicId": 2092,
+          "topicSlug": "time-work",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109737,
+            109728
+          ]
+        },
+        {
+          "ruleId": 1018,
+          "bankId": 36,
+          "topicId": 2093,
+          "topicSlug": "time-distance",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109752,
+            109748
+          ]
+        },
+        {
+          "ruleId": 1019,
+          "bankId": 36,
+          "topicId": 2094,
+          "topicSlug": "algebra",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109764,
+            109762
+          ]
+        },
+        {
+          "ruleId": 1020,
+          "bankId": 36,
+          "topicId": 2095,
+          "topicSlug": "geometry",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109773,
+            109786
+          ]
+        },
+        {
+          "ruleId": 1021,
+          "bankId": 36,
+          "topicId": 2096,
+          "topicSlug": "mensuration",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109795,
+            109798
+          ]
+        },
+        {
+          "ruleId": 1022,
+          "bankId": 36,
+          "topicId": 2097,
+          "topicSlug": "trigonometry",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109810
+          ]
+        },
+        {
+          "ruleId": 1023,
+          "bankId": 36,
+          "topicId": 2098,
+          "topicSlug": "data-interpretation",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109818,
+            109825
+          ]
+        }
+      ]
+    },
+    {
+      "run": 5,
+      "count": 25,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1009,
+          "bankId": 36,
+          "topicId": 2084,
+          "topicSlug": "number-systems",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109632,
+            109642
+          ]
+        },
+        {
+          "ruleId": 1010,
+          "bankId": 36,
+          "topicId": 475,
+          "topicSlug": "percentages",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109647,
+            109653
+          ]
+        },
+        {
+          "ruleId": 1011,
+          "bankId": 36,
+          "topicId": 2086,
+          "topicSlug": "ratio-proportion",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109664
+          ]
+        },
+        {
+          "ruleId": 1012,
+          "bankId": 36,
+          "topicId": 467,
+          "topicSlug": "averages",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109672
+          ]
+        },
+        {
+          "ruleId": 1013,
+          "bankId": 36,
+          "topicId": 2088,
+          "topicSlug": "interest",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109685,
+            109686
+          ]
+        },
+        {
+          "ruleId": 1014,
+          "bankId": 36,
+          "topicId": 2089,
+          "topicSlug": "profit-loss-discount",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109697,
+            109698
+          ]
+        },
+        {
+          "ruleId": 1015,
+          "bankId": 36,
+          "topicId": 2090,
+          "topicSlug": "partnership-business",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109709
+          ]
+        },
+        {
+          "ruleId": 1016,
+          "bankId": 36,
+          "topicId": 2091,
+          "topicSlug": "mixture-alligation",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109718
+          ]
+        },
+        {
+          "ruleId": 1017,
+          "bankId": 36,
+          "topicId": 2092,
+          "topicSlug": "time-work",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109736,
+            109732
+          ]
+        },
+        {
+          "ruleId": 1018,
+          "bankId": 36,
+          "topicId": 2093,
+          "topicSlug": "time-distance",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109745,
+            109744
+          ]
+        },
+        {
+          "ruleId": 1019,
+          "bankId": 36,
+          "topicId": 2094,
+          "topicSlug": "algebra",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109757,
+            109766
+          ]
+        },
+        {
+          "ruleId": 1020,
+          "bankId": 36,
+          "topicId": 2095,
+          "topicSlug": "geometry",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109771,
+            109772
+          ]
+        },
+        {
+          "ruleId": 1021,
+          "bankId": 36,
+          "topicId": 2096,
+          "topicSlug": "mensuration",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109792,
+            109793
+          ]
+        },
+        {
+          "ruleId": 1022,
+          "bankId": 36,
+          "topicId": 2097,
+          "topicSlug": "trigonometry",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109805
+          ]
+        },
+        {
+          "ruleId": 1023,
+          "bankId": 36,
+          "topicId": 2098,
+          "topicSlug": "data-interpretation",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109823,
+            109815
+          ]
+        }
+      ]
+    },
+    {
+      "run": 6,
+      "count": 25,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1009,
+          "bankId": 36,
+          "topicId": 2084,
+          "topicSlug": "number-systems",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109629,
+            109988
+          ]
+        },
+        {
+          "ruleId": 1010,
+          "bankId": 36,
+          "topicId": 475,
+          "topicSlug": "percentages",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109993,
+            109994
+          ]
+        },
+        {
+          "ruleId": 1011,
+          "bankId": 36,
+          "topicId": 2086,
+          "topicSlug": "ratio-proportion",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109659
+          ]
+        },
+        {
+          "ruleId": 1012,
+          "bankId": 36,
+          "topicId": 467,
+          "topicSlug": "averages",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109670
+          ]
+        },
+        {
+          "ruleId": 1013,
+          "bankId": 36,
+          "topicId": 2088,
+          "topicSlug": "interest",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109678,
+            109685
+          ]
+        },
+        {
+          "ruleId": 1014,
+          "bankId": 36,
+          "topicId": 2089,
+          "topicSlug": "profit-loss-discount",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109699,
+            109705
+          ]
+        },
+        {
+          "ruleId": 1015,
+          "bankId": 36,
+          "topicId": 2090,
+          "topicSlug": "partnership-business",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109710
+          ]
+        },
+        {
+          "ruleId": 1016,
+          "bankId": 36,
+          "topicId": 2091,
+          "topicSlug": "mixture-alligation",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109717
+          ]
+        },
+        {
+          "ruleId": 1017,
+          "bankId": 36,
+          "topicId": 2092,
+          "topicSlug": "time-work",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109727,
+            109735
+          ]
+        },
+        {
+          "ruleId": 1018,
+          "bankId": 36,
+          "topicId": 2093,
+          "topicSlug": "time-distance",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109739,
+            109747
+          ]
+        },
+        {
+          "ruleId": 1019,
+          "bankId": 36,
+          "topicId": 2094,
+          "topicSlug": "algebra",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109765,
+            109759
+          ]
+        },
+        {
+          "ruleId": 1020,
+          "bankId": 36,
+          "topicId": 2095,
+          "topicSlug": "geometry",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109781,
+            109777
+          ]
+        },
+        {
+          "ruleId": 1021,
+          "bankId": 36,
+          "topicId": 2096,
+          "topicSlug": "mensuration",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109791,
+            109793
+          ]
+        },
+        {
+          "ruleId": 1022,
+          "bankId": 36,
+          "topicId": 2097,
+          "topicSlug": "trigonometry",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109807
+          ]
+        },
+        {
+          "ruleId": 1023,
+          "bankId": 36,
+          "topicId": 2098,
+          "topicSlug": "data-interpretation",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109816,
+            109815
+          ]
+        }
+      ]
+    },
+    {
+      "run": 7,
+      "count": 25,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1009,
+          "bankId": 36,
+          "topicId": 2084,
+          "topicSlug": "number-systems",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109630,
+            109988
+          ]
+        },
+        {
+          "ruleId": 1010,
+          "bankId": 36,
+          "topicId": 475,
+          "topicSlug": "percentages",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109655,
+            109653
+          ]
+        },
+        {
+          "ruleId": 1011,
+          "bankId": 36,
+          "topicId": 2086,
+          "topicSlug": "ratio-proportion",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109663
+          ]
+        },
+        {
+          "ruleId": 1012,
+          "bankId": 36,
+          "topicId": 467,
+          "topicSlug": "averages",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109669
+          ]
+        },
+        {
+          "ruleId": 1013,
+          "bankId": 36,
+          "topicId": 2088,
+          "topicSlug": "interest",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109689,
+            109684
+          ]
+        },
+        {
+          "ruleId": 1014,
+          "bankId": 36,
+          "topicId": 2089,
+          "topicSlug": "profit-loss-discount",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109694,
+            109692
+          ]
+        },
+        {
+          "ruleId": 1015,
+          "bankId": 36,
+          "topicId": 2090,
+          "topicSlug": "partnership-business",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109712
+          ]
+        },
+        {
+          "ruleId": 1016,
+          "bankId": 36,
+          "topicId": 2091,
+          "topicSlug": "mixture-alligation",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109720
+          ]
+        },
+        {
+          "ruleId": 1017,
+          "bankId": 36,
+          "topicId": 2092,
+          "topicSlug": "time-work",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109729,
+            109728
+          ]
+        },
+        {
+          "ruleId": 1018,
+          "bankId": 36,
+          "topicId": 2093,
+          "topicSlug": "time-distance",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109740,
+            109748
+          ]
+        },
+        {
+          "ruleId": 1019,
+          "bankId": 36,
+          "topicId": 2094,
+          "topicSlug": "algebra",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109768,
+            109765
+          ]
+        },
+        {
+          "ruleId": 1020,
+          "bankId": 36,
+          "topicId": 2095,
+          "topicSlug": "geometry",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109775,
+            109773
+          ]
+        },
+        {
+          "ruleId": 1021,
+          "bankId": 36,
+          "topicId": 2096,
+          "topicSlug": "mensuration",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109802,
+            109801
+          ]
+        },
+        {
+          "ruleId": 1022,
+          "bankId": 36,
+          "topicId": 2097,
+          "topicSlug": "trigonometry",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109806
+          ]
+        },
+        {
+          "ruleId": 1023,
+          "bankId": 36,
+          "topicId": 2098,
+          "topicSlug": "data-interpretation",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109811,
+            109821
+          ]
+        }
+      ]
+    },
+    {
+      "run": 8,
+      "count": 25,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1009,
+          "bankId": 36,
+          "topicId": 2084,
+          "topicSlug": "number-systems",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109638,
+            109631
+          ]
+        },
+        {
+          "ruleId": 1010,
+          "bankId": 36,
+          "topicId": 475,
+          "topicSlug": "percentages",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109654,
+            109647
+          ]
+        },
+        {
+          "ruleId": 1011,
+          "bankId": 36,
+          "topicId": 2086,
+          "topicSlug": "ratio-proportion",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109659
+          ]
+        },
+        {
+          "ruleId": 1012,
+          "bankId": 36,
+          "topicId": 467,
+          "topicSlug": "averages",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109674
+          ]
+        },
+        {
+          "ruleId": 1013,
+          "bankId": 36,
+          "topicId": 2088,
+          "topicSlug": "interest",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109684,
+            109686
+          ]
+        },
+        {
+          "ruleId": 1014,
+          "bankId": 36,
+          "topicId": 2089,
+          "topicSlug": "profit-loss-discount",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109693,
+            109695
+          ]
+        },
+        {
+          "ruleId": 1015,
+          "bankId": 36,
+          "topicId": 2090,
+          "topicSlug": "partnership-business",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109711
+          ]
+        },
+        {
+          "ruleId": 1016,
+          "bankId": 36,
+          "topicId": 2091,
+          "topicSlug": "mixture-alligation",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109722
+          ]
+        },
+        {
+          "ruleId": 1017,
+          "bankId": 36,
+          "topicId": 2092,
+          "topicSlug": "time-work",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109737,
+            109728
+          ]
+        },
+        {
+          "ruleId": 1018,
+          "bankId": 36,
+          "topicId": 2093,
+          "topicSlug": "time-distance",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109749,
+            109753
+          ]
+        },
+        {
+          "ruleId": 1019,
+          "bankId": 36,
+          "topicId": 2094,
+          "topicSlug": "algebra",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109756,
+            109763
+          ]
+        },
+        {
+          "ruleId": 1020,
+          "bankId": 36,
+          "topicId": 2095,
+          "topicSlug": "geometry",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109786,
+            109772
+          ]
+        },
+        {
+          "ruleId": 1021,
+          "bankId": 36,
+          "topicId": 2096,
+          "topicSlug": "mensuration",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109790,
+            109799
+          ]
+        },
+        {
+          "ruleId": 1022,
+          "bankId": 36,
+          "topicId": 2097,
+          "topicSlug": "trigonometry",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109803
+          ]
+        },
+        {
+          "ruleId": 1023,
+          "bankId": 36,
+          "topicId": 2098,
+          "topicSlug": "data-interpretation",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109825,
+            109815
+          ]
+        }
+      ]
+    },
+    {
+      "run": 9,
+      "count": 25,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1009,
+          "bankId": 36,
+          "topicId": 2084,
+          "topicSlug": "number-systems",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109630,
+            109638
+          ]
+        },
+        {
+          "ruleId": 1010,
+          "bankId": 36,
+          "topicId": 475,
+          "topicSlug": "percentages",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109650,
+            109657
+          ]
+        },
+        {
+          "ruleId": 1011,
+          "bankId": 36,
+          "topicId": 2086,
+          "topicSlug": "ratio-proportion",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109663
+          ]
+        },
+        {
+          "ruleId": 1012,
+          "bankId": 36,
+          "topicId": 467,
+          "topicSlug": "averages",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109673
+          ]
+        },
+        {
+          "ruleId": 1013,
+          "bankId": 36,
+          "topicId": 2088,
+          "topicSlug": "interest",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109679,
+            109680
+          ]
+        },
+        {
+          "ruleId": 1014,
+          "bankId": 36,
+          "topicId": 2089,
+          "topicSlug": "profit-loss-discount",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109696,
+            109701
+          ]
+        },
+        {
+          "ruleId": 1015,
+          "bankId": 36,
+          "topicId": 2090,
+          "topicSlug": "partnership-business",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109709
+          ]
+        },
+        {
+          "ruleId": 1016,
+          "bankId": 36,
+          "topicId": 2091,
+          "topicSlug": "mixture-alligation",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109716
+          ]
+        },
+        {
+          "ruleId": 1017,
+          "bankId": 36,
+          "topicId": 2092,
+          "topicSlug": "time-work",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109738,
+            109731
+          ]
+        },
+        {
+          "ruleId": 1018,
+          "bankId": 36,
+          "topicId": 2093,
+          "topicSlug": "time-distance",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109747,
+            109740
+          ]
+        },
+        {
+          "ruleId": 1019,
+          "bankId": 36,
+          "topicId": 2094,
+          "topicSlug": "algebra",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109770,
+            109756
+          ]
+        },
+        {
+          "ruleId": 1020,
+          "bankId": 36,
+          "topicId": 2095,
+          "topicSlug": "geometry",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109774,
+            109776
+          ]
+        },
+        {
+          "ruleId": 1021,
+          "bankId": 36,
+          "topicId": 2096,
+          "topicSlug": "mensuration",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109795,
+            109794
+          ]
+        },
+        {
+          "ruleId": 1022,
+          "bankId": 36,
+          "topicId": 2097,
+          "topicSlug": "trigonometry",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109806
+          ]
+        },
+        {
+          "ruleId": 1023,
+          "bankId": 36,
+          "topicId": 2098,
+          "topicSlug": "data-interpretation",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109814,
+            109811
+          ]
+        }
+      ]
+    },
+    {
+      "run": 10,
+      "count": 25,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1009,
+          "bankId": 36,
+          "topicId": 2084,
+          "topicSlug": "number-systems",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109988,
+            109636
+          ]
+        },
+        {
+          "ruleId": 1010,
+          "bankId": 36,
+          "topicId": 475,
+          "topicSlug": "percentages",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109658,
+            109651
+          ]
+        },
+        {
+          "ruleId": 1011,
+          "bankId": 36,
+          "topicId": 2086,
+          "topicSlug": "ratio-proportion",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109660
+          ]
+        },
+        {
+          "ruleId": 1012,
+          "bankId": 36,
+          "topicId": 467,
+          "topicSlug": "averages",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109672
+          ]
+        },
+        {
+          "ruleId": 1013,
+          "bankId": 36,
+          "topicId": 2088,
+          "topicSlug": "interest",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109688,
+            109689
+          ]
+        },
+        {
+          "ruleId": 1014,
+          "bankId": 36,
+          "topicId": 2089,
+          "topicSlug": "profit-loss-discount",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109700,
+            109694
+          ]
+        },
+        {
+          "ruleId": 1015,
+          "bankId": 36,
+          "topicId": 2090,
+          "topicSlug": "partnership-business",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109707
+          ]
+        },
+        {
+          "ruleId": 1016,
+          "bankId": 36,
+          "topicId": 2091,
+          "topicSlug": "mixture-alligation",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109721
+          ]
+        },
+        {
+          "ruleId": 1017,
+          "bankId": 36,
+          "topicId": 2092,
+          "topicSlug": "time-work",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109723,
+            109728
+          ]
+        },
+        {
+          "ruleId": 1018,
+          "bankId": 36,
+          "topicId": 2093,
+          "topicSlug": "time-distance",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109750,
+            109740
+          ]
+        },
+        {
+          "ruleId": 1019,
+          "bankId": 36,
+          "topicId": 2094,
+          "topicSlug": "algebra",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109768,
+            109760
+          ]
+        },
+        {
+          "ruleId": 1020,
+          "bankId": 36,
+          "topicId": 2095,
+          "topicSlug": "geometry",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109786,
+            109777
+          ]
+        },
+        {
+          "ruleId": 1021,
+          "bankId": 36,
+          "topicId": 2096,
+          "topicSlug": "mensuration",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109799,
+            109787
+          ]
+        },
+        {
+          "ruleId": 1022,
+          "bankId": 36,
+          "topicId": 2097,
+          "topicSlug": "trigonometry",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109810
+          ]
+        },
+        {
+          "ruleId": 1023,
+          "bankId": 36,
+          "topicId": 2098,
+          "topicSlug": "data-interpretation",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109826,
+            109823
+          ]
+        }
+      ]
+    },
+    {
+      "run": 11,
+      "count": 25,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1009,
+          "bankId": 36,
+          "topicId": 2084,
+          "topicSlug": "number-systems",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109629,
+            109634
+          ]
+        },
+        {
+          "ruleId": 1010,
+          "bankId": 36,
+          "topicId": 475,
+          "topicSlug": "percentages",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109656,
+            109993
+          ]
+        },
+        {
+          "ruleId": 1011,
+          "bankId": 36,
+          "topicId": 2086,
+          "topicSlug": "ratio-proportion",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109661
+          ]
+        },
+        {
+          "ruleId": 1012,
+          "bankId": 36,
+          "topicId": 467,
+          "topicSlug": "averages",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109673
+          ]
+        },
+        {
+          "ruleId": 1013,
+          "bankId": 36,
+          "topicId": 2088,
+          "topicSlug": "interest",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109687,
+            109690
+          ]
+        },
+        {
+          "ruleId": 1014,
+          "bankId": 36,
+          "topicId": 2089,
+          "topicSlug": "profit-loss-discount",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109693,
+            109691
+          ]
+        },
+        {
+          "ruleId": 1015,
+          "bankId": 36,
+          "topicId": 2090,
+          "topicSlug": "partnership-business",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109712
+          ]
+        },
+        {
+          "ruleId": 1016,
+          "bankId": 36,
+          "topicId": 2091,
+          "topicSlug": "mixture-alligation",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109721
+          ]
+        },
+        {
+          "ruleId": 1017,
+          "bankId": 36,
+          "topicId": 2092,
+          "topicSlug": "time-work",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109725,
+            109727
+          ]
+        },
+        {
+          "ruleId": 1018,
+          "bankId": 36,
+          "topicId": 2093,
+          "topicSlug": "time-distance",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109747,
+            109753
+          ]
+        },
+        {
+          "ruleId": 1019,
+          "bankId": 36,
+          "topicId": 2094,
+          "topicSlug": "algebra",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109758,
+            109761
+          ]
+        },
+        {
+          "ruleId": 1020,
+          "bankId": 36,
+          "topicId": 2095,
+          "topicSlug": "geometry",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109785,
+            109775
+          ]
+        },
+        {
+          "ruleId": 1021,
+          "bankId": 36,
+          "topicId": 2096,
+          "topicSlug": "mensuration",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109790,
+            109798
+          ]
+        },
+        {
+          "ruleId": 1022,
+          "bankId": 36,
+          "topicId": 2097,
+          "topicSlug": "trigonometry",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109810
+          ]
+        },
+        {
+          "ruleId": 1023,
+          "bankId": 36,
+          "topicId": 2098,
+          "topicSlug": "data-interpretation",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109819,
+            109811
+          ]
+        }
+      ]
+    },
+    {
+      "run": 12,
+      "count": 25,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1009,
+          "bankId": 36,
+          "topicId": 2084,
+          "topicSlug": "number-systems",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109636,
+            109642
+          ]
+        },
+        {
+          "ruleId": 1010,
+          "bankId": 36,
+          "topicId": 475,
+          "topicSlug": "percentages",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109656,
+            109657
+          ]
+        },
+        {
+          "ruleId": 1011,
+          "bankId": 36,
+          "topicId": 2086,
+          "topicSlug": "ratio-proportion",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109660
+          ]
+        },
+        {
+          "ruleId": 1012,
+          "bankId": 36,
+          "topicId": 467,
+          "topicSlug": "averages",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109674
+          ]
+        },
+        {
+          "ruleId": 1013,
+          "bankId": 36,
+          "topicId": 2088,
+          "topicSlug": "interest",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109689,
+            109682
+          ]
+        },
+        {
+          "ruleId": 1014,
+          "bankId": 36,
+          "topicId": 2089,
+          "topicSlug": "profit-loss-discount",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109691,
+            109693
+          ]
+        },
+        {
+          "ruleId": 1015,
+          "bankId": 36,
+          "topicId": 2090,
+          "topicSlug": "partnership-business",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109710
+          ]
+        },
+        {
+          "ruleId": 1016,
+          "bankId": 36,
+          "topicId": 2091,
+          "topicSlug": "mixture-alligation",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109721
+          ]
+        },
+        {
+          "ruleId": 1017,
+          "bankId": 36,
+          "topicId": 2092,
+          "topicSlug": "time-work",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109738,
+            109734
+          ]
+        },
+        {
+          "ruleId": 1018,
+          "bankId": 36,
+          "topicId": 2093,
+          "topicSlug": "time-distance",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109749,
+            109753
+          ]
+        },
+        {
+          "ruleId": 1019,
+          "bankId": 36,
+          "topicId": 2094,
+          "topicSlug": "algebra",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109755,
+            109767
+          ]
+        },
+        {
+          "ruleId": 1020,
+          "bankId": 36,
+          "topicId": 2095,
+          "topicSlug": "geometry",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109786,
+            109782
+          ]
+        },
+        {
+          "ruleId": 1021,
+          "bankId": 36,
+          "topicId": 2096,
+          "topicSlug": "mensuration",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109798,
+            109795
+          ]
+        },
+        {
+          "ruleId": 1022,
+          "bankId": 36,
+          "topicId": 2097,
+          "topicSlug": "trigonometry",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109804
+          ]
+        },
+        {
+          "ruleId": 1023,
+          "bankId": 36,
+          "topicId": 2098,
+          "topicSlug": "data-interpretation",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109822,
+            109819
+          ]
+        }
+      ]
+    },
+    {
+      "run": 13,
+      "count": 25,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1009,
+          "bankId": 36,
+          "topicId": 2084,
+          "topicSlug": "number-systems",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109628,
+            109637
+          ]
+        },
+        {
+          "ruleId": 1010,
+          "bankId": 36,
+          "topicId": 475,
+          "topicSlug": "percentages",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109992,
+            109653
+          ]
+        },
+        {
+          "ruleId": 1011,
+          "bankId": 36,
+          "topicId": 2086,
+          "topicSlug": "ratio-proportion",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109661
+          ]
+        },
+        {
+          "ruleId": 1012,
+          "bankId": 36,
+          "topicId": 467,
+          "topicSlug": "averages",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109667
+          ]
+        },
+        {
+          "ruleId": 1013,
+          "bankId": 36,
+          "topicId": 2088,
+          "topicSlug": "interest",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109678,
+            109685
+          ]
+        },
+        {
+          "ruleId": 1014,
+          "bankId": 36,
+          "topicId": 2089,
+          "topicSlug": "profit-loss-discount",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109699,
+            109700
+          ]
+        },
+        {
+          "ruleId": 1015,
+          "bankId": 36,
+          "topicId": 2090,
+          "topicSlug": "partnership-business",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109708
+          ]
+        },
+        {
+          "ruleId": 1016,
+          "bankId": 36,
+          "topicId": 2091,
+          "topicSlug": "mixture-alligation",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109722
+          ]
+        },
+        {
+          "ruleId": 1017,
+          "bankId": 36,
+          "topicId": 2092,
+          "topicSlug": "time-work",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109737,
+            109736
+          ]
+        },
+        {
+          "ruleId": 1018,
+          "bankId": 36,
+          "topicId": 2093,
+          "topicSlug": "time-distance",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109739,
+            109741
+          ]
+        },
+        {
+          "ruleId": 1019,
+          "bankId": 36,
+          "topicId": 2094,
+          "topicSlug": "algebra",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109764,
+            109769
+          ]
+        },
+        {
+          "ruleId": 1020,
+          "bankId": 36,
+          "topicId": 2095,
+          "topicSlug": "geometry",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109780,
+            109773
+          ]
+        },
+        {
+          "ruleId": 1021,
+          "bankId": 36,
+          "topicId": 2096,
+          "topicSlug": "mensuration",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109788,
+            109797
+          ]
+        },
+        {
+          "ruleId": 1022,
+          "bankId": 36,
+          "topicId": 2097,
+          "topicSlug": "trigonometry",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109803
+          ]
+        },
+        {
+          "ruleId": 1023,
+          "bankId": 36,
+          "topicId": 2098,
+          "topicSlug": "data-interpretation",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109815,
+            109811
+          ]
+        }
+      ]
+    },
+    {
+      "run": 14,
+      "count": 25,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1009,
+          "bankId": 36,
+          "topicId": 2084,
+          "topicSlug": "number-systems",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109636,
+            109988
+          ]
+        },
+        {
+          "ruleId": 1010,
+          "bankId": 36,
+          "topicId": 475,
+          "topicSlug": "percentages",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109989,
+            109657
+          ]
+        },
+        {
+          "ruleId": 1011,
+          "bankId": 36,
+          "topicId": 2086,
+          "topicSlug": "ratio-proportion",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109663
+          ]
+        },
+        {
+          "ruleId": 1012,
+          "bankId": 36,
+          "topicId": 467,
+          "topicSlug": "averages",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109667
+          ]
+        },
+        {
+          "ruleId": 1013,
+          "bankId": 36,
+          "topicId": 2088,
+          "topicSlug": "interest",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109675,
+            109676
+          ]
+        },
+        {
+          "ruleId": 1014,
+          "bankId": 36,
+          "topicId": 2089,
+          "topicSlug": "profit-loss-discount",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109695,
+            109698
+          ]
+        },
+        {
+          "ruleId": 1015,
+          "bankId": 36,
+          "topicId": 2090,
+          "topicSlug": "partnership-business",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109707
+          ]
+        },
+        {
+          "ruleId": 1016,
+          "bankId": 36,
+          "topicId": 2091,
+          "topicSlug": "mixture-alligation",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109719
+          ]
+        },
+        {
+          "ruleId": 1017,
+          "bankId": 36,
+          "topicId": 2092,
+          "topicSlug": "time-work",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109725,
+            109735
+          ]
+        },
+        {
+          "ruleId": 1018,
+          "bankId": 36,
+          "topicId": 2093,
+          "topicSlug": "time-distance",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109751,
+            109749
+          ]
+        },
+        {
+          "ruleId": 1019,
+          "bankId": 36,
+          "topicId": 2094,
+          "topicSlug": "algebra",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109764,
+            109758
+          ]
+        },
+        {
+          "ruleId": 1020,
+          "bankId": 36,
+          "topicId": 2095,
+          "topicSlug": "geometry",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109777,
+            109786
+          ]
+        },
+        {
+          "ruleId": 1021,
+          "bankId": 36,
+          "topicId": 2096,
+          "topicSlug": "mensuration",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109799,
+            109795
+          ]
+        },
+        {
+          "ruleId": 1022,
+          "bankId": 36,
+          "topicId": 2097,
+          "topicSlug": "trigonometry",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109804
+          ]
+        },
+        {
+          "ruleId": 1023,
+          "bankId": 36,
+          "topicId": 2098,
+          "topicSlug": "data-interpretation",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109819,
+            109813
+          ]
+        }
+      ]
+    },
+    {
+      "run": 15,
+      "count": 25,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1009,
+          "bankId": 36,
+          "topicId": 2084,
+          "topicSlug": "number-systems",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109637,
+            109642
+          ]
+        },
+        {
+          "ruleId": 1010,
+          "bankId": 36,
+          "topicId": 475,
+          "topicSlug": "percentages",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109652,
+            109993
+          ]
+        },
+        {
+          "ruleId": 1011,
+          "bankId": 36,
+          "topicId": 2086,
+          "topicSlug": "ratio-proportion",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109662
+          ]
+        },
+        {
+          "ruleId": 1012,
+          "bankId": 36,
+          "topicId": 467,
+          "topicSlug": "averages",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109672
+          ]
+        },
+        {
+          "ruleId": 1013,
+          "bankId": 36,
+          "topicId": 2088,
+          "topicSlug": "interest",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109687,
+            109682
+          ]
+        },
+        {
+          "ruleId": 1014,
+          "bankId": 36,
+          "topicId": 2089,
+          "topicSlug": "profit-loss-discount",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109705,
+            109695
+          ]
+        },
+        {
+          "ruleId": 1015,
+          "bankId": 36,
+          "topicId": 2090,
+          "topicSlug": "partnership-business",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109713
+          ]
+        },
+        {
+          "ruleId": 1016,
+          "bankId": 36,
+          "topicId": 2091,
+          "topicSlug": "mixture-alligation",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109718
+          ]
+        },
+        {
+          "ruleId": 1017,
+          "bankId": 36,
+          "topicId": 2092,
+          "topicSlug": "time-work",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109731,
+            109724
+          ]
+        },
+        {
+          "ruleId": 1018,
+          "bankId": 36,
+          "topicId": 2093,
+          "topicSlug": "time-distance",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109742,
+            109751
+          ]
+        },
+        {
+          "ruleId": 1019,
+          "bankId": 36,
+          "topicId": 2094,
+          "topicSlug": "algebra",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109764,
+            109770
+          ]
+        },
+        {
+          "ruleId": 1020,
+          "bankId": 36,
+          "topicId": 2095,
+          "topicSlug": "geometry",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109782,
+            109773
+          ]
+        },
+        {
+          "ruleId": 1021,
+          "bankId": 36,
+          "topicId": 2096,
+          "topicSlug": "mensuration",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109795,
+            109801
+          ]
+        },
+        {
+          "ruleId": 1022,
+          "bankId": 36,
+          "topicId": 2097,
+          "topicSlug": "trigonometry",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109810
+          ]
+        },
+        {
+          "ruleId": 1023,
+          "bankId": 36,
+          "topicId": 2098,
+          "topicSlug": "data-interpretation",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109813,
+            109826
+          ]
+        }
+      ]
+    },
+    {
+      "run": 16,
+      "count": 25,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1009,
+          "bankId": 36,
+          "topicId": 2084,
+          "topicSlug": "number-systems",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109988,
+            109636
+          ]
+        },
+        {
+          "ruleId": 1010,
+          "bankId": 36,
+          "topicId": 475,
+          "topicSlug": "percentages",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109647,
+            109654
+          ]
+        },
+        {
+          "ruleId": 1011,
+          "bankId": 36,
+          "topicId": 2086,
+          "topicSlug": "ratio-proportion",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109660
+          ]
+        },
+        {
+          "ruleId": 1012,
+          "bankId": 36,
+          "topicId": 467,
+          "topicSlug": "averages",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109669
+          ]
+        },
+        {
+          "ruleId": 1013,
+          "bankId": 36,
+          "topicId": 2088,
+          "topicSlug": "interest",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109685,
+            109680
+          ]
+        },
+        {
+          "ruleId": 1014,
+          "bankId": 36,
+          "topicId": 2089,
+          "topicSlug": "profit-loss-discount",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109703,
+            109705
+          ]
+        },
+        {
+          "ruleId": 1015,
+          "bankId": 36,
+          "topicId": 2090,
+          "topicSlug": "partnership-business",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109707
+          ]
+        },
+        {
+          "ruleId": 1016,
+          "bankId": 36,
+          "topicId": 2091,
+          "topicSlug": "mixture-alligation",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109718
+          ]
+        },
+        {
+          "ruleId": 1017,
+          "bankId": 36,
+          "topicId": 2092,
+          "topicSlug": "time-work",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109730,
+            109729
+          ]
+        },
+        {
+          "ruleId": 1018,
+          "bankId": 36,
+          "topicId": 2093,
+          "topicSlug": "time-distance",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109753,
+            109748
+          ]
+        },
+        {
+          "ruleId": 1019,
+          "bankId": 36,
+          "topicId": 2094,
+          "topicSlug": "algebra",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109765,
+            109757
+          ]
+        },
+        {
+          "ruleId": 1020,
+          "bankId": 36,
+          "topicId": 2095,
+          "topicSlug": "geometry",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109782,
+            109777
+          ]
+        },
+        {
+          "ruleId": 1021,
+          "bankId": 36,
+          "topicId": 2096,
+          "topicSlug": "mensuration",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109795,
+            109796
+          ]
+        },
+        {
+          "ruleId": 1022,
+          "bankId": 36,
+          "topicId": 2097,
+          "topicSlug": "trigonometry",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109805
+          ]
+        },
+        {
+          "ruleId": 1023,
+          "bankId": 36,
+          "topicId": 2098,
+          "topicSlug": "data-interpretation",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109819,
+            109824
+          ]
+        }
+      ]
+    },
+    {
+      "run": 17,
+      "count": 25,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1009,
+          "bankId": 36,
+          "topicId": 2084,
+          "topicSlug": "number-systems",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109630,
+            109640
+          ]
+        },
+        {
+          "ruleId": 1010,
+          "bankId": 36,
+          "topicId": 475,
+          "topicSlug": "percentages",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109991,
+            109656
+          ]
+        },
+        {
+          "ruleId": 1011,
+          "bankId": 36,
+          "topicId": 2086,
+          "topicSlug": "ratio-proportion",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109664
+          ]
+        },
+        {
+          "ruleId": 1012,
+          "bankId": 36,
+          "topicId": 467,
+          "topicSlug": "averages",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109674
+          ]
+        },
+        {
+          "ruleId": 1013,
+          "bankId": 36,
+          "topicId": 2088,
+          "topicSlug": "interest",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109690,
+            109688
+          ]
+        },
+        {
+          "ruleId": 1014,
+          "bankId": 36,
+          "topicId": 2089,
+          "topicSlug": "profit-loss-discount",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109703,
+            109696
+          ]
+        },
+        {
+          "ruleId": 1015,
+          "bankId": 36,
+          "topicId": 2090,
+          "topicSlug": "partnership-business",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109707
+          ]
+        },
+        {
+          "ruleId": 1016,
+          "bankId": 36,
+          "topicId": 2091,
+          "topicSlug": "mixture-alligation",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109719
+          ]
+        },
+        {
+          "ruleId": 1017,
+          "bankId": 36,
+          "topicId": 2092,
+          "topicSlug": "time-work",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109731,
+            109723
+          ]
+        },
+        {
+          "ruleId": 1018,
+          "bankId": 36,
+          "topicId": 2093,
+          "topicSlug": "time-distance",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109743,
+            109746
+          ]
+        },
+        {
+          "ruleId": 1019,
+          "bankId": 36,
+          "topicId": 2094,
+          "topicSlug": "algebra",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109770,
+            109769
+          ]
+        },
+        {
+          "ruleId": 1020,
+          "bankId": 36,
+          "topicId": 2095,
+          "topicSlug": "geometry",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109775,
+            109780
+          ]
+        },
+        {
+          "ruleId": 1021,
+          "bankId": 36,
+          "topicId": 2096,
+          "topicSlug": "mensuration",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109801,
+            109790
+          ]
+        },
+        {
+          "ruleId": 1022,
+          "bankId": 36,
+          "topicId": 2097,
+          "topicSlug": "trigonometry",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109807
+          ]
+        },
+        {
+          "ruleId": 1023,
+          "bankId": 36,
+          "topicId": 2098,
+          "topicSlug": "data-interpretation",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109819,
+            109815
+          ]
+        }
+      ]
+    },
+    {
+      "run": 18,
+      "count": 25,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1009,
+          "bankId": 36,
+          "topicId": 2084,
+          "topicSlug": "number-systems",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109628,
+            109642
+          ]
+        },
+        {
+          "ruleId": 1010,
+          "bankId": 36,
+          "topicId": 475,
+          "topicSlug": "percentages",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109655,
+            109994
+          ]
+        },
+        {
+          "ruleId": 1011,
+          "bankId": 36,
+          "topicId": 2086,
+          "topicSlug": "ratio-proportion",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109659
+          ]
+        },
+        {
+          "ruleId": 1012,
+          "bankId": 36,
+          "topicId": 467,
+          "topicSlug": "averages",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109667
+          ]
+        },
+        {
+          "ruleId": 1013,
+          "bankId": 36,
+          "topicId": 2088,
+          "topicSlug": "interest",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109677,
+            109685
+          ]
+        },
+        {
+          "ruleId": 1014,
+          "bankId": 36,
+          "topicId": 2089,
+          "topicSlug": "profit-loss-discount",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109703,
+            109704
+          ]
+        },
+        {
+          "ruleId": 1015,
+          "bankId": 36,
+          "topicId": 2090,
+          "topicSlug": "partnership-business",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109713
+          ]
+        },
+        {
+          "ruleId": 1016,
+          "bankId": 36,
+          "topicId": 2091,
+          "topicSlug": "mixture-alligation",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109717
+          ]
+        },
+        {
+          "ruleId": 1017,
+          "bankId": 36,
+          "topicId": 2092,
+          "topicSlug": "time-work",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109731,
+            109725
+          ]
+        },
+        {
+          "ruleId": 1018,
+          "bankId": 36,
+          "topicId": 2093,
+          "topicSlug": "time-distance",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109742,
+            109743
+          ]
+        },
+        {
+          "ruleId": 1019,
+          "bankId": 36,
+          "topicId": 2094,
+          "topicSlug": "algebra",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109762,
+            109767
+          ]
+        },
+        {
+          "ruleId": 1020,
+          "bankId": 36,
+          "topicId": 2095,
+          "topicSlug": "geometry",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109772,
+            109783
+          ]
+        },
+        {
+          "ruleId": 1021,
+          "bankId": 36,
+          "topicId": 2096,
+          "topicSlug": "mensuration",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109789,
+            109800
+          ]
+        },
+        {
+          "ruleId": 1022,
+          "bankId": 36,
+          "topicId": 2097,
+          "topicSlug": "trigonometry",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109803
+          ]
+        },
+        {
+          "ruleId": 1023,
+          "bankId": 36,
+          "topicId": 2098,
+          "topicSlug": "data-interpretation",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109825,
+            109817
+          ]
+        }
+      ]
+    },
+    {
+      "run": 19,
+      "count": 25,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1009,
+          "bankId": 36,
+          "topicId": 2084,
+          "topicSlug": "number-systems",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109627,
+            109637
+          ]
+        },
+        {
+          "ruleId": 1010,
+          "bankId": 36,
+          "topicId": 475,
+          "topicSlug": "percentages",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109656,
+            109994
+          ]
+        },
+        {
+          "ruleId": 1011,
+          "bankId": 36,
+          "topicId": 2086,
+          "topicSlug": "ratio-proportion",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109665
+          ]
+        },
+        {
+          "ruleId": 1012,
+          "bankId": 36,
+          "topicId": 467,
+          "topicSlug": "averages",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109674
+          ]
+        },
+        {
+          "ruleId": 1013,
+          "bankId": 36,
+          "topicId": 2088,
+          "topicSlug": "interest",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109690,
+            109676
+          ]
+        },
+        {
+          "ruleId": 1014,
+          "bankId": 36,
+          "topicId": 2089,
+          "topicSlug": "profit-loss-discount",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109703,
+            109693
+          ]
+        },
+        {
+          "ruleId": 1015,
+          "bankId": 36,
+          "topicId": 2090,
+          "topicSlug": "partnership-business",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109710
+          ]
+        },
+        {
+          "ruleId": 1016,
+          "bankId": 36,
+          "topicId": 2091,
+          "topicSlug": "mixture-alligation",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109719
+          ]
+        },
+        {
+          "ruleId": 1017,
+          "bankId": 36,
+          "topicId": 2092,
+          "topicSlug": "time-work",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109729,
+            109726
+          ]
+        },
+        {
+          "ruleId": 1018,
+          "bankId": 36,
+          "topicId": 2093,
+          "topicSlug": "time-distance",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109742,
+            109746
+          ]
+        },
+        {
+          "ruleId": 1019,
+          "bankId": 36,
+          "topicId": 2094,
+          "topicSlug": "algebra",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109757,
+            109760
+          ]
+        },
+        {
+          "ruleId": 1020,
+          "bankId": 36,
+          "topicId": 2095,
+          "topicSlug": "geometry",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109783,
+            109773
+          ]
+        },
+        {
+          "ruleId": 1021,
+          "bankId": 36,
+          "topicId": 2096,
+          "topicSlug": "mensuration",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109802,
+            109794
+          ]
+        },
+        {
+          "ruleId": 1022,
+          "bankId": 36,
+          "topicId": 2097,
+          "topicSlug": "trigonometry",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109806
+          ]
+        },
+        {
+          "ruleId": 1023,
+          "bankId": 36,
+          "topicId": 2098,
+          "topicSlug": "data-interpretation",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109820,
+            109814
+          ]
+        }
+      ]
+    },
+    {
+      "run": 20,
+      "count": 25,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 1009,
+          "bankId": 36,
+          "topicId": 2084,
+          "topicSlug": "number-systems",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109632,
+            109633
+          ]
+        },
+        {
+          "ruleId": 1010,
+          "bankId": 36,
+          "topicId": 475,
+          "topicSlug": "percentages",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109647,
+            109658
+          ]
+        },
+        {
+          "ruleId": 1011,
+          "bankId": 36,
+          "topicId": 2086,
+          "topicSlug": "ratio-proportion",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109665
+          ]
+        },
+        {
+          "ruleId": 1012,
+          "bankId": 36,
+          "topicId": 467,
+          "topicSlug": "averages",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109672
+          ]
+        },
+        {
+          "ruleId": 1013,
+          "bankId": 36,
+          "topicId": 2088,
+          "topicSlug": "interest",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109679,
+            109678
+          ]
+        },
+        {
+          "ruleId": 1014,
+          "bankId": 36,
+          "topicId": 2089,
+          "topicSlug": "profit-loss-discount",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109705,
+            109703
+          ]
+        },
+        {
+          "ruleId": 1015,
+          "bankId": 36,
+          "topicId": 2090,
+          "topicSlug": "partnership-business",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109708
+          ]
+        },
+        {
+          "ruleId": 1016,
+          "bankId": 36,
+          "topicId": 2091,
+          "topicSlug": "mixture-alligation",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109721
+          ]
+        },
+        {
+          "ruleId": 1017,
+          "bankId": 36,
+          "topicId": 2092,
+          "topicSlug": "time-work",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109733,
+            109726
+          ]
+        },
+        {
+          "ruleId": 1018,
+          "bankId": 36,
+          "topicId": 2093,
+          "topicSlug": "time-distance",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109749,
+            109748
+          ]
+        },
+        {
+          "ruleId": 1019,
+          "bankId": 36,
+          "topicId": 2094,
+          "topicSlug": "algebra",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109763,
+            109757
+          ]
+        },
+        {
+          "ruleId": 1020,
+          "bankId": 36,
+          "topicId": 2095,
+          "topicSlug": "geometry",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109783,
+            109781
+          ]
+        },
+        {
+          "ruleId": 1021,
+          "bankId": 36,
+          "topicId": 2096,
+          "topicSlug": "mensuration",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109798,
+            109789
+          ]
+        },
+        {
+          "ruleId": 1022,
+          "bankId": 36,
+          "topicId": 2097,
+          "topicSlug": "trigonometry",
+          "difficulty": "mixed",
+          "expected": 1,
+          "selected": 1,
+          "availableAtAudit": 8,
+          "unusedCapacity": 7,
+          "exhausted": false,
+          "questionIds": [
+            109809
+          ]
+        },
+        {
+          "ruleId": 1023,
+          "bankId": 36,
+          "topicId": 2098,
+          "topicSlug": "data-interpretation",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 16,
+          "unusedCapacity": 14,
+          "exhausted": false,
+          "questionIds": [
+            109817,
+            109825
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "assessmentId": 71,
+  "slug": "jee-main-chemistry-numerical-practice",
+  "blueprintRevision": 1,
+  "passingScore": 60,
+  "formSimulationArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/71-jee-main-chemistry-numerical-practice/form-simulation.json",
+  "representativeAttemptQaArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/71-jee-main-chemistry-numerical-practice/representative-attempt-qa.json",
+  "accessibilityAuditArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/71-jee-main-chemistry-numerical-practice/accessibility-content-audit.json",
+  "cutScoreApprovalReference": "automated-boundary-check:jee-main-chemistry-numerical-practice:revision-1:score-60",
+  "cutScoreApprovalSha256": "19c2b8bf623b984525579758b129105af6d3e876b561b0bd52bcd5c18f1489e3",
+  "results": {
+    "forms": 20,
+    "draws": 500,
+    "duplicateSelections": 0,
+    "poolExhaustions": 0,
+    "topicRuleChecks": 100,
+    "representativeAttempts": 60,
+    "auditedItems": 200,
+    "mediaItems": 0
+  }
+}

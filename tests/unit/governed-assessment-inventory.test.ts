@@ -1,17 +1,23 @@
 import { createHash } from "node:crypto";
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "@jest/globals";
 import {
   assertGovernedInventoryReadOnlyMode,
   evaluateGovernedAssessmentInventory,
   governedAssessmentContentManifestSha256,
+  governedMachineArtifactReference,
   governedReleaseBundleSha256,
   groupInventoryIssues,
   inventoryBlockerSeverity,
+  OFFICER_ITEM_AUTHORSHIP_DISCLOSURE,
   type GovernedAssessmentInventoryInput,
   type InventoryReleaseBundle,
 } from "../../scripts/lib/governed-assessment-inventory";
 import { governedInventoryGateFailure } from "../../scripts/governed-assessment-inventory";
-import { assertAuthorizedReleasePrincipals } from "../../scripts/record-assessment-release-evidence";
+import {
+  assertAuthorizedReleasePrincipals,
+  assertSingleOfficerItemIndependence,
+} from "../../scripts/record-assessment-release-evidence";
 import { assertGrantableReleaseIdentity } from "../../scripts/grant-assessment-release-role";
 
 const EVIDENCE_CODES = [
@@ -202,9 +208,85 @@ function addCompleteEvidence(input: GovernedAssessmentInventoryInput): GovernedA
   return input;
 }
 
+function machineArtifactReference(
+  artifactType: "form_simulation" | "representative_attempt_qa" | "accessibility_content_audit",
+  blueprintRevision = 3,
+) {
+  const reference = governedMachineArtifactReference({
+    schemaVersion: "octamy.release-machine-artifact.v1",
+    artifactType,
+    assessmentId: 43,
+    blueprintRevision,
+    generatedAt: "2026-07-27T08:30:00.000Z",
+    passed: true,
+    summary: `Passed ${artifactType.replaceAll("_", " ")} checks.`,
+    checks: [{ name: "result", passed: true, detail: "All configured assertions passed." }],
+  });
+  return { reference, sha256: createHash("sha256").update(reference).digest("hex") };
+}
+
+function addSingleOfficerEvidence(input: GovernedAssessmentInventoryInput): GovernedAssessmentInventoryInput {
+  addCompleteEvidence(input);
+  const officer = 19;
+  const form = machineArtifactReference("form_simulation");
+  const qa = machineArtifactReference("representative_attempt_qa");
+  const accessibility = machineArtifactReference("accessibility_content_audit");
+  input.releaseEvidence.accessibilityAcceptances[0] = {
+    ...input.releaseEvidence.accessibilityAcceptances[0],
+    reviewerUserId: officer,
+    evidenceReference: accessibility.reference,
+    evidenceSha256: accessibility.sha256,
+  };
+  input.releaseEvidence.rightsRoleReviews[0].reviewerUserId = officer;
+  const prior = input.releaseEvidence.releaseBundles[0];
+  const { bundleSha256: _priorHash, ...base } = prior;
+  const unsigned: Omit<InventoryReleaseBundle, "bundleSha256"> = {
+    ...base,
+    attestationMode: "single_accountable_officer",
+    accountableOfficerUserId: officer,
+    singleOfficerAttestation: "I accept named accountability for this small-organisation release.",
+    formSimulationReference: form.reference,
+    formSimulationSha256: form.sha256,
+    releaseQaReference: qa.reference,
+    releaseQaSha256: qa.sha256,
+    contentReviewerUserId: officer,
+    cutScoreApproverUserId: officer,
+    qaReviewerUserId: officer,
+    publisherUserId: officer,
+    rollbackOwnerUserId: officer,
+  };
+  input.releaseEvidence.releaseBundles[0] = { ...unsigned, bundleSha256: governedReleaseBundleSha256(unsigned) };
+  return input;
+}
+
 function codes(input: GovernedAssessmentInventoryInput) {
   return evaluateGovernedAssessmentInventory(input).issues.map((found) => found.code);
 }
+
+  it("aligns the release trigger with officer-item-authorship disclosure policy", () => {
+    const sql = readFileSync(
+      "migrations/0043_align_officer_item_authorship_disclosure.sql",
+      "utf8",
+    );
+    const functionBody = sql.match(
+      /CREATE OR REPLACE FUNCTION\s+enforce_assessment_release_role_separation\(\)[\s\S]*?AS \$\$([\s\S]*?)\$\$ LANGUAGE plpgsql;/,
+    )?.[1];
+
+    expect(sql).toMatch(
+      /CREATE TRIGGER\s+assessment_release_bundles_role_separation[\s\S]*?ON\s+"assessment_release_bundles"[\s\S]*?EXECUTE FUNCTION\s+enforce_assessment_release_role_separation\(\);/,
+    );
+    expect(functionBody).toBeDefined();
+    expect(functionBody).not.toMatch(/question\."created_by"\s*=\s*single_officer\s+OR\s+question\."reviewed_by"/);
+    expect(functionBody).toContain('question."reviewed_by" = single_officer');
+    expect(functionBody).toContain('question."created_by" = single_officer');
+    expect(functionBody).toContain('NEW."single_officer_attestation"');
+    expect(functionBody).toContain('NEW."takedown_procedure"');
+    expect(functionBody?.match(/ACCOUNTABLE_OFFICER_ITEM_AUTHORSHIP_DISCLOSURE/g)).toHaveLength(1);
+    expect(functionBody).toContain("Single accountable officer must be a platform administrator");
+    expect(functionBody).toContain("Single accountable officer requires a current release_operator grant");
+    expect(functionBody).toContain("Release attestation mode must be multi_party or single_accountable_officer");
+    expect(functionBody).toContain("Release sign-off roles must be independent from accessibility and rights reviewers");
+  });
 
 describe("governed assessment inventory", () => {
   it("refuses every mode except dry-run", () => {
@@ -270,6 +352,72 @@ describe("governed assessment inventory", () => {
     )).toMatch(/substantive content or legal blockers/);
   });
 
+  it("permits officer-as-item-author only with the explicit disclosure acknowledgement", () => {
+    const questions = [{ created_by: 19, reviewed_by: 12 }];
+    expect(() => assertSingleOfficerItemIndependence(19, questions, false))
+      .toThrow(/OFFICER_ITEM_AUTHORSHIP_DISCLOSURE_REQUIRED/);
+    expect(assertSingleOfficerItemIndependence(19, questions, true)).toEqual({
+      officerIsItemAuthor: true,
+      officerIsRecordedItemReviewer: false,
+      disclosure: OFFICER_ITEM_AUTHORSHIP_DISCLOSURE,
+    });
+  });
+
+  it("still refuses an officer who is the recorded independent item reviewer", () => {
+    expect(() => assertSingleOfficerItemIndependence(19, [{ created_by: 11, reviewed_by: 19 }], false))
+      .toThrow(/SELF_APPROVAL_FORBIDDEN.*recorded independent item reviewer/);
+  });
+
+  it("surfaces the immutable officer-authorship disclosure and lack of multi-party review", () => {
+    const fixture = acceptedFixture();
+    fixture.questions[0].createdBy = 19;
+    addSingleOfficerEvidence(fixture);
+    const bundle = fixture.releaseEvidence.releaseBundles[0];
+    bundle.singleOfficerAttestation = `${bundle.singleOfficerAttestation}\n\n${OFFICER_ITEM_AUTHORSHIP_DISCLOSURE}`;
+    bundle.takedownProcedure = `${bundle.takedownProcedure}\n\n${OFFICER_ITEM_AUTHORSHIP_DISCLOSURE}`;
+    bundle.takedownProcedureSha256 = createHash("sha256").update(bundle.takedownProcedure).digest("hex");
+    const { bundleSha256: _old, ...unsigned } = bundle;
+    bundle.bundleSha256 = governedReleaseBundleSha256(unsigned);
+
+    const report = evaluateGovernedAssessmentInventory(fixture);
+    expect(report.releaseReady).toBe(true);
+    expect(report.releaseAttestation).toEqual({
+      mode: "single_accountable_officer",
+      accountableOfficerUserId: 19,
+      officerIsItemAuthor: true,
+      officerIsRecordedItemReviewer: false,
+      independentMultiPartyReleaseReview: false,
+      officerItemAuthorshipDisclosure: OFFICER_ITEM_AUTHORSHIP_DISCLOSURE,
+    });
+  });
+
+  it("does not accept officer authorship when the immutable disclosure is absent", () => {
+    const fixture = acceptedFixture();
+    fixture.questions[0].createdBy = 19;
+    const report = evaluateGovernedAssessmentInventory(addSingleOfficerEvidence(fixture));
+    expect(report.releaseReady).toBe(false);
+    expect(report.releaseAttestation.officerIsItemAuthor).toBe(true);
+    expect(report.releaseAttestation.officerItemAuthorshipDisclosure).toBeNull();
+    expect(report.issues).toEqual(expect.arrayContaining([
+      expect.objectContaining({ code: "IMMUTABLE_RELEASE_BUNDLE_NOT_REPRESENTED" }),
+    ]));
+  });
+
+  it("evaluator refuses a single officer recorded as the item reviewer", () => {
+    const fixture = acceptedFixture();
+    fixture.questions[0].reviewedBy = 19;
+    if (fixture.questions[0].releaseEvidence?.reviewAttestation) {
+      fixture.questions[0].releaseEvidence.reviewAttestation.reviewerId = 19;
+    }
+    const report = evaluateGovernedAssessmentInventory(addSingleOfficerEvidence(fixture));
+    expect(report.releaseReady).toBe(false);
+    expect(report.releaseAttestation.officerIsRecordedItemReviewer).toBe(true);
+    expect(report.issues).toEqual(expect.arrayContaining([
+      expect.objectContaining({ code: "RIGHTS_ROLE_SEPARATION_VIOLATED", blockerSeverity: "SUBSTANTIVE" }),
+      expect.objectContaining({ code: "IMMUTABLE_RELEASE_BUNDLE_NOT_REPRESENTED" }),
+    ]));
+  });
+
   it("clears the blockers only for complete attributable current-revision evidence", () => {
     const report = evaluateGovernedAssessmentInventory(addCompleteEvidence(acceptedFixture()));
     expect(report.issues).toEqual([]);
@@ -281,6 +429,42 @@ describe("governed assessment inventory", () => {
       immutableReleaseBundle: true,
       attributableRightsReviewerIdentity: true,
     });
+  });
+
+  it("accepts single-accountable-officer mode only with all complete current machine artifacts", () => {
+    const report = evaluateGovernedAssessmentInventory(addSingleOfficerEvidence(acceptedFixture()));
+    expect(report.issues).toEqual([]);
+    expect(report.releaseReady).toBe(true);
+  });
+
+  it("refuses single-accountable-officer mode without all three machine artifacts", () => {
+    const fixture = addSingleOfficerEvidence(acceptedFixture());
+    fixture.releaseEvidence.releaseBundles[0].formSimulationReference = "evidence/form-simulation/bare-human-claim";
+    const { bundleSha256: _old, ...unsigned } = fixture.releaseEvidence.releaseBundles[0];
+    fixture.releaseEvidence.releaseBundles[0].bundleSha256 = governedReleaseBundleSha256(unsigned);
+    expect(codes(fixture)).toContain("IMMUTABLE_RELEASE_BUNDLE_NOT_REPRESENTED");
+  });
+
+  it("refuses stale or hash-mismatched single-officer artifacts", () => {
+    const stale = addSingleOfficerEvidence(acceptedFixture());
+    const oldAccessibility = machineArtifactReference("accessibility_content_audit", 2);
+    stale.releaseEvidence.accessibilityAcceptances[0].evidenceReference = oldAccessibility.reference;
+    stale.releaseEvidence.accessibilityAcceptances[0].evidenceSha256 = oldAccessibility.sha256;
+    expect(codes(stale)).toContain("ASSESSMENT_ACCESSIBILITY_ACCEPTANCE_NOT_REPRESENTED");
+
+    const mismatched = addSingleOfficerEvidence(acceptedFixture());
+    mismatched.releaseEvidence.releaseBundles[0].releaseQaSha256 = "0".repeat(64);
+    const { bundleSha256: _old, ...unsigned } = mismatched.releaseEvidence.releaseBundles[0];
+    mismatched.releaseEvidence.releaseBundles[0].bundleSha256 = governedReleaseBundleSha256(unsigned);
+    expect(codes(mismatched)).toContain("IMMUTABLE_RELEASE_BUNDLE_NOT_REPRESENTED");
+  });
+
+  it("keeps six distinct approval principals mandatory in multi-party mode", () => {
+    const fixture = addCompleteEvidence(acceptedFixture());
+    fixture.releaseEvidence.releaseBundles[0].qaReviewerUserId = fixture.releaseEvidence.releaseBundles[0].publisherUserId;
+    const { bundleSha256: _old, ...unsigned } = fixture.releaseEvidence.releaseBundles[0];
+    fixture.releaseEvidence.releaseBundles[0].bundleSha256 = governedReleaseBundleSha256(unsigned);
+    expect(codes(fixture)).toContain("IMMUTABLE_RELEASE_BUNDLE_NOT_REPRESENTED");
   });
 
   it("does not clear blockers with partial evidence", () => {
@@ -332,14 +516,14 @@ describe("governed assessment inventory", () => {
 
 describe("release evidence revocation and principal authorization", () => {
   const roleIds = {
-    operator: 1,
-    accessibility: 2,
-    content: 3,
-    rights: 4,
-    cutScore: 5,
-    qa: 6,
-    publisher: 7,
-    rollback: 8,
+    operator: 101,
+    accessibility: 102,
+    content: 103,
+    rights: 104,
+    cutScore: 105,
+    qa: 106,
+    publisher: 107,
+    rollback: 108,
   };
   const roleNames = [
     "release_operator",
@@ -391,7 +575,7 @@ describe("release evidence revocation and principal authorization", () => {
     expect(() => assertAuthorizedReleasePrincipals(roleIds, users, grants))
       .not.toThrow();
     expect(() => assertAuthorizedReleasePrincipals(roleIds, users, grants.filter((grant) => grant.releaseRole !== "rights_reviewer")))
-      .toThrow(/rights user 4 lacks a current, unrevoked, unexpired rights_reviewer grant/);
+      .toThrow(/rights user 104 lacks a current, unrevoked, unexpired rights_reviewer grant/);
   });
 
   it("refuses evidence when an exact grant is revoked", () => {
@@ -399,7 +583,7 @@ describe("release evidence revocation and principal authorization", () => {
       ? { ...grant, revokedAt: "2026-07-29T08:00:00.000Z" }
       : grant);
     expect(() => assertAuthorizedReleasePrincipals(roleIds, users, revoked, new Date("2026-07-29T09:00:00.000Z")))
-      .toThrow(/qa user 6 lacks a current, unrevoked, unexpired qa_reviewer grant/);
+      .toThrow(/qa user 106 lacks a current, unrevoked, unexpired qa_reviewer grant/);
   });
 
   it("refuses evidence when an exact grant is expired", () => {
@@ -407,7 +591,7 @@ describe("release evidence revocation and principal authorization", () => {
       ? { ...grant, expiresAt: "2026-07-29T08:00:00.000Z" }
       : grant);
     expect(() => assertAuthorizedReleasePrincipals(roleIds, users, expired, new Date("2026-07-29T09:00:00.000Z")))
-      .toThrow(/publisher user 7 lacks a current, unrevoked, unexpired publisher grant/);
+      .toThrow(/publisher user 107 lacks a current, unrevoked, unexpired publisher grant/);
   });
 
   it.each([
@@ -419,11 +603,44 @@ describe("release evidence revocation and principal authorization", () => {
       .toThrow(/RELEASE_ROLE_TARGET_FORBIDDEN/);
   });
 
+  it.each([3, 5, 6, 7])("refuses confirmed non-real production user %i regardless of display name", (userId) => {
+    const singleOfficerRoles = {
+      operator: userId, accessibility: userId, content: userId, rights: userId,
+      cutScore: userId, qa: userId, publisher: userId, rollback: userId,
+    };
+    expect(() => assertAuthorizedReleasePrincipals(
+      singleOfficerRoles,
+      [{ id: userId, name: "Apparently Named Human", email: "named-human@example.invalid" }],
+      [{ grantId: 1, userId, releaseRole: "release_operator", expiresAt: null, revokedAt: null }],
+      new Date("2026-07-29T09:00:00.000Z"),
+      "single_accountable_officer",
+    )).toThrow(/RELEASE_PRINCIPAL_IDENTITY_FORBIDDEN/);
+  });
+
   it("refuses test, smoke, automation, and AI-authoring principals even when granted", () => {
     const unsafeUsers = users.map((user) => user.id === roleIds.qa
       ? { ...user, name: "Octamy Assessment Authoring" }
       : user);
     expect(() => assertAuthorizedReleasePrincipals(roleIds, unsafeUsers, grants))
       .toThrow(/RELEASE_PRINCIPAL_IDENTITY_FORBIDDEN.*AI-authoring, test, or smoke/);
+  });
+
+  it.each([
+    ["Release automation bot", "owner@example.invalid"],
+    ["Junk fixture account", "owner@example.invalid"],
+    ["Named Officer", "test-officer@example.invalid"],
+    ["AI assessment authoring", "officer@example.invalid"],
+  ])("refuses automation, test, and AI-authoring accountable officers", (name, email) => {
+    const singleOfficerRoles = {
+      operator: 1, accessibility: 1, content: 1, rights: 1,
+      cutScore: 1, qa: 1, publisher: 1, rollback: 1,
+    };
+    expect(() => assertAuthorizedReleasePrincipals(
+      singleOfficerRoles,
+      [{ id: 1, name, email }],
+      [{ grantId: 1, userId: 1, releaseRole: "release_operator", expiresAt: null, revokedAt: null }],
+      new Date("2026-07-29T09:00:00.000Z"),
+      "single_accountable_officer",
+    )).toThrow(/RELEASE_PRINCIPAL_IDENTITY_FORBIDDEN/);
   });
 });

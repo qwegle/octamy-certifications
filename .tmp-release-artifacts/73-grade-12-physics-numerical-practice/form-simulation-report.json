@@ -1,0 +1,3968 @@
+{
+  "schemaVersion": "octamy.form-simulation-report.v1",
+  "assessmentId": 73,
+  "assessmentSlug": "grade-12-physics-numerical-practice",
+  "blueprintRevision": 1,
+  "generatedAt": "2026-07-29T12:27:03.614Z",
+  "runtimePath": "DatabaseStorage.materializeBlueprintForAttempt",
+  "independentFormCount": 20,
+  "expectedDrawPerForm": 30,
+  "totalDraws": 600,
+  "duplicateSelections": 0,
+  "poolExhaustions": 0,
+  "topicRuleChecks": 220,
+  "rules": [
+    {
+      "id": 836,
+      "bank_id": 48,
+      "topic_id": 641,
+      "topic_slug": "current-electricity",
+      "question_count": 3,
+      "difficulty": "mixed",
+      "sort_order": 0,
+      "available": 19
+    },
+    {
+      "id": 837,
+      "bank_id": 48,
+      "topic_id": 642,
+      "topic_slug": "force-and-newtons-laws",
+      "question_count": 3,
+      "difficulty": "mixed",
+      "sort_order": 1,
+      "available": 19
+    },
+    {
+      "id": 838,
+      "bank_id": 48,
+      "topic_id": 643,
+      "topic_slug": "mechanical-properties-of-fluids",
+      "question_count": 3,
+      "difficulty": "mixed",
+      "sort_order": 2,
+      "available": 18
+    },
+    {
+      "id": 839,
+      "bank_id": 48,
+      "topic_id": 644,
+      "topic_slug": "momentum",
+      "question_count": 3,
+      "difficulty": "mixed",
+      "sort_order": 3,
+      "available": 18
+    },
+    {
+      "id": 840,
+      "bank_id": 48,
+      "topic_id": 645,
+      "topic_slug": "motion-in-a-straight-line",
+      "question_count": 3,
+      "difficulty": "mixed",
+      "sort_order": 4,
+      "available": 18
+    },
+    {
+      "id": 841,
+      "bank_id": 48,
+      "topic_id": 646,
+      "topic_slug": "oscillations",
+      "question_count": 3,
+      "difficulty": "mixed",
+      "sort_order": 5,
+      "available": 18
+    },
+    {
+      "id": 842,
+      "bank_id": 48,
+      "topic_id": 647,
+      "topic_slug": "properties-of-matter",
+      "question_count": 3,
+      "difficulty": "mixed",
+      "sort_order": 6,
+      "available": 18
+    },
+    {
+      "id": 843,
+      "bank_id": 48,
+      "topic_id": 648,
+      "topic_slug": "speed-distance-time",
+      "question_count": 3,
+      "difficulty": "mixed",
+      "sort_order": 7,
+      "available": 18
+    },
+    {
+      "id": 844,
+      "bank_id": 48,
+      "topic_id": 649,
+      "topic_slug": "thermal-properties",
+      "question_count": 2,
+      "difficulty": "mixed",
+      "sort_order": 8,
+      "available": 18
+    },
+    {
+      "id": 845,
+      "bank_id": 48,
+      "topic_id": 650,
+      "topic_slug": "waves",
+      "question_count": 2,
+      "difficulty": "mixed",
+      "sort_order": 9,
+      "available": 18
+    },
+    {
+      "id": 846,
+      "bank_id": 48,
+      "topic_id": 651,
+      "topic_slug": "work-energy-and-power",
+      "question_count": 2,
+      "difficulty": "mixed",
+      "sort_order": 10,
+      "available": 18
+    }
+  ],
+  "forms": [
+    {
+      "run": 1,
+      "count": 30,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 836,
+          "bankId": 48,
+          "topicId": 641,
+          "topicSlug": "current-electricity",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 19,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117730,
+            117725,
+            117738
+          ]
+        },
+        {
+          "ruleId": 837,
+          "bankId": 48,
+          "topicId": 642,
+          "topicSlug": "force-and-newtons-laws",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 19,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117746,
+            117750,
+            117752
+          ]
+        },
+        {
+          "ruleId": 838,
+          "bankId": 48,
+          "topicId": 643,
+          "topicSlug": "mechanical-properties-of-fluids",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117777,
+            117770,
+            117763
+          ]
+        },
+        {
+          "ruleId": 839,
+          "bankId": 48,
+          "topicId": 644,
+          "topicSlug": "momentum",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117790,
+            117795,
+            117794
+          ]
+        },
+        {
+          "ruleId": 840,
+          "bankId": 48,
+          "topicId": 645,
+          "topicSlug": "motion-in-a-straight-line",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117799,
+            117797,
+            117806
+          ]
+        },
+        {
+          "ruleId": 841,
+          "bankId": 48,
+          "topicId": 646,
+          "topicSlug": "oscillations",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117816,
+            117818,
+            117820
+          ]
+        },
+        {
+          "ruleId": 842,
+          "bankId": 48,
+          "topicId": 647,
+          "topicSlug": "properties-of-matter",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117840,
+            117844,
+            117845
+          ]
+        },
+        {
+          "ruleId": 843,
+          "bankId": 48,
+          "topicId": 648,
+          "topicSlug": "speed-distance-time",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117855,
+            117851,
+            117857
+          ]
+        },
+        {
+          "ruleId": 844,
+          "bankId": 48,
+          "topicId": 649,
+          "topicSlug": "thermal-properties",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117883,
+            117884
+          ]
+        },
+        {
+          "ruleId": 845,
+          "bankId": 48,
+          "topicId": 650,
+          "topicSlug": "waves",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117903,
+            117891
+          ]
+        },
+        {
+          "ruleId": 846,
+          "bankId": 48,
+          "topicId": 651,
+          "topicSlug": "work-energy-and-power",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117908,
+            117918
+          ]
+        }
+      ]
+    },
+    {
+      "run": 2,
+      "count": 30,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 836,
+          "bankId": 48,
+          "topicId": 641,
+          "topicSlug": "current-electricity",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 19,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117735,
+            117740,
+            117733
+          ]
+        },
+        {
+          "ruleId": 837,
+          "bankId": 48,
+          "topicId": 642,
+          "topicSlug": "force-and-newtons-laws",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 19,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117754,
+            117743,
+            117758
+          ]
+        },
+        {
+          "ruleId": 838,
+          "bankId": 48,
+          "topicId": 643,
+          "topicSlug": "mechanical-properties-of-fluids",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117769,
+            117773,
+            117770
+          ]
+        },
+        {
+          "ruleId": 839,
+          "bankId": 48,
+          "topicId": 644,
+          "topicSlug": "momentum",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117783,
+            117780,
+            117781
+          ]
+        },
+        {
+          "ruleId": 840,
+          "bankId": 48,
+          "topicId": 645,
+          "topicSlug": "motion-in-a-straight-line",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117796,
+            117812,
+            117805
+          ]
+        },
+        {
+          "ruleId": 841,
+          "bankId": 48,
+          "topicId": 646,
+          "topicSlug": "oscillations",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117824,
+            117826,
+            117819
+          ]
+        },
+        {
+          "ruleId": 842,
+          "bankId": 48,
+          "topicId": 647,
+          "topicSlug": "properties-of-matter",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117842,
+            117835,
+            117834
+          ]
+        },
+        {
+          "ruleId": 843,
+          "bankId": 48,
+          "topicId": 648,
+          "topicSlug": "speed-distance-time",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117867,
+            117855,
+            117851
+          ]
+        },
+        {
+          "ruleId": 844,
+          "bankId": 48,
+          "topicId": 649,
+          "topicSlug": "thermal-properties",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117868,
+            117880
+          ]
+        },
+        {
+          "ruleId": 845,
+          "bankId": 48,
+          "topicId": 650,
+          "topicSlug": "waves",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117901,
+            117896
+          ]
+        },
+        {
+          "ruleId": 846,
+          "bankId": 48,
+          "topicId": 651,
+          "topicSlug": "work-energy-and-power",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117916,
+            117906
+          ]
+        }
+      ]
+    },
+    {
+      "run": 3,
+      "count": 30,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 836,
+          "bankId": 48,
+          "topicId": 641,
+          "topicSlug": "current-electricity",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 19,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117731,
+            117737,
+            117729
+          ]
+        },
+        {
+          "ruleId": 837,
+          "bankId": 48,
+          "topicId": 642,
+          "topicSlug": "force-and-newtons-laws",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 19,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117746,
+            117741,
+            117759
+          ]
+        },
+        {
+          "ruleId": 838,
+          "bankId": 48,
+          "topicId": 643,
+          "topicSlug": "mechanical-properties-of-fluids",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117775,
+            117768,
+            117766
+          ]
+        },
+        {
+          "ruleId": 839,
+          "bankId": 48,
+          "topicId": 644,
+          "topicSlug": "momentum",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117794,
+            117779,
+            117791
+          ]
+        },
+        {
+          "ruleId": 840,
+          "bankId": 48,
+          "topicId": 645,
+          "topicSlug": "motion-in-a-straight-line",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117806,
+            117813,
+            117797
+          ]
+        },
+        {
+          "ruleId": 841,
+          "bankId": 48,
+          "topicId": 646,
+          "topicSlug": "oscillations",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117816,
+            117820,
+            117814
+          ]
+        },
+        {
+          "ruleId": 842,
+          "bankId": 48,
+          "topicId": 647,
+          "topicSlug": "properties-of-matter",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117833,
+            117841,
+            117845
+          ]
+        },
+        {
+          "ruleId": 843,
+          "bankId": 48,
+          "topicId": 648,
+          "topicSlug": "speed-distance-time",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117852,
+            117858,
+            117857
+          ]
+        },
+        {
+          "ruleId": 844,
+          "bankId": 48,
+          "topicId": 649,
+          "topicSlug": "thermal-properties",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117882,
+            117869
+          ]
+        },
+        {
+          "ruleId": 845,
+          "bankId": 48,
+          "topicId": 650,
+          "topicSlug": "waves",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117901,
+            117900
+          ]
+        },
+        {
+          "ruleId": 846,
+          "bankId": 48,
+          "topicId": 651,
+          "topicSlug": "work-energy-and-power",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117916,
+            117913
+          ]
+        }
+      ]
+    },
+    {
+      "run": 4,
+      "count": 30,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 836,
+          "bankId": 48,
+          "topicId": 641,
+          "topicSlug": "current-electricity",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 19,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117725,
+            117722,
+            117723
+          ]
+        },
+        {
+          "ruleId": 837,
+          "bankId": 48,
+          "topicId": 642,
+          "topicSlug": "force-and-newtons-laws",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 19,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117750,
+            117744,
+            117742
+          ]
+        },
+        {
+          "ruleId": 838,
+          "bankId": 48,
+          "topicId": 643,
+          "topicSlug": "mechanical-properties-of-fluids",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117775,
+            117763,
+            117766
+          ]
+        },
+        {
+          "ruleId": 839,
+          "bankId": 48,
+          "topicId": 644,
+          "topicSlug": "momentum",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117778,
+            117787,
+            117789
+          ]
+        },
+        {
+          "ruleId": 840,
+          "bankId": 48,
+          "topicId": 645,
+          "topicSlug": "motion-in-a-straight-line",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117811,
+            117801,
+            117806
+          ]
+        },
+        {
+          "ruleId": 841,
+          "bankId": 48,
+          "topicId": 646,
+          "topicSlug": "oscillations",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117819,
+            117826,
+            117820
+          ]
+        },
+        {
+          "ruleId": 842,
+          "bankId": 48,
+          "topicId": 647,
+          "topicSlug": "properties-of-matter",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117846,
+            117844,
+            117836
+          ]
+        },
+        {
+          "ruleId": 843,
+          "bankId": 48,
+          "topicId": 648,
+          "topicSlug": "speed-distance-time",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117851,
+            117850,
+            117864
+          ]
+        },
+        {
+          "ruleId": 844,
+          "bankId": 48,
+          "topicId": 649,
+          "topicSlug": "thermal-properties",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117870,
+            117879
+          ]
+        },
+        {
+          "ruleId": 845,
+          "bankId": 48,
+          "topicId": 650,
+          "topicSlug": "waves",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117902,
+            117890
+          ]
+        },
+        {
+          "ruleId": 846,
+          "bankId": 48,
+          "topicId": 651,
+          "topicSlug": "work-energy-and-power",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117914,
+            117918
+          ]
+        }
+      ]
+    },
+    {
+      "run": 5,
+      "count": 30,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 836,
+          "bankId": 48,
+          "topicId": 641,
+          "topicSlug": "current-electricity",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 19,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117739,
+            117725,
+            117731
+          ]
+        },
+        {
+          "ruleId": 837,
+          "bankId": 48,
+          "topicId": 642,
+          "topicSlug": "force-and-newtons-laws",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 19,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117750,
+            117751,
+            117746
+          ]
+        },
+        {
+          "ruleId": 838,
+          "bankId": 48,
+          "topicId": 643,
+          "topicSlug": "mechanical-properties-of-fluids",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117772,
+            117764,
+            117774
+          ]
+        },
+        {
+          "ruleId": 839,
+          "bankId": 48,
+          "topicId": 644,
+          "topicSlug": "momentum",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117786,
+            117793,
+            117782
+          ]
+        },
+        {
+          "ruleId": 840,
+          "bankId": 48,
+          "topicId": 645,
+          "topicSlug": "motion-in-a-straight-line",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117806,
+            117808,
+            117797
+          ]
+        },
+        {
+          "ruleId": 841,
+          "bankId": 48,
+          "topicId": 646,
+          "topicSlug": "oscillations",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117815,
+            117827,
+            117817
+          ]
+        },
+        {
+          "ruleId": 842,
+          "bankId": 48,
+          "topicId": 647,
+          "topicSlug": "properties-of-matter",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117832,
+            117848,
+            117843
+          ]
+        },
+        {
+          "ruleId": 843,
+          "bankId": 48,
+          "topicId": 648,
+          "topicSlug": "speed-distance-time",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117857,
+            117866,
+            117854
+          ]
+        },
+        {
+          "ruleId": 844,
+          "bankId": 48,
+          "topicId": 649,
+          "topicSlug": "thermal-properties",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117873,
+            117879
+          ]
+        },
+        {
+          "ruleId": 845,
+          "bankId": 48,
+          "topicId": 650,
+          "topicSlug": "waves",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117898,
+            117903
+          ]
+        },
+        {
+          "ruleId": 846,
+          "bankId": 48,
+          "topicId": 651,
+          "topicSlug": "work-energy-and-power",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117906,
+            117907
+          ]
+        }
+      ]
+    },
+    {
+      "run": 6,
+      "count": 30,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 836,
+          "bankId": 48,
+          "topicId": 641,
+          "topicSlug": "current-electricity",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 19,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117722,
+            117739,
+            117727
+          ]
+        },
+        {
+          "ruleId": 837,
+          "bankId": 48,
+          "topicId": 642,
+          "topicSlug": "force-and-newtons-laws",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 19,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117758,
+            117752,
+            117753
+          ]
+        },
+        {
+          "ruleId": 838,
+          "bankId": 48,
+          "topicId": 643,
+          "topicSlug": "mechanical-properties-of-fluids",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117772,
+            117763,
+            117762
+          ]
+        },
+        {
+          "ruleId": 839,
+          "bankId": 48,
+          "topicId": 644,
+          "topicSlug": "momentum",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117786,
+            117793,
+            117792
+          ]
+        },
+        {
+          "ruleId": 840,
+          "bankId": 48,
+          "topicId": 645,
+          "topicSlug": "motion-in-a-straight-line",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117798,
+            117810,
+            117802
+          ]
+        },
+        {
+          "ruleId": 841,
+          "bankId": 48,
+          "topicId": 646,
+          "topicSlug": "oscillations",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117815,
+            117823,
+            117814
+          ]
+        },
+        {
+          "ruleId": 842,
+          "bankId": 48,
+          "topicId": 647,
+          "topicSlug": "properties-of-matter",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117843,
+            117840,
+            117844
+          ]
+        },
+        {
+          "ruleId": 843,
+          "bankId": 48,
+          "topicId": 648,
+          "topicSlug": "speed-distance-time",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117860,
+            117857,
+            117851
+          ]
+        },
+        {
+          "ruleId": 844,
+          "bankId": 48,
+          "topicId": 649,
+          "topicSlug": "thermal-properties",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117883,
+            117870
+          ]
+        },
+        {
+          "ruleId": 845,
+          "bankId": 48,
+          "topicId": 650,
+          "topicSlug": "waves",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117899,
+            117894
+          ]
+        },
+        {
+          "ruleId": 846,
+          "bankId": 48,
+          "topicId": 651,
+          "topicSlug": "work-energy-and-power",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117915,
+            117910
+          ]
+        }
+      ]
+    },
+    {
+      "run": 7,
+      "count": 30,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 836,
+          "bankId": 48,
+          "topicId": 641,
+          "topicSlug": "current-electricity",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 19,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117733,
+            117737,
+            117730
+          ]
+        },
+        {
+          "ruleId": 837,
+          "bankId": 48,
+          "topicId": 642,
+          "topicSlug": "force-and-newtons-laws",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 19,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117746,
+            117748,
+            117742
+          ]
+        },
+        {
+          "ruleId": 838,
+          "bankId": 48,
+          "topicId": 643,
+          "topicSlug": "mechanical-properties-of-fluids",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117775,
+            117761,
+            117764
+          ]
+        },
+        {
+          "ruleId": 839,
+          "bankId": 48,
+          "topicId": 644,
+          "topicSlug": "momentum",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117792,
+            117795,
+            117791
+          ]
+        },
+        {
+          "ruleId": 840,
+          "bankId": 48,
+          "topicId": 645,
+          "topicSlug": "motion-in-a-straight-line",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117796,
+            117801,
+            117800
+          ]
+        },
+        {
+          "ruleId": 841,
+          "bankId": 48,
+          "topicId": 646,
+          "topicSlug": "oscillations",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117819,
+            117831,
+            117823
+          ]
+        },
+        {
+          "ruleId": 842,
+          "bankId": 48,
+          "topicId": 647,
+          "topicSlug": "properties-of-matter",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117843,
+            117839,
+            117842
+          ]
+        },
+        {
+          "ruleId": 843,
+          "bankId": 48,
+          "topicId": 648,
+          "topicSlug": "speed-distance-time",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117852,
+            117866,
+            117865
+          ]
+        },
+        {
+          "ruleId": 844,
+          "bankId": 48,
+          "topicId": 649,
+          "topicSlug": "thermal-properties",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117875,
+            117876
+          ]
+        },
+        {
+          "ruleId": 845,
+          "bankId": 48,
+          "topicId": 650,
+          "topicSlug": "waves",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117899,
+            117892
+          ]
+        },
+        {
+          "ruleId": 846,
+          "bankId": 48,
+          "topicId": 651,
+          "topicSlug": "work-energy-and-power",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117915,
+            117921
+          ]
+        }
+      ]
+    },
+    {
+      "run": 8,
+      "count": 30,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 836,
+          "bankId": 48,
+          "topicId": 641,
+          "topicSlug": "current-electricity",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 19,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117731,
+            117728,
+            117722
+          ]
+        },
+        {
+          "ruleId": 837,
+          "bankId": 48,
+          "topicId": 642,
+          "topicSlug": "force-and-newtons-laws",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 19,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117751,
+            117747,
+            117748
+          ]
+        },
+        {
+          "ruleId": 838,
+          "bankId": 48,
+          "topicId": 643,
+          "topicSlug": "mechanical-properties-of-fluids",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117764,
+            117776,
+            117761
+          ]
+        },
+        {
+          "ruleId": 839,
+          "bankId": 48,
+          "topicId": 644,
+          "topicSlug": "momentum",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117792,
+            117785,
+            117786
+          ]
+        },
+        {
+          "ruleId": 840,
+          "bankId": 48,
+          "topicId": 645,
+          "topicSlug": "motion-in-a-straight-line",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117810,
+            117801,
+            117796
+          ]
+        },
+        {
+          "ruleId": 841,
+          "bankId": 48,
+          "topicId": 646,
+          "topicSlug": "oscillations",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117819,
+            117822,
+            117821
+          ]
+        },
+        {
+          "ruleId": 842,
+          "bankId": 48,
+          "topicId": 647,
+          "topicSlug": "properties-of-matter",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117834,
+            117832,
+            117838
+          ]
+        },
+        {
+          "ruleId": 843,
+          "bankId": 48,
+          "topicId": 648,
+          "topicSlug": "speed-distance-time",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117856,
+            117860,
+            117861
+          ]
+        },
+        {
+          "ruleId": 844,
+          "bankId": 48,
+          "topicId": 649,
+          "topicSlug": "thermal-properties",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117885,
+            117872
+          ]
+        },
+        {
+          "ruleId": 845,
+          "bankId": 48,
+          "topicId": 650,
+          "topicSlug": "waves",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117889,
+            117897
+          ]
+        },
+        {
+          "ruleId": 846,
+          "bankId": 48,
+          "topicId": 651,
+          "topicSlug": "work-energy-and-power",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117914,
+            117920
+          ]
+        }
+      ]
+    },
+    {
+      "run": 9,
+      "count": 30,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 836,
+          "bankId": 48,
+          "topicId": 641,
+          "topicSlug": "current-electricity",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 19,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117738,
+            117732,
+            117727
+          ]
+        },
+        {
+          "ruleId": 837,
+          "bankId": 48,
+          "topicId": 642,
+          "topicSlug": "force-and-newtons-laws",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 19,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117750,
+            117742,
+            117749
+          ]
+        },
+        {
+          "ruleId": 838,
+          "bankId": 48,
+          "topicId": 643,
+          "topicSlug": "mechanical-properties-of-fluids",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117760,
+            117763,
+            117768
+          ]
+        },
+        {
+          "ruleId": 839,
+          "bankId": 48,
+          "topicId": 644,
+          "topicSlug": "momentum",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117780,
+            117795,
+            117794
+          ]
+        },
+        {
+          "ruleId": 840,
+          "bankId": 48,
+          "topicId": 645,
+          "topicSlug": "motion-in-a-straight-line",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117805,
+            117804,
+            117809
+          ]
+        },
+        {
+          "ruleId": 841,
+          "bankId": 48,
+          "topicId": 646,
+          "topicSlug": "oscillations",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117820,
+            117826,
+            117822
+          ]
+        },
+        {
+          "ruleId": 842,
+          "bankId": 48,
+          "topicId": 647,
+          "topicSlug": "properties-of-matter",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117841,
+            117838,
+            117839
+          ]
+        },
+        {
+          "ruleId": 843,
+          "bankId": 48,
+          "topicId": 648,
+          "topicSlug": "speed-distance-time",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117850,
+            117852,
+            117856
+          ]
+        },
+        {
+          "ruleId": 844,
+          "bankId": 48,
+          "topicId": 649,
+          "topicSlug": "thermal-properties",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117872,
+            117874
+          ]
+        },
+        {
+          "ruleId": 845,
+          "bankId": 48,
+          "topicId": 650,
+          "topicSlug": "waves",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117899,
+            117903
+          ]
+        },
+        {
+          "ruleId": 846,
+          "bankId": 48,
+          "topicId": 651,
+          "topicSlug": "work-energy-and-power",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117921,
+            117906
+          ]
+        }
+      ]
+    },
+    {
+      "run": 10,
+      "count": 30,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 836,
+          "bankId": 48,
+          "topicId": 641,
+          "topicSlug": "current-electricity",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 19,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117725,
+            117737,
+            117722
+          ]
+        },
+        {
+          "ruleId": 837,
+          "bankId": 48,
+          "topicId": 642,
+          "topicSlug": "force-and-newtons-laws",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 19,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117753,
+            117745,
+            117754
+          ]
+        },
+        {
+          "ruleId": 838,
+          "bankId": 48,
+          "topicId": 643,
+          "topicSlug": "mechanical-properties-of-fluids",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117765,
+            117771,
+            117763
+          ]
+        },
+        {
+          "ruleId": 839,
+          "bankId": 48,
+          "topicId": 644,
+          "topicSlug": "momentum",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117787,
+            117790,
+            117785
+          ]
+        },
+        {
+          "ruleId": 840,
+          "bankId": 48,
+          "topicId": 645,
+          "topicSlug": "motion-in-a-straight-line",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117796,
+            117806,
+            117812
+          ]
+        },
+        {
+          "ruleId": 841,
+          "bankId": 48,
+          "topicId": 646,
+          "topicSlug": "oscillations",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117820,
+            117817,
+            117827
+          ]
+        },
+        {
+          "ruleId": 842,
+          "bankId": 48,
+          "topicId": 647,
+          "topicSlug": "properties-of-matter",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117841,
+            117845,
+            117840
+          ]
+        },
+        {
+          "ruleId": 843,
+          "bankId": 48,
+          "topicId": 648,
+          "topicSlug": "speed-distance-time",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117861,
+            117853,
+            117850
+          ]
+        },
+        {
+          "ruleId": 844,
+          "bankId": 48,
+          "topicId": 649,
+          "topicSlug": "thermal-properties",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117876,
+            117881
+          ]
+        },
+        {
+          "ruleId": 845,
+          "bankId": 48,
+          "topicId": 650,
+          "topicSlug": "waves",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117890,
+            117902
+          ]
+        },
+        {
+          "ruleId": 846,
+          "bankId": 48,
+          "topicId": 651,
+          "topicSlug": "work-energy-and-power",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117916,
+            117907
+          ]
+        }
+      ]
+    },
+    {
+      "run": 11,
+      "count": 30,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 836,
+          "bankId": 48,
+          "topicId": 641,
+          "topicSlug": "current-electricity",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 19,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117732,
+            117725,
+            117727
+          ]
+        },
+        {
+          "ruleId": 837,
+          "bankId": 48,
+          "topicId": 642,
+          "topicSlug": "force-and-newtons-laws",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 19,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117754,
+            117745,
+            117753
+          ]
+        },
+        {
+          "ruleId": 838,
+          "bankId": 48,
+          "topicId": 643,
+          "topicSlug": "mechanical-properties-of-fluids",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117767,
+            117762,
+            117770
+          ]
+        },
+        {
+          "ruleId": 839,
+          "bankId": 48,
+          "topicId": 644,
+          "topicSlug": "momentum",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117790,
+            117783,
+            117784
+          ]
+        },
+        {
+          "ruleId": 840,
+          "bankId": 48,
+          "topicId": 645,
+          "topicSlug": "motion-in-a-straight-line",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117803,
+            117801,
+            117804
+          ]
+        },
+        {
+          "ruleId": 841,
+          "bankId": 48,
+          "topicId": 646,
+          "topicSlug": "oscillations",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117824,
+            117818,
+            117826
+          ]
+        },
+        {
+          "ruleId": 842,
+          "bankId": 48,
+          "topicId": 647,
+          "topicSlug": "properties-of-matter",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117842,
+            117833,
+            117836
+          ]
+        },
+        {
+          "ruleId": 843,
+          "bankId": 48,
+          "topicId": 648,
+          "topicSlug": "speed-distance-time",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117867,
+            117858,
+            117852
+          ]
+        },
+        {
+          "ruleId": 844,
+          "bankId": 48,
+          "topicId": 649,
+          "topicSlug": "thermal-properties",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117875,
+            117871
+          ]
+        },
+        {
+          "ruleId": 845,
+          "bankId": 48,
+          "topicId": 650,
+          "topicSlug": "waves",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117899,
+            117893
+          ]
+        },
+        {
+          "ruleId": 846,
+          "bankId": 48,
+          "topicId": 651,
+          "topicSlug": "work-energy-and-power",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117910,
+            117905
+          ]
+        }
+      ]
+    },
+    {
+      "run": 12,
+      "count": 30,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 836,
+          "bankId": 48,
+          "topicId": 641,
+          "topicSlug": "current-electricity",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 19,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117739,
+            117725,
+            117738
+          ]
+        },
+        {
+          "ruleId": 837,
+          "bankId": 48,
+          "topicId": 642,
+          "topicSlug": "force-and-newtons-laws",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 19,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117744,
+            117755,
+            117752
+          ]
+        },
+        {
+          "ruleId": 838,
+          "bankId": 48,
+          "topicId": 643,
+          "topicSlug": "mechanical-properties-of-fluids",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117772,
+            117776,
+            117769
+          ]
+        },
+        {
+          "ruleId": 839,
+          "bankId": 48,
+          "topicId": 644,
+          "topicSlug": "momentum",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117788,
+            117790,
+            117787
+          ]
+        },
+        {
+          "ruleId": 840,
+          "bankId": 48,
+          "topicId": 645,
+          "topicSlug": "motion-in-a-straight-line",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117799,
+            117807,
+            117809
+          ]
+        },
+        {
+          "ruleId": 841,
+          "bankId": 48,
+          "topicId": 646,
+          "topicSlug": "oscillations",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117818,
+            117831,
+            117820
+          ]
+        },
+        {
+          "ruleId": 842,
+          "bankId": 48,
+          "topicId": 647,
+          "topicSlug": "properties-of-matter",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117836,
+            117844,
+            117832
+          ]
+        },
+        {
+          "ruleId": 843,
+          "bankId": 48,
+          "topicId": 648,
+          "topicSlug": "speed-distance-time",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117865,
+            117863,
+            117866
+          ]
+        },
+        {
+          "ruleId": 844,
+          "bankId": 48,
+          "topicId": 649,
+          "topicSlug": "thermal-properties",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117882,
+            117878
+          ]
+        },
+        {
+          "ruleId": 845,
+          "bankId": 48,
+          "topicId": 650,
+          "topicSlug": "waves",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117895,
+            117891
+          ]
+        },
+        {
+          "ruleId": 846,
+          "bankId": 48,
+          "topicId": 651,
+          "topicSlug": "work-energy-and-power",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117906,
+            117916
+          ]
+        }
+      ]
+    },
+    {
+      "run": 13,
+      "count": 30,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 836,
+          "bankId": 48,
+          "topicId": 641,
+          "topicSlug": "current-electricity",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 19,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117723,
+            117739,
+            117722
+          ]
+        },
+        {
+          "ruleId": 837,
+          "bankId": 48,
+          "topicId": 642,
+          "topicSlug": "force-and-newtons-laws",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 19,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117741,
+            117755,
+            117756
+          ]
+        },
+        {
+          "ruleId": 838,
+          "bankId": 48,
+          "topicId": 643,
+          "topicSlug": "mechanical-properties-of-fluids",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117777,
+            117770,
+            117768
+          ]
+        },
+        {
+          "ruleId": 839,
+          "bankId": 48,
+          "topicId": 644,
+          "topicSlug": "momentum",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117790,
+            117782,
+            117791
+          ]
+        },
+        {
+          "ruleId": 840,
+          "bankId": 48,
+          "topicId": 645,
+          "topicSlug": "motion-in-a-straight-line",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117800,
+            117812,
+            117805
+          ]
+        },
+        {
+          "ruleId": 841,
+          "bankId": 48,
+          "topicId": 646,
+          "topicSlug": "oscillations",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117821,
+            117817,
+            117831
+          ]
+        },
+        {
+          "ruleId": 842,
+          "bankId": 48,
+          "topicId": 647,
+          "topicSlug": "properties-of-matter",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117839,
+            117841,
+            117832
+          ]
+        },
+        {
+          "ruleId": 843,
+          "bankId": 48,
+          "topicId": 648,
+          "topicSlug": "speed-distance-time",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117864,
+            117853,
+            117852
+          ]
+        },
+        {
+          "ruleId": 844,
+          "bankId": 48,
+          "topicId": 649,
+          "topicSlug": "thermal-properties",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117881,
+            117878
+          ]
+        },
+        {
+          "ruleId": 845,
+          "bankId": 48,
+          "topicId": 650,
+          "topicSlug": "waves",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117902,
+            117897
+          ]
+        },
+        {
+          "ruleId": 846,
+          "bankId": 48,
+          "topicId": 651,
+          "topicSlug": "work-energy-and-power",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117904,
+            117910
+          ]
+        }
+      ]
+    },
+    {
+      "run": 14,
+      "count": 30,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 836,
+          "bankId": 48,
+          "topicId": 641,
+          "topicSlug": "current-electricity",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 19,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117730,
+            117731,
+            117736
+          ]
+        },
+        {
+          "ruleId": 837,
+          "bankId": 48,
+          "topicId": 642,
+          "topicSlug": "force-and-newtons-laws",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 19,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117750,
+            117741,
+            117742
+          ]
+        },
+        {
+          "ruleId": 838,
+          "bankId": 48,
+          "topicId": 643,
+          "topicSlug": "mechanical-properties-of-fluids",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117770,
+            117762,
+            117768
+          ]
+        },
+        {
+          "ruleId": 839,
+          "bankId": 48,
+          "topicId": 644,
+          "topicSlug": "momentum",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117786,
+            117782,
+            117790
+          ]
+        },
+        {
+          "ruleId": 840,
+          "bankId": 48,
+          "topicId": 645,
+          "topicSlug": "motion-in-a-straight-line",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117801,
+            117809,
+            117799
+          ]
+        },
+        {
+          "ruleId": 841,
+          "bankId": 48,
+          "topicId": 646,
+          "topicSlug": "oscillations",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117828,
+            117824,
+            117818
+          ]
+        },
+        {
+          "ruleId": 842,
+          "bankId": 48,
+          "topicId": 647,
+          "topicSlug": "properties-of-matter",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117836,
+            117842,
+            117845
+          ]
+        },
+        {
+          "ruleId": 843,
+          "bankId": 48,
+          "topicId": 648,
+          "topicSlug": "speed-distance-time",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117864,
+            117861,
+            117862
+          ]
+        },
+        {
+          "ruleId": 844,
+          "bankId": 48,
+          "topicId": 649,
+          "topicSlug": "thermal-properties",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117877,
+            117876
+          ]
+        },
+        {
+          "ruleId": 845,
+          "bankId": 48,
+          "topicId": 650,
+          "topicSlug": "waves",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117891,
+            117888
+          ]
+        },
+        {
+          "ruleId": 846,
+          "bankId": 48,
+          "topicId": 651,
+          "topicSlug": "work-energy-and-power",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117920,
+            117912
+          ]
+        }
+      ]
+    },
+    {
+      "run": 15,
+      "count": 30,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 836,
+          "bankId": 48,
+          "topicId": 641,
+          "topicSlug": "current-electricity",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 19,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117727,
+            117740,
+            117737
+          ]
+        },
+        {
+          "ruleId": 837,
+          "bankId": 48,
+          "topicId": 642,
+          "topicSlug": "force-and-newtons-laws",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 19,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117752,
+            117746,
+            117751
+          ]
+        },
+        {
+          "ruleId": 838,
+          "bankId": 48,
+          "topicId": 643,
+          "topicSlug": "mechanical-properties-of-fluids",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117776,
+            117773,
+            117761
+          ]
+        },
+        {
+          "ruleId": 839,
+          "bankId": 48,
+          "topicId": 644,
+          "topicSlug": "momentum",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117786,
+            117794,
+            117781
+          ]
+        },
+        {
+          "ruleId": 840,
+          "bankId": 48,
+          "topicId": 645,
+          "topicSlug": "motion-in-a-straight-line",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117798,
+            117799,
+            117811
+          ]
+        },
+        {
+          "ruleId": 841,
+          "bankId": 48,
+          "topicId": 646,
+          "topicSlug": "oscillations",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117828,
+            117815,
+            117819
+          ]
+        },
+        {
+          "ruleId": 842,
+          "bankId": 48,
+          "topicId": 647,
+          "topicSlug": "properties-of-matter",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117841,
+            117846,
+            117849
+          ]
+        },
+        {
+          "ruleId": 843,
+          "bankId": 48,
+          "topicId": 648,
+          "topicSlug": "speed-distance-time",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117857,
+            117853,
+            117856
+          ]
+        },
+        {
+          "ruleId": 844,
+          "bankId": 48,
+          "topicId": 649,
+          "topicSlug": "thermal-properties",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117869,
+            117868
+          ]
+        },
+        {
+          "ruleId": 845,
+          "bankId": 48,
+          "topicId": 650,
+          "topicSlug": "waves",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117901,
+            117900
+          ]
+        },
+        {
+          "ruleId": 846,
+          "bankId": 48,
+          "topicId": 651,
+          "topicSlug": "work-energy-and-power",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117920,
+            117915
+          ]
+        }
+      ]
+    },
+    {
+      "run": 16,
+      "count": 30,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 836,
+          "bankId": 48,
+          "topicId": 641,
+          "topicSlug": "current-electricity",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 19,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117725,
+            117724,
+            117733
+          ]
+        },
+        {
+          "ruleId": 837,
+          "bankId": 48,
+          "topicId": 642,
+          "topicSlug": "force-and-newtons-laws",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 19,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117752,
+            117755,
+            117758
+          ]
+        },
+        {
+          "ruleId": 838,
+          "bankId": 48,
+          "topicId": 643,
+          "topicSlug": "mechanical-properties-of-fluids",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117765,
+            117764,
+            117760
+          ]
+        },
+        {
+          "ruleId": 839,
+          "bankId": 48,
+          "topicId": 644,
+          "topicSlug": "momentum",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117791,
+            117790,
+            117788
+          ]
+        },
+        {
+          "ruleId": 840,
+          "bankId": 48,
+          "topicId": 645,
+          "topicSlug": "motion-in-a-straight-line",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117809,
+            117805,
+            117811
+          ]
+        },
+        {
+          "ruleId": 841,
+          "bankId": 48,
+          "topicId": 646,
+          "topicSlug": "oscillations",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117815,
+            117823,
+            117822
+          ]
+        },
+        {
+          "ruleId": 842,
+          "bankId": 48,
+          "topicId": 647,
+          "topicSlug": "properties-of-matter",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117832,
+            117849,
+            117841
+          ]
+        },
+        {
+          "ruleId": 843,
+          "bankId": 48,
+          "topicId": 648,
+          "topicSlug": "speed-distance-time",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117862,
+            117854,
+            117861
+          ]
+        },
+        {
+          "ruleId": 844,
+          "bankId": 48,
+          "topicId": 649,
+          "topicSlug": "thermal-properties",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117875,
+            117871
+          ]
+        },
+        {
+          "ruleId": 845,
+          "bankId": 48,
+          "topicId": 650,
+          "topicSlug": "waves",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117894,
+            117895
+          ]
+        },
+        {
+          "ruleId": 846,
+          "bankId": 48,
+          "topicId": 651,
+          "topicSlug": "work-energy-and-power",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117910,
+            117920
+          ]
+        }
+      ]
+    },
+    {
+      "run": 17,
+      "count": 30,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 836,
+          "bankId": 48,
+          "topicId": 641,
+          "topicSlug": "current-electricity",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 19,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117725,
+            117740,
+            117733
+          ]
+        },
+        {
+          "ruleId": 837,
+          "bankId": 48,
+          "topicId": 642,
+          "topicSlug": "force-and-newtons-laws",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 19,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117758,
+            117753,
+            117752
+          ]
+        },
+        {
+          "ruleId": 838,
+          "bankId": 48,
+          "topicId": 643,
+          "topicSlug": "mechanical-properties-of-fluids",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117768,
+            117770,
+            117764
+          ]
+        },
+        {
+          "ruleId": 839,
+          "bankId": 48,
+          "topicId": 644,
+          "topicSlug": "momentum",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117784,
+            117786,
+            117779
+          ]
+        },
+        {
+          "ruleId": 840,
+          "bankId": 48,
+          "topicId": 645,
+          "topicSlug": "motion-in-a-straight-line",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117813,
+            117811,
+            117801
+          ]
+        },
+        {
+          "ruleId": 841,
+          "bankId": 48,
+          "topicId": 646,
+          "topicSlug": "oscillations",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117814,
+            117827,
+            117819
+          ]
+        },
+        {
+          "ruleId": 842,
+          "bankId": 48,
+          "topicId": 647,
+          "topicSlug": "properties-of-matter",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117842,
+            117839,
+            117832
+          ]
+        },
+        {
+          "ruleId": 843,
+          "bankId": 48,
+          "topicId": 648,
+          "topicSlug": "speed-distance-time",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117854,
+            117862,
+            117867
+          ]
+        },
+        {
+          "ruleId": 844,
+          "bankId": 48,
+          "topicId": 649,
+          "topicSlug": "thermal-properties",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117882,
+            117879
+          ]
+        },
+        {
+          "ruleId": 845,
+          "bankId": 48,
+          "topicId": 650,
+          "topicSlug": "waves",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117902,
+            117895
+          ]
+        },
+        {
+          "ruleId": 846,
+          "bankId": 48,
+          "topicId": 651,
+          "topicSlug": "work-energy-and-power",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117911,
+            117919
+          ]
+        }
+      ]
+    },
+    {
+      "run": 18,
+      "count": 30,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 836,
+          "bankId": 48,
+          "topicId": 641,
+          "topicSlug": "current-electricity",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 19,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117729,
+            117740,
+            117737
+          ]
+        },
+        {
+          "ruleId": 837,
+          "bankId": 48,
+          "topicId": 642,
+          "topicSlug": "force-and-newtons-laws",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 19,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117742,
+            117745,
+            117749
+          ]
+        },
+        {
+          "ruleId": 838,
+          "bankId": 48,
+          "topicId": 643,
+          "topicSlug": "mechanical-properties-of-fluids",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117772,
+            117761,
+            117766
+          ]
+        },
+        {
+          "ruleId": 839,
+          "bankId": 48,
+          "topicId": 644,
+          "topicSlug": "momentum",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117784,
+            117795,
+            117786
+          ]
+        },
+        {
+          "ruleId": 840,
+          "bankId": 48,
+          "topicId": 645,
+          "topicSlug": "motion-in-a-straight-line",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117806,
+            117812,
+            117809
+          ]
+        },
+        {
+          "ruleId": 841,
+          "bankId": 48,
+          "topicId": 646,
+          "topicSlug": "oscillations",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117830,
+            117821,
+            117819
+          ]
+        },
+        {
+          "ruleId": 842,
+          "bankId": 48,
+          "topicId": 647,
+          "topicSlug": "properties-of-matter",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117849,
+            117839,
+            117838
+          ]
+        },
+        {
+          "ruleId": 843,
+          "bankId": 48,
+          "topicId": 648,
+          "topicSlug": "speed-distance-time",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117856,
+            117850,
+            117851
+          ]
+        },
+        {
+          "ruleId": 844,
+          "bankId": 48,
+          "topicId": 649,
+          "topicSlug": "thermal-properties",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117871,
+            117873
+          ]
+        },
+        {
+          "ruleId": 845,
+          "bankId": 48,
+          "topicId": 650,
+          "topicSlug": "waves",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117893,
+            117903
+          ]
+        },
+        {
+          "ruleId": 846,
+          "bankId": 48,
+          "topicId": 651,
+          "topicSlug": "work-energy-and-power",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117907,
+            117914
+          ]
+        }
+      ]
+    },
+    {
+      "run": 19,
+      "count": 30,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 836,
+          "bankId": 48,
+          "topicId": 641,
+          "topicSlug": "current-electricity",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 19,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117740,
+            117726,
+            117725
+          ]
+        },
+        {
+          "ruleId": 837,
+          "bankId": 48,
+          "topicId": 642,
+          "topicSlug": "force-and-newtons-laws",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 19,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117750,
+            117754,
+            117746
+          ]
+        },
+        {
+          "ruleId": 838,
+          "bankId": 48,
+          "topicId": 643,
+          "topicSlug": "mechanical-properties-of-fluids",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117762,
+            117770,
+            117764
+          ]
+        },
+        {
+          "ruleId": 839,
+          "bankId": 48,
+          "topicId": 644,
+          "topicSlug": "momentum",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117780,
+            117784,
+            117794
+          ]
+        },
+        {
+          "ruleId": 840,
+          "bankId": 48,
+          "topicId": 645,
+          "topicSlug": "motion-in-a-straight-line",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117809,
+            117805,
+            117804
+          ]
+        },
+        {
+          "ruleId": 841,
+          "bankId": 48,
+          "topicId": 646,
+          "topicSlug": "oscillations",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117814,
+            117828,
+            117831
+          ]
+        },
+        {
+          "ruleId": 842,
+          "bankId": 48,
+          "topicId": 647,
+          "topicSlug": "properties-of-matter",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117846,
+            117848,
+            117847
+          ]
+        },
+        {
+          "ruleId": 843,
+          "bankId": 48,
+          "topicId": 648,
+          "topicSlug": "speed-distance-time",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117864,
+            117862,
+            117853
+          ]
+        },
+        {
+          "ruleId": 844,
+          "bankId": 48,
+          "topicId": 649,
+          "topicSlug": "thermal-properties",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117883,
+            117882
+          ]
+        },
+        {
+          "ruleId": 845,
+          "bankId": 48,
+          "topicId": 650,
+          "topicSlug": "waves",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117892,
+            117896
+          ]
+        },
+        {
+          "ruleId": 846,
+          "bankId": 48,
+          "topicId": 651,
+          "topicSlug": "work-energy-and-power",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117914,
+            117904
+          ]
+        }
+      ]
+    },
+    {
+      "run": 20,
+      "count": 30,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 836,
+          "bankId": 48,
+          "topicId": 641,
+          "topicSlug": "current-electricity",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 19,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117727,
+            117726,
+            117737
+          ]
+        },
+        {
+          "ruleId": 837,
+          "bankId": 48,
+          "topicId": 642,
+          "topicSlug": "force-and-newtons-laws",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 19,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117756,
+            117750,
+            117745
+          ]
+        },
+        {
+          "ruleId": 838,
+          "bankId": 48,
+          "topicId": 643,
+          "topicSlug": "mechanical-properties-of-fluids",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117768,
+            117769,
+            117766
+          ]
+        },
+        {
+          "ruleId": 839,
+          "bankId": 48,
+          "topicId": 644,
+          "topicSlug": "momentum",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117779,
+            117792,
+            117787
+          ]
+        },
+        {
+          "ruleId": 840,
+          "bankId": 48,
+          "topicId": 645,
+          "topicSlug": "motion-in-a-straight-line",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117812,
+            117811,
+            117802
+          ]
+        },
+        {
+          "ruleId": 841,
+          "bankId": 48,
+          "topicId": 646,
+          "topicSlug": "oscillations",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117825,
+            117829,
+            117816
+          ]
+        },
+        {
+          "ruleId": 842,
+          "bankId": 48,
+          "topicId": 647,
+          "topicSlug": "properties-of-matter",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117848,
+            117841,
+            117838
+          ]
+        },
+        {
+          "ruleId": 843,
+          "bankId": 48,
+          "topicId": 648,
+          "topicSlug": "speed-distance-time",
+          "difficulty": "mixed",
+          "expected": 3,
+          "selected": 3,
+          "availableAtAudit": 18,
+          "unusedCapacity": 15,
+          "exhausted": false,
+          "questionIds": [
+            117864,
+            117856,
+            117852
+          ]
+        },
+        {
+          "ruleId": 844,
+          "bankId": 48,
+          "topicId": 649,
+          "topicSlug": "thermal-properties",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117882,
+            117877
+          ]
+        },
+        {
+          "ruleId": 845,
+          "bankId": 48,
+          "topicId": 650,
+          "topicSlug": "waves",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117896,
+            117888
+          ]
+        },
+        {
+          "ruleId": 846,
+          "bankId": 48,
+          "topicId": 651,
+          "topicSlug": "work-energy-and-power",
+          "difficulty": "mixed",
+          "expected": 2,
+          "selected": 2,
+          "availableAtAudit": 18,
+          "unusedCapacity": 16,
+          "exhausted": false,
+          "questionIds": [
+            117921,
+            117915
+          ]
+        }
+      ]
+    }
+  ]
+}

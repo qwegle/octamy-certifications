@@ -6,7 +6,11 @@ import {
 } from "../../server/lib/assessment-content-acceptance";
 import type { AssessmentPurpose } from "../../server/lib/assessment-bank-readiness";
 
-export const GOVERNED_INVENTORY_SCHEMA_VERSION = "octamy.governed-assessment-inventory.v4";
+export const GOVERNED_INVENTORY_SCHEMA_VERSION = "octamy.governed-assessment-inventory.v6";
+
+export type AssessmentReleaseAttestationMode = "multi_party" | "single_accountable_officer";
+
+export const OFFICER_ITEM_AUTHORSHIP_DISCLOSURE = "ACCOUNTABLE_OFFICER_ITEM_AUTHORSHIP_DISCLOSURE: The accountable officer authored one or more in-scope items; every such item has a different attributable reviewer bound to its exact content hash and version; no independent multi-party release review occurred.";
 
 export type InventoryBlockerSeverity = "SUBSTANTIVE" | "RELEASE_EVIDENCE";
 
@@ -159,6 +163,9 @@ export type InventoryReleaseBundle = {
   takedownProcedure: string;
   takedownProcedureSha256: string;
   bundleSha256: string;
+  attestationMode?: AssessmentReleaseAttestationMode;
+  accountableOfficerUserId?: number | null;
+  singleOfficerAttestation?: string | null;
   voided?: boolean;
 };
 
@@ -225,6 +232,14 @@ export type GovernedAssessmentInventoryResult = {
     sourceLinkedQuestions: number;
   };
   evidenceRepresentation: InventoryEvidenceRepresentation;
+  releaseAttestation: {
+    mode: AssessmentReleaseAttestationMode | null;
+    accountableOfficerUserId: number | null;
+    officerIsItemAuthor: boolean;
+    officerIsRecordedItemReviewer: boolean;
+    independentMultiPartyReleaseReview: boolean;
+    officerItemAuthorshipDisclosure: string | null;
+  };
   contentAcceptance: AssessmentAcceptanceReport;
   issues: InventoryIssue[];
 };
@@ -267,6 +282,64 @@ function sha256(value: string): string {
   return createHash("sha256").update(value, "utf8").digest("hex");
 }
 
+export type ReleaseMachineArtifactType = "form_simulation" | "representative_attempt_qa" | "accessibility_content_audit";
+
+export type ReleaseMachineArtifact = {
+  schemaVersion: "octamy.release-machine-artifact.v1";
+  artifactType: ReleaseMachineArtifactType;
+  assessmentId: number;
+  blueprintRevision: number;
+  generatedAt: string;
+  passed: true;
+  summary: string;
+  checks: Array<{ name: string; passed: true; detail: string }>;
+};
+
+const MACHINE_ARTIFACT_PREFIX = "octamy-artifact:";
+
+export function governedMachineArtifactReference(artifact: ReleaseMachineArtifact): string {
+  const reference = `${MACHINE_ARTIFACT_PREFIX}${Buffer.from(JSON.stringify(artifact), "utf8").toString("base64url")}`;
+  if (reference.length > 500) throw new Error("Machine artifact envelope exceeds the 500-character immutable evidence-reference limit");
+  return reference;
+}
+
+function validMachineArtifact(
+  reference: string,
+  digest: string,
+  artifactType: ReleaseMachineArtifactType,
+  assessmentId: number,
+  blueprintRevision: number,
+): boolean {
+  if (!reference.startsWith(MACHINE_ARTIFACT_PREFIX) || sha256(reference) !== digest) return false;
+  try {
+    const artifact = JSON.parse(Buffer.from(reference.slice(MACHINE_ARTIFACT_PREFIX.length), "base64url").toString("utf8")) as Partial<ReleaseMachineArtifact>;
+    return artifact.schemaVersion === "octamy.release-machine-artifact.v1"
+      && artifact.artifactType === artifactType
+      && artifact.assessmentId === assessmentId
+      && artifact.blueprintRevision === blueprintRevision
+      && artifact.passed === true
+      && iso(String(artifact.generatedAt)) != null
+      && nonEmpty(artifact.summary, 20, 1000)
+      && Array.isArray(artifact.checks)
+      && artifact.checks.length > 0
+      && artifact.checks.every((check) => check && nonEmpty(check.name, 3, 120) && check.passed === true && nonEmpty(check.detail, 3, 500));
+  } catch {
+    return false;
+  }
+}
+
+function attestationMode(bundle: InventoryReleaseBundle): AssessmentReleaseAttestationMode {
+  if (bundle.attestationMode) return bundle.attestationMode;
+  const releasePrincipals = [
+    bundle.contentReviewerUserId,
+    bundle.cutScoreApproverUserId,
+    bundle.qaReviewerUserId,
+    bundle.publisherUserId,
+    bundle.rollbackOwnerUserId,
+  ];
+  return new Set(releasePrincipals).size === 1 ? "single_accountable_officer" : "multi_party";
+}
+
 export function governedAssessmentContentManifestSha256(input: Pick<
   GovernedAssessmentInventoryInput,
   "id" | "blueprintRevision" | "rules" | "questions"
@@ -298,13 +371,25 @@ export function governedAssessmentContentManifestSha256(input: Pick<
 }
 
 function releaseBundleCanonicalValue(bundle: Omit<InventoryReleaseBundle, "bundleSha256">) {
-  const { voided: _voided, ...evidence } = bundle;
-  return {
+  const {
+    voided: _voided,
+    attestationMode: _storedMode,
+    accountableOfficerUserId: _storedOfficer,
+    singleOfficerAttestation: _singleOfficerAttestation,
+    ...evidence
+  } = bundle;
+  const mode = attestationMode(bundle as InventoryReleaseBundle);
+  const canonical = {
     ...evidence,
     cutScoreApprovedAt: iso(bundle.cutScoreApprovedAt),
     qaAcceptedAt: iso(bundle.qaAcceptedAt),
     publisherSignedAt: iso(bundle.publisherSignedAt),
     releasedAt: iso(bundle.releasedAt),
+  };
+  return mode === "multi_party" ? canonical : {
+    ...canonical,
+    attestationMode: mode,
+    accountableOfficerUserId: bundle.accountableOfficerUserId ?? bundle.publisherUserId,
   };
 }
 
@@ -366,6 +451,17 @@ function evidenceValidity(input: GovernedAssessmentInventoryInput) {
     .find((record) => record.blueprintRevision === revision && record.voided !== true);
   const bundle = revision == null ? undefined : input.releaseEvidence.releaseBundles
     .find((record) => record.blueprintRevision === revision && record.voided !== true);
+  const mode = bundle ? attestationMode(bundle) : "multi_party";
+  const accountableOfficerId = bundle && mode === "single_accountable_officer"
+    ? (bundle.accountableOfficerUserId ?? bundle.publisherUserId)
+    : null;
+  const officerIsItemAuthor = accountableOfficerId != null && authors.has(accountableOfficerId);
+  const officerIsRecordedItemReviewer = accountableOfficerId != null && contentReviewers.has(accountableOfficerId);
+  const officerItemAuthorshipDisclosure = bundle && officerIsItemAuthor
+    && ((bundle.singleOfficerAttestation ?? "").includes(OFFICER_ITEM_AUTHORSHIP_DISCLOSURE)
+      || bundle.takedownProcedure.includes(OFFICER_ITEM_AUTHORSHIP_DISCLOSURE))
+    ? OFFICER_ITEM_AUTHORSHIP_DISCLOSURE
+    : null;
 
   const accessibilityValid = Boolean(accessibility
     && validUserId(accessibility.reviewerUserId)
@@ -373,24 +469,30 @@ function evidenceValidity(input: GovernedAssessmentInventoryInput) {
     && nonEmpty(accessibility.evidenceReference, 8, 500)
     && validHash(accessibility.evidenceSha256)
     && iso(accessibility.acceptedAt)
-    && !authors.has(accessibility.reviewerUserId)
-    && !contentReviewers.has(accessibility.reviewerUserId)
-    && !rightsReviewerIds.has(accessibility.reviewerUserId));
+    && (mode === "single_accountable_officer"
+      ? accessibility.reviewerUserId === accountableOfficerId
+        && !officerIsRecordedItemReviewer
+        && revision != null
+        && validMachineArtifact(accessibility.evidenceReference, accessibility.evidenceSha256, "accessibility_content_audit", input.id, revision)
+      : !authors.has(accessibility.reviewerUserId)
+        && !contentReviewers.has(accessibility.reviewerUserId)
+        && !rightsReviewerIds.has(accessibility.reviewerUserId)));
 
   const bundleRoleIds = bundle
     ? [bundle.contentReviewerUserId, bundle.cutScoreApproverUserId, bundle.qaReviewerUserId, bundle.publisherUserId]
     : [];
   const rightsRoleViolation = rightsReviews.some((record) => validUserId(record.reviewerUserId)
-    && (authors.has(record.reviewerUserId)
-      || contentReviewers.has(record.reviewerUserId)
-      || record.reviewerUserId === accessibility?.reviewerUserId
-      || bundleRoleIds.includes(record.reviewerUserId)));
+    && (contentReviewers.has(record.reviewerUserId)
+      || (mode === "multi_party" && (authors.has(record.reviewerUserId)
+        || record.reviewerUserId === accessibility?.reviewerUserId
+        || bundleRoleIds.includes(record.reviewerUserId)))));
 
   const rightsRecordsValid = sourceLinks.size > 0 && Array.from(sourceLinks.values()).every((source) => {
     const record = rightsReviews.find((candidate) => candidate.sourceId === source.sourceId);
     const sourceReview = rightsReviewRecord(source.sourceProvenance);
     return Boolean(record
       && validUserId(record.reviewerUserId)
+      && (mode === "multi_party" || record.reviewerUserId === accountableOfficerId)
       && record.evidenceReference === source.evidenceReference
       && validHash(record.evidenceSha256)
       && record.evidenceSha256 === sourceReview?.evidenceSha256
@@ -401,19 +503,38 @@ function evidenceValidity(input: GovernedAssessmentInventoryInput) {
   let bundleValid = false;
   if (bundle) {
     const { bundleSha256, voided: _voided, ...unsignedBundle } = bundle;
-    const roleIds = [bundle.contentReviewerUserId, bundle.cutScoreApproverUserId, bundle.qaReviewerUserId, bundle.publisherUserId];
-    const roleSet = new Set(roleIds);
+    const releasePrincipals = [
+      bundle.contentReviewerUserId,
+      bundle.cutScoreApproverUserId,
+      bundle.qaReviewerUserId,
+      bundle.publisherUserId,
+      bundle.rollbackOwnerUserId,
+    ];
+    const roleSet = new Set(releasePrincipals);
     const cutApproved = iso(bundle.cutScoreApprovedAt);
     const qaAccepted = iso(bundle.qaAcceptedAt);
     const publisherSigned = iso(bundle.publisherSignedAt);
     const released = iso(bundle.releasedAt);
     const releaseTime = released ? Date.parse(released) : Number.NaN;
-    bundleValid = roleIds.every(validUserId)
-      && roleSet.size === roleIds.length
-      && validUserId(bundle.rollbackOwnerUserId)
+    const multiPartyRolesValid = mode === "multi_party"
+      && roleSet.size === releasePrincipals.length
       && contentReviewers.has(bundle.contentReviewerUserId)
       && !rightsReviewerIds.has(bundle.contentReviewerUserId)
-      && accessibility?.reviewerUserId !== bundle.contentReviewerUserId
+      && accessibility?.reviewerUserId !== bundle.contentReviewerUserId;
+    const singleOfficerRolesValid = mode === "single_accountable_officer"
+      && validUserId(accountableOfficerId)
+      && releasePrincipals.every((principal) => principal === accountableOfficerId)
+      && (bundle.accountableOfficerUserId == null || bundle.accountableOfficerUserId === accountableOfficerId)
+      && !officerIsRecordedItemReviewer
+      && (!officerIsItemAuthor || officerItemAuthorshipDisclosure != null)
+      && rightsReviewerIds.size > 0
+      && [...rightsReviewerIds].every((principal) => principal === accountableOfficerId)
+      && accessibility?.reviewerUserId === accountableOfficerId
+      && revision != null
+      && validMachineArtifact(bundle.formSimulationReference, bundle.formSimulationSha256, "form_simulation", input.id, revision)
+      && validMachineArtifact(bundle.releaseQaReference, bundle.releaseQaSha256, "representative_attempt_qa", input.id, revision);
+    bundleValid = releasePrincipals.every(validUserId)
+      && (multiPartyRolesValid || singleOfficerRolesValid)
       && bundle.contentManifestSha256 === governedAssessmentContentManifestSha256(input)
       && nonEmpty(bundle.formSimulationReference, 8, 500) && validHash(bundle.formSimulationSha256)
       && bundle.cutScore === input.passingScore
@@ -427,7 +548,7 @@ function evidenceValidity(input: GovernedAssessmentInventoryInput) {
       && Date.parse(cutApproved) <= releaseTime && Date.parse(qaAccepted) <= releaseTime && Date.parse(publisherSigned) <= releaseTime
       && validHash(bundleSha256)
       && bundleSha256 === governedReleaseBundleSha256(unsignedBundle);
-    if (bundleValid) {
+    if (bundleValid && mode === "multi_party") {
       const separated = [...rightsReviewerIds, accessibility?.reviewerUserId]
         .filter(validUserId)
         .every((reviewerId) => !roleSet.has(reviewerId));
@@ -435,7 +556,21 @@ function evidenceValidity(input: GovernedAssessmentInventoryInput) {
     }
   }
 
-  return { accessibilityValid, rightsRecordsValid, rightsRoleViolation, rightsValid, bundleValid };
+  return {
+    accessibilityValid,
+    rightsRecordsValid,
+    rightsRoleViolation,
+    rightsValid,
+    bundleValid,
+    releaseAttestation: {
+      mode: bundle ? mode : null,
+      accountableOfficerUserId: accountableOfficerId,
+      officerIsItemAuthor,
+      officerIsRecordedItemReviewer,
+      independentMultiPartyReleaseReview: bundle != null && mode === "multi_party",
+      officerItemAuthorshipDisclosure,
+    },
+  };
 }
 
 export function assertGovernedInventoryReadOnlyMode(mode: string): asserts mode is "dry-run" {
@@ -524,6 +659,7 @@ export function evaluateGovernedAssessmentInventory(input: GovernedAssessmentInv
       immutableReleaseBundle: evidence.bundleValid,
       attributableRightsReviewerIdentity: evidence.rightsValid,
     },
+    releaseAttestation: evidence.releaseAttestation,
     contentAcceptance,
     issues,
   };

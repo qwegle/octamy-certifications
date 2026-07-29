@@ -1,0 +1,119 @@
+{
+  "schemaVersion": "octamy.form-simulation-result.v1",
+  "generatedAt": "2026-07-29T13:34:28.039Z",
+  "assessmentId": 106,
+  "assessmentSlug": "data-analytics-sql-bi-foundations",
+  "blueprintRevision": 1,
+  "runtimePath": "DatabaseStorage.materializeBlueprintForAttempt",
+  "independentForms": 5,
+  "expectedItemsPerForm": 10,
+  "poolExhaustionChecks": [
+    {
+      "ruleId": 887,
+      "bankId": 81,
+      "topicId": null,
+      "difficulty": "mixed",
+      "requiredPerForm": 10,
+      "available": 80,
+      "passed": true
+    }
+  ],
+  "forms": [
+    {
+      "formNumber": 1,
+      "questionCount": 10,
+      "expectedQuestionCount": 10,
+      "duplicateQuestionIds": [],
+      "topicCoverage": [
+        {
+          "ruleId": 887,
+          "bankId": 81,
+          "topicId": null,
+          "difficulty": "mixed",
+          "required": 10,
+          "selected": 10,
+          "matching": 10,
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "formNumber": 2,
+      "questionCount": 10,
+      "expectedQuestionCount": 10,
+      "duplicateQuestionIds": [],
+      "topicCoverage": [
+        {
+          "ruleId": 887,
+          "bankId": 81,
+          "topicId": null,
+          "difficulty": "mixed",
+          "required": 10,
+          "selected": 10,
+          "matching": 10,
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "formNumber": 3,
+      "questionCount": 10,
+      "expectedQuestionCount": 10,
+      "duplicateQuestionIds": [],
+      "topicCoverage": [
+        {
+          "ruleId": 887,
+          "bankId": 81,
+          "topicId": null,
+          "difficulty": "mixed",
+          "required": 10,
+          "selected": 10,
+          "matching": 10,
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "formNumber": 4,
+      "questionCount": 10,
+      "expectedQuestionCount": 10,
+      "duplicateQuestionIds": [],
+      "topicCoverage": [
+        {
+          "ruleId": 887,
+          "bankId": 81,
+          "topicId": null,
+          "difficulty": "mixed",
+          "required": 10,
+          "selected": 10,
+          "matching": 10,
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "formNumber": 5,
+      "questionCount": 10,
+      "expectedQuestionCount": 10,
+      "duplicateQuestionIds": [],
+      "topicCoverage": [
+        {
+          "ruleId": 887,
+          "bankId": 81,
+          "topicId": null,
+          "difficulty": "mixed",
+          "required": 10,
+          "selected": 10,
+          "matching": 10,
+          "passed": true
+        }
+      ],
+      "passed": true
+    }
+  ],
+  "passed": true
+}

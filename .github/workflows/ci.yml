@@ -80,5 +80,46 @@ jobs:
       - name: Mobile tests
         run: npm test --prefix mobile -- --ci
 
-      - name: Audit high-severity production dependencies (advisory)
-        run: npm audit --omit=dev --audit-level=high || true
+      - name: Audit high-severity production dependencies
+        run: |
+          npm audit --omit=dev --audit-level=high
+          npm audit --prefix mobile --omit=dev --audit-level=high
+
+      - name: Audit development dependencies (non-blocking)
+        continue-on-error: true
+        run: |
+          npm audit --audit-level=high
+          npm audit --prefix mobile --audit-level=high
+
+      - name: Record accountable-officer release evidence
+        env:
+          ACCOUNTABLE_OFFICER: ${{ github.actor }}
+        run: |
+          node --input-type=module <<'NODE'
+          import { createHash } from 'node:crypto';
+          import { readFileSync, writeFileSync } from 'node:fs';
+          const sha256 = (path) => createHash('sha256').update(readFileSync(path)).digest('hex');
+          const evidence = {
+            schemaVersion: 1,
+            accountableOfficer: process.env.ACCOUNTABLE_OFFICER,
+            commit: process.env.GITHUB_SHA,
+            repository: process.env.GITHUB_REPOSITORY,
+            workflowRun: process.env.GITHUB_RUN_ID,
+            machineChecks: ['migration-validation', 'database-migration', 'type-check', 'production-build', 'root-tests', 'mobile-type-check', 'mobile-tests', 'production-audit'],
+            artifacts: {
+              packageLockSha256: sha256('package-lock.json'),
+              mobilePackageLockSha256: sha256('mobile/package-lock.json'),
+            },
+          };
+          writeFileSync('release-evidence.json', `${JSON.stringify(evidence, null, 2)}\n`);
+          console.log(readFileSync('release-evidence.json', 'utf8'));
+          NODE
+          shasum -a 256 release-evidence.json
+
+      - name: Upload accountable-officer release evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-evidence-${{ github.sha }}
+          path: release-evidence.json
+          if-no-files-found: error
+          retention-days: 90

@@ -1,0 +1,119 @@
+{
+  "schemaVersion": "octamy.form-simulation-result.v1",
+  "generatedAt": "2026-07-29T13:27:10.939Z",
+  "assessmentId": 190,
+  "assessmentSlug": "azure-administration-skills",
+  "blueprintRevision": 1,
+  "runtimePath": "DatabaseStorage.materializeBlueprintForAttempt",
+  "independentForms": 5,
+  "expectedItemsPerForm": 20,
+  "poolExhaustionChecks": [
+    {
+      "ruleId": 933,
+      "bankId": 127,
+      "topicId": null,
+      "difficulty": "mixed",
+      "requiredPerForm": 20,
+      "available": 80,
+      "passed": true
+    }
+  ],
+  "forms": [
+    {
+      "formNumber": 1,
+      "questionCount": 20,
+      "expectedQuestionCount": 20,
+      "duplicateQuestionIds": [],
+      "topicCoverage": [
+        {
+          "ruleId": 933,
+          "bankId": 127,
+          "topicId": null,
+          "difficulty": "mixed",
+          "required": 20,
+          "selected": 20,
+          "matching": 20,
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "formNumber": 2,
+      "questionCount": 20,
+      "expectedQuestionCount": 20,
+      "duplicateQuestionIds": [],
+      "topicCoverage": [
+        {
+          "ruleId": 933,
+          "bankId": 127,
+          "topicId": null,
+          "difficulty": "mixed",
+          "required": 20,
+          "selected": 20,
+          "matching": 20,
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "formNumber": 3,
+      "questionCount": 20,
+      "expectedQuestionCount": 20,
+      "duplicateQuestionIds": [],
+      "topicCoverage": [
+        {
+          "ruleId": 933,
+          "bankId": 127,
+          "topicId": null,
+          "difficulty": "mixed",
+          "required": 20,
+          "selected": 20,
+          "matching": 20,
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "formNumber": 4,
+      "questionCount": 20,
+      "expectedQuestionCount": 20,
+      "duplicateQuestionIds": [],
+      "topicCoverage": [
+        {
+          "ruleId": 933,
+          "bankId": 127,
+          "topicId": null,
+          "difficulty": "mixed",
+          "required": 20,
+          "selected": 20,
+          "matching": 20,
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "formNumber": 5,
+      "questionCount": 20,
+      "expectedQuestionCount": 20,
+      "duplicateQuestionIds": [],
+      "topicCoverage": [
+        {
+          "ruleId": 933,
+          "bankId": 127,
+          "topicId": null,
+          "difficulty": "mixed",
+          "required": 20,
+          "selected": 20,
+          "matching": 20,
+          "passed": true
+        }
+      ],
+      "passed": true
+    }
+  ],
+  "passed": true
+}

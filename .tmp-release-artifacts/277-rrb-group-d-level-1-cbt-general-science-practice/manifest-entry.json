@@ -1,0 +1,21 @@
+{
+  "assessmentId": 277,
+  "slug": "rrb-group-d-level-1-cbt-general-science-practice",
+  "blueprintRevision": 1,
+  "passingScore": 60,
+  "formSimulationArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/277-rrb-group-d-level-1-cbt-general-science-practice/form-simulation.json",
+  "representativeAttemptQaArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/277-rrb-group-d-level-1-cbt-general-science-practice/representative-attempt-qa.json",
+  "accessibilityAuditArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/277-rrb-group-d-level-1-cbt-general-science-practice/accessibility-content-audit.json",
+  "cutScoreApprovalReference": "automated-boundary-check:rrb-group-d-level-1-cbt-general-science-practice:revision-1:score-60",
+  "cutScoreApprovalSha256": "fdf2a4cc388d184738d6f7e90e8f3bbb32d7d11b5a76bfa8277736394e1784a8",
+  "results": {
+    "forms": 20,
+    "draws": 500,
+    "duplicateSelections": 0,
+    "poolExhaustions": 0,
+    "topicRuleChecks": 20,
+    "representativeAttempts": 60,
+    "auditedItems": 200,
+    "mediaItems": 0
+  }
+}

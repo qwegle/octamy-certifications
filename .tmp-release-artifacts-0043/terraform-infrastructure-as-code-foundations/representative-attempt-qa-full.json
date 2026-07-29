@@ -1,0 +1,187 @@
+{
+  "schemaVersion": "octamy.representative-attempt-qa-result.v1",
+  "generatedAt": "2026-07-29T13:27:51.694Z",
+  "assessmentId": 188,
+  "assessmentSlug": "terraform-infrastructure-as-code-foundations",
+  "blueprintRevision": 1,
+  "runtimeMaterializer": "DatabaseStorage.materializeBlueprintForAttempt",
+  "servingPath": "server/routes.ts option shuffle and answer-key omission",
+  "scoringPath": "server/utils/examScoring.scoreExam",
+  "servedQuestionCount": 20,
+  "configuredPassingScore": 70,
+  "testedScoreLevels": [
+    {
+      "correctCount": 0,
+      "expectedScore": 0,
+      "actualScore": 0,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 1,
+      "expectedScore": 5,
+      "actualScore": 5,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 2,
+      "expectedScore": 10,
+      "actualScore": 10,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 3,
+      "expectedScore": 15,
+      "actualScore": 15,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 4,
+      "expectedScore": 20,
+      "actualScore": 20,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 5,
+      "expectedScore": 25,
+      "actualScore": 25,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 6,
+      "expectedScore": 30,
+      "actualScore": 30,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 7,
+      "expectedScore": 35,
+      "actualScore": 35,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 8,
+      "expectedScore": 40,
+      "actualScore": 40,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 9,
+      "expectedScore": 45,
+      "actualScore": 45,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 10,
+      "expectedScore": 50,
+      "actualScore": 50,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 11,
+      "expectedScore": 55,
+      "actualScore": 55,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 12,
+      "expectedScore": 60,
+      "actualScore": 60,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 13,
+      "expectedScore": 65,
+      "actualScore": 65,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 14,
+      "expectedScore": 70,
+      "actualScore": 70,
+      "expectedPassed": true,
+      "actualPassed": true,
+      "passed": true
+    },
+    {
+      "correctCount": 15,
+      "expectedScore": 75,
+      "actualScore": 75,
+      "expectedPassed": true,
+      "actualPassed": true,
+      "passed": true
+    },
+    {
+      "correctCount": 16,
+      "expectedScore": 80,
+      "actualScore": 80,
+      "expectedPassed": true,
+      "actualPassed": true,
+      "passed": true
+    },
+    {
+      "correctCount": 17,
+      "expectedScore": 85,
+      "actualScore": 85,
+      "expectedPassed": true,
+      "actualPassed": true,
+      "passed": true
+    },
+    {
+      "correctCount": 18,
+      "expectedScore": 90,
+      "actualScore": 90,
+      "expectedPassed": true,
+      "actualPassed": true,
+      "passed": true
+    },
+    {
+      "correctCount": 19,
+      "expectedScore": 95,
+      "actualScore": 95,
+      "expectedPassed": true,
+      "actualPassed": true,
+      "passed": true
+    },
+    {
+      "correctCount": 20,
+      "expectedScore": 100,
+      "actualScore": 100,
+      "expectedPassed": true,
+      "actualPassed": true,
+      "passed": true
+    }
+  ],
+  "preSubmissionAnswerKeyExposure": {
+    "leakedKeys": [],
+    "passed": true
+  },
+  "passed": true
+}

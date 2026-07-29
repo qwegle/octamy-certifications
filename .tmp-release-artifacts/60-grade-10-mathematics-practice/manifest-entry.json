@@ -1,0 +1,21 @@
+{
+  "assessmentId": 60,
+  "slug": "grade-10-mathematics-practice",
+  "blueprintRevision": 2,
+  "passingScore": 60,
+  "formSimulationArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/60-grade-10-mathematics-practice/form-simulation.json",
+  "representativeAttemptQaArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/60-grade-10-mathematics-practice/representative-attempt-qa.json",
+  "accessibilityAuditArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/60-grade-10-mathematics-practice/accessibility-content-audit.json",
+  "cutScoreApprovalReference": "automated-boundary-check:grade-10-mathematics-practice:revision-2:score-60",
+  "cutScoreApprovalSha256": "cb39bcbfe9417b8fe5991043ea2d89855eb6a465aa1b15c3b410ebd8ae12fa66",
+  "results": {
+    "forms": 20,
+    "draws": 800,
+    "duplicateSelections": 0,
+    "poolExhaustions": 0,
+    "topicRuleChecks": 180,
+    "representativeAttempts": 60,
+    "auditedItems": 200,
+    "mediaItems": 0
+  }
+}

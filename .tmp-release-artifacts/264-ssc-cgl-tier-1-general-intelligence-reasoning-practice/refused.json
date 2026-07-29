@@ -1,0 +1,8 @@
+{
+  "assessmentId": 264,
+  "slug": "ssc-cgl-tier-1-general-intelligence-reasoning-practice",
+  "blueprintRevision": null,
+  "failures": [
+    "CURRENT_BLUEPRINT_REVISION_MISSING: no immutable course_question_blueprint_versions revision exists, so current-revision artifacts cannot be hash-bound"
+  ]
+}

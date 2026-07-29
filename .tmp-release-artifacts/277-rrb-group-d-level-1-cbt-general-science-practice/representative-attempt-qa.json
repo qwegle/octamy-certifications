@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "octamy.release-machine-artifact.v1",
+  "artifactType": "representative_attempt_qa",
+  "assessmentId": 277,
+  "blueprintRevision": 1,
+  "generatedAt": "2026-07-29T12:34:56.376Z",
+  "passed": true,
+  "summary": "60 scoring attempts passed checks",
+  "checks": [
+    {
+      "name": "report_sha256",
+      "passed": true,
+      "detail": "gNrk9qw7Og_KXz2u1Qi-BKnbOJomSfuOayUrFbMCu68"
+    }
+  ]
+}

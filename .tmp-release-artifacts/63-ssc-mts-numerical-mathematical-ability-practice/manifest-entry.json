@@ -1,0 +1,21 @@
+{
+  "assessmentId": 63,
+  "slug": "ssc-mts-numerical-mathematical-ability-practice",
+  "blueprintRevision": 2,
+  "passingScore": 60,
+  "formSimulationArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/63-ssc-mts-numerical-mathematical-ability-practice/form-simulation.json",
+  "representativeAttemptQaArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/63-ssc-mts-numerical-mathematical-ability-practice/representative-attempt-qa.json",
+  "accessibilityAuditArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/63-ssc-mts-numerical-mathematical-ability-practice/accessibility-content-audit.json",
+  "cutScoreApprovalReference": "automated-boundary-check:ssc-mts-numerical-mathematical-ability-practice:revision-2:score-60",
+  "cutScoreApprovalSha256": "1298e952ba45808c0f2c85426ceb9cafac03501002d5a37985ac74dc77531dc8",
+  "results": {
+    "forms": 20,
+    "draws": 500,
+    "duplicateSelections": 0,
+    "poolExhaustions": 0,
+    "topicRuleChecks": 20,
+    "representativeAttempts": 60,
+    "auditedItems": 200,
+    "mediaItems": 0
+  }
+}

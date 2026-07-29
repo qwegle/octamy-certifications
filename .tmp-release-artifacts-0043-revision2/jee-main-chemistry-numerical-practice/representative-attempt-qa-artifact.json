@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "octamy.release-machine-artifact.v1",
+  "artifactType": "representative_attempt_qa",
+  "assessmentId": 71,
+  "blueprintRevision": 1,
+  "generatedAt": "2026-07-29T13:34:48.385Z",
+  "passed": true,
+  "summary": "All score levels and pass threshold passed.",
+  "checks": [
+    {
+      "name": "attempt",
+      "passed": true,
+      "detail": "No answer key leaked."
+    }
+  ]
+}

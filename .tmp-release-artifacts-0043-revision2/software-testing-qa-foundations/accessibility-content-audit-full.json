@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "octamy.accessibility-content-audit-result.v1",
+  "generatedAt": "2026-07-29T13:35:09.237Z",
+  "assessmentId": 203,
+  "assessmentSlug": "software-testing-qa-foundations",
+  "blueprintRevision": 2,
+  "methods": [
+    "media alternative text presence",
+    "absence of colour-only references",
+    "absence of position-only references",
+    "normalized option distinctness",
+    "stem readability length 8-2000"
+  ],
+  "counts": {
+    "inspectedItems": 100,
+    "mediaReferences": 0,
+    "missingMediaAltText": 0,
+    "colorOnlyReferences": 0,
+    "positionOnlyReferences": 0,
+    "duplicateOptionSets": 0,
+    "unreadableStems": 0
+  },
+  "findings": [],
+  "passed": true
+}

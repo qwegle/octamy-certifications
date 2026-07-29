@@ -1,0 +1,3789 @@
+{
+  "schemaVersion": "octamy.release-artifact-run.v1",
+  "generatedAt": "2026-07-29T12:49:42.701Z",
+  "targetScope": "all_published",
+  "targetCount": 110,
+  "certificationTargetCount": 69,
+  "passedCount": 57,
+  "failedCount": 53,
+  "aggregate": {
+    "forms": 5700,
+    "materializedItems": 123300,
+    "scoreLevels": 1290,
+    "accessibilityItems": 8420,
+    "mediaReferences": 0
+  },
+  "results": [
+    {
+      "status": "failed",
+      "target": {
+        "id": 194,
+        "slug": "advanced-sql-analytics-skills",
+        "title": "Advanced SQL Analytics Skills Assessment",
+        "assessmentPurpose": "certification",
+        "passingScore": 72,
+        "blueprintRevision": null
+      },
+      "failure": "BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"
+    },
+    {
+      "status": "failed",
+      "target": {
+        "id": 209,
+        "slug": "agile-scrum-delivery-foundations",
+        "title": "Agile and Scrum Delivery Foundations Certification",
+        "assessmentPurpose": "certification",
+        "passingScore": 70,
+        "blueprintRevision": null
+      },
+      "failure": "BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 5,
+        "slug": "ai-ethics-governance",
+        "title": "AI Ethics and Governance",
+        "assessmentPurpose": "certification",
+        "passingScore": 70,
+        "blueprintRevision": 1
+      },
+      "expectedItems": 10,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ai-ethics-governance/form-simulation-full.json",
+          "sha256": "9cbe2e83479c92769b33204145bdafe0c5a0af35bbc31d6b525ede868781d821",
+          "bytes": 206117
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ai-ethics-governance/representative-attempt-qa-full.json",
+          "sha256": "fce73c3128143ee74033ecd5d08028aa27f9c0faeedca3697a809da1d93fe840",
+          "bytes": 2476
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ai-ethics-governance/accessibility-content-audit-full.json",
+          "sha256": "f53e4dbfc0ec978e2a87efe958049e7b6cb43646c505a249b755ce7a1e84c8e2",
+          "bytes": 679
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ai-ethics-governance/form-simulation-artifact.json",
+          "sha256": "6e55e4a7ef3f7377b2469ad649d18520c18ba91c55f12878264c51260a79c736",
+          "bytes": 391
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ai-ethics-governance/representative-attempt-qa-artifact.json",
+          "sha256": "4d2ca49a99e975af3b73f4989ee366af6a591837b842109acbe750121686db4c",
+          "bytes": 395
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ai-ethics-governance/accessibility-content-audit-artifact.json",
+          "sha256": "c20d4207f74ad49d4780e39e0bc8dc0b0d48b757f2a60ec6f3e2c60609283376",
+          "bytes": 410
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 1000,
+        "scoreLevels": 11,
+        "accessibilityItems": 80,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/ai-ethics-governance/revision-1",
+      "cutScoreApprovalSha256": "fce73c3128143ee74033ecd5d08028aa27f9c0faeedca3697a809da1d93fe840"
+    },
+    {
+      "status": "failed",
+      "target": {
+        "id": 103,
+        "slug": "ai-fundamentals-for-work",
+        "title": "AI Fundamentals for Work Skills Assessment",
+        "assessmentPurpose": "certification",
+        "passingScore": 70,
+        "blueprintRevision": null
+      },
+      "failure": "BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 202,
+        "slug": "api-design-microservices-foundations",
+        "title": "API Design and Microservices Skills",
+        "assessmentPurpose": "certification",
+        "passingScore": 72,
+        "blueprintRevision": 1
+      },
+      "expectedItems": 16,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/api-design-microservices-foundations/form-simulation-full.json",
+          "sha256": "d0f0daff582dc604d673129d060d2d387efbf151b56d55a30fd7c1f284552776",
+          "bytes": 205327
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/api-design-microservices-foundations/representative-attempt-qa-full.json",
+          "sha256": "e271f6940758c75495ca4e16f769d8b672393b56c95ae8125718077c0f9264c4",
+          "bytes": 3522
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/api-design-microservices-foundations/accessibility-content-audit-full.json",
+          "sha256": "9c08a402780b278b1523b6ea7cc2ec82a94c8d0040ccaff62b104190de6b33da",
+          "bytes": 697
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/api-design-microservices-foundations/form-simulation-artifact.json",
+          "sha256": "802b06b8c501612c32da9afc83df899b882236a84344da27fc9db8157387ab3b",
+          "bytes": 393
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/api-design-microservices-foundations/representative-attempt-qa-artifact.json",
+          "sha256": "f5b6147d42a73a329290670a2610f644bf765969c95eea9fb8eed82d4978eab1",
+          "bytes": 397
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/api-design-microservices-foundations/accessibility-content-audit-artifact.json",
+          "sha256": "1eac01b7fc43007a003661996148854a09801a97c5e2523d37e0b449e237f583",
+          "bytes": 412
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 1600,
+        "scoreLevels": 17,
+        "accessibilityItems": 80,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/api-design-microservices-foundations/revision-1",
+      "cutScoreApprovalSha256": "e271f6940758c75495ca4e16f769d8b672393b56c95ae8125718077c0f9264c4"
+    },
+    {
+      "status": "failed",
+      "target": {
+        "id": 206,
+        "slug": "application-security-foundations",
+        "title": "Application Security Foundations Certification",
+        "assessmentPurpose": "certification",
+        "passingScore": 72,
+        "blueprintRevision": null
+      },
+      "failure": "BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"
+    },
+    {
+      "status": "failed",
+      "target": {
+        "id": 99,
+        "slug": "aws-cloud-practitioner-foundations",
+        "title": "AWS Cloud Practitioner (CLF-C02) Skills Assessment",
+        "assessmentPurpose": "certification",
+        "passingScore": 70,
+        "blueprintRevision": null
+      },
+      "failure": "BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"
+    },
+    {
+      "status": "failed",
+      "target": {
+        "id": 189,
+        "slug": "aws-solutions-architecture-skills",
+        "title": "AWS Solutions Architecture Skills Assessment",
+        "assessmentPurpose": "certification",
+        "passingScore": 72,
+        "blueprintRevision": null
+      },
+      "failure": "BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"
+    },
+    {
+      "status": "failed",
+      "target": {
+        "id": 190,
+        "slug": "azure-administration-skills",
+        "title": "Microsoft Azure Administration Skills Assessment",
+        "assessmentPurpose": "certification",
+        "passingScore": 70,
+        "blueprintRevision": null
+      },
+      "failure": "BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"
+    },
+    {
+      "status": "failed",
+      "target": {
+        "id": 100,
+        "slug": "azure-fundamentals-az-900-readiness",
+        "title": "Microsoft Azure Fundamentals (AZ-900) Preparation Assessment",
+        "assessmentPurpose": "certification",
+        "passingScore": 70,
+        "blueprintRevision": null
+      },
+      "failure": "BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"
+    },
+    {
+      "status": "failed",
+      "target": {
+        "id": 112,
+        "slug": "business-analyst-digital-foundations",
+        "title": "Business Analyst Digital Foundations",
+        "assessmentPurpose": "certification",
+        "passingScore": 70,
+        "blueprintRevision": null
+      },
+      "failure": "BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"
+    },
+    {
+      "status": "failed",
+      "target": {
+        "id": 111,
+        "slug": "cloud-security-foundations",
+        "title": "Cloud Security Foundations Skills Assessment",
+        "assessmentPurpose": "certification",
+        "passingScore": 70,
+        "blueprintRevision": null
+      },
+      "failure": "BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 4,
+        "slug": "computer-vision",
+        "title": "Computer Vision",
+        "assessmentPurpose": "certification",
+        "passingScore": 85,
+        "blueprintRevision": 1
+      },
+      "expectedItems": 10,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/computer-vision/form-simulation-full.json",
+          "sha256": "329ccc5f277891a3fe872586f478331f5d1edee2c0c0685949ccfcb382323873",
+          "bytes": 206112
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/computer-vision/representative-attempt-qa-full.json",
+          "sha256": "0c1d87df0fc584f276794173cfe05d5d60d38486228d9150a36b89807410db0f",
+          "bytes": 2475
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/computer-vision/accessibility-content-audit-full.json",
+          "sha256": "9a896db033af160c305df19bca4a051eecece68923ee5aa690bbf6b0ff1e35f4",
+          "bytes": 674
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/computer-vision/form-simulation-artifact.json",
+          "sha256": "db55f782094290241efaca49bb789b911c52e29e33ffe1f9736c7efcec54740c",
+          "bytes": 391
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/computer-vision/representative-attempt-qa-artifact.json",
+          "sha256": "1f8a48424d29fae626f546e024e958fa64af4f1c201144ba06016f3abc6653c6",
+          "bytes": 395
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/computer-vision/accessibility-content-audit-artifact.json",
+          "sha256": "d87c9d725cd3c949ced87b1ba0653d5d889abe3af39b3a5f3a0cb9cc3dd89e1f",
+          "bytes": 410
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 1000,
+        "scoreLevels": 11,
+        "accessibilityItems": 80,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/computer-vision/revision-1",
+      "cutScoreApprovalSha256": "0c1d87df0fc584f276794173cfe05d5d60d38486228d9150a36b89807410db0f"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 27,
+        "slug": "content-marketing",
+        "title": "Content Marketing",
+        "assessmentPurpose": "certification",
+        "passingScore": 70,
+        "blueprintRevision": 1
+      },
+      "expectedItems": 10,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/content-marketing/form-simulation-full.json",
+          "sha256": "1b6568acc38ec64b82ba952ad8f615d6ec647740acf18d2064c26d04f217cba3",
+          "bytes": 206115
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/content-marketing/representative-attempt-qa-full.json",
+          "sha256": "57b85b0c4edfa65f4d499d372648f84ee18c7c8a47eeb7a0a5200d785a20568f",
+          "bytes": 2474
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/content-marketing/accessibility-content-audit-full.json",
+          "sha256": "222372c05fb58203461b00e45e3a7ec2370d6cd4b8beca4cfd8c51305f32921e",
+          "bytes": 677
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/content-marketing/form-simulation-artifact.json",
+          "sha256": "52072cdfc5c4da6e51395c017d8c1cbbbbe0c82b777d83f0959491b071d126d1",
+          "bytes": 392
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/content-marketing/representative-attempt-qa-artifact.json",
+          "sha256": "3279e0abc95e87f3bbc638aa7e07d035d6db39ade00de3157db0b2168aa6184d",
+          "bytes": 396
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/content-marketing/accessibility-content-audit-artifact.json",
+          "sha256": "7b9e7103648b94c616a87a322e3d71a5ee34b75043d086d8342696eb57d39d1f",
+          "bytes": 411
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 1000,
+        "scoreLevels": 11,
+        "accessibilityItems": 80,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/content-marketing/revision-1",
+      "cutScoreApprovalSha256": "57b85b0c4edfa65f4d499d372648f84ee18c7c8a47eeb7a0a5200d785a20568f"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 38,
+        "slug": "corporate-finance",
+        "title": "Corporate Finance Certification",
+        "assessmentPurpose": "certification",
+        "passingScore": 80,
+        "blueprintRevision": 1
+      },
+      "expectedItems": 10,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/corporate-finance/form-simulation-full.json",
+          "sha256": "24f46206a6384ef703de6b499f0683d1e4d9fdb4216b1d433def2f6f8029cfcc",
+          "bytes": 206115
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/corporate-finance/representative-attempt-qa-full.json",
+          "sha256": "1adf6ab28362365f4140f38e2d77798992dce21f46c39a374ef3b083b09c4d4f",
+          "bytes": 2476
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/corporate-finance/accessibility-content-audit-full.json",
+          "sha256": "af27015e56db7583aaebaeb2fd56064deb3399ea67584dc87edfc2c9df41499f",
+          "bytes": 677
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/corporate-finance/form-simulation-artifact.json",
+          "sha256": "c94231fd88e56c2eb6141af444b1a69724dc49a550a7624ca584ef680390db6a",
+          "bytes": 392
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/corporate-finance/representative-attempt-qa-artifact.json",
+          "sha256": "363006dd7ec17ff108f6e018e201c4e2793b2fb4a75f6e812a59a49060da6e2f",
+          "bytes": 396
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/corporate-finance/accessibility-content-audit-artifact.json",
+          "sha256": "4405137bf9daff5bc482ac93bc7af8aee9f09f306bdeecbd0f2a47c6e224ad7f",
+          "bytes": 411
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 1000,
+        "scoreLevels": 11,
+        "accessibilityItems": 80,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/corporate-finance/revision-1",
+      "cutScoreApprovalSha256": "1adf6ab28362365f4140f38e2d77798992dce21f46c39a374ef3b083b09c4d4f"
+    },
+    {
+      "status": "failed",
+      "target": {
+        "id": 199,
+        "slug": "csharp-dotnet-backend-skills",
+        "title": "C# and .NET Backend Skills Certification",
+        "assessmentPurpose": "certification",
+        "passingScore": 70,
+        "blueprintRevision": null
+      },
+      "failure": "BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"
+    },
+    {
+      "status": "failed",
+      "target": {
+        "id": 110,
+        "slug": "cybersecurity-foundations",
+        "title": "Cybersecurity Foundations Certification Assessment",
+        "assessmentPurpose": "certification",
+        "passingScore": 70,
+        "blueprintRevision": null
+      },
+      "failure": "BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"
+    },
+    {
+      "status": "failed",
+      "target": {
+        "id": 106,
+        "slug": "data-analytics-sql-bi-foundations",
+        "title": "Data Analytics SQL and BI Foundations",
+        "assessmentPurpose": "certification",
+        "passingScore": 70,
+        "blueprintRevision": null
+      },
+      "failure": "BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"
+    },
+    {
+      "status": "failed",
+      "target": {
+        "id": 195,
+        "slug": "data-engineering-foundations",
+        "title": "Data Engineering Foundations Skills Assessment",
+        "assessmentPurpose": "certification",
+        "passingScore": 70,
+        "blueprintRevision": null
+      },
+      "failure": "BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 2,
+        "slug": "deep-learning-neural-networks",
+        "title": "Deep Learning and Neural Networks",
+        "assessmentPurpose": "certification",
+        "passingScore": 70,
+        "blueprintRevision": 1
+      },
+      "expectedItems": 10,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/deep-learning-neural-networks/form-simulation-full.json",
+          "sha256": "ad33953da3fbf740404d1ebaad9d0084fda1b90105186aea8b1f86f33892891a",
+          "bytes": 206126
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/deep-learning-neural-networks/representative-attempt-qa-full.json",
+          "sha256": "585400a0b1ad509b06e7e7152f2e2126dedeec0a8233fcd80ad392e58d4e0515",
+          "bytes": 2485
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/deep-learning-neural-networks/accessibility-content-audit-full.json",
+          "sha256": "ffa738d2cf3002bd9d8c0975966c1b2087a8fc7a334b9f7fe2b1e9ac979c441d",
+          "bytes": 688
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/deep-learning-neural-networks/form-simulation-artifact.json",
+          "sha256": "e5de4e51c02c53b1bda283e08c1cbd7cfb5086a4762135d2cd1028c18ed08868",
+          "bytes": 391
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/deep-learning-neural-networks/representative-attempt-qa-artifact.json",
+          "sha256": "653ebe79eed79e472505324bcbfbfdf4a0f2b4f7fadd9bf8ee37f1a94d1ab21b",
+          "bytes": 395
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/deep-learning-neural-networks/accessibility-content-audit-artifact.json",
+          "sha256": "9e98f4a723b3de9536f2c52d0dd2a7e18da2e43e86c58df8e5b2c7e7e05bd307",
+          "bytes": 410
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 1000,
+        "scoreLevels": 11,
+        "accessibilityItems": 80,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/deep-learning-neural-networks/revision-1",
+      "cutScoreApprovalSha256": "585400a0b1ad509b06e7e7152f2e2126dedeec0a8233fcd80ad392e58d4e0515"
+    },
+    {
+      "status": "failed",
+      "target": {
+        "id": 101,
+        "slug": "devops-ci-cd-foundations",
+        "title": "DevOps and CI/CD Foundations Certification",
+        "assessmentPurpose": "certification",
+        "passingScore": 70,
+        "blueprintRevision": null
+      },
+      "failure": "BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 26,
+        "slug": "digital-marketing-basics",
+        "title": "Digital Marketing Basics",
+        "assessmentPurpose": "certification",
+        "passingScore": 60,
+        "blueprintRevision": 1
+      },
+      "expectedItems": 10,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/digital-marketing-basics/form-simulation-full.json",
+          "sha256": "436c9e0f3ed71558a31054197b9de641fe7754ec587ac3c9e258ad78e1e74bb5",
+          "bytes": 206122
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/digital-marketing-basics/representative-attempt-qa-full.json",
+          "sha256": "c6c23f8259e08b48e61b3e738302615e31869be8941216c655c92aef793f3744",
+          "bytes": 2479
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/digital-marketing-basics/accessibility-content-audit-full.json",
+          "sha256": "5b5f83b6dc6e24d69eef74f3459db5ba0862a34d8d0685fd5f5d41855054f51d",
+          "bytes": 684
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/digital-marketing-basics/form-simulation-artifact.json",
+          "sha256": "a7af18362b0886674d854bfaaaf778b334594d6106c230a23e58857a8bc0ce8b",
+          "bytes": 392
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/digital-marketing-basics/representative-attempt-qa-artifact.json",
+          "sha256": "3377a3c79d0e54eab042a5977a610c094705cc6934ff1486b83717ced2501c87",
+          "bytes": 396
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/digital-marketing-basics/accessibility-content-audit-artifact.json",
+          "sha256": "8b759e8e50864373d66307f324abb5ab5018d77c10fc24f6e56ff350bf71f95f",
+          "bytes": 411
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 1000,
+        "scoreLevels": 11,
+        "accessibilityItems": 80,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/digital-marketing-basics/revision-1",
+      "cutScoreApprovalSha256": "c6c23f8259e08b48e61b3e738302615e31869be8941216c655c92aef793f3744"
+    },
+    {
+      "status": "failed",
+      "target": {
+        "id": 187,
+        "slug": "docker-containerization-foundations",
+        "title": "Docker Containerization Skills Assessment",
+        "assessmentPurpose": "certification",
+        "passingScore": 70,
+        "blueprintRevision": null
+      },
+      "failure": "BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 33,
+        "slug": "ethical-hacking",
+        "title": "Ethical Hacking — Defensive and Authorized Testing",
+        "assessmentPurpose": "certification",
+        "passingScore": 80,
+        "blueprintRevision": 1
+      },
+      "expectedItems": 10,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ethical-hacking/form-simulation-full.json",
+          "sha256": "8492ff85b7b10a208224968227429218bcea29842d0ed4b55f11f39b614efc6d",
+          "bytes": 206113
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ethical-hacking/representative-attempt-qa-full.json",
+          "sha256": "8e3330b814a2fb6150a915a26cdcc9e3159fdc742d481c95e5eb1d5c6d0c1783",
+          "bytes": 2474
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ethical-hacking/accessibility-content-audit-full.json",
+          "sha256": "f6167fb976bed60a065c6ea495508ecb8f7fc636fccd1096af5de8ec3be0134f",
+          "bytes": 675
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ethical-hacking/form-simulation-artifact.json",
+          "sha256": "82f64a2a32b28043071e3501fdc3d823ca7c9fb127eeee60f6604a22883ff269",
+          "bytes": 392
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ethical-hacking/representative-attempt-qa-artifact.json",
+          "sha256": "6d0d02172e724253025a1eeb0d87da601ca919d1fab71a4d86a71f021d17c702",
+          "bytes": 396
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ethical-hacking/accessibility-content-audit-artifact.json",
+          "sha256": "4fd37d4f8330e9ba409da46029c4e6c0ba3171415139509a17faf916acccb88d",
+          "bytes": 411
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 1000,
+        "scoreLevels": 11,
+        "accessibilityItems": 80,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/ethical-hacking/revision-1",
+      "cutScoreApprovalSha256": "8e3330b814a2fb6150a915a26cdcc9e3159fdc742d481c95e5eb1d5c6d0c1783"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 36,
+        "slug": "financial-fundamentals",
+        "title": "Financial Fundamentals Certification",
+        "assessmentPurpose": "certification",
+        "passingScore": 60,
+        "blueprintRevision": 1
+      },
+      "expectedItems": 10,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/financial-fundamentals/form-simulation-full.json",
+          "sha256": "dd960f6ebf5313ba94d6888e50d3d5253668feb5be965db7961f6ece13e761a3",
+          "bytes": 206120
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/financial-fundamentals/representative-attempt-qa-full.json",
+          "sha256": "9f0dbd2448e5edae2e5220cf390deb732c54652fcb593006bdbc2aaea507f0f9",
+          "bytes": 2477
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/financial-fundamentals/accessibility-content-audit-full.json",
+          "sha256": "b5e9923eb3301d9b13033e99fe3f842d87fee8b206a23c1c4f8aed1994c67e1a",
+          "bytes": 682
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/financial-fundamentals/form-simulation-artifact.json",
+          "sha256": "1b1b123ba79b6b74b2a08c63b842438c4b9f5968696d6fd9135bb68c5eab4f13",
+          "bytes": 392
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/financial-fundamentals/representative-attempt-qa-artifact.json",
+          "sha256": "b65a24b81c625b2e0ec02116f4a371efa2e57ac8fa474e29e769a4ada50b7557",
+          "bytes": 396
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/financial-fundamentals/accessibility-content-audit-artifact.json",
+          "sha256": "bb11a7b135398dd42f0a72073a0d2cf20866055f075ccb735a3cca1ff8b3ba51",
+          "bytes": 411
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 1000,
+        "scoreLevels": 11,
+        "accessibilityItems": 80,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/financial-fundamentals/revision-1",
+      "cutScoreApprovalSha256": "9f0dbd2448e5edae2e5220cf390deb732c54652fcb593006bdbc2aaea507f0f9"
+    },
+    {
+      "status": "failed",
+      "target": {
+        "id": 196,
+        "slug": "generative-ai-application-engineering",
+        "title": "Generative AI Application Engineering Skills Assessment",
+        "assessmentPurpose": "certification",
+        "passingScore": 72,
+        "blueprintRevision": null
+      },
+      "failure": "BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"
+    },
+    {
+      "status": "failed",
+      "target": {
+        "id": 104,
+        "slug": "generative-ai-prompt-engineering-foundations",
+        "title": "Generative AI Prompt Engineering Skills Assessment",
+        "assessmentPurpose": "certification",
+        "passingScore": 70,
+        "blueprintRevision": null
+      },
+      "failure": "BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"
+    },
+    {
+      "status": "failed",
+      "target": {
+        "id": 204,
+        "slug": "git-linux-developer-workflows",
+        "title": "Git and Linux Developer Workflows Assessment",
+        "assessmentPurpose": "certification",
+        "passingScore": 70,
+        "blueprintRevision": null
+      },
+      "failure": "BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 51,
+        "slug": "grade-1-mathematics-diagnostic",
+        "title": "Grade 1 Mathematics Diagnostic",
+        "assessmentPurpose": "practice",
+        "passingScore": 60,
+        "blueprintRevision": 1
+      },
+      "expectedItems": 20,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-1-mathematics-diagnostic/form-simulation-full.json",
+          "sha256": "ed1a655a3ced347b7df6f27ec51663642102fb75158870bc143906b82ef450ce",
+          "bytes": 42770
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-1-mathematics-diagnostic/representative-attempt-qa-full.json",
+          "sha256": "0fedb96312aa71dadb787a924acc041bcd250f01e2a58bd7e3fb9fb4e0f9202a",
+          "bytes": 4195
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-1-mathematics-diagnostic/accessibility-content-audit-full.json",
+          "sha256": "df8ccd2b06a7e27325aff62ab68541811c86ccb5a41bb4615f8e2e8c535f9dab",
+          "bytes": 691
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-1-mathematics-diagnostic/form-simulation-artifact.json",
+          "sha256": "554657ee5d6dcf16d14db4a7f441bfaf747ea47ff9537a606e35a7aa19cd6cb0",
+          "bytes": 392
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-1-mathematics-diagnostic/representative-attempt-qa-artifact.json",
+          "sha256": "0ae105758518746cca1dbb9ca49317ee0075fc739b5528e0192b909c869572f6",
+          "bytes": 396
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-1-mathematics-diagnostic/accessibility-content-audit-artifact.json",
+          "sha256": "955e883c400a562cc7aa5c1ec82d7ee1778e055312bd11eedc5cd1104b8ed17d",
+          "bytes": 411
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 2000,
+        "scoreLevels": 21,
+        "accessibilityItems": 200,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/grade-1-mathematics-diagnostic/revision-1",
+      "cutScoreApprovalSha256": "0fedb96312aa71dadb787a924acc041bcd250f01e2a58bd7e3fb9fb4e0f9202a"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 60,
+        "slug": "grade-10-mathematics-practice",
+        "title": "Grade 10 Mathematics Practice",
+        "assessmentPurpose": "practice",
+        "passingScore": 60,
+        "blueprintRevision": 2
+      },
+      "expectedItems": 40,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-10-mathematics-practice/form-simulation-full.json",
+          "sha256": "fd87350bfe089a2b8829ceda03fe2fed50a2f0f80cb73d679a61e2305b42199c",
+          "bytes": 227689
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-10-mathematics-practice/representative-attempt-qa-full.json",
+          "sha256": "9009b3a30eb276914d1c52e872f69ecbe729af3a44e2fb6824dc11e0776411c6",
+          "bytes": 7614
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-10-mathematics-practice/accessibility-content-audit-full.json",
+          "sha256": "eb52138f81e2ee69fcecb918e82916cf834837b1c595495d3b53d6c24a34e74b",
+          "bytes": 690
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-10-mathematics-practice/form-simulation-artifact.json",
+          "sha256": "db30fc2df1a7cbd37975a4f24ea14d74eb821d1eb704728d6aeddfd3b03cbb38",
+          "bytes": 392
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-10-mathematics-practice/representative-attempt-qa-artifact.json",
+          "sha256": "47d39aa825394108b39bca59e532787810fc081126a8f5043bc5772ee072558a",
+          "bytes": 396
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-10-mathematics-practice/accessibility-content-audit-artifact.json",
+          "sha256": "7f671640b6693ebc1012d8f8283c83aaeba342d67a1231ce3ff71a6429861eeb",
+          "bytes": 411
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 4000,
+        "scoreLevels": 41,
+        "accessibilityItems": 200,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/grade-10-mathematics-practice/revision-2",
+      "cutScoreApprovalSha256": "9009b3a30eb276914d1c52e872f69ecbe729af3a44e2fb6824dc11e0776411c6"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 74,
+        "slug": "grade-11-chemistry-numerical-practice",
+        "title": "Grade 11 Chemistry Numerical Practice",
+        "assessmentPurpose": "practice",
+        "passingScore": 60,
+        "blueprintRevision": 1
+      },
+      "expectedItems": 30,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-11-chemistry-numerical-practice/form-simulation-full.json",
+          "sha256": "71a8e5f3f870133db7b9bdb3bfd1c2468f392c6f699b219a2604ba5e12bf5141",
+          "bytes": 134480
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-11-chemistry-numerical-practice/representative-attempt-qa-full.json",
+          "sha256": "76ba3115902e780ea224d914f7cf8aef0c55b30399a435fb2d612634fce7907e",
+          "bytes": 5912
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-11-chemistry-numerical-practice/accessibility-content-audit-full.json",
+          "sha256": "ddcc0bdfc405c8be09b7be452c12ace5e215e834b06839d892b5cfb2e872e694",
+          "bytes": 698
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-11-chemistry-numerical-practice/form-simulation-artifact.json",
+          "sha256": "8bbce230f41e5af5921188e4d461bf752fd4259986deaa758322ae76d84f3a01",
+          "bytes": 392
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-11-chemistry-numerical-practice/representative-attempt-qa-artifact.json",
+          "sha256": "7f12ceb146bedcb7cd61032389d0dea752441fb6f6ee9f15bbc32fe96cc93617",
+          "bytes": 396
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-11-chemistry-numerical-practice/accessibility-content-audit-artifact.json",
+          "sha256": "793a9f2fea5993449b60b6c642cfe8aa1a41a7ca13437c51a83d1447566baaba",
+          "bytes": 411
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 3000,
+        "scoreLevels": 31,
+        "accessibilityItems": 200,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/grade-11-chemistry-numerical-practice/revision-1",
+      "cutScoreApprovalSha256": "76ba3115902e780ea224d914f7cf8aef0c55b30399a435fb2d612634fce7907e"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 72,
+        "slug": "grade-11-physics-numerical-practice",
+        "title": "Grade 11 Physics Numerical Practice",
+        "assessmentPurpose": "practice",
+        "passingScore": 60,
+        "blueprintRevision": 1
+      },
+      "expectedItems": 30,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-11-physics-numerical-practice/form-simulation-full.json",
+          "sha256": "4b56d660b3be58a98bf6a4b887ff8873d2bb1653c4e4f5c9afac3dce191fdee7",
+          "bytes": 272940
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-11-physics-numerical-practice/representative-attempt-qa-full.json",
+          "sha256": "88e3255e3911ce667c7a306de45f670c0fa7b5611667b5f7f667393eba468baa",
+          "bytes": 5910
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-11-physics-numerical-practice/accessibility-content-audit-full.json",
+          "sha256": "fb08441c99e8ad6fb4eeba7a2f23917a205cfbe4ae34cdcb8ec44808cfa94e32",
+          "bytes": 696
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-11-physics-numerical-practice/form-simulation-artifact.json",
+          "sha256": "19ed8f10cc93ce4ec8ac8069ab6d3ef0737c574895e49dac3073067a258c3683",
+          "bytes": 392
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-11-physics-numerical-practice/representative-attempt-qa-artifact.json",
+          "sha256": "7c663944915cac98552a08e6c083dce4ad740af59869e28e85fa5113f0d2a771",
+          "bytes": 396
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-11-physics-numerical-practice/accessibility-content-audit-artifact.json",
+          "sha256": "138feef152ca4231edbc6672f531bfb529d7237ee4b4c2e2aa8bb31dd32cd413",
+          "bytes": 411
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 3000,
+        "scoreLevels": 31,
+        "accessibilityItems": 200,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/grade-11-physics-numerical-practice/revision-1",
+      "cutScoreApprovalSha256": "88e3255e3911ce667c7a306de45f670c0fa7b5611667b5f7f667393eba468baa"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 75,
+        "slug": "grade-12-chemistry-numerical-practice",
+        "title": "Grade 12 Chemistry Numerical Practice",
+        "assessmentPurpose": "practice",
+        "passingScore": 60,
+        "blueprintRevision": 1
+      },
+      "expectedItems": 30,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-12-chemistry-numerical-practice/form-simulation-full.json",
+          "sha256": "82d75f2e0e951c5eabed20709e85ef2f1dd42dbd8fe74894f392b6c6736f8c63",
+          "bytes": 134480
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-12-chemistry-numerical-practice/representative-attempt-qa-full.json",
+          "sha256": "4b08420ffe57ae07cdc4c19478f2853225401f17d2a099883b2c64a7154f99a4",
+          "bytes": 5912
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-12-chemistry-numerical-practice/accessibility-content-audit-full.json",
+          "sha256": "5c188667a39297cd6961355f4ca5b8d75227bd8ff432a2cb47d9552fe7b30f40",
+          "bytes": 698
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-12-chemistry-numerical-practice/form-simulation-artifact.json",
+          "sha256": "38c7681e90dc99c09c3361c096e18bccf36ab6466162b2746c254d8aa02da7ba",
+          "bytes": 392
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-12-chemistry-numerical-practice/representative-attempt-qa-artifact.json",
+          "sha256": "205d9ca2d9aa3fa41c09d7c1e862705f541ef34b120f3128b5a86f1d04172790",
+          "bytes": 396
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-12-chemistry-numerical-practice/accessibility-content-audit-artifact.json",
+          "sha256": "582f75ae2e687454fb299185bdb67168f21ae9fa2a09fb690d81bd1b18a0665d",
+          "bytes": 411
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 3000,
+        "scoreLevels": 31,
+        "accessibilityItems": 200,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/grade-12-chemistry-numerical-practice/revision-1",
+      "cutScoreApprovalSha256": "4b08420ffe57ae07cdc4c19478f2853225401f17d2a099883b2c64a7154f99a4"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 73,
+        "slug": "grade-12-physics-numerical-practice",
+        "title": "Grade 12 Physics Numerical Practice",
+        "assessmentPurpose": "practice",
+        "passingScore": 60,
+        "blueprintRevision": 1
+      },
+      "expectedItems": 30,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-12-physics-numerical-practice/form-simulation-full.json",
+          "sha256": "a68460bc435b44a0afb24c1627e3e5501bf8fffbfccac6a815bad8a1bc33ea56",
+          "bytes": 272940
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-12-physics-numerical-practice/representative-attempt-qa-full.json",
+          "sha256": "10e1d2cc1b4e285d8bdaa07951b51c877b33c1519cacb431e2716697bd17bc44",
+          "bytes": 5910
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-12-physics-numerical-practice/accessibility-content-audit-full.json",
+          "sha256": "f72d02db7faac8b3c0468ec94cd5ec6ba1773a40c7d013c7ddc7eb2b962fa199",
+          "bytes": 696
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-12-physics-numerical-practice/form-simulation-artifact.json",
+          "sha256": "380151641c383eab3b6df17bcafe4716ef332ab5fbdec613c60216073a2f5a38",
+          "bytes": 392
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-12-physics-numerical-practice/representative-attempt-qa-artifact.json",
+          "sha256": "a58e188617ff365e65da45a79cf746f3ad7b9555d78b76fd53ce0761eaaa8c48",
+          "bytes": 396
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-12-physics-numerical-practice/accessibility-content-audit-artifact.json",
+          "sha256": "ece4d887c376bcb1da13f2f9f60bfd8c4b9a382200996ed3815f6f80d8c182a7",
+          "bytes": 411
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 3000,
+        "scoreLevels": 31,
+        "accessibilityItems": 200,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/grade-12-physics-numerical-practice/revision-1",
+      "cutScoreApprovalSha256": "10e1d2cc1b4e285d8bdaa07951b51c877b33c1519cacb431e2716697bd17bc44"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 52,
+        "slug": "grade-2-mathematics-diagnostic",
+        "title": "Grade 2 Mathematics Diagnostic",
+        "assessmentPurpose": "practice",
+        "passingScore": 60,
+        "blueprintRevision": 1
+      },
+      "expectedItems": 20,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-2-mathematics-diagnostic/form-simulation-full.json",
+          "sha256": "0d4278174e9af5dd7ee8ecee44b025e47eef692144abc51aefd66b50fdc94cbb",
+          "bytes": 42770
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-2-mathematics-diagnostic/representative-attempt-qa-full.json",
+          "sha256": "352b17960819b40967fe354ab832107060d6c2a142cfe25a451b719aca47c0ae",
+          "bytes": 4195
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-2-mathematics-diagnostic/accessibility-content-audit-full.json",
+          "sha256": "1072d1836dfef2ef3ff2b689b6d795779ac514f1729b6d20611bbaffc708580d",
+          "bytes": 691
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-2-mathematics-diagnostic/form-simulation-artifact.json",
+          "sha256": "00fe08552f35478f33b280cc9067ec04d76d29dcbd4239b154c426b732ac8218",
+          "bytes": 392
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-2-mathematics-diagnostic/representative-attempt-qa-artifact.json",
+          "sha256": "084cc1ec7ea94f46307ad0b59e284a7cbfd4fb8a72dd15e56800cd63db6c25aa",
+          "bytes": 396
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-2-mathematics-diagnostic/accessibility-content-audit-artifact.json",
+          "sha256": "c87fe56c6430ba45516b2c2ec57afac38908e04e1a29ac16cbd5713fbbd65262",
+          "bytes": 411
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 2000,
+        "scoreLevels": 21,
+        "accessibilityItems": 200,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/grade-2-mathematics-diagnostic/revision-1",
+      "cutScoreApprovalSha256": "352b17960819b40967fe354ab832107060d6c2a142cfe25a451b719aca47c0ae"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 53,
+        "slug": "grade-3-arithmetic-time-and-perimeter-practice",
+        "title": "Grade 3 Arithmetic, Time and Perimeter Practice",
+        "assessmentPurpose": "practice",
+        "passingScore": 60,
+        "blueprintRevision": 2
+      },
+      "expectedItems": 25,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-3-arithmetic-time-and-perimeter-practice/form-simulation-full.json",
+          "sha256": "a836b202915fdb0f500a6c4f7a3504921e2d1c209845699c06d20f6a38446932",
+          "bytes": 204528
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-3-arithmetic-time-and-perimeter-practice/representative-attempt-qa-full.json",
+          "sha256": "17b335075c07ddc717a344171c41b28c9910227af79b9cf6132fd45ae5b3bb9f",
+          "bytes": 5065
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-3-arithmetic-time-and-perimeter-practice/accessibility-content-audit-full.json",
+          "sha256": "dbe1383ce054a12e4a2533555026683b960d9fcf6e48a904fa34618bdd0b9193",
+          "bytes": 707
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-3-arithmetic-time-and-perimeter-practice/form-simulation-artifact.json",
+          "sha256": "09e631b5ce757454f358cd03e79336bf06129437d59c237e11b88c5555a29fa6",
+          "bytes": 392
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-3-arithmetic-time-and-perimeter-practice/representative-attempt-qa-artifact.json",
+          "sha256": "568917b676a7bb878a71d34063b3d7e33693b5463b14066bc920cf252ce96244",
+          "bytes": 396
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-3-arithmetic-time-and-perimeter-practice/accessibility-content-audit-artifact.json",
+          "sha256": "c19b5527bf756f9462ad170a622e73ea65128017c375c97d897611d431445f03",
+          "bytes": 411
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 2500,
+        "scoreLevels": 26,
+        "accessibilityItems": 200,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/grade-3-arithmetic-time-and-perimeter-practice/revision-2",
+      "cutScoreApprovalSha256": "17b335075c07ddc717a344171c41b28c9910227af79b9cf6132fd45ae5b3bb9f"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 54,
+        "slug": "grade-4-mathematics-practice",
+        "title": "Grade 4 Mathematics Practice",
+        "assessmentPurpose": "practice",
+        "passingScore": 60,
+        "blueprintRevision": 2
+      },
+      "expectedItems": 30,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-4-mathematics-practice/form-simulation-full.json",
+          "sha256": "3966a0785432f00ceca3306c15c15d66566d36d3ac0ce4a53a77ed05fc633a0e",
+          "bytes": 42667
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-4-mathematics-practice/representative-attempt-qa-full.json",
+          "sha256": "9cd651e5f58a8e7fc67883c64973c6a7cbe114173e0724d1750fd88b3bbf1c4a",
+          "bytes": 5903
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-4-mathematics-practice/accessibility-content-audit-full.json",
+          "sha256": "93569abeeac2bff08b097175ac8c0494b221c1d49e1c3e7b5835b692725b10a7",
+          "bytes": 689
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-4-mathematics-practice/form-simulation-artifact.json",
+          "sha256": "70544e4c33b69278720bef8fc46283e950c94beec8897f8719ad7152cfdcde16",
+          "bytes": 392
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-4-mathematics-practice/representative-attempt-qa-artifact.json",
+          "sha256": "55bb62f0f989d361b0bf77f93d0a2998361fdf35b4a9cfcb62b10a0befbbd292",
+          "bytes": 396
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-4-mathematics-practice/accessibility-content-audit-artifact.json",
+          "sha256": "9effee473fdbe6e25e695c5647c0427c139a2b84db454efd090856460201c917",
+          "bytes": 411
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 3000,
+        "scoreLevels": 31,
+        "accessibilityItems": 200,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/grade-4-mathematics-practice/revision-2",
+      "cutScoreApprovalSha256": "9cd651e5f58a8e7fc67883c64973c6a7cbe114173e0724d1750fd88b3bbf1c4a"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 55,
+        "slug": "grade-5-mathematics-practice",
+        "title": "Grade 5 Mathematics Practice",
+        "assessmentPurpose": "practice",
+        "passingScore": 60,
+        "blueprintRevision": 2
+      },
+      "expectedItems": 30,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-5-mathematics-practice/form-simulation-full.json",
+          "sha256": "5b753ee8376e48df77af0f66894a502abc1fbaad29d06ca772e84c17f0fe1c65",
+          "bytes": 42667
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-5-mathematics-practice/representative-attempt-qa-full.json",
+          "sha256": "4cc0bbe9f9dfba2f726002833ded530be08f011315e3532a5f95d3cfa81a13b8",
+          "bytes": 5903
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-5-mathematics-practice/accessibility-content-audit-full.json",
+          "sha256": "18675a297f44c26dd9700676a21248e00647f334bd16a84e8ae6ff0b2461697c",
+          "bytes": 689
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-5-mathematics-practice/form-simulation-artifact.json",
+          "sha256": "2c9b38be6a90dc50cd47af62e9ee1de52c19353bdf1cdc6107daca6bb01cda06",
+          "bytes": 392
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-5-mathematics-practice/representative-attempt-qa-artifact.json",
+          "sha256": "9c79406ad0cbae4f883e9aabe397918d167907bb297c647391cad1b975a2efb6",
+          "bytes": 396
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-5-mathematics-practice/accessibility-content-audit-artifact.json",
+          "sha256": "f4aa8b4061f4ac96a4a6dfdd09fead7ce421814bc69e7a029cd4e7cfd0e1aaa0",
+          "bytes": 411
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 3000,
+        "scoreLevels": 31,
+        "accessibilityItems": 200,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/grade-5-mathematics-practice/revision-2",
+      "cutScoreApprovalSha256": "4cc0bbe9f9dfba2f726002833ded530be08f011315e3532a5f95d3cfa81a13b8"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 56,
+        "slug": "grade-6-mathematics-practice",
+        "title": "Grade 6 Mathematics Practice",
+        "assessmentPurpose": "practice",
+        "passingScore": 60,
+        "blueprintRevision": 2
+      },
+      "expectedItems": 35,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-6-mathematics-practice/form-simulation-full.json",
+          "sha256": "f7c85217188c4e0c53a9785045238c2481219037388eeb8031c24130f6e8a5fb",
+          "bytes": 366756
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-6-mathematics-practice/representative-attempt-qa-full.json",
+          "sha256": "dc3fc466b8538da4dd3639938b4ba29eec23118ba2990b6c1e50618594034aa9",
+          "bytes": 6757
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-6-mathematics-practice/accessibility-content-audit-full.json",
+          "sha256": "a65752fd7ae5d5bd73707e5bde9ed2a574d67e9d833cbefcdb85d4262009e7a3",
+          "bytes": 689
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-6-mathematics-practice/form-simulation-artifact.json",
+          "sha256": "ef39fca81a809394dd352b40eedcb14fb6e6d18febc5addec69eea7086223dd0",
+          "bytes": 392
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-6-mathematics-practice/representative-attempt-qa-artifact.json",
+          "sha256": "22bdf800c30d2a69f84748ef5534d5e27268b13734fab5275659f7b6ac4c0989",
+          "bytes": 396
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-6-mathematics-practice/accessibility-content-audit-artifact.json",
+          "sha256": "118c03afbafa2785dd82f2c889f012b7c327e71f28232e1614d095c7f084db86",
+          "bytes": 411
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 3500,
+        "scoreLevels": 36,
+        "accessibilityItems": 200,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/grade-6-mathematics-practice/revision-2",
+      "cutScoreApprovalSha256": "dc3fc466b8538da4dd3639938b4ba29eec23118ba2990b6c1e50618594034aa9"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 57,
+        "slug": "grade-7-mathematics-practice",
+        "title": "Grade 7 Mathematics Practice",
+        "assessmentPurpose": "practice",
+        "passingScore": 60,
+        "blueprintRevision": 2
+      },
+      "expectedItems": 40,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-7-mathematics-practice/form-simulation-full.json",
+          "sha256": "01d3551d1064b00251b4bb0e597bd1d8981c849dcbd9c3b7e0a804cb0ece7ab7",
+          "bytes": 343578
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-7-mathematics-practice/representative-attempt-qa-full.json",
+          "sha256": "4e3349cff4ce94152a259abb3ceb6c7d65b41a243540ec339677ab8b57775e82",
+          "bytes": 7613
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-7-mathematics-practice/accessibility-content-audit-full.json",
+          "sha256": "d3e73e9d5c45d596e0c9bdbbb4ffd8764b8b0849313a252e2e76a33467480805",
+          "bytes": 689
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-7-mathematics-practice/form-simulation-artifact.json",
+          "sha256": "70bbacadd60a2e9e631dfaf081c58f36a7399c5a6d00a0d4c1f280f7315f9996",
+          "bytes": 392
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-7-mathematics-practice/representative-attempt-qa-artifact.json",
+          "sha256": "12bc6c98ed07223336678dd6e0f9a98caadd23b5925cec75f725816591a7c65f",
+          "bytes": 396
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-7-mathematics-practice/accessibility-content-audit-artifact.json",
+          "sha256": "7de63b29717bbcef732bf89723ae580dc985f3a0b2c23b0de769e82da2bba925",
+          "bytes": 411
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 4000,
+        "scoreLevels": 41,
+        "accessibilityItems": 200,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/grade-7-mathematics-practice/revision-2",
+      "cutScoreApprovalSha256": "4e3349cff4ce94152a259abb3ceb6c7d65b41a243540ec339677ab8b57775e82"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 58,
+        "slug": "grade-8-mathematics-practice",
+        "title": "Grade 8 Mathematics Practice",
+        "assessmentPurpose": "practice",
+        "passingScore": 60,
+        "blueprintRevision": 2
+      },
+      "expectedItems": 40,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-8-mathematics-practice/form-simulation-full.json",
+          "sha256": "4b944ab23b228417fb9d8b5fff8e383a882bf2ff527d1bf17a560b9c81d25a5f",
+          "bytes": 320400
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-8-mathematics-practice/representative-attempt-qa-full.json",
+          "sha256": "88b00f20821fe7013b843b1e2af3cd83bd0e3cf1ab62fa11ea99701455fc27b7",
+          "bytes": 7613
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-8-mathematics-practice/accessibility-content-audit-full.json",
+          "sha256": "46478cfdc9fce08570facd53b86d9d9181e6ce5033f9a342833bcad334079031",
+          "bytes": 689
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-8-mathematics-practice/form-simulation-artifact.json",
+          "sha256": "38da26062ea9a74edad9845c1eec840fa43d86580cdfebf3a0edaaa1ce7473ce",
+          "bytes": 392
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-8-mathematics-practice/representative-attempt-qa-artifact.json",
+          "sha256": "cd6bb1cfd0b617a571a34d063703280905d10e87512a6b73f139605ee16181f4",
+          "bytes": 396
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-8-mathematics-practice/accessibility-content-audit-artifact.json",
+          "sha256": "a113c4baebffca42a6baf959215a74961992c5fd3eb42658a850f0b1fb9e6df7",
+          "bytes": 411
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 4000,
+        "scoreLevels": 41,
+        "accessibilityItems": 200,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/grade-8-mathematics-practice/revision-2",
+      "cutScoreApprovalSha256": "88b00f20821fe7013b843b1e2af3cd83bd0e3cf1ab62fa11ea99701455fc27b7"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 59,
+        "slug": "grade-9-mathematics-practice",
+        "title": "Grade 9 Mathematics Practice",
+        "assessmentPurpose": "practice",
+        "passingScore": 60,
+        "blueprintRevision": 2
+      },
+      "expectedItems": 40,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-9-mathematics-practice/form-simulation-full.json",
+          "sha256": "d6f73e7bc0e4ab236d369a9c2800ab13b5d87fb76207dbea4329ddd72161d783",
+          "bytes": 227688
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-9-mathematics-practice/representative-attempt-qa-full.json",
+          "sha256": "e15920389150242d5376003a4a9af932941f432a5b03a72096a8da50bcfe5e81",
+          "bytes": 7613
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-9-mathematics-practice/accessibility-content-audit-full.json",
+          "sha256": "af453dbdc86b440beb0215c69ca236e04388f936effb6f10138d47dcc81a64f9",
+          "bytes": 689
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-9-mathematics-practice/form-simulation-artifact.json",
+          "sha256": "b974c1177f011d675829e270f055436e69cf73033506f038c657218121c8faf2",
+          "bytes": 392
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-9-mathematics-practice/representative-attempt-qa-artifact.json",
+          "sha256": "416202e4e1b34aa6e73fb09c2df479713bb9454c425708d1ecab2d8f18f6299c",
+          "bytes": 396
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/grade-9-mathematics-practice/accessibility-content-audit-artifact.json",
+          "sha256": "2f6d0223ba50a8dd8fcc64227c15954cbbd46dc6ec7cec76dba3acf7d2cf59a7",
+          "bytes": 411
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 4000,
+        "scoreLevels": 41,
+        "accessibilityItems": 200,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/grade-9-mathematics-practice/revision-2",
+      "cutScoreApprovalSha256": "e15920389150242d5376003a4a9af932941f432a5b03a72096a8da50bcfe5e81"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 67,
+        "slug": "ibps-clerk-quantitative-aptitude-practice",
+        "title": "IBPS Clerk Quantitative Aptitude Practice",
+        "assessmentPurpose": "practice",
+        "passingScore": 60,
+        "blueprintRevision": 2
+      },
+      "expectedItems": 30,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ibps-clerk-quantitative-aptitude-practice/form-simulation-full.json",
+          "sha256": "919acc65ebf5b6f1cad7a979b009704b7f290b712036d3ecfee95f3a7f687976",
+          "bytes": 459473
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ibps-clerk-quantitative-aptitude-practice/representative-attempt-qa-full.json",
+          "sha256": "101b592f1a68d1c5caba440167accad71d0b49aacdbdc6681c3eb74ce19d8325",
+          "bytes": 5916
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ibps-clerk-quantitative-aptitude-practice/accessibility-content-audit-full.json",
+          "sha256": "5474a0498f3e27417e4201a7d8399ab49042de7d95802334e869feae00ab25e1",
+          "bytes": 702
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ibps-clerk-quantitative-aptitude-practice/form-simulation-artifact.json",
+          "sha256": "106adc62337542b58099bf1406ed42e22e9c99dd6d76d9e9145fdeae0f58afa2",
+          "bytes": 392
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ibps-clerk-quantitative-aptitude-practice/representative-attempt-qa-artifact.json",
+          "sha256": "c00b508d7d261e22f5bf78719bcdee39e2b16dbc2b01e4704b66d5ab191657f9",
+          "bytes": 396
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ibps-clerk-quantitative-aptitude-practice/accessibility-content-audit-artifact.json",
+          "sha256": "6aca5c5fb4f4dd78cd3d1148b5e067326e57b29e451c031e30f56f5c6511d885",
+          "bytes": 411
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 3000,
+        "scoreLevels": 31,
+        "accessibilityItems": 200,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/ibps-clerk-quantitative-aptitude-practice/revision-2",
+      "cutScoreApprovalSha256": "101b592f1a68d1c5caba440167accad71d0b49aacdbdc6681c3eb74ce19d8325"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 279,
+        "slug": "ibps-po-english-language-practice",
+        "title": "IBPS PO English Language Practice",
+        "assessmentPurpose": "practice",
+        "passingScore": 60,
+        "blueprintRevision": 1
+      },
+      "expectedItems": 30,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ibps-po-english-language-practice/form-simulation-full.json",
+          "sha256": "65ea5688abfb7bdb0579c3e6ff9ae4af804ab675f96dfdcb6079b1907568c899",
+          "bytes": 42774
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ibps-po-english-language-practice/representative-attempt-qa-full.json",
+          "sha256": "00023123a17a182d89e7c11a26a93415c5e1249d90e0ced8fc495f42c36879a7",
+          "bytes": 5909
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ibps-po-english-language-practice/accessibility-content-audit-full.json",
+          "sha256": "e227e4baa422f11c702296b2afdd61e25de73d0c5268e2d751876c8628235a68",
+          "bytes": 695
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ibps-po-english-language-practice/form-simulation-artifact.json",
+          "sha256": "8d3b7ec9b398ec453f218032e353044cb3e834cfa664adcddc3aa7e9f7d7954a",
+          "bytes": 393
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ibps-po-english-language-practice/representative-attempt-qa-artifact.json",
+          "sha256": "f9a5540f0449ced4386ffd27a26b0f6a0a42f5c159f84434c501efaa8234bace",
+          "bytes": 397
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ibps-po-english-language-practice/accessibility-content-audit-artifact.json",
+          "sha256": "a375996d0cd0045431ead124e96cbbc9ce83dbc2a7fa5b2f60b75d6aca1a0861",
+          "bytes": 412
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 3000,
+        "scoreLevels": 31,
+        "accessibilityItems": 200,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/ibps-po-english-language-practice/revision-1",
+      "cutScoreApprovalSha256": "00023123a17a182d89e7c11a26a93415c5e1249d90e0ced8fc495f42c36879a7"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 66,
+        "slug": "ibps-po-quantitative-aptitude-practice",
+        "title": "IBPS PO Quantitative Aptitude Practice",
+        "assessmentPurpose": "practice",
+        "passingScore": 60,
+        "blueprintRevision": 2
+      },
+      "expectedItems": 35,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ibps-po-quantitative-aptitude-practice/form-simulation-full.json",
+          "sha256": "32b2977d553cede86582763a2c908ed90a20e1eaa8a556e7a1806ac24b001b04",
+          "bytes": 42677
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ibps-po-quantitative-aptitude-practice/representative-attempt-qa-full.json",
+          "sha256": "e6348d4993fb0e2384c28f837485e7f37569b84cdbb47b1ac2c69106d09d2242",
+          "bytes": 6767
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ibps-po-quantitative-aptitude-practice/accessibility-content-audit-full.json",
+          "sha256": "97a6f9d2326de2472c5de05bf465975619f0d15150bfa8223c949b98418bc1d4",
+          "bytes": 699
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ibps-po-quantitative-aptitude-practice/form-simulation-artifact.json",
+          "sha256": "23ba13d170524e0864a719eadc3114de929ab0adc8d099f1194d81fba40ed317",
+          "bytes": 392
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ibps-po-quantitative-aptitude-practice/representative-attempt-qa-artifact.json",
+          "sha256": "3104732d01662480461dfec9be1bedfe7512027ba4d0da8f53b1b0da04a7013c",
+          "bytes": 396
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ibps-po-quantitative-aptitude-practice/accessibility-content-audit-artifact.json",
+          "sha256": "6083b9711b1f6fe609e8b04508a973b660aa55ff2502b2de33c955d87bd878a0",
+          "bytes": 411
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 3500,
+        "scoreLevels": 36,
+        "accessibilityItems": 200,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/ibps-po-quantitative-aptitude-practice/revision-2",
+      "cutScoreApprovalSha256": "e6348d4993fb0e2384c28f837485e7f37569b84cdbb47b1ac2c69106d09d2242"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 278,
+        "slug": "ibps-po-reasoning-ability-practice",
+        "title": "IBPS PO Reasoning Ability Practice",
+        "assessmentPurpose": "practice",
+        "passingScore": 60,
+        "blueprintRevision": 1
+      },
+      "expectedItems": 35,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ibps-po-reasoning-ability-practice/form-simulation-full.json",
+          "sha256": "8c4773b2ab00e096da0721e55d4e0a1160e20b468f4762f374a84a081caf80bc",
+          "bytes": 42775
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ibps-po-reasoning-ability-practice/representative-attempt-qa-full.json",
+          "sha256": "77e0b5c9b35bde66d4013ac7786772b73969f3c0791a0ef0fa6e9249077a9fdf",
+          "bytes": 6764
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ibps-po-reasoning-ability-practice/accessibility-content-audit-full.json",
+          "sha256": "6ecdcb8eb24925bace5f19ec610f5ec04a976c0ec09d5de010672b45f9ef9e23",
+          "bytes": 696
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ibps-po-reasoning-ability-practice/form-simulation-artifact.json",
+          "sha256": "86ffe4d3b29bef2275f8927c17082051889ce30518f6018f1cd0b97e3e9c67e6",
+          "bytes": 393
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ibps-po-reasoning-ability-practice/representative-attempt-qa-artifact.json",
+          "sha256": "4aca27a1c3ed3904463945b5f0dcd745fe85d370794ac7acdf5cbfc14e5e745a",
+          "bytes": 397
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ibps-po-reasoning-ability-practice/accessibility-content-audit-artifact.json",
+          "sha256": "586b8d6d42c9ed86b6b55fd5b53fec4d9abc3ba48aa6ea35d5f2d4ec0f3b6002",
+          "bytes": 412
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 3500,
+        "scoreLevels": 36,
+        "accessibilityItems": 200,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/ibps-po-reasoning-ability-practice/revision-1",
+      "cutScoreApprovalSha256": "77e0b5c9b35bde66d4013ac7786772b73969f3c0791a0ef0fa6e9249077a9fdf"
+    },
+    {
+      "status": "failed",
+      "target": {
+        "id": 207,
+        "slug": "identity-access-management-foundations",
+        "title": "Identity and Access Management Foundations Certification",
+        "assessmentPurpose": "certification",
+        "passingScore": 70,
+        "blueprintRevision": null
+      },
+      "failure": "BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"
+    },
+    {
+      "status": "failed",
+      "target": {
+        "id": 208,
+        "slug": "incident-response-threat-analysis",
+        "title": "Incident Response and Threat Analysis Certification",
+        "assessmentPurpose": "certification",
+        "passingScore": 72,
+        "blueprintRevision": null
+      },
+      "failure": "BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 37,
+        "slug": "investment-analysis",
+        "title": "Investment Analysis Certification",
+        "assessmentPurpose": "certification",
+        "passingScore": 70,
+        "blueprintRevision": 1
+      },
+      "expectedItems": 10,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/investment-analysis/form-simulation-full.json",
+          "sha256": "9c980788db55efb46a9741286653d68f459d605c1164ab82ab8c9d641dab035e",
+          "bytes": 206117
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/investment-analysis/representative-attempt-qa-full.json",
+          "sha256": "ca3ebe92ddb5a2ad9c380d39347a88bb7eb0e926974e008ff772d068536f71f8",
+          "bytes": 2476
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/investment-analysis/accessibility-content-audit-full.json",
+          "sha256": "42993dee8427a21f50c196825ab6efadc50d39f72e7e05655fbaad4230f98b60",
+          "bytes": 679
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/investment-analysis/form-simulation-artifact.json",
+          "sha256": "cacb6c2c2c26e752d31c1679afc76b5dd827cd287fa1a3422f851769377ad3a2",
+          "bytes": 392
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/investment-analysis/representative-attempt-qa-artifact.json",
+          "sha256": "54530c29ecc56e110424f9ac42023121445576aefa0f3446264fa06a5dbfba06",
+          "bytes": 396
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/investment-analysis/accessibility-content-audit-artifact.json",
+          "sha256": "00abd78bca8f9fdd593ffe6cca41780c2195aaff9d01e5b499604963c311ba4a",
+          "bytes": 411
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 1000,
+        "scoreLevels": 11,
+        "accessibilityItems": 80,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/investment-analysis/revision-1",
+      "cutScoreApprovalSha256": "ca3ebe92ddb5a2ad9c380d39347a88bb7eb0e926974e008ff772d068536f71f8"
+    },
+    {
+      "status": "failed",
+      "target": {
+        "id": 211,
+        "slug": "it-support-service-desk-foundations",
+        "title": "IT Support and Service Desk Foundations Certification",
+        "assessmentPurpose": "certification",
+        "passingScore": 70,
+        "blueprintRevision": null
+      },
+      "failure": "BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"
+    },
+    {
+      "status": "failed",
+      "target": {
+        "id": 198,
+        "slug": "java-spring-boot-backend-skills",
+        "title": "Java and Spring Boot Backend Skills Assessment",
+        "assessmentPurpose": "certification",
+        "passingScore": 70,
+        "blueprintRevision": null
+      },
+      "failure": "BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"
+    },
+    {
+      "status": "failed",
+      "target": {
+        "id": 108,
+        "slug": "javascript-react-foundations",
+        "title": "JavaScript and React Foundations Certification",
+        "assessmentPurpose": "certification",
+        "passingScore": 70,
+        "blueprintRevision": null
+      },
+      "failure": "BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 71,
+        "slug": "jee-main-chemistry-numerical-practice",
+        "title": "JEE Main Chemistry Numerical Practice",
+        "assessmentPurpose": "practice",
+        "passingScore": 60,
+        "blueprintRevision": 1
+      },
+      "expectedItems": 25,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/jee-main-chemistry-numerical-practice/form-simulation-full.json",
+          "sha256": "44a16cc7ed40543db1a61005d866017b49075768b128bfbe8669a84acf95f982",
+          "bytes": 134480
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/jee-main-chemistry-numerical-practice/representative-attempt-qa-full.json",
+          "sha256": "8a42d9e62618a6f7992d5004f32c890e76d741bbf8498b968212b49f3426d096",
+          "bytes": 5056
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/jee-main-chemistry-numerical-practice/accessibility-content-audit-full.json",
+          "sha256": "5810462281f595bee761d77edbfcd63c7b71a2eb97f16047fb3cf6c4be3352b6",
+          "bytes": 698
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/jee-main-chemistry-numerical-practice/form-simulation-artifact.json",
+          "sha256": "75933f6dcecb3e2087c4d43a91cc1d400048e9b118354ea5b92361d23bf3d3f5",
+          "bytes": 392
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/jee-main-chemistry-numerical-practice/representative-attempt-qa-artifact.json",
+          "sha256": "ccb63e2f59f05a50660f18e7b57dbeee09b3f4076b12c0da702752af66181161",
+          "bytes": 396
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/jee-main-chemistry-numerical-practice/accessibility-content-audit-artifact.json",
+          "sha256": "146fc5ea5e6fea71ff055b7337b1bef0c3b68410b6039e15632ba4a823f0da67",
+          "bytes": 411
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 2500,
+        "scoreLevels": 26,
+        "accessibilityItems": 200,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/jee-main-chemistry-numerical-practice/revision-1",
+      "cutScoreApprovalSha256": "8a42d9e62618a6f7992d5004f32c890e76d741bbf8498b968212b49f3426d096"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 69,
+        "slug": "jee-main-physics-numerical-practice",
+        "title": "JEE Main Physics Numerical Practice",
+        "assessmentPurpose": "practice",
+        "passingScore": 60,
+        "blueprintRevision": 1
+      },
+      "expectedItems": 30,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/jee-main-physics-numerical-practice/form-simulation-full.json",
+          "sha256": "6a00e2daf232da5cc2e2c7aa70aa3b6bcba718276d86cf1544387bc2422eabf4",
+          "bytes": 272940
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/jee-main-physics-numerical-practice/representative-attempt-qa-full.json",
+          "sha256": "a516e9f6375684e7fd535e99d7650b17d3e0609932421c62f1b6bdc48849c709",
+          "bytes": 5910
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/jee-main-physics-numerical-practice/accessibility-content-audit-full.json",
+          "sha256": "5028ba99641ab5d3c864e3b29e32ad33dbef6e6195cde1ce100f394b22b1601e",
+          "bytes": 696
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/jee-main-physics-numerical-practice/form-simulation-artifact.json",
+          "sha256": "a65134dfdd11ee0325d2fe3f11786b20dc9f7b42f8e45cff2dc7a3a2a9f9cd15",
+          "bytes": 392
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/jee-main-physics-numerical-practice/representative-attempt-qa-artifact.json",
+          "sha256": "0417ee9f184dbd834fd42dac5ffa901f46ae53493be497dcb57de832ecad9d3e",
+          "bytes": 396
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/jee-main-physics-numerical-practice/accessibility-content-audit-artifact.json",
+          "sha256": "ecbe5dd194e78fb7372e4fae46033a0772275bd72862b8caaf72cc830688f0c3",
+          "bytes": 411
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 3000,
+        "scoreLevels": 31,
+        "accessibilityItems": 200,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/jee-main-physics-numerical-practice/revision-1",
+      "cutScoreApprovalSha256": "a516e9f6375684e7fd535e99d7650b17d3e0609932421c62f1b6bdc48849c709"
+    },
+    {
+      "status": "failed",
+      "target": {
+        "id": 102,
+        "slug": "kubernetes-foundations",
+        "title": "Kubernetes Foundations Skills Assessment",
+        "assessmentPurpose": "certification",
+        "passingScore": 70,
+        "blueprintRevision": null
+      },
+      "failure": "BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"
+    },
+    {
+      "status": "failed",
+      "target": {
+        "id": 212,
+        "slug": "linux-system-administration-foundations",
+        "title": "Linux System Administration Foundations Assessment",
+        "assessmentPurpose": "certification",
+        "passingScore": 70,
+        "blueprintRevision": null
+      },
+      "failure": "BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"
+    },
+    {
+      "status": "failed",
+      "target": {
+        "id": 197,
+        "slug": "llm-rag-evaluation-foundations",
+        "title": "LLM RAG and Evaluation Skills Assessment",
+        "assessmentPurpose": "certification",
+        "passingScore": 72,
+        "blueprintRevision": null
+      },
+      "failure": "BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"
+    },
+    {
+      "status": "failed",
+      "target": {
+        "id": 105,
+        "slug": "machine-learning-foundations",
+        "title": "Machine Learning Foundations Skills Assessment",
+        "assessmentPurpose": "certification",
+        "passingScore": 70,
+        "blueprintRevision": null
+      },
+      "failure": "BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 10,
+        "slug": "mobile-app-development",
+        "title": "Mobile App Development",
+        "assessmentPurpose": "certification",
+        "passingScore": 70,
+        "blueprintRevision": 1
+      },
+      "expectedItems": 10,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/mobile-app-development/form-simulation-full.json",
+          "sha256": "c39c736f20fcab1129c26e27f68ea7a8fa8319a0603a20ad697dcfe7db6da90a",
+          "bytes": 206120
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/mobile-app-development/representative-attempt-qa-full.json",
+          "sha256": "62c54ce4d228607fb97536528a78e0c440dc45a61c8aa621add0c80f078e1e8c",
+          "bytes": 2479
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/mobile-app-development/accessibility-content-audit-full.json",
+          "sha256": "4c62080a21149d79a4e79c9ed26485bded1f01c7af19d40fc1995ce033680225",
+          "bytes": 682
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/mobile-app-development/form-simulation-artifact.json",
+          "sha256": "80a4edb024d7bf8b548ae5c4973280348eeb41b47294abf6d91918d164a76730",
+          "bytes": 392
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/mobile-app-development/representative-attempt-qa-artifact.json",
+          "sha256": "8f1e6a0fdad701c34d95f18ef94fd1306b5bfe8099f385ac61d9a054593e214e",
+          "bytes": 396
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/mobile-app-development/accessibility-content-audit-artifact.json",
+          "sha256": "0471c579a25ace589e6532df58ec7d6c9f63603842f698bf38ae47d4271a9b18",
+          "bytes": 411
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 1000,
+        "scoreLevels": 11,
+        "accessibilityItems": 80,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/mobile-app-development/revision-1",
+      "cutScoreApprovalSha256": "62c54ce4d228607fb97536528a78e0c440dc45a61c8aa621add0c80f078e1e8c"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 3,
+        "slug": "natural-language-processing",
+        "title": "Natural Language Processing",
+        "assessmentPurpose": "certification",
+        "passingScore": 80,
+        "blueprintRevision": 1
+      },
+      "expectedItems": 10,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/natural-language-processing/form-simulation-full.json",
+          "sha256": "6e0e593a81fb78df40ca7b6469c11be69944887027a899d8edc9577858cce286",
+          "bytes": 206124
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/natural-language-processing/representative-attempt-qa-full.json",
+          "sha256": "688239b1e880f773e0750e18b63fbb5d6a5174fe8ea919429a11736cf0848228",
+          "bytes": 2485
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/natural-language-processing/accessibility-content-audit-full.json",
+          "sha256": "cfacb0cf90547b5b586622690c0abbac2d16da49e4a40758d1bb08ffde3608b0",
+          "bytes": 686
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/natural-language-processing/form-simulation-artifact.json",
+          "sha256": "c7ecc341ffdefb8dfc81fc64b13cd09a5d44112cf5bea1a915a99fbfa192b67d",
+          "bytes": 391
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/natural-language-processing/representative-attempt-qa-artifact.json",
+          "sha256": "d58287a38a6fd28d2b638cd9b8c645d6577bb4effa33aa275984cd82ce39016c",
+          "bytes": 395
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/natural-language-processing/accessibility-content-audit-artifact.json",
+          "sha256": "de27385e96fbacccba99f74a144aabd945e19c9748ac42a43e873c677604c83c",
+          "bytes": 410
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 1000,
+        "scoreLevels": 11,
+        "accessibilityItems": 80,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/natural-language-processing/revision-1",
+      "cutScoreApprovalSha256": "688239b1e880f773e0750e18b63fbb5d6a5174fe8ea919429a11736cf0848228"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 70,
+        "slug": "neet-ug-chemistry-numerical-practice",
+        "title": "NEET (UG) Chemistry Numerical Practice",
+        "assessmentPurpose": "practice",
+        "passingScore": 60,
+        "blueprintRevision": 1
+      },
+      "expectedItems": 25,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/neet-ug-chemistry-numerical-practice/form-simulation-full.json",
+          "sha256": "1e7c72fd548ed876f9662d6e74415b43595e0a971bd82d48d6dabe99050b8876",
+          "bytes": 134479
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/neet-ug-chemistry-numerical-practice/representative-attempt-qa-full.json",
+          "sha256": "bb703446891c4516ed4e6504644cbf42ce864f4a7f8f2e6706c30aa849095050",
+          "bytes": 5055
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/neet-ug-chemistry-numerical-practice/accessibility-content-audit-full.json",
+          "sha256": "ef8110f9a28ec4954521d4dbe2ee89cdeddbe04983c8af2c9c722251515978bd",
+          "bytes": 697
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/neet-ug-chemistry-numerical-practice/form-simulation-artifact.json",
+          "sha256": "8a8b48220c17d57c6223b16b7d6ebd44c09bc727fe01099e0bcdb807398e15ab",
+          "bytes": 392
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/neet-ug-chemistry-numerical-practice/representative-attempt-qa-artifact.json",
+          "sha256": "c9e6a11bfe712103f737562e4445c04954bd5c6d5934989da85f245fe3a282b6",
+          "bytes": 396
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/neet-ug-chemistry-numerical-practice/accessibility-content-audit-artifact.json",
+          "sha256": "00277391798b87dadd29d6f68ae136b70e0b25661c33e00ee25a13b1aa9f5021",
+          "bytes": 411
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 2500,
+        "scoreLevels": 26,
+        "accessibilityItems": 200,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/neet-ug-chemistry-numerical-practice/revision-1",
+      "cutScoreApprovalSha256": "bb703446891c4516ed4e6504644cbf42ce864f4a7f8f2e6706c30aa849095050"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 68,
+        "slug": "neet-ug-physics-numerical-practice",
+        "title": "NEET (UG) Physics Numerical Practice",
+        "assessmentPurpose": "practice",
+        "passingScore": 60,
+        "blueprintRevision": 1
+      },
+      "expectedItems": 30,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/neet-ug-physics-numerical-practice/form-simulation-full.json",
+          "sha256": "8b6203d6a968a146ebad2444a2c269ef91392e321844f91508b824e331eaf3c7",
+          "bytes": 272939
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/neet-ug-physics-numerical-practice/representative-attempt-qa-full.json",
+          "sha256": "810d99f2acae18afd3853ce8f1eb7724c88665839c1aecc2ecd373d8457349ff",
+          "bytes": 5909
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/neet-ug-physics-numerical-practice/accessibility-content-audit-full.json",
+          "sha256": "eed4e228a1c2904c295f76eeb6cc398a7dec522f6d51a36ada10ebaa6eada7f0",
+          "bytes": 695
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/neet-ug-physics-numerical-practice/form-simulation-artifact.json",
+          "sha256": "af4ac71f713a164f4f3408f8102cc2578186d0f9b347aee92ca0b5fe04477260",
+          "bytes": 392
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/neet-ug-physics-numerical-practice/representative-attempt-qa-artifact.json",
+          "sha256": "37fc085f97efcfd98ae7e9fb5f4dcaf8369a567a83bedddf13cb70caedf11d1e",
+          "bytes": 396
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/neet-ug-physics-numerical-practice/accessibility-content-audit-artifact.json",
+          "sha256": "f9e64dc0cf65162ea3888200b9f1c909654d3698d6105b88efc207ea636ffa8d",
+          "bytes": 411
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 3000,
+        "scoreLevels": 31,
+        "accessibilityItems": 200,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/neet-ug-physics-numerical-practice/revision-1",
+      "cutScoreApprovalSha256": "810d99f2acae18afd3853ce8f1eb7724c88665839c1aecc2ecd373d8457349ff"
+    },
+    {
+      "status": "failed",
+      "target": {
+        "id": 213,
+        "slug": "networking-support-foundations",
+        "title": "Networking Support Foundations Certification",
+        "assessmentPurpose": "certification",
+        "passingScore": 70,
+        "blueprintRevision": null
+      },
+      "failure": "BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"
+    },
+    {
+      "status": "failed",
+      "target": {
+        "id": 109,
+        "slug": "nodejs-backend-foundations",
+        "title": "Node.js Backend Foundations Certification",
+        "assessmentPurpose": "certification",
+        "passingScore": 70,
+        "blueprintRevision": null
+      },
+      "failure": "BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 12,
+        "slug": "operations-management",
+        "title": "Operations Management Certification",
+        "assessmentPurpose": "certification",
+        "passingScore": 70,
+        "blueprintRevision": 1
+      },
+      "expectedItems": 10,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/operations-management/form-simulation-full.json",
+          "sha256": "d002f81a0546ee146da73841772446b340908366d265ea459c66cb1e6ccaad96",
+          "bytes": 206119
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/operations-management/representative-attempt-qa-full.json",
+          "sha256": "245d354586cac2d215e16339a46480b9a351577ec2ee023ec27ebf0dac8be110",
+          "bytes": 2478
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/operations-management/accessibility-content-audit-full.json",
+          "sha256": "8c9ae153672ac7090a299653b6f1d9ac458edffb4a036ff51b9494ef0c2ba29b",
+          "bytes": 681
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/operations-management/form-simulation-artifact.json",
+          "sha256": "ca0be1fad4eae86027ec4866445c912cdbb97b7be5650d8673f134d93acb3f7c",
+          "bytes": 392
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/operations-management/representative-attempt-qa-artifact.json",
+          "sha256": "dbc8dec595e228d2828ceb84c6649b2b1609d1f948a3fbce6c3a23a5aad9868e",
+          "bytes": 396
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/operations-management/accessibility-content-audit-artifact.json",
+          "sha256": "c6226d756537df652b9a125480c5368be981aa2b7ffa186962a07eb226c32137",
+          "bytes": 411
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 1000,
+        "scoreLevels": 11,
+        "accessibilityItems": 80,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/operations-management/revision-1",
+      "cutScoreApprovalSha256": "245d354586cac2d215e16339a46480b9a351577ec2ee023ec27ebf0dac8be110"
+    },
+    {
+      "status": "failed",
+      "target": {
+        "id": 185,
+        "slug": "oracle-cloud-supply-chain-foundations",
+        "title": "Oracle Cloud Supply Chain Foundations",
+        "assessmentPurpose": "certification",
+        "passingScore": 70,
+        "blueprintRevision": null
+      },
+      "failure": "BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"
+    },
+    {
+      "status": "failed",
+      "target": {
+        "id": 97,
+        "slug": "oracle-erp-cloud-financials-foundations",
+        "title": "Oracle ERP Cloud Financials Foundations",
+        "assessmentPurpose": "certification",
+        "passingScore": 70,
+        "blueprintRevision": null
+      },
+      "failure": "BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 28,
+        "slug": "performance-marketing",
+        "title": "Performance Marketing",
+        "assessmentPurpose": "certification",
+        "passingScore": 80,
+        "blueprintRevision": 1
+      },
+      "expectedItems": 10,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/performance-marketing/form-simulation-full.json",
+          "sha256": "583c7e1e1b4569cf347cfcf51982f3c62d89488a3ce7bae94eb701751d91b8b9",
+          "bytes": 206119
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/performance-marketing/representative-attempt-qa-full.json",
+          "sha256": "be9850702f5d36d31bb76e94ddd60a8f677177ae8dfe8f6daf7adfd277579a6e",
+          "bytes": 2480
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/performance-marketing/accessibility-content-audit-full.json",
+          "sha256": "b0f8b9d5099936f03a68b9f9ad83c299a17981d19efad22bb8215a94dd0c28f4",
+          "bytes": 681
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/performance-marketing/form-simulation-artifact.json",
+          "sha256": "d937c1d6cfb332f3057db4c2fdd65d6b320e6ac48a623de2641dad17c05a96f2",
+          "bytes": 392
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/performance-marketing/representative-attempt-qa-artifact.json",
+          "sha256": "ac0924a15ceb38d681f02616b8aee9866f1d7b23b403c30571f6647a97944c9a",
+          "bytes": 396
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/performance-marketing/accessibility-content-audit-artifact.json",
+          "sha256": "bfe1cf324726b51d439caaff8476ac8177d76919422f33ae5aa410dd10ed5516",
+          "bytes": 411
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 1000,
+        "scoreLevels": 11,
+        "accessibilityItems": 80,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/performance-marketing/revision-1",
+      "cutScoreApprovalSha256": "be9850702f5d36d31bb76e94ddd60a8f677177ae8dfe8f6daf7adfd277579a6e"
+    },
+    {
+      "status": "failed",
+      "target": {
+        "id": 193,
+        "slug": "power-bi-data-analyst-skills",
+        "title": "Microsoft Power BI Data Analyst Skills Assessment",
+        "assessmentPurpose": "certification",
+        "passingScore": 70,
+        "blueprintRevision": null
+      },
+      "failure": "BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"
+    },
+    {
+      "status": "failed",
+      "target": {
+        "id": 113,
+        "slug": "product-management-tech-foundations",
+        "title": "Technology Product Management Foundations",
+        "assessmentPurpose": "certification",
+        "passingScore": 70,
+        "blueprintRevision": null
+      },
+      "failure": "BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 43,
+        "slug": "program-management",
+        "title": "Program Management Certification",
+        "assessmentPurpose": "certification",
+        "passingScore": 80,
+        "blueprintRevision": 1
+      },
+      "expectedItems": 10,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/program-management/form-simulation-full.json",
+          "sha256": "c4f2ede1858485abe550a85f55f49d091b3344ab609cb87eaf186ace4c4e2706",
+          "bytes": 206116
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/program-management/representative-attempt-qa-full.json",
+          "sha256": "be21b87fb934d15b2212aa7876b4054fbff77a5438d02ac4fb164bd986fd8879",
+          "bytes": 2477
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/program-management/accessibility-content-audit-full.json",
+          "sha256": "25a252c412a8576f7b056a75c29dd4463fc889f2b9abe2b4fe37bf17883d91ab",
+          "bytes": 678
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/program-management/form-simulation-artifact.json",
+          "sha256": "1a8dd4dca1d308bd60347e43960605d07771b0fd4d20b48285553f2710d5e3a6",
+          "bytes": 392
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/program-management/representative-attempt-qa-artifact.json",
+          "sha256": "767f5e3b210d7784335a1b812cea7eb5f7642a0db719f4b06c72da4a94058a62",
+          "bytes": 396
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/program-management/accessibility-content-audit-artifact.json",
+          "sha256": "15198d4bd187ed059eca1cdfb09727ac0fc8b23066859a81acb6850c3abb0baa",
+          "bytes": 411
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 1000,
+        "scoreLevels": 11,
+        "accessibilityItems": 80,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/program-management/revision-1",
+      "cutScoreApprovalSha256": "be21b87fb934d15b2212aa7876b4054fbff77a5438d02ac4fb164bd986fd8879"
+    },
+    {
+      "status": "failed",
+      "target": {
+        "id": 107,
+        "slug": "python-backend-api-foundations",
+        "title": "Python Backend API Development Skills Assessment",
+        "assessmentPurpose": "certification",
+        "passingScore": 70,
+        "blueprintRevision": null
+      },
+      "failure": "BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"
+    },
+    {
+      "status": "failed",
+      "target": {
+        "id": 192,
+        "slug": "python-data-analysis-skills",
+        "title": "Python Data Analysis Skills Assessment",
+        "assessmentPurpose": "certification",
+        "passingScore": 70,
+        "blueprintRevision": null
+      },
+      "failure": "BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 201,
+        "slug": "react-application-engineering-skills",
+        "title": "React Application Engineering Skills",
+        "assessmentPurpose": "certification",
+        "passingScore": 70,
+        "blueprintRevision": 1
+      },
+      "expectedItems": 16,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/react-application-engineering-skills/form-simulation-full.json",
+          "sha256": "803961f17d86d67c7218558d3fc90307c170d64c7dbbc92dcf6b0794b0c11b68",
+          "bytes": 205327
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/react-application-engineering-skills/representative-attempt-qa-full.json",
+          "sha256": "6870dd3314c59b45f30521796f2f52dee365d051bebb6d740b29eb46fdc45065",
+          "bytes": 3522
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/react-application-engineering-skills/accessibility-content-audit-full.json",
+          "sha256": "bcdc2eef2455091b852bac191bbd460bf141b64d423c0d25069dea495bf8f8f1",
+          "bytes": 697
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/react-application-engineering-skills/form-simulation-artifact.json",
+          "sha256": "aca1ab417e2a56339fd0c010aa728846047d7264e50f57270ed2506298d8d5ef",
+          "bytes": 393
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/react-application-engineering-skills/representative-attempt-qa-artifact.json",
+          "sha256": "92ae22a4350ff77adb43773e676d591a937352c3e484d9308de42166f3c0d6bd",
+          "bytes": 397
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/react-application-engineering-skills/accessibility-content-audit-artifact.json",
+          "sha256": "d7519095ba0c92031e53e8408afa2b40b46bdba5b3ef2dd44cc1994eaa097263",
+          "bytes": 412
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 1600,
+        "scoreLevels": 17,
+        "accessibilityItems": 80,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/react-application-engineering-skills/revision-1",
+      "cutScoreApprovalSha256": "6870dd3314c59b45f30521796f2f52dee365d051bebb6d740b29eb46fdc45065"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 39,
+        "slug": "risk-management",
+        "title": "Risk Management Certification",
+        "assessmentPurpose": "certification",
+        "passingScore": 85,
+        "blueprintRevision": 1
+      },
+      "expectedItems": 10,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/risk-management/form-simulation-full.json",
+          "sha256": "a91c59240849b210c23487d82d8c98d8b5c11ffe4c0a41de0536ae193a210fe0",
+          "bytes": 206113
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/risk-management/representative-attempt-qa-full.json",
+          "sha256": "e1132e1c0998e67b47dc502e71650affde89fcb3cd118aafa5bdc09597ee2397",
+          "bytes": 2476
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/risk-management/accessibility-content-audit-full.json",
+          "sha256": "7b760fd5658b25880ff78c69c0a573761c397c2ae87b17d3be88b56b3967eac7",
+          "bytes": 675
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/risk-management/form-simulation-artifact.json",
+          "sha256": "ab73639504bd30fc32ca06156b84b557ca9f8725d6b2f2510dbcf3b448af0ae4",
+          "bytes": 392
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/risk-management/representative-attempt-qa-artifact.json",
+          "sha256": "b5fab9ee6349937face0eed1c6a270b76842f849ef88719346c3c7f25102a502",
+          "bytes": 396
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/risk-management/accessibility-content-audit-artifact.json",
+          "sha256": "62f66f50b1135c2486dc509876dc9f9e02b8cb376901467219a5c8f4add955f7",
+          "bytes": 411
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 1000,
+        "scoreLevels": 11,
+        "accessibilityItems": 80,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/risk-management/revision-1",
+      "cutScoreApprovalSha256": "e1132e1c0998e67b47dc502e71650affde89fcb3cd118aafa5bdc09597ee2397"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 276,
+        "slug": "rrb-group-d-level-1-cbt-general-awareness-practice",
+        "title": "RRB Group D (Level 1) CBT General Awareness Practice",
+        "assessmentPurpose": "practice",
+        "passingScore": 60,
+        "blueprintRevision": 1
+      },
+      "expectedItems": 20,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/rrb-group-d-level-1-cbt-general-awareness-practice/form-simulation-full.json",
+          "sha256": "f347a379df15ddf65eae10faba3258d6f3577737dba40875e2f9dae7bfdbcd60",
+          "bytes": 42791
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/rrb-group-d-level-1-cbt-general-awareness-practice/representative-attempt-qa-full.json",
+          "sha256": "16b9299ea396b1a3a5a3be99676b1178dcfecc9ba3b05cd6eebb6efa47e871e4",
+          "bytes": 4216
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/rrb-group-d-level-1-cbt-general-awareness-practice/accessibility-content-audit-full.json",
+          "sha256": "fa2ecf62ca69d4a9d5a7226fca60f0d8d41a13c837848cbca9760c1712afbd61",
+          "bytes": 712
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/rrb-group-d-level-1-cbt-general-awareness-practice/form-simulation-artifact.json",
+          "sha256": "40640bdaff81debb497f73580afd17b9c3e6d5fd89a400766cbd358b5c542582",
+          "bytes": 393
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/rrb-group-d-level-1-cbt-general-awareness-practice/representative-attempt-qa-artifact.json",
+          "sha256": "0c627aee28bd952dbce93233c22c074475804070031674b75263aa54da9c7775",
+          "bytes": 397
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/rrb-group-d-level-1-cbt-general-awareness-practice/accessibility-content-audit-artifact.json",
+          "sha256": "956ed4dd637b8e2a8d293049fa3a3f2c723532399d94cf26f49df309758daf96",
+          "bytes": 412
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 2000,
+        "scoreLevels": 21,
+        "accessibilityItems": 200,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/rrb-group-d-level-1-cbt-general-awareness-practice/revision-1",
+      "cutScoreApprovalSha256": "16b9299ea396b1a3a5a3be99676b1178dcfecc9ba3b05cd6eebb6efa47e871e4"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 275,
+        "slug": "rrb-group-d-level-1-cbt-general-intelligence-reasoning-practice",
+        "title": "RRB Group D (Level 1) CBT General Intelligence and Reasoning Practice",
+        "assessmentPurpose": "practice",
+        "passingScore": 60,
+        "blueprintRevision": 1
+      },
+      "expectedItems": 30,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/rrb-group-d-level-1-cbt-general-intelligence-reasoning-practice/form-simulation-full.json",
+          "sha256": "bb7d6e73ee0d29831106fb190d00b74842f30d3e0ca7fa1d8dd9bac5f5af1ec9",
+          "bytes": 42804
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/rrb-group-d-level-1-cbt-general-intelligence-reasoning-practice/representative-attempt-qa-full.json",
+          "sha256": "323cee52268381fd92de508fb22c9429fbec71640d8b531faa0eb4f39b52f9f4",
+          "bytes": 5939
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/rrb-group-d-level-1-cbt-general-intelligence-reasoning-practice/accessibility-content-audit-full.json",
+          "sha256": "a513879e42177868684920e134b26f14d18c790f9a8c26d817556bd7b692ff5c",
+          "bytes": 725
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/rrb-group-d-level-1-cbt-general-intelligence-reasoning-practice/form-simulation-artifact.json",
+          "sha256": "d1cbaa07c367d2d4d59441cc7c4540b80947f73f4fc2e686acbc82d75ccb26db",
+          "bytes": 393
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/rrb-group-d-level-1-cbt-general-intelligence-reasoning-practice/representative-attempt-qa-artifact.json",
+          "sha256": "26de0b45e185d604c12ce544828fc4bb30a1f2ca00146ec4fffa48fc3c206bf3",
+          "bytes": 397
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/rrb-group-d-level-1-cbt-general-intelligence-reasoning-practice/accessibility-content-audit-artifact.json",
+          "sha256": "0cd1e65515cb7310ef4d720deb6ace6a1aecaa42e9ebd64aa6276dd4b1faccdf",
+          "bytes": 412
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 3000,
+        "scoreLevels": 31,
+        "accessibilityItems": 200,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/rrb-group-d-level-1-cbt-general-intelligence-reasoning-practice/revision-1",
+      "cutScoreApprovalSha256": "323cee52268381fd92de508fb22c9429fbec71640d8b531faa0eb4f39b52f9f4"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 277,
+        "slug": "rrb-group-d-level-1-cbt-general-science-practice",
+        "title": "RRB Group D (Level 1) CBT General Science Practice",
+        "assessmentPurpose": "practice",
+        "passingScore": 60,
+        "blueprintRevision": 1
+      },
+      "expectedItems": 25,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/rrb-group-d-level-1-cbt-general-science-practice/form-simulation-full.json",
+          "sha256": "574b4f80cc5653310211e0f2a7c15939532e22aa666d8895cb7a33d874a47666",
+          "bytes": 42789
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/rrb-group-d-level-1-cbt-general-science-practice/representative-attempt-qa-full.json",
+          "sha256": "aca2814183e29f768bd1c2fee086eb3b09cad5b86790c571acd081d263184a51",
+          "bytes": 5068
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/rrb-group-d-level-1-cbt-general-science-practice/accessibility-content-audit-full.json",
+          "sha256": "38d6afcc75d137c4be8012382f067c5345ae18d7a69e8b6bb12d217626384edc",
+          "bytes": 710
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/rrb-group-d-level-1-cbt-general-science-practice/form-simulation-artifact.json",
+          "sha256": "b836378d2e37ad5697e0f9c52a63cb11696ea7389edee28bf31d9639b0e11144",
+          "bytes": 393
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/rrb-group-d-level-1-cbt-general-science-practice/representative-attempt-qa-artifact.json",
+          "sha256": "93bc0c9dacd2b59aaa3105e613721066722222449fad43f247aebd56fc4598cc",
+          "bytes": 397
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/rrb-group-d-level-1-cbt-general-science-practice/accessibility-content-audit-artifact.json",
+          "sha256": "4e422b46ab2171ec792e7abedbbecda5158c07e7ec10e56d9e915b89e99a86a5",
+          "bytes": 412
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 2500,
+        "scoreLevels": 26,
+        "accessibilityItems": 200,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/rrb-group-d-level-1-cbt-general-science-practice/revision-1",
+      "cutScoreApprovalSha256": "aca2814183e29f768bd1c2fee086eb3b09cad5b86790c571acd081d263184a51"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 65,
+        "slug": "rrb-group-d-level-1-cbt-mathematics-practice",
+        "title": "RRB Group D (Level 1) CBT Mathematics Practice",
+        "assessmentPurpose": "practice",
+        "passingScore": 60,
+        "blueprintRevision": 2
+      },
+      "expectedItems": 25,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/rrb-group-d-level-1-cbt-mathematics-practice/form-simulation-full.json",
+          "sha256": "7dc32efaf0d47f57fc45608ac0f8a2953eb12f60ea92402fcf0a7c7f68fe8f78",
+          "bytes": 42683
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/rrb-group-d-level-1-cbt-mathematics-practice/representative-attempt-qa-full.json",
+          "sha256": "fadfa9c91fbbea3d0d729b4e67ec8b1d60072c69a21ed8ba3084eef008651920",
+          "bytes": 5063
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/rrb-group-d-level-1-cbt-mathematics-practice/accessibility-content-audit-full.json",
+          "sha256": "742783430130eaed8290270f82726f0e011da8de305d6365c3161a859e8a4dac",
+          "bytes": 705
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/rrb-group-d-level-1-cbt-mathematics-practice/form-simulation-artifact.json",
+          "sha256": "33c50ed00674437bda0f3d7a3221d02a4cba39a91229a106a1848c0d69965b8f",
+          "bytes": 392
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/rrb-group-d-level-1-cbt-mathematics-practice/representative-attempt-qa-artifact.json",
+          "sha256": "25245a0f2cc67fbc43b5abf868fe54cd0dc87d2f7d2f4ef9967b15c0fd3b50a8",
+          "bytes": 396
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/rrb-group-d-level-1-cbt-mathematics-practice/accessibility-content-audit-artifact.json",
+          "sha256": "4bae2c3d8ef8fcc10cfd67605b9a5870bc1a0556f229258d3573f6ea875220bf",
+          "bytes": 411
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 2500,
+        "scoreLevels": 26,
+        "accessibilityItems": 200,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/rrb-group-d-level-1-cbt-mathematics-practice/revision-2",
+      "cutScoreApprovalSha256": "fadfa9c91fbbea3d0d729b4e67ec8b1d60072c69a21ed8ba3084eef008651920"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 274,
+        "slug": "rrb-ntpc-cbt-1-general-awareness-practice",
+        "title": "RRB NTPC CBT 1 General Awareness Practice",
+        "assessmentPurpose": "practice",
+        "passingScore": 60,
+        "blueprintRevision": 1
+      },
+      "expectedItems": 40,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/rrb-ntpc-cbt-1-general-awareness-practice/form-simulation-full.json",
+          "sha256": "d5aa104ca9a5f341b0c365224a13cfb842b5526881470ee099d54d019e40513c",
+          "bytes": 42782
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/rrb-ntpc-cbt-1-general-awareness-practice/representative-attempt-qa-full.json",
+          "sha256": "aefe4246b4c4837af367188c30573a90b1d44f04ad4f672da081d600e7b0ced7",
+          "bytes": 7627
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/rrb-ntpc-cbt-1-general-awareness-practice/accessibility-content-audit-full.json",
+          "sha256": "de277b805b013ccfcadc194e818f8647ef6542e3c992129a5e329298d6680583",
+          "bytes": 703
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/rrb-ntpc-cbt-1-general-awareness-practice/form-simulation-artifact.json",
+          "sha256": "5794bf414da92bd855a8caa3fbb9baef005eb1d9d57ae75341180332b27eedb3",
+          "bytes": 393
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/rrb-ntpc-cbt-1-general-awareness-practice/representative-attempt-qa-artifact.json",
+          "sha256": "b2d3f4cc335b5ea1c38c0e3da0a33e2aa2635a27c5f40a6059ec9fedab4e5eed",
+          "bytes": 397
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/rrb-ntpc-cbt-1-general-awareness-practice/accessibility-content-audit-artifact.json",
+          "sha256": "b7b9342331af604b3a796bbf1b7d46d56ff7894e3fc30ca2650fa2080304722e",
+          "bytes": 412
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 4000,
+        "scoreLevels": 41,
+        "accessibilityItems": 200,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/rrb-ntpc-cbt-1-general-awareness-practice/revision-1",
+      "cutScoreApprovalSha256": "aefe4246b4c4837af367188c30573a90b1d44f04ad4f672da081d600e7b0ced7"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 273,
+        "slug": "rrb-ntpc-cbt-1-general-intelligence-reasoning-practice",
+        "title": "RRB NTPC CBT 1 General Intelligence and Reasoning Practice",
+        "assessmentPurpose": "practice",
+        "passingScore": 60,
+        "blueprintRevision": 1
+      },
+      "expectedItems": 30,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/rrb-ntpc-cbt-1-general-intelligence-reasoning-practice/form-simulation-full.json",
+          "sha256": "371c41d04305acf5e83a93b1c2bc346d516e8ae15f51e6a1807c834b436c3fe8",
+          "bytes": 42795
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/rrb-ntpc-cbt-1-general-intelligence-reasoning-practice/representative-attempt-qa-full.json",
+          "sha256": "3b6cf3f7c7e70cd7c73a75a71029a59703fe68f2fdfd3034bea0f188e8aa2bad",
+          "bytes": 5930
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/rrb-ntpc-cbt-1-general-intelligence-reasoning-practice/accessibility-content-audit-full.json",
+          "sha256": "0678ddec9f216b934ef9000ba8b5cee969fa6e60d0fe4853e0a63c302f482c77",
+          "bytes": 716
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/rrb-ntpc-cbt-1-general-intelligence-reasoning-practice/form-simulation-artifact.json",
+          "sha256": "9e5e3ea16bfd6be50d4b7e4139f71db4e4f67329bcec18be5baca5de67416bda",
+          "bytes": 393
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/rrb-ntpc-cbt-1-general-intelligence-reasoning-practice/representative-attempt-qa-artifact.json",
+          "sha256": "cb3d0c4966ab961ca716e0b1e56e205dfc154212e7d2957cd4acf0f4c3b1f144",
+          "bytes": 397
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/rrb-ntpc-cbt-1-general-intelligence-reasoning-practice/accessibility-content-audit-artifact.json",
+          "sha256": "39acab3a44864664f612b9688f4ff90bd6e00fbc9a28c2ddd4e40f2e20a2227a",
+          "bytes": 412
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 3000,
+        "scoreLevels": 31,
+        "accessibilityItems": 200,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/rrb-ntpc-cbt-1-general-intelligence-reasoning-practice/revision-1",
+      "cutScoreApprovalSha256": "3b6cf3f7c7e70cd7c73a75a71029a59703fe68f2fdfd3034bea0f188e8aa2bad"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 64,
+        "slug": "rrb-ntpc-cbt-1-mathematics-practice",
+        "title": "RRB NTPC CBT 1 Mathematics Practice",
+        "assessmentPurpose": "practice",
+        "passingScore": 60,
+        "blueprintRevision": 2
+      },
+      "expectedItems": 30,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/rrb-ntpc-cbt-1-mathematics-practice/form-simulation-full.json",
+          "sha256": "c233fa8937874468e9b135aa14d9b161056b18ef8a525cc6be836d84f303f588",
+          "bytes": 42674
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/rrb-ntpc-cbt-1-mathematics-practice/representative-attempt-qa-full.json",
+          "sha256": "aa1f26f4789e8ff60afe62b5e4efe4077626cf2d38d6f58b43c3fda359fe0dff",
+          "bytes": 5910
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/rrb-ntpc-cbt-1-mathematics-practice/accessibility-content-audit-full.json",
+          "sha256": "dd1a51721d76ff13084a17ea6f824e895aaaa8955291159b002eaa19a33e43fd",
+          "bytes": 696
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/rrb-ntpc-cbt-1-mathematics-practice/form-simulation-artifact.json",
+          "sha256": "24b54c448f3def5683c27ac55beda7f203174fba831dae43a1e21a5e1ca0c65c",
+          "bytes": 392
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/rrb-ntpc-cbt-1-mathematics-practice/representative-attempt-qa-artifact.json",
+          "sha256": "5d92340d44cc8d2af5682bfd7f322484c7faca4f63096bd4746aeed1cee64915",
+          "bytes": 396
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/rrb-ntpc-cbt-1-mathematics-practice/accessibility-content-audit-artifact.json",
+          "sha256": "b6c75e1dae411079ceb2a71251fed52e69a9faaa7dd6b6e0df76de7dec59cdf1",
+          "bytes": 411
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 3000,
+        "scoreLevels": 31,
+        "accessibilityItems": 200,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/rrb-ntpc-cbt-1-mathematics-practice/revision-2",
+      "cutScoreApprovalSha256": "aa1f26f4789e8ff60afe62b5e4efe4077626cf2d38d6f58b43c3fda359fe0dff"
+    },
+    {
+      "status": "failed",
+      "target": {
+        "id": 98,
+        "slug": "salesforce-crm-admin-foundations",
+        "title": "Salesforce CRM Administration Skills",
+        "assessmentPurpose": "certification",
+        "passingScore": 70,
+        "blueprintRevision": null
+      },
+      "failure": "BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 184,
+        "slug": "sap-abap-development-skills",
+        "title": "SAP ABAP Development Skills",
+        "assessmentPurpose": "certification",
+        "passingScore": 70,
+        "blueprintRevision": 1
+      },
+      "expectedItems": 10,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/sap-abap-development-skills/form-simulation-full.json",
+          "sha256": "c5552d4d1ec67f0bbb6a181e1274a57ade840295e3796c29e5755b7cba5c54ba",
+          "bytes": 42767
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/sap-abap-development-skills/representative-attempt-qa-full.json",
+          "sha256": "d2507c897a4f955de6ed2bb3ded3cc1f233c52fe2cee82770d39ecf582d0bd69",
+          "bytes": 2485
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/sap-abap-development-skills/accessibility-content-audit-full.json",
+          "sha256": "77f935e340be062e0c495d3cc68c98798f7bc7344e92ee41623eb168853e0b1d",
+          "bytes": 688
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/sap-abap-development-skills/form-simulation-artifact.json",
+          "sha256": "ebe9d5a9f8442e5355d34a4248a2f6934bd358a5315bca517e0e1145d59fe03f",
+          "bytes": 393
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/sap-abap-development-skills/representative-attempt-qa-artifact.json",
+          "sha256": "c751bd8b082d365bc98ac9903e6eece28203c8a04a770568d88cf859cbf37946",
+          "bytes": 397
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/sap-abap-development-skills/accessibility-content-audit-artifact.json",
+          "sha256": "167382ba56350bd195551cafc844d25489403caa733789c802ab4e9831467126",
+          "bytes": 412
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 1000,
+        "scoreLevels": 11,
+        "accessibilityItems": 80,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/sap-abap-development-skills/revision-1",
+      "cutScoreApprovalSha256": "d2507c897a4f955de6ed2bb3ded3cc1f233c52fe2cee82770d39ecf582d0bd69"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 96,
+        "slug": "sap-mm-procurement-foundations",
+        "title": "SAP MM Procurement Foundations",
+        "assessmentPurpose": "certification",
+        "passingScore": 70,
+        "blueprintRevision": 1
+      },
+      "expectedItems": 10,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/sap-mm-procurement-foundations/form-simulation-full.json",
+          "sha256": "bc07a80ff3b77211195ff5a28939caab7fd631b9fe71ef0537041cb152d3d334",
+          "bytes": 42668
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/sap-mm-procurement-foundations/representative-attempt-qa-full.json",
+          "sha256": "79caf4ae65e9cfe4b28a2c9850ee52274bd75cbf97584963f7c2842972948df3",
+          "bytes": 2487
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/sap-mm-procurement-foundations/accessibility-content-audit-full.json",
+          "sha256": "db8ef2df342aacf9495c3a31e6eacfc45f2ca35658b9f716fbe3a34a21323ba5",
+          "bytes": 690
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/sap-mm-procurement-foundations/form-simulation-artifact.json",
+          "sha256": "e8577f30cd397626b28969d3b245a9b1d4b3d97274fc780429109034369de9a0",
+          "bytes": 392
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/sap-mm-procurement-foundations/representative-attempt-qa-artifact.json",
+          "sha256": "636128ff15ae5de32b9220aaa99748d6006e37d08f135e5a5ddc4c3de6dd16ea",
+          "bytes": 396
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/sap-mm-procurement-foundations/accessibility-content-audit-artifact.json",
+          "sha256": "168097a1a497a0f3dc909679405e1ac7dce0ba29d33905f0b0f3bb678ee27fe5",
+          "bytes": 411
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 1000,
+        "scoreLevels": 11,
+        "accessibilityItems": 80,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/sap-mm-procurement-foundations/revision-1",
+      "cutScoreApprovalSha256": "79caf4ae65e9cfe4b28a2c9850ee52274bd75cbf97584963f7c2842972948df3"
+    },
+    {
+      "status": "failed",
+      "target": {
+        "id": 95,
+        "slug": "sap-s4hana-finance-foundations",
+        "title": "SAP S/4HANA Finance Skills",
+        "assessmentPurpose": "certification",
+        "passingScore": 70,
+        "blueprintRevision": null
+      },
+      "failure": "BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"
+    },
+    {
+      "status": "failed",
+      "target": {
+        "id": 183,
+        "slug": "sap-s4hana-sales-distribution-skills",
+        "title": "SAP S/4HANA Sales and Distribution Skills",
+        "assessmentPurpose": "certification",
+        "passingScore": 70,
+        "blueprintRevision": null
+      },
+      "failure": "BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 34,
+        "slug": "security-architecture",
+        "title": "Security Architecture",
+        "assessmentPurpose": "certification",
+        "passingScore": 85,
+        "blueprintRevision": 1
+      },
+      "expectedItems": 10,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/security-architecture/form-simulation-full.json",
+          "sha256": "642be5fbeae420ddfe9dc77fe2d1ca4fb715f744ecf79931a5da498a09af1242",
+          "bytes": 206119
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/security-architecture/representative-attempt-qa-full.json",
+          "sha256": "10cac967a6966f5ed652461a9f9bc2c79ddf835aa08dcfd128c983715795726e",
+          "bytes": 2482
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/security-architecture/accessibility-content-audit-full.json",
+          "sha256": "211a2b180f7d7bd9123153cc40426b588e0df7bf120bb685ecad9387127143cd",
+          "bytes": 681
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/security-architecture/form-simulation-artifact.json",
+          "sha256": "926edde28236d00a73d6c2be199db153272fda6f0f74010f383c7e22ee79ba4e",
+          "bytes": 392
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/security-architecture/representative-attempt-qa-artifact.json",
+          "sha256": "8e1e25d56c5c9edbd0e0185cea4e8cc95028e5a19fd878b362dfddb715d4153e",
+          "bytes": 396
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/security-architecture/accessibility-content-audit-artifact.json",
+          "sha256": "4e7ed98853177020e99ff70e38abd98c1a9a10fd57bf193b965127bbaf8d351b",
+          "bytes": 411
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 1000,
+        "scoreLevels": 11,
+        "accessibilityItems": 80,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/security-architecture/revision-1",
+      "cutScoreApprovalSha256": "10cac967a6966f5ed652461a9f9bc2c79ddf835aa08dcfd128c983715795726e"
+    },
+    {
+      "status": "failed",
+      "target": {
+        "id": 186,
+        "slug": "servicenow-administration-foundations",
+        "title": "ServiceNow Administration Skills",
+        "assessmentPurpose": "certification",
+        "passingScore": 70,
+        "blueprintRevision": null
+      },
+      "failure": "BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"
+    },
+    {
+      "status": "failed",
+      "target": {
+        "id": 191,
+        "slug": "site-reliability-engineering-foundations",
+        "title": "Site Reliability Engineering Foundations Assessment",
+        "assessmentPurpose": "certification",
+        "passingScore": 70,
+        "blueprintRevision": null
+      },
+      "failure": "BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"
+    },
+    {
+      "status": "failed",
+      "target": {
+        "id": 205,
+        "slug": "soc-analyst-foundations",
+        "title": "SOC Analyst Foundations Certification",
+        "assessmentPurpose": "certification",
+        "passingScore": 70,
+        "blueprintRevision": null
+      },
+      "failure": "BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 30,
+        "slug": "social-media-strategy",
+        "title": "Social Media Strategy",
+        "assessmentPurpose": "certification",
+        "passingScore": 70,
+        "blueprintRevision": 1
+      },
+      "expectedItems": 10,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/social-media-strategy/form-simulation-full.json",
+          "sha256": "98150103384ade452b3d08c7b829bb3276b36d28bcc6ee4686ac1c3ab9b473d0",
+          "bytes": 206119
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/social-media-strategy/representative-attempt-qa-full.json",
+          "sha256": "a65c2b8b223e687ef4ccb02b301dc7b7dd643dc3484efa5debb77544720c5915",
+          "bytes": 2478
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/social-media-strategy/accessibility-content-audit-full.json",
+          "sha256": "b68dba755bb844caac5d050518b5b4556abe53163cd0f9946b880d0905e50433",
+          "bytes": 681
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/social-media-strategy/form-simulation-artifact.json",
+          "sha256": "29bbf177b4a2d0a74861d23ea9b9a8ed1795886bb8217ea20d707cbc785d8525",
+          "bytes": 392
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/social-media-strategy/representative-attempt-qa-artifact.json",
+          "sha256": "f05d7a4021b4147506dace702da464f526c5b9c45606f7307f8b01221a7e0322",
+          "bytes": 396
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/social-media-strategy/accessibility-content-audit-artifact.json",
+          "sha256": "b8f916c2dcc6756eefa734d14ed15888afcdadb29ef1a8b463be67c9625f10fb",
+          "bytes": 411
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 1000,
+        "scoreLevels": 11,
+        "accessibilityItems": 80,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/social-media-strategy/revision-1",
+      "cutScoreApprovalSha256": "a65c2b8b223e687ef4ccb02b301dc7b7dd643dc3484efa5debb77544720c5915"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 203,
+        "slug": "software-testing-qa-foundations",
+        "title": "Software Testing and QA Skills",
+        "assessmentPurpose": "certification",
+        "passingScore": 70,
+        "blueprintRevision": 2
+      },
+      "expectedItems": 20,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/software-testing-qa-foundations/form-simulation-full.json",
+          "sha256": "cfb9df09d2157dd9d6074e07e571fbccd966eee6cf048165a8e9d89f3e1fb1f9",
+          "bytes": 251981
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/software-testing-qa-foundations/representative-attempt-qa-full.json",
+          "sha256": "f4ffc14f2582eb66b916ec5cb07e3470841fc56f3d37de1f3a322e0c19dd18a5",
+          "bytes": 4201
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/software-testing-qa-foundations/accessibility-content-audit-full.json",
+          "sha256": "2e1528393f8d207304bf103d7761a72481bfa59297f846b9404389bbfd681d2e",
+          "bytes": 693
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/software-testing-qa-foundations/form-simulation-artifact.json",
+          "sha256": "d0df4006281b513c1e2f690aceaf08eb38a825c72bc0f11ac75a8b2bbf8ec733",
+          "bytes": 393
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/software-testing-qa-foundations/representative-attempt-qa-artifact.json",
+          "sha256": "55d4499a7a3b93f205a6aa2b8d07b8a4c57f8df9d335ae198584c63ce6898c29",
+          "bytes": 397
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/software-testing-qa-foundations/accessibility-content-audit-artifact.json",
+          "sha256": "86d4cd999c9b6cbfd94824d49bb9287579b2814e2adb730f3752687ceff6a5af",
+          "bytes": 412
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 2000,
+        "scoreLevels": 21,
+        "accessibilityItems": 100,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/software-testing-qa-foundations/revision-2",
+      "cutScoreApprovalSha256": "f4ffc14f2582eb66b916ec5cb07e3470841fc56f3d37de1f3a322e0c19dd18a5"
+    },
+    {
+      "status": "failed",
+      "target": {
+        "id": 265,
+        "slug": "ssc-cgl-tier-1-english-comprehension-practice",
+        "title": "SSC CGL Tier I English Comprehension Practice",
+        "assessmentPurpose": "practice",
+        "passingScore": 60,
+        "blueprintRevision": null
+      },
+      "failure": "BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"
+    },
+    {
+      "status": "failed",
+      "target": {
+        "id": 266,
+        "slug": "ssc-cgl-tier-1-general-awareness-practice",
+        "title": "SSC CGL Tier I General Awareness Practice",
+        "assessmentPurpose": "practice",
+        "passingScore": 60,
+        "blueprintRevision": null
+      },
+      "failure": "BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"
+    },
+    {
+      "status": "failed",
+      "target": {
+        "id": 264,
+        "slug": "ssc-cgl-tier-1-general-intelligence-reasoning-practice",
+        "title": "SSC CGL Tier I General Intelligence and Reasoning Practice",
+        "assessmentPurpose": "practice",
+        "passingScore": 60,
+        "blueprintRevision": null
+      },
+      "failure": "BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 61,
+        "slug": "ssc-cgl-tier-1-quantitative-aptitude-practice",
+        "title": "SSC CGL Tier I Quantitative Aptitude Practice",
+        "assessmentPurpose": "practice",
+        "passingScore": 60,
+        "blueprintRevision": 2
+      },
+      "expectedItems": 25,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ssc-cgl-tier-1-quantitative-aptitude-practice/form-simulation-full.json",
+          "sha256": "f3bcab7774e2ee0721398b7605242214310c688cfc5f8c4531f22c002a368b38",
+          "bytes": 368081
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ssc-cgl-tier-1-quantitative-aptitude-practice/representative-attempt-qa-full.json",
+          "sha256": "41963dc29c682dfa150ab14a36fb0791c23e5b6212b1723928e012cc33831ff4",
+          "bytes": 5064
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ssc-cgl-tier-1-quantitative-aptitude-practice/accessibility-content-audit-full.json",
+          "sha256": "12c26ad12585a0c90944f885a48f7ae71ae9e3600a040d85e0fa5f5835bcb362",
+          "bytes": 706
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ssc-cgl-tier-1-quantitative-aptitude-practice/form-simulation-artifact.json",
+          "sha256": "148e1afa7dbcc172a7724536017816c6e7e4591790ff3e31268debc96986bd61",
+          "bytes": 392
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ssc-cgl-tier-1-quantitative-aptitude-practice/representative-attempt-qa-artifact.json",
+          "sha256": "c0fd00671e6a26fa9a990cc7cf19626e234be1bc23799e828f0c4370e1fbcada",
+          "bytes": 396
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ssc-cgl-tier-1-quantitative-aptitude-practice/accessibility-content-audit-artifact.json",
+          "sha256": "3e81309129a6282eb019befbe9f0147c0ce79b5e5ac63353bf0b99c2a8ce6b10",
+          "bytes": 411
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 2500,
+        "scoreLevels": 26,
+        "accessibilityItems": 200,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/ssc-cgl-tier-1-quantitative-aptitude-practice/revision-2",
+      "cutScoreApprovalSha256": "41963dc29c682dfa150ab14a36fb0791c23e5b6212b1723928e012cc33831ff4"
+    },
+    {
+      "status": "failed",
+      "target": {
+        "id": 268,
+        "slug": "ssc-chsl-tier-1-english-language-practice",
+        "title": "SSC CHSL Tier I English Language Practice",
+        "assessmentPurpose": "practice",
+        "passingScore": 60,
+        "blueprintRevision": null
+      },
+      "failure": "BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"
+    },
+    {
+      "status": "failed",
+      "target": {
+        "id": 269,
+        "slug": "ssc-chsl-tier-1-general-awareness-practice",
+        "title": "SSC CHSL Tier I General Awareness Practice",
+        "assessmentPurpose": "practice",
+        "passingScore": 60,
+        "blueprintRevision": null
+      },
+      "failure": "BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"
+    },
+    {
+      "status": "failed",
+      "target": {
+        "id": 267,
+        "slug": "ssc-chsl-tier-1-general-intelligence-practice",
+        "title": "SSC CHSL Tier I General Intelligence Practice",
+        "assessmentPurpose": "practice",
+        "passingScore": 60,
+        "blueprintRevision": null
+      },
+      "failure": "BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 62,
+        "slug": "ssc-chsl-tier-1-quantitative-aptitude-practice",
+        "title": "SSC CHSL Tier I Quantitative Aptitude Practice",
+        "assessmentPurpose": "practice",
+        "passingScore": 60,
+        "blueprintRevision": 2
+      },
+      "expectedItems": 25,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ssc-chsl-tier-1-quantitative-aptitude-practice/form-simulation-full.json",
+          "sha256": "457b12592ae1f9352e28e96895edfecbca0b7399fb44a831e6caba86a5de0c1f",
+          "bytes": 368082
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ssc-chsl-tier-1-quantitative-aptitude-practice/representative-attempt-qa-full.json",
+          "sha256": "afeca6ce456b052d56b48132130277f75922b43d9cdf0e1eb1b2ffdff0d2af2f",
+          "bytes": 5065
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ssc-chsl-tier-1-quantitative-aptitude-practice/accessibility-content-audit-full.json",
+          "sha256": "6f5a8327fe5d8b539c31a6cccd68580cb29b332a3bf339e06b1661a5159690da",
+          "bytes": 707
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ssc-chsl-tier-1-quantitative-aptitude-practice/form-simulation-artifact.json",
+          "sha256": "15433efd59f18dacfea07c90435a2bffd63120476a875dbdbda58b62ab416b4a",
+          "bytes": 392
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ssc-chsl-tier-1-quantitative-aptitude-practice/representative-attempt-qa-artifact.json",
+          "sha256": "add3c6b481534f534e07ff91e9d1ab9125f40d288df155dd4a20628b9e4d0242",
+          "bytes": 396
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ssc-chsl-tier-1-quantitative-aptitude-practice/accessibility-content-audit-artifact.json",
+          "sha256": "5b741f6748a47084cc39b43ce3876a098b9b4757b7590fe0aec88c22ae64b0eb",
+          "bytes": 411
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 2500,
+        "scoreLevels": 26,
+        "accessibilityItems": 200,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/ssc-chsl-tier-1-quantitative-aptitude-practice/revision-2",
+      "cutScoreApprovalSha256": "afeca6ce456b052d56b48132130277f75922b43d9cdf0e1eb1b2ffdff0d2af2f"
+    },
+    {
+      "status": "failed",
+      "target": {
+        "id": 271,
+        "slug": "ssc-mts-english-language-comprehension-practice",
+        "title": "SSC MTS English Language and Comprehension Practice",
+        "assessmentPurpose": "practice",
+        "passingScore": 60,
+        "blueprintRevision": null
+      },
+      "failure": "BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"
+    },
+    {
+      "status": "failed",
+      "target": {
+        "id": 272,
+        "slug": "ssc-mts-general-awareness-practice",
+        "title": "SSC MTS General Awareness Practice",
+        "assessmentPurpose": "practice",
+        "passingScore": 60,
+        "blueprintRevision": null
+      },
+      "failure": "BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 63,
+        "slug": "ssc-mts-numerical-mathematical-ability-practice",
+        "title": "SSC MTS Numerical and Mathematical Ability Practice",
+        "assessmentPurpose": "practice",
+        "passingScore": 60,
+        "blueprintRevision": 2
+      },
+      "expectedItems": 25,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ssc-mts-numerical-mathematical-ability-practice/form-simulation-full.json",
+          "sha256": "4a162afc9b521f3cb74f41390537ca22f3900e7381b529bb23b5c3091f11139b",
+          "bytes": 42686
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ssc-mts-numerical-mathematical-ability-practice/representative-attempt-qa-full.json",
+          "sha256": "37d3b538f4d17c58d0e2e531c8a262b6af27d2c03c1d487c9a860941012171e4",
+          "bytes": 5066
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ssc-mts-numerical-mathematical-ability-practice/accessibility-content-audit-full.json",
+          "sha256": "66aa0104be7b361d46732feccb8d8e52dda3da848345328a6add5ce6c16da08e",
+          "bytes": 708
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ssc-mts-numerical-mathematical-ability-practice/form-simulation-artifact.json",
+          "sha256": "c3e1c400eb372997e1c7a032d26d48dbce51515735f5ba68378b04a3c2e7592e",
+          "bytes": 392
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ssc-mts-numerical-mathematical-ability-practice/representative-attempt-qa-artifact.json",
+          "sha256": "76dce2ed315ab3848e72056ee24c3d1a037277065c05b7544c751e3493f7fc85",
+          "bytes": 396
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ssc-mts-numerical-mathematical-ability-practice/accessibility-content-audit-artifact.json",
+          "sha256": "a2a3fab347b3d8d55d679b9e57e016ae62c800773c25bedfa57b779ffde6e15f",
+          "bytes": 411
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 2500,
+        "scoreLevels": 26,
+        "accessibilityItems": 200,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/ssc-mts-numerical-mathematical-ability-practice/revision-2",
+      "cutScoreApprovalSha256": "37d3b538f4d17c58d0e2e531c8a262b6af27d2c03c1d487c9a860941012171e4"
+    },
+    {
+      "status": "failed",
+      "target": {
+        "id": 270,
+        "slug": "ssc-mts-reasoning-ability-problem-solving-practice",
+        "title": "SSC MTS Reasoning Ability and Problem Solving Practice",
+        "assessmentPurpose": "practice",
+        "passingScore": 60,
+        "blueprintRevision": null
+      },
+      "failure": "BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 17,
+        "slug": "statistical-analysis",
+        "title": "Statistical Analysis",
+        "assessmentPurpose": "certification",
+        "passingScore": 70,
+        "blueprintRevision": 1
+      },
+      "expectedItems": 10,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/statistical-analysis/form-simulation-full.json",
+          "sha256": "eba6bb5e278bccf16592b4c71e152c9289d181e4dbd52bec05f79572e2b8d0a3",
+          "bytes": 206118
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/statistical-analysis/representative-attempt-qa-full.json",
+          "sha256": "4312376d5c5d953085161f98b1765389b17a97fca814ce59a67fffa8887597c0",
+          "bytes": 2477
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/statistical-analysis/accessibility-content-audit-full.json",
+          "sha256": "b0d7cbf8b036a8ea88437751f7fb5894d4b09214a7c646ae59dff0a3d94b1ba7",
+          "bytes": 680
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/statistical-analysis/form-simulation-artifact.json",
+          "sha256": "f9835f06d7a2a1b92c734b23a38d33204a2afdd08ca418567ab56f27de36a8ce",
+          "bytes": 392
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/statistical-analysis/representative-attempt-qa-artifact.json",
+          "sha256": "c384ba010965110c05299467442c8e53f739dbb62377c3eeea98af784d6054d4",
+          "bytes": 396
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/statistical-analysis/accessibility-content-audit-artifact.json",
+          "sha256": "d9bfda4062365047a1f21575ed901291e67dbf2e4e05c141c045364c27cbe369",
+          "bytes": 411
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 1000,
+        "scoreLevels": 11,
+        "accessibilityItems": 80,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/statistical-analysis/revision-1",
+      "cutScoreApprovalSha256": "4312376d5c5d953085161f98b1765389b17a97fca814ce59a67fffa8887597c0"
+    },
+    {
+      "status": "failed",
+      "target": {
+        "id": 210,
+        "slug": "technical-project-management-foundations",
+        "title": "Technical Project Management Foundations Certification",
+        "assessmentPurpose": "certification",
+        "passingScore": 70,
+        "blueprintRevision": null
+      },
+      "failure": "BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"
+    },
+    {
+      "status": "failed",
+      "target": {
+        "id": 188,
+        "slug": "terraform-infrastructure-as-code-foundations",
+        "title": "Terraform Infrastructure as Code Skills Assessment",
+        "assessmentPurpose": "certification",
+        "passingScore": 70,
+        "blueprintRevision": null
+      },
+      "failure": "BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 200,
+        "slug": "typescript-application-development-skills",
+        "title": "TypeScript Application Development Skills",
+        "assessmentPurpose": "certification",
+        "passingScore": 70,
+        "blueprintRevision": 1
+      },
+      "expectedItems": 16,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/typescript-application-development-skills/form-simulation-full.json",
+          "sha256": "cdc1fb85b905e3c13b5ebe7a22e68797d1caaa65410e635f20be0960cd04f649",
+          "bytes": 205332
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/typescript-application-development-skills/representative-attempt-qa-full.json",
+          "sha256": "32dcdc16d8e04821b644f8d08756a519d36dee1a3f6fc92b9953af40819159bb",
+          "bytes": 3527
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/typescript-application-development-skills/accessibility-content-audit-full.json",
+          "sha256": "6776380eac2c0df9cc7a98ca27894f2320123ad189990e4b57e9184e9e4f4bd3",
+          "bytes": 702
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/typescript-application-development-skills/form-simulation-artifact.json",
+          "sha256": "f966ada7c4bca575ee35e3d3f82028345e6bede571d5ad5af06a2cf579ccfa1d",
+          "bytes": 393
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/typescript-application-development-skills/representative-attempt-qa-artifact.json",
+          "sha256": "f88c5372146681e5424c15566a9753c30b2785413767a810876def12ca7dd12f",
+          "bytes": 397
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/typescript-application-development-skills/accessibility-content-audit-artifact.json",
+          "sha256": "4cfe70a7da815c7464f57ebe13e5684e2d51de5242e39b5c4a86238ff2b5fff4",
+          "bytes": 412
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 1600,
+        "scoreLevels": 17,
+        "accessibilityItems": 80,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/typescript-application-development-skills/revision-1",
+      "cutScoreApprovalSha256": "32dcdc16d8e04821b644f8d08756a519d36dee1a3f6fc92b9953af40819159bb"
+    },
+    {
+      "status": "passed",
+      "target": {
+        "id": 22,
+        "slug": "ui-ux-design",
+        "title": "UI/UX Design Certification",
+        "assessmentPurpose": "certification",
+        "passingScore": 70,
+        "blueprintRevision": 1
+      },
+      "expectedItems": 10,
+      "fullFiles": {
+        "formFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ui-ux-design/form-simulation-full.json",
+          "sha256": "e179f46a9515d88acc37716b1552604e17d2b5f1ba6ea065b8f67e0e8644c753",
+          "bytes": 206110
+        },
+        "qaFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ui-ux-design/representative-attempt-qa-full.json",
+          "sha256": "36b6995ed77dc7a28decd21f619687e9aa4805ffbc0f3ccf9d827ca1b387f8f4",
+          "bytes": 2469
+        },
+        "accessibilityFile": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ui-ux-design/accessibility-content-audit-full.json",
+          "sha256": "2bb6da0acc88437751b65758c74691ee69a13a02f14b3ea0a59c1029a252d14b",
+          "bytes": 672
+        }
+      },
+      "compactFiles": {
+        "formSimulationArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ui-ux-design/form-simulation-artifact.json",
+          "sha256": "00f20badab7e94f3c40e2512021029758d53800667cc09cea85a3f5882f6044a",
+          "bytes": 392
+        },
+        "representativeAttemptQaArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ui-ux-design/representative-attempt-qa-artifact.json",
+          "sha256": "9e8c1d03a7dec9b9129c8b59af97236241284fb0a404e71d602fe2cb08d1eae6",
+          "bytes": 396
+        },
+        "accessibilityAuditArtifact": {
+          "file": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts-20260729/ui-ux-design/accessibility-content-audit-artifact.json",
+          "sha256": "df17a8b0153d8664364d341dcc17773947fff823d46cbbd052cbc9d3205eb673",
+          "bytes": 411
+        }
+      },
+      "aggregate": {
+        "forms": 100,
+        "materializedItems": 1000,
+        "scoreLevels": 11,
+        "accessibilityItems": 80,
+        "mediaReferences": 0
+      },
+      "cutScoreApprovalReference": "automated-threshold-verification/ui-ux-design/revision-1",
+      "cutScoreApprovalSha256": "36b6995ed77dc7a28decd21f619687e9aa4805ffbc0f3ccf9d827ca1b387f8f4"
+    }
+  ]
+}

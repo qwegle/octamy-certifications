@@ -1,0 +1,2228 @@
+{
+  "schemaVersion": "octamy.form-simulation-report.v1",
+  "assessmentId": 74,
+  "assessmentSlug": "grade-11-chemistry-numerical-practice",
+  "blueprintRevision": 1,
+  "generatedAt": "2026-07-29T12:26:04.036Z",
+  "runtimePath": "DatabaseStorage.materializeBlueprintForAttempt",
+  "independentFormCount": 20,
+  "expectedDrawPerForm": 30,
+  "totalDraws": 600,
+  "duplicateSelections": 0,
+  "poolExhaustions": 0,
+  "topicRuleChecks": 100,
+  "rules": [
+    {
+      "id": 847,
+      "bank_id": 49,
+      "topic_id": 652,
+      "topic_slug": "equilibrium-and-ph",
+      "question_count": 6,
+      "difficulty": "mixed",
+      "sort_order": 0,
+      "available": 40
+    },
+    {
+      "id": 848,
+      "bank_id": 49,
+      "topic_id": 653,
+      "topic_slug": "mole-concept",
+      "question_count": 6,
+      "difficulty": "mixed",
+      "sort_order": 1,
+      "available": 40
+    },
+    {
+      "id": 849,
+      "bank_id": 49,
+      "topic_id": 654,
+      "topic_slug": "solutions-and-concentration",
+      "question_count": 6,
+      "difficulty": "mixed",
+      "sort_order": 2,
+      "available": 40
+    },
+    {
+      "id": 850,
+      "bank_id": 49,
+      "topic_id": 655,
+      "topic_slug": "states-of-matter",
+      "question_count": 6,
+      "difficulty": "mixed",
+      "sort_order": 3,
+      "available": 40
+    },
+    {
+      "id": 851,
+      "bank_id": 49,
+      "topic_id": 656,
+      "topic_slug": "stoichiometry",
+      "question_count": 6,
+      "difficulty": "mixed",
+      "sort_order": 4,
+      "available": 40
+    }
+  ],
+  "forms": [
+    {
+      "run": 1,
+      "count": 30,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 847,
+          "bankId": 49,
+          "topicId": 652,
+          "topicSlug": "equilibrium-and-ph",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            117946,
+            117926,
+            117925,
+            117922,
+            117944,
+            117937
+          ]
+        },
+        {
+          "ruleId": 848,
+          "bankId": 49,
+          "topicId": 653,
+          "topicSlug": "mole-concept",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            117989,
+            117985,
+            117986,
+            117979,
+            117970,
+            117991
+          ]
+        },
+        {
+          "ruleId": 849,
+          "bankId": 49,
+          "topicId": 654,
+          "topicSlug": "solutions-and-concentration",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118028,
+            118018,
+            118009,
+            118036,
+            118031,
+            118021
+          ]
+        },
+        {
+          "ruleId": 850,
+          "bankId": 49,
+          "topicId": 655,
+          "topicSlug": "states-of-matter",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118079,
+            118063,
+            118046,
+            118068,
+            118065,
+            118081
+          ]
+        },
+        {
+          "ruleId": 851,
+          "bankId": 49,
+          "topicId": 656,
+          "topicSlug": "stoichiometry",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118114,
+            118096,
+            118104,
+            118084,
+            118091,
+            118115
+          ]
+        }
+      ]
+    },
+    {
+      "run": 2,
+      "count": 30,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 847,
+          "bankId": 49,
+          "topicId": 652,
+          "topicSlug": "equilibrium-and-ph",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            117953,
+            117957,
+            117944,
+            117954,
+            117949,
+            117956
+          ]
+        },
+        {
+          "ruleId": 848,
+          "bankId": 49,
+          "topicId": 653,
+          "topicSlug": "mole-concept",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118001,
+            117994,
+            117985,
+            117965,
+            117989,
+            117980
+          ]
+        },
+        {
+          "ruleId": 849,
+          "bankId": 49,
+          "topicId": 654,
+          "topicSlug": "solutions-and-concentration",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118013,
+            118023,
+            118014,
+            118006,
+            118027,
+            118032
+          ]
+        },
+        {
+          "ruleId": 850,
+          "bankId": 49,
+          "topicId": 655,
+          "topicSlug": "states-of-matter",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118065,
+            118050,
+            118048,
+            118068,
+            118075,
+            118059
+          ]
+        },
+        {
+          "ruleId": 851,
+          "bankId": 49,
+          "topicId": 656,
+          "topicSlug": "stoichiometry",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118099,
+            118097,
+            118096,
+            118101,
+            118082,
+            118108
+          ]
+        }
+      ]
+    },
+    {
+      "run": 3,
+      "count": 30,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 847,
+          "bankId": 49,
+          "topicId": 652,
+          "topicSlug": "equilibrium-and-ph",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            117928,
+            117922,
+            117957,
+            117938,
+            117930,
+            117942
+          ]
+        },
+        {
+          "ruleId": 848,
+          "bankId": 49,
+          "topicId": 653,
+          "topicSlug": "mole-concept",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            117971,
+            117977,
+            117986,
+            117965,
+            117998,
+            117974
+          ]
+        },
+        {
+          "ruleId": 849,
+          "bankId": 49,
+          "topicId": 654,
+          "topicSlug": "solutions-and-concentration",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118031,
+            118010,
+            118014,
+            118024,
+            118016,
+            118027
+          ]
+        },
+        {
+          "ruleId": 850,
+          "bankId": 49,
+          "topicId": 655,
+          "topicSlug": "states-of-matter",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118055,
+            118056,
+            118051,
+            118078,
+            118075,
+            118072
+          ]
+        },
+        {
+          "ruleId": 851,
+          "bankId": 49,
+          "topicId": 656,
+          "topicSlug": "stoichiometry",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118097,
+            118116,
+            118105,
+            118113,
+            118110,
+            118115
+          ]
+        }
+      ]
+    },
+    {
+      "run": 4,
+      "count": 30,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 847,
+          "bankId": 49,
+          "topicId": 652,
+          "topicSlug": "equilibrium-and-ph",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            117936,
+            117945,
+            117950,
+            117934,
+            117935,
+            117923
+          ]
+        },
+        {
+          "ruleId": 848,
+          "bankId": 49,
+          "topicId": 653,
+          "topicSlug": "mole-concept",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            117969,
+            117999,
+            117966,
+            117991,
+            117974,
+            117983
+          ]
+        },
+        {
+          "ruleId": 849,
+          "bankId": 49,
+          "topicId": 654,
+          "topicSlug": "solutions-and-concentration",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118013,
+            118036,
+            118020,
+            118011,
+            118003,
+            118021
+          ]
+        },
+        {
+          "ruleId": 850,
+          "bankId": 49,
+          "topicId": 655,
+          "topicSlug": "states-of-matter",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118065,
+            118044,
+            118067,
+            118057,
+            118049,
+            118072
+          ]
+        },
+        {
+          "ruleId": 851,
+          "bankId": 49,
+          "topicId": 656,
+          "topicSlug": "stoichiometry",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118100,
+            118094,
+            118120,
+            118114,
+            118119,
+            118095
+          ]
+        }
+      ]
+    },
+    {
+      "run": 5,
+      "count": 30,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 847,
+          "bankId": 49,
+          "topicId": 652,
+          "topicSlug": "equilibrium-and-ph",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            117947,
+            117946,
+            117944,
+            117956,
+            117938,
+            117943
+          ]
+        },
+        {
+          "ruleId": 848,
+          "bankId": 49,
+          "topicId": 653,
+          "topicSlug": "mole-concept",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            117991,
+            117974,
+            117994,
+            117979,
+            117993,
+            117986
+          ]
+        },
+        {
+          "ruleId": 849,
+          "bankId": 49,
+          "topicId": 654,
+          "topicSlug": "solutions-and-concentration",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118002,
+            118003,
+            118026,
+            118041,
+            118007,
+            118029
+          ]
+        },
+        {
+          "ruleId": 850,
+          "bankId": 49,
+          "topicId": 655,
+          "topicSlug": "states-of-matter",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118060,
+            118047,
+            118071,
+            118081,
+            118064,
+            118058
+          ]
+        },
+        {
+          "ruleId": 851,
+          "bankId": 49,
+          "topicId": 656,
+          "topicSlug": "stoichiometry",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118105,
+            118091,
+            118097,
+            118104,
+            118108,
+            118084
+          ]
+        }
+      ]
+    },
+    {
+      "run": 6,
+      "count": 30,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 847,
+          "bankId": 49,
+          "topicId": 652,
+          "topicSlug": "equilibrium-and-ph",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            117950,
+            117947,
+            117934,
+            117954,
+            117960,
+            117938
+          ]
+        },
+        {
+          "ruleId": 848,
+          "bankId": 49,
+          "topicId": 653,
+          "topicSlug": "mole-concept",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118001,
+            117975,
+            117980,
+            117999,
+            117998,
+            117996
+          ]
+        },
+        {
+          "ruleId": 849,
+          "bankId": 49,
+          "topicId": 654,
+          "topicSlug": "solutions-and-concentration",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118033,
+            118035,
+            118030,
+            118018,
+            118006,
+            118016
+          ]
+        },
+        {
+          "ruleId": 850,
+          "bankId": 49,
+          "topicId": 655,
+          "topicSlug": "states-of-matter",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118061,
+            118072,
+            118069,
+            118075,
+            118071,
+            118070
+          ]
+        },
+        {
+          "ruleId": 851,
+          "bankId": 49,
+          "topicId": 656,
+          "topicSlug": "stoichiometry",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118116,
+            118082,
+            118091,
+            118089,
+            118094,
+            118111
+          ]
+        }
+      ]
+    },
+    {
+      "run": 7,
+      "count": 30,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 847,
+          "bankId": 49,
+          "topicId": 652,
+          "topicSlug": "equilibrium-and-ph",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            117942,
+            117935,
+            117958,
+            117931,
+            117951,
+            117923
+          ]
+        },
+        {
+          "ruleId": 848,
+          "bankId": 49,
+          "topicId": 653,
+          "topicSlug": "mole-concept",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            117997,
+            117976,
+            117974,
+            117992,
+            117989,
+            117991
+          ]
+        },
+        {
+          "ruleId": 849,
+          "bankId": 49,
+          "topicId": 654,
+          "topicSlug": "solutions-and-concentration",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118017,
+            118013,
+            118007,
+            118021,
+            118022,
+            118012
+          ]
+        },
+        {
+          "ruleId": 850,
+          "bankId": 49,
+          "topicId": 655,
+          "topicSlug": "states-of-matter",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118052,
+            118043,
+            118045,
+            118075,
+            118050,
+            118070
+          ]
+        },
+        {
+          "ruleId": 851,
+          "bankId": 49,
+          "topicId": 656,
+          "topicSlug": "stoichiometry",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118102,
+            118101,
+            118093,
+            118111,
+            118107,
+            118109
+          ]
+        }
+      ]
+    },
+    {
+      "run": 8,
+      "count": 30,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 847,
+          "bankId": 49,
+          "topicId": 652,
+          "topicSlug": "equilibrium-and-ph",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            117961,
+            117943,
+            117953,
+            117945,
+            117944,
+            117930
+          ]
+        },
+        {
+          "ruleId": 848,
+          "bankId": 49,
+          "topicId": 653,
+          "topicSlug": "mole-concept",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            117993,
+            117966,
+            117986,
+            117995,
+            117962,
+            117985
+          ]
+        },
+        {
+          "ruleId": 849,
+          "bankId": 49,
+          "topicId": 654,
+          "topicSlug": "solutions-and-concentration",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118037,
+            118021,
+            118036,
+            118016,
+            118017,
+            118034
+          ]
+        },
+        {
+          "ruleId": 850,
+          "bankId": 49,
+          "topicId": 655,
+          "topicSlug": "states-of-matter",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118069,
+            118080,
+            118049,
+            118047,
+            118051,
+            118046
+          ]
+        },
+        {
+          "ruleId": 851,
+          "bankId": 49,
+          "topicId": 656,
+          "topicSlug": "stoichiometry",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118089,
+            118100,
+            118098,
+            118096,
+            118099,
+            118112
+          ]
+        }
+      ]
+    },
+    {
+      "run": 9,
+      "count": 30,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 847,
+          "bankId": 49,
+          "topicId": 652,
+          "topicSlug": "equilibrium-and-ph",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            117945,
+            117930,
+            117931,
+            117951,
+            117944,
+            117948
+          ]
+        },
+        {
+          "ruleId": 848,
+          "bankId": 49,
+          "topicId": 653,
+          "topicSlug": "mole-concept",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            117962,
+            117986,
+            117976,
+            118001,
+            117963,
+            117985
+          ]
+        },
+        {
+          "ruleId": 849,
+          "bankId": 49,
+          "topicId": 654,
+          "topicSlug": "solutions-and-concentration",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118033,
+            118029,
+            118012,
+            118014,
+            118018,
+            118024
+          ]
+        },
+        {
+          "ruleId": 850,
+          "bankId": 49,
+          "topicId": 655,
+          "topicSlug": "states-of-matter",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118071,
+            118061,
+            118046,
+            118054,
+            118050,
+            118076
+          ]
+        },
+        {
+          "ruleId": 851,
+          "bankId": 49,
+          "topicId": 656,
+          "topicSlug": "stoichiometry",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118114,
+            118117,
+            118098,
+            118100,
+            118113,
+            118109
+          ]
+        }
+      ]
+    },
+    {
+      "run": 10,
+      "count": 30,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 847,
+          "bankId": 49,
+          "topicId": 652,
+          "topicSlug": "equilibrium-and-ph",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            117942,
+            117947,
+            117929,
+            117945,
+            117939,
+            117953
+          ]
+        },
+        {
+          "ruleId": 848,
+          "bankId": 49,
+          "topicId": 653,
+          "topicSlug": "mole-concept",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            117987,
+            118001,
+            117964,
+            117985,
+            117965,
+            117972
+          ]
+        },
+        {
+          "ruleId": 849,
+          "bankId": 49,
+          "topicId": 654,
+          "topicSlug": "solutions-and-concentration",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118010,
+            118018,
+            118025,
+            118036,
+            118013,
+            118008
+          ]
+        },
+        {
+          "ruleId": 850,
+          "bankId": 49,
+          "topicId": 655,
+          "topicSlug": "states-of-matter",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118073,
+            118070,
+            118065,
+            118062,
+            118079,
+            118069
+          ]
+        },
+        {
+          "ruleId": 851,
+          "bankId": 49,
+          "topicId": 656,
+          "topicSlug": "stoichiometry",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118094,
+            118089,
+            118104,
+            118103,
+            118102,
+            118116
+          ]
+        }
+      ]
+    },
+    {
+      "run": 11,
+      "count": 30,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 847,
+          "bankId": 49,
+          "topicId": 652,
+          "topicSlug": "equilibrium-and-ph",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            117943,
+            117933,
+            117945,
+            117922,
+            117959,
+            117927
+          ]
+        },
+        {
+          "ruleId": 848,
+          "bankId": 49,
+          "topicId": 653,
+          "topicSlug": "mole-concept",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            117977,
+            117990,
+            117996,
+            117983,
+            117993,
+            117998
+          ]
+        },
+        {
+          "ruleId": 849,
+          "bankId": 49,
+          "topicId": 654,
+          "topicSlug": "solutions-and-concentration",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118033,
+            118034,
+            118029,
+            118016,
+            118019,
+            118032
+          ]
+        },
+        {
+          "ruleId": 850,
+          "bankId": 49,
+          "topicId": 655,
+          "topicSlug": "states-of-matter",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118054,
+            118056,
+            118080,
+            118053,
+            118046,
+            118060
+          ]
+        },
+        {
+          "ruleId": 851,
+          "bankId": 49,
+          "topicId": 656,
+          "topicSlug": "stoichiometry",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118088,
+            118084,
+            118101,
+            118086,
+            118097,
+            118117
+          ]
+        }
+      ]
+    },
+    {
+      "run": 12,
+      "count": 30,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 847,
+          "bankId": 49,
+          "topicId": 652,
+          "topicSlug": "equilibrium-and-ph",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            117940,
+            117939,
+            117951,
+            117947,
+            117954,
+            117950
+          ]
+        },
+        {
+          "ruleId": 848,
+          "bankId": 49,
+          "topicId": 653,
+          "topicSlug": "mole-concept",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            117967,
+            118001,
+            117993,
+            117990,
+            117964,
+            117969
+          ]
+        },
+        {
+          "ruleId": 849,
+          "bankId": 49,
+          "topicId": 654,
+          "topicSlug": "solutions-and-concentration",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118026,
+            118028,
+            118019,
+            118004,
+            118006,
+            118010
+          ]
+        },
+        {
+          "ruleId": 850,
+          "bankId": 49,
+          "topicId": 655,
+          "topicSlug": "states-of-matter",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118050,
+            118059,
+            118046,
+            118070,
+            118049,
+            118051
+          ]
+        },
+        {
+          "ruleId": 851,
+          "bankId": 49,
+          "topicId": 656,
+          "topicSlug": "stoichiometry",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118105,
+            118091,
+            118090,
+            118109,
+            118113,
+            118086
+          ]
+        }
+      ]
+    },
+    {
+      "run": 13,
+      "count": 30,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 847,
+          "bankId": 49,
+          "topicId": 652,
+          "topicSlug": "equilibrium-and-ph",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            117961,
+            117931,
+            117928,
+            117956,
+            117924,
+            117949
+          ]
+        },
+        {
+          "ruleId": 848,
+          "bankId": 49,
+          "topicId": 653,
+          "topicSlug": "mole-concept",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            117991,
+            117963,
+            117984,
+            117972,
+            117978,
+            117997
+          ]
+        },
+        {
+          "ruleId": 849,
+          "bankId": 49,
+          "topicId": 654,
+          "topicSlug": "solutions-and-concentration",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118027,
+            118008,
+            118038,
+            118029,
+            118019,
+            118002
+          ]
+        },
+        {
+          "ruleId": 850,
+          "bankId": 49,
+          "topicId": 655,
+          "topicSlug": "states-of-matter",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118056,
+            118043,
+            118075,
+            118060,
+            118048,
+            118071
+          ]
+        },
+        {
+          "ruleId": 851,
+          "bankId": 49,
+          "topicId": 656,
+          "topicSlug": "stoichiometry",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118096,
+            118113,
+            118103,
+            118114,
+            118120,
+            118101
+          ]
+        }
+      ]
+    },
+    {
+      "run": 14,
+      "count": 30,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 847,
+          "bankId": 49,
+          "topicId": 652,
+          "topicSlug": "equilibrium-and-ph",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            117934,
+            117936,
+            117926,
+            117928,
+            117939,
+            117959
+          ]
+        },
+        {
+          "ruleId": 848,
+          "bankId": 49,
+          "topicId": 653,
+          "topicSlug": "mole-concept",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            117988,
+            117986,
+            117980,
+            117984,
+            117967,
+            117982
+          ]
+        },
+        {
+          "ruleId": 849,
+          "bankId": 49,
+          "topicId": 654,
+          "topicSlug": "solutions-and-concentration",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118030,
+            118034,
+            118003,
+            118029,
+            118004,
+            118019
+          ]
+        },
+        {
+          "ruleId": 850,
+          "bankId": 49,
+          "topicId": 655,
+          "topicSlug": "states-of-matter",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118065,
+            118073,
+            118042,
+            118052,
+            118080,
+            118045
+          ]
+        },
+        {
+          "ruleId": 851,
+          "bankId": 49,
+          "topicId": 656,
+          "topicSlug": "stoichiometry",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118108,
+            118119,
+            118104,
+            118111,
+            118092,
+            118110
+          ]
+        }
+      ]
+    },
+    {
+      "run": 15,
+      "count": 30,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 847,
+          "bankId": 49,
+          "topicId": 652,
+          "topicSlug": "equilibrium-and-ph",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            117961,
+            117936,
+            117930,
+            117949,
+            117931,
+            117927
+          ]
+        },
+        {
+          "ruleId": 848,
+          "bankId": 49,
+          "topicId": 653,
+          "topicSlug": "mole-concept",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            117970,
+            117976,
+            117974,
+            117997,
+            117964,
+            117966
+          ]
+        },
+        {
+          "ruleId": 849,
+          "bankId": 49,
+          "topicId": 654,
+          "topicSlug": "solutions-and-concentration",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118019,
+            118026,
+            118028,
+            118038,
+            118040,
+            118034
+          ]
+        },
+        {
+          "ruleId": 850,
+          "bankId": 49,
+          "topicId": 655,
+          "topicSlug": "states-of-matter",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118052,
+            118081,
+            118065,
+            118042,
+            118069,
+            118053
+          ]
+        },
+        {
+          "ruleId": 851,
+          "bankId": 49,
+          "topicId": 656,
+          "topicSlug": "stoichiometry",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118098,
+            118116,
+            118100,
+            118110,
+            118092,
+            118085
+          ]
+        }
+      ]
+    },
+    {
+      "run": 16,
+      "count": 30,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 847,
+          "bankId": 49,
+          "topicId": 652,
+          "topicSlug": "equilibrium-and-ph",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            117951,
+            117922,
+            117942,
+            117959,
+            117960,
+            117927
+          ]
+        },
+        {
+          "ruleId": 848,
+          "bankId": 49,
+          "topicId": 653,
+          "topicSlug": "mole-concept",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            117976,
+            117990,
+            117992,
+            117977,
+            117981,
+            117972
+          ]
+        },
+        {
+          "ruleId": 849,
+          "bankId": 49,
+          "topicId": 654,
+          "topicSlug": "solutions-and-concentration",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118036,
+            118006,
+            118025,
+            118030,
+            118027,
+            118002
+          ]
+        },
+        {
+          "ruleId": 850,
+          "bankId": 49,
+          "topicId": 655,
+          "topicSlug": "states-of-matter",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118075,
+            118073,
+            118044,
+            118063,
+            118081,
+            118052
+          ]
+        },
+        {
+          "ruleId": 851,
+          "bankId": 49,
+          "topicId": 656,
+          "topicSlug": "stoichiometry",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118115,
+            118096,
+            118102,
+            118095,
+            118119,
+            118084
+          ]
+        }
+      ]
+    },
+    {
+      "run": 17,
+      "count": 30,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 847,
+          "bankId": 49,
+          "topicId": 652,
+          "topicSlug": "equilibrium-and-ph",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            117924,
+            117925,
+            117936,
+            117941,
+            117929,
+            117940
+          ]
+        },
+        {
+          "ruleId": 848,
+          "bankId": 49,
+          "topicId": 653,
+          "topicSlug": "mole-concept",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            117978,
+            117989,
+            117999,
+            117981,
+            117992,
+            117993
+          ]
+        },
+        {
+          "ruleId": 849,
+          "bankId": 49,
+          "topicId": 654,
+          "topicSlug": "solutions-and-concentration",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118026,
+            118033,
+            118011,
+            118035,
+            118009,
+            118012
+          ]
+        },
+        {
+          "ruleId": 850,
+          "bankId": 49,
+          "topicId": 655,
+          "topicSlug": "states-of-matter",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118072,
+            118081,
+            118067,
+            118078,
+            118075,
+            118077
+          ]
+        },
+        {
+          "ruleId": 851,
+          "bankId": 49,
+          "topicId": 656,
+          "topicSlug": "stoichiometry",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118100,
+            118084,
+            118102,
+            118121,
+            118085,
+            118114
+          ]
+        }
+      ]
+    },
+    {
+      "run": 18,
+      "count": 30,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 847,
+          "bankId": 49,
+          "topicId": 652,
+          "topicSlug": "equilibrium-and-ph",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            117931,
+            117926,
+            117952,
+            117938,
+            117936,
+            117939
+          ]
+        },
+        {
+          "ruleId": 848,
+          "bankId": 49,
+          "topicId": 653,
+          "topicSlug": "mole-concept",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            117977,
+            117981,
+            117998,
+            117991,
+            117962,
+            117996
+          ]
+        },
+        {
+          "ruleId": 849,
+          "bankId": 49,
+          "topicId": 654,
+          "topicSlug": "solutions-and-concentration",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118008,
+            118033,
+            118036,
+            118034,
+            118038,
+            118018
+          ]
+        },
+        {
+          "ruleId": 850,
+          "bankId": 49,
+          "topicId": 655,
+          "topicSlug": "states-of-matter",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118062,
+            118042,
+            118076,
+            118050,
+            118077,
+            118044
+          ]
+        },
+        {
+          "ruleId": 851,
+          "bankId": 49,
+          "topicId": 656,
+          "topicSlug": "stoichiometry",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118084,
+            118090,
+            118111,
+            118086,
+            118109,
+            118092
+          ]
+        }
+      ]
+    },
+    {
+      "run": 19,
+      "count": 30,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 847,
+          "bankId": 49,
+          "topicId": 652,
+          "topicSlug": "equilibrium-and-ph",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            117954,
+            117932,
+            117923,
+            117928,
+            117959,
+            117925
+          ]
+        },
+        {
+          "ruleId": 848,
+          "bankId": 49,
+          "topicId": 653,
+          "topicSlug": "mole-concept",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            117976,
+            117965,
+            117962,
+            117992,
+            117986,
+            117980
+          ]
+        },
+        {
+          "ruleId": 849,
+          "bankId": 49,
+          "topicId": 654,
+          "topicSlug": "solutions-and-concentration",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118033,
+            118003,
+            118017,
+            118041,
+            118020,
+            118010
+          ]
+        },
+        {
+          "ruleId": 850,
+          "bankId": 49,
+          "topicId": 655,
+          "topicSlug": "states-of-matter",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118047,
+            118058,
+            118054,
+            118056,
+            118053,
+            118074
+          ]
+        },
+        {
+          "ruleId": 851,
+          "bankId": 49,
+          "topicId": 656,
+          "topicSlug": "stoichiometry",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118087,
+            118102,
+            118109,
+            118112,
+            118097,
+            118088
+          ]
+        }
+      ]
+    },
+    {
+      "run": 20,
+      "count": 30,
+      "duplicateCount": 0,
+      "poolExhaustions": 0,
+      "coverage": [
+        {
+          "ruleId": 847,
+          "bankId": 49,
+          "topicId": 652,
+          "topicSlug": "equilibrium-and-ph",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            117930,
+            117937,
+            117960,
+            117940,
+            117931,
+            117961
+          ]
+        },
+        {
+          "ruleId": 848,
+          "bankId": 49,
+          "topicId": 653,
+          "topicSlug": "mole-concept",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            117993,
+            117989,
+            117992,
+            117982,
+            117986,
+            117964
+          ]
+        },
+        {
+          "ruleId": 849,
+          "bankId": 49,
+          "topicId": 654,
+          "topicSlug": "solutions-and-concentration",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118036,
+            118039,
+            118021,
+            118034,
+            118022,
+            118018
+          ]
+        },
+        {
+          "ruleId": 850,
+          "bankId": 49,
+          "topicId": 655,
+          "topicSlug": "states-of-matter",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118072,
+            118050,
+            118074,
+            118076,
+            118079,
+            118055
+          ]
+        },
+        {
+          "ruleId": 851,
+          "bankId": 49,
+          "topicId": 656,
+          "topicSlug": "stoichiometry",
+          "difficulty": "mixed",
+          "expected": 6,
+          "selected": 6,
+          "availableAtAudit": 40,
+          "unusedCapacity": 34,
+          "exhausted": false,
+          "questionIds": [
+            118108,
+            118094,
+            118085,
+            118112,
+            118110,
+            118090
+          ]
+        }
+      ]
+    }
+  ]
+}

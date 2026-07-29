@@ -1,0 +1,111 @@
+{"progress":1,"total":110,"slug":"advanced-sql-analytics-skills","status":"failed","failure":"BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"}
+{"progress":2,"total":110,"slug":"agile-scrum-delivery-foundations","status":"failed","failure":"BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"}
+{"progress":3,"total":110,"slug":"ai-fundamentals-for-work","status":"failed","failure":"BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"}
+{"progress":4,"total":110,"slug":"application-security-foundations","status":"failed","failure":"BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"}
+{"progress":5,"total":110,"slug":"aws-cloud-practitioner-foundations","status":"failed","failure":"BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"}
+{"progress":6,"total":110,"slug":"aws-solutions-architecture-skills","status":"failed","failure":"BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"}
+{"progress":7,"total":110,"slug":"azure-administration-skills","status":"failed","failure":"BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"}
+{"progress":8,"total":110,"slug":"azure-fundamentals-az-900-readiness","status":"failed","failure":"BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"}
+{"progress":9,"total":110,"slug":"business-analyst-digital-foundations","status":"failed","failure":"BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"}
+{"progress":10,"total":110,"slug":"cloud-security-foundations","status":"failed","failure":"BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"}
+{"progress":11,"total":110,"slug":"csharp-dotnet-backend-skills","status":"failed","failure":"BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"}
+{"progress":12,"total":110,"slug":"cybersecurity-foundations","status":"failed","failure":"BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"}
+{"progress":13,"total":110,"slug":"data-analytics-sql-bi-foundations","status":"failed","failure":"BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"}
+{"progress":14,"total":110,"slug":"data-engineering-foundations","status":"failed","failure":"BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"}
+{"progress":15,"total":110,"slug":"devops-ci-cd-foundations","status":"failed","failure":"BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"}
+{"progress":16,"total":110,"slug":"docker-containerization-foundations","status":"failed","failure":"BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"}
+{"progress":17,"total":110,"slug":"ai-ethics-governance","status":"passed"}
+{"progress":18,"total":110,"slug":"content-marketing","status":"passed"}
+{"progress":19,"total":110,"slug":"generative-ai-application-engineering","status":"failed","failure":"BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"}
+{"progress":20,"total":110,"slug":"generative-ai-prompt-engineering-foundations","status":"failed","failure":"BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"}
+{"progress":21,"total":110,"slug":"git-linux-developer-workflows","status":"failed","failure":"BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"}
+{"progress":22,"total":110,"slug":"api-design-microservices-foundations","status":"passed"}
+{"progress":23,"total":110,"slug":"computer-vision","status":"passed"}
+{"progress":24,"total":110,"slug":"digital-marketing-basics","status":"passed"}
+{"progress":25,"total":110,"slug":"deep-learning-neural-networks","status":"passed"}
+{"progress":26,"total":110,"slug":"corporate-finance","status":"passed"}
+{"progress":27,"total":110,"slug":"ethical-hacking","status":"passed"}
+{"progress":28,"total":110,"slug":"grade-1-mathematics-diagnostic","status":"passed"}
+{"progress":29,"total":110,"slug":"grade-2-mathematics-diagnostic","status":"passed"}
+{"progress":30,"total":110,"slug":"grade-4-mathematics-practice","status":"passed"}
+{"progress":31,"total":110,"slug":"grade-12-chemistry-numerical-practice","status":"passed"}
+{"progress":32,"total":110,"slug":"grade-11-chemistry-numerical-practice","status":"passed"}
+{"progress":33,"total":110,"slug":"grade-5-mathematics-practice","status":"passed"}
+{"progress":34,"total":110,"slug":"financial-fundamentals","status":"passed"}
+{"progress":35,"total":110,"slug":"grade-10-mathematics-practice","status":"passed"}
+{"progress":36,"total":110,"slug":"grade-3-arithmetic-time-and-perimeter-practice","status":"passed"}
+{"progress":37,"total":110,"slug":"grade-12-physics-numerical-practice","status":"passed"}
+{"progress":38,"total":110,"slug":"grade-11-physics-numerical-practice","status":"passed"}
+{"progress":39,"total":110,"slug":"ibps-po-english-language-practice","status":"passed"}
+{"progress":40,"total":110,"slug":"identity-access-management-foundations","status":"failed","failure":"BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"}
+{"progress":41,"total":110,"slug":"incident-response-threat-analysis","status":"failed","failure":"BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"}
+{"progress":42,"total":110,"slug":"ibps-po-quantitative-aptitude-practice","status":"passed"}
+{"progress":43,"total":110,"slug":"it-support-service-desk-foundations","status":"failed","failure":"BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"}
+{"progress":44,"total":110,"slug":"java-spring-boot-backend-skills","status":"failed","failure":"BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"}
+{"progress":45,"total":110,"slug":"javascript-react-foundations","status":"failed","failure":"BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"}
+{"progress":46,"total":110,"slug":"ibps-po-reasoning-ability-practice","status":"passed"}
+{"progress":47,"total":110,"slug":"grade-9-mathematics-practice","status":"passed"}
+{"progress":48,"total":110,"slug":"kubernetes-foundations","status":"failed","failure":"BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"}
+{"progress":49,"total":110,"slug":"linux-system-administration-foundations","status":"failed","failure":"BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"}
+{"progress":50,"total":110,"slug":"llm-rag-evaluation-foundations","status":"failed","failure":"BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"}
+{"progress":51,"total":110,"slug":"machine-learning-foundations","status":"failed","failure":"BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"}
+{"progress":52,"total":110,"slug":"jee-main-chemistry-numerical-practice","status":"passed"}
+{"progress":53,"total":110,"slug":"investment-analysis","status":"passed"}
+{"progress":54,"total":110,"slug":"grade-8-mathematics-practice","status":"passed"}
+{"progress":55,"total":110,"slug":"grade-7-mathematics-practice","status":"passed"}
+{"progress":56,"total":110,"slug":"networking-support-foundations","status":"failed","failure":"BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"}
+{"progress":57,"total":110,"slug":"nodejs-backend-foundations","status":"failed","failure":"BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"}
+{"progress":58,"total":110,"slug":"grade-6-mathematics-practice","status":"passed"}
+{"progress":59,"total":110,"slug":"oracle-cloud-supply-chain-foundations","status":"failed","failure":"BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"}
+{"progress":60,"total":110,"slug":"oracle-erp-cloud-financials-foundations","status":"failed","failure":"BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"}
+{"progress":61,"total":110,"slug":"mobile-app-development","status":"passed"}
+{"progress":62,"total":110,"slug":"power-bi-data-analyst-skills","status":"failed","failure":"BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"}
+{"progress":63,"total":110,"slug":"product-management-tech-foundations","status":"failed","failure":"BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"}
+{"progress":64,"total":110,"slug":"jee-main-physics-numerical-practice","status":"passed"}
+{"progress":65,"total":110,"slug":"python-backend-api-foundations","status":"failed","failure":"BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"}
+{"progress":66,"total":110,"slug":"python-data-analysis-skills","status":"failed","failure":"BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"}
+{"progress":67,"total":110,"slug":"neet-ug-chemistry-numerical-practice","status":"passed"}
+{"progress":68,"total":110,"slug":"natural-language-processing","status":"passed"}
+{"progress":69,"total":110,"slug":"rrb-group-d-level-1-cbt-general-awareness-practice","status":"passed"}
+{"progress":70,"total":110,"slug":"operations-management","status":"passed"}
+{"progress":71,"total":110,"slug":"performance-marketing","status":"passed"}
+{"progress":72,"total":110,"slug":"ibps-clerk-quantitative-aptitude-practice","status":"passed"}
+{"progress":73,"total":110,"slug":"rrb-group-d-level-1-cbt-general-intelligence-reasoning-practice","status":"passed"}
+{"progress":74,"total":110,"slug":"rrb-group-d-level-1-cbt-general-science-practice","status":"passed"}
+{"progress":75,"total":110,"slug":"rrb-group-d-level-1-cbt-mathematics-practice","status":"passed"}
+{"progress":76,"total":110,"slug":"salesforce-crm-admin-foundations","status":"failed","failure":"BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"}
+{"progress":77,"total":110,"slug":"rrb-ntpc-cbt-1-general-awareness-practice","status":"passed"}
+{"progress":78,"total":110,"slug":"neet-ug-physics-numerical-practice","status":"passed"}
+{"progress":79,"total":110,"slug":"sap-s4hana-finance-foundations","status":"failed","failure":"BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"}
+{"progress":80,"total":110,"slug":"sap-s4hana-sales-distribution-skills","status":"failed","failure":"BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"}
+{"progress":81,"total":110,"slug":"rrb-ntpc-cbt-1-general-intelligence-reasoning-practice","status":"passed"}
+{"progress":82,"total":110,"slug":"servicenow-administration-foundations","status":"failed","failure":"BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"}
+{"progress":83,"total":110,"slug":"site-reliability-engineering-foundations","status":"failed","failure":"BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"}
+{"progress":84,"total":110,"slug":"soc-analyst-foundations","status":"failed","failure":"BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"}
+{"progress":85,"total":110,"slug":"program-management","status":"passed"}
+{"progress":86,"total":110,"slug":"rrb-ntpc-cbt-1-mathematics-practice","status":"passed"}
+{"progress":87,"total":110,"slug":"ssc-cgl-tier-1-english-comprehension-practice","status":"failed","failure":"BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"}
+{"progress":88,"total":110,"slug":"ssc-cgl-tier-1-general-awareness-practice","status":"failed","failure":"BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"}
+{"progress":89,"total":110,"slug":"ssc-cgl-tier-1-general-intelligence-reasoning-practice","status":"failed","failure":"BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"}
+{"progress":90,"total":110,"slug":"sap-abap-development-skills","status":"passed"}
+{"progress":91,"total":110,"slug":"ssc-chsl-tier-1-english-language-practice","status":"failed","failure":"BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"}
+{"progress":92,"total":110,"slug":"ssc-chsl-tier-1-general-awareness-practice","status":"failed","failure":"BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"}
+{"progress":93,"total":110,"slug":"ssc-chsl-tier-1-general-intelligence-practice","status":"failed","failure":"BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"}
+{"progress":94,"total":110,"slug":"sap-mm-procurement-foundations","status":"passed"}
+{"progress":95,"total":110,"slug":"ssc-mts-english-language-comprehension-practice","status":"failed","failure":"BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"}
+{"progress":96,"total":110,"slug":"ssc-mts-general-awareness-practice","status":"failed","failure":"BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"}
+{"progress":97,"total":110,"slug":"react-application-engineering-skills","status":"passed"}
+{"progress":98,"total":110,"slug":"ssc-mts-reasoning-ability-problem-solving-practice","status":"failed","failure":"BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"}
+{"progress":99,"total":110,"slug":"risk-management","status":"passed"}
+{"progress":100,"total":110,"slug":"technical-project-management-foundations","status":"failed","failure":"BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"}
+{"progress":101,"total":110,"slug":"terraform-infrastructure-as-code-foundations","status":"failed","failure":"BLUEPRINT_REVISION_REQUIRED: no current immutable course_question_blueprint_versions revision exists"}
+{"progress":102,"total":110,"slug":"ssc-mts-numerical-mathematical-ability-practice","status":"passed"}
+{"progress":103,"total":110,"slug":"social-media-strategy","status":"passed"}
+{"progress":104,"total":110,"slug":"security-architecture","status":"passed"}
+{"progress":105,"total":110,"slug":"statistical-analysis","status":"passed"}
+{"progress":106,"total":110,"slug":"typescript-application-development-skills","status":"passed"}
+{"progress":107,"total":110,"slug":"software-testing-qa-foundations","status":"passed"}
+{"progress":108,"total":110,"slug":"ui-ux-design","status":"passed"}
+{"progress":109,"total":110,"slug":"ssc-cgl-tier-1-quantitative-aptitude-practice","status":"passed"}
+{"progress":110,"total":110,"slug":"ssc-chsl-tier-1-quantitative-aptitude-practice","status":"passed"}
+{"complete":true,"targetCount":110,"passedCount":57,"failedCount":53,"aggregate":{"forms":5700,"materializedItems":123300,"scoreLevels":1290,"accessibilityItems":8420,"mediaReferences":0}}

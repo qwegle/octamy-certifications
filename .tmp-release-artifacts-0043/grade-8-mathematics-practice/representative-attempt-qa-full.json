@@ -1,0 +1,347 @@
+{
+  "schemaVersion": "octamy.representative-attempt-qa-result.v1",
+  "generatedAt": "2026-07-29T13:27:31.700Z",
+  "assessmentId": 58,
+  "assessmentSlug": "grade-8-mathematics-practice",
+  "blueprintRevision": 2,
+  "runtimeMaterializer": "DatabaseStorage.materializeBlueprintForAttempt",
+  "servingPath": "server/routes.ts option shuffle and answer-key omission",
+  "scoringPath": "server/utils/examScoring.scoreExam",
+  "servedQuestionCount": 40,
+  "configuredPassingScore": 60,
+  "testedScoreLevels": [
+    {
+      "correctCount": 0,
+      "expectedScore": 0,
+      "actualScore": 0,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 1,
+      "expectedScore": 3,
+      "actualScore": 3,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 2,
+      "expectedScore": 5,
+      "actualScore": 5,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 3,
+      "expectedScore": 8,
+      "actualScore": 8,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 4,
+      "expectedScore": 10,
+      "actualScore": 10,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 5,
+      "expectedScore": 13,
+      "actualScore": 13,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 6,
+      "expectedScore": 15,
+      "actualScore": 15,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 7,
+      "expectedScore": 18,
+      "actualScore": 18,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 8,
+      "expectedScore": 20,
+      "actualScore": 20,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 9,
+      "expectedScore": 23,
+      "actualScore": 23,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 10,
+      "expectedScore": 25,
+      "actualScore": 25,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 11,
+      "expectedScore": 28,
+      "actualScore": 28,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 12,
+      "expectedScore": 30,
+      "actualScore": 30,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 13,
+      "expectedScore": 33,
+      "actualScore": 33,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 14,
+      "expectedScore": 35,
+      "actualScore": 35,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 15,
+      "expectedScore": 38,
+      "actualScore": 38,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 16,
+      "expectedScore": 40,
+      "actualScore": 40,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 17,
+      "expectedScore": 43,
+      "actualScore": 43,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 18,
+      "expectedScore": 45,
+      "actualScore": 45,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 19,
+      "expectedScore": 48,
+      "actualScore": 48,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 20,
+      "expectedScore": 50,
+      "actualScore": 50,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 21,
+      "expectedScore": 53,
+      "actualScore": 53,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 22,
+      "expectedScore": 55,
+      "actualScore": 55,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 23,
+      "expectedScore": 57,
+      "actualScore": 57,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 24,
+      "expectedScore": 60,
+      "actualScore": 60,
+      "expectedPassed": true,
+      "actualPassed": true,
+      "passed": true
+    },
+    {
+      "correctCount": 25,
+      "expectedScore": 63,
+      "actualScore": 63,
+      "expectedPassed": true,
+      "actualPassed": true,
+      "passed": true
+    },
+    {
+      "correctCount": 26,
+      "expectedScore": 65,
+      "actualScore": 65,
+      "expectedPassed": true,
+      "actualPassed": true,
+      "passed": true
+    },
+    {
+      "correctCount": 27,
+      "expectedScore": 68,
+      "actualScore": 68,
+      "expectedPassed": true,
+      "actualPassed": true,
+      "passed": true
+    },
+    {
+      "correctCount": 28,
+      "expectedScore": 70,
+      "actualScore": 70,
+      "expectedPassed": true,
+      "actualPassed": true,
+      "passed": true
+    },
+    {
+      "correctCount": 29,
+      "expectedScore": 73,
+      "actualScore": 73,
+      "expectedPassed": true,
+      "actualPassed": true,
+      "passed": true
+    },
+    {
+      "correctCount": 30,
+      "expectedScore": 75,
+      "actualScore": 75,
+      "expectedPassed": true,
+      "actualPassed": true,
+      "passed": true
+    },
+    {
+      "correctCount": 31,
+      "expectedScore": 78,
+      "actualScore": 78,
+      "expectedPassed": true,
+      "actualPassed": true,
+      "passed": true
+    },
+    {
+      "correctCount": 32,
+      "expectedScore": 80,
+      "actualScore": 80,
+      "expectedPassed": true,
+      "actualPassed": true,
+      "passed": true
+    },
+    {
+      "correctCount": 33,
+      "expectedScore": 83,
+      "actualScore": 83,
+      "expectedPassed": true,
+      "actualPassed": true,
+      "passed": true
+    },
+    {
+      "correctCount": 34,
+      "expectedScore": 85,
+      "actualScore": 85,
+      "expectedPassed": true,
+      "actualPassed": true,
+      "passed": true
+    },
+    {
+      "correctCount": 35,
+      "expectedScore": 88,
+      "actualScore": 88,
+      "expectedPassed": true,
+      "actualPassed": true,
+      "passed": true
+    },
+    {
+      "correctCount": 36,
+      "expectedScore": 90,
+      "actualScore": 90,
+      "expectedPassed": true,
+      "actualPassed": true,
+      "passed": true
+    },
+    {
+      "correctCount": 37,
+      "expectedScore": 93,
+      "actualScore": 93,
+      "expectedPassed": true,
+      "actualPassed": true,
+      "passed": true
+    },
+    {
+      "correctCount": 38,
+      "expectedScore": 95,
+      "actualScore": 95,
+      "expectedPassed": true,
+      "actualPassed": true,
+      "passed": true
+    },
+    {
+      "correctCount": 39,
+      "expectedScore": 98,
+      "actualScore": 98,
+      "expectedPassed": true,
+      "actualPassed": true,
+      "passed": true
+    },
+    {
+      "correctCount": 40,
+      "expectedScore": 100,
+      "actualScore": 100,
+      "expectedPassed": true,
+      "actualPassed": true,
+      "passed": true
+    }
+  ],
+  "preSubmissionAnswerKeyExposure": {
+    "leakedKeys": [],
+    "passed": true
+  },
+  "passed": true
+}

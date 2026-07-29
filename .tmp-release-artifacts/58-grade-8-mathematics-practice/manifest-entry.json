@@ -1,0 +1,21 @@
+{
+  "assessmentId": 58,
+  "slug": "grade-8-mathematics-practice",
+  "blueprintRevision": 2,
+  "passingScore": 60,
+  "formSimulationArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/58-grade-8-mathematics-practice/form-simulation.json",
+  "representativeAttemptQaArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/58-grade-8-mathematics-practice/representative-attempt-qa.json",
+  "accessibilityAuditArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/58-grade-8-mathematics-practice/accessibility-content-audit.json",
+  "cutScoreApprovalReference": "automated-boundary-check:grade-8-mathematics-practice:revision-2:score-60",
+  "cutScoreApprovalSha256": "aba4303912c0403a105a68936b2d49956e4095a706fd2645878be4ebac1c9688",
+  "results": {
+    "forms": 20,
+    "draws": 800,
+    "duplicateSelections": 0,
+    "poolExhaustions": 0,
+    "topicRuleChecks": 260,
+    "representativeAttempts": 60,
+    "auditedItems": 200,
+    "mediaItems": 0
+  }
+}

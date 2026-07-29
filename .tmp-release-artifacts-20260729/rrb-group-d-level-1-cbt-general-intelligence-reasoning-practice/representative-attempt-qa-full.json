@@ -1,0 +1,267 @@
+{
+  "schemaVersion": "octamy.representative-attempt-qa-result.v1",
+  "generatedAt": "2026-07-29T12:46:51.182Z",
+  "assessmentId": 275,
+  "assessmentSlug": "rrb-group-d-level-1-cbt-general-intelligence-reasoning-practice",
+  "blueprintRevision": 1,
+  "runtimeMaterializer": "DatabaseStorage.materializeBlueprintForAttempt",
+  "servingPath": "server/routes.ts option shuffle and answer-key omission",
+  "scoringPath": "server/utils/examScoring.scoreExam",
+  "servedQuestionCount": 30,
+  "configuredPassingScore": 60,
+  "testedScoreLevels": [
+    {
+      "correctCount": 0,
+      "expectedScore": 0,
+      "actualScore": 0,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 1,
+      "expectedScore": 3,
+      "actualScore": 3,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 2,
+      "expectedScore": 7,
+      "actualScore": 7,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 3,
+      "expectedScore": 10,
+      "actualScore": 10,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 4,
+      "expectedScore": 13,
+      "actualScore": 13,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 5,
+      "expectedScore": 17,
+      "actualScore": 17,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 6,
+      "expectedScore": 20,
+      "actualScore": 20,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 7,
+      "expectedScore": 23,
+      "actualScore": 23,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 8,
+      "expectedScore": 27,
+      "actualScore": 27,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 9,
+      "expectedScore": 30,
+      "actualScore": 30,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 10,
+      "expectedScore": 33,
+      "actualScore": 33,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 11,
+      "expectedScore": 37,
+      "actualScore": 37,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 12,
+      "expectedScore": 40,
+      "actualScore": 40,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 13,
+      "expectedScore": 43,
+      "actualScore": 43,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 14,
+      "expectedScore": 47,
+      "actualScore": 47,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 15,
+      "expectedScore": 50,
+      "actualScore": 50,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 16,
+      "expectedScore": 53,
+      "actualScore": 53,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 17,
+      "expectedScore": 57,
+      "actualScore": 57,
+      "expectedPassed": false,
+      "actualPassed": false,
+      "passed": true
+    },
+    {
+      "correctCount": 18,
+      "expectedScore": 60,
+      "actualScore": 60,
+      "expectedPassed": true,
+      "actualPassed": true,
+      "passed": true
+    },
+    {
+      "correctCount": 19,
+      "expectedScore": 63,
+      "actualScore": 63,
+      "expectedPassed": true,
+      "actualPassed": true,
+      "passed": true
+    },
+    {
+      "correctCount": 20,
+      "expectedScore": 67,
+      "actualScore": 67,
+      "expectedPassed": true,
+      "actualPassed": true,
+      "passed": true
+    },
+    {
+      "correctCount": 21,
+      "expectedScore": 70,
+      "actualScore": 70,
+      "expectedPassed": true,
+      "actualPassed": true,
+      "passed": true
+    },
+    {
+      "correctCount": 22,
+      "expectedScore": 73,
+      "actualScore": 73,
+      "expectedPassed": true,
+      "actualPassed": true,
+      "passed": true
+    },
+    {
+      "correctCount": 23,
+      "expectedScore": 77,
+      "actualScore": 77,
+      "expectedPassed": true,
+      "actualPassed": true,
+      "passed": true
+    },
+    {
+      "correctCount": 24,
+      "expectedScore": 80,
+      "actualScore": 80,
+      "expectedPassed": true,
+      "actualPassed": true,
+      "passed": true
+    },
+    {
+      "correctCount": 25,
+      "expectedScore": 83,
+      "actualScore": 83,
+      "expectedPassed": true,
+      "actualPassed": true,
+      "passed": true
+    },
+    {
+      "correctCount": 26,
+      "expectedScore": 87,
+      "actualScore": 87,
+      "expectedPassed": true,
+      "actualPassed": true,
+      "passed": true
+    },
+    {
+      "correctCount": 27,
+      "expectedScore": 90,
+      "actualScore": 90,
+      "expectedPassed": true,
+      "actualPassed": true,
+      "passed": true
+    },
+    {
+      "correctCount": 28,
+      "expectedScore": 93,
+      "actualScore": 93,
+      "expectedPassed": true,
+      "actualPassed": true,
+      "passed": true
+    },
+    {
+      "correctCount": 29,
+      "expectedScore": 97,
+      "actualScore": 97,
+      "expectedPassed": true,
+      "actualPassed": true,
+      "passed": true
+    },
+    {
+      "correctCount": 30,
+      "expectedScore": 100,
+      "actualScore": 100,
+      "expectedPassed": true,
+      "actualPassed": true,
+      "passed": true
+    }
+  ],
+  "preSubmissionAnswerKeyExposure": {
+    "leakedKeys": [],
+    "passed": true
+  },
+  "passed": true
+}

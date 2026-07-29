@@ -1,0 +1,21 @@
+{
+  "assessmentId": 275,
+  "slug": "rrb-group-d-level-1-cbt-general-intelligence-reasoning-practice",
+  "blueprintRevision": 1,
+  "passingScore": 60,
+  "formSimulationArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/275-rrb-group-d-level-1-cbt-general-intelligence-reasoning-practice/form-simulation.json",
+  "representativeAttemptQaArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/275-rrb-group-d-level-1-cbt-general-intelligence-reasoning-practice/representative-attempt-qa.json",
+  "accessibilityAuditArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/275-rrb-group-d-level-1-cbt-general-intelligence-reasoning-practice/accessibility-content-audit.json",
+  "cutScoreApprovalReference": "automated-boundary-check:rrb-group-d-level-1-cbt-general-intelligence-reasoning-practice:revision-1:score-60",
+  "cutScoreApprovalSha256": "6ed18d3747df7dac44ac561edc6787ee212b11bcb704618db4b410a9e7573ed1",
+  "results": {
+    "forms": 20,
+    "draws": 600,
+    "duplicateSelections": 0,
+    "poolExhaustions": 0,
+    "topicRuleChecks": 20,
+    "representativeAttempts": 60,
+    "auditedItems": 200,
+    "mediaItems": 0
+  }
+}

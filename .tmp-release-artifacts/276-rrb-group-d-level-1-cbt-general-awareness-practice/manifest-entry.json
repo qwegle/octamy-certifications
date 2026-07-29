@@ -1,0 +1,21 @@
+{
+  "assessmentId": 276,
+  "slug": "rrb-group-d-level-1-cbt-general-awareness-practice",
+  "blueprintRevision": 1,
+  "passingScore": 60,
+  "formSimulationArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/276-rrb-group-d-level-1-cbt-general-awareness-practice/form-simulation.json",
+  "representativeAttemptQaArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/276-rrb-group-d-level-1-cbt-general-awareness-practice/representative-attempt-qa.json",
+  "accessibilityAuditArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/276-rrb-group-d-level-1-cbt-general-awareness-practice/accessibility-content-audit.json",
+  "cutScoreApprovalReference": "automated-boundary-check:rrb-group-d-level-1-cbt-general-awareness-practice:revision-1:score-60",
+  "cutScoreApprovalSha256": "21e0f4914e56268d1d34d0b15e55b32d21601a1b60766b1e8099b99656a4bf01",
+  "results": {
+    "forms": 20,
+    "draws": 400,
+    "duplicateSelections": 0,
+    "poolExhaustions": 0,
+    "topicRuleChecks": 20,
+    "representativeAttempts": 60,
+    "auditedItems": 200,
+    "mediaItems": 0
+  }
+}

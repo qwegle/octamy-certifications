@@ -1,0 +1,21 @@
+{
+  "assessmentId": 62,
+  "slug": "ssc-chsl-tier-1-quantitative-aptitude-practice",
+  "blueprintRevision": 2,
+  "passingScore": 60,
+  "formSimulationArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/62-ssc-chsl-tier-1-quantitative-aptitude-practice/form-simulation.json",
+  "representativeAttemptQaArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/62-ssc-chsl-tier-1-quantitative-aptitude-practice/representative-attempt-qa.json",
+  "accessibilityAuditArtifact": "/Users/nitikeshd/Downloads/octamy-certifications/.tmp-release-artifacts/62-ssc-chsl-tier-1-quantitative-aptitude-practice/accessibility-content-audit.json",
+  "cutScoreApprovalReference": "automated-boundary-check:ssc-chsl-tier-1-quantitative-aptitude-practice:revision-2:score-60",
+  "cutScoreApprovalSha256": "0c29172deb93f855a8afda291f3e59a8bf3a1c6d1bb26da53c355197d2782732",
+  "results": {
+    "forms": 20,
+    "draws": 500,
+    "duplicateSelections": 0,
+    "poolExhaustions": 0,
+    "topicRuleChecks": 300,
+    "representativeAttempts": 60,
+    "auditedItems": 200,
+    "mediaItems": 0
+  }
+}
