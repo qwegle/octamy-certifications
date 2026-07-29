@@ -36,7 +36,10 @@ export async function apiRequest(
   method: string,
   url: string,
   data?: unknown | undefined,
-  options: { headers?: Record<string, string> } = {},
+  options: {
+    headers?: Record<string, string>;
+    redirectOnUnauthorized?: boolean;
+  } = {},
 ): Promise<Response> {
   // Use appropriate token based on route type
   const isAdminContext = typeof window !== "undefined" && (window.location.pathname.startsWith('/admin') || window.location.pathname.startsWith('/qwegle') || window.location.pathname.startsWith('/enhanced-admin'));
@@ -88,11 +91,13 @@ export async function apiRequest(
         } else {
           localStorage.removeItem('token');
           localStorage.removeItem('user');
-          if (!window.location.pathname.includes('/login')) {
+          if (options.redirectOnUnauthorized !== false && !window.location.pathname.includes('/login')) {
             window.location.href = '/login';
           }
         }
-        throw new Error("Session expired. Please login again.");
+        if (options.redirectOnUnauthorized !== false) {
+          throw new Error("Session expired. Please login again.");
+        }
     }
   }
 

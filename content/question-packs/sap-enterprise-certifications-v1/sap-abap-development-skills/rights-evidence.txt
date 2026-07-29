@@ -1,0 +1,8 @@
+SAP ABAP Development Skills Original Question Pack v1
+Generated: 2026-07-29
+Question count: 80
+Ownership basis: original first-party commissioned content.
+Author and item reviewer: Kiro AI under the authenticated Octamy product owner's explicit instruction.
+Factual sources: official SAP Learning and SAP ABAP Keyword Documentation pages listed per item.
+Excluded sources: SAP certification questions, exam dumps, copied vendor questions, third-party question banks, and placeholders.
+Question JSONL SHA-256: 437060291a09767e44b23385f00b475dba66bfe1ef99ce157e6672baf7a3e56f

@@ -165,6 +165,7 @@ export function CertificationCard({
             <Sparkles className="h-4 w-4" aria-hidden="true" />{pricing.primaryLabel}
           </p>
           <p className="mt-1 text-xs leading-5 text-slate-600">{pricing.supportingLabel}</p>
+          {!practice && <p className="mt-2 text-xs font-bold text-slate-800">Account required to start · no charge for the attempt</p>}
           {!practice && pricing.credentialPrice && (
             <div className="mt-3 flex flex-wrap items-baseline gap-x-2 border-t border-emerald-200 pt-3">
               <span className="text-[10px] font-black uppercase tracking-[0.11em] text-slate-500">Verified credential</span>
@@ -176,8 +177,8 @@ export function CertificationCard({
         </div>
 
         <Button asChild className={`mt-4 w-full rounded-full ${practice ? "bg-violet-700 hover:bg-violet-800" : "bg-slate-950 hover:bg-slate-800"}`}>
-          <Link href={href} aria-label={`${practice ? "View practice exam" : "Explore free certification exam"}: ${item.title}`}>
-            {practice ? "View practice exam" : "Explore free exam"}<ArrowUpRight className="ml-1.5 h-4 w-4" aria-hidden="true" />
+          <Link href={href} aria-label={`${practice ? "View practice exam" : "View free certification exam; account required"}: ${item.title}`}>
+            {practice ? "View practice exam" : "View free exam · account required"}<ArrowUpRight className="ml-1.5 h-4 w-4" aria-hidden="true" />
           </Link>
         </Button>
       </div>

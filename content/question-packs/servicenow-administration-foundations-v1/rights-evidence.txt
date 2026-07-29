@@ -1,0 +1,9 @@
+ServiceNow Administration Skills Original Question Pack v1
+Generated: 2026-07-29
+Question count: 80
+Ownership basis: original first-party commissioned content.
+Author: Kiro AI original-content author under authenticated Octamy product-owner instruction.
+Content reviewer: Admin User production account 1; item-level decisions are recorded separately.
+Factual sources: official vendor documentation URLs embedded per item.
+Excluded sources: certification exams, exam dumps, copied vendor questions, third-party banks, and placeholders.
+Questions SHA-256: 3b625cd2a7edd88c7ceb28208c01618f9b49619129bbb6641e1e5cb631f1339f

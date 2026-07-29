@@ -1,0 +1,9 @@
+Oracle ERP Cloud Financials Foundations Question Pack v1
+Generated: 2026-07-29
+Question count: 80
+Ownership basis: original first-party commissioned content.
+Author/reviewer: Kiro AI acting under the authenticated Octamy product owner's explicit instruction.
+Factual sources: Oracle Help Center documentation linked item-by-item.
+Excluded sources: Oracle certification exam items, exam dumps, copied vendor questions, third-party question banks, and placeholders.
+Review representation: decisions explicitly identify Kiro AI and do not claim human item review.
+Question JSONL SHA-256: c895c44e4b46fcd705aa4976a1535c2013698d6dc4e52bf45c1a38289c14b964

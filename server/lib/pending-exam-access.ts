@@ -23,6 +23,29 @@ export function parseGuestExamIdentity(input: unknown) {
   return guestIdentitySchema.safeParse(input);
 }
 
+export const CERTIFICATION_ACCOUNT_REQUIRED_CODE = "ACCOUNT_REQUIRED";
+
+export function certificationExamAccountRequirement(input: {
+  assessmentPurpose?: string | null;
+  userId?: number | null;
+  action: "start" | "submit";
+}) {
+  if (
+    input.assessmentPurpose === "practice"
+    || (Number.isInteger(input.userId) && Number(input.userId) > 0)
+  ) {
+    return null;
+  }
+
+  return {
+    statusCode: 401,
+    body: {
+      code: CERTIFICATION_ACCOUNT_REQUIRED_CODE,
+      message: `Create an account or sign in before ${input.action === "start" ? "starting" : "submitting"} this certification exam.`,
+    },
+  } as const;
+}
+
 export function canAccessPendingExam(
   pending: PendingExamOwner,
   requestUserId: number | null | undefined,
@@ -41,9 +64,12 @@ export function assertPendingExamAccess(
 }
 
 /**
- * Pending results are bearer links for guest attempts, so they receive only
- * the display and checkout fields needed by the browser. Database ownership,
- * moderation, internal pricing, and authoring fields never enter the payload.
+ * Legacy pending results created before the account gate used bearer links for
+ * guest attempts. Keep those records readable and payable so an existing
+ * learner is not stranded, while all newly-created attempts are account-owned.
+ * The payload still includes only the display and checkout fields needed by the
+ * browser; database ownership, moderation, internal pricing, and authoring
+ * fields never enter it.
  */
 export function publicPendingCourseSnapshot(course: {
   id: number;

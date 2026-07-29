@@ -316,6 +316,9 @@ export const courses = pgTable("courses", {
   useBlueprintEngine: boolean("use_blueprint_engine").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 }, (t) => ({
+  reviewStatus: check("courses_review_status_check", sql`
+    ${t.reviewStatus} IN ('draft','pending','approved','rejected','suspended','archived')
+  `),
   byPublicAssessment: index("courses_public_assessment_idx").on(
     t.ownerType,
     t.productType,

@@ -1,0 +1,9 @@
+ServiceNow Administration Skills v2 Correction
+Generated: 2026-07-29
+Superseded record: snadm-2026-v1-053
+Replacement record: snadm-2026-v2-053
+Ownership basis: original first-party commissioned content.
+Author: Kiro AI original-content author; reviewer: Admin User production account 1.
+Factual source: official ServiceNow Flow Designer documentation.
+No exam dump, copied bank, vendor question, or placeholder wording was used.
+Replacement SHA-256: c5ebc3904f99f1185a9b1311b8e2adc02f9455e1f373805d9870bf66ff729403

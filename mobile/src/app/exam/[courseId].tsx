@@ -4,6 +4,7 @@ import { Alert, AppState, Pressable, StyleSheet, View } from 'react-native';
 
 import { Badge, Banner, Button, Card, ErrorState, Heading, Screen, Skeleton, Text } from '@/components/ui';
 import { useSession } from '@/features/auth';
+import { AccountRequiredState } from '@/features/certifications/AccountRequiredState';
 import { startCertificationExam, submitCertificationExam } from '@/features/certifications/api';
 import { clearAttempt, loadAttempt, saveAttempt } from '@/features/certifications/attempt-repository';
 import { errorMessage, formatTimer } from '@/features/certifications/format';
@@ -14,6 +15,7 @@ import {
   normalizeMobileExamExitCount,
 } from '@/features/certifications/proctoring';
 import type { ExamStartResponse, RecoverableAttempt } from '@/features/certifications/types';
+import { asApiError } from '@/lib/api-client';
 import { useFeedback } from '@/lib/feedback';
 import { useNetworkStatus } from '@/lib/query';
 import { minimumTouchTarget, radii, spacing, useAppTheme } from '@/theme';
@@ -29,17 +31,23 @@ function exitEvidenceMessage(count: number): string {
   return `${recorded}Octamy detects when this exam becomes inactive or enters the background, but cannot identify which external app you opened. Octamy does not lock your device or prevent switching apps.`;
 }
 
+function isAccountRequiredError(error: unknown): boolean {
+  const apiError = asApiError(error);
+  return apiError.status === 401 || apiError.code === 'ACCOUNT_REQUIRED';
+}
+
 export default function ExamScreen() {
   const params = useLocalSearchParams<{ courseId?: string | string[]; slug?: string | string[]; title?: string | string[] }>();
   const courseId = Number(oneParam(params.courseId));
   const courseSlug = oneParam(params.slug) ?? String(courseId);
   const courseTitle = oneParam(params.title) ?? 'Certification assessment';
-  const { canMutate, user } = useSession();
+  const { canMutate, status, user } = useSession();
   const network = useNetworkStatus();
   const { colors } = useAppTheme();
   const { showToast } = useFeedback();
   const [loadingRecovery, setLoadingRecovery] = useState(true);
   const [attempt, setAttempt] = useState<RecoverableAttempt | null>(null);
+  const [accountRequired, setAccountRequired] = useState(status === 'anonymous');
   const [consented, setConsented] = useState(false);
   const [starting, setStarting] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -51,6 +59,10 @@ export default function ExamScreen() {
   const lastAnnouncement = useRef<number | null>(null);
   const appState = useRef(AppState.currentState);
   const saveChain = useRef<Promise<void>>(Promise.resolve());
+
+  useEffect(() => {
+    if (status === 'anonymous') setAccountRequired(true);
+  }, [status]);
 
   useEffect(() => {
     let mounted = true;
@@ -152,7 +164,11 @@ export default function ExamScreen() {
       setRemainingSeconds(Math.max(0, Math.floor((Date.parse(next.deadlineAt) - Date.now()) / 1000)));
       showToast({ message: 'The server-issued session is saved on this device for recovery.', title: 'Exam started', tone: 'success' });
     } catch (error) {
-      showToast({ message: errorMessage(error, 'The exam could not be started.'), title: 'Unable to start exam', tone: 'error' });
+      if (isAccountRequiredError(error)) {
+        setAccountRequired(true);
+      } else {
+        showToast({ message: errorMessage(error, 'The exam could not be started.'), title: 'Unable to start exam', tone: 'error' });
+      }
     } finally {
       setStarting(false);
     }
@@ -193,12 +209,22 @@ export default function ExamScreen() {
       const href = { pathname: '/exam/result/[tempExamId]', params: { tempExamId: result.tempExamId } } as Href;
       router.replace(href);
     } catch (error) {
-      showToast({
-        durationMs: 7_000,
-        message: `${errorMessage(error, 'Submission could not be completed.')} Your session and answers remain on this device; retry uses the same submission ID.`,
-        title: 'Exam not cleared',
-        tone: 'error',
-      });
+      if (isAccountRequiredError(error)) {
+        const savedAttempt = { ...attempt, updatedAt: new Date().toISOString() };
+        setAttempt(savedAttempt);
+        await saveChain.current.catch(() => undefined);
+        await saveAttempt(savedAttempt).catch(() => {
+          showToast({ message: 'Keep this screen open. Your saved answers are still loaded, but the device copy could not be refreshed.', title: 'Device save needs retry', tone: 'warning' });
+        });
+        setAccountRequired(true);
+      } else {
+        showToast({
+          durationMs: 7_000,
+          message: `${errorMessage(error, 'Submission could not be completed.')} Your session and answers remain on this device; retry uses the same submission ID.`,
+          title: 'Exam not cleared',
+          tone: 'error',
+        });
+      }
     } finally {
       setSubmitting(false);
     }
@@ -251,6 +277,13 @@ export default function ExamScreen() {
   }
   if (loadingRecovery) {
     return <Screen><Skeleton width="40%" /><Skeleton height={32} width="80%" /><Skeleton height={220} /></Screen>;
+  }
+  if (accountRequired) {
+    return (
+      <Screen>
+        <AccountRequiredState interrupted={Boolean(attempt)} onAuthenticated={() => setAccountRequired(false)} />
+      </Screen>
+    );
   }
 
   if (!attempt) {

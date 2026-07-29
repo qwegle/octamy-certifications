@@ -1,7 +1,10 @@
 import { describe, expect, it } from "@jest/globals";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { buildPendingExamResultPayload } from "../../server/lib/pending-exam-access";
+import {
+  buildPendingExamResultPayload,
+  canAccessPendingExam,
+} from "../../server/lib/pending-exam-access";
 
 const sensitiveReview = [{
   questionId: 17,
@@ -89,6 +92,18 @@ describe("pending exam review access", () => {
       review: sensitiveReview,
     });
     expect(payload).not.toHaveProperty("credential");
+  });
+
+  it("keeps a legacy guest temporary result readable without unlocking its review", () => {
+    const legacyGuest = { ...pendingExam("certification"), userId: null };
+    expect(canAccessPendingExam(legacyGuest, null)).toBe(true);
+    expect(buildPendingExamResultPayload("temp_legacy_guest", legacyGuest)).toMatchObject({
+      tempExamId: "temp_legacy_guest",
+      isGuest: true,
+      maskedEmail: "l******@example.test",
+      reviewLocked: true,
+      needsPayment: true,
+    });
   });
 
   it("uses an authoritative paid certificate lookup and never returns review directly from the route", async () => {

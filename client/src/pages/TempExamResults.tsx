@@ -8,6 +8,7 @@ import { CheckCircle, XCircle, Award, Clock, Target, Loader2, ShieldCheck, Mail,
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/lib/auth.tsx";
+import { examAccountPath } from "@/lib/exam-account-intent";
 
 type ReviewItem = {
   questionId: number;
@@ -120,7 +121,7 @@ export default function TempExamResults() {
   const redeemSubscriptionCredential = async () => {
     if (!results || !tempExamId) return;
     if (!user || !token) {
-      navigate(`/login?next=${encodeURIComponent(`/exam-results-temp/${tempExamId}`)}`);
+      navigate(examAccountPath("login", `/exam-results-temp/${tempExamId}`));
       return;
     }
     setRedeeming(true);
@@ -233,11 +234,11 @@ export default function TempExamResults() {
                 <div className="max-w-2xl">
                   <div className="flex items-center gap-2 text-sm font-bold text-sky-300"><Mail className="h-4 w-4" />{results.recoveryEmailSent ? `Recovery link sent ${results.maskedEmail ? `to ${results.maskedEmail}` : "to your email"}` : "Your result is saved for 24 hours"}</div>
                   <h2 className="mt-2 text-xl font-extrabold">Keep this result in your learner record</h2>
-                  <p className="mt-2 text-sm leading-6 text-slate-300">Create a free account or sign in with the same email. You can return to this result, use an eligible subscription benefit, and keep future credentials together.</p>
+                  <p className="mt-2 text-sm leading-6 text-slate-300">Octamy now requires an account before a free exam attempt. Create an account or log in with the same email to keep this legacy result and future credentials together.</p>
                 </div>
                 <div className="flex shrink-0 flex-wrap gap-2">
-                  <Button onClick={() => navigate(`/register?role=learner&next=${encodeURIComponent(`/exam-results-temp/${tempExamId}`)}`)} className="bg-white text-slate-950 hover:bg-slate-100"><UserPlus className="mr-2 h-4 w-4" />Create free account</Button>
-                  <Button variant="outline" onClick={() => navigate(`/login?next=${encodeURIComponent(`/exam-results-temp/${tempExamId}`)}`)} className="border-slate-600 bg-transparent text-white hover:bg-slate-800 hover:text-white">Sign in</Button>
+                  <Button onClick={() => navigate(examAccountPath("register", `/exam-results-temp/${tempExamId}`))} className="bg-white text-slate-950 hover:bg-slate-100"><UserPlus className="mr-2 h-4 w-4" />Create account</Button>
+                  <Button variant="outline" onClick={() => navigate(examAccountPath("login", `/exam-results-temp/${tempExamId}`))} className="border-slate-600 bg-transparent text-white hover:bg-slate-800 hover:text-white">Log in</Button>
                 </div>
               </CardContent>
             </Card>

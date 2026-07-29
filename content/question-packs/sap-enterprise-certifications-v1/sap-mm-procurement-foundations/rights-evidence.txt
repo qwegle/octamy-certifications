@@ -1,0 +1,8 @@
+SAP MM Procurement Foundations Original Question Pack v1
+Generated: 2026-07-29
+Question count: 80
+Ownership basis: original first-party commissioned content.
+Author and item reviewer: Kiro AI under the authenticated Octamy product owner's explicit instruction.
+Factual sources: official SAP Learning and SAP ABAP Keyword Documentation pages listed per item.
+Excluded sources: SAP certification questions, exam dumps, copied vendor questions, third-party question banks, and placeholders.
+Question JSONL SHA-256: f5617bc62348b2224bbac5ed2308a22ef85aeb1a28b37e1c32c3d2c0a90a2091

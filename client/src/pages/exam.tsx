@@ -17,7 +17,13 @@ import { FullscreenExitGuard, QuestionNavigator, SubmitExamDialog } from '@/comp
 import { publicAssessmentCategoryPath, publicAssessmentPath, publicPracticeCategoryPath, publicPracticePath } from '@shared/public-assessment-routes';
 import { practicePlansPath, practicePricingPath } from '@/lib/practice-purchase-intent';
 import { shouldEnforceExamFullscreen, supportsBrowserFullscreen } from '@/lib/exam-display-mode';
-import { AlertTriangle, Award, CheckCircle2, ChevronLeft, ChevronRight, Clock3, FileQuestion, Flag, RotateCcw, Save, Send, ShieldCheck, TicketCheck, WifiOff } from 'lucide-react';
+import {
+  examAccountGatePresentation,
+  isExamAccountRequiredError,
+  type ExamAccountGatePresentation,
+  type ExamAccountGateReason,
+} from '@/lib/exam-account-intent';
+import { AlertTriangle, Award, CheckCircle2, ChevronLeft, ChevronRight, Clock3, FileQuestion, Flag, LockKeyhole, LogIn, RotateCcw, Save, Send, ShieldCheck, TicketCheck, UserPlus, WifiOff } from 'lucide-react';
 
 interface ExamQuestion {
   id: number;
@@ -48,6 +54,37 @@ type SavedExamDraft = {
   expiresAt: number;
 };
 
+function ExamAccountGate({ presentation, compact = false }: { presentation: ExamAccountGatePresentation; compact?: boolean }) {
+  const headingRef = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    headingRef.current?.focus();
+  }, [presentation.title]);
+
+  return (
+    <section
+      role="alert"
+      aria-live="assertive"
+      aria-labelledby="exam-account-gate-title"
+      aria-describedby="exam-account-gate-description"
+      className={`rounded-2xl border border-violet-200 bg-violet-50 ${compact ? "p-4" : "p-6 shadow-lg"}`}
+    >
+      <div className="flex items-start gap-3">
+        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-violet-700 text-white" aria-hidden="true"><LockKeyhole className="h-5 w-5" /></span>
+        <div>
+          <p className="text-xs font-black uppercase tracking-[0.12em] text-violet-800">{presentation.eyebrow}</p>
+          <h2 id="exam-account-gate-title" ref={headingRef} tabIndex={-1} className="mt-1 text-xl font-black text-slate-950 outline-none">{presentation.title}</h2>
+          <p id="exam-account-gate-description" className="mt-2 text-sm leading-6 text-slate-700">{presentation.description}</p>
+        </div>
+      </div>
+      <div className="mt-4 grid gap-2 sm:grid-cols-2">
+        <Button asChild className="min-h-11 rounded-full"><Link href={presentation.createAccountHref}><UserPlus className="mr-2 h-4 w-4" aria-hidden="true" />Create account</Link></Button>
+        <Button asChild variant="outline" className="min-h-11 rounded-full border-violet-300 bg-white"><Link href={presentation.loginHref}><LogIn className="mr-2 h-4 w-4" aria-hidden="true" />Log in</Link></Button>
+      </div>
+    </section>
+  );
+}
+
 type PublicAssessment = {
   id: number;
   title: string;
@@ -76,7 +113,7 @@ type PublicAssessment = {
 export default function Exam() {
   const { slug } = useParams();
   const [location, setLocation] = useLocation();
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -96,6 +133,7 @@ export default function Exam() {
   const [submitDialogOpen, setSubmitDialogOpen] = useState(false);
   const [returningToFullscreen, setReturningToFullscreen] = useState(false);
   const [integrityConsent, setIntegrityConsent] = useState(false);
+  const [accountGateReason, setAccountGateReason] = useState<ExamAccountGateReason | null>(null);
   const examEndingRef = useRef(false);
   const submissionRequestedRef = useRef(false);
   const autoSubmitFiredRef = useRef(false);
@@ -154,11 +192,11 @@ export default function Exam() {
       // The server creates and owns the authoritative attempt session ID.
       const response = await apiRequest('POST', `/api/courses/${course?.id}/questions`, {
         evidenceConsent: course?.assessmentPurpose !== 'practice',
-      });
+      }, { redirectOnUnauthorized: false });
       return response.json();
     },
     enabled: !!course?.id && examStarted && !restoredQuestionsData,
-    retry: 2,
+    retry: (failureCount, error) => !isExamAccountRequiredError(error) && failureCount < 2,
   });
 
   const activeQuestionsData = restoredQuestionsData || questionsData;
@@ -320,7 +358,7 @@ export default function Exam() {
 
   const submitExamMutation = useMutation({
     mutationFn: async (examData: any) => {
-      return apiRequest('POST', '/api/exam/submit', examData);
+      return apiRequest('POST', '/api/exam/submit', examData, { redirectOnUnauthorized: false });
     },
     onSuccess: async (response) => {
       const result = await response.json();
@@ -344,6 +382,12 @@ export default function Exam() {
     onError: (error: unknown) => {
       submissionRequestedRef.current = false;
       examEndingRef.current = false;
+      if (isExamAccountRequiredError(error)) {
+        setAccountGateReason(error instanceof ApiError && error.code === 'TOKEN_EXPIRED' ? 'session-expired' : 'account-required');
+        setSubmitDialogOpen(false);
+        if (document.fullscreenElement) void document.exitFullscreen().catch(() => undefined);
+        return;
+      }
       if (error instanceof ApiError && error.code === 'SESSION_EXPIRED') {
         toast({
           title: "Session Expired",
@@ -389,6 +433,10 @@ export default function Exam() {
   };
 
   const startExam = async () => {
+    if (course?.assessmentPurpose !== "practice" && !user) {
+      setAccountGateReason('before-start');
+      return;
+    }
     if (course?.assessmentPurpose === "practice" && !user) {
       setLocation(practicePlansPath({ next: location }));
       return;
@@ -434,6 +482,10 @@ export default function Exam() {
 
   const resumeSavedExam = async () => {
     if (!savedDraft || savedDraft.expiresAt <= Date.now()) return;
+    if (!user) {
+      setAccountGateReason('before-start');
+      return;
+    }
     if (course?.assessmentPurpose === 'practice' && !hasPracticeAccess) {
       setLocation(practicePricingPath({ next: location }));
       return;
@@ -546,9 +598,30 @@ export default function Exam() {
     .replace(/\bPractice\s*\|\s*Octamy Assessments?\b/gi, "Certification Exam | Octamy")
     .replace(/\bAssessments\b/gi, "Certification Exams")
     .replace(/\bAssessment\b/gi, "Certification Exam");
+  const gatePresentation = examAccountGatePresentation({
+    authenticated: Boolean(user) || authLoading,
+    assessmentPath: canonicalPath,
+    reason: accountGateReason || (!authLoading && !user && savedDraft ? 'account-required' : null),
+  });
+  const refusalPresentation = isExamAccountRequiredError(questionsError)
+    ? examAccountGatePresentation({ authenticated: false, assessmentPath: canonicalPath, reason: 'account-required' })
+    : null;
   const metaDescription = course.metaDescription || (isPractice
     ? `Practice ${displayTitle} with rotating questions and answer review. Practice Pass is required to start.`
     : `Take the ${displayTitle} exam free. Review the published passing threshold before you begin; credential activation is optional after a passing result.`);
+
+  if (accountGateReason && examStarted && gatePresentation) {
+    return (
+      <div className="min-h-screen bg-slate-50">
+        <SEO title={`Account required | ${course.title}`} description={metaDescription} path={canonicalPath} noIndex />
+        <Header />
+        <main id="main-content" className="mx-auto max-w-xl px-4 py-16 sm:px-6">
+          <ExamAccountGate presentation={gatePresentation} />
+          <p className="mt-4 text-center text-sm text-slate-600">Your saved answers remain on this device while you authenticate.</p>
+        </main>
+      </div>
+    );
+  }
 
   if (!examStarted) {
     return (
@@ -590,7 +663,7 @@ export default function Exam() {
                   <div className="mt-3 flex items-end justify-between gap-4"><div><p className="text-2xl font-black text-slate-950">{isPractice ? "Included in Practice Pass" : "Free exam attempt"}</p><p className="mt-1 text-sm text-slate-600">{isPractice ? "Choose 30-day or 365-day access to reviewed Practice exams." : <>Activate the credential for <strong>₹{course.price}</strong>{Number(course.originalPrice) > Number(course.price) && <><span className="ml-1.5 line-through">₹{Number(course.originalPrice).toFixed(2)}</span><span className="ml-1.5 font-bold text-emerald-700">Save ₹{(Number(course.originalPrice) - Number(course.price)).toFixed(2)}</span></>} only after passing.</>}</p></div><CheckCircle2 className="h-8 w-8 shrink-0 text-emerald-600" /></div>
                 </div>
                 <CardContent className="space-y-5 p-6">
-                  {!user && !isPractice && <div className="space-y-4"><div><Label htmlFor="name" className="font-bold">Full name</Label><input id="name" type="text" autoComplete="name" value={userInfo.name} onChange={(e) => setUserInfo(prev => ({ ...prev, name: e.target.value }))} className="mt-1.5 h-11 w-full rounded-xl border border-slate-300 px-3 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-100" placeholder="As it should appear on your credential" /></div><div><Label htmlFor="email" className="font-bold">Email address</Label><input id="email" type="email" autoComplete="email" value={userInfo.email} onChange={(e) => setUserInfo(prev => ({ ...prev, email: e.target.value }))} className="mt-1.5 h-11 w-full rounded-xl border border-slate-300 px-3 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-100" placeholder="For result recovery" /></div></div>}
+                  {!user && !isPractice && gatePresentation && <ExamAccountGate presentation={gatePresentation} compact />}
 
                   {user && <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4"><p className="text-xs font-black uppercase tracking-wide text-emerald-800">Signed-in learner</p><p className="mt-1 font-bold text-slate-950">{user.name}</p><p className="text-sm text-slate-600">{user.email}</p><p className="mt-2 text-xs text-emerald-800">Your account identity will be used automatically for this attempt.</p></div>}
 
@@ -598,14 +671,14 @@ export default function Exam() {
 
                   {!user && isPractice && <div className="rounded-2xl border border-violet-200 bg-violet-50 p-4"><p className="font-black text-slate-950">Review Practice Pass first</p><p className="mt-1 text-sm leading-6 text-slate-600">Choose 30-day or 365-day access first. After selecting a plan, you can sign in or create a learner account.</p><Button type="button" className="mt-4 w-full" onClick={() => setLocation(practicePlansPath({ next: location }))}>View Practice Pass plans</Button></div>}
 
-                  {!isPractice && <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                  {user && !isPractice && <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
                     <input type="checkbox" checked={integrityConsent} onChange={(event) => setIntegrityConsent(event.target.checked)} className="mt-1 h-4 w-4 shrink-0 rounded border-slate-300 accent-violet-700" />
                     <span className="text-xs leading-5 text-slate-600"><strong className="block text-sm text-slate-900">Browser integrity evidence consent</strong>I understand that fullscreen changes, tab/window focus changes, and the occurrence of copy or paste attempts are recorded for assessment integrity. Octamy does not capture screen contents, webcam, microphone, audio, or keystrokes in this exam.</span>
                   </label>}
 
-                  {savedDraft && <div className="rounded-2xl border border-sky-200 bg-sky-50 p-4"><div className="flex items-start gap-3"><RotateCcw className="mt-0.5 h-5 w-5 text-sky-700" /><div className="min-w-0 flex-1"><h2 className="font-bold text-slate-950">Saved attempt found</h2><p className="mt-1 text-sm leading-5 text-slate-600">{Object.keys(savedDraft.answers).length} of {savedDraft.questions.length} answers saved on this device.</p><div className="mt-3 flex flex-wrap gap-2"><Button size="sm" onClick={resumeSavedExam} disabled={!isPractice && !integrityConsent}>Resume exam</Button><Button size="sm" variant="ghost" onClick={discardSavedExam}>Discard</Button></div></div></div></div>}
+                  {user && savedDraft && <div className="rounded-2xl border border-sky-200 bg-sky-50 p-4"><div className="flex items-start gap-3"><RotateCcw className="mt-0.5 h-5 w-5 text-sky-700" /><div className="min-w-0 flex-1"><h2 className="font-bold text-slate-950">Saved attempt found</h2><p className="mt-1 text-sm leading-5 text-slate-600">{Object.keys(savedDraft.answers).length} of {savedDraft.questions.length} answers saved on this device.</p><div className="mt-3 flex flex-wrap gap-2"><Button size="sm" onClick={resumeSavedExam} disabled={!isPractice && !integrityConsent}>Resume exam</Button><Button size="sm" variant="ghost" onClick={discardSavedExam}>Discard</Button></div></div></div></div>}
 
-                  {!savedDraft && (user || !isPractice) && (!isPractice || hasPracticeAccess) && <Button onClick={startExam} className="h-12 w-full rounded-full text-base font-black" disabled={!userInfo.name || !userInfo.email || (!isPractice && !integrityConsent)}>{isPractice ? "Start practice exam" : "Start certification exam"}</Button>}
+                  {!savedDraft && user && (!isPractice || hasPracticeAccess) && <Button onClick={startExam} className="h-12 w-full rounded-full text-base font-black" disabled={!userInfo.name || !userInfo.email || (!isPractice && !integrityConsent)}>{isPractice ? "Start practice exam" : "Start free certification exam"}</Button>}
                   <ul className="space-y-2.5 border-t border-slate-100 pt-5 text-xs leading-5 text-slate-600"><li className="flex gap-2"><CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-600" />Answers autosave on this device during interruptions.</li><li className="flex gap-2"><CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-600" />Your score and answer review appear after submission.</li><li className="flex gap-2"><TicketCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-violet-600" />{isPractice ? "Practice attempts are not shared as recruiter credentials." : "Direct payment, coupon, or institute voucher can fund activation."}</li></ul>
                 </CardContent>
               </Card>
@@ -616,6 +689,19 @@ export default function Exam() {
             <div className="sm:col-span-3"><h2 id="certification-process-title" className="text-xl font-black">{isPractice ? "How this practice exam works" : "How this certification works"}</h2><p className="mt-1 text-sm text-slate-600">{isPractice ? "A private timed rehearsal with answer review and no credential issuance." : "A transparent result first. Credential activation is your choice after passing."}</p></div>
             {[{ step: "01", title: "Take the exam", copy: "Stay in this tab and complete the timed questions." }, { step: "02", title: "Review your result", copy: "See the score and the published answer review." }, { step: "03", title: isPractice ? "Repeat and improve" : "Activate the credential", copy: isPractice ? "Practice stays separate from recruiter credentials." : "Pay directly, use a coupon, or redeem an institute voucher." }].map((item) => <div key={item.step} className="rounded-2xl bg-slate-50 p-5"><span className="text-xs font-black text-violet-700">{item.step}</span><h3 className="mt-2 font-black text-slate-950">{item.title}</h3><p className="mt-1 text-sm leading-6 text-slate-600">{item.copy}</p></div>)}
           </section>
+        </main>
+      </div>
+    );
+  }
+
+  if (refusalPresentation) {
+    return (
+      <div className="min-h-screen bg-slate-50">
+        <SEO title={`Account required | ${course.title}`} description={metaDescription} path={canonicalPath} noIndex />
+        <Header />
+        <main id="main-content" className="mx-auto max-w-xl px-4 py-16 sm:px-6">
+          <ExamAccountGate presentation={refusalPresentation} />
+          <p className="mt-4 text-center text-sm text-slate-600">Return after authentication to start this exact assessment.</p>
         </main>
       </div>
     );

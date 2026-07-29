@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "sourceKey": "first-party-original:servicenow-administration-foundations:v2-correction",
+  "name": "ServiceNow Administration Skills v2 Correction",
+  "publisher": "Octamy",
+  "datasetVersion": "2.0.0",
+  "description": "One original replacement item superseding snadm-2026-v1-053, which the production publication evaluator rejected as too short and generic.",
+  "sourceUrl": "https://www.servicenow.com/docs/bundle/zurich-build-workflows/page/administer/flow-designer/concept/flow-designer.html",
+  "retrievedAt": "2026-07-29T00:00:00.000Z",
+  "license": {
+    "identifier": "Proprietary-Octamy-Original-1.0",
+    "name": "Original assessment-content rights",
+    "url": "https://octamy.com/terms-of-service",
+    "rightsBasis": "owned",
+    "commercialUseAllowed": true,
+    "derivativesAllowed": true,
+    "shareAlikeObligation": "none",
+    "attributionText": "Original ServiceNow Administration Skills replacement content",
+    "evidenceReference": "servicenow-administration-foundations-v2-correction-rights"
+  },
+  "provenance": {
+    "acquisitionMethod": "first_party",
+    "originalFormat": "JSONL",
+    "chainOfTitle": "The replacement stem, options, answer, and explanation were newly authored for Octamy under the authenticated product owner's instruction. Official ServiceNow documentation was used only for factual verification; no exam or third-party question wording was copied.",
+    "notes": "Governed replacement for snadm-2026-v1-053; separate rejection evidence preserves the superseded item's history."
+  }
+}

@@ -177,9 +177,15 @@ Every candidate currently draws 10, so 4× rotation is 40; the certification-pro
 
 These sources establish topic scope, not rights to copy vendor questions. Items must be original and must not claim vendor endorsement or official exam equivalence.
 
-### Safe disposition recommendation (not executed)
+### Safe disposition execution record — blocked, no rows changed
 
-Do not delete rows. After an authorized operator re-runs the same inventory in one transaction, archive only the 8 duplicates and 6 legacy-empty rows with this idempotent, history-failing guard:
+At **2026-07-29 11:21:43 +0530**, the authorized production disposition was attempted through the dedicated `127.0.0.1:15455` tunnel. A single `REPEATABLE READ READ ONLY` pre-check returned all 14 intended IDs and confirmed every row was inactive/private/pending with `B0 K0 Q0 A0 C0 P0`; the aggregate guard result was `target_rows=14`, `safe_rows=14`, `all_14_safe=true`.
+
+The exact prepared statement below was then run inside an explicit transaction. PostgreSQL rejected it before any commit because production constraint `courses_review_status_check` permits only `draft`, `pending`, `approved`, `rejected`, and `suspended`, not `archived`. The transaction aborted and **rows changed = 0**. The constraint was not altered because doing so would create unreviewed production schema drift outside this task's ownership boundary.
+
+A post-attempt read-only check confirmed `archived_targets=0`, all 14 targets remain inactive/private/pending, and the published assessment cohort remained 81 rows with identical fingerprint `db9022f18d5cc4e99e0a8fc409097722`. Public curl comparisons were byte-identical: certification assessments **40 → 40** (`sha256 af7d14d22985290895317e97a53671de3f05fa198e7300201b6738da0193ebdd`) and Practice assessments **41 → 41** (`sha256 c52c26ca0320f9543ea7af2dcb7e1175221bf0f8573ee8516f405381d4127aa7`). The 10 enterprise candidates remain inactive/private/pending; `data-analytics-sql-bi-foundations` remains active/public/approved; no `NEEDS_DECISION` row was targeted. A reviewed migration that adds `archived` to the constraint is required before this exact disposition can succeed.
+
+Do not delete rows. The attempted idempotent, history-failing statement was:
 
 ```sql
 UPDATE courses AS c
@@ -204,4 +210,10 @@ UPDATE courses AS c
 RETURNING c.id, c.slug;
 ```
 
-It is idempotent because only unchanged `pending` rows qualify; a second run returns none. It preserves invisibility, rejects any row that gains content/history, and records retirement without destroying referential or audit evidence. `NEEDS_DECISION`, enterprise, and data-analytics rows are deliberately excluded.
+If a reviewed schema change permits `archived`, this statement remains idempotent because only unchanged `pending` rows qualify; a second successful run would return none. Its guards preserve invisibility and reject any row that gains content or learner history. `NEEDS_DECISION`, enterprise, and data-analytics rows remain deliberately excluded.
+
+### Safe disposition execution record — applied by migration 0038
+
+At **2026-07-29 11:47 +0530**, `0038_archive_audited_certification_shells` extended `courses_review_status_check` with the truthful `archived` state while retaining every prior allowed state. The guarded migration then archived exactly IDs `1,6,7,8,9,16,18,19,20,31,32,35,41,42`; all remained inactive/private and had zero blueprints, linked banks, questions, legacy or scheduled attempts, certificates, and payments. No rows were deleted.
+
+The production runner verified all 39 journal hashes. Read-only post-checks found exactly those 14—and no other course rows—with `review_status='archived'`. The active/public/approved assessment cohort remained 91 rows with unchanged fingerprint `8b8566136e3b03df7e2d733feaf83a66`. Public curl totals and payload hashes were unchanged: certification assessments **50 → 50** (`8cc0328cd8e9af725ae91e25de0e1f6f03eacd24d3d08521ae19c1e046480735`) and Practice assessments **41 → 41** (`901895bd6705ca068c5f4c456ce00a2f1a57504e1c93dac511c5222e8497079c`). The read-only governed inventory gate exited successfully with `published-with-substantive-blockers: 0`.

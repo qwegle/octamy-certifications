@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "sourceKey": "first-party-original:servicenow-administration-foundations:v1",
+  "name": "ServiceNow Administration Skills Original Question Pack v1",
+  "publisher": "Octamy",
+  "datasetVersion": "1.0.0",
+  "description": "Independent Octamy assessment of ServiceNow data structures, security, ITSM processes, catalog delivery, automation, analytics, and governed instance configuration.",
+  "sourceUrl": "https://www.servicenow.com/docs/bundle/zurich-platform-administration/page/administer/table-administration/concept/c_TableAdministration.html",
+  "retrievedAt": "2026-07-29T00:00:00.000Z",
+  "license": {
+    "identifier": "Proprietary-Octamy-Original-1.0",
+    "name": "Original assessment-content rights",
+    "url": "https://octamy.com/terms-of-service",
+    "rightsBasis": "owned",
+    "commercialUseAllowed": true,
+    "derivativesAllowed": true,
+    "shareAlikeObligation": "none",
+    "attributionText": "Original ServiceNow Administration Skills assessment content",
+    "evidenceReference": "servicenow-administration-foundations-v1-rights-evidence"
+  },
+  "provenance": {
+    "acquisitionMethod": "first_party",
+    "originalFormat": "JSONL",
+    "chainOfTitle": "Every stem, option, keyed answer, and explanation was newly authored for Octamy under the authenticated product owner's instruction. Official vendor documentation was used only to verify platform facts; no certification exam, dump, vendor question, or third-party bank wording was copied.",
+    "notes": "Original vendor-aligned content. Item decisions identify the actual production reviewer account and do not represent vendor endorsement."
+  }
+}

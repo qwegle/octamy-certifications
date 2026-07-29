@@ -56,6 +56,7 @@ const immutableMigrationHashes = Object.freeze({
   "0035_governed_assessment_release_evidence": "34470923b08347a592189197916a86dc6f77a07ca83e356154991dc69cbef14a",
   "0036_void_fabricated_release_evidence": "c4ab69809b5a884da9185aa166af89d0bd160080c2f1d1eadf45ce402707f7a4",
   "0037_release_evidence_rls_breaks_backups": "f0314ed982c804ce4eb8b3cc0e1ec8d0981217810f8bacc8a5ca46b9730f5097",
+  "0038_archive_audited_certification_shells": "52aca66a2b735cc95588c1fb696d22c45a424d73d9583a36c51dc29bf8640a83",
 });
 
 // Exact-hash review records for migrations containing data mutation,
@@ -86,6 +87,7 @@ const destructiveMigrationReviews = Object.freeze({
   "0034_database_managed_sale_state": "database-triggered sale-state normalization and constraint tightening after bounded reconciliation",
   "0035_governed_assessment_release_evidence": "new cross-role and append-only policy functions on additive release-evidence tables",
   "0036_void_fabricated_release_evidence": "new append-only void and release-role authorization policy function with forced unvoided evidence visibility",
+  "0038_archive_audited_certification_shells": "additive review-state extension and exact-ID/state/history guarded archival of 14 audited empty certification shells",
 });
 
 const mutatingPatterns = Object.freeze([

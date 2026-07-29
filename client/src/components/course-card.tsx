@@ -169,6 +169,7 @@ export default function CourseCard({ course, certifiedCount, rating, viewMode = 
               <>
                 <p className={`font-black ${isPractice ? "text-violet-900" : "text-emerald-800"}`}>{pricing.primaryLabel}</p>
                 <p className="mt-1 text-xs leading-5 text-slate-600">{pricing.supportingLabel}</p>
+                {!isPractice && <p className="mt-2 text-xs font-bold text-slate-800">Account required to start · no charge for the attempt</p>}
                 {!isPractice && pricing.credentialPrice && <div className="mt-2 flex items-baseline gap-2"><span className="text-xs font-bold text-slate-500">Verified credential</span><span className="text-xl font-black">{pricing.credentialPrice}</span>{pricing.originalCredentialPrice && <span className="text-sm text-slate-500 line-through">{pricing.originalCredentialPrice}</span>}</div>}
               </>
             ) : (
@@ -177,7 +178,7 @@ export default function CourseCard({ course, certifiedCount, rating, viewMode = 
           </div>
 
           <Button asChild className={`mt-4 w-full ${isPractice ? "bg-violet-700 hover:bg-violet-800" : "bg-slate-950 hover:bg-slate-800"}`}>
-            <Link href={href}>{isAssessment ? (isPractice ? "View practice exam" : "Explore free exam") : "View course"}<ChevronRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" /></Link>
+            <Link href={href}>{isAssessment ? (isPractice ? "View practice exam" : "View free exam · account required") : "View course"}<ChevronRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" /></Link>
           </Button>
         </CardContent>
       </div>

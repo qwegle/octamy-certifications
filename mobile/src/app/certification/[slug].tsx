@@ -5,7 +5,8 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import { Badge, Banner, Button, Card, ErrorState, Heading, Screen, Skeleton, Text } from '@/components/ui';
 import { useSession } from '@/features/auth';
-import { getCertification, getCourseAccess } from '@/features/certifications/api';
+import { AccountRequiredState } from '@/features/certifications/AccountRequiredState';
+import { getCertification } from '@/features/certifications/api';
 import { formatDuration, formatPrice } from '@/features/certifications/format';
 import { queryKeys } from '@/lib/query-keys';
 import { motion, spacing, useAppReducedMotion } from '@/theme';
@@ -19,11 +20,6 @@ export default function CertificationDetailScreen() {
     enabled: Boolean(slug),
     queryKey: queryKeys.certifications.detail(slug),
     queryFn: ({ signal }) => getCertification(slug ?? '', signal),
-  });
-  const access = useQuery({
-    enabled: Boolean(detail.data?.id),
-    queryKey: queryKeys.certifications.access(detail.data?.id),
-    queryFn: ({ signal }) => getCourseAccess(detail.data!.id, signal),
   });
 
   if (!slug) {
@@ -44,26 +40,17 @@ export default function CertificationDetailScreen() {
   }
 
   const item = detail.data;
-  const accessReady = access.data?.hasAccess === true;
-  const canStart = canMutate && accessReady;
   const examHref = {
     pathname: '/exam/[courseId]',
     params: { courseId: String(item.id), slug: item.slug, title: item.title },
   } as Href;
-  const accessLabel = access.isPending
-    ? 'Checking access…'
-    : access.isError
-      ? 'Access check unavailable'
-      : accessReady
-        ? 'Start certification exam'
-        : access.data?.requiresPurchase
-          ? 'Course access required'
-          : 'Exam unavailable';
+  const accountRequired = status === 'anonymous';
+  const startLabel = status === 'authenticatedOffline' ? 'Reconnect to start free exam' : 'Start free certification exam';
 
   return (
     <Screen
-      bottomAction={(
-        <Button disabled={!canStart} label={accessLabel} loading={access.isPending} onPress={() => router.push(examHref)} />
+      bottomAction={accountRequired ? undefined : (
+        <Button disabled={!canMutate} label={startLabel} onPress={() => router.push(examHref)} />
       )}>
       <Animated.View entering={reduceMotion ? undefined : FadeInDown.duration(motion.duration.enter).easing(motion.easing.enter)} style={styles.hero}>
         <View style={styles.badges}>
@@ -73,6 +60,8 @@ export default function CertificationDetailScreen() {
         <Heading>{item.title}</Heading>
         <Text muted>{item.description}</Text>
       </Animated.View>
+
+      {accountRequired ? <AccountRequiredState onAuthenticated={() => undefined} /> : null}
 
       {status === 'authenticatedOffline' ? (
         <Banner message="You can review details, but starting a new server-issued exam requires a validated online session." title="Offline session" tone="warning" />
@@ -90,13 +79,8 @@ export default function CertificationDetailScreen() {
       <Card>
         <Heading level={2}>Access and credential</Heading>
         <View style={styles.section}>
-          <Text variant="bodyStrong">Assessment access</Text>
-          {access.isError ? (
-            <Text muted>The server could not confirm access. Retry before starting.</Text>
-          ) : (
-            <Text muted>{accessReady ? 'Your account may start this assessment.' : 'Assessment access is not currently available for this account.'}</Text>
-          )}
-          {access.isError ? <Button label="Retry access check" onPress={() => void access.refetch()} variant="secondary" /> : null}
+          <Text variant="bodyStrong">Free assessment attempt</Text>
+          <Text muted>There is no charge to start this exam. A signed-in, online account is required to save and validate the attempt.</Text>
         </View>
         <View style={styles.section}>
           <Text variant="bodyStrong">Verified credential activation</Text>
@@ -114,7 +98,7 @@ export default function CertificationDetailScreen() {
         title="Recoverable exam session"
       />
 
-      {!canMutate ? <Text muted style={styles.center} variant="small">Reconnect and validate your session to start an exam.</Text> : null}
+      {!accountRequired && !canMutate ? <Text muted style={styles.center} variant="small">Reconnect and validate your session to start an exam.</Text> : null}
     </Screen>
   );
 }

@@ -6,8 +6,10 @@ import { router, useLocalSearchParams } from 'expo-router';
 
 import CertificationsScreen from '@/app/(tabs)/certifications';
 import ExamScreen from '@/app/exam/[courseId]';
+import { useSession } from '@/features/auth';
 import { getCertifications, startCertificationExam, submitCertificationExam } from '@/features/certifications/api';
 import { clearAttempt, loadAttempt, saveAttempt } from '@/features/certifications/attempt-repository';
+import { ApiError } from '@/lib/api-client';
 
 jest.mock('expo-router', () => {
   const React = require('react') as typeof import('react');
@@ -23,13 +25,9 @@ jest.mock('@react-native-community/netinfo', () => ({
   useNetInfo: () => ({ isConnected: true, isInternetReachable: true }),
 }));
 
-jest.mock('@/features/auth', () => {
-  const session = {
-    canMutate: true,
-    user: { email: 'learner@example.test', id: 7, isAdmin: false, name: 'Learner' },
-  };
-  return { useSession: () => session };
-});
+jest.mock('@/features/auth', () => ({
+  useSession: jest.fn(),
+}));
 
 jest.mock('@/lib/feedback', () => {
   const feedback = { showToast: jest.fn() };
@@ -134,6 +132,13 @@ function captureAppStateListener() {
 describe('certification catalog and exam repairs', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (useSession as jest.Mock).mockReturnValue({
+      canMutate: true,
+      register: jest.fn(async () => undefined),
+      signIn: jest.fn(async () => undefined),
+      status: 'authenticated',
+      user: { email: 'learner@example.test', id: 7, isAdmin: false, name: 'Learner' },
+    });
     (useLocalSearchParams as jest.Mock).mockReturnValue({});
     (loadAttempt as jest.Mock).mockResolvedValue(null);
   });
@@ -158,6 +163,83 @@ describe('certification catalog and exam repairs', () => {
     const { findByText, queryByText } = await renderWithQuery(<CertificationsScreen />);
     expect(await findByText('Artificial Intelligence')).toBeTruthy();
     expect(queryByText('Global Business')).toBeNull();
+  });
+
+  it('gates a signed-out free attempt and returns to the same assessment after sign-in', async () => {
+    (useLocalSearchParams as jest.Mock).mockReturnValue({ courseId: '12', slug: 'ai-foundations', title: 'AI Foundations' });
+    const signIn = jest.fn(async () => {
+      currentSession = {
+        ...currentSession,
+        canMutate: true,
+        status: 'authenticated',
+        user: { email: 'learner@example.test', id: 7, isAdmin: false, name: 'Learner' },
+      };
+    });
+    let currentSession = {
+      canMutate: false,
+      register: jest.fn(async () => undefined),
+      signIn,
+      status: 'anonymous',
+      user: null as null | { email: string; id: number; isAdmin: boolean; name: string },
+    };
+    (useSession as jest.Mock).mockImplementation(() => currentSession);
+
+    const screen = await render(<ExamScreen />);
+    expect(await screen.findByText('Create an account or sign in before you start')).toBeTruthy();
+    expect(screen.getByText(/This exam attempt is free/)).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Create account' })).toBeTruthy();
+    await fireEvent.press(screen.getByRole('button', { name: 'Sign in' }));
+    await fireEvent.changeText(screen.getByLabelText('Email'), 'learner@example.test');
+    await fireEvent.changeText(screen.getByLabelText('Password'), 'correct-password');
+    await fireEvent.press(screen.getByRole('button', { name: 'Sign in and continue' }));
+
+    await waitFor(() => expect(signIn).toHaveBeenCalledWith({ email: 'learner@example.test', password: 'correct-password' }));
+    expect(await screen.findByText('Evidence consent')).toBeTruthy();
+    expect(useLocalSearchParams).toHaveReturnedWith(expect.objectContaining({ courseId: '12' }));
+  });
+
+  it('keeps recovered answers through a submit 401, reauthenticates in place, and retries', async () => {
+    (useLocalSearchParams as jest.Mock).mockReturnValue({ courseId: '12', slug: 'ai-foundations', title: 'AI Foundations' });
+    (loadAttempt as jest.Mock).mockResolvedValue(recoveredAttempt(2));
+    (submitCertificationExam as jest.Mock)
+      .mockRejectedValueOnce(new ApiError({ code: 'ACCOUNT_REQUIRED', message: 'Account required', status: 401 }))
+      .mockResolvedValueOnce(submitResult);
+    const signIn = jest.fn(async () => undefined);
+    (useSession as jest.Mock).mockReturnValue({
+      canMutate: true,
+      register: jest.fn(async () => undefined),
+      signIn,
+      status: 'authenticated',
+      user: { email: 'learner@example.test', id: 7, isAdmin: false, name: 'Learner' },
+    });
+
+    const screen = await render(<ExamScreen />);
+    await fireEvent.press(await screen.findByRole('button', { name: 'Review answers' }));
+    await fireEvent.press(within(screen.getByLabelText('Fixed actions')).getByRole('button', { name: 'Confirm final submission' }));
+
+    expect(await screen.findByText('Sign in to continue your saved attempt')).toBeTruthy();
+    await waitFor(() => expect(saveAttempt).toHaveBeenCalledWith(expect.objectContaining({
+      answers: { '99': 0 },
+      integrityExitCount: 2,
+      sessionId: 'session-1',
+    })));
+    expect(clearAttempt).not.toHaveBeenCalled();
+
+    await fireEvent.press(screen.getByRole('button', { name: 'Sign in' }));
+    await fireEvent.changeText(screen.getByLabelText('Email'), 'learner@example.test');
+    await fireEvent.changeText(screen.getByLabelText('Password'), 'correct-password');
+    await fireEvent.press(screen.getByRole('button', { name: 'Sign in and continue' }));
+    expect(await screen.findByText('Review before submission')).toBeTruthy();
+    await fireEvent.press(within(screen.getByLabelText('Fixed actions')).getByRole('button', { name: 'Confirm final submission' }));
+
+    await waitFor(() => expect(submitCertificationExam).toHaveBeenLastCalledWith({
+      answers: { '99': 0 },
+      courseId: 12,
+      sessionId: 'session-1',
+      tabSwitches: 2,
+    }));
+    expect(submitCertificationExam).toHaveBeenCalledTimes(2);
+    expect(clearAttempt).toHaveBeenCalledWith(7, 12);
   });
 
   it('persists flags locally and submits only answers through the in-screen final review', async () => {

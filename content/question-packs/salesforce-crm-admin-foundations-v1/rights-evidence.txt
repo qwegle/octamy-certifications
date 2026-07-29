@@ -1,0 +1,9 @@
+Salesforce CRM Administration Skills Original Question Pack v1
+Generated: 2026-07-29
+Question count: 80
+Ownership basis: original first-party commissioned content.
+Author: Kiro AI original-content author under authenticated Octamy product-owner instruction.
+Content reviewer: Admin User production account 1; item-level decisions are recorded separately.
+Factual sources: official vendor documentation URLs embedded per item.
+Excluded sources: certification exams, exam dumps, copied vendor questions, third-party banks, and placeholders.
+Questions SHA-256: 9c9ee15db1dc8f0ea9db3882c82256b02a63c6aef70874c01b2c5b75b042a538

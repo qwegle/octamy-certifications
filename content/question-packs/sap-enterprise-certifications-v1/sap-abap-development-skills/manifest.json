@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "sourceKey": "first-party-original:sap-abap-development-skills:v1",
+  "name": "SAP ABAP Development Skills Original Question Pack v1",
+  "publisher": "Octamy",
+  "datasetVersion": "1.0.0",
+  "description": "Eighty original ABAP certification questions covering Dictionary design, internal tables, ABAP SQL, modularization, ALV, objects, debugging, testing, and modern expressions.",
+  "sourceUrl": "https://help.sap.com/doc/abapdocu_latest_index_htm/latest/en-US/index.htm",
+  "retrievedAt": "2026-07-29T00:00:00.000Z",
+  "license": {
+    "identifier": "Proprietary-Octamy-Original-1.0",
+    "name": "Original assessment-content rights",
+    "url": "https://octamy.com/terms-of-service",
+    "rightsBasis": "owned",
+    "commercialUseAllowed": true,
+    "derivativesAllowed": true,
+    "shareAlikeObligation": "none",
+    "attributionText": "Original SAP ABAP Development Skills assessment content",
+    "evidenceReference": "sap-abap-development-skills-v1-rights-evidence"
+  },
+  "provenance": {
+    "acquisitionMethod": "first_party",
+    "originalFormat": "JSONL",
+    "chainOfTitle": "Every question, option, answer, and explanation was newly authored for Octamy by Kiro AI under the authenticated product owner's instruction. Official SAP documentation was used only as factual evidence; no SAP certification item, exam dump, or third-party question-bank wording was copied.",
+    "notes": "Item decisions identify AI review accurately and do not claim human subject-matter review."
+  }
+}

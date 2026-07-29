@@ -1,0 +1,8 @@
+SAP S/4HANA Finance Skills Question Pack v1
+Generated: 2026-07-29
+Question count: 80
+Ownership basis: original first-party commissioned content.
+Author/reviewer: Kiro AI under the authenticated Octamy product owner's instruction; no human item review is asserted.
+Factual sources: SAP Help Portal documentation for SAP S/4HANA Finance, Financial Accounting, Management Accounting, and Asset Accounting.
+Excluded sources: proprietary SAP exams, exam dumps, copied vendor questions, third-party question banks, and placeholders.
+Question JSONL SHA-256: 3c777d090a107290ec34b1833cb6c06781d449de6b5fa897985c6bc7be14b2bb

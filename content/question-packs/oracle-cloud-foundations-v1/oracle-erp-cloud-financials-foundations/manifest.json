@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "sourceKey": "first-party-original:oracle-erp-cloud-financials-foundations:v1",
+  "name": "Oracle ERP Cloud Financials Foundations Question Pack v1",
+  "publisher": "Octamy",
+  "datasetVersion": "1.0.0",
+  "description": "Eighty original questions covering foundational Oracle Fusion Cloud Financials configuration, processing, controls, and reporting.",
+  "sourceUrl": "https://docs.oracle.com/en/cloud/saas/financials/25d/faigl/",
+  "retrievedAt": "2026-07-29T00:00:00.000Z",
+  "license": {
+    "identifier": "Proprietary-Octamy-Original-1.0",
+    "name": "Original assessment-content rights",
+    "url": "https://octamy.com/terms-of-service",
+    "rightsBasis": "owned",
+    "commercialUseAllowed": true,
+    "derivativesAllowed": true,
+    "shareAlikeObligation": "none",
+    "attributionText": "Original Oracle ERP Cloud Financials Foundations assessment content",
+    "evidenceReference": "oracle-erp-cloud-financials-foundations-v1-rights-evidence"
+  },
+  "provenance": {
+    "acquisitionMethod": "first_party",
+    "originalFormat": "JSONL",
+    "chainOfTitle": "Every stem, option, answer, and explanation was newly authored for Octamy by Kiro AI under the authenticated product owner's instruction. Oracle Help Center documentation was consulted only as factual evidence; no Oracle exam question, exam dump, or third-party question-bank wording was copied.",
+    "notes": "The governed decisions identify Kiro AI review and do not claim human item review."
+  }
+}

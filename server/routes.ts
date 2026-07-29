@@ -72,7 +72,6 @@ import apiRoutes from "./routes/index";
 import certificateRoutes from "./routes/certificateRoutes";
 import questionBanksRouter, { courseBlueprintRouter } from "./routes/question-banks";
 import { assessmentRuntimeReviewEligibilitySql } from "./lib/question-review-policy";
-import { emailService } from "./utils/emailService";
 import { generateCertificateHTML } from "./utils/newCertificateGenerator";
 import { Readable } from "stream";
 import { evaluateAnswersWithAI } from "./utils/openai";
@@ -81,7 +80,6 @@ import {
   loadExamSession,
   commitPendingExamForSession,
   loadPendingExamBySessionId,
-  savePendingExam,
   loadPendingExam,
   startExamStateCron,
 } from "./utils/examState";
@@ -119,7 +117,7 @@ import {
   assertPendingExamAccess,
   buildPendingExamResultPayload,
   canAccessPendingExam,
-  parseGuestExamIdentity,
+  certificationExamAccountRequirement,
   publicPendingCourseSnapshot,
 } from "./lib/pending-exam-access";
 import { buildExamReview } from "./lib/exam-review";
@@ -1811,6 +1809,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Course not found" });
       }
       const isPracticeAssessment = course.assessmentPurpose === "practice";
+      const accountRequirement = certificationExamAccountRequirement({
+        assessmentPurpose: course.assessmentPurpose,
+        userId: req.user?.userId,
+        action: "start",
+      });
+      if (accountRequirement) {
+        return res.status(accountRequirement.statusCode).json(accountRequirement.body);
+      }
       if (!isPracticeAssessment) {
         const evidenceConsent = z.object({ evidenceConsent: z.literal(true) }).safeParse(req.body);
         if (!evidenceConsent.success) {
@@ -2038,7 +2044,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           createdAt: sessionStartedAt,
           evidenceConsentAt: isPracticeAssessment ? undefined : sessionStartedAt,
           evidenceConsentVersion: isPracticeAssessment ? undefined : PUBLIC_EXAM_EVIDENCE_CONSENT_VERSION,
-          userId: req.user?.userId ?? null,
+          userId: req.user!.userId,
           // Retain a short recovery window after the authoritative deadline. The
           // submission route still rejects answer payloads after deadline grace.
           ttlMs: Math.max(1, course.duration) * 60_000 + 15 * 60_000,
@@ -2092,8 +2098,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const {
           courseId,
           answers,
-          userEmail,
-          userName,
           sessionId,
           tabSwitches,
         } = req.body;
@@ -2103,26 +2107,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(400).json({ message: "Valid course and exam session are required" });
         }
 
-        let effectiveUserEmail: string;
-        let effectiveUserName: string;
-        if (req.user?.userId) {
-          const authenticatedUser = await storage.getUser(req.user.userId);
-          if (!authenticatedUser) {
-            return res.status(401).json({ message: "Your account could not be verified" });
-          }
-          effectiveUserEmail = authenticatedUser.email;
-          effectiveUserName = authenticatedUser.name || authenticatedUser.email.split("@")[0];
-        } else {
-          const guestIdentity = parseGuestExamIdentity({ userEmail, userName });
-          if (!guestIdentity.success) {
-            return res.status(400).json({
-              message: "Enter a valid learner name and email before submitting",
-              errors: guestIdentity.error.flatten().fieldErrors,
-            });
-          }
-          effectiveUserEmail = guestIdentity.data.userEmail;
-          effectiveUserName = guestIdentity.data.userName;
+        const course = await storage.getCourse(numericCourseId);
+        if (!course || !course.isActive || course.visibility !== "public" || course.reviewStatus !== "approved") {
+          return res.status(404).json({ message: "Course not found" });
         }
+        const isPracticeExam = course.assessmentPurpose === "practice";
+        const accountRequirement = certificationExamAccountRequirement({
+          assessmentPurpose: course.assessmentPurpose,
+          userId: req.user?.userId,
+          action: "submit",
+        });
+        if (accountRequirement) {
+          return res.status(accountRequirement.statusCode).json(accountRequirement.body);
+        }
+        if (isPracticeExam && !req.user?.userId) {
+          return res.status(401).json({
+            message: "Sign in and activate Practice Pass to submit this practice exam",
+            code: "PRACTICE_SUBSCRIPTION_REQUIRED",
+          });
+        }
+
+        const authenticatedUser = await storage.getUser(req.user!.userId);
+        if (!authenticatedUser) {
+          return res.status(401).json({ message: "Your account could not be verified" });
+        }
+        const effectiveUserEmail = authenticatedUser.email;
+        const effectiveUserName = authenticatedUser.name || authenticatedUser.email.split("@")[0];
 
         // A network retry after the first successful commit must replay the
         // original result instead of creating a second payable assessment.
@@ -2172,20 +2182,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(403).json({ message: "This assessment session belongs to another learner" });
         }
 
-        const course = await storage.getCourse(numericCourseId);
-        if (!course || !course.isActive || course.visibility !== "public" || course.reviewStatus !== "approved") {
-          return res.status(404).json({ message: "Course not found" });
-        }
-        const isPracticeExam = course.assessmentPurpose === "practice";
         let practiceSubscriptionId: number | null = null;
         if (isPracticeExam) {
-          if (!req.user?.userId) {
-            return res.status(401).json({
-              message: "Sign in and activate Practice Pass to submit this practice exam",
-              code: "PRACTICE_SUBSCRIPTION_REQUIRED",
-            });
-          }
-          const subscription = await getActiveLearnerPracticeSubscription(req.user.userId);
+          const subscription = await getActiveLearnerPracticeSubscription(req.user!.userId);
           if (!subscription) {
             return res.status(402).json({
               message: "Practice exams require an active Practice Pass",
@@ -2242,7 +2241,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const resultExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
         const pendingExamPayload = {
-          userId: req.user?.userId || null,
+          userId: req.user!.userId,
           courseId: numericCourseId,
           userEmail: effectiveUserEmail,
           userName: effectiveUserName,
@@ -2310,23 +2309,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         }
 
-        if (!committed.replayed && !req.user?.userId && !isPracticeExam) {
-          const baseUrl = (process.env.APP_URL || `${req.protocol}://${req.get("host")}`).replace(/\/+$/, "");
-          const resultPath = `/exam-results-temp/${committed.id}`;
-          const resultLink = `${baseUrl}${resultPath}`;
-          const registerLink = `${baseUrl}/register?role=learner&email=${encodeURIComponent(effectiveUserEmail)}&next=${encodeURIComponent(resultPath)}`;
-          const recoveryEmailSent = await emailService.sendGuestExamRecoveryEmail({
-            userEmail: effectiveUserEmail,
-            userName: effectiveUserName,
-            courseTitle: course.title,
-            score,
-            resultLink,
-            registerLink,
-          });
-          committed.payload.recoveryEmailSent = recoveryEmailSent;
-          await savePendingExam(committed.id, committed.payload);
-        }
-
         res.json(publicExamResultResponse(committed.id, committed.payload));
       } catch (error) {
         console.error("Error submitting exam:", error);
@@ -2343,7 +2325,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         const { tempExamId } = req.params;
 
-        // Read from the persistent pending-exam store (matches savePendingExam in /api/exam/submit)
+        // Read from the persistent pending-exam store populated by /api/exam/submit.
         const examData = await loadPendingExam(tempExamId);
 
         if (!examData) {
