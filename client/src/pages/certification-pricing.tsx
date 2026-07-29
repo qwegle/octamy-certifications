@@ -11,12 +11,24 @@ import { apiRequest } from '@/lib/queryClient';
 
 type CatalogPricingResponse = {
   items: Array<{ id: number; price: string | number; title: string; canonicalPath: string }>;
+  pagination: { totalPages: number };
 };
+
+async function fetchAllCredentialPrices(): Promise<CatalogPricingResponse> {
+  const first = await apiRequest('GET', '/api/assessments?page=1&pageSize=48').then((response) => response.json()) as CatalogPricingResponse;
+  if (first.pagination.totalPages <= 1) return first;
+  const remaining = await Promise.all(
+    Array.from({ length: first.pagination.totalPages - 1 }, (_, index) => index + 2).map(async (page) =>
+      await apiRequest('GET', `/api/assessments?page=${page}&pageSize=48`).then((response) => response.json()) as CatalogPricingResponse,
+    ),
+  );
+  return { ...first, items: [first, ...remaining].flatMap((response) => response.items) };
+}
 
 export default function CertificationPricing() {
   const { data } = useQuery<CatalogPricingResponse>({
-    queryKey: ['/api/assessments', 'credential-pricing'],
-    queryFn: async () => (await apiRequest('GET', '/api/assessments?page=1&pageSize=48')).json(),
+    queryKey: ['/api/assessments', 'complete-credential-pricing'],
+    queryFn: fetchAllCredentialPrices,
   });
   const currentPrice = useMemo(() => {
     const prices = (data?.items || []).map((item) => Number(item.price)).filter((price) => Number.isFinite(price) && price >= 0);

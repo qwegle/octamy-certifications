@@ -309,6 +309,20 @@
       "when": 1785331448000,
       "tag": "0043_align_officer_item_authorship_disclosure",
       "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1785335374841,
+      "tag": "0044_learner_account_deletion",
+      "breakpoints": true
+    },
+    {
+      "idx": 45,
+      "version": "7",
+      "when": 1785337614372,
+      "tag": "0045_blog_posts",
+      "breakpoints": true
     }
   ]
 }

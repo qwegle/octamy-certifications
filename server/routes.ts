@@ -44,6 +44,7 @@ import {
   questionBanks as questionBanksTable,
   questions as questionsTable,
   questionPackImportRuns,
+  blogPosts,
 } from "@shared/schema";
 import { desc, and, eq, not, sql, or, ilike, count, inArray, isNotNull } from "drizzle-orm";
 import { db, pool } from "./db";
@@ -1699,6 +1700,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (practiceCategoryIds.has(cat.id)) {
           urls.push({ loc: `${base}${publicPracticeCategoryPath(cat.slug)}`, priority: "0.4", freq: "weekly" });
         }
+      }
+
+      // Published blog posts are indexable content and belong in the sitemap.
+      // Future-dated posts are excluded so nothing is announced before release.
+      try {
+        const posts = await db.select({ slug: blogPosts.slug })
+          .from(blogPosts)
+          .where(and(eq(blogPosts.status, "published"), sql`${blogPosts.publishedAt} <= now()`))
+          .orderBy(desc(blogPosts.publishedAt))
+          .limit(2000);
+        if (posts.length > 0) {
+          urls.push({ loc: `${base}/blog`, priority: "0.6", freq: "weekly" });
+          for (const post of posts) {
+            if (!canonicalPublicSlug(post.slug)) continue;
+            urls.push({ loc: `${base}/blog/${post.slug}`, priority: "0.5", freq: "monthly" });
+          }
+        }
+      } catch (error) {
+        // A blog read failure must never break the assessment sitemap.
+        console.error("sitemap blog section failed", error);
       }
 
       const xmlEscape = (value: string) => value

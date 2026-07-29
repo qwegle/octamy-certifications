@@ -24,11 +24,14 @@ import learnerSubscriptionRoutes from './learnerSubscriptionRoutes';
 import certificationBenefitRoutes from './certificationBenefitRoutes';
 import interviewStudioRoutes from './interviewStudioRoutes';
 import recruiterEvidenceGrantRoutes from './recruiterEvidenceGrantRoutes';
+import blogRoutes from './blogRoutes';
+import accountRoutes from './accountRoutes';
 // Remove sellerRoutes import to prevent conflicts - seller routes are handled directly in main routes.ts
 
 const router = Router();
 
 // Mount route modules with proper API prefixing
+router.use('/', accountRoutes); // Learner-owned, email-verified account deletion lifecycle
 router.use('/auth', authRoutes);
 // Remove /courses mounting to prevent conflict with frontend routing
 // router.use('/courses', courseRoutes);
@@ -58,5 +61,6 @@ router.use('/', interviewStudioRoutes); // Private AI interview practice + gated
 // Register recruiter routes
 registerRecruiterRoutes(router);
 router.use('/', recruiterEvidenceGrantRoutes); // Selected, expiring learner evidence grants
+router.use('/', blogRoutes); // Public blog reads + authenticated owner-admin writes
 
 export default router;

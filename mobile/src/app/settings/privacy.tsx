@@ -7,6 +7,7 @@ import { Banner, Button, Card, ErrorState, Heading, Screen, Skeleton, Text } fro
 import { requireApiUrl } from '@/config/env';
 import { requestPasswordReset, useSession } from '@/features/auth';
 import {
+  AccountDeletionCard,
   getEvidencePassportLink,
   getLearnerProfile,
   updateLearnerProfile,
@@ -148,26 +149,6 @@ export default function PrivacyScreen() {
     );
   };
 
-  const contactDeletionSupport = () => {
-    Alert.alert(
-      'Request account deletion?',
-      'Octamy does not yet provide an automated learner account-deletion endpoint. Continue to email support from your mail app. Support must verify and process the request.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Continue to email',
-          onPress: () => {
-            const subject = encodeURIComponent('Learner account deletion request');
-            const body = encodeURIComponent(`Please delete my Octamy learner account associated with ${user?.email ?? 'my sign-in email'}. Please tell me what identity verification is required.`);
-            void Linking.openURL(`mailto:support@octamy.com?subject=${subject}&body=${body}`).catch(() => {
-              showToast({ title: 'Mail app unavailable', message: 'Email support@octamy.com to request account deletion.', tone: 'error' });
-            });
-          },
-        },
-      ],
-    );
-  };
-
   const confirmSignOut = () => {
     Alert.alert('Sign out on this device?', 'Your local token and app-stored learner data on this device will be removed.', [
       { text: 'Cancel', style: 'cancel' },
@@ -248,13 +229,13 @@ export default function PrivacyScreen() {
         </Card>
 
         <Card>
-          <Heading level={2}>Legal & support</Heading>
+          <Heading level={2}>Legal</Heading>
           <Button label="Open Privacy Policy" onPress={() => void openWebsitePath('/privacy-policy')} variant="secondary" />
           <Button label="Open Terms of Service" onPress={() => void openWebsitePath('/terms-of-service')} variant="secondary" />
           <Button label="Open User Deletion Policy" onPress={() => void openWebsitePath('/user-deletion')} variant="secondary" />
-          <Button label="Email account deletion support" onPress={contactDeletionSupport} variant="secondary" />
-          <Text muted variant="small">No automated account-deletion API exists. Email support@octamy.com from this in-app path to start a verified deletion request.</Text>
         </Card>
+
+        <AccountDeletionCard />
 
         <Card>
           <Heading level={2}>Security & session</Heading>

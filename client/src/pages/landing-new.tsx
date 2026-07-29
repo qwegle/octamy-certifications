@@ -196,7 +196,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Do I have to pay before taking the test?",
-    a: "No. Every assessment is free to attempt. You only pay when you pass with a score of 50% or higher and choose to claim your verified certificate.",
+    a: "No. Every public certification assessment is free to attempt. Each exam shows its own passing score before you begin; you pay only after passing and only if you choose to activate the verified credential.",
   },
   {
     q: "How is verification done?",
@@ -562,8 +562,8 @@ export default function Landing() {
               },
               {
                 n: "03",
-                title: "Pass with 50%+ score",
-                desc: "Earn a recognition tier — Bronze, Silver, Gold or Platinum.",
+                title: "Meet the shown pass score",
+                desc: "Each exam publishes its own threshold before you begin; passing records your score and recognition tier.",
                 Icon: CheckCircle2,
               },
               {
@@ -681,7 +681,7 @@ export default function Landing() {
                       {cat.name}
                     </h3>
                     <p className="mt-1 text-sm text-slate-500">
-                      {cat.count} {cat.count === 1 ? "exam" : "exams"} · 50–80% to pass
+                      {cat.count} {cat.count === 1 ? "exam" : "exams"} · Passing score shown per exam
                     </p>
                     <span className="mt-auto pt-4 inline-flex items-center text-sm font-medium text-slate-700 transition-all group-hover:gap-2">
                       Explore <ArrowRight className="ml-1 w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
@@ -747,7 +747,7 @@ export default function Landing() {
               {
                 Icon: Wallet,
                 title: "Affordable",
-                body: "Take any assessment for free. Pay only after you pass — no subscriptions, no upfront fees, no surprises.",
+                body: "Take any public certification assessment free. Pay only after you pass and choose credential activation — no upfront credential fee.",
               },
               {
                 Icon: BadgeCheck,
@@ -889,16 +889,17 @@ export default function Landing() {
                 {filteredCourses.length}
                 {filteredCourses.length === 1 ? " exam" : " exams"}
               </p>
-              <Button
-                asChild
-                  size="lg"
-                  className="bg-slate-900 hover:bg-black text-white rounded-full px-8"
-                >
-                <Link href="/get-certified">
-                  Browse all {filteredCourses.length} exams
-                  <ArrowRight className="ml-2 w-4 h-4" />
-                </Link>
-              </Button>
+              <div className="flex flex-wrap justify-center gap-3">
+                <Button asChild size="lg" className="rounded-full bg-slate-900 px-8 text-white hover:bg-black">
+                  <Link href="/get-certified">
+                    Browse all {filteredCourses.length} exams
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+                <Button asChild size="lg" variant="outline" className="rounded-full border-slate-300 px-8 text-slate-700">
+                  <Link href="/blog">Read assessment guides</Link>
+                </Button>
+              </div>
             </div>
           )}
         </div>
@@ -1013,8 +1014,7 @@ export default function Landing() {
             Start your first assessment — free.
           </Reveal>
           <Reveal as="p" delay={0.1} className="mt-5 text-base sm:text-lg text-slate-300 leading-relaxed max-w-2xl mx-auto">
-            Pick an exam, prove your skill, and walk away with a recruiter-
-            verifiable credential. No subscription, no card required to start.
+            Pick an exam and prove your skill free. If you pass, choose whether to activate a recruiter-verifiable credential. No card is required to start.
           </Reveal>
           <Reveal as="div" delay={0.2} className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
             <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} className="inline-block">

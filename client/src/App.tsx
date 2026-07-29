@@ -65,6 +65,8 @@ const AcceptableUse = lazy(() => import("@/pages/legal/acceptable-use"));
 const DisclaimerPage = lazy(() => import("@/pages/legal/disclaimer"));
 const ResellerAgreement = lazy(() => import("@/pages/legal/reseller-agreement"));
 const AccessibilityPage = lazy(() => import("@/pages/legal/accessibility"));
+const BlogIndex = lazy(() => import("@/pages/blog"));
+const BlogPost = lazy(() => import("@/pages/blog/post"));
 import { CookieConsent } from "@/components/cookie-consent";
 import { RouteEffects } from "@/components/route-effects";
 import { WorkspaceAccessGate } from "@/components/workspace-access-gate";
@@ -299,6 +301,8 @@ function Router() {
       <Route path="/profile-edit" component={ProfileEdit} />
       <Route path="/profile" component={ProfileEdit} />
       <Route path="/my-certificates" component={Dashboard} />
+      <Route path="/blog/:slug" component={BlogPost} />
+      <Route path="/blog" component={BlogIndex} />
       
       {/* Recruiter Portal Routes */}
       <Route path="/recruiter/auth" component={RecruiterAuth} />

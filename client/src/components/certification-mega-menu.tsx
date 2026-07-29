@@ -35,7 +35,7 @@ type CatalogItem = {
 
 type CatalogResponse = {
   items: CatalogItem[];
-  pagination: { total: number };
+  pagination: { page: number; pageSize: number; total: number; totalPages: number };
 };
 
 type CatalogGroup = {
@@ -45,8 +45,20 @@ type CatalogGroup = {
   items: CatalogItem[];
 };
 
-const CERTIFICATION_API = "/api/assessments?pageSize=48";
-const PRACTICE_API = "/api/practice-assessments?pageSize=48";
+const CERTIFICATION_API = "/api/assessments";
+const PRACTICE_API = "/api/practice-assessments";
+const MENU_CATEGORY_LIMIT = 8;
+
+async function fetchCompleteCatalog(endpoint: string): Promise<CatalogResponse> {
+  const first = await apiRequest("GET", `${endpoint}?page=1&pageSize=48`).then((response) => response.json()) as CatalogResponse;
+  if (first.pagination.totalPages <= 1) return first;
+  const remaining = await Promise.all(
+    Array.from({ length: first.pagination.totalPages - 1 }, (_, index) => index + 2).map(async (page) =>
+      await apiRequest("GET", `${endpoint}?page=${page}&pageSize=48`).then((response) => response.json()) as CatalogResponse,
+    ),
+  );
+  return { ...first, items: [first, ...remaining].flatMap((response) => response.items) };
+}
 
 function groupCatalog(items: CatalogItem[] = []): CatalogGroup[] {
   const groups = new Map<string, CatalogGroup>();
@@ -62,18 +74,18 @@ function groupCatalog(items: CatalogItem[] = []): CatalogGroup[] {
   }
   return Array.from(groups.values())
     .filter((group) => group.items.length > 0)
-    .sort((left, right) => left.name.localeCompare(right.name));
+    .sort((left, right) => right.items.length - left.items.length || left.name.localeCompare(right.name));
 }
 
 function useCatalogMenu() {
   const certifications = useQuery<CatalogResponse>({
-    queryKey: [CERTIFICATION_API],
-    queryFn: async () => (await apiRequest("GET", CERTIFICATION_API)).json(),
+    queryKey: [CERTIFICATION_API, "complete-menu-catalog"],
+    queryFn: () => fetchCompleteCatalog(CERTIFICATION_API),
     staleTime: 5 * 60_000,
   });
   const practice = useQuery<CatalogResponse>({
-    queryKey: [PRACTICE_API],
-    queryFn: async () => (await apiRequest("GET", PRACTICE_API)).json(),
+    queryKey: [PRACTICE_API, "complete-menu-catalog"],
+    queryFn: () => fetchCompleteCatalog(PRACTICE_API),
     staleTime: 5 * 60_000,
   });
 
@@ -332,18 +344,23 @@ function CatalogSection({
         <p role="status" className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs leading-5 text-slate-600">No published assessments are available in this catalog yet.</p>
       ) : (
         <>
-          <nav aria-label={`${title} categories`} className="mt-5 grid grid-cols-2 gap-2">
-            {groups.map((group) => (
+          <nav aria-label={`${title} most populated categories`} className="mt-5 grid grid-cols-2 gap-2">
+            {groups.slice(0, MENU_CATEGORY_LIMIT).map((group) => (
               <Link
                 key={group.id}
                 href={categoryPath(group.slug)}
                 className={`group flex min-h-14 items-center justify-between gap-2 rounded-xl border bg-white px-3 py-2 transition ${certification ? "border-violet-100 hover:border-violet-300 hover:bg-violet-50" : "border-cyan-100 hover:border-cyan-300 hover:bg-cyan-50"}`}
               >
                 <span className="text-xs font-bold leading-4 text-slate-800">{group.name}</span>
-                <span className={`rounded-full px-2 py-1 text-[10px] font-black ${certification ? "bg-violet-100 text-violet-800" : "bg-cyan-100 text-cyan-900"}`}>{group.items.length}</span>
+                <span aria-label={`${group.items.length} assessments`} className={`rounded-full px-2 py-1 text-[10px] font-black ${certification ? "bg-violet-100 text-violet-800" : "bg-cyan-100 text-cyan-900"}`}>{group.items.length}</span>
               </Link>
             ))}
           </nav>
+          {groups.length > MENU_CATEGORY_LIMIT && (
+            <p className="mt-3 text-xs font-semibold text-slate-500">
+              Showing the {MENU_CATEGORY_LIMIT} largest subjects · {groups.length - MENU_CATEGORY_LIMIT} more in View all
+            </p>
+          )}
           <div className="mt-5 border-t border-slate-200 pt-4">
             <p className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">Explore assessments</p>
             <div className="mt-2 grid gap-1">

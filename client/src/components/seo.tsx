@@ -11,6 +11,9 @@ interface SEOProps {
   image?: string;
   jsonLd?: Record<string, unknown> | Record<string, unknown>[];
   noIndex?: boolean;
+  type?: "website" | "article";
+  publishedTime?: string;
+  modifiedTime?: string;
 }
 
 const DEFAULT_DESC =
@@ -40,6 +43,9 @@ export function SEO({
   image = DEFAULT_IMAGE,
   jsonLd,
   noIndex = false,
+  type = "website",
+  publishedTime,
+  modifiedTime,
 }: SEOProps) {
   const normalizedTitle = title.trim() || "Octamy";
   const normalizedDescription = description.trim().replace(/\s+/g, " ") || DEFAULT_DESC;
@@ -71,7 +77,9 @@ export function SEO({
       <meta property="og:title" content={fullTitle} />
       <meta property="og:description" content={normalizedDescription} />
       <meta property="og:url" content={url} />
-      <meta property="og:type" content="website" />
+      <meta property="og:type" content={type} />
+      {type === "article" && publishedTime && <meta property="article:published_time" content={publishedTime} />}
+      {type === "article" && modifiedTime && <meta property="article:modified_time" content={modifiedTime} />}
       <meta property="og:image" content={imageUrl} />
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={fullTitle} />

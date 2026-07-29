@@ -390,7 +390,33 @@ A common session payload contains `{id,templateId,templateKey,templateVersion,mo
 - **Auth:** JWT owner by filename prefix. **Success:** file bytes.
 - **Errors:** `403`; `404`. **Source:** `server/routes/upload.ts:68-80`.
 
-# 9. Recruiter discovery and learner evidence-sharing consent (15 verified endpoints)
+# 9. Learner account deletion (4 verified endpoints)
+
+All four routes require the learner JWT and derive the deletion subject only from `req.user.userId`; clients never send a user ID. Responses set `Cache-Control: private, no-store`. A state response is `{state:"none"}` when no request exists, otherwise `{requestId,state:"requested"|"verified"|"completed"|"cancelled"|"rejected",requestedAt,tokenExpiresAt,verifiedAt,completedAt,cancelledAt,rejectedAt,irreversible}`. `tokenExpiresAt` is present only while requested; `irreversible` is true only after completion. Sources: routes/response projection `server/routes/accountRoutes.ts`; transactional policy and lifecycle `server/lib/account-deletion.ts`.
+
+### `GET /api/account/deletion`
+- **Auth:** JWT owner. **Input:** none.
+- **Success:** `200` current state response, including `{state:"none"}` when no request exists.
+- **Errors:** standard JWT `401`; `500 {message:"Account deletion could not be completed",code:"ACCOUNT_DELETION_FAILED"}`.
+
+### `POST /api/account/deletion`
+- **Auth:** JWT owner. **Body:** none. Rate-limited to three requests per learner per hour.
+- **Success:** `202` state response. A new request emails a random verification token that expires after 30 minutes; an existing requested/verified/completed request is returned without creating another.
+- **Errors:** `429 ACCOUNT_DELETION_RATE_LIMITED`; `503 ACCOUNT_DELETION_EMAIL_UNAVAILABLE` when verification email delivery fails (the created request is rejected); standard JWT `401`; `500`.
+
+### `POST /api/account/deletion/confirm`
+- **Auth:** JWT owner. **Body:** `{token:string}`; token length must be 20–200 characters.
+- **Success:** `200` completed state response. Completion is irreversible and transactionally erases/de-identifies the learner account; replay of an already completed request is idempotent at the service layer.
+- **Errors:** `400 INVALID_DELETION_TOKEN`; `403 INVALID_DELETION_TOKEN`; `404 DELETION_REQUEST_NOT_FOUND` or `ACCOUNT_NOT_FOUND`; `409 LEARNER_ACCOUNT_REQUIRED` for creator/institute/admin accounts and artifact-cleanup policy errors; `410 DELETION_TOKEN_EXPIRED_OR_USED`; standard JWT `401`; `500 ACCOUNT_DELETION_FAILED`.
+
+### `DELETE /api/account/deletion`
+- **Auth:** JWT owner. **Body:** none.
+- **Success:** `200` cancelled state response; the token hash and expiry are removed.
+- **Errors:** `409 NO_PENDING_DELETION`; standard JWT `401`; `500`.
+
+**Completion policy:** authentication/profile/contact data, addresses, resume files, preferences/notifications, learning progress/reviews, Interview Studio responses/artifact references, and active evidence grants are erased or revoked. Issued credentials/public verification, assessment attempts/aggregate statistics, payment/tax/coupon records, and audit/recruiter-evidence events are retained only in de-identified form. Credentials remain verifiable; financial records remain for legal/accounting obligations; audit records remain for security/compliance. The user row loses password/OAuth identifiers and becomes `Deleted account` with a non-routable deleted email. Mobile must clear its token and all user-scoped local data after a completed response.
+
+# 10. Recruiter discovery and learner evidence-sharing consent (15 verified endpoints)
 
 There are two separate learner opt-ins:
 
@@ -481,7 +507,8 @@ Counts are unique method + full-path contracts documented above (aliases count s
 | Payments/subscriptions | 12 |
 | Private Interview Studio | 13 |
 | Learner profile/preferences | 6 |
+| Account deletion | 4 |
 | Recruiter discovery/evidence consent | 15 |
-| **Total** | **81** |
+| **Total** | **85** |
 
 Adjacent generic upload/media routes and retired 410 intercepts are explained but not counted as supported learner feature endpoints.

@@ -83,7 +83,7 @@ export const CLIENT_APP_ROUTE_TEMPLATES = [
   "/institute/login", "/institute/register", "/creator", "/creators",
   "/teach-on-octamy", "/institute", "/institutes", "/for-recruiters", "/pricing",
   "/pricing/practice-pass", "/pricing/certification", "/pricing/workspaces",
-  "/billing/return", "/exams", "/get-certified/categories/:slug",
+  "/billing/return", "/exams", "/blog", "/blog/:slug", "/get-certified/categories/:slug",
   "/get-certified/:slug", "/get-certified", "/practice/categories/:slug",
   "/practice/:slug", "/practice", "/assessments/categories/:slug",
   "/assessments/:slug", "/assessments", "/creator-assessments", "/courses",

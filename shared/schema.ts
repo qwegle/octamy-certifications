@@ -190,6 +190,7 @@ export const users = pgTable("users", {
   profileCompleteness: integer("profile_completeness").default(0), // percentage
   
   updatedAt: timestamp("updated_at").defaultNow(),
+  accountDeletedAt: timestamp("account_deleted_at", { withTimezone: true }),
 });
 
 // User profile insert and update schemas
@@ -327,6 +328,68 @@ export const courses = pgTable("courses", {
     t.isActive,
   ),
 }));
+
+// Admin-authored public blog. Body is deliberately stored as plain text with
+// optional Markdown-style links; HTML angle brackets are rejected both by the
+// API and the database so content is never an executable HTML fragment.
+export const blogPosts = pgTable("blog_posts", {
+  id: serial("id").primaryKey(),
+  slug: text("slug").notNull(),
+  title: text("title").notNull(),
+  excerpt: text("excerpt").notNull(),
+  body: text("body").notNull(),
+  status: text("status").default("draft").notNull(),
+  authorUserId: integer("author_user_id").references(() => users.id, { onDelete: "restrict" }).notNull(),
+  publishedAt: timestamp("published_at", { withTimezone: true }),
+  canonicalPath: text("canonical_path").notNull(),
+  seoTitle: text("seo_title"),
+  seoDescription: text("seo_description"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => ({
+  slugFormat: check("blog_posts_slug_format_check", sql`
+    length(${t.slug}) BETWEEN 1 AND 160
+    AND ${t.slug} ~ '^[a-z0-9]+(?:-[a-z0-9]+)*$'
+  `),
+  titleLength: check("blog_posts_title_check", sql`length(btrim(${t.title})) BETWEEN 5 AND 180`),
+  excerptLength: check("blog_posts_excerpt_check", sql`length(btrim(${t.excerpt})) BETWEEN 20 AND 320`),
+  safeBody: check("blog_posts_body_check", sql`
+    length(btrim(${t.body})) BETWEEN 20 AND 50000
+    AND position('<' IN ${t.body}) = 0
+    AND position('>' IN ${t.body}) = 0
+  `),
+  statusValue: check("blog_posts_status_check", sql`${t.status} IN ('draft', 'published')`),
+  publicationState: check("blog_posts_publication_check", sql`
+    (${t.status} = 'draft' AND ${t.publishedAt} IS NULL)
+    OR (${t.status} = 'published' AND ${t.publishedAt} IS NOT NULL)
+  `),
+  canonicalPathMatchesSlug: check("blog_posts_canonical_path_check", sql`${t.canonicalPath} = '/blog/' || ${t.slug}`),
+  seoTitleLength: check("blog_posts_seo_title_check", sql`${t.seoTitle} IS NULL OR length(btrim(${t.seoTitle})) BETWEEN 5 AND 70`),
+  seoDescriptionLength: check("blog_posts_seo_description_check", sql`${t.seoDescription} IS NULL OR length(btrim(${t.seoDescription})) BETWEEN 20 AND 180`),
+  slugIndex: uniqueIndex("blog_posts_slug_idx").on(t.slug),
+  publishedListing: index("blog_posts_published_listing_idx")
+    .on(desc(t.publishedAt), desc(t.id))
+    .where(sql`${t.status} = 'published'`),
+}));
+
+export const blogPostAssessments = pgTable("blog_post_assessments", {
+  blogPostId: integer("blog_post_id").references(() => blogPosts.id, { onDelete: "cascade" }).notNull(),
+  courseId: integer("course_id").references(() => courses.id, { onDelete: "restrict" }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => ({
+  uniquePostCourse: unique("blog_post_assessments_unique").on(t.blogPostId, t.courseId),
+  byCourse: index("blog_post_assessments_course_idx").on(t.courseId, t.blogPostId),
+}));
+
+export const insertBlogPostSchema = createInsertSchema(blogPosts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type BlogPost = typeof blogPosts.$inferSelect;
+export type InsertBlogPost = typeof blogPosts.$inferInsert;
+export type BlogPostAssessment = typeof blogPostAssessments.$inferSelect;
 
 export const audienceBands = pgTable("audience_bands", {
   id: serial("id").primaryKey(),
@@ -491,6 +554,44 @@ export const cohortStudents = pgTable("cohort_students", {
   uniqMember: unique().on(t.cohortId, t.email),
 }));
 
+
+// Learner self-service account deletion. Raw verification tokens are never
+// persisted; completion keeps only this lifecycle and its de-identified,
+// append-only erase/retain audit.
+export const accountDeletionRequests = pgTable("account_deletion_requests", {
+  id: text("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id, { onDelete: "restrict" }).notNull(),
+  actorUserId: integer("actor_user_id").references(() => users.id, { onDelete: "restrict" }).notNull(),
+  state: text("state").default("requested").notNull(),
+  verificationTokenHash: varchar("verification_token_hash", { length: 64 }),
+  tokenExpiresAt: timestamp("token_expires_at", { withTimezone: true }),
+  tokenUsedAt: timestamp("token_used_at", { withTimezone: true }),
+  requestedAt: timestamp("requested_at", { withTimezone: true }).defaultNow().notNull(),
+  verifiedAt: timestamp("verified_at", { withTimezone: true }),
+  completedAt: timestamp("completed_at", { withTimezone: true }),
+  cancelledAt: timestamp("cancelled_at", { withTimezone: true }),
+  rejectedAt: timestamp("rejected_at", { withTimezone: true }),
+  rejectionReason: text("rejection_reason"),
+  completionAuditId: integer("completion_audit_id"),
+}, (t) => ({
+  byUserTime: index("account_deletion_requests_user_time_idx").on(t.userId, t.requestedAt),
+  validState: check("account_deletion_requests_state_check", sql`${t.state} IN ('requested','verified','completed','cancelled','rejected')`),
+}));
+
+export const accountDeletionAudits = pgTable("account_deletion_audits", {
+  id: serial("id").primaryKey(),
+  requestId: text("request_id").references(() => accountDeletionRequests.id, { onDelete: "restrict" }).notNull().unique(),
+  subjectReference: varchar("subject_reference", { length: 64 }).notNull(),
+  actorType: text("actor_type").notNull(),
+  policyVersion: text("policy_version").notNull(),
+  erased: text("erased").array().notNull(),
+  retained: text("retained").array().notNull(),
+  counts: jsonb("counts").$type<Record<string, number>>().notNull(),
+  occurredAt: timestamp("occurred_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+export type AccountDeletionRequest = typeof accountDeletionRequests.$inferSelect;
+export type AccountDeletionAudit = typeof accountDeletionAudits.$inferSelect;
 // Subscriptions — recurring plans for learner/creator/institute/recruiter personas.
 // Backed by Cashfree one-off orders today (renewal tracked manually);
 // will switch to Cashfree Subscriptions API in a follow-up.

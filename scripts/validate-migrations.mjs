@@ -62,6 +62,8 @@ const immutableMigrationHashes = Object.freeze({
   "0041_single_accountable_officer_release_attestation": "cca2499d373f717862bfa9370cad3670388227b41e6f6f9c3e60b8ef97ebeae2",
   "0042_repair_release_attestation_and_snapshot_blueprints": "e7f4dd41d351623f2906dc8a965735d920634395b2985bd2945f5ea0c1573bf1",
   "0043_align_officer_item_authorship_disclosure": "2a7d7e21f2485ed29c56e48fc1f3c2d5c8a250a7076651a48bb3b665d36d7d94",
+  "0044_learner_account_deletion": "863773fd7efeeb25b009ec4b61d169fefbaaf97100a927fe23e43681f4f38f98",
+  "0045_blog_posts": "d4b3285db0285df395ca1145b8dc7da27e4147b5924fdebc85de66509156028b",
 });
 
 // Exact-hash review records for migrations containing data mutation,
@@ -98,6 +100,7 @@ const destructiveMigrationReviews = Object.freeze({
   "0041_single_accountable_officer_release_attestation": "additive attestation-mode columns with conditional replacement of six-party separation constraint and role trigger",
   "0042_repair_release_attestation_and_snapshot_blueprints": "table-scoped release policy function replacement, idempotent trigger reattachment, and append-only snapshots of unchanged published blueprints missing immutable revisions",
   "0043_align_officer_item_authorship_disclosure": "release policy function replacement permitting disclosed item authorship while retaining independent-review and all release-role guards",
+  "0044_learner_account_deletion": "additive deletion lifecycle and append-only erase/retain audit policy functions",
 });
 
 const mutatingPatterns = Object.freeze([

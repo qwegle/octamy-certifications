@@ -187,6 +187,7 @@ export default function Footer() {
           <FooterColumn title="Company" className="md:col-span-2">
             <ul className="space-y-2.5">
               <FooterLink to="/about">About Us</FooterLink>
+              <FooterLink to="/blog">Blog</FooterLink>
               <FooterLink to="/vision">Our Vision</FooterLink>
               <FooterLink to="/creator">For Creators</FooterLink>
               <FooterLink to="/institute">For Institutes</FooterLink>

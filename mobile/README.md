@@ -53,10 +53,10 @@ Unauthenticated users can access the auth group and public certificate verificat
 - Practice Pass access is authoritative only from `GET /api/me/subscription`; browser return or payment status never grants access.
 - Camera video is local rehearsal media only. There is no learner interview/profile video upload or recruiter-video endpoint.
 - Recruiter discovery/public-link controls are separate from selected per-recruiter grants. Grants are purpose-bound, expiring, revocable, and learner-auditable; they exclude Interview Studio, recordings, answers, question data, and raw integrity evidence.
-- There is no verified learner account-deletion endpoint or approved in-app web deletion contract. Because account creation is present, store submission remains blocked until the backend/product supplies one and updates `docs/API-CONTRACT.md`.
+- Learner account deletion is available in-app through the authenticated, emailed-token flow. Completion irreversibly erases the learner account, de-identifies legally retained records, then clears the local token and user-scoped app data.
 - External web checkout must remain storefront/region policy-gated. The backend has no App Store/Play receipt validation or restore-purchase contract.
 
-Before store submission, confirm ownership of `com.octamy.mobile`, final production artwork and metadata, EAS credentials, privacy/data-safety disclosures, external-payment policy eligibility, and the account-deletion contract.
+Before store submission, confirm ownership of `com.octamy.mobile`, final production artwork and metadata, EAS credentials, privacy/data-safety disclosures, external-payment policy eligibility, and production configuration.
 
 ## Permissions and privacy
 
@@ -68,7 +68,7 @@ Recruiter discovery and public evidence-passport-by-link are separate, off-by-de
 
 ## Account deletion and store-policy blockers
 
-Account deletion is available in-app at **Profile → Privacy & evidence → Email account deletion support**. It opens a pre-addressed request to `support@octamy.com`; support must verify and process deletion because the verified backend has no learner deletion endpoint. Since the app supports account creation, production store submission remains blocked until product/backend provides a store-compliant deletion contract and updates `docs/API-CONTRACT.md`.
+Account deletion is available in-app at **Profile → Privacy & evidence → Delete learner account**. The learner must review the erase/retain disclosure, explicitly acknowledge permanence, request an emailed verification token, and enter it within 30 minutes. While a request is pending, the screen shows its expiry and lets the learner cancel it. Successful confirmation irreversibly erases sign-in/profile data and learner artifacts, de-identifies retained credentials, assessments, payments, and audit records, then signs the learner out using token-first local invalidation and clears user-scoped app data. Issued credentials remain verifiable; payment/tax records remain for legal and accounting obligations. If the server explicitly reports that automated deletion or email delivery is unavailable, the same screen provides the honest `support@octamy.com` email fallback.
 
 Practice Pass currently uses a Cashfree external web-checkout handoff. Browser return and payment status never grant access; only the signed server webhook plus authoritative `GET /api/me/subscription` state can do so. This flow has no Apple/Google in-app purchase, receipt validation, restore-purchase, or subscription-management API and must be storefront/region policy-gated before release. Apple App Review and Google Play billing policy may reject unrestricted external checkout for digital access.
 
