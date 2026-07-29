@@ -313,6 +313,35 @@ app.use((req, res, next) => {
       }
     }
 
+    // A blog post slug matches the route shape for any value, so an unknown or
+    // unpublished post would otherwise be served as an indexable HTTP 200
+    // soft-404. Resolve it against the same live database.
+    const blogMatch = routePath.match(/^\/blog\/([^/]+)$/);
+    if (blogMatch) {
+      const slug = canonicalPublicSlug(blogMatch[1]);
+      if (!slug) return sendNotFound();
+      try {
+        const { db } = await import("./db");
+        const { blogPosts } = await import("@shared/schema");
+        const { and, eq, sql } = await import("drizzle-orm");
+        const rows = await db.select({ id: blogPosts.id }).from(blogPosts)
+          .where(and(
+            eq(blogPosts.slug, slug),
+            eq(blogPosts.status, "published"),
+            sql`${blogPosts.publishedAt} <= now()`,
+          )).limit(1);
+        if (rows.length === 0) return sendNotFound();
+      } catch (error) {
+        logger.warn("spa.blog_route_lookup_failed", { path: routePath, error: String(error) });
+        res.set({
+          "Cache-Control": "no-store",
+          "Retry-After": "60",
+          "X-Robots-Tag": "noindex, nofollow",
+        });
+        return res.status(503).type("html").send("<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"robots\" content=\"noindex,nofollow\"><title>Article temporarily unavailable | Octamy</title></head><body><main><h1>Article temporarily unavailable</h1><p>Please try again shortly.</p><p><a href=\"/blog\">Blog</a></p></main></body></html>");
+      }
+    }
+
     const isCanonicalPublicSurface = routePath === "/get-certified"
       || routePath.startsWith("/get-certified/")
       || routePath === "/practice"
