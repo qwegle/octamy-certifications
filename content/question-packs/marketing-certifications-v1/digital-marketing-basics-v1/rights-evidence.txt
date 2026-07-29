@@ -1,0 +1,9 @@
+Digital Marketing Basics Question Pack v1
+Generated: 2026-07-29
+Question count: 80
+Ownership basis: original first-party commissioned content.
+Author identity: production user 1.
+Independent item reviewer identity: production user 4.
+Factual evidence: authoritative public regulatory, standards, platform-mechanics, and measurement references stored per item.
+Excluded: exam dumps, copied question banks, placeholders, and unverified subjective best-practice claims.
+Question JSONL SHA-256: 36bbf04908e9691519806ba3203a784d4e0b32b3a0fac0d797277d2b0cf10f3b

@@ -1,0 +1,74 @@
+[
+  {
+    "bankId": 182,
+    "topicId": 3010,
+    "questionCount": 2,
+    "difficulty": "mixed",
+    "marksPerQuestion": 1,
+    "negativeMarks": 0,
+    "sortOrder": 0
+  },
+  {
+    "bankId": 182,
+    "topicId": 3011,
+    "questionCount": 2,
+    "difficulty": "mixed",
+    "marksPerQuestion": 1,
+    "negativeMarks": 0,
+    "sortOrder": 1
+  },
+  {
+    "bankId": 182,
+    "topicId": 3012,
+    "questionCount": 1,
+    "difficulty": "mixed",
+    "marksPerQuestion": 1,
+    "negativeMarks": 0,
+    "sortOrder": 2
+  },
+  {
+    "bankId": 182,
+    "topicId": 3013,
+    "questionCount": 1,
+    "difficulty": "mixed",
+    "marksPerQuestion": 1,
+    "negativeMarks": 0,
+    "sortOrder": 3
+  },
+  {
+    "bankId": 182,
+    "topicId": 3014,
+    "questionCount": 1,
+    "difficulty": "mixed",
+    "marksPerQuestion": 1,
+    "negativeMarks": 0,
+    "sortOrder": 4
+  },
+  {
+    "bankId": 182,
+    "topicId": 3015,
+    "questionCount": 1,
+    "difficulty": "mixed",
+    "marksPerQuestion": 1,
+    "negativeMarks": 0,
+    "sortOrder": 5
+  },
+  {
+    "bankId": 182,
+    "topicId": 3016,
+    "questionCount": 1,
+    "difficulty": "mixed",
+    "marksPerQuestion": 1,
+    "negativeMarks": 0,
+    "sortOrder": 6
+  },
+  {
+    "bankId": 182,
+    "topicId": 3017,
+    "questionCount": 1,
+    "difficulty": "mixed",
+    "marksPerQuestion": 1,
+    "negativeMarks": 0,
+    "sortOrder": 7
+  }
+]

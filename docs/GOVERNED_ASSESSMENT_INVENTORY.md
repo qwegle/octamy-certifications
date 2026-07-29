@@ -155,14 +155,76 @@ so the assessment returns to the administrative
 `IMMUTABLE_RELEASE_BUNDLE_NOT_REPRESENTED` state without becoming a substantive
 publication blocker.
 
-The same migration adds append-only `grant`/`revoke` events for the eight named
-release roles. `record-assessment-release-evidence.ts` requires a current exact
-role grant for the operator, accessibility/content/rights reviewers, cut-score
-approver, QA reviewer, publisher, and rollback owner. With no grants it refuses
-and tells the administrator to grant roles first. Test/smoke, automation,
-service/system, and AI or shared assessment-authoring identities are rejected by
-both the CLI and database grant policy. Authorization events and evidence voids
-cannot be updated or deleted.
+Migration `0040_archive_shells_and_release_roles.sql` supersedes the legacy
+`0036` authorization event stream with explicit
+`assessment_release_role_grants` and `assessment_release_role_revocations`.
+Each immutable grant records the real user, exact role, granting administrator,
+time, reason, optional expiry, and any documented single-officer exception. A
+separate immutable revocation points to one exact grant. Legacy `0036` grant
+events are not accepted by `record-assessment-release-evidence.ts`.
+
+Before recording evidence, the platform owner must create ordinary named
+accounts for the actual people responsible for the work (through the normal
+registration/admin workflow), verify their names and email addresses, and note
+their user IDs. Never substitute automation, AI-authoring, test, smoke, shared,
+or service identities. Grant only the role each person genuinely performs:
+
+```bash
+# Preview: this is read-only because --apply is absent.
+npx tsx scripts/grant-assessment-release-role.ts \
+  --granting-admin-user-id <platform-owner-admin-id> \
+  --target-user-id <real-person-user-id> \
+  --role <release_operator|accessibility_reviewer|content_reviewer|rights_reviewer|cut_score_approver|qa_reviewer|publisher|rollback_owner> \
+  --reason "Named person is responsible for this governed release function"
+
+# After checking the named account and role, repeat with both write guards:
+#   --apply --confirm-release-role-grant
+# Optionally bound the appointment with --expires-at <ISO-8601 timestamp>.
+```
+
+Repeat for each responsible person. The CLI and database reject unsafe account
+names/emails, duplicate active grants, non-admin grantors, and conflicting
+approval roles. For a genuinely small team only, the owner may add
+`--single-officer-exception --single-officer-exception-reason "<20+ character
+justification>"`; the exception is stored on the grant. It is not permission to
+fabricate work or bypass evidence-level independence: whoever signs must have
+genuinely performed that role, and the evidence CLI still requires distinct
+accessibility, content, rights, cut-score, QA, and publisher signatories for one
+assessment.
+
+`record-assessment-release-evidence.ts` accepts a principal only when the exact
+role has a current, unexpired grant with no revocation. With no such grants it
+names the missing role and refuses before writing. Test/smoke, automation,
+service/system, and AI or shared assessment-authoring identities remain rejected.
+Authorization rows, revocations, evidence, and evidence voids cannot be updated
+or deleted.
+
+## Final non-viable shell disposition
+
+Migration `0039_archive_remaining_certification_shells.sql` archives, without
+deleting, the final 17 audited legacy certification shells. Migration `0040`
+writes one immutable `assessment_shell_archival_records` row per shell. Every target was production-verified as inactive, private,
+pending, and free of blueprints, questions, attempts, certificates, and
+payments. The guarded exact ID/slug list is:
+
+- Undefined certification claim: `business-strategy-fundamentals`,
+  `innovation-management`, `growth-hacking`, `fintech-innovation`,
+  `strategic-pmo`, and `digital-transformation` (no sufficiently specific role,
+  framework, jurisdiction, durable syllabus, or observable claim).
+- Evidence model incompatible with an empty MCQ shell: `strategic-leadership`,
+  `entrepreneurship`, `design-principles`, `advanced-prototyping`,
+  `design-leadership`, and `brand-identity` (these require behavioural,
+  scenario, practical, portfolio, artifact, or multi-rater evidence).
+- Experience claim, not an assessment claim: `software-engineering-internship`,
+  `data-science-internship`, `marketing-internship`,
+  `business-analyst-internship`, and `ux-design-internship` (internship
+  participation/completion requires an identified employer or institution and
+  verified workplace evidence; a quiz cannot prove it).
+
+The migration fails closed if any exact production target has gained content or
+learner history, cannot reach `archived`, or lacks its rationale record. On a
+fresh database where those exact legacy ID/slug pairs do not exist, the
+postcondition is intentionally a no-op.
 
 ## Operator runbook: candidate pack to publishable assessment
 

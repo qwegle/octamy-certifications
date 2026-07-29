@@ -1,0 +1,66 @@
+[
+  {
+    "topicSlug": "capacity-utilisation",
+    "questionCount": 2,
+    "difficulty": "mixed",
+    "marksPerQuestion": 1,
+    "negativeMarks": 0,
+    "sortOrder": 0
+  },
+  {
+    "topicSlug": "bottlenecks-throughput",
+    "questionCount": 2,
+    "difficulty": "mixed",
+    "marksPerQuestion": 1,
+    "negativeMarks": 0,
+    "sortOrder": 1
+  },
+  {
+    "topicSlug": "inventory-replenishment",
+    "questionCount": 1,
+    "difficulty": "mixed",
+    "marksPerQuestion": 1,
+    "negativeMarks": 0,
+    "sortOrder": 2
+  },
+  {
+    "topicSlug": "queueing-flow",
+    "questionCount": 1,
+    "difficulty": "mixed",
+    "marksPerQuestion": 1,
+    "negativeMarks": 0,
+    "sortOrder": 3
+  },
+  {
+    "topicSlug": "lean-six-sigma",
+    "questionCount": 1,
+    "difficulty": "mixed",
+    "marksPerQuestion": 1,
+    "negativeMarks": 0,
+    "sortOrder": 4
+  },
+  {
+    "topicSlug": "statistical-quality-control",
+    "questionCount": 1,
+    "difficulty": "mixed",
+    "marksPerQuestion": 1,
+    "negativeMarks": 0,
+    "sortOrder": 5
+  },
+  {
+    "topicSlug": "forecasting-error",
+    "questionCount": 1,
+    "difficulty": "mixed",
+    "marksPerQuestion": 1,
+    "negativeMarks": 0,
+    "sortOrder": 6
+  },
+  {
+    "topicSlug": "supply-planning",
+    "questionCount": 1,
+    "difficulty": "mixed",
+    "marksPerQuestion": 1,
+    "negativeMarks": 0,
+    "sortOrder": 7
+  }
+]

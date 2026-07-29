@@ -1,0 +1,48 @@
+{
+  "status": "passed",
+  "calculationCount": 6,
+  "checks": [
+    {
+      "sourceRecordId": "ui-ux-design-v1-019",
+      "formula": "(1.0+.05)/(0+.05)",
+      "computed": 21,
+      "expected": 21,
+      "key": "21.00:1"
+    },
+    {
+      "sourceRecordId": "ui-ux-design-v1-020",
+      "formula": "WCAG luminance(#777777,#FFFFFF)",
+      "computed": 4.478089453577214,
+      "expected": 4.478089453577214,
+      "key": "4.48:1"
+    },
+    {
+      "sourceRecordId": "ui-ux-design-v1-047",
+      "formula": "18/24*100",
+      "computed": 75,
+      "expected": 75,
+      "key": "75%"
+    },
+    {
+      "sourceRecordId": "ui-ux-design-v1-048",
+      "formula": "(40+50+70+60)/4",
+      "computed": 55,
+      "expected": 55,
+      "key": "55 seconds"
+    },
+    {
+      "sourceRecordId": "ui-ux-design-v1-049",
+      "formula": "(3+1+0+4)/4",
+      "computed": 2,
+      "expected": 2,
+      "key": "2 errors"
+    },
+    {
+      "sourceRecordId": "ui-ux-design-v1-050",
+      "formula": "(90-72)/90*100",
+      "computed": 20,
+      "expected": 20,
+      "key": "20%"
+    }
+  ]
+}

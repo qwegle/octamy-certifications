@@ -57,6 +57,8 @@ const immutableMigrationHashes = Object.freeze({
   "0036_void_fabricated_release_evidence": "c4ab69809b5a884da9185aa166af89d0bd160080c2f1d1eadf45ce402707f7a4",
   "0037_release_evidence_rls_breaks_backups": "f0314ed982c804ce4eb8b3cc0e1ec8d0981217810f8bacc8a5ca46b9730f5097",
   "0038_archive_audited_certification_shells": "52aca66a2b735cc95588c1fb696d22c45a424d73d9583a36c51dc29bf8640a83",
+  "0039_archive_remaining_certification_shells": "5a3f65ce5ebb71c29b280d5f234793903ccddd2ff39ce87bf73568f8578d850e",
+  "0040_archive_shells_and_release_roles": "0919e1a3c2be30398a397515697c241860ed86ade6c48e9df559794ea4e5cc19",
 });
 
 // Exact-hash review records for migrations containing data mutation,
@@ -88,6 +90,8 @@ const destructiveMigrationReviews = Object.freeze({
   "0035_governed_assessment_release_evidence": "new cross-role and append-only policy functions on additive release-evidence tables",
   "0036_void_fabricated_release_evidence": "new append-only void and release-role authorization policy function with forced unvoided evidence visibility",
   "0038_archive_audited_certification_shells": "additive review-state extension and exact-ID/state/history guarded archival of 14 audited empty certification shells",
+  "0039_archive_remaining_certification_shells": "exact-ID/slug/state/history guarded archival of 17 audited empty non-viable certification shells",
+  "0040_archive_shells_and_release_roles": "additive immutable shell-rationale and release-role grant/revocation tables with new policy functions",
 });
 
 const mutatingPatterns = Object.freeze([
@@ -273,17 +277,20 @@ try {
         to_regclass($4) IS NOT NULL AS benefit_usages,
         to_regclass($5) IS NOT NULL AS institute_exam_invitations,
         to_regclass($6) IS NOT NULL AS candidate_evidence_grants,
+        to_regclass($7) IS NOT NULL AS assessment_shell_archival_records,
+        to_regclass($8) IS NOT NULL AS assessment_release_role_grants,
+        to_regclass($9) IS NOT NULL AS assessment_release_role_revocations,
         EXISTS (
           SELECT 1 FROM information_schema.columns
-          WHERE table_schema = $7 AND table_name = 'courses' AND column_name = 'review_status'
+          WHERE table_schema = $10 AND table_name = 'courses' AND column_name = 'review_status'
         ) AS course_review_status,
         EXISTS (
           SELECT 1 FROM information_schema.columns
-          WHERE table_schema = $7 AND table_name = 'certificates' AND column_name = 'scheduled_attempt_id'
+          WHERE table_schema = $10 AND table_name = 'certificates' AND column_name = 'scheduled_attempt_id'
         ) AS scheduled_certificate_link,
         EXISTS (
           SELECT 1 FROM information_schema.columns
-          WHERE table_schema = $7 AND table_name = 'exam_instance_attempts' AND column_name = 'invitation_id'
+          WHERE table_schema = $10 AND table_name = 'exam_instance_attempts' AND column_name = 'invitation_id'
         ) AS invitation_attempt_link
     `,
     [
@@ -293,6 +300,9 @@ try {
       `${schemaName}.subscription_benefit_usages`,
       `${schemaName}.exam_instance_invitations`,
       `${schemaName}.candidate_evidence_grants`,
+      `${schemaName}.assessment_shell_archival_records`,
+      `${schemaName}.assessment_release_role_grants`,
+      `${schemaName}.assessment_release_role_revocations`,
       schemaName,
     ],
   );

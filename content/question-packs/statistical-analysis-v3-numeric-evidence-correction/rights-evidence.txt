@@ -1,0 +1,6 @@
+Statistical Analysis numeric-evidence correction v3
+Generated: 2026-07-29
+Ownership: original first-party wording for Octamy.
+Numeric check: 95 / 100 = 0.95, asserted programmatically.
+Reference: https://www.itl.nist.gov/div898/handbook/
+Questions SHA-256: f2657709a12969143dd6c32bb3ea3ff0f79e735965197394e0854685d3fe134e

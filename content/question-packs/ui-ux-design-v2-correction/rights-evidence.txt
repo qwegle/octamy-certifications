@@ -1,0 +1,8 @@
+UI/UX Design v2 Governed Correction
+Prepared: 2026-07-29
+Superseded record: ui-ux-design-v1-076
+Replacement record: ui-ux-design-v2-076
+Ownership: original first-party Octamy content.
+Author user: 1; independent reviewer user: 4.
+Factual source: W3C WAI form-label guidance.
+Replacement SHA-256: 4b8b4024ee648465d8aa797664fd3a61a8fc71839a4e119a87c69d870e85a48e

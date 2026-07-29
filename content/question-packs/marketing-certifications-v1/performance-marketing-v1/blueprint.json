@@ -1,0 +1,72 @@
+{
+  "assessmentSlug": "performance-marketing",
+  "bankSlug": "performance-marketing-bank",
+  "syllabusVersion": "OCT-PFM-2026.1",
+  "drawCount": 10,
+  "rules": [
+    {
+      "topicSlug": "acquisition-efficiency",
+      "questionCount": 2,
+      "difficulty": "mixed",
+      "marksPerQuestion": 1,
+      "negativeMarks": 0,
+      "sortOrder": 0
+    },
+    {
+      "topicSlug": "ltv-cac-economics",
+      "questionCount": 2,
+      "difficulty": "mixed",
+      "marksPerQuestion": 1,
+      "negativeMarks": 0,
+      "sortOrder": 1
+    },
+    {
+      "topicSlug": "auction-bidding",
+      "questionCount": 1,
+      "difficulty": "mixed",
+      "marksPerQuestion": 1,
+      "negativeMarks": 0,
+      "sortOrder": 2
+    },
+    {
+      "topicSlug": "analytics-attribution",
+      "questionCount": 1,
+      "difficulty": "mixed",
+      "marksPerQuestion": 1,
+      "negativeMarks": 0,
+      "sortOrder": 3
+    },
+    {
+      "topicSlug": "incrementality-testing",
+      "questionCount": 1,
+      "difficulty": "mixed",
+      "marksPerQuestion": 1,
+      "negativeMarks": 0,
+      "sortOrder": 4
+    },
+    {
+      "topicSlug": "tracking-measurement",
+      "questionCount": 1,
+      "difficulty": "mixed",
+      "marksPerQuestion": 1,
+      "negativeMarks": 0,
+      "sortOrder": 5
+    },
+    {
+      "topicSlug": "audience-privacy",
+      "questionCount": 1,
+      "difficulty": "mixed",
+      "marksPerQuestion": 1,
+      "negativeMarks": 0,
+      "sortOrder": 6
+    },
+    {
+      "topicSlug": "quality-integrity",
+      "questionCount": 1,
+      "difficulty": "mixed",
+      "marksPerQuestion": 1,
+      "negativeMarks": 0,
+      "sortOrder": 7
+    }
+  ]
+}

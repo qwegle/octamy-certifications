@@ -1,0 +1,72 @@
+{
+  "assessmentSlug": "content-marketing",
+  "bankSlug": "content-marketing-bank",
+  "syllabusVersion": "OCT-CMK-2026.1",
+  "drawCount": 10,
+  "rules": [
+    {
+      "topicSlug": "content-objectives",
+      "questionCount": 2,
+      "difficulty": "mixed",
+      "marksPerQuestion": 1,
+      "negativeMarks": 0,
+      "sortOrder": 0
+    },
+    {
+      "topicSlug": "search-discovery",
+      "questionCount": 2,
+      "difficulty": "mixed",
+      "marksPerQuestion": 1,
+      "negativeMarks": 0,
+      "sortOrder": 1
+    },
+    {
+      "topicSlug": "content-measurement",
+      "questionCount": 1,
+      "difficulty": "mixed",
+      "marksPerQuestion": 1,
+      "negativeMarks": 0,
+      "sortOrder": 2
+    },
+    {
+      "topicSlug": "distribution-email",
+      "questionCount": 1,
+      "difficulty": "mixed",
+      "marksPerQuestion": 1,
+      "negativeMarks": 0,
+      "sortOrder": 3
+    },
+    {
+      "topicSlug": "rights-disclosure",
+      "questionCount": 1,
+      "difficulty": "mixed",
+      "marksPerQuestion": 1,
+      "negativeMarks": 0,
+      "sortOrder": 4
+    },
+    {
+      "topicSlug": "content-privacy",
+      "questionCount": 1,
+      "difficulty": "mixed",
+      "marksPerQuestion": 1,
+      "negativeMarks": 0,
+      "sortOrder": 5
+    },
+    {
+      "topicSlug": "content-accessibility",
+      "questionCount": 1,
+      "difficulty": "mixed",
+      "marksPerQuestion": 1,
+      "negativeMarks": 0,
+      "sortOrder": 6
+    },
+    {
+      "topicSlug": "content-governance",
+      "questionCount": 1,
+      "difficulty": "mixed",
+      "marksPerQuestion": 1,
+      "negativeMarks": 0,
+      "sortOrder": 7
+    }
+  ]
+}

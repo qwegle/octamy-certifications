@@ -1,0 +1,185 @@
+{
+  "status": "passed",
+  "packs": [
+    {
+      "assessment": "digital-marketing-basics",
+      "items": 80,
+      "topics": [
+        "core-metrics",
+        "unit-economics",
+        "channel-mechanics",
+        "search-email-mechanics",
+        "analytics-attribution",
+        "privacy-governance",
+        "experimentation",
+        "creative-accessibility"
+      ],
+      "topicCounts": {
+        "core-metrics": 10,
+        "unit-economics": 10,
+        "channel-mechanics": 10,
+        "search-email-mechanics": 10,
+        "analytics-attribution": 10,
+        "privacy-governance": 10,
+        "experimentation": 10,
+        "creative-accessibility": 10
+      },
+      "drawCount": 10,
+      "minimumRuleRotationDepth": 5,
+      "answerPositions": [
+        20,
+        20,
+        20,
+        20
+      ],
+      "calculationsProgrammaticallyVerified": 23,
+      "validation": {
+        "validRows": 80,
+        "invalidRows": 0,
+        "duplicateSourceRecordIds": 0,
+        "duplicateContentRows": 0,
+        "exactDuplicateStems": 0,
+        "nearDuplicateStems": 0,
+        "manifest": "passed",
+        "decisions": "passed",
+        "rightsEvidenceSha256": "0dfc739212d9bbd7229957cc9fcda41e676cbc26a07b14198fa5cbddfc1de04f",
+        "questionsSha256": "36bbf04908e9691519806ba3203a784d4e0b32b3a0fac0d797277d2b0cf10f3b"
+      }
+    },
+    {
+      "assessment": "performance-marketing",
+      "items": 80,
+      "topics": [
+        "acquisition-efficiency",
+        "ltv-cac-economics",
+        "auction-bidding",
+        "analytics-attribution",
+        "incrementality-testing",
+        "tracking-measurement",
+        "audience-privacy",
+        "quality-integrity"
+      ],
+      "topicCounts": {
+        "acquisition-efficiency": 10,
+        "ltv-cac-economics": 10,
+        "auction-bidding": 10,
+        "analytics-attribution": 10,
+        "incrementality-testing": 10,
+        "tracking-measurement": 10,
+        "audience-privacy": 10,
+        "quality-integrity": 10
+      },
+      "drawCount": 10,
+      "minimumRuleRotationDepth": 5,
+      "answerPositions": [
+        20,
+        20,
+        20,
+        20
+      ],
+      "calculationsProgrammaticallyVerified": 23,
+      "validation": {
+        "validRows": 80,
+        "invalidRows": 0,
+        "duplicateSourceRecordIds": 0,
+        "duplicateContentRows": 0,
+        "exactDuplicateStems": 0,
+        "nearDuplicateStems": 0,
+        "manifest": "passed",
+        "decisions": "passed",
+        "rightsEvidenceSha256": "afaf034bbec30025599107ae017ff0574cfa012c39e904eb6b90be863cf807e2",
+        "questionsSha256": "f58dc898e6babf7d840cd03daeb0898f8b5f9b2b0e1cf22cb90b6f66f3ca54ff"
+      }
+    },
+    {
+      "assessment": "content-marketing",
+      "items": 80,
+      "topics": [
+        "content-objectives",
+        "search-discovery",
+        "content-measurement",
+        "distribution-email",
+        "rights-disclosure",
+        "content-privacy",
+        "content-accessibility",
+        "content-governance"
+      ],
+      "topicCounts": {
+        "content-objectives": 10,
+        "search-discovery": 10,
+        "content-measurement": 10,
+        "distribution-email": 10,
+        "rights-disclosure": 10,
+        "content-privacy": 10,
+        "content-accessibility": 10,
+        "content-governance": 10
+      },
+      "drawCount": 10,
+      "minimumRuleRotationDepth": 5,
+      "answerPositions": [
+        20,
+        20,
+        20,
+        20
+      ],
+      "calculationsProgrammaticallyVerified": 10,
+      "validation": {
+        "validRows": 80,
+        "invalidRows": 0,
+        "duplicateSourceRecordIds": 0,
+        "duplicateContentRows": 0,
+        "exactDuplicateStems": 0,
+        "nearDuplicateStems": 0,
+        "manifest": "passed",
+        "decisions": "passed",
+        "rightsEvidenceSha256": "6d8a2c04322fb018c64d701c5cd8a58711a1ee03ea8981a67f45633e8d3f72e8",
+        "questionsSha256": "87cc0b7a7bdd5fd8aba442902d649809c6c440fdbe6381307732975e101a9004"
+      }
+    },
+    {
+      "assessment": "social-media-strategy",
+      "items": 80,
+      "topics": [
+        "organic-mechanics",
+        "organic-social-metrics",
+        "paid-social-economics",
+        "auction-bidding",
+        "social-attribution",
+        "social-experiments",
+        "disclosure-moderation",
+        "social-accessibility"
+      ],
+      "topicCounts": {
+        "organic-mechanics": 10,
+        "organic-social-metrics": 10,
+        "paid-social-economics": 10,
+        "auction-bidding": 10,
+        "social-attribution": 10,
+        "social-experiments": 10,
+        "disclosure-moderation": 10,
+        "social-accessibility": 10
+      },
+      "drawCount": 10,
+      "minimumRuleRotationDepth": 5,
+      "answerPositions": [
+        20,
+        20,
+        20,
+        20
+      ],
+      "calculationsProgrammaticallyVerified": 23,
+      "validation": {
+        "validRows": 80,
+        "invalidRows": 0,
+        "duplicateSourceRecordIds": 0,
+        "duplicateContentRows": 0,
+        "exactDuplicateStems": 0,
+        "nearDuplicateStems": 0,
+        "manifest": "passed",
+        "decisions": "passed",
+        "rightsEvidenceSha256": "3c49b30ff2767f25ab5f141bcc2f4ba0a2087a1b3acd6378112dfe85a935da45",
+        "questionsSha256": "50a8b4ec83e5efb0656f3191567381786c7408f7519636d4a52664773dde71a8"
+      }
+    }
+  ]
+}

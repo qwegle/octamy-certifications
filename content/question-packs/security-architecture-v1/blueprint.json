@@ -1,0 +1,73 @@
+{
+  "assessmentSlug": "security-architecture",
+  "bankSlug": "security-architecture-bank",
+  "syllabusVersion": "SECARCH-2026.1",
+  "totalDraw": 10,
+  "minimumRuleRotationDepth": 5,
+  "rules": [
+    {
+      "topicSlug": "zero-trust",
+      "questionCount": 2,
+      "difficulty": "mixed",
+      "marksPerQuestion": 1,
+      "negativeMarks": 0,
+      "sortOrder": 0
+    },
+    {
+      "topicSlug": "segmentation-trust-boundaries",
+      "questionCount": 2,
+      "difficulty": "mixed",
+      "marksPerQuestion": 1,
+      "negativeMarks": 0,
+      "sortOrder": 1
+    },
+    {
+      "topicSlug": "identity-privileged-access",
+      "questionCount": 1,
+      "difficulty": "mixed",
+      "marksPerQuestion": 1,
+      "negativeMarks": 0,
+      "sortOrder": 2
+    },
+    {
+      "topicSlug": "key-management",
+      "questionCount": 1,
+      "difficulty": "mixed",
+      "marksPerQuestion": 1,
+      "negativeMarks": 0,
+      "sortOrder": 3
+    },
+    {
+      "topicSlug": "secure-design-patterns",
+      "questionCount": 1,
+      "difficulty": "mixed",
+      "marksPerQuestion": 1,
+      "negativeMarks": 0,
+      "sortOrder": 4
+    },
+    {
+      "topicSlug": "threat-modeling",
+      "questionCount": 1,
+      "difficulty": "mixed",
+      "marksPerQuestion": 1,
+      "negativeMarks": 0,
+      "sortOrder": 5
+    },
+    {
+      "topicSlug": "defence-in-depth",
+      "questionCount": 1,
+      "difficulty": "mixed",
+      "marksPerQuestion": 1,
+      "negativeMarks": 0,
+      "sortOrder": 6
+    },
+    {
+      "topicSlug": "resilience-recovery",
+      "questionCount": 1,
+      "difficulty": "mixed",
+      "marksPerQuestion": 1,
+      "negativeMarks": 0,
+      "sortOrder": 7
+    }
+  ]
+}

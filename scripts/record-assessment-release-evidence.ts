@@ -56,16 +56,31 @@ const RELEASE_AUTHORIZATION_ROLES: Record<keyof ReleasePrincipalIds, AssessmentR
 
 const FORBIDDEN_RELEASE_IDENTITY = /(^|[^a-z0-9])(smoke|test|testing|automation|automated|bot|robot|system|service account)([^a-z0-9]|$)|\b(ai|artificial intelligence)\b.*\b(author|authoring|generated|automation)\b|\bassessment authoring\b/i;
 
+export type ReleaseRoleGrantState = {
+  grantId: number;
+  userId: number;
+  releaseRole: string;
+  expiresAt: string | Date | null;
+  revokedAt: string | Date | null;
+};
+
 export function assertAuthorizedReleasePrincipals(
   roleIds: ReleasePrincipalIds,
   users: Array<{ id: number; name: string; email: string }>,
-  activeAuthorizations: Array<{ userId: number; releaseRole: string }>,
+  authorizations: ReleaseRoleGrantState[],
+  now: Date = new Date(),
 ) {
-  if (activeAuthorizations.length === 0) {
-    throw new Error("NO_RELEASE_ROLE_AUTHORIZATIONS: no active release-role grants exist; an administrator must grant roles first");
+  const currentAuthorizations = authorizations.filter((grant) => {
+    if (grant.revokedAt != null) return false;
+    if (grant.expiresAt == null) return true;
+    const expiry = new Date(grant.expiresAt);
+    return Number.isFinite(expiry.getTime()) && expiry.getTime() > now.getTime();
+  });
+  if (currentAuthorizations.length === 0) {
+    throw new Error("NO_RELEASE_ROLE_AUTHORIZATIONS: no current release-role grants exist; an administrator must grant roles first");
   }
   const usersById = new Map(users.map((user) => [user.id, user]));
-  const grants = new Set(activeAuthorizations.map((grant) => `${grant.userId}:${grant.releaseRole}`));
+  const grants = new Set(currentAuthorizations.map((grant) => `${grant.userId}:${grant.releaseRole}`));
   for (const [principal, userId] of Object.entries(roleIds) as Array<[keyof ReleasePrincipalIds, number]>) {
     const user = usersById.get(userId);
     if (!user) throw new Error(`RELEASE_PRINCIPAL_NOT_FOUND: ${principal} user ${userId} does not exist`);
@@ -74,7 +89,7 @@ export function assertAuthorizedReleasePrincipals(
     }
     const requiredRole = RELEASE_AUTHORIZATION_ROLES[principal];
     if (!grants.has(`${userId}:${requiredRole}`)) {
-      throw new Error(`RELEASE_ROLE_NOT_AUTHORIZED: ${principal} user ${userId} lacks active ${requiredRole} authorization; grant roles first`);
+      throw new Error(`RELEASE_ROLE_NOT_AUTHORIZED: ${principal} user ${userId} lacks a current, unrevoked, unexpired ${requiredRole} grant; grant that exact role first`);
     }
   }
 }
@@ -159,14 +174,6 @@ export async function recordAssessmentReleaseEvidence(options: RecordAssessmentR
     throw new Error("SELF_APPROVAL_FORBIDDEN: accessibility, content, rights, cut-score, QA, and publisher user IDs must all be distinct");
   }
 
-  const initialReport = await buildGovernedAssessmentInventory({ databaseUrl: options.databaseUrl, assessmentSlugs: [options.assessmentSlug] });
-  const assessmentReport = initialReport.assessments.find((assessment: any) => assessment.slug === options.assessmentSlug);
-  if (!assessmentReport) throw new Error(`Assessment ${options.assessmentSlug} was not found`);
-  const substantiveBlockers = assessmentReport.blockers.filter((blocker: any) => !EVIDENCE_ONLY_BLOCKERS.has(blocker.code));
-  if (substantiveBlockers.length > 0) {
-    throw new Error(`SUBSTANTIVE_CONTENT_BLOCKERS: ${substantiveBlockers.map((blocker: any) => blocker.code).join(", ")}`);
-  }
-
   const client = new Client({ connectionString: options.databaseUrl, application_name: "octamy-record-assessment-release-evidence" });
   await client.connect();
   let transactionOpen = false;
@@ -175,6 +182,37 @@ export async function recordAssessmentReleaseEvidence(options: RecordAssessmentR
     transactionOpen = true;
     await client.query("SET LOCAL statement_timeout = '30s'");
     await client.query("SET LOCAL lock_timeout = '2s'");
+
+    const distinctIds = Array.from(new Set(Object.values(roleIds)));
+    const users = await client.query<{ id: number; is_admin: boolean; name: string; email: string }>(
+      `SELECT id, is_admin, name, email FROM users WHERE id = ANY($1::int[])`,
+      [distinctIds],
+    );
+    if (users.rows.length !== distinctIds.length) throw new Error("Every operator/reviewer/signatory user ID must exist");
+    if (!users.rows.find((user) => user.id === roleIds.operator)?.is_admin) throw new Error("OPERATOR_NOT_AUTHORIZED: --operator-user-id must identify an administrator");
+
+    const authorizationResult = await client.query<ReleaseRoleGrantState>(
+      `SELECT grant_row.id AS "grantId", grant_row.user_id AS "userId",
+              grant_row.release_role AS "releaseRole", grant_row.expires_at AS "expiresAt",
+              revocation.revoked_at AS "revokedAt"
+         FROM assessment_release_role_grants grant_row
+         LEFT JOIN assessment_release_role_revocations revocation ON revocation.grant_id = grant_row.id
+        WHERE grant_row.user_id = ANY($1::int[])`,
+      [distinctIds],
+    );
+    assertAuthorizedReleasePrincipals(
+      roleIds,
+      users.rows.map(({ id, name, email }) => ({ id, name, email })),
+      authorizationResult.rows,
+    );
+
+    const initialReport = await buildGovernedAssessmentInventory({ databaseUrl: options.databaseUrl, assessmentSlugs: [options.assessmentSlug] });
+    const assessmentReport = initialReport.assessments.find((assessment: any) => assessment.slug === options.assessmentSlug);
+    if (!assessmentReport) throw new Error(`Assessment ${options.assessmentSlug} was not found`);
+    const substantiveBlockers = assessmentReport.blockers.filter((blocker: any) => !EVIDENCE_ONLY_BLOCKERS.has(blocker.code));
+    if (substantiveBlockers.length > 0) {
+      throw new Error(`SUBSTANTIVE_CONTENT_BLOCKERS: ${substantiveBlockers.map((blocker: any) => blocker.code).join(", ")}`);
+    }
 
     const courseResult = await client.query<{
       id: number; passing_score: number; revision: number | null;
@@ -189,32 +227,6 @@ export async function recordAssessmentReleaseEvidence(options: RecordAssessmentR
     const course = courseResult.rows[0];
     if (!course || course.revision == null) throw new Error("A current immutable blueprint revision is required");
     if (options.apply) await client.query("SELECT pg_advisory_xact_lock(7355, $1)", [course.id]);
-
-    const distinctIds = Array.from(new Set(Object.values(roleIds)));
-    const users = await client.query<{ id: number; is_admin: boolean; name: string; email: string }>(
-      `SELECT id, is_admin, name, email FROM users WHERE id = ANY($1::int[])`,
-      [distinctIds],
-    );
-    if (users.rows.length !== distinctIds.length) throw new Error("Every operator/reviewer/signatory user ID must exist");
-    if (!users.rows.find((user) => user.id === roleIds.operator)?.is_admin) throw new Error("OPERATOR_NOT_AUTHORIZED: --operator-user-id must identify an administrator");
-
-    const authorizationResult = await client.query<{ userId: number; releaseRole: string }>(
-      `SELECT grant_event.user_id AS "userId", grant_event.release_role AS "releaseRole"
-         FROM assessment_release_role_authorizations grant_event
-        WHERE grant_event.authorization_action = 'grant'
-          AND grant_event.user_id = ANY($1::int[])
-          AND NOT EXISTS (
-            SELECT 1 FROM assessment_release_role_authorizations revoke_event
-             WHERE revoke_event.authorization_action = 'revoke'
-               AND revoke_event.supersedes_authorization_id = grant_event.id
-          )`,
-      [distinctIds],
-    );
-    assertAuthorizedReleasePrincipals(
-      roleIds,
-      users.rows.map(({ id, name, email }) => ({ id, name, email })),
-      authorizationResult.rows,
-    );
 
     const rulesResult = await client.query<{
       id: number; bank_id: number; topic_id: number | null; question_count: number; difficulty: string;

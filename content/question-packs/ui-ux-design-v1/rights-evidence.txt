@@ -1,0 +1,8 @@
+UI/UX Design Original Question Pack v1
+Prepared: 2026-07-29
+Items: 80; topics: 8; items per topic: 10.
+Ownership: original first-party Octamy content commissioned by the authenticated product owner.
+Authoring and evidence review: Kiro AI; production author user 1 and independent item reviewer user 4 are separately attributed.
+References are used only to verify facts; no source question wording was copied.
+Excluded: exam dumps, proprietary exams, copied banks, placeholders, and unattributed material.
+Questions SHA-256: 0dd14415a2ab521f1c440aaad7aea0187cc234ec9b5af2a5bc6ca1da46ef6ac3

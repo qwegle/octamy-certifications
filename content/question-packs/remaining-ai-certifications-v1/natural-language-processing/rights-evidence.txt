@@ -1,0 +1,8 @@
+Natural Language Processing Question Pack v1
+Generated: 2026-07-29
+Question count: 80
+Ownership basis: original first-party commissioned content.
+Author/reviewer representation: Kiro AI acting under the authenticated Octamy product owner's explicit instruction; no human review is claimed.
+Factual sources: Stanford Speech and Language Processing materials, official Hugging Face and PyTorch documentation, original Transformer, BLEU, ROUGE, and RAG papers, and the NIST Generative AI Profile.
+Excluded sources: proprietary exams, exam dumps, copied vendor questions, third-party question banks, and placeholders.
+Question JSONL SHA-256: 7f02aeb61e982deaf9c6c183dc1ea94e857021ce003ac3176a15e201d208feab

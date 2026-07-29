@@ -1,0 +1,314 @@
+{
+  "status": "passed",
+  "calculationCount": 44,
+  "checks": [
+    {
+      "sourceRecordId": "operations-management-v1-006",
+      "formula": "360/480*100",
+      "computed": 75,
+      "expected": 75,
+      "key": "75%"
+    },
+    {
+      "sourceRecordId": "operations-management-v1-007",
+      "formula": "250*0.80",
+      "computed": 200,
+      "expected": 200,
+      "key": "200 cases/day"
+    },
+    {
+      "sourceRecordId": "operations-management-v1-008",
+      "formula": "3*18",
+      "computed": 54,
+      "expected": 54,
+      "key": "54 parts/hour"
+    },
+    {
+      "sourceRecordId": "operations-management-v1-009",
+      "formula": "920/(1-0.15)",
+      "computed": 1082.3529411764707,
+      "expected": 1082.35294117647,
+      "key": "1082.35 units/week"
+    },
+    {
+      "sourceRecordId": "operations-management-v1-010",
+      "formula": "(420-35)/5",
+      "computed": 77,
+      "expected": 77,
+      "key": "77 units/day"
+    },
+    {
+      "sourceRecordId": "operations-management-v1-016",
+      "formula": "min(24,18,21)",
+      "computed": 18,
+      "expected": 18,
+      "key": "18 units/hour"
+    },
+    {
+      "sourceRecordId": "operations-management-v1-017",
+      "formula": "450/1.5",
+      "computed": 300,
+      "expected": 300,
+      "key": "300 units/day"
+    },
+    {
+      "sourceRecordId": "operations-management-v1-018",
+      "formula": "(480-40)/2",
+      "computed": 220,
+      "expected": 220,
+      "key": "220 units/day"
+    },
+    {
+      "sourceRecordId": "operations-management-v1-019",
+      "formula": "(7+9)*6",
+      "computed": 96,
+      "expected": 96,
+      "key": "96 units"
+    },
+    {
+      "sourceRecordId": "operations-management-v1-020",
+      "formula": "(46-40)/40*100",
+      "computed": 15,
+      "expected": 15,
+      "key": "15%"
+    },
+    {
+      "sourceRecordId": "operations-management-v1-024",
+      "formula": "sqrt(2*10000*50/2)",
+      "computed": 707.1067811865476,
+      "expected": 707.106781186548,
+      "key": "707.11 units"
+    },
+    {
+      "sourceRecordId": "operations-management-v1-025",
+      "formula": "80*6+120",
+      "computed": 600,
+      "expected": 600,
+      "key": "600 units"
+    },
+    {
+      "sourceRecordId": "operations-management-v1-026",
+      "formula": "600/2",
+      "computed": 300,
+      "expected": 300,
+      "key": "300 units"
+    },
+    {
+      "sourceRecordId": "operations-management-v1-027",
+      "formula": "24000/800",
+      "computed": 30,
+      "expected": 30,
+      "key": "30 orders/year"
+    },
+    {
+      "sourceRecordId": "operations-management-v1-028",
+      "formula": "45*8+90",
+      "computed": 450,
+      "expected": 450,
+      "key": "450 units"
+    },
+    {
+      "sourceRecordId": "operations-management-v1-029",
+      "formula": "20000/500*40+500/2*3",
+      "computed": 2350,
+      "expected": 2350,
+      "key": "2350 currency/year"
+    },
+    {
+      "sourceRecordId": "operations-management-v1-030",
+      "formula": "900+350-780",
+      "computed": 470,
+      "expected": 470,
+      "key": "470 units"
+    },
+    {
+      "sourceRecordId": "operations-management-v1-035",
+      "formula": "12*2.5",
+      "computed": 30,
+      "expected": 30,
+      "key": "30 cases"
+    },
+    {
+      "sourceRecordId": "operations-management-v1-036",
+      "formula": "48/6",
+      "computed": 8,
+      "expected": 8,
+      "key": "8 hours"
+    },
+    {
+      "sourceRecordId": "operations-management-v1-037",
+      "formula": "7.5/10*100",
+      "computed": 75,
+      "expected": 75,
+      "key": "75%"
+    },
+    {
+      "sourceRecordId": "operations-management-v1-038",
+      "formula": "60/4",
+      "computed": 15,
+      "expected": 15,
+      "key": "15 units/hour"
+    },
+    {
+      "sourceRecordId": "operations-management-v1-039",
+      "formula": "18/9",
+      "computed": 2,
+      "expected": 2,
+      "key": "2 hours"
+    },
+    {
+      "sourceRecordId": "operations-management-v1-040",
+      "formula": "60/5",
+      "computed": 12,
+      "expected": 12,
+      "key": "12 customers/hour"
+    },
+    {
+      "sourceRecordId": "operations-management-v1-049",
+      "formula": "25/(5000*2)*1000000",
+      "computed": 2500,
+      "expected": 2500,
+      "key": "2500 DPMO"
+    },
+    {
+      "sourceRecordId": "operations-management-v1-050",
+      "formula": "18/240*100",
+      "computed": 7.5,
+      "expected": 7.5,
+      "key": "7.5%"
+    },
+    {
+      "sourceRecordId": "operations-management-v1-055",
+      "formula": "50+3*2",
+      "computed": 56,
+      "expected": 56,
+      "key": "56"
+    },
+    {
+      "sourceRecordId": "operations-management-v1-056",
+      "formula": "120-3*3",
+      "computed": 111,
+      "expected": 111,
+      "key": "111"
+    },
+    {
+      "sourceRecordId": "operations-management-v1-057",
+      "formula": "sqrt(.04*.96/400)",
+      "computed": 0.009797958971132711,
+      "expected": 0.00979795897113,
+      "key": "0.01"
+    },
+    {
+      "sourceRecordId": "operations-management-v1-058",
+      "formula": ".04+3*.00979795897113",
+      "computed": 0.06939387691339,
+      "expected": 0.0693938769134,
+      "key": "0.07"
+    },
+    {
+      "sourceRecordId": "operations-management-v1-059",
+      "formula": "(10+12+11+13+14)/5",
+      "computed": 12,
+      "expected": 12,
+      "key": "12"
+    },
+    {
+      "sourceRecordId": "operations-management-v1-060",
+      "formula": "27.4-24.9",
+      "computed": 2.5,
+      "expected": 2.5,
+      "key": "2.5"
+    },
+    {
+      "sourceRecordId": "operations-management-v1-064",
+      "formula": "140-125",
+      "computed": 15,
+      "expected": 15,
+      "key": "15 units"
+    },
+    {
+      "sourceRecordId": "operations-management-v1-065",
+      "formula": "(8+12+5+15)/4",
+      "computed": 10,
+      "expected": 10,
+      "key": "10 units"
+    },
+    {
+      "sourceRecordId": "operations-management-v1-066",
+      "formula": "(6-2+4-4)/4",
+      "computed": 1,
+      "expected": 1,
+      "key": "1 units"
+    },
+    {
+      "sourceRecordId": "operations-management-v1-067",
+      "formula": "(9+25+16+0)/4",
+      "computed": 12.5,
+      "expected": 12.5,
+      "key": "12.5 units squared"
+    },
+    {
+      "sourceRecordId": "operations-management-v1-068",
+      "formula": "sqrt(144)",
+      "computed": 12,
+      "expected": 12,
+      "key": "12 units"
+    },
+    {
+      "sourceRecordId": "operations-management-v1-069",
+      "formula": "((10/100)+(8/80))/2*100",
+      "computed": 10,
+      "expected": 10,
+      "key": "10%"
+    },
+    {
+      "sourceRecordId": "operations-management-v1-070",
+      "formula": "(90+105+120)/3",
+      "computed": 105,
+      "expected": 105,
+      "key": "105 units"
+    },
+    {
+      "sourceRecordId": "operations-management-v1-075",
+      "formula": "500-140-60",
+      "computed": 300,
+      "expected": 300,
+      "key": "300 units"
+    },
+    {
+      "sourceRecordId": "operations-management-v1-076",
+      "formula": "240*3",
+      "computed": 720,
+      "expected": 720,
+      "key": "720 components"
+    },
+    {
+      "sourceRecordId": "operations-management-v1-077",
+      "formula": "1000+600-1250",
+      "computed": 350,
+      "expected": 350,
+      "key": "350 units"
+    },
+    {
+      "sourceRecordId": "operations-management-v1-078",
+      "formula": "900-640",
+      "computed": 260,
+      "expected": 260,
+      "key": "260 units"
+    },
+    {
+      "sourceRecordId": "operations-management-v1-079",
+      "formula": "200*3",
+      "computed": 600,
+      "expected": 600,
+      "key": "600 units"
+    },
+    {
+      "sourceRecordId": "operations-management-v1-080",
+      "formula": "(1150-1000)/1000*100",
+      "computed": 15,
+      "expected": 15,
+      "key": "15%"
+    }
+  ]
+}

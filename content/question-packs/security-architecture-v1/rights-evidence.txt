@@ -1,0 +1,9 @@
+Security Architecture Original Question Pack v1
+Generated: 2026-07-29
+Items: 80; topics: 8; draw: 10; minimum per-rule rotation depth: 5.
+Ownership: original first-party commissioned content for Octamy.
+Authoring attribution: Kiro AI under authenticated product-owner instruction; production author account is user 1.
+Review attribution: Kiro AI item review recorded through the required separate production reviewer account user 4; no claim of unauthenticated human review.
+References: https://doi.org/10.6028/NIST.SP.800-207, https://doi.org/10.6028/NIST.SP.800-53r5, https://doi.org/10.6028/NIST.SP.800-57pt1r5, https://doi.org/10.6028/NIST.SP.800-160v1r1, https://doi.org/10.6028/NIST.SP.800-154, https://doi.org/10.6028/NIST.SP.800-34r1.
+Excluded: exam dumps, copied vendor questions, third-party banks, exploit payloads, placeholders, and unstated sources.
+Questions SHA-256: 72652db418aaeb3f3477c7da07fb343561e2c3fad15704091bb3297189d20a25

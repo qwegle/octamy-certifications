@@ -1314,6 +1314,54 @@ export const assessmentReleaseRoleAuthorizations = pgTable("assessment_release_r
   current: index("assessment_release_role_authorizations_current_idx").on(t.userId, t.releaseRole, t.authorizationAction, t.id),
 }));
 
+export const assessmentShellArchivalRecords = pgTable("assessment_shell_archival_records", {
+  id: serial("id").primaryKey(),
+  courseId: integer("course_id").references(() => courses.id, { onDelete: "restrict" }).notNull(),
+  rationaleCode: text("rationale_code").notNull(),
+  rationale: text("rationale").notNull(),
+  decisionReference: text("decision_reference").notNull(),
+  archivedAt: timestamp("archived_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => ({
+  courseUnique: unique("assessment_shell_archival_records_course_unique").on(t.courseId),
+  rationaleCode: check("assessment_shell_archival_records_code_check", sql`${t.rationaleCode} IN ('undefined_certification_claim', 'non_mcq_evidence_required', 'experience_claim_not_assessment')`),
+  rationale: check("assessment_shell_archival_records_rationale_check", sql`length(btrim(${t.rationale})) BETWEEN 20 AND 1000`),
+  decisionReference: check("assessment_shell_archival_records_reference_check", sql`length(btrim(${t.decisionReference})) BETWEEN 8 AND 200`),
+  byArchivedAt: index("assessment_shell_archival_records_archived_at_idx").on(t.archivedAt, t.id),
+}));
+
+// Migration 0040 supersedes the legacy 0036 action stream with explicit,
+// expirable grants and separate append-only revocations. Exceptional role
+// consolidation is visible on the grant rather than hidden in operator notes.
+export const assessmentReleaseRoleGrants = pgTable("assessment_release_role_grants", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id, { onDelete: "restrict" }).notNull(),
+  releaseRole: text("release_role").notNull(),
+  grantedByUserId: integer("granted_by_user_id").references(() => users.id, { onDelete: "restrict" }).notNull(),
+  grantedAt: timestamp("granted_at", { withTimezone: true }).defaultNow().notNull(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }),
+  reason: text("reason").notNull(),
+  singleOfficerException: boolean("single_officer_exception").default(false).notNull(),
+  singleOfficerExceptionReason: text("single_officer_exception_reason"),
+}, (t) => ({
+  role: check("assessment_release_role_grants_role_check", sql`${t.releaseRole} IN ('release_operator', 'accessibility_reviewer', 'content_reviewer', 'rights_reviewer', 'cut_score_approver', 'qa_reviewer', 'publisher', 'rollback_owner')`),
+  expiry: check("assessment_release_role_grants_expiry_check", sql`${t.expiresAt} IS NULL OR ${t.expiresAt} > ${t.grantedAt}`),
+  reason: check("assessment_release_role_grants_reason_check", sql`length(btrim(${t.reason})) BETWEEN 20 AND 1000`),
+  exception: check("assessment_release_role_grants_exception_check", sql`(${t.singleOfficerException} = false AND ${t.singleOfficerExceptionReason} IS NULL) OR (${t.singleOfficerException} = true AND length(btrim(${t.singleOfficerExceptionReason})) BETWEEN 20 AND 1000)`),
+  byPrincipal: index("assessment_release_role_grants_principal_idx").on(t.userId, t.releaseRole, t.grantedAt, t.id),
+}));
+
+export const assessmentReleaseRoleRevocations = pgTable("assessment_release_role_revocations", {
+  id: serial("id").primaryKey(),
+  grantId: integer("grant_id").references(() => assessmentReleaseRoleGrants.id, { onDelete: "restrict" }).notNull(),
+  revokedByUserId: integer("revoked_by_user_id").references(() => users.id, { onDelete: "restrict" }).notNull(),
+  revokedAt: timestamp("revoked_at", { withTimezone: true }).defaultNow().notNull(),
+  reason: text("reason").notNull(),
+}, (t) => ({
+  grantUnique: unique("assessment_release_role_revocations_grant_unique").on(t.grantId),
+  reason: check("assessment_release_role_revocations_reason_check", sql`length(btrim(${t.reason})) BETWEEN 20 AND 1000`),
+  byRevokedAt: index("assessment_release_role_revocations_revoked_at_idx").on(t.revokedAt, t.id),
+}));
+
 export type AssessmentAccessibilityAcceptance = typeof assessmentAccessibilityAcceptances.$inferSelect;
 export type InsertAssessmentAccessibilityAcceptance = typeof assessmentAccessibilityAcceptances.$inferInsert;
 export type AssessmentRightsRoleReview = typeof assessmentRightsRoleReviews.$inferSelect;
@@ -1324,6 +1372,12 @@ export type AssessmentReleaseEvidenceRevocation = typeof assessmentReleaseEviden
 export type InsertAssessmentReleaseEvidenceRevocation = typeof assessmentReleaseEvidenceRevocations.$inferInsert;
 export type AssessmentReleaseRoleAuthorization = typeof assessmentReleaseRoleAuthorizations.$inferSelect;
 export type InsertAssessmentReleaseRoleAuthorization = typeof assessmentReleaseRoleAuthorizations.$inferInsert;
+export type AssessmentShellArchivalRecord = typeof assessmentShellArchivalRecords.$inferSelect;
+export type InsertAssessmentShellArchivalRecord = typeof assessmentShellArchivalRecords.$inferInsert;
+export type AssessmentReleaseRoleGrant = typeof assessmentReleaseRoleGrants.$inferSelect;
+export type InsertAssessmentReleaseRoleGrant = typeof assessmentReleaseRoleGrants.$inferInsert;
+export type AssessmentReleaseRoleRevocation = typeof assessmentReleaseRoleRevocations.$inferSelect;
+export type InsertAssessmentReleaseRoleRevocation = typeof assessmentReleaseRoleRevocations.$inferInsert;
 
 export const insertQuestionTopicSchema = createInsertSchema(questionTopics).omit({
   id: true,

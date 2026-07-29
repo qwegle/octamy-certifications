@@ -1,0 +1,6 @@
+mobile-app-development governed stem correction v2
+Generated: 2026-07-29
+Ownership: original first-party wording commissioned for Octamy.
+Reason: replace one inventory-rejected weak stem while preserving the superseded item and provenance.
+Reference: https://developer.android.com/topic/performance
+Questions SHA-256: a9d56dd5a6e262a190bddacfd59a1ab40cfd90bc2e092ce8ca23baff6d835275

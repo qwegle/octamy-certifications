@@ -1,0 +1,15 @@
+{
+  "drawCount": 10,
+  "topicDrawPattern": [
+    2,
+    2,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+  ],
+  "overallRotationDepth": 8,
+  "minimumRuleRotationDepth": 5
+}

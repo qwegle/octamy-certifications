@@ -217,3 +217,29 @@ If a reviewed schema change permits `archived`, this statement remains idempoten
 At **2026-07-29 11:47 +0530**, `0038_archive_audited_certification_shells` extended `courses_review_status_check` with the truthful `archived` state while retaining every prior allowed state. The guarded migration then archived exactly IDs `1,6,7,8,9,16,18,19,20,31,32,35,41,42`; all remained inactive/private and had zero blueprints, linked banks, questions, legacy or scheduled attempts, certificates, and payments. No rows were deleted.
 
 The production runner verified all 39 journal hashes. Read-only post-checks found exactly those 14—and no other course rows—with `review_status='archived'`. The active/public/approved assessment cohort remained 91 rows with unchanged fingerprint `8b8566136e3b03df7e2d733feaf83a66`. Public curl totals and payload hashes were unchanged: certification assessments **50 → 50** (`8cc0328cd8e9af725ae91e25de0e1f6f03eacd24d3d08521ae19c1e046480735`) and Practice assessments **41 → 41** (`901895bd6705ca068c5f4c456ce00a2f1a57504e1c93dac511c5222e8497079c`). The read-only governed inventory gate exited successfully with `published-with-substantive-blockers: 0`.
+
+### Remaining non-viable certification-shell disposition — migration 0039
+
+After every viable subject in the triage cohort was built and published, the following 17 empty certification shells were retired. Immediately before migration 0039, one production `REPEATABLE READ READ ONLY` transaction reconfirmed that every row was inactive/private/pending with zero blueprint rows, linked banks, questions, legacy attempts, scheduled attempts, certificates, and payments.
+
+| ID / shell | Recorded product rationale |
+|---|---|
+| 49 `business-analyst-internship` | Archived: an internship is institution-issued placement or completion evidence, not an Octamy scored skills certification. |
+| 47 `data-science-internship` | Archived: an internship is institution-issued placement or completion evidence, not an Octamy scored skills certification. |
+| 48 `marketing-internship` | Archived: an internship is institution-issued placement or completion evidence, not an Octamy scored skills certification. |
+| 46 `software-engineering-internship` | Archived: an internship is institution-issued placement or completion evidence, not an Octamy scored skills certification. |
+| 50 `ux-design-internship` | Archived: an internship is institution-issued placement or completion evidence, not an Octamy scored skills certification. |
+| 21 `design-principles` | Archived: superseded by the narrower live `ui-ux-design` certification. |
+| 44 `strategic-pmo` | Archived: superseded by the narrower live `program-management` certification. |
+| 23 `advanced-prototyping` | Archived: the claim depends on taste and portfolio evidence that a scored multiple-choice assessment cannot defensibly substantiate. |
+| 25 `brand-identity` | Archived: the claim depends on taste and portfolio evidence that a scored multiple-choice assessment cannot defensibly substantiate. |
+| 11 `business-strategy-fundamentals` | Archived: the broad claim depends on seniority judgement and contextual evidence that a scored multiple-choice assessment cannot defensibly substantiate. |
+| 24 `design-leadership` | Archived: the claim depends on leadership judgement and portfolio evidence that a scored multiple-choice assessment cannot defensibly substantiate. |
+| 45 `digital-transformation` | Archived: the claim depends on seniority and organisational judgement that a scored multiple-choice assessment cannot defensibly substantiate. |
+| 15 `entrepreneurship` | Archived: entrepreneurial competence depends on execution and portfolio evidence that a scored multiple-choice assessment cannot defensibly substantiate. |
+| 40 `fintech-innovation` | Archived: the claim depends on fast-moving trends, regulation, and contextual judgement that a scored multiple-choice assessment cannot defensibly substantiate. |
+| 29 `growth-hacking` | Archived: the claim depends on fast-moving channels, ethical judgement, and execution evidence that a scored multiple-choice assessment cannot defensibly substantiate. |
+| 14 `innovation-management` | Archived: the claim depends on organisational judgement and practical evidence that a scored multiple-choice assessment cannot defensibly substantiate. |
+| 13 `strategic-leadership` | Archived: the claim depends on seniority, leadership judgement, and behavioural evidence that a scored multiple-choice assessment cannot defensibly substantiate. |
+
+This resolves the final product decisions from the triage cohort: **`NEEDS_DECISION` is now empty**. These records are archival dispositions, not deletions; no learner or content data was removed. Release evidence remains governed by the append-only release-role grants/revocations and database-enforced authorization policy introduced in migration 0036: only administrator-authorized, non-automation principals with the exact active role may record governed evidence.

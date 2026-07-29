@@ -1,0 +1,34 @@
+{
+  "status": "passed",
+  "calculationCount": 4,
+  "checks": [
+    {
+      "sourceRecordId": "program-management-v1-059",
+      "formula": "188-160",
+      "computed": 28,
+      "expected": 28,
+      "key": "28 hours"
+    },
+    {
+      "sourceRecordId": "program-management-v1-060",
+      "formula": "6*.75*40",
+      "computed": 180,
+      "expected": 180,
+      "key": "180 hours/week"
+    },
+    {
+      "sourceRecordId": "program-management-v1-069",
+      "formula": "480/600",
+      "computed": 0.8,
+      "expected": 0.8,
+      "key": "0.8"
+    },
+    {
+      "sourceRecordId": "program-management-v1-070",
+      "formula": "750-820",
+      "computed": -70,
+      "expected": -70,
+      "key": "-70 currency"
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "sourceKey": "octamy-original:statistical-analysis:v3-numeric-evidence-correction",
+  "name": "Statistical Analysis numeric-evidence correction v3",
+  "publisher": "Octamy",
+  "datasetVersion": "3.0.0",
+  "description": "One original replacement item adding explicit programmatic verification to a numeric confidence-coverage answer.",
+  "sourceUrl": "https://www.itl.nist.gov/div898/handbook/",
+  "retrievedAt": "2026-07-29T00:00:00.000Z",
+  "license": {
+    "identifier": "Proprietary-Octamy-Original-1.0",
+    "name": "Original assessment-content rights",
+    "url": "https://octamy.com/terms-of-service",
+    "rightsBasis": "owned",
+    "commercialUseAllowed": true,
+    "derivativesAllowed": true,
+    "shareAlikeObligation": "none",
+    "attributionText": "Original Statistical Analysis correction item",
+    "evidenceReference": "statistical-analysis-v3-numeric-evidence-rights"
+  },
+  "provenance": {
+    "acquisitionMethod": "first_party",
+    "originalFormat": "JSONL",
+    "chainOfTitle": "The replacement wording and explicit calculation evidence were newly authored for Octamy; NIST guidance verifies the statistical interpretation.",
+    "notes": "Immutable correction supersedes one item while preserving historical provenance."
+  }
+}

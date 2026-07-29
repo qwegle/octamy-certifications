@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "sourceKey": "octamy-original:corporate-finance:v1",
+  "name": "Corporate Finance Question Pack v1",
+  "publisher": "Octamy",
+  "datasetVersion": "1.0.0",
+  "description": "Original Octamy certification assessment covering universal corporate-finance concepts, calculations, governance, and decision controls.",
+  "sourceUrl": "https://www.cfainstitute.org/insights/professional-learning/refresher-readings/2026/time-value-money",
+  "retrievedAt": "2026-07-29T00:00:00.000Z",
+  "license": {
+    "identifier": "Proprietary-Octamy-Original-1.0",
+    "name": "Original assessment-content rights",
+    "url": "https://octamy.com/terms-of-service",
+    "rightsBasis": "owned",
+    "commercialUseAllowed": true,
+    "derivativesAllowed": true,
+    "shareAlikeObligation": "none",
+    "attributionText": "Original Corporate Finance assessment content",
+    "evidenceReference": "corporate-finance-finance-v1-rights-evidence"
+  },
+  "provenance": {
+    "acquisitionMethod": "first_party",
+    "originalFormat": "JSONL",
+    "chainOfTitle": "Every stem, option, answer, calculation, and explanation was newly authored for Octamy by Kiro AI under the authenticated product owner's instruction. IFRS Foundation standards pages, CFA Institute learning references, ISO 31000, COSO frameworks, and Basel Committee standards as applicable were consulted only for factual verification; no examination item, dump, or third-party question-bank wording was copied.",
+    "notes": "Programmatic formula assertions verify every numeric keyed answer. Governed decisions identify Kiro AI review and do not claim human review or regulated advisory qualification."
+  }
+}

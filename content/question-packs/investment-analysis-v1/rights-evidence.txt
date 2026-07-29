@@ -1,0 +1,9 @@
+Investment Analysis Question Pack v1
+Generated: 2026-07-29
+Items: 80 across 8 topics; intended draw: 10; overall rotation depth: 8x.
+Ownership: original first-party commissioned content.
+Author accountability: production user 1; independent item reviewer: production user 4.
+Factual sources: IFRS Foundation standards pages, CFA Institute learning references, ISO 31000, COSO frameworks, and Basel Committee standards as applicable.
+Numeric assurance: 44 numeric keyed answers were recomputed and formatting-asserted during generation.
+Excluded: personal investment advice, jurisdiction-dependent unstated tax rules, exam dumps, copied question banks, and placeholders.
+Question JSONL SHA-256: 140b9756a0b349706571210c8e4add8e33786d32c6d643a5a15127b980ec40f1

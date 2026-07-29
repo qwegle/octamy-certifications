@@ -1,0 +1,6 @@
+statistical-analysis governed stem correction v2
+Generated: 2026-07-29
+Ownership: original first-party wording commissioned for Octamy.
+Reason: replace one inventory-rejected weak stem while preserving the superseded item and provenance.
+Reference: https://www.itl.nist.gov/div898/handbook/
+Questions SHA-256: 49939eb83ccc6ad0970eb7c91375b5f076022c29980f0eacada94b77f4c73bb3

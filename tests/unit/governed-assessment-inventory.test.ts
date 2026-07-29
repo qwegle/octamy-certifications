@@ -12,6 +12,7 @@ import {
 } from "../../scripts/lib/governed-assessment-inventory";
 import { governedInventoryGateFailure } from "../../scripts/governed-assessment-inventory";
 import { assertAuthorizedReleasePrincipals } from "../../scripts/record-assessment-release-evidence";
+import { assertGrantableReleaseIdentity } from "../../scripts/grant-assessment-release-role";
 
 const EVIDENCE_CODES = [
   "RIGHTS_ROLE_SEPARATION_NOT_VERIFIABLE",
@@ -356,8 +357,11 @@ describe("release evidence revocation and principal authorization", () => {
     email: `reviewer-${id}@example.invalid`,
   }));
   const grants = Object.values(roleIds).map((userId, index) => ({
+    grantId: index + 1,
     userId,
     releaseRole: roleNames[index],
+    expiresAt: null,
+    revokedAt: null,
   }));
 
   it("restores missing-release-evidence blockers when current evidence is voided", () => {
@@ -381,6 +385,38 @@ describe("release evidence revocation and principal authorization", () => {
   it("requires operators to grant release roles before recording evidence", () => {
     expect(() => assertAuthorizedReleasePrincipals(roleIds, users, []))
       .toThrow(/NO_RELEASE_ROLE_AUTHORIZATIONS.*grant roles first/);
+  });
+
+  it("accepts every principal only when an exact current grant exists", () => {
+    expect(() => assertAuthorizedReleasePrincipals(roleIds, users, grants))
+      .not.toThrow();
+    expect(() => assertAuthorizedReleasePrincipals(roleIds, users, grants.filter((grant) => grant.releaseRole !== "rights_reviewer")))
+      .toThrow(/rights user 4 lacks a current, unrevoked, unexpired rights_reviewer grant/);
+  });
+
+  it("refuses evidence when an exact grant is revoked", () => {
+    const revoked = grants.map((grant) => grant.releaseRole === "qa_reviewer"
+      ? { ...grant, revokedAt: "2026-07-29T08:00:00.000Z" }
+      : grant);
+    expect(() => assertAuthorizedReleasePrincipals(roleIds, users, revoked, new Date("2026-07-29T09:00:00.000Z")))
+      .toThrow(/qa user 6 lacks a current, unrevoked, unexpired qa_reviewer grant/);
+  });
+
+  it("refuses evidence when an exact grant is expired", () => {
+    const expired = grants.map((grant) => grant.releaseRole === "publisher"
+      ? { ...grant, expiresAt: "2026-07-29T08:00:00.000Z" }
+      : grant);
+    expect(() => assertAuthorizedReleasePrincipals(roleIds, users, expired, new Date("2026-07-29T09:00:00.000Z")))
+      .toThrow(/publisher user 7 lacks a current, unrevoked, unexpired publisher grant/);
+  });
+
+  it.each([
+    ["Release automation bot", "owner@example.invalid"],
+    ["Named Reviewer", "smoke-test@example.invalid"],
+    ["AI assessment authoring", "human@example.invalid"],
+  ])("refuses automation, test, smoke, and AI-authoring grant targets", (name, email) => {
+    expect(() => assertGrantableReleaseIdentity({ id: 99, name, email }))
+      .toThrow(/RELEASE_ROLE_TARGET_FORBIDDEN/);
   });
 
   it("refuses test, smoke, automation, and AI-authoring principals even when granted", () => {

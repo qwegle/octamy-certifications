@@ -1,0 +1,66 @@
+[
+  {
+    "topicSlug": "usability-heuristics",
+    "questionCount": 2,
+    "difficulty": "mixed",
+    "marksPerQuestion": 1,
+    "negativeMarks": 0,
+    "sortOrder": 0
+  },
+  {
+    "topicSlug": "accessibility-wcag",
+    "questionCount": 2,
+    "difficulty": "mixed",
+    "marksPerQuestion": 1,
+    "negativeMarks": 0,
+    "sortOrder": 1
+  },
+  {
+    "topicSlug": "information-architecture",
+    "questionCount": 1,
+    "difficulty": "mixed",
+    "marksPerQuestion": 1,
+    "negativeMarks": 0,
+    "sortOrder": 2
+  },
+  {
+    "topicSlug": "interaction-patterns",
+    "questionCount": 1,
+    "difficulty": "mixed",
+    "marksPerQuestion": 1,
+    "negativeMarks": 0,
+    "sortOrder": 3
+  },
+  {
+    "topicSlug": "usability-testing-metrics",
+    "questionCount": 1,
+    "difficulty": "mixed",
+    "marksPerQuestion": 1,
+    "negativeMarks": 0,
+    "sortOrder": 4
+  },
+  {
+    "topicSlug": "research-ethics",
+    "questionCount": 1,
+    "difficulty": "mixed",
+    "marksPerQuestion": 1,
+    "negativeMarks": 0,
+    "sortOrder": 5
+  },
+  {
+    "topicSlug": "design-systems",
+    "questionCount": 1,
+    "difficulty": "mixed",
+    "marksPerQuestion": 1,
+    "negativeMarks": 0,
+    "sortOrder": 6
+  },
+  {
+    "topicSlug": "responsive-inclusive",
+    "questionCount": 1,
+    "difficulty": "mixed",
+    "marksPerQuestion": 1,
+    "negativeMarks": 0,
+    "sortOrder": 7
+  }
+]

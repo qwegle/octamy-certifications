@@ -1,0 +1,10 @@
+Ethical Hacking Original Question Pack v1
+Generated: 2026-07-29
+Items: 80; topics: 8; draw: 10; minimum per-rule rotation depth: 5.
+Ownership: original first-party commissioned content for Octamy.
+Authoring attribution: Kiro AI under authenticated product-owner instruction; production author account is user 1.
+Review attribution: Kiro AI item review recorded through the required separate production reviewer account user 4; no claim of unauthenticated human review.
+References: https://doi.org/10.6028/NIST.SP.800-115, https://owasp.org/www-project-web-security-testing-guide/, https://cwe.mitre.org/, https://www.first.org/cvss/v4.0/specification-document, https://www.cisa.gov/resources-tools/resources/vulnerability-disclosure-policy-template, https://www.justice.gov/opa/pr/department-justice-announces-new-policy-charging-cases-under-computer-fraud-and-abuse-act.
+Excluded: exam dumps, copied vendor questions, third-party banks, exploit payloads, placeholders, and unstated sources.
+Questions SHA-256: be2f4e409084ed0beddbaf094ef60e13fd95cc0eb8a630e76644f6dd75e2e540
+Safety claim: all items are defensive and lawful; they contain no working payload, evasion instruction, persistence guidance, credential theft method, or attack recipe.

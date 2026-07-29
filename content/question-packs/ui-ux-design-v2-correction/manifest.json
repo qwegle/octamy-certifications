@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "sourceKey": "first-party-original:ui-ux-design:v2-correction",
+  "name": "UI/UX Design v2 Governed Correction",
+  "publisher": "Octamy",
+  "datasetVersion": "2.0.0",
+  "description": "One original replacement item superseding ui-ux-design-v1-076 after the publication evaluator interpreted a valid UX term as weak wording.",
+  "sourceUrl": "https://www.w3.org/WAI/tutorials/forms/labels/",
+  "retrievedAt": "2026-07-29T00:00:00.000Z",
+  "license": {
+    "identifier": "Proprietary-Octamy-Original-1.0",
+    "name": "Octamy original assessment-content rights",
+    "url": "https://octamy.com/terms-of-service",
+    "rightsBasis": "owned",
+    "commercialUseAllowed": true,
+    "derivativesAllowed": true,
+    "shareAlikeObligation": "none",
+    "attributionText": "Original UI/UX Design correction content",
+    "evidenceReference": "ui-ux-design-v2-correction-original-rights"
+  },
+  "provenance": {
+    "acquisitionMethod": "first_party",
+    "originalFormat": "JSONL",
+    "chainOfTitle": "The replacement question, options, keyed answer, and explanation are original first-party Octamy content. W3C WAI guidance supports factual verification only; no third-party assessment wording was copied.",
+    "notes": "Governed correction superseding ui-ux-design-v1-076; original lineage remains auditable."
+  }
+}

@@ -1,0 +1,8 @@
+Computer Vision Question Pack v1
+Generated: 2026-07-29
+Question count: 80
+Ownership basis: original first-party commissioned content.
+Author/reviewer representation: Kiro AI acting under the authenticated Octamy product owner's explicit instruction; no human review is claimed.
+Factual sources: Official PyTorch and Torchvision documentation, OpenCV documentation, and NIST adversarial machine-learning guidance.
+Excluded sources: proprietary exams, exam dumps, copied vendor questions, third-party question banks, and placeholders.
+Question JSONL SHA-256: 1083f4808d53a9aa90a48c2af9c36f004707c0925eb185277d36462741287fea

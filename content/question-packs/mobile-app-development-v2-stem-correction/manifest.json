@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "sourceKey": "octamy-original:mobile-app-development:v2-stem-correction",
+  "name": "mobile-app-development governed stem correction v2",
+  "publisher": "Octamy",
+  "datasetVersion": "2.0.0",
+  "description": "One original replacement item correcting a stem rejected by the governed acceptance heuristic while preserving immutable history.",
+  "sourceUrl": "https://developer.android.com/topic/performance",
+  "retrievedAt": "2026-07-29T00:00:00.000Z",
+  "license": {
+    "identifier": "Proprietary-Octamy-Original-1.0",
+    "name": "Original assessment-content rights",
+    "url": "https://octamy.com/terms-of-service",
+    "rightsBasis": "owned",
+    "commercialUseAllowed": true,
+    "derivativesAllowed": true,
+    "shareAlikeObligation": "none",
+    "attributionText": "Original mobile-app-development correction item",
+    "evidenceReference": "mobile-app-development-v2-stem-correction-rights"
+  },
+  "provenance": {
+    "acquisitionMethod": "first_party",
+    "originalFormat": "JSONL",
+    "chainOfTitle": "The replacement stem is newly authored for Octamy; the official reference verifies the concept and no third-party assessment wording was copied.",
+    "notes": "Immutable correction supersedes one weak-stem item without deleting historical provenance."
+  }
+}

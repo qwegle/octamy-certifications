@@ -1,0 +1,73 @@
+{
+  "assessmentSlug": "statistical-analysis",
+  "bankSlug": "statistical-analysis-bank",
+  "syllabusVersion": "STAT-ANALYSIS-2026.1",
+  "totalDraw": 10,
+  "minimumRuleRotationDepth": 5,
+  "rules": [
+    {
+      "topicSlug": "descriptive-statistics",
+      "questionCount": 2,
+      "difficulty": "mixed",
+      "marksPerQuestion": 1,
+      "negativeMarks": 0,
+      "sortOrder": 0
+    },
+    {
+      "topicSlug": "probability-distributions",
+      "questionCount": 2,
+      "difficulty": "mixed",
+      "marksPerQuestion": 1,
+      "negativeMarks": 0,
+      "sortOrder": 1
+    },
+    {
+      "topicSlug": "sampling-estimation",
+      "questionCount": 1,
+      "difficulty": "mixed",
+      "marksPerQuestion": 1,
+      "negativeMarks": 0,
+      "sortOrder": 2
+    },
+    {
+      "topicSlug": "hypothesis-testing",
+      "questionCount": 1,
+      "difficulty": "mixed",
+      "marksPerQuestion": 1,
+      "negativeMarks": 0,
+      "sortOrder": 3
+    },
+    {
+      "topicSlug": "confidence-intervals",
+      "questionCount": 1,
+      "difficulty": "mixed",
+      "marksPerQuestion": 1,
+      "negativeMarks": 0,
+      "sortOrder": 4
+    },
+    {
+      "topicSlug": "regression-diagnostics",
+      "questionCount": 1,
+      "difficulty": "mixed",
+      "marksPerQuestion": 1,
+      "negativeMarks": 0,
+      "sortOrder": 5
+    },
+    {
+      "topicSlug": "experimental-design",
+      "questionCount": 1,
+      "difficulty": "mixed",
+      "marksPerQuestion": 1,
+      "negativeMarks": 0,
+      "sortOrder": 6
+    },
+    {
+      "topicSlug": "analysis-integrity",
+      "questionCount": 1,
+      "difficulty": "mixed",
+      "marksPerQuestion": 1,
+      "negativeMarks": 0,
+      "sortOrder": 7
+    }
+  ]
+}

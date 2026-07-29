@@ -274,6 +274,20 @@
       "when": 1785305508000,
       "tag": "0038_archive_audited_certification_shells",
       "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1785315512982,
+      "tag": "0039_archive_remaining_certification_shells",
+      "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1785315720635,
+      "tag": "0040_archive_shells_and_release_roles",
+      "breakpoints": true
     }
   ]
 }

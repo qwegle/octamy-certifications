@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "sourceKey": "octamy-original:statistical-analysis:v1",
+  "name": "Statistical Analysis Original Question Pack v1",
+  "publisher": "Octamy",
+  "datasetVersion": "1.0.0",
+  "description": "Eighty original questions spanning descriptive statistics, distributions, sampling, inference, regression, and experimental design with programmatically verified numeric answers.",
+  "sourceUrl": "https://www.itl.nist.gov/div898/handbook/",
+  "retrievedAt": "2026-07-29T00:00:00.000Z",
+  "license": {
+    "identifier": "Proprietary-Octamy-Original-1.0",
+    "name": "Original assessment-content rights",
+    "url": "https://octamy.com/terms-of-service",
+    "rightsBasis": "owned",
+    "commercialUseAllowed": true,
+    "derivativesAllowed": true,
+    "shareAlikeObligation": "none",
+    "attributionText": "Original Statistical Analysis assessment content",
+    "evidenceReference": "statistical-analysis-v1-rights-evidence"
+  },
+  "provenance": {
+    "acquisitionMethod": "first_party",
+    "originalFormat": "JSONL",
+    "chainOfTitle": "Every question, option, answer, and explanation was newly authored for Octamy under the authenticated product owner's instruction. The item-level official references were used only to verify facts; no third-party question bank or examination wording was copied.",
+    "notes": "Review decisions identify AI-assisted review and do not claim unauthenticated human authorship."
+  }
+}

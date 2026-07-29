@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "sourceKey": "octamy-original:digital-marketing-basics:v1",
+  "name": "Digital Marketing Basics Question Pack v1",
+  "publisher": "Octamy",
+  "datasetVersion": "1.0.0",
+  "description": "Original certification bank covering objective metrics, channel mechanics, analytics, search, email, privacy, experiments, and accessible creative.",
+  "sourceUrl": "https://support.google.com/google-ads/answer/14074",
+  "retrievedAt": "2026-07-29T00:00:00.000Z",
+  "license": {
+    "identifier": "Proprietary-Octamy-Original-1.0",
+    "name": "Original assessment-content rights",
+    "url": "https://octamy.com/terms-of-service",
+    "rightsBasis": "owned",
+    "commercialUseAllowed": true,
+    "derivativesAllowed": true,
+    "shareAlikeObligation": "none",
+    "attributionText": "Original Digital Marketing Basics assessment content",
+    "evidenceReference": "digital-marketing-basics-v1-rights-evidence"
+  },
+  "provenance": {
+    "acquisitionMethod": "first_party",
+    "originalFormat": "JSONL",
+    "chainOfTitle": "Every question, option, answer, and explanation was newly authored for Octamy. Authoritative public references support factual verification only; no vendor exam, dump, or third-party question-bank wording was copied.",
+    "notes": "Calculations were generated from explicit formulas; review decisions are attributable to production reviewer user 4 and do not claim external human review."
+  }
+}
