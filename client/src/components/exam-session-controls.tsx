@@ -27,7 +27,7 @@ export function QuestionNavigator({
   onNavigate: (index: number) => void;
 }) {
   return (
-    <nav aria-label="Question navigator" className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+    <nav aria-label="Question navigator" className="rounded-xl border border-slate-300 bg-white p-4">
       <div className="flex items-center justify-between gap-3">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Question navigator</p>
@@ -51,20 +51,20 @@ export function QuestionNavigator({
               aria-current={current ? "step" : undefined}
               onClick={() => onNavigate(index)}
               className={cn(
-                "relative grid min-h-11 place-items-center rounded-xl border text-sm font-black transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2",
+                "relative grid min-h-11 place-items-center rounded-lg border text-sm font-black transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2",
                 flagged
-                  ? "border-amber-300 bg-amber-50 text-amber-950 hover:bg-amber-100"
+                  ? "border-2 border-dashed border-black bg-white text-black hover:bg-slate-100"
                   : answered
-                    ? "border-emerald-200 bg-emerald-50 text-emerald-900 hover:bg-emerald-100"
+                    ? "border-2 border-black bg-slate-100 text-black hover:bg-slate-200"
                     : "border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-400 hover:bg-white",
-                current && "border-violet-700 bg-violet-700 text-white ring-2 ring-violet-300 ring-offset-2 hover:bg-violet-700",
+                current && "border-black bg-black text-white ring-2 ring-slate-400 ring-offset-2 hover:bg-slate-800",
               )}
             >
               {index + 1}
               {flagged ? (
-                <Flag className={cn("absolute right-1 top-1 h-2.5 w-2.5", current ? "fill-amber-300 text-amber-200" : "fill-amber-500 text-amber-600")} aria-hidden="true" />
+                <Flag className={cn("absolute right-1 top-1 h-2.5 w-2.5", current ? "fill-white text-white" : "fill-black text-black")} aria-hidden="true" />
               ) : answered ? (
-                <Check className={cn("absolute right-1 top-1 h-2.5 w-2.5", current ? "text-white" : "text-emerald-700")} aria-hidden="true" />
+                <Check className={cn("absolute right-1 top-1 h-2.5 w-2.5", current ? "text-white" : "text-black")} aria-hidden="true" />
               ) : null}
             </button>
           );
@@ -72,9 +72,9 @@ export function QuestionNavigator({
       </div>
 
       <div className="mt-4 flex flex-wrap gap-x-3 gap-y-2 text-[11px] font-semibold text-slate-600" aria-hidden="true">
-        <span className="inline-flex items-center gap-1"><i className="h-2.5 w-2.5 rounded-sm bg-violet-700 ring-1 ring-violet-300 ring-offset-1" />Current</span>
-        <span className="inline-flex items-center gap-1"><i className="h-2.5 w-2.5 rounded-sm border border-emerald-200 bg-emerald-50" />Answered</span>
-        <span className="inline-flex items-center gap-1"><i className="h-2.5 w-2.5 rounded-sm border border-amber-300 bg-amber-50" />Flagged</span>
+        <span className="inline-flex items-center gap-1"><i className="h-2.5 w-2.5 rounded-sm bg-black ring-1 ring-slate-400 ring-offset-1" />Current</span>
+        <span className="inline-flex items-center gap-1"><i className="h-2.5 w-2.5 rounded-sm border-2 border-black bg-slate-100" />Answered</span>
+        <span className="inline-flex items-center gap-1"><i className="h-2.5 w-2.5 rounded-sm border-2 border-dashed border-black bg-white" />Flagged</span>
         <span className="inline-flex items-center gap-1"><i className="h-2.5 w-2.5 rounded-sm border border-slate-200 bg-slate-50" />Unanswered</span>
       </div>
     </nav>
@@ -101,9 +101,9 @@ export function SubmitExamDialog({
   const unansweredQuestions = Math.max(0, totalQuestions - answeredQuestions);
   return (
     <AlertDialog open={open} onOpenChange={(nextOpen) => !submitting && onOpenChange(nextOpen)}>
-      <AlertDialogContent className="max-w-md rounded-2xl">
+      <AlertDialogContent className="max-w-md rounded-xl border-slate-300">
         <AlertDialogHeader>
-          <div className="mb-1 flex h-11 w-11 items-center justify-center rounded-full bg-amber-100 text-amber-800">
+          <div className="mb-1 flex h-11 w-11 items-center justify-center rounded-lg bg-black text-white">
             <Send className="h-5 w-5" aria-hidden="true" />
           </div>
           <AlertDialogTitle>Submit this exam?</AlertDialogTitle>
@@ -117,7 +117,7 @@ export function SubmitExamDialog({
           <SummaryValue label="Flagged" value={flaggedQuestions} tone={flaggedQuestions > 0 ? "amber" : "slate"} />
         </div>
         {(unansweredQuestions > 0 || flaggedQuestions > 0) && (
-          <p className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-950">
+          <p className="flex items-start gap-2 rounded-xl border border-slate-400 bg-slate-50 p-3 text-xs leading-5 text-slate-900">
             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
             You can cancel and use the question navigator to review unfinished or flagged questions.
           </p>
@@ -150,11 +150,11 @@ export function FullscreenExitGuard({
   return (
     <AlertDialog open={open}>
       <AlertDialogContent
-        className="max-w-md rounded-2xl border-amber-200"
+        className="max-w-md rounded-xl border-slate-400"
         onEscapeKeyDown={(event) => event.preventDefault()}
       >
         <AlertDialogHeader>
-          <div className="mb-1 flex h-11 w-11 items-center justify-center rounded-full bg-amber-100 text-amber-800">
+          <div className="mb-1 flex h-11 w-11 items-center justify-center rounded-lg bg-black text-white">
             <AlertTriangle className="h-5 w-5" aria-hidden="true" />
           </div>
           <AlertDialogTitle>Fullscreen is required to continue</AlertDialogTitle>
@@ -178,9 +178,9 @@ export function FullscreenExitGuard({
 
 function SummaryValue({ label, value, tone }: { label: string; value: number; tone: "emerald" | "amber" | "slate" }) {
   const toneClass = tone === "emerald"
-    ? "border-emerald-200 bg-emerald-50 text-emerald-900"
+    ? "border-black bg-slate-100 text-black"
     : tone === "amber"
-      ? "border-amber-200 bg-amber-50 text-amber-950"
+      ? "border-dashed border-black bg-white text-black"
       : "border-slate-200 bg-slate-50 text-slate-800";
   return <div className={cn("rounded-xl border p-3 text-center", toneClass)}><strong className="block text-xl">{value}</strong><span className="text-[11px] font-bold">{label}</span></div>;
 }

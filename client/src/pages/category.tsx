@@ -140,7 +140,7 @@ export default function CategoryPage({ mode = "certification" }: { mode?: "certi
               {category && <><ChevronRight className="h-3.5 w-3.5" aria-hidden="true" /><span className="font-medium text-slate-800" aria-current="page">{category.name}</span></>}
             </nav>
 
-            <Badge className="mt-6 border border-violet-200 bg-violet-50 text-violet-800 hover:bg-violet-50">{isPractice ? "Practice-only path" : "Octamy certification path"}</Badge>
+            <Badge className="mt-6 border border-slate-200 bg-slate-50 text-slate-800 hover:bg-slate-50">{isPractice ? "Practice-only path" : "Octamy certification path"}</Badge>
             <h1 className="mt-4 max-w-4xl text-4xl font-black tracking-tight sm:text-6xl">{category?.name || (hierarchyQuery.isLoading ? "Loading category…" : "Category unavailable")}</h1>
             <p className="mt-5 max-w-3xl text-base leading-7 text-slate-600 sm:text-lg">{category ? description : "This certification path could not be found or is no longer public."}</p>
 

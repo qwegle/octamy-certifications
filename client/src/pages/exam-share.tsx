@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useRoute } from "wouter";
+import { Link, useRoute } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +9,8 @@ import { SEO } from "@/components/seo";
 import { FullscreenExitGuard, QuestionNavigator, SubmitExamDialog } from "@/components/exam-session-controls";
 import { resyncAuthoritativeExamTimer } from "@/lib/exam-timer";
 import { shouldEnforceExamFullscreen, supportsBrowserFullscreen } from "@/lib/exam-display-mode";
+import { examAccountPath } from "@/lib/exam-account-intent";
+import { useAuth } from "@/lib/auth";
 import {
   AlertCircle,
   CheckCircle2,
@@ -18,10 +20,12 @@ import {
   Flag,
   Loader2,
   Lock,
+  LogIn,
   Maximize,
   Save,
   Send,
   ShieldCheck,
+  UserPlus,
   Wifi,
   WifiOff,
   XCircle,
@@ -177,12 +181,14 @@ function readInvitationLink(): { token: string; email: string } | null {
 export default function ExamShare() {
   const [, params] = useRoute<{ code: string }>("/x/:code");
   const code = params?.code ?? "";
+  const { user, isLoading: authLoading } = useAuth();
   const recoveryKey = `octamy.exam.recovery.${code}`;
   const invitationLinkRef = useRef<{ token: string; email: string } | null>(readInvitationLink());
   const invitationLink = invitationLinkRef.current;
 
   const [phase, setPhase] = useState<"gate" | "loading" | "live" | "done">("gate");
   const [email, setEmail] = useState(invitationLink?.email ?? "");
+  const [guestAccessSelected, setGuestAccessSelected] = useState(Boolean(invitationLink));
   const [password, setPassword] = useState("");
   const [consented, setConsented] = useState(false);
   const [attemptId, setAttemptId] = useState<number | null>(null);
@@ -251,6 +257,11 @@ export default function ExamShare() {
     },
     retry: false,
   });
+
+  useEffect(() => {
+    if (!user?.email || invitationLink) return;
+    setEmail(user.email);
+  }, [invitationLink, user?.email]);
 
   useEffect(() => {
     if (!invitationLink || typeof window === "undefined") return;
@@ -629,8 +640,8 @@ export default function ExamShare() {
 
   if (isLoading) return <div className="min-h-screen grid place-items-center text-slate-500">Loading exam…</div>;
   if (!inst || instanceError) return (
-    <div className="min-h-screen grid place-items-center bg-cream-deep px-4">
-      <Card className="max-w-md"><CardContent className="p-6 text-center"><XCircle className="w-10 h-10 mx-auto text-slate-400 mb-3" /><h1 className="font-semibold mb-2">Exam unavailable</h1><p className="text-sm text-slate-500">{instanceError instanceof Error ? instanceError.message : "This share link is invalid, closed or expired."}</p></CardContent></Card>
+    <div className="min-h-screen grid place-items-center bg-white px-4">
+      <Card className="max-w-md rounded-xl border-slate-300 shadow-none"><CardContent className="p-6 text-center"><XCircle className="w-10 h-10 mx-auto text-slate-500 mb-3" /><h1 className="font-semibold mb-2">Exam unavailable</h1><p className="text-sm text-slate-500">{instanceError instanceof Error ? instanceError.message : "This share link is invalid, closed or expired."}</p></CardContent></Card>
     </div>
   );
 
@@ -640,16 +651,24 @@ export default function ExamShare() {
   const hasNotOpened = !!opensAt && opensAt.getTime() > Date.now();
   const isBrowserEvidence = (phase === "gate" ? inst.proctorMode : activeProctorMode) === "browser_evidence";
   const currentQuestionIsFlagged = current ? flaggedQuestionIds.has(current.id) : false;
+  const sharedExamPath = `/x/${encodeURIComponent(code)}`;
+  const showPublicAccessChoice = phase === "gate"
+    && inst.accessMode === "public_link"
+    && !authLoading
+    && !user
+    && !guestAccessSelected;
+  const showCandidateForm = phase === "gate"
+    && (inst.accessMode === "cohort_invite" || Boolean(user) || guestAccessSelected);
 
   return (
-    <div className="min-h-screen min-h-[100dvh] bg-cream-deep px-3 py-3 sm:px-4 sm:py-12">
+    <div className="min-h-screen min-h-[100dvh] bg-white px-3 py-3 sm:px-4 sm:py-10">
       <SEO title={`${inst.title} — Exam`} description="Octamy scheduled assessment" />
-      <Card className={`mx-auto w-full border-slate-200 shadow-sm ${phase === "live" ? "max-w-6xl" : "max-w-3xl"}`}>
-        <CardHeader className="border-b border-slate-100">
+      <Card className={`mx-auto w-full rounded-xl border-slate-300 shadow-none ${phase === "live" ? "max-w-6xl" : "max-w-3xl"}`}>
+        <CardHeader className="border-b border-slate-200">
           <CardTitle className="flex items-center justify-between gap-3">
             <span className="truncate">{inst.title}</span>
             {phase === "live" && (
-              <span className={`text-sm font-mono flex items-center gap-1 px-2.5 py-1 rounded-lg shrink-0 ${secondsLeft <= 60 ? "bg-amber-100 text-amber-900" : "bg-slate-100 text-slate-700"}`}>
+              <span className={`text-sm font-mono flex items-center gap-1 px-2.5 py-1 rounded-lg shrink-0 ${secondsLeft <= 60 ? "bg-black text-white" : "bg-slate-100 text-slate-700"}`}>
                 <Clock className="w-4 h-4" />{Math.floor(secondsLeft / 60)}:{String(secondsLeft % 60).padStart(2, "0")}
               </span>
             )}
@@ -670,17 +689,40 @@ export default function ExamShare() {
                 </p>
               </div>
               {hasNotOpened && <Notice>This exam opens {opensAt!.toLocaleString()}.</Notice>}
+              {inst.accessMode === "public_link" && authLoading && (
+                <div className="flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-slate-50 px-4 py-5 text-sm text-slate-600" role="status">
+                  <Loader2 className="h-4 w-4 animate-spin" />Checking account access…
+                </div>
+              )}
+              {showPublicAccessChoice && (
+                <section className="rounded-xl border border-slate-300 bg-white p-4" aria-labelledby="shared-exam-access-title">
+                  <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-600">Exam access</p>
+                  <h2 id="shared-exam-access-title" className="mt-1 text-xl font-black text-black">Choose how to continue</h2>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">Login to use your existing learner identity, register a new account, or continue as a guest with your email address.</p>
+                  <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                    <Button asChild className="min-h-11 rounded-lg bg-black text-white hover:bg-slate-800"><Link href={examAccountPath("register", sharedExamPath)}><UserPlus className="mr-2 h-4 w-4" />Register</Link></Button>
+                    <Button asChild variant="outline" className="min-h-11 rounded-lg border-slate-400 bg-white text-black hover:bg-slate-100"><Link href={examAccountPath("login", sharedExamPath)}><LogIn className="mr-2 h-4 w-4" />Login</Link></Button>
+                  </div>
+                  <Button type="button" variant="ghost" className="mt-2 min-h-11 w-full rounded-lg text-black hover:bg-slate-100" onClick={() => setGuestAccessSelected(true)}>Continue as guest</Button>
+                </section>
+              )}
+              {!showPublicAccessChoice && !user && inst.accessMode === "public_link" && guestAccessSelected && (
+                <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-300 bg-slate-50 px-4 py-3">
+                  <div><p className="text-sm font-bold text-black">Continuing as guest</p><p className="mt-0.5 text-xs text-slate-600">Your email identifies this exam attempt.</p></div>
+                  <Button type="button" size="sm" variant="ghost" className="text-black" onClick={() => setGuestAccessSelected(false)}>Change</Button>
+                </div>
+              )}
               {inst.accessMode === "cohort_invite" ? (
-                <div className="rounded-xl border border-emerald-200 bg-emerald-50/70 p-3 text-sm text-emerald-900">
+                <div className="rounded-xl border border-slate-300 bg-slate-50 p-3 text-sm text-slate-800">
                   This is a private, institute-funded assessment. You will not be charged. Your invitation is bound to the cohort email shown below.
                 </div>
               ) : inst.cohortRestricted ? (
                 <p className="text-xs text-slate-500">Use the email address enrolled in the assigned cohort.</p>
               ) : null}
 
-              <div className={`rounded-xl border p-4 ${isBrowserEvidence ? "border-indigo-200 bg-indigo-50/60" : "border-slate-200 bg-slate-50"}`}>
+              <div className="rounded-xl border border-slate-300 bg-slate-50 p-4">
                 <div className="flex gap-3">
-                  <ShieldCheck className={`w-5 h-5 shrink-0 mt-0.5 ${isBrowserEvidence ? "text-indigo-700" : "text-slate-600"}`} />
+                  <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-black" />
                   <div className="text-sm">
                     <p className="font-medium text-slate-900">{isBrowserEvidence ? "Browser evidence exam" : "Standard assessment"}</p>
                     <p className="text-slate-600 mt-1 leading-5">{inst.evidenceDisclosure}</p>
@@ -689,7 +731,7 @@ export default function ExamShare() {
                 </div>
               </div>
 
-              <div>
+              {showCandidateForm && <div>
                 <label className="text-sm font-medium text-slate-800">Your email</label>
                 <Input
                   type="email"
@@ -700,27 +742,27 @@ export default function ExamShare() {
                   placeholder="you@email.com"
                   className="mt-1"
                 />
-              </div>
-              {inst.requiresPassword && (
+              </div>}
+              {showCandidateForm && inst.requiresPassword && (
                 <div>
                   <label className="text-sm font-medium text-slate-800 flex items-center gap-1"><Lock className="w-3.5 h-3.5" /> Exam password</label>
                   <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="mt-1" />
                 </div>
               )}
-              <label className="flex items-start gap-3 rounded-xl border border-slate-200 p-3 cursor-pointer bg-white">
+              {showCandidateForm && <label className="flex items-start gap-3 rounded-xl border border-slate-200 p-3 cursor-pointer bg-white">
                 <input type="checkbox" checked={consented} onChange={(e) => setConsented(e.target.checked)} className="mt-1 h-4 w-4 rounded border-slate-300" />
                 <span className="text-sm text-slate-700">I have read the evidence notice and consent to the described collection for this attempt.</span>
-              </label>
-              <Button onClick={startExam} disabled={!email || !consented || hasNotOpened || starting} className="w-full bg-slate-900 text-white">
-                {starting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Starting securely…</> : "Start exam"}
-              </Button>
+              </label>}
+              {showCandidateForm && <Button onClick={startExam} disabled={!email || !consented || hasNotOpened || starting} className="w-full bg-black text-white hover:bg-slate-800">
+                {starting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Starting securely…</> : user ? "Start exam" : inst.accessMode === "cohort_invite" ? "Continue with invitation" : "Start exam as guest"}
+              </Button>}
               {message && <Notice>{message}</Notice>}
             </div>
           )}
 
           {phase === "loading" && (
             <div className="py-10 text-center space-y-4">
-              {!message ? <Loader2 className="w-8 h-8 mx-auto animate-spin text-slate-500" /> : <AlertCircle className="w-8 h-8 mx-auto text-amber-600" />}
+              {!message ? <Loader2 className="w-8 h-8 mx-auto animate-spin text-slate-500" /> : <AlertCircle className="w-8 h-8 mx-auto text-black" />}
               <div><p className="font-medium text-slate-900">{message ? "Session needs attention" : "Preparing your saved session"}</p><p className="text-sm text-slate-500 mt-1">{message || "Loading the fixed question set and last autosave…"}</p></div>
               {message && attemptIdRef.current && accessTokenRef.current && (
                 <Button variant="outline" onClick={() => loadLiveSession({
@@ -744,7 +786,7 @@ export default function ExamShare() {
                   <span>Question {currentIdx + 1} of {questions.length} · {answeredCount} answered · {flaggedQuestionIds.size} flagged</span>
                   <div className="flex items-center gap-2">
                     <SyncStatus state={syncState} lastSavedAt={lastSavedAt} />
-                    {isBrowserEvidence && !fullscreenEnforced && <span className="rounded-full bg-sky-50 px-2.5 py-1 font-semibold text-sky-800">Mobile exam mode</span>}
+                    {isBrowserEvidence && !fullscreenEnforced && <span className="rounded-full border border-slate-300 bg-slate-50 px-2.5 py-1 font-semibold text-slate-800">Mobile exam mode</span>}
                     {isBrowserEvidence && fullscreenEnforced && !isFullscreen && <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => void returnToFullscreen()}><Maximize className="mr-1 h-3 w-3" /> Fullscreen</Button>}
                   </div>
                 </div>
@@ -766,9 +808,9 @@ export default function ExamShare() {
                       variant="outline"
                       aria-pressed={currentQuestionIsFlagged}
                       onClick={() => toggleFlaggedQuestion(current.id)}
-                      className={currentQuestionIsFlagged ? "shrink-0 border-amber-300 bg-amber-50 text-amber-950 hover:bg-amber-100" : "shrink-0"}
+                      className={currentQuestionIsFlagged ? "shrink-0 border-black bg-slate-100 text-black hover:bg-slate-200" : "shrink-0"}
                     >
-                      <Flag className={`mr-2 h-4 w-4 ${currentQuestionIsFlagged ? "fill-amber-500 text-amber-600" : ""}`} />
+                      <Flag className={`mr-2 h-4 w-4 ${currentQuestionIsFlagged ? "fill-black text-black" : ""}`} />
                       {currentQuestionIsFlagged ? "Flagged for review" : "Flag for review"}
                     </Button>
                   </div>
@@ -784,11 +826,11 @@ export default function ExamShare() {
                           aria-checked={selected}
                           disabled={secondsLeft <= 0}
                           onClick={() => chooseAnswer(current.id, index)}
-                          className={`flex min-h-14 w-full items-center gap-3 rounded-xl border-2 px-4 py-3 text-left text-sm leading-6 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 sm:text-base ${selected ? "border-violet-600 bg-violet-50 text-slate-950" : "border-slate-200 bg-white hover:border-slate-400 hover:bg-slate-50"}`}
+                          className={`flex min-h-14 w-full items-center gap-3 rounded-xl border-2 px-4 py-3 text-left text-sm leading-6 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 sm:text-base ${selected ? "border-black bg-slate-100 text-slate-950" : "border-slate-200 bg-white hover:border-slate-400 hover:bg-slate-50"}`}
                         >
-                          <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg text-xs font-black ${selected ? "bg-violet-700 text-white" : "bg-slate-100 text-slate-600"}`}>{String.fromCharCode(65 + index)}</span>
+                          <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg text-xs font-black ${selected ? "bg-black text-white" : "bg-slate-100 text-slate-600"}`}>{String.fromCharCode(65 + index)}</span>
                           <span className="flex-1">{option}</span>
-                          <span className={`h-5 w-5 shrink-0 rounded-full border-2 ${selected ? "border-violet-700 bg-violet-700 shadow-[inset_0_0_0_4px_white]" : "border-slate-300"}`} aria-hidden="true" />
+                          <span className={`h-5 w-5 shrink-0 rounded-full border-2 ${selected ? "border-black bg-black shadow-[inset_0_0_0_4px_white]" : "border-slate-300"}`} aria-hidden="true" />
                         </button>
                       );
                     })}
@@ -824,7 +866,7 @@ export default function ExamShare() {
           {phase === "done" && result && (
             <div className="space-y-6 py-8">
               <div className="text-center space-y-4">
-              {result.passed ? <CheckCircle2 className="w-14 h-14 mx-auto text-emerald-600" /> : <XCircle className="w-14 h-14 mx-auto text-slate-400" />}
+              {result.passed ? <CheckCircle2 className="w-14 h-14 mx-auto text-black" /> : <XCircle className="w-14 h-14 mx-auto text-slate-500" />}
               <h2 className="text-2xl font-bold text-slate-900">{result.passed ? "Passed" : result.timedOut ? "Time expired" : "Not passed"}</h2>
               <p className="text-slate-600">Score: <span className="font-semibold">{result.scorePct}%</span> ({result.score} / {result.totalPoints} points)</p>
               <p className="text-xs text-slate-500">{result.totalQuestions} questions · Passing mark was {inst.passingScore}%. Your exam owner can review the separate technical and browser evidence record.</p>
@@ -842,13 +884,13 @@ export default function ExamShare() {
                   {review.questions.map((question, index) => {
                     const submittedIndex = typeof question.submittedAnswer === "number" ? question.submittedAnswer : null;
                     return (
-                      <div key={question.id} className={`rounded-xl border p-4 ${question.isCorrect ? "border-emerald-200 bg-emerald-50/50" : "border-slate-200 bg-white"}`}>
+                      <div key={question.id} className={`rounded-xl border p-4 ${question.isCorrect ? "border-black bg-slate-50" : "border-slate-200 bg-white"}`}>
                         <div className="flex items-start gap-2">
-                          {question.isCorrect ? <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" /> : <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />}
+                          {question.isCorrect ? <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-black" /> : <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />}
                           <div className="min-w-0">
                             <p className="text-sm font-medium text-slate-900">{index + 1}. {question.question}</p>
                             <p className="mt-2 text-xs text-slate-600">Your answer: {submittedIndex === null ? "Not answered" : question.options[submittedIndex] ?? "Invalid option"}</p>
-                            {!question.isCorrect && <p className="mt-1 text-xs font-medium text-emerald-700">Correct answer: {question.correctOption ?? "Unavailable"}</p>}
+                            {!question.isCorrect && <p className="mt-1 text-xs font-medium text-black">Correct answer: {question.correctOption ?? "Unavailable"}</p>}
                             {question.explanation && <p className="mt-2 text-xs leading-5 text-slate-600">{question.explanation}</p>}
                             <p className="mt-2 text-xs text-slate-500">{question.awardedPoints} / {question.maxPoints} points</p>
                           </div>
@@ -883,12 +925,12 @@ export default function ExamShare() {
 }
 
 function Notice({ children }: { children: React.ReactNode }) {
-  return <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-5 text-amber-950">{children}</div>;
+  return <div className="rounded-xl border border-slate-400 bg-slate-50 px-4 py-3 text-sm leading-5 text-slate-900">{children}</div>;
 }
 
 function SyncStatus({ state, lastSavedAt }: { state: "saved" | "saving" | "pending" | "offline"; lastSavedAt: string | null }) {
-  if (state === "offline") return <span className="inline-flex items-center gap-1 text-amber-700"><WifiOff className="w-3.5 h-3.5" /> Offline · saved locally</span>;
+  if (state === "offline") return <span className="inline-flex items-center gap-1 font-medium text-black"><WifiOff className="w-3.5 h-3.5" /> Offline · saved locally</span>;
   if (state === "saving") return <span className="inline-flex items-center gap-1 text-slate-600"><Loader2 className="w-3.5 h-3.5 animate-spin" /> Saving…</span>;
-  if (state === "pending") return <span className="inline-flex items-center gap-1 text-amber-700"><Save className="w-3.5 h-3.5" /> Save pending</span>;
-  return <span className="inline-flex items-center gap-1 text-emerald-700" title={lastSavedAt ? new Date(lastSavedAt).toLocaleString() : undefined}><Wifi className="w-3.5 h-3.5" /> Saved</span>;
+  if (state === "pending") return <span className="inline-flex items-center gap-1 font-medium text-black"><Save className="w-3.5 h-3.5" /> Save pending</span>;
+  return <span className="inline-flex items-center gap-1 text-slate-700" title={lastSavedAt ? new Date(lastSavedAt).toLocaleString() : undefined}><Wifi className="w-3.5 h-3.5" /> Saved</span>;
 }

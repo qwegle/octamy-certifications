@@ -182,7 +182,7 @@ export default function CandidateSearch() {
       <div className="space-y-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-sky-700">Consent-gated talent evidence</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-700">Consent-gated talent evidence</p>
             <h1 className="mt-2 text-3xl font-bold text-gray-900">Search candidates</h1>
             <p className="text-gray-600 mt-2 max-w-2xl">
               Results meet discovery eligibility: learner opt-in and at least one current paid credential. Exact credential and Practice details remain hidden until that learner creates an explicit, expiring evidence grant for your company.
@@ -202,7 +202,7 @@ export default function CandidateSearch() {
         <Card className="overflow-hidden border-slate-200 shadow-sm">
           <CardContent className="grid gap-4 p-0 md:grid-cols-[1fr_auto] md:items-stretch">
             <div className="flex gap-3 p-5">
-              <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-emerald-50 text-emerald-700">
+              <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-slate-50 text-slate-700">
                 <ShieldCheck className="h-5 w-5" />
               </div>
               <div>
@@ -227,8 +227,8 @@ export default function CandidateSearch() {
         <InterviewEvidenceNotice compact />
 
         {searchError ? (
-          <Card className="border-amber-200 bg-amber-50/70" role="alert">
-            <CardContent className="flex flex-col gap-3 p-4 text-sm text-amber-950 sm:flex-row sm:items-center sm:justify-between">
+          <Card className="border-slate-200 bg-slate-50/70" role="alert">
+            <CardContent className="flex flex-col gap-3 p-4 text-sm text-slate-950 sm:flex-row sm:items-center sm:justify-between">
               <span className="flex items-center gap-2"><AlertCircle className="h-4 w-4" />{searchError}</span>
               <Button size="sm" variant="outline" onClick={() => searchCandidates(currentPage)}>Retry search</Button>
             </CardContent>
@@ -350,13 +350,13 @@ export default function CandidateSearch() {
 
               {/* Additional Filters */}
               <div className="flex flex-wrap items-center gap-6">
-                <div className="flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-800">
+                <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-800">
                   <Check className="h-4 w-4" /> Current paid evidence required
                 </div>
               </div>
 
               <div className="flex space-x-4">
-                <Button onClick={() => searchCandidates(1)} className="bg-blue-600 hover:bg-blue-700">
+                <Button onClick={() => searchCandidates(1)} className="bg-slate-600 hover:bg-slate-700">
                   <Search className="h-4 w-4 mr-2" />
                   Search Candidates
                 </Button>
@@ -393,7 +393,7 @@ export default function CandidateSearch() {
 
           {loading ? (
             <div className="flex items-center justify-center py-12">
-              <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full" aria-hidden="true" /><span className="sr-only">Searching candidates</span>
+              <div className="animate-spin w-8 h-8 border-4 border-slate-600 border-t-transparent rounded-full" aria-hidden="true" /><span className="sr-only">Searching candidates</span>
             </div>
           ) : candidates.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-slate-300 bg-white text-center py-12">
@@ -420,7 +420,7 @@ export default function CandidateSearch() {
                         <div className="mb-3 flex flex-wrap items-center gap-3">
                           <h3 className="text-xl font-semibold text-gray-900">{candidate.name}</h3>
                           <Badge variant="outline">{candidate.experience || 0} years exp</Badge>
-                          <Badge className="border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-50"><ShieldCheck className="mr-1 h-3 w-3" />Discovery eligible · details grant-gated</Badge>
+                          <Badge className="border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-50"><ShieldCheck className="mr-1 h-3 w-3" />Discovery eligible · details grant-gated</Badge>
                         </div>
                         
                         <div className="space-y-2 mb-4">

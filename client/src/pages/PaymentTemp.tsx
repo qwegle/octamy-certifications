@@ -321,19 +321,19 @@ export default function PaymentTemp() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950 p-6 rounded-lg border-2 border-dashed border-blue-200 dark:border-blue-800">
+                  <div className="bg-gradient-to-br from-slate-50 to-slate-50 dark:from-slate-950 dark:to-slate-950 p-6 rounded-lg border-2 border-dashed border-slate-200 dark:border-slate-800">
                     <div className="text-center space-y-2">
-                      <Trophy className="h-12 w-12 text-blue-600 mx-auto" />
-                      <h3 className="text-xl font-semibold text-blue-900 dark:text-blue-100">
+                      <Trophy className="h-12 w-12 text-slate-600 mx-auto" />
+                      <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
                         Professional Certificate
                       </h3>
-                      <p className="text-blue-700 dark:text-blue-300">
+                      <p className="text-slate-700 dark:text-slate-300">
                         {course.title || 'Course'}
                       </p>
-                      <p className="text-sm text-blue-600 dark:text-blue-400">
+                      <p className="text-sm text-slate-600 dark:text-slate-400">
                         Awarded to: {examResults.userName || 'Unknown'}
                       </p>
-                      <div className="flex justify-center gap-4 text-sm text-blue-600 dark:text-blue-400">
+                      <div className="flex justify-center gap-4 text-sm text-slate-600 dark:text-slate-400">
                         <span>Score: {examResults.score || 0}%</span>
                         <span>•</span>
                         <span>Grade: {examResults.score >= 90 ? 'A+' : examResults.score >= 80 ? 'A' : 'B+'}</span>
@@ -379,7 +379,7 @@ export default function PaymentTemp() {
                           <span className="line-through text-muted-foreground mr-2">
                             ₹{course.originalPrice}
                           </span>
-                          <span className="text-green-600">₹{course.price}</span>
+                          <span className="text-slate-600">₹{course.price}</span>
                         </div>
                       ) : (
                         <span>₹{course.price || 0}</span>
@@ -389,7 +389,7 @@ export default function PaymentTemp() {
 
                   <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
                     <Label htmlFor="coupon" className="flex items-center gap-2 text-sm font-semibold text-slate-800">
-                      <TicketPercent className="h-4 w-4 text-violet-600" />
+                      <TicketPercent className="h-4 w-4 text-slate-600" />
                       Coupon code
                     </Label>
                     <div className="mt-2 flex gap-2">
@@ -414,7 +414,7 @@ export default function PaymentTemp() {
                       </Button>
                     </div>
                     {appliedCoupon && (
-                      <p className="mt-2 flex items-center gap-1.5 text-sm font-medium text-emerald-700">
+                      <p className="mt-2 flex items-center gap-1.5 text-sm font-medium text-slate-700">
                         <CheckCircle2 className="h-4 w-4" />
                         Applied {appliedCoupon.codeHint}
                       </p>
@@ -422,7 +422,7 @@ export default function PaymentTemp() {
                   </div>
 
                   {discountAmount > 0 && (
-                    <div className="flex justify-between text-sm font-medium text-emerald-700">
+                    <div className="flex justify-between text-sm font-medium text-slate-700">
                       <span>Coupon saving</span>
                       <span>−₹{discountAmount.toLocaleString('en-IN')}</span>
                     </div>

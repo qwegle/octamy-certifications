@@ -176,11 +176,11 @@ export default function CandidateProfile() {
 
   const getBadgeColor = (badge: string) => {
     switch (badge.toLowerCase()) {
-      case 'platinum': return 'bg-purple-100 text-purple-800';
-      case 'gold': return 'bg-yellow-100 text-yellow-800';
+      case 'platinum': return 'bg-slate-100 text-slate-800';
+      case 'gold': return 'bg-slate-100 text-slate-800';
       case 'silver': return 'bg-gray-100 text-gray-800';
-      case 'expert': return 'bg-green-100 text-green-800';
-      case 'professional': return 'bg-blue-100 text-blue-800';
+      case 'expert': return 'bg-slate-100 text-slate-800';
+      case 'professional': return 'bg-slate-100 text-slate-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
@@ -201,7 +201,7 @@ export default function CandidateProfile() {
   if (loading) {
     return (
       <RecruiterLayout><div className="flex min-h-64 items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full" />
+        <div className="animate-spin w-8 h-8 border-4 border-slate-600 border-t-transparent rounded-full" />
       </div></RecruiterLayout>
     );
   }
@@ -226,7 +226,7 @@ export default function CandidateProfile() {
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex min-w-0 items-center space-x-4">
               <Avatar className="h-16 w-16">
-                <AvatarFallback className="text-2xl font-semibold bg-blue-600 text-white">
+                <AvatarFallback className="text-2xl font-semibold bg-slate-600 text-white">
                   {candidate.name.split(' ').map(n => n[0]).join('')}
                 </AvatarFallback>
               </Avatar>
@@ -285,14 +285,14 @@ export default function CandidateProfile() {
             {evidenceLoading ? (
               <Card><CardContent className="py-6 text-sm text-slate-600" role="status">Checking learner evidence grants…</CardContent></Card>
             ) : evidenceError ? (
-              <Card className="border-amber-200 bg-amber-50" role="alert"><CardContent className="py-6"><p className="text-sm text-amber-950">Evidence authorization could not be checked: {evidenceError}</p><Button type="button" size="sm" variant="outline" className="mt-3" onClick={() => void fetchCandidateProfile(String(candidate.id))}>Retry authorization check</Button></CardContent></Card>
+              <Card className="border-slate-200 bg-slate-50" role="alert"><CardContent className="py-6"><p className="text-sm text-slate-950">Evidence authorization could not be checked: {evidenceError}</p><Button type="button" size="sm" variant="outline" className="mt-3" onClick={() => void fetchCandidateProfile(String(candidate.id))}>Retry authorization check</Button></CardContent></Card>
             ) : selectedEvidence ? (
-              <Card className="border-emerald-200 bg-emerald-50/60">
+              <Card className="border-slate-200 bg-slate-50/60">
                 <CardHeader><CardTitle className="flex items-center"><Eye className="mr-2 h-5 w-5" aria-hidden="true" />Learner-authorized evidence</CardTitle></CardHeader>
                 <CardContent>
-                  <p className="text-sm text-emerald-950"><strong>Purpose:</strong> {selectedEvidence.grant.purpose}</p>
-                  {selectedEvidence.grant.jobReference && <p className="mt-1 text-sm text-emerald-900"><strong>Job reference:</strong> {selectedEvidence.grant.jobReference}</p>}
-                  <p className="mt-2 text-xs text-emerald-800">Access expires {new Date(selectedEvidence.grant.expiresAt).toLocaleString()}. Every read is logged for the learner.</p>
+                  <p className="text-sm text-slate-950"><strong>Purpose:</strong> {selectedEvidence.grant.purpose}</p>
+                  {selectedEvidence.grant.jobReference && <p className="mt-1 text-sm text-slate-900"><strong>Job reference:</strong> {selectedEvidence.grant.jobReference}</p>}
+                  <p className="mt-2 text-xs text-slate-800">Access expires {new Date(selectedEvidence.grant.expiresAt).toLocaleString()}. Every read is logged for the learner.</p>
                 </CardContent>
               </Card>
             ) : (
@@ -328,7 +328,7 @@ export default function CandidateProfile() {
                                 {new Date(cert.issuedAt).toLocaleDateString()}
                               </div>
                             </div>
-                            <Trophy className={`h-6 w-6 ${cert.score >= 90 ? 'text-yellow-500' : 'text-gray-400'}`} />
+                            <Trophy className={`h-6 w-6 ${cert.score >= 90 ? 'text-slate-500' : 'text-gray-400'}`} />
                           </div>
                         </div>
                       ))}
@@ -440,7 +440,7 @@ export default function CandidateProfile() {
               </CardHeader>
               <CardContent>
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-green-600 mb-2">
+                  <div className="text-3xl font-bold text-slate-600 mb-2">
                     {candidate.dedicationScore}%
                   </div>
                   <Progress value={candidate.dedicationScore} className="mb-3" />

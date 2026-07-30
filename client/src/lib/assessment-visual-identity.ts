@@ -20,18 +20,12 @@ export type AssessmentIconKey =
   | "landmark"
   | "security";
 
-const PALETTES = [
-  { paletteName: "indigo", headerClass: "from-indigo-950 via-indigo-800 to-violet-600", accentClass: "bg-indigo-300", softClass: "bg-indigo-50 text-indigo-900 border-indigo-200" },
-  { paletteName: "cyan", headerClass: "from-cyan-950 via-sky-800 to-cyan-500", accentClass: "bg-cyan-300", softClass: "bg-cyan-50 text-cyan-950 border-cyan-200" },
-  { paletteName: "emerald", headerClass: "from-emerald-950 via-emerald-800 to-teal-500", accentClass: "bg-emerald-300", softClass: "bg-emerald-50 text-emerald-950 border-emerald-200" },
-  { paletteName: "amber", headerClass: "from-amber-950 via-orange-800 to-amber-500", accentClass: "bg-amber-300", softClass: "bg-amber-50 text-amber-950 border-amber-200" },
-  { paletteName: "rose", headerClass: "from-rose-950 via-rose-800 to-pink-500", accentClass: "bg-rose-300", softClass: "bg-rose-50 text-rose-950 border-rose-200" },
-  { paletteName: "slate", headerClass: "from-slate-950 via-slate-700 to-blue-600", accentClass: "bg-blue-300", softClass: "bg-slate-100 text-slate-950 border-slate-300" },
-  { paletteName: "purple", headerClass: "from-purple-950 via-purple-800 to-fuchsia-600", accentClass: "bg-fuchsia-300", softClass: "bg-purple-50 text-purple-950 border-purple-200" },
-  { paletteName: "blue", headerClass: "from-blue-950 via-blue-800 to-sky-500", accentClass: "bg-sky-300", softClass: "bg-blue-50 text-blue-950 border-blue-200" },
-  { paletteName: "teal", headerClass: "from-teal-950 via-teal-800 to-emerald-500", accentClass: "bg-teal-300", softClass: "bg-teal-50 text-teal-950 border-teal-200" },
-  { paletteName: "red", headerClass: "from-red-950 via-red-800 to-orange-500", accentClass: "bg-orange-300", softClass: "bg-red-50 text-red-950 border-red-200" },
-] as const;
+const MONOCHROME_PALETTE = {
+  paletteName: "monochrome",
+  headerClass: "from-black via-neutral-900 to-neutral-700",
+  accentClass: "bg-white",
+  softClass: "border-neutral-300 bg-neutral-100 text-neutral-950",
+} as const;
 
 // Ordering is intentional: specific technologies and subjects win over broad
 // words such as "management", "language", or "practice".
@@ -51,27 +45,17 @@ const TOPICS: Array<{ pattern: RegExp; iconKey: AssessmentIconKey; topicLabel: s
   { pattern: /business|marketing|management|leadership|sales|strategy|agile|scrum|operations|project|product/, iconKey: "briefcase", topicLabel: "Business" },
 ];
 
-function stableHash(value: string): number {
-  let hash = 2166136261;
-  for (let index = 0; index < value.length; index += 1) {
-    hash ^= value.charCodeAt(index);
-    hash = Math.imul(hash, 16777619);
-  }
-  return hash >>> 0;
-}
-
 export function getAssessmentVisualIdentity(input: {
   slug: string;
   title: string;
   category?: string;
 }): AssessmentVisualIdentity {
-  const seed = `${input.slug || input.title}`.trim().toLowerCase();
   const searchable = `${input.title} ${input.category ?? ""} ${input.slug}`.toLowerCase();
   const topic = TOPICS.find(({ pattern }) => pattern.test(searchable)) ?? {
     iconKey: "graduation" as const,
     topicLabel: "Exam preparation",
   };
-  return { ...PALETTES[stableHash(seed) % PALETTES.length], ...topic };
+  return { ...MONOCHROME_PALETTE, ...topic };
 }
 
 export type AssessmentCardPricing = {

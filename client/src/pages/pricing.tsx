@@ -31,7 +31,7 @@ export default function Pricing() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#f7f5f0] text-slate-950">
+    <div className="flex min-h-screen flex-col bg-[#fafafa] text-slate-950">
       <SEO
         title="Octamy pricing: practice or certification"
         description="Choose Practice Pass for practice exams, or take a certification assessment free and pay separately only when activating a verified credential."
@@ -41,7 +41,7 @@ export default function Pricing() {
       <main id="main-content" tabIndex={-1} className="flex-1">
         <section className="relative overflow-hidden px-4 py-16 sm:py-24">
           <div aria-hidden className="absolute inset-0 bg-grid-slate opacity-50 [mask-image:radial-gradient(ellipse_at_top,black_35%,transparent_76%)]" />
-          <div aria-hidden className="absolute -right-28 top-0 h-80 w-80 rounded-full bg-violet-300/30 blur-3xl" />
+          <div aria-hidden className="absolute -right-28 top-0 h-80 w-80 rounded-full bg-slate-300/30 blur-3xl" />
           <div className="relative mx-auto max-w-4xl text-center">
             <p className="inline-flex rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-slate-700 shadow-sm">Choose the right path</p>
             <h1 className="mt-6 text-4xl font-black tracking-[-0.045em] sm:text-6xl">Practice access and certification credentials are separate.</h1>
@@ -79,7 +79,7 @@ export default function Pricing() {
         <section className="border-y border-slate-200 bg-white px-4 py-12">
           <div className="mx-auto flex max-w-6xl flex-col gap-6 rounded-[2rem] bg-slate-950 p-7 text-white sm:flex-row sm:items-center sm:justify-between sm:p-10">
             <div>
-              <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.16em] text-sky-300"><Building2 className="h-4 w-4" />For organizations</p>
+              <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.16em] text-slate-300"><Building2 className="h-4 w-4" />For organizations</p>
               <h2 className="mt-3 text-3xl font-black tracking-tight">Creator and institute workspace plans</h2>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300">Publishing and institute workspace subscriptions have their own pricing. They do not turn Practice Pass into a credential.</p>
             </div>
@@ -88,7 +88,7 @@ export default function Pricing() {
         </section>
 
         <section className="px-4 py-10 text-center text-sm text-slate-600">
-          <p className="inline-flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-emerald-700" />Prices are in INR. GST is extra where applicable. No certification payment is taken automatically.</p>
+          <p className="inline-flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-slate-700" />Prices are in INR. GST is extra where applicable. No certification payment is taken automatically.</p>
         </section>
       </main>
       <Footer />
@@ -108,8 +108,8 @@ function PricingChoice({ accent, icon, eyebrow, title, price, description, point
   cta: string;
 }) {
   const theme = accent === 'violet'
-    ? 'border-violet-200 bg-gradient-to-br from-violet-50 via-white to-fuchsia-50 text-violet-800'
-    : 'border-emerald-200 bg-gradient-to-br from-emerald-50 via-white to-cyan-50 text-emerald-800';
+    ? 'border-slate-200 bg-gradient-to-br from-slate-50 via-white to-slate-50 text-slate-800'
+    : 'border-slate-200 bg-gradient-to-br from-slate-50 via-white to-slate-50 text-slate-800';
   return (
     <Card className={`overflow-hidden rounded-[2rem] border-2 shadow-[0_24px_70px_-45px_rgba(15,23,42,0.55)] ${theme}`}>
       <CardContent className="flex h-full flex-col p-7 sm:p-9">

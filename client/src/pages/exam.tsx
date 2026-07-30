@@ -54,7 +54,15 @@ type SavedExamDraft = {
   expiresAt: number;
 };
 
-function ExamAccountGate({ presentation, compact = false }: { presentation: ExamAccountGatePresentation; compact?: boolean }) {
+function ExamAccountGate({
+  presentation,
+  compact = false,
+  onContinueAsGuest,
+}: {
+  presentation: ExamAccountGatePresentation;
+  compact?: boolean;
+  onContinueAsGuest?: () => void;
+}) {
   const headingRef = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => {
@@ -67,20 +75,30 @@ function ExamAccountGate({ presentation, compact = false }: { presentation: Exam
       aria-live="assertive"
       aria-labelledby="exam-account-gate-title"
       aria-describedby="exam-account-gate-description"
-      className={`rounded-2xl border border-violet-200 bg-violet-50 ${compact ? "p-4" : "p-6 shadow-lg"}`}
+      className={`rounded-xl border border-slate-300 bg-white ${compact ? "p-4" : "p-6"}`}
     >
       <div className="flex items-start gap-3">
-        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-violet-700 text-white" aria-hidden="true"><LockKeyhole className="h-5 w-5" /></span>
+        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-black text-white" aria-hidden="true"><LockKeyhole className="h-5 w-5" /></span>
         <div>
-          <p className="text-xs font-black uppercase tracking-[0.12em] text-violet-800">{presentation.eyebrow}</p>
+          <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-600">{presentation.eyebrow}</p>
           <h2 id="exam-account-gate-title" ref={headingRef} tabIndex={-1} className="mt-1 text-xl font-black text-slate-950 outline-none">{presentation.title}</h2>
           <p id="exam-account-gate-description" className="mt-2 text-sm leading-6 text-slate-700">{presentation.description}</p>
         </div>
       </div>
       <div className="mt-4 grid gap-2 sm:grid-cols-2">
-        <Button asChild className="min-h-11 rounded-full"><Link href={presentation.createAccountHref}><UserPlus className="mr-2 h-4 w-4" aria-hidden="true" />Create account</Link></Button>
-        <Button asChild variant="outline" className="min-h-11 rounded-full border-violet-300 bg-white"><Link href={presentation.loginHref}><LogIn className="mr-2 h-4 w-4" aria-hidden="true" />Log in</Link></Button>
+        <Button asChild className="min-h-11 rounded-lg bg-black text-white hover:bg-slate-800"><Link href={presentation.createAccountHref}><UserPlus className="mr-2 h-4 w-4" aria-hidden="true" />Register</Link></Button>
+        <Button asChild variant="outline" className="min-h-11 rounded-lg border-slate-400 bg-white text-black hover:bg-slate-100"><Link href={presentation.loginHref}><LogIn className="mr-2 h-4 w-4" aria-hidden="true" />Login</Link></Button>
       </div>
+      {onContinueAsGuest && (
+        <Button type="button" variant="ghost" className="mt-2 min-h-11 w-full rounded-lg text-black hover:bg-slate-100" onClick={onContinueAsGuest}>
+          Continue as guest
+        </Button>
+      )}
+      <p className="mt-2 text-xs leading-5 text-slate-500">
+        {onContinueAsGuest
+          ? "Continue as guest to review the exam details. Registration or login is required only when you start and submit this exam."
+          : "Exam results and optional credentials must belong to a learner account."}
+      </p>
     </section>
   );
 }
@@ -95,6 +113,8 @@ type PublicAssessment = {
   passingScore: number;
   price: string;
   originalPrice: string | null;
+  isOnSale: boolean;
+  subscriptionEligible: boolean;
   productType: "assessment";
   level: string;
   language: string;
@@ -109,6 +129,14 @@ type PublicAssessment = {
   category: { id: number; name: string; slug: string; kind: string };
   creator: { displayName: string; slug: string } | null;
 };
+
+function formatInr(value: number) {
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: Number.isInteger(value) ? 0 : 2,
+  }).format(value);
+}
 
 export default function Exam() {
   const { slug } = useParams();
@@ -134,6 +162,7 @@ export default function Exam() {
   const [returningToFullscreen, setReturningToFullscreen] = useState(false);
   const [integrityConsent, setIntegrityConsent] = useState(false);
   const [accountGateReason, setAccountGateReason] = useState<ExamAccountGateReason | null>(null);
+  const [guestBrowsing, setGuestBrowsing] = useState(false);
   const examEndingRef = useRef(false);
   const submissionRequestedRef = useRef(false);
   const autoSubmitFiredRef = useRef(false);
@@ -609,6 +638,12 @@ export default function Exam() {
   const metaDescription = course.metaDescription || (isPractice
     ? `Practice ${displayTitle} with rotating questions and answer review. Practice Pass is required to start.`
     : `Take the ${displayTitle} exam free. Review the published passing threshold before you begin; credential activation is optional after a passing result.`);
+  const credentialPrice = Number(course.price);
+  const originalCredentialPrice = Number(course.originalPrice);
+  const credentialIsOnSale = Number.isFinite(credentialPrice)
+    && Number.isFinite(originalCredentialPrice)
+    && originalCredentialPrice > credentialPrice;
+  const credentialSavings = credentialIsOnSale ? originalCredentialPrice - credentialPrice : 0;
 
   if (accountGateReason && examStarted && gatePresentation) {
     return (
@@ -625,69 +660,91 @@ export default function Exam() {
 
   if (!examStarted) {
     return (
-      <div className="min-h-screen bg-slate-50">
+      <div className="min-h-screen bg-white">
         <SEO title={seoTitle} description={metaDescription} path={canonicalPath} image={course.thumbnailUrl || undefined} />
         
         <ExamStructuredData course={course} />
         
         <Header />
-        <main id="main-content" className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
-          <nav aria-label="Breadcrumb" className="mb-7 flex flex-wrap items-center gap-1.5 text-sm text-slate-500">
+        <main id="main-content" className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-9">
+          <nav aria-label="Breadcrumb" className="mb-6 flex flex-wrap items-center gap-1.5 text-sm text-slate-500">
             <Link href={isPractice ? "/practice" : course.origin === "creator" ? "/creator-assessments" : "/get-certified"} className="hover:text-slate-950">{isPractice ? "Practice" : course.origin === "creator" ? "Creator certifications" : "Get certified"}</Link><ChevronRight className="h-3.5 w-3.5" aria-hidden="true" /><Link href={isPractice ? publicPracticeCategoryPath(course.category.slug) : course.origin === "creator" ? `/creator-assessments?category=${encodeURIComponent(course.category.slug)}` : publicAssessmentCategoryPath(course.category.slug)} className="hover:text-slate-950">{course.category.name}</Link><ChevronRight className="h-3.5 w-3.5" aria-hidden="true" /><span className="max-w-xs truncate font-medium text-slate-800" aria-current="page">{displayTitle}</span>
           </nav>
 
-          <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_390px] lg:items-start">
-            <section className="overflow-hidden rounded-[2rem] bg-slate-950 text-white shadow-xl shadow-slate-900/10">
-              <div className="relative overflow-hidden px-6 py-9 sm:px-10 sm:py-12">
-                <div aria-hidden className="absolute -right-24 -top-24 h-72 w-72 rounded-full border-[48px] border-violet-400/10" />
-                <div aria-hidden className="absolute -bottom-24 left-1/3 h-60 w-60 rounded-full bg-sky-500/10 blur-3xl" />
-                <div className="relative">
-                  <div className="flex flex-wrap gap-2"><span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-black uppercase tracking-[0.13em]"><Award className="h-3.5 w-3.5 text-violet-300" />{course.originLabel}</span><span className="rounded-full border border-white/15 px-3 py-1.5 text-xs font-bold text-slate-300">{course.category.name}</span></div>
-                  <h1 className="mt-6 max-w-3xl text-4xl font-black leading-[1.03] tracking-[-0.04em] sm:text-6xl">{displayTitle}</h1>
-                  <p className="mt-5 max-w-2xl text-base leading-7 text-slate-300 sm:text-lg">{course.description}</p>
-                  <p className="mt-5 flex items-start gap-2 text-sm leading-6 text-violet-200"><ShieldCheck className="mt-0.5 h-4 w-4 shrink-0" />{isPractice ? "Practice only. No recruiter credential is issued from this attempt." : course.certificationLabel}</p>
+          <div id="exam-overview" className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_370px] lg:items-start">
+            <section className="overflow-hidden rounded-2xl border border-black bg-black text-white">
+              <div className="px-6 py-8 sm:px-9 sm:py-10">
+                <div className="flex flex-wrap gap-2">
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-white/30 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.11em]"><Award className="h-3.5 w-3.5" />{isPractice ? "Practice exam" : "Certification exam"}</span>
+                  <span className="rounded-full border border-white/30 px-3 py-1.5 text-xs font-medium text-slate-300">{course.category.name}</span>
                 </div>
+                <h1 className="mt-6 max-w-3xl text-4xl font-black leading-[1.04] tracking-[-0.04em] sm:text-5xl">{displayTitle}</h1>
+                <p className="mt-5 max-w-2xl text-base leading-7 text-slate-300">{course.description}</p>
+                <p className="mt-5 flex items-start gap-2 border-t border-white/20 pt-5 text-sm leading-6 text-slate-300"><ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-white" />{isPractice ? "Practice only. No recruiter credential is issued from this attempt." : course.certificationLabel}</p>
               </div>
 
-              <div className="grid border-t border-white/10 bg-white/[0.04] sm:grid-cols-3">
-                <div className="flex items-center gap-3 border-b border-white/10 p-5 sm:border-b-0 sm:border-r"><Clock3 className="h-5 w-5 text-violet-300" /><div><p className="text-xs uppercase tracking-wider text-slate-400">Duration</p><p className="mt-1 font-bold">{course.duration} minutes</p></div></div>
-                <div className="flex items-center gap-3 border-b border-white/10 p-5 sm:border-b-0 sm:border-r"><FileQuestion className="h-5 w-5 text-sky-300" /><div><p className="text-xs uppercase tracking-wider text-slate-400">Format</p><p className="mt-1 font-bold">Timed MCQ</p></div></div>
-                <div className="flex items-center gap-3 p-5"><ShieldCheck className="h-5 w-5 text-emerald-300" /><div><p className="text-xs uppercase tracking-wider text-slate-400">Pass mark</p><p className="mt-1 font-bold">{course.passingScore}% or higher</p></div></div>
+              <div className="grid border-t border-white/20 sm:grid-cols-3">
+                <div className="flex items-center gap-3 border-b border-white/20 p-5 sm:border-b-0 sm:border-r"><Clock3 className="h-5 w-5 text-white" /><div><p className="text-xs uppercase tracking-wider text-slate-400">Duration</p><p className="mt-1 font-bold">{course.duration} minutes</p></div></div>
+                <div className="flex items-center gap-3 border-b border-white/20 p-5 sm:border-b-0 sm:border-r"><FileQuestion className="h-5 w-5 text-white" /><div><p className="text-xs uppercase tracking-wider text-slate-400">Format</p><p className="mt-1 font-bold">Timed MCQ</p></div></div>
+                <div className="flex items-center gap-3 p-5"><ShieldCheck className="h-5 w-5 text-white" /><div><p className="text-xs uppercase tracking-wider text-slate-400">Pass mark</p><p className="mt-1 font-bold">{course.passingScore}% or higher</p></div></div>
               </div>
             </section>
 
             <aside className="lg:sticky lg:top-28">
-              <Card className="overflow-hidden rounded-[1.75rem] border-slate-200 shadow-xl shadow-slate-900/10">
-                <div className="border-b border-slate-100 bg-gradient-to-br from-violet-50 to-sky-50 p-6">
-                  <p className="text-xs font-black uppercase tracking-[0.14em] text-violet-800">Start when you are ready</p>
-                  <div className="mt-3 flex items-end justify-between gap-4"><div><p className="text-2xl font-black text-slate-950">{isPractice ? "Included in Practice Pass" : "Free exam attempt"}</p><p className="mt-1 text-sm text-slate-600">{isPractice ? "Choose 30-day or 365-day access to reviewed Practice exams." : <>Activate the credential for <strong>₹{course.price}</strong>{Number(course.originalPrice) > Number(course.price) && <><span className="ml-1.5 line-through">₹{Number(course.originalPrice).toFixed(2)}</span><span className="ml-1.5 font-bold text-emerald-700">Save ₹{(Number(course.originalPrice) - Number(course.price)).toFixed(2)}</span></>} only after passing.</>}</p></div><CheckCircle2 className="h-8 w-8 shrink-0 text-emerald-600" /></div>
+              <Card className="overflow-hidden rounded-2xl border-slate-300 shadow-none">
+                <div className="border-b border-slate-200 bg-slate-50 p-6">
+                  <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-600">Exam access</p>
+                  <p className="mt-2 text-2xl font-black text-slate-950">{isPractice ? "Included in Practice Pass" : "Free exam attempt"}</p>
+                  {isPractice ? (
+                    <p className="mt-2 text-sm leading-6 text-slate-600">Choose 30-day or 365-day access before login or registration.</p>
+                  ) : (
+                    <div className="mt-3 border-t border-slate-300 pt-3">
+                      <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Credential after passing</p>
+                      <div className="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                        <span className="text-2xl font-black text-black">{Number.isFinite(credentialPrice) ? formatInr(credentialPrice) : course.price}</span>
+                        {credentialIsOnSale && <span className="text-sm text-slate-500 line-through">{formatInr(originalCredentialPrice)}</span>}
+                        {credentialIsOnSale && <span className="rounded-full border border-black px-2 py-0.5 text-xs font-bold text-black">Save {formatInr(credentialSavings)}</span>}
+                      </div>
+                      <p className="mt-1 text-xs leading-5 text-slate-500">Payment is optional and requested only after a passing result.</p>
+                    </div>
+                  )}
                 </div>
                 <CardContent className="space-y-5 p-6">
-                  {!user && !isPractice && gatePresentation && <ExamAccountGate presentation={gatePresentation} compact />}
+                  {!user && !isPractice && gatePresentation && !guestBrowsing && (
+                    <ExamAccountGate presentation={gatePresentation} compact onContinueAsGuest={() => setGuestBrowsing(true)} />
+                  )}
 
-                  {user && <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4"><p className="text-xs font-black uppercase tracking-wide text-emerald-800">Signed-in learner</p><p className="mt-1 font-bold text-slate-950">{user.name}</p><p className="text-sm text-slate-600">{user.email}</p><p className="mt-2 text-xs text-emerald-800">Your account identity will be used automatically for this attempt.</p></div>}
+                  {!user && !isPractice && guestBrowsing && (
+                    <div className="rounded-xl border border-slate-300 bg-slate-50 p-4">
+                      <p className="text-xs font-black uppercase tracking-wide text-slate-600">Browsing as guest</p>
+                      <p className="mt-1 text-sm leading-6 text-slate-700">You can review this exam, its price, and requirements without an account. Register or login when you are ready to start.</p>
+                      <Button type="button" variant="outline" className="mt-3 w-full rounded-lg border-slate-400 bg-white text-black hover:bg-slate-100" onClick={() => setGuestBrowsing(false)}>Show exam access options</Button>
+                    </div>
+                  )}
 
-                  {user && isPractice && !subscriptionLoading && !hasPracticeAccess && <div className="rounded-2xl border border-violet-200 bg-violet-50 p-4"><p className="font-black text-slate-950">Practice Pass required</p><p className="mt-1 text-sm leading-6 text-slate-600">Review 30-day or 365-day access. Your account details are already attached, so they will not be requested again.</p><Button type="button" className="mt-4 w-full" onClick={() => setLocation(practicePricingPath({ next: location }))}>Review Practice Pass</Button></div>}
+                  {user && <div className="rounded-xl border border-slate-300 bg-slate-50 p-4"><p className="text-xs font-black uppercase tracking-wide text-slate-600">Signed-in learner</p><p className="mt-1 font-bold text-slate-950">{user.name}</p><p className="text-sm text-slate-600">{user.email}</p><p className="mt-2 text-xs text-slate-600">Your account identity will be used automatically for this attempt.</p></div>}
 
-                  {!user && isPractice && <div className="rounded-2xl border border-violet-200 bg-violet-50 p-4"><p className="font-black text-slate-950">Review Practice Pass first</p><p className="mt-1 text-sm leading-6 text-slate-600">Choose 30-day or 365-day access first. After selecting a plan, you can sign in or create a learner account.</p><Button type="button" className="mt-4 w-full" onClick={() => setLocation(practicePlansPath({ next: location }))}>View Practice Pass plans</Button></div>}
+                  {user && isPractice && !subscriptionLoading && !hasPracticeAccess && <div className="rounded-xl border border-slate-300 bg-white p-4"><p className="font-black text-slate-950">Practice Pass required</p><p className="mt-1 text-sm leading-6 text-slate-600">Review 30-day or 365-day access. Your account details are already attached, so they will not be requested again.</p><Button type="button" className="mt-4 w-full rounded-lg bg-black text-white hover:bg-slate-800" onClick={() => setLocation(practicePricingPath({ next: location }))}>Review Practice Pass</Button></div>}
 
-                  {user && !isPractice && <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                    <input type="checkbox" checked={integrityConsent} onChange={(event) => setIntegrityConsent(event.target.checked)} className="mt-1 h-4 w-4 shrink-0 rounded border-slate-300 accent-violet-700" />
+                  {!user && isPractice && <div className="rounded-xl border border-slate-300 bg-white p-4"><p className="font-black text-slate-950">Choose a Practice Pass first</p><p className="mt-1 text-sm leading-6 text-slate-600">Select a plan first. Login or registration follows your selection; guest attempts are not included with Practice Pass.</p><Button type="button" className="mt-4 w-full rounded-lg bg-black text-white hover:bg-slate-800" onClick={() => setLocation(practicePlansPath({ next: location }))}>View Practice Pass plans</Button></div>}
+
+                  {user && !isPractice && <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-300 bg-slate-50 p-4">
+                    <input type="checkbox" checked={integrityConsent} onChange={(event) => setIntegrityConsent(event.target.checked)} className="mt-1 h-4 w-4 shrink-0 rounded border-slate-400 accent-black" />
                     <span className="text-xs leading-5 text-slate-600"><strong className="block text-sm text-slate-900">Browser integrity evidence consent</strong>I understand that fullscreen changes, tab/window focus changes, and the occurrence of copy or paste attempts are recorded for assessment integrity. Octamy does not capture screen contents, webcam, microphone, audio, or keystrokes in this exam.</span>
                   </label>}
 
-                  {user && savedDraft && <div className="rounded-2xl border border-sky-200 bg-sky-50 p-4"><div className="flex items-start gap-3"><RotateCcw className="mt-0.5 h-5 w-5 text-sky-700" /><div className="min-w-0 flex-1"><h2 className="font-bold text-slate-950">Saved attempt found</h2><p className="mt-1 text-sm leading-5 text-slate-600">{Object.keys(savedDraft.answers).length} of {savedDraft.questions.length} answers saved on this device.</p><div className="mt-3 flex flex-wrap gap-2"><Button size="sm" onClick={resumeSavedExam} disabled={!isPractice && !integrityConsent}>Resume exam</Button><Button size="sm" variant="ghost" onClick={discardSavedExam}>Discard</Button></div></div></div></div>}
+                  {user && savedDraft && <div className="rounded-xl border border-slate-300 bg-slate-50 p-4"><div className="flex items-start gap-3"><RotateCcw className="mt-0.5 h-5 w-5 text-black" /><div className="min-w-0 flex-1"><h2 className="font-bold text-slate-950">Saved attempt found</h2><p className="mt-1 text-sm leading-5 text-slate-600">{Object.keys(savedDraft.answers).length} of {savedDraft.questions.length} answers saved on this device.</p><div className="mt-3 flex flex-wrap gap-2"><Button size="sm" className="bg-black text-white hover:bg-slate-800" onClick={resumeSavedExam} disabled={!isPractice && !integrityConsent}>Resume exam</Button><Button size="sm" variant="ghost" onClick={discardSavedExam}>Discard</Button></div></div></div></div>}
 
-                  {!savedDraft && user && (!isPractice || hasPracticeAccess) && <Button onClick={startExam} className="h-12 w-full rounded-full text-base font-black" disabled={!userInfo.name || !userInfo.email || (!isPractice && !integrityConsent)}>{isPractice ? "Start practice exam" : "Start free certification exam"}</Button>}
-                  <ul className="space-y-2.5 border-t border-slate-100 pt-5 text-xs leading-5 text-slate-600"><li className="flex gap-2"><CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-600" />Answers autosave on this device during interruptions.</li><li className="flex gap-2"><CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-600" />Your score and answer review appear after submission.</li><li className="flex gap-2"><TicketCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-violet-600" />{isPractice ? "Practice attempts are not shared as recruiter credentials." : "Direct payment, coupon, or institute voucher can fund activation."}</li></ul>
+                  {!savedDraft && user && (!isPractice || hasPracticeAccess) && <Button onClick={startExam} className="h-12 w-full rounded-lg bg-black text-base font-black text-white hover:bg-slate-800" disabled={!userInfo.name || !userInfo.email || (!isPractice && !integrityConsent)}>{isPractice ? "Start practice exam" : "Start free certification exam"}</Button>}
+                  <ul className="space-y-2.5 border-t border-slate-200 pt-5 text-xs leading-5 text-slate-600"><li className="flex gap-2"><CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-black" />Answers autosave on this device during interruptions.</li><li className="flex gap-2"><CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-black" />Your score and answer review appear after submission.</li><li className="flex gap-2"><TicketCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-black" />{isPractice ? "Practice attempts are not shared as recruiter credentials." : "Direct payment, coupon, or institute voucher can fund activation."}</li></ul>
                 </CardContent>
               </Card>
             </aside>
           </div>
 
-          <section className="mt-8 grid gap-4 rounded-[1.75rem] border border-slate-200 bg-white p-6 sm:grid-cols-3 sm:p-8" aria-labelledby="certification-process-title">
+          <section className="mt-6 grid gap-3 rounded-2xl border border-slate-300 bg-white p-5 sm:grid-cols-3 sm:p-6" aria-labelledby="certification-process-title">
             <div className="sm:col-span-3"><h2 id="certification-process-title" className="text-xl font-black">{isPractice ? "How this practice exam works" : "How this certification works"}</h2><p className="mt-1 text-sm text-slate-600">{isPractice ? "A private timed rehearsal with answer review and no credential issuance." : "A transparent result first. Credential activation is your choice after passing."}</p></div>
-            {[{ step: "01", title: "Take the exam", copy: "Stay in this tab and complete the timed questions." }, { step: "02", title: "Review your result", copy: "See the score and the published answer review." }, { step: "03", title: isPractice ? "Repeat and improve" : "Activate the credential", copy: isPractice ? "Practice stays separate from recruiter credentials." : "Pay directly, use a coupon, or redeem an institute voucher." }].map((item) => <div key={item.step} className="rounded-2xl bg-slate-50 p-5"><span className="text-xs font-black text-violet-700">{item.step}</span><h3 className="mt-2 font-black text-slate-950">{item.title}</h3><p className="mt-1 text-sm leading-6 text-slate-600">{item.copy}</p></div>)}
+            {[{ step: "01", title: "Take the exam", copy: "Stay in this tab and complete the timed questions." }, { step: "02", title: "Review your result", copy: "See the score and the published answer review." }, { step: "03", title: isPractice ? "Repeat and improve" : "Activate the credential", copy: isPractice ? "Practice stays separate from recruiter credentials." : "Pay directly, use a coupon, or redeem an institute voucher." }].map((item) => <div key={item.step} className="rounded-xl border border-slate-200 bg-slate-50 p-5"><span className="text-xs font-black text-black">{item.step}</span><h3 className="mt-2 font-black text-slate-950">{item.title}</h3><p className="mt-1 text-sm leading-6 text-slate-600">{item.copy}</p></div>)}
           </section>
         </main>
       </div>
@@ -709,12 +766,12 @@ export default function Exam() {
 
   if (questionsError) {
     return (
-      <div className="min-h-screen bg-cream-deep">
+      <div className="min-h-screen bg-white">
         <SEO title={`${course.title} assessment unavailable`} description={metaDescription} path={canonicalPath} noIndex />
         <main className="mx-auto max-w-xl px-4 py-16 text-center sm:px-6">
-          <Card className="border-amber-200 shadow-sm">
+          <Card className="rounded-xl border-slate-300 shadow-none">
             <CardContent className="py-12">
-              <AlertTriangle className="mx-auto h-9 w-9 text-amber-600" />
+              <AlertTriangle className="mx-auto h-9 w-9 text-black" />
               <h1 className="mt-4 text-2xl font-black text-slate-950">Assessment session could not start</h1>
               <p className="mt-3 leading-7 text-slate-600">{questionsError instanceof Error ? questionsError.message : "The reviewed question pool is temporarily unavailable."}</p>
               <div className="mt-6 flex flex-wrap justify-center gap-3">
@@ -730,10 +787,10 @@ export default function Exam() {
 
   if (questionsLoading) {
     return (
-      <div className="min-h-screen bg-cream-deep">
+      <div className="min-h-screen bg-white">
         <SEO title={`${course.title} assessment session`} description={metaDescription} path={canonicalPath} noIndex />
         <main className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
-          <Card className="border-cream-deep shadow-sm"><CardContent className="py-12 text-center" role="status"><span className="mx-auto block h-8 w-8 animate-spin rounded-full border-2 border-slate-300 border-t-slate-900" aria-hidden="true" /><p className="mt-4">Preparing the reviewed question set…</p></CardContent></Card>
+          <Card className="rounded-xl border-slate-300 shadow-none"><CardContent className="py-12 text-center" role="status"><span className="mx-auto block h-8 w-8 animate-spin rounded-full border-2 border-slate-300 border-t-black" aria-hidden="true" /><p className="mt-4">Preparing the reviewed question set…</p></CardContent></Card>
         </main>
       </div>
     );
@@ -741,10 +798,10 @@ export default function Exam() {
 
   if (questions.length === 0) {
     return (
-      <div className="min-h-screen bg-cream-deep">
+      <div className="min-h-screen bg-white">
         <SEO title={`${course.title} assessment unavailable`} description={metaDescription} path={canonicalPath} noIndex />
         <main className="mx-auto max-w-xl px-4 py-16 text-center sm:px-6">
-          <Card className="border-amber-200 shadow-sm"><CardContent className="py-12"><AlertTriangle className="mx-auto h-9 w-9 text-amber-600" aria-hidden="true" /><h1 className="mt-4 text-2xl font-black text-slate-950">No release-ready questions are available</h1><p className="mt-3 leading-7 text-slate-600">This assessment cannot start until its governed question pool meets publication requirements. No placeholder questions will be used.</p><div className="mt-6 flex flex-wrap justify-center gap-3"><Button type="button" onClick={() => void refetchQuestions()}>Check again</Button><Button type="button" variant="outline" onClick={() => setExamStarted(false)}>Back to assessment</Button></div></CardContent></Card>
+          <Card className="rounded-xl border-slate-300 shadow-none"><CardContent className="py-12"><AlertTriangle className="mx-auto h-9 w-9 text-black" aria-hidden="true" /><h1 className="mt-4 text-2xl font-black text-slate-950">No release-ready questions are available</h1><p className="mt-3 leading-7 text-slate-600">This assessment cannot start until its governed question pool meets publication requirements. No placeholder questions will be used.</p><div className="mt-6 flex flex-wrap justify-center gap-3"><Button type="button" onClick={() => void refetchQuestions()}>Check again</Button><Button type="button" variant="outline" onClick={() => setExamStarted(false)}>Back to assessment</Button></div></CardContent></Card>
         </main>
       </div>
     );
@@ -754,18 +811,18 @@ export default function Exam() {
   const currentQuestionIsFlagged = flaggedQuestionIds.has(currentQ.id);
 
   return (
-    <div className="min-h-screen min-h-[100dvh] bg-cream-soft">
+    <div className="min-h-screen min-h-[100dvh] bg-white">
       <SEO title={`${course.title} assessment session`} description={metaDescription} path={canonicalPath} noIndex />
       <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-8 lg:px-8">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-950 px-4 py-3 text-white shadow-sm">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.14em] text-violet-300">{isPractice ? "Private timed practice" : "Proctored assessment"}</p>
+            <p className="text-xs font-black uppercase tracking-[0.14em] text-white">{isPractice ? "Private timed practice" : "Proctored assessment"}</p>
             <p className="mt-0.5 text-sm text-slate-300">{isPractice ? "No fullscreen, clipboard, or focus monitoring. This attempt does not issue recruiter evidence." : fullscreenEnforced ? "Navigation, focus, fullscreen exits, and clipboard actions are monitored." : "Mobile exam mode is active. Navigation, focus, and clipboard actions are still monitored."}</p>
           </div>
           {!isPractice && !fullscreenEnforced
-            ? <span className="inline-flex items-center gap-2 rounded-full bg-sky-400/15 px-3 py-1.5 text-xs font-bold text-sky-100"><ShieldCheck className="h-4 w-4" />Mobile exam mode</span>
+            ? <span className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-3 py-1.5 text-xs font-bold text-white"><ShieldCheck className="h-4 w-4" />Mobile exam mode</span>
             : !isPractice && (fullscreenActive
-            ? <span className="inline-flex items-center gap-2 rounded-full bg-emerald-400/15 px-3 py-1.5 text-xs font-bold text-emerald-200"><ShieldCheck className="h-4 w-4" />Fullscreen active</span>
+            ? <span className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-3 py-1.5 text-xs font-bold text-white"><ShieldCheck className="h-4 w-4" />Fullscreen active</span>
             : <Button type="button" size="sm" variant="secondary" onClick={() => void enterFullscreen()}>Return to fullscreen</Button>)}
         </div>
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_260px] lg:items-start">
@@ -783,15 +840,15 @@ export default function Exam() {
 
             <CardContent className="space-y-6 p-4 sm:p-6">
               <div className="flex flex-wrap items-center gap-3 text-xs font-semibold text-slate-600">
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5"><Save className="h-3.5 w-3.5 text-emerald-700" />Progress saved on this device</span>
-                {!isOnline && <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-amber-900"><WifiOff className="h-3.5 w-3.5" />Offline — keep this tab open; answers will remain available</span>}
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5"><Save className="h-3.5 w-3.5 text-black" />Progress saved on this device</span>
+                {!isOnline && <span className="inline-flex items-center gap-1.5 rounded-full border border-black bg-slate-100 px-3 py-1.5 font-bold text-black"><WifiOff className="h-3.5 w-3.5" />Offline — keep this tab open; answers will remain available</span>}
               </div>
 
               {!isPractice && tabSwitches > 0 && (
-                <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+                <div className="rounded-xl border border-slate-400 bg-slate-50 p-4">
                   <div className="flex items-start">
-                    <AlertTriangle className="mr-2 mt-0.5 h-5 w-5 shrink-0 text-amber-700" />
-                    <p className="text-sm leading-6 text-amber-900">Tab or window switching detected ({tabSwitches} event{tabSwitches === 1 ? '' : 's'}).{tabSwitches > 3 && <span className="font-semibold"> Repeated exits may cause this attempt to be reviewed.</span>}</p>
+                    <AlertTriangle className="mr-2 mt-0.5 h-5 w-5 shrink-0 text-black" />
+                    <p className="text-sm leading-6 text-slate-900">Tab or window switching detected ({tabSwitches} event{tabSwitches === 1 ? '' : 's'}).{tabSwitches > 3 && <span className="font-semibold"> Repeated exits may cause this attempt to be reviewed.</span>}</p>
                   </div>
                 </div>
               )}
@@ -805,9 +862,9 @@ export default function Exam() {
                     variant="outline"
                     aria-pressed={currentQuestionIsFlagged}
                     onClick={() => toggleFlaggedQuestion(currentQ.id)}
-                    className={currentQuestionIsFlagged ? "shrink-0 border-amber-300 bg-amber-50 text-amber-950 hover:bg-amber-100" : "shrink-0"}
+                    className={currentQuestionIsFlagged ? "shrink-0 border-2 border-dashed border-black bg-white text-black hover:bg-slate-100" : "shrink-0"}
                   >
-                    <Flag className={`mr-2 h-4 w-4 ${currentQuestionIsFlagged ? "fill-amber-500 text-amber-600" : ""}`} />
+                    <Flag className={`mr-2 h-4 w-4 ${currentQuestionIsFlagged ? "fill-black text-black" : ""}`} />
                     {currentQuestionIsFlagged ? "Flagged for review" : "Flag for review"}
                   </Button>
                 </div>
@@ -820,10 +877,10 @@ export default function Exam() {
                       <Label
                         key={optionId}
                         htmlFor={optionId}
-                        className={`flex min-h-14 w-full cursor-pointer items-center gap-3 rounded-xl border-2 px-4 py-3 text-sm leading-6 transition focus-within:ring-2 focus-within:ring-violet-500 focus-within:ring-offset-2 sm:text-base ${selected ? "border-violet-600 bg-violet-50 text-slate-950" : "border-slate-200 bg-white text-slate-800 hover:border-slate-400 hover:bg-slate-50"}`}
+                        className={`flex min-h-14 w-full cursor-pointer items-center gap-3 rounded-xl border-2 px-4 py-3 text-sm leading-6 transition focus-within:ring-2 focus-within:ring-black focus-within:ring-offset-2 sm:text-base ${selected ? "border-black bg-slate-100 text-slate-950" : "border-slate-200 bg-white text-slate-800 hover:border-slate-400 hover:bg-slate-50"}`}
                       >
                         <RadioGroupItem value={index.toString()} id={optionId} className="h-5 w-5 shrink-0" />
-                        <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg text-xs font-black ${selected ? "bg-violet-700 text-white" : "bg-slate-100 text-slate-600"}`}>{String.fromCharCode(65 + index)}</span>
+                        <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg text-xs font-black ${selected ? "bg-black text-white" : "bg-slate-100 text-slate-600"}`}>{String.fromCharCode(65 + index)}</span>
                         <span className="flex-1">{option}</span>
                       </Label>
                     );

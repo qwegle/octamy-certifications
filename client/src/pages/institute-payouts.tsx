@@ -61,13 +61,13 @@ export default function InstitutePayouts() {
         <Metric title="Pending requests" value={String(data?.requests.filter((item) => item.status === "pending").length ?? 0)} icon={ArrowDownToLine} />
       </div>
 
-      <Card className="mt-6 border-violet-200 bg-violet-50/70">
+      <Card className="mt-6 border-slate-200 bg-slate-50/70">
         <CardContent className="p-5">
-          <h2 className="font-bold text-violet-950">How the institute split works</h2>
-          <p className="mt-1 text-sm leading-6 text-violet-900/75">
+          <h2 className="font-bold text-slate-950">How the institute split works</h2>
+          <p className="mt-1 text-sm leading-6 text-slate-900/75">
             The institute receives {data?.policy.ownerSharePercent ?? 80}% of each paid credential activation on institute-owned programs. Shipping is excluded. Affiliate commission comes from the remaining platform share.
           </p>
-          <p className="mt-2 text-xs text-violet-900/60">{data?.policy.settlement}</p>
+          <p className="mt-2 text-xs text-slate-900/60">{data?.policy.settlement}</p>
         </CardContent>
       </Card>
 
@@ -76,7 +76,7 @@ export default function InstitutePayouts() {
           <CardHeader><CardTitle className="text-lg">Request payout</CardTitle></CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit((values) => request.mutate(values))} className="space-y-4">
-              <div><label className="text-sm font-semibold">Amount (₹)</label><Input type="number" min={500} max={available || undefined} {...register("amount", { required: true, valueAsNumber: true, min: 500, max: available })} />{errors.amount && <p className="mt-1 text-xs text-rose-700">Enter at least ₹500 and no more than the available balance.</p>}</div>
+              <div><label className="text-sm font-semibold">Amount (₹)</label><Input type="number" min={500} max={available || undefined} {...register("amount", { required: true, valueAsNumber: true, min: 500, max: available })} />{errors.amount && <p className="mt-1 text-xs text-slate-700">Enter at least ₹500 and no more than the available balance.</p>}</div>
               <div><label className="text-sm font-semibold">UPI ID</label><Input placeholder="finance@bank" {...register("upi")} /></div>
               <div className="text-xs font-semibold uppercase tracking-wider text-slate-400">or bank transfer</div>
               <div className="grid grid-cols-2 gap-3">

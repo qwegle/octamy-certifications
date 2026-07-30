@@ -36,7 +36,7 @@ export default function RecruiterLanding() {
           accent="indigo"
           eyebrow="For recruiters & hiring teams"
           eyebrowIcon={<ShieldCheck className="h-3.5 w-3.5" />}
-          title={<>Move from profile claims to <span className="bg-gradient-to-r from-indigo-700 via-blue-600 to-cyan-600 bg-clip-text text-transparent">verified skill evidence</span></>}
+          title={<>Move from profile claims to <span className="bg-gradient-to-r from-slate-700 via-slate-600 to-slate-600 bg-clip-text text-transparent">verified skill evidence</span></>}
           description="Search opted-in candidates by profile details and active assessment credentials. Save searches and unlock protected profiles or CVs only when relevant."
           primary={{ label: 'Start hiring', href: '/recruiter/register' }}
           secondary={{ label: 'See credit packs', href: '/pricing' }}

@@ -36,7 +36,7 @@ export default function CreatorLanding() {
           accent="fuchsia"
           eyebrow="For creators & coaches"
           eyebrowIcon={<Sparkles className="h-3.5 w-3.5" />}
-          title={<>Turn expertise into <span className="bg-gradient-to-r from-fuchsia-600 via-violet-600 to-sky-700 bg-clip-text text-transparent">assessed learning</span></>}
+          title={<>Turn expertise into <span className="bg-gradient-to-r from-slate-600 via-slate-600 to-slate-700 bg-clip-text text-transparent">assessed learning</span></>}
           description="Build video courses and assessments, submit them for review, set access and credential pricing, then track auditable earnings and payout requests in one workspace."
           primary={{ label: 'Become a creator', href: '/register?role=creator' }}
           secondary={{ label: 'See pricing', href: '/pricing' }}
@@ -69,7 +69,7 @@ export default function CreatorLanding() {
                   >
                     <Card className="border-cream-deep hover:shadow-lg transition-shadow h-full">
                       <CardContent className="pt-6">
-                        <div className="inline-flex h-7 px-2 items-center rounded-full bg-sky-50 text-[11px] font-bold tracking-[0.2em] text-sky-700 ring-1 ring-sky-200">{s.n}</div>
+                        <div className="inline-flex h-7 px-2 items-center rounded-full bg-slate-50 text-[11px] font-bold tracking-[0.2em] text-slate-700 ring-1 ring-slate-200">{s.n}</div>
                         <div className="text-lg font-semibold text-slate-900 mt-3">{s.t}</div>
                         <div className="text-sm text-slate-600 mt-2">{s.d}</div>
                       </CardContent>
@@ -130,7 +130,7 @@ export default function CreatorLanding() {
                         <div className="text-sm text-slate-600 mt-1">{t.courses} · {t.fee}</div>
                         <ul className="mt-4 space-y-2 text-sm text-slate-700">
                           {t.features.map((f) => (
-                            <li key={f} className="flex gap-2"><Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />{f}</li>
+                            <li key={f} className="flex gap-2"><Check className="w-4 h-4 text-slate-600 shrink-0 mt-0.5" />{f}</li>
                           ))}
                         </ul>
                         <Button asChild className={`w-full mt-6 ${t.highlight ? 'bg-slate-900 hover:bg-black text-white' : ''}`} variant={t.highlight ? 'default' : 'outline'}>

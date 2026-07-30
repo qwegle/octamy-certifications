@@ -164,7 +164,7 @@ export default function EvidenceSharing() {
     <DashboardLayout role="learner" title="Recruiter evidence sharing" description="Choose exactly which evidence one verified recruiter may inspect, for a limited purpose and time.">
       <main className="space-y-6" aria-busy={recruitersQuery.isLoading || optionsQuery.isLoading || grantsQuery.isLoading || historyQuery.isLoading}>
         <Button asChild variant="ghost"><Link href="/dashboard"><ArrowLeft className="h-4 w-4" aria-hidden="true" />Back to dashboard</Link></Button>
-        <Alert className="border-sky-200 bg-sky-50 text-sky-950">
+        <Alert className="border-slate-200 bg-slate-50 text-slate-950">
           <ShieldCheck className="h-4 w-4" aria-hidden="true" />
           <AlertTitle>Discovery is not evidence consent</AlertTitle>
           <AlertDescription>Profile visibility and recruiter credits do not disclose activity. A grant below is recruiter-specific, purpose-bound, expires automatically, and can be revoked. Answers, questions, hidden tests, IP addresses, user agents, raw integrity events, recordings, transcripts, global activity, and Interview Studio data are never shared.</AlertDescription>
@@ -221,7 +221,7 @@ export default function EvidenceSharing() {
               </fieldset>
 
               <p className={selectedCount > MAX_EVIDENCE_ITEMS ? "text-sm font-medium text-red-700" : "text-xs text-slate-500"} role="status">{selectedCount} of {MAX_EVIDENCE_ITEMS} evidence items selected.</p>
-              <div className="flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4"><Checkbox id="grant-consent" checked={consented} onCheckedChange={(value) => setConsented(value === true)} /><Label htmlFor="grant-consent" className="cursor-pointer font-normal text-sm text-emerald-950"><strong className="block">I authorize this exact disclosure</strong>I understand the selected recruiter, purpose, evidence, expiry, and immediate revocation behavior described above.</Label></div>
+              <div className="flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4"><Checkbox id="grant-consent" checked={consented} onCheckedChange={(value) => setConsented(value === true)} /><Label htmlFor="grant-consent" className="cursor-pointer font-normal text-sm text-slate-950"><strong className="block">I authorize this exact disclosure</strong>I understand the selected recruiter, purpose, evidence, expiry, and immediate revocation behavior described above.</Label></div>
               <Button className="w-full" disabled={!canCreate} onClick={() => createGrant.mutate()} aria-busy={createGrant.isPending}>{createGrant.isPending ? "Creating grant…" : "Create expiring grant"}</Button>
               <div className="sr-only" aria-live="polite">{createGrant.isPending ? "Creating evidence grant" : ""}</div>
             </CardContent>
@@ -252,7 +252,7 @@ export default function EvidenceSharing() {
               <CardHeader><CardTitle className="flex items-center gap-2"><Eye className="h-5 w-5" aria-hidden="true" />Access history</CardTitle></CardHeader>
               <CardContent className="space-y-3">
                 {historyQuery.isLoading && <p className="text-sm text-slate-500" role="status">Loading append-only access history…</p>}
-                {!historyQuery.isLoading && !historyQuery.isError && ((historyQuery.data?.events || []).length ? historyQuery.data!.events.map((event) => <article key={event.id} className="rounded-xl bg-slate-50 p-3"><p className="flex items-center gap-2 text-sm font-medium"><CheckCircle2 className="h-4 w-4 text-emerald-600" aria-hidden="true" />{event.recruiterCompany} viewed selected evidence</p><p className="mt-1 text-xs text-slate-500">{dateLabel(event.occurredAt)} · {event.selectedCertificateIds.length} certification(s) · {event.selectedPracticeSummaryIds.length} practice summary(s)</p></article>) : <p className="text-sm text-slate-500">No recruiter has accessed a selected evidence grant yet.</p>)}
+                {!historyQuery.isLoading && !historyQuery.isError && ((historyQuery.data?.events || []).length ? historyQuery.data!.events.map((event) => <article key={event.id} className="rounded-xl bg-slate-50 p-3"><p className="flex items-center gap-2 text-sm font-medium"><CheckCircle2 className="h-4 w-4 text-slate-600" aria-hidden="true" />{event.recruiterCompany} viewed selected evidence</p><p className="mt-1 text-xs text-slate-500">{dateLabel(event.occurredAt)} · {event.selectedCertificateIds.length} certification(s) · {event.selectedPracticeSummaryIds.length} practice summary(s)</p></article>) : <p className="text-sm text-slate-500">No recruiter has accessed a selected evidence grant yet.</p>)}
               </CardContent>
             </Card>
 

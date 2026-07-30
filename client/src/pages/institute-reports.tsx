@@ -68,10 +68,10 @@ export default function InstituteReports() {
       <SEO title="Reports · Institute" description="Attempts, pass rates, and student activity." path="/institute/reports" />
 
       {error ? (
-        <Card className="border-rose-200 bg-rose-50/60">
+        <Card className="border-slate-200 bg-slate-50/60">
           <CardContent className="flex flex-col items-start gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex gap-3">
-              <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-rose-600" aria-hidden="true" />
+              <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-slate-600" aria-hidden="true" />
               <div>
                 <h2 className="font-semibold text-slate-900">Reports are temporarily unavailable</h2>
                 <p className="mt-1 text-sm text-slate-600">We couldn't retrieve the latest assessment data. Try again in a moment.</p>
@@ -224,10 +224,10 @@ function AttemptCard({ attempt, onReview }: { attempt: Report["recent"][number];
 
 function ResultBadge({ attempt }: { attempt: Report["recent"][number] }) {
   if (!attempt.submitted_at) {
-    return <Badge variant="outline" className="shrink-0 border-amber-300 bg-amber-50 text-amber-800">In progress</Badge>;
+    return <Badge variant="outline" className="shrink-0 border-slate-300 bg-slate-50 text-slate-800">In progress</Badge>;
   }
   if (attempt.passed) {
-    return <Badge className="shrink-0 bg-emerald-100 text-emerald-800 hover:bg-emerald-100">Pass</Badge>;
+    return <Badge className="shrink-0 bg-slate-100 text-slate-800 hover:bg-slate-100">Pass</Badge>;
   }
   return <Badge variant="outline" className="shrink-0 border-slate-300 bg-slate-50 text-slate-700">Not passed</Badge>;
 }

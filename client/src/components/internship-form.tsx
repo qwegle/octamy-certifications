@@ -271,9 +271,9 @@ export default function InternshipForm({ certificateId, onSuccess }: InternshipF
               />
             </div>
 
-            <div className="bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
-              <h4 className="font-semibold text-blue-800 dark:text-blue-200 mb-2">Important Note</h4>
-              <p className="text-blue-700 dark:text-blue-300 text-sm">
+            <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-4">
+              <h4 className="font-semibold text-slate-800 dark:text-slate-200 mb-2">Important Note</h4>
+              <p className="text-slate-700 dark:text-slate-300 text-sm">
                 This is a virtual internship certificate based on your assessment completion. 
                 The dates and duration you specify will appear on your certificate. 
                 Please ensure all information is accurate as it cannot be changed after submission.

@@ -67,18 +67,18 @@ export default function RecruiterDashboard() {
     switch (recruiter.kycStatus) {
       case 'pending':
         return (
-          <Card className="border-l-4 border-yellow-500 bg-gradient-to-r from-yellow-50 to-orange-50">
+          <Card className="border-l-4 border-slate-500 bg-gradient-to-r from-slate-50 to-slate-50">
             <CardContent className="p-6">
               <div className="flex items-center space-x-4">
-                <div className="bg-yellow-100 p-3 rounded-full">
-                  <Clock className="h-8 w-8 text-yellow-600" />
+                <div className="bg-slate-100 p-3 rounded-full">
+                  <Clock className="h-8 w-8 text-slate-600" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-bold text-yellow-800 text-lg">Verification In Progress</h3>
-                  <p className="text-yellow-700 text-sm mt-1">
+                  <h3 className="font-bold text-slate-800 text-lg">Verification In Progress</h3>
+                  <p className="text-slate-700 text-sm mt-1">
                     Complete your company profile to unlock candidate search and protected evidence.
                   </p>
-                  <Link href="/recruiter/onboarding"><Button className="mt-3 bg-yellow-600 hover:bg-yellow-700 text-white" size="sm">Complete setup</Button></Link>
+                  <Link href="/recruiter/onboarding"><Button className="mt-3 bg-slate-600 hover:bg-slate-700 text-white" size="sm">Complete setup</Button></Link>
                 </div>
               </div>
             </CardContent>
@@ -86,15 +86,15 @@ export default function RecruiterDashboard() {
         );
       case 'under_review':
         return (
-          <Card className="border-l-4 border-blue-500 bg-gradient-to-r from-blue-50 to-indigo-50">
+          <Card className="border-l-4 border-slate-500 bg-gradient-to-r from-slate-50 to-slate-50">
             <CardContent className="p-6">
               <div className="flex items-center space-x-4">
-                <div className="bg-blue-100 p-3 rounded-full">
-                  <AlertCircle className="h-8 w-8 text-blue-600" />
+                <div className="bg-slate-100 p-3 rounded-full">
+                  <AlertCircle className="h-8 w-8 text-slate-600" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-bold text-blue-800 text-lg">Under Review</h3>
-                  <p className="text-blue-700 text-sm mt-1">
+                  <h3 className="font-bold text-slate-800 text-lg">Under Review</h3>
+                  <p className="text-slate-700 text-sm mt-1">
                     Our team is reviewing your documents. You'll be notified within 24-48 hours.
                   </p>
                 </div>
@@ -104,7 +104,7 @@ export default function RecruiterDashboard() {
         );
       case 'rejected':
         return (
-          <Card className="border-l-4 border-red-500 bg-gradient-to-r from-red-50 to-pink-50">
+          <Card className="border-l-4 border-red-500 bg-gradient-to-r from-red-50 to-slate-50">
             <CardContent className="p-6">
               <div className="flex items-center space-x-4">
                 <div className="bg-red-100 p-3 rounded-full">
@@ -123,15 +123,15 @@ export default function RecruiterDashboard() {
         );
       case 'approved':
         return (
-          <Card className="border-l-4 border-green-500 bg-gradient-to-r from-green-50 to-emerald-50">
+          <Card className="border-l-4 border-slate-500 bg-gradient-to-r from-slate-50 to-slate-50">
             <CardContent className="p-6">
               <div className="flex items-center space-x-4">
-                <div className="bg-green-100 p-3 rounded-full">
-                  <CheckCircle className="h-8 w-8 text-green-600" />
+                <div className="bg-slate-100 p-3 rounded-full">
+                  <CheckCircle className="h-8 w-8 text-slate-600" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-bold text-green-800 text-lg">✓ Fully Verified</h3>
-                  <p className="text-green-700 text-sm mt-1">
+                  <h3 className="font-bold text-slate-800 text-lg">✓ Fully Verified</h3>
+                  <p className="text-slate-700 text-sm mt-1">
                     Your company is verified. You now have access to candidate search and evidence controls.
                   </p>
                 </div>
@@ -148,7 +148,7 @@ export default function RecruiterDashboard() {
     return (
       <RecruiterLayout>
         <div className="flex items-center justify-center h-64">
-          <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full" />
+          <div className="animate-spin w-8 h-8 border-4 border-slate-600 border-t-transparent rounded-full" />
         </div>
       </RecruiterLayout>
     );
@@ -167,8 +167,8 @@ export default function RecruiterDashboard() {
         </div>
 
         {loadError && (
-          <Card className="border-rose-200 bg-rose-50">
-            <CardContent className="flex flex-col gap-3 p-4 text-sm text-rose-900 sm:flex-row sm:items-center sm:justify-between">
+          <Card className="border-slate-200 bg-slate-50">
+            <CardContent className="flex flex-col gap-3 p-4 text-sm text-slate-900 sm:flex-row sm:items-center sm:justify-between">
               <span>We couldn't load the latest recruiter activity.</span>
               <Button size="sm" variant="outline" onClick={fetchDashboardData}>Retry</Button>
             </CardContent>
@@ -249,7 +249,7 @@ export default function RecruiterDashboard() {
                 Find the perfect candidates using our advanced search filters.
               </p>
               <Link href="/recruiter/search">
-                <Button className="w-full bg-blue-600 hover:bg-blue-700">
+                <Button className="w-full bg-slate-600 hover:bg-slate-700">
                   Start Searching
                 </Button>
               </Link>
@@ -302,7 +302,7 @@ export default function RecruiterDashboard() {
                 {dashboardData.recentActivity.map((activity) => (
                   <div key={activity.id} className="flex items-center justify-between p-4 border rounded-lg">
                     <div className="flex items-center space-x-3">
-                      <div className="h-2 w-2 bg-blue-600 rounded-full" />
+                      <div className="h-2 w-2 bg-slate-600 rounded-full" />
                       <div>
                         <p className="font-medium">
                           {activity.type === 'profile_view' && 'Viewed profile of '}

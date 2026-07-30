@@ -124,7 +124,7 @@ export default function CourseCard({ course, certifiedCount, rating, viewMode = 
     <Card
       data-card-kind={isAssessment ? (isPractice ? "practice" : "certification") : "course"}
       className={`group relative overflow-hidden transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl ${
-        isPractice ? "border-2 border-violet-200 bg-violet-50/30 hover:border-violet-400" : "border border-slate-200 hover:border-slate-400"
+        isPractice ? "border-2 border-slate-200 bg-slate-50/30 hover:border-slate-400" : "border border-slate-200 hover:border-slate-400"
       } ${viewMode === "list" ? "flex flex-col sm:flex-row" : ""}`}
     >
       <div className={viewMode === "list" ? "w-full flex-shrink-0 sm:w-64" : ""}>
@@ -151,8 +151,8 @@ export default function CourseCard({ course, certifiedCount, rating, viewMode = 
       <div className={viewMode === "list" ? "flex-1" : ""}>
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between gap-2">
-            <CardTitle className="text-lg transition-colors group-hover:text-violet-700">{course.title}</CardTitle>
-            {typeof rating === "number" && rating > 0 && <div className="flex items-center gap-1 text-amber-500" aria-label={`${rating} out of 5 rating`}><Star className="h-4 w-4 fill-current" /><span className="text-sm font-medium">{rating.toFixed(1)}</span></div>}
+            <CardTitle className="text-lg transition-colors group-hover:text-slate-700">{course.title}</CardTitle>
+            {typeof rating === "number" && rating > 0 && <div className="flex items-center gap-1 text-slate-500" aria-label={`${rating} out of 5 rating`}><Star className="h-4 w-4 fill-current" /><span className="text-sm font-medium">{rating.toFixed(1)}</span></div>}
           </div>
           <p className="line-clamp-2 text-sm text-slate-600">{course.description}</p>
         </CardHeader>
@@ -164,10 +164,10 @@ export default function CourseCard({ course, certifiedCount, rating, viewMode = 
             {course.level && <span className="flex items-center gap-1"><Award className="h-4 w-4" />{course.level}</span>}
           </div>
 
-          <div className={`mt-4 rounded-2xl p-3 ${isPractice ? "border border-dashed border-violet-300 bg-violet-50" : isAssessment ? "border border-emerald-200 bg-emerald-50" : "bg-slate-50"}`}>
+          <div className={`mt-4 rounded-2xl p-3 ${isPractice ? "border border-dashed border-slate-300 bg-slate-50" : isAssessment ? "border border-slate-200 bg-slate-50" : "bg-slate-50"}`}>
             {isAssessment ? (
               <>
-                <p className={`font-black ${isPractice ? "text-violet-900" : "text-emerald-800"}`}>{pricing.primaryLabel}</p>
+                <p className={`font-black ${isPractice ? "text-slate-900" : "text-slate-800"}`}>{pricing.primaryLabel}</p>
                 <p className="mt-1 text-xs leading-5 text-slate-600">{pricing.supportingLabel}</p>
                 {!isPractice && <p className="mt-2 text-xs font-bold text-slate-800">Account required to start · no charge for the attempt</p>}
                 {!isPractice && pricing.credentialPrice && <div className="mt-2 flex items-baseline gap-2"><span className="text-xs font-bold text-slate-500">Verified credential</span><span className="text-xl font-black">{pricing.credentialPrice}</span>{pricing.originalCredentialPrice && <span className="text-sm text-slate-500 line-through">{pricing.originalCredentialPrice}</span>}</div>}
@@ -177,7 +177,7 @@ export default function CourseCard({ course, certifiedCount, rating, viewMode = 
             )}
           </div>
 
-          <Button asChild className={`mt-4 w-full ${isPractice ? "bg-violet-700 hover:bg-violet-800" : "bg-slate-950 hover:bg-slate-800"}`}>
+          <Button asChild className={`mt-4 w-full ${isPractice ? "bg-slate-700 hover:bg-slate-800" : "bg-slate-950 hover:bg-slate-800"}`}>
             <Link href={href}>{isAssessment ? (isPractice ? "View practice exam" : "View free exam · account required") : "View course"}<ChevronRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" /></Link>
           </Button>
         </CardContent>

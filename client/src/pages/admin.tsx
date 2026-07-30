@@ -573,7 +573,7 @@ export default function Admin() {
                                 key={optIndex}
                                 className={`p-2 rounded border ${
                                   optIndex === question.correctAnswer
-                                    ? 'bg-green-50 border-green-200 text-green-800'
+                                    ? 'bg-slate-50 border-slate-200 text-slate-800'
                                     : 'bg-octamy-gray-50 border-octamy-gray-200'
                                 }`}
                               >
@@ -582,7 +582,7 @@ export default function Admin() {
                                 </span>
                                 {option}
                                 {optIndex === question.correctAnswer && (
-                                  <Badge className="ml-2 bg-green-100 text-green-800">Correct</Badge>
+                                  <Badge className="ml-2 bg-slate-100 text-slate-800">Correct</Badge>
                                 )}
                               </div>
                             ))}

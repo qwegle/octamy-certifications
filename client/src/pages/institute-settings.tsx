@@ -78,7 +78,7 @@ export default function InstituteSettings() {
           <CardHeader className="border-b border-slate-100">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <CardTitle className="flex items-center gap-2 text-xl"><Building2 className="h-5 w-5" /> Workspace identity</CardTitle>
-              <Badge variant={verified ? "default" : "secondary"} className={verified ? "bg-emerald-700" : ""}>{verified ? "Verified co-issuer" : `${institute?.status || "pending"} review`}</Badge>
+              <Badge variant={verified ? "default" : "secondary"} className={verified ? "bg-slate-700" : ""}>{verified ? "Verified co-issuer" : `${institute?.status || "pending"} review`}</Badge>
             </div>
           </CardHeader>
           <CardContent className="space-y-5 p-6">
@@ -105,21 +105,21 @@ export default function InstituteSettings() {
               </div>
             </div>
 
-            {!canEdit && <p className="rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-950">Only institute owners and admins can change public identity details.</p>}
+            {!canEdit && <p className="rounded-xl bg-slate-50 px-4 py-3 text-sm text-slate-950">Only institute owners and admins can change public identity details.</p>}
             <div className="flex justify-end"><Button className="bg-slate-950 text-white hover:bg-slate-800" disabled={!canEdit || save.isPending || form.name.trim().length < 2} onClick={() => save.mutate()}>{save.isPending ? "Saving…" : "Save identity"}</Button></div>
           </CardContent>
         </Card>
 
-        <Card className="h-fit border-violet-200 bg-gradient-to-b from-violet-50 to-white shadow-sm">
+        <Card className="h-fit border-slate-200 bg-gradient-to-b from-slate-50 to-white shadow-sm">
           <CardContent className="p-6">
-            <span className="grid h-12 w-12 place-items-center rounded-2xl bg-violet-700 text-white"><ShieldCheck className="h-6 w-6" /></span>
+            <span className="grid h-12 w-12 place-items-center rounded-2xl bg-slate-700 text-white"><ShieldCheck className="h-6 w-6" /></span>
             <h2 className="mt-5 text-xl font-black text-slate-950">What co-branding means</h2>
             <div className="mt-4 space-y-3 text-sm leading-6 text-slate-600">
-              <p className="flex gap-2"><CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-emerald-700" /> Octamy records and verifies the digital assessment evidence.</p>
-              <p className="flex gap-2"><CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-emerald-700" /> A verified institute can appear as a co-issuer on new credentials for its own programs.</p>
-              <p className="flex gap-2"><CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-emerald-700" /> The verification page states the score, status, issuer, and evidence boundaries.</p>
+              <p className="flex gap-2"><CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-slate-700" /> Octamy records and verifies the digital assessment evidence.</p>
+              <p className="flex gap-2"><CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-slate-700" /> A verified institute can appear as a co-issuer on new credentials for its own programs.</p>
+              <p className="flex gap-2"><CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-slate-700" /> The verification page states the score, status, issuer, and evidence boundaries.</p>
             </div>
-            {!verified && <p className="mt-5 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-950">Branding can be prepared now, but it is not rendered as a public co-issuer until Octamy verifies the workspace.</p>}
+            {!verified && <p className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs leading-5 text-slate-950">Branding can be prepared now, but it is not rendered as a public co-issuer until Octamy verifies the workspace.</p>}
           </CardContent>
         </Card>
       </div>
@@ -130,5 +130,5 @@ export default function InstituteSettings() {
 }
 
 function Field({ id, label, required, children }: { id: string; label: string; required?: boolean; children: React.ReactNode }) {
-  return <div className="space-y-2"><Label htmlFor={id}>{label}{required && <span className="text-rose-700" aria-hidden="true"> *</span>}</Label>{children}</div>;
+  return <div className="space-y-2"><Label htmlFor={id}>{label}{required && <span className="text-slate-700" aria-hidden="true"> *</span>}</Label>{children}</div>;
 }

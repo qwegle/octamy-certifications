@@ -446,10 +446,10 @@ export default function RecruiterOnboarding() {
                   className="flex-1"
                 />
                 {uploadingFiles[key] && (
-                  <div className="animate-spin w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full" />
+                  <div className="animate-spin w-4 h-4 border-2 border-slate-600 border-t-transparent rounded-full" />
                 )}
                 {step3Data[key as keyof Step3Data] && (
-                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <CheckCircle className="h-4 w-4 text-slate-600" />
                 )}
               </div>
             </div>

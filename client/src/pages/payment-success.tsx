@@ -70,7 +70,7 @@ export default function PaymentSuccess() {
     <main className="grid min-h-screen place-items-center bg-slate-50 p-4">
       <Card className="w-full max-w-lg border-slate-200 bg-white shadow-lg" aria-live="polite">
         <CardHeader className="text-center">
-          <span className={`mx-auto grid h-16 w-16 place-items-center rounded-2xl ${completed ? "bg-emerald-50 text-emerald-700" : failed ? "bg-rose-50 text-rose-700" : "bg-sky-50 text-sky-700"}`}>
+          <span className={`mx-auto grid h-16 w-16 place-items-center rounded-2xl ${completed ? "bg-slate-50 text-slate-900" : failed ? "bg-red-50 text-red-700" : "bg-slate-100 text-slate-600"}`}>
             {completed ? <CheckCircle className="h-8 w-8" aria-hidden="true" /> : failed ? <AlertCircle className="h-8 w-8" aria-hidden="true" /> : state === "verifying" ? <Loader2 className="h-8 w-8 animate-spin" aria-hidden="true" /> : <ShieldCheck className="h-8 w-8" aria-hidden="true" />}
           </span>
           <CardTitle className="mt-3 text-2xl text-slate-950">

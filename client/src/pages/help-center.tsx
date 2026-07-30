@@ -231,7 +231,7 @@ export default function HelpCenter() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
-                  <HelpCircle className="h-6 w-6 text-blue-600" />
+                  <HelpCircle className="h-6 w-6 text-slate-600" />
                   <span>Frequently Asked Questions</span>
                 </CardTitle>
                 <CardDescription>
@@ -258,7 +258,7 @@ export default function HelpCenter() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
-                  <Send className="h-6 w-6 text-blue-600" />
+                  <Send className="h-6 w-6 text-slate-600" />
                   <span>Contact Support</span>
                 </CardTitle>
                 <CardDescription>
@@ -368,7 +368,7 @@ export default function HelpCenter() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center space-x-3 p-3 bg-cream-deep dark:bg-gray-800 rounded-lg">
-                  <Mail className="h-5 w-5 text-blue-600" />
+                  <Mail className="h-5 w-5 text-slate-600" />
                   <div>
                     <p className="font-medium">Email Support</p>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -378,7 +378,7 @@ export default function HelpCenter() {
                 </div>
 
                 <div className="flex items-center space-x-3 p-3 bg-cream-deep dark:bg-gray-800 rounded-lg">
-                  <Phone className="h-5 w-5 text-green-600" />
+                  <Phone className="h-5 w-5 text-slate-600" />
                   <div>
                     <p className="font-medium">Phone Support</p>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -391,7 +391,7 @@ export default function HelpCenter() {
                   className="flex items-center space-x-3 p-3 bg-cream-deep dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors"
                   onClick={openLiveChat}
                 >
-                  <MessageCircle className="h-5 w-5 text-purple-600" />
+                  <MessageCircle className="h-5 w-5 text-slate-600" />
                   <div>
                     <p className="font-medium">Live Chat</p>
                     <p className="text-sm text-gray-600 dark:text-gray-400">

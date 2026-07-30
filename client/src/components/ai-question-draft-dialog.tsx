@@ -291,7 +291,7 @@ export function AiQuestionDraftDialog({
       >
         <DialogHeader className="border-b border-slate-200 bg-slate-950 px-5 py-5 text-left text-white sm:px-6">
           <div className="flex items-start gap-3">
-            <span className="rounded-xl bg-violet-500/20 p-2 text-violet-200" aria-hidden="true">
+            <span className="rounded-xl bg-slate-500/20 p-2 text-slate-200" aria-hidden="true">
               <Sparkles className="h-5 w-5" />
             </span>
             <div>
@@ -306,18 +306,18 @@ export function AiQuestionDraftDialog({
         {drafts.length === 0 ? (
           <div className="overflow-y-auto px-5 py-5 sm:px-6">
             <div className="mb-5 grid gap-3 sm:grid-cols-2">
-              <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-950">
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-950">
                 <p className="flex items-center gap-2 font-semibold"><ShieldCheck className="h-4 w-4" /> Review-first workflow</p>
-                <p className="mt-1 text-emerald-800">Drafts stay in this browser dialog. Imported drafts remain inactive until a bank editor approves them.</p>
+                <p className="mt-1 text-slate-800">Drafts stay in this browser dialog. Imported drafts remain inactive until a bank editor approves them.</p>
               </div>
-              <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-950">
                 <p className="flex items-center gap-2 font-semibold"><AlertTriangle className="h-4 w-4" /> SME review required</p>
-                <p className="mt-1 text-amber-800">Verify accuracy, answer keys, bias, syllabus alignment, and age appropriateness before import.</p>
+                <p className="mt-1 text-slate-800">Verify accuracy, answer keys, bias, syllabus alignment, and age appropriateness before import.</p>
               </div>
             </div>
 
             {statusQuery.isError ? (
-              <div role="alert" className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+              <div role="alert" className="mb-4 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-900">
                 <p className="font-medium">AI availability could not be checked.</p>
                 <p className="mt-1">Retry the secure configuration check, or continue with the existing bulk-import workflow.</p>
                 <div className="mt-3 flex flex-wrap gap-2">
@@ -393,7 +393,7 @@ export function AiQuestionDraftDialog({
                       <label key={value} className="flex min-h-11 cursor-pointer items-center gap-3 rounded-lg border border-slate-200 px-3 py-2 text-sm hover:bg-slate-50">
                         <input
                           type="checkbox"
-                          className="h-4 w-4 accent-violet-700"
+                          className="h-4 w-4 accent-slate-700"
                           checked={questionTypes.includes(value)}
                           onChange={() => toggleType(value)}
                         />
@@ -426,7 +426,7 @@ export function AiQuestionDraftDialog({
                       </div>
                     ))}
                   </div>
-                  <p className={`mt-2 text-xs font-medium ${mixTotal === count ? "text-emerald-700" : "text-amber-700"}`}>
+                  <p className={`mt-2 text-xs font-medium ${mixTotal === count ? "text-slate-700" : "text-red-700"}`}>
                     {mixTotal === count ? `Ready · ${mixTotal} total` : `${mixTotal} of ${count} allocated`}
                   </p>
                 </fieldset>
@@ -446,12 +446,12 @@ export function AiQuestionDraftDialog({
             </div>
 
             {formError && (
-              <div role="alert" className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+              <div role="alert" className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-900">
                 {formError}
               </div>
             )}
             {generateMutation.isError && (
-              <div role="alert" className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+              <div role="alert" className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-900">
                 <p className="font-medium">The draft was not generated</p>
                 <p className="mt-1">{generateMutation.error.message}</p>
               </div>
@@ -479,14 +479,14 @@ export function AiQuestionDraftDialog({
                 return (
                   <article
                     key={index}
-                    className={`rounded-xl border p-4 ${selected.has(index) ? "border-violet-300 bg-violet-50/30" : "border-slate-200 bg-white opacity-75"}`}
+                    className={`rounded-xl border p-4 ${selected.has(index) ? "border-slate-300 bg-slate-50/30" : "border-slate-200 bg-white opacity-75"}`}
                     aria-describedby={validationId}
                   >
                   <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <label className="flex cursor-pointer items-center gap-3 font-semibold text-slate-900">
                       <input
                         type="checkbox"
-                        className="h-5 w-5 accent-violet-700"
+                        className="h-5 w-5 accent-slate-700"
                         checked={selected.has(index)}
                         onChange={() => setSelected((current) => {
                           const next = new Set(current);
@@ -523,7 +523,7 @@ export function AiQuestionDraftDialog({
                               type="radio"
                               name={`ai-draft-answer-${index}`}
                               aria-label={`Mark option ${optionIndex + 1} correct for draft ${index + 1}`}
-                              className="h-4 w-4 shrink-0 accent-emerald-700"
+                              className="h-4 w-4 shrink-0 accent-slate-700"
                               checked={draft.correctAnswer === optionIndex}
                               onChange={() => updateDraft(index, { correctAnswer: optionIndex })}
                             />
@@ -582,7 +582,7 @@ export function AiQuestionDraftDialog({
                     </div>
                     <p
                       id={validationId}
-                      className={`flex items-center gap-2 text-xs ${complete ? "text-emerald-700" : "text-amber-800"}`}
+                      className={`flex items-center gap-2 text-xs ${complete ? "text-slate-700" : "text-slate-800"}`}
                     >
                       {complete
                         ? <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden="true" />
@@ -606,7 +606,7 @@ export function AiQuestionDraftDialog({
               <Button
                 onClick={submitBrief}
                 disabled={generateMutation.isPending || statusQuery.isLoading || statusQuery.data?.enabled !== true}
-                className="bg-violet-700 hover:bg-violet-800"
+                className="bg-slate-700 hover:bg-slate-800"
               >
                 {generateMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
                 {generateMutation.isPending ? "Drafting questions…" : `Generate ${count} drafts`}

@@ -18,7 +18,7 @@ export function Toaster() {
         const Icon = variant === "destructive" ? CircleAlert : CheckCircle2
         return (
           <Toast key={id} variant={variant} {...props}>
-            <Icon className={variant === "destructive" ? "mt-0.5 h-5 w-5 shrink-0 text-rose-600" : "mt-0.5 h-5 w-5 shrink-0 text-emerald-600"} />
+            <Icon className={variant === "destructive" ? "mt-0.5 h-5 w-5 shrink-0 text-red-600" : "mt-0.5 h-5 w-5 shrink-0 text-slate-600"} />
             <div className="grid min-w-0 flex-1 gap-1">
               {title && <ToastTitle>{title}</ToastTitle>}
               {description && (

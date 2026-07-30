@@ -60,14 +60,14 @@ const credentialStatusMeta: Record<CredentialStatus, {
   active: {
     label: "Verified",
     icon: ShieldCheck,
-    badgeClassName: "border-emerald-200 bg-emerald-50 text-emerald-700",
-    iconClassName: "bg-emerald-50 text-emerald-700 ring-emerald-100",
+    badgeClassName: "border-slate-200 bg-slate-50 text-slate-700",
+    iconClassName: "bg-slate-50 text-slate-700 ring-slate-100",
   },
   pending: {
     label: "Ready to activate",
     icon: Clock3,
-    badgeClassName: "border-amber-200 bg-amber-50 text-amber-800",
-    iconClassName: "bg-amber-50 text-amber-700 ring-amber-100",
+    badgeClassName: "border-slate-200 bg-slate-50 text-slate-800",
+    iconClassName: "bg-slate-50 text-slate-700 ring-slate-100",
   },
   expired: {
     label: "Expired",
@@ -78,8 +78,8 @@ const credentialStatusMeta: Record<CredentialStatus, {
   revoked: {
     label: "Revoked",
     icon: XCircle,
-    badgeClassName: "border-rose-200 bg-rose-50 text-rose-700",
-    iconClassName: "bg-rose-50 text-rose-700 ring-rose-100",
+    badgeClassName: "border-slate-200 bg-slate-50 text-slate-700",
+    iconClassName: "bg-slate-50 text-slate-700 ring-slate-100",
   },
 };
 
@@ -174,7 +174,7 @@ function CredentialCard({
             <dd className="mt-1 flex items-center gap-1.5 text-sm font-semibold text-slate-900">
               {certificate.score}%
               {certificate.mastered && (
-                <span className="rounded-full bg-violet-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-violet-700">
+                <span className="rounded-full bg-slate-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-700">
                   Mastery
                 </span>
               )}
@@ -585,10 +585,10 @@ export default function Dashboard() {
         <div className="space-y-8">
           <section className="grid gap-4 lg:grid-cols-[minmax(0,1.7fr)_minmax(320px,1fr)]" aria-label="Recommended next action and Evidence Passport progress">
             <Card className="relative overflow-hidden border-slate-800 bg-slate-950 text-white shadow-lg">
-              <div className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-sky-500/15 blur-3xl" aria-hidden="true" />
-              <div className="pointer-events-none absolute -bottom-32 left-1/3 h-64 w-64 rounded-full bg-violet-500/10 blur-3xl" aria-hidden="true" />
+              <div className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-slate-500/15 blur-3xl" aria-hidden="true" />
+              <div className="pointer-events-none absolute -bottom-32 left-1/3 h-64 w-64 rounded-full bg-slate-500/10 blur-3xl" aria-hidden="true" />
               <CardContent className="relative flex h-full min-h-[260px] flex-col p-6 sm:p-8">
-                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-sky-300">
+                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-300">
                   <Sparkles className="h-4 w-4" aria-hidden="true" />
                   {nextAction.eyebrow}
                 </div>
@@ -624,7 +624,7 @@ export default function Dashboard() {
                     <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Evidence Passport</p>
                     <h2 className="mt-2 text-xl font-semibold text-slate-950">Recruiter readiness</h2>
                   </div>
-                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-sky-50 text-sky-700 ring-1 ring-sky-100">
+                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-slate-50 text-slate-700 ring-1 ring-slate-100">
                     <ShieldCheck className="h-5 w-5" aria-hidden="true" />
                   </span>
                 </div>
@@ -649,7 +649,7 @@ export default function Dashboard() {
                         aria-valuemax={100}
                         aria-valuenow={passportReadiness}
                       >
-                        <div className="h-full rounded-full bg-sky-600 transition-[width]" style={{ width: `${passportReadiness}%` }} />
+                        <div className="h-full rounded-full bg-slate-600 transition-[width]" style={{ width: `${passportReadiness}%` }} />
                       </div>
                     </div>
 
@@ -658,7 +658,7 @@ export default function Dashboard() {
                         <li key={step.label} className="flex items-start gap-3">
                           <span className={cn(
                             "mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full",
-                            step.complete ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-400",
+                            step.complete ? "bg-slate-100 text-slate-700" : "bg-slate-100 text-slate-400",
                           )}>
                             {step.complete ? <Check className="h-3 w-3" aria-hidden="true" /> : <span className="h-1.5 w-1.5 rounded-full bg-current" />}
                           </span>
@@ -783,10 +783,10 @@ export default function Dashboard() {
             </div>
 
             {certificatesQuery.error ? (
-              <Card className="border-rose-200 bg-white shadow-sm" role="alert">
+              <Card className="border-slate-200 bg-white shadow-sm" role="alert">
                 <CardContent className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex items-start gap-3">
-                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-rose-50 text-rose-700 ring-1 ring-rose-100">
+                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-slate-50 text-slate-700 ring-1 ring-slate-100">
                       <AlertCircle className="h-5 w-5" aria-hidden="true" />
                     </span>
                     <div>
@@ -802,7 +802,7 @@ export default function Dashboard() {
             ) : certificates.length === 0 ? (
               <Card className="border-slate-200 bg-white shadow-sm">
                 <CardContent className="px-6 py-12 text-center sm:px-10 sm:py-14">
-                  <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-sky-50 text-sky-700 ring-1 ring-sky-100">
+                  <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-slate-50 text-slate-700 ring-1 ring-slate-100">
                     <FileCheck2 className="h-6 w-6" aria-hidden="true" />
                   </span>
                   <h3 className="mt-5 text-xl font-semibold text-slate-950">Build your first proof of skill</h3>
@@ -847,10 +847,10 @@ export default function Dashboard() {
             )}
           </section>
 
-          <Card className="overflow-hidden border-slate-200 bg-sky-50/70 shadow-sm">
+          <Card className="overflow-hidden border-slate-200 bg-slate-50/70 shadow-sm">
             <CardContent className="flex flex-col gap-5 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-7">
               <div className="flex min-w-0 items-start gap-4">
-                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-white text-sky-700 ring-1 ring-sky-100">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-white text-slate-700 ring-1 ring-slate-100">
                   <Award className="h-5 w-5" aria-hidden="true" />
                 </span>
                 <div>

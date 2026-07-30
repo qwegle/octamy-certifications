@@ -166,7 +166,7 @@ export default function Login() {
         ]}
       >
         <div className="mb-7">
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-fuchsia-700">Secure access</p>
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-700">Secure access</p>
           <h1 className="mt-3 text-4xl font-extrabold tracking-[-0.04em] text-slate-950 sm:text-5xl">{v.heading}</h1>
           <p className="mt-3 text-base leading-7 text-slate-600">{v.sub}</p>
         </div>
@@ -206,7 +206,7 @@ export default function Login() {
             <div>
               <div className="flex items-center justify-between gap-4">
                 <Label htmlFor="password" className="text-sm font-semibold text-slate-800">Password</Label>
-                <Link href="/forgot-password" className="text-xs font-semibold text-fuchsia-700 hover:text-fuchsia-900 hover:underline">Forgot password?</Link>
+                <Link href="/forgot-password" className="text-xs font-semibold text-slate-700 hover:text-slate-900 hover:underline">Forgot password?</Link>
               </div>
               <div className="relative mt-2">
                 <Lock className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
@@ -236,7 +236,7 @@ export default function Login() {
             </Button>
           </form>
 
-          <div className="mt-5 flex items-center justify-center gap-2 rounded-xl bg-emerald-50 px-3 py-2.5 text-xs font-medium text-emerald-800">
+          <div className="mt-5 flex items-center justify-center gap-2 rounded-xl bg-slate-50 px-3 py-2.5 text-xs font-medium text-slate-800">
             <ShieldCheck className="h-4 w-4" /> Your credentials stay private until you share them.
           </div>
         </section>

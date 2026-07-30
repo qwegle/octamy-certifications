@@ -106,7 +106,7 @@ export function EnhancedAIQuestionsManagement() {
                     </TableCell>
                     <TableCell className="text-gray-300">{question.type || 'General'}</TableCell>
                     <TableCell>
-                      <Badge variant={question.isActive ? 'default' : 'secondary'} className={question.isActive ? "bg-green-600" : "bg-gray-600"}>
+                      <Badge variant={question.isActive ? 'default' : 'secondary'} className={question.isActive ? "bg-slate-600" : "bg-gray-600"}>
                         {question.isActive ? 'Active' : 'Inactive'}
                       </Badge>
                     </TableCell>

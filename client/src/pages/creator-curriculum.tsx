@@ -195,7 +195,7 @@ export default function CreatorCurriculum() {
             {[1, 2].map((item) => <div key={item} className="h-28 animate-pulse rounded-xl bg-slate-200/70" />)}
           </div>
         ) : isError ? (
-          <Card className="border-amber-200 bg-amber-50/70">
+          <Card className="border-slate-200 bg-slate-50/70">
             <CardContent className="py-8 text-center">
               <h2 className="font-semibold text-slate-900">Curriculum could not be loaded</h2>
               <p className="mt-1 text-sm text-slate-600">Check your workspace access and try again.</p>
@@ -227,7 +227,7 @@ export default function CreatorCurriculum() {
                       }}
                       disabled={delSection.isPending}
                     >
-                      <Trash2 className="w-4 h-4 text-rose-600" />
+                      <Trash2 className="w-4 h-4 text-slate-600" />
                     </Button>
                   </CardHeader>
                   <CardContent className="space-y-2">
@@ -247,7 +247,7 @@ export default function CreatorCurriculum() {
                                 aria-label={`${l.isPreview ? "Protect" : "Allow free preview for"} ${l.title}`}
                                 title={l.isPreview ? "Make this lesson protected" : "Allow this lesson as a free preview"}
                               >
-                                <Badge variant={l.isPreview ? "default" : "outline"} className={l.isPreview ? "bg-emerald-100 text-emerald-800 text-[10px] hover:bg-emerald-200" : "text-[10px] text-slate-500"}><Eye className="w-3 h-3 mr-1" />{l.isPreview ? "Preview" : "Protected"}</Badge>
+                                <Badge variant={l.isPreview ? "default" : "outline"} className={l.isPreview ? "bg-slate-100 text-slate-800 text-[10px] hover:bg-slate-200" : "text-[10px] text-slate-500"}><Eye className="w-3 h-3 mr-1" />{l.isPreview ? "Preview" : "Protected"}</Badge>
                               </button>
                             </div>
                             <div className="flex shrink-0 items-center gap-1 self-end sm:self-auto">
@@ -266,7 +266,7 @@ export default function CreatorCurriculum() {
                                 disabled={delLesson.isPending}
                                 onClick={() => { if (window.confirm(`Remove “${l.title}” from this course?`)) delLesson.mutate(l.id); }}
                               >
-                                <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+                                <Trash2 className="w-3.5 h-3.5 text-slate-600" />
                               </Button>
                             </div>
                           </li>

@@ -70,8 +70,8 @@ export default function CreatorDashboard() {
           </div>
 
           {error ? (
-            <Card className="border-amber-200 bg-amber-50">
-              <CardContent className="pt-6 text-sm text-amber-900">
+            <Card className="border-slate-200 bg-slate-50">
+              <CardContent className="pt-6 text-sm text-slate-900">
                 We couldn't load your creator profile. Try refreshing the page.
               </CardContent>
             </Card>

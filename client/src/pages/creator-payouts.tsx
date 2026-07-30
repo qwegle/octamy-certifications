@@ -75,13 +75,13 @@ export default function CreatorPayouts() {
           </Card>
         </div>
 
-        <Card className="mb-8 border-violet-200 bg-violet-50/70">
+        <Card className="mb-8 border-slate-200 bg-slate-50/70">
           <CardContent className="p-5">
-            <p className="font-semibold text-violet-950">How the split works</p>
-            <p className="mt-1 text-sm leading-6 text-violet-900/75">
+            <p className="font-semibold text-slate-950">How the split works</p>
+            <p className="mt-1 text-sm leading-6 text-slate-900/75">
               Your current creator share is {data?.policy.ownerSharePercent ?? 80}% of the certificate activation fee. Shipping is excluded. An affiliate commission, when present, comes from the remaining platform share—not from your creator share.
             </p>
-            <p className="mt-2 text-xs text-violet-900/60">{data?.policy.settlement || 'Confirmed payments create an auditable split entry before funds become withdrawable.'}</p>
+            <p className="mt-2 text-xs text-slate-900/60">{data?.policy.settlement || 'Confirmed payments create an auditable split entry before funds become withdrawable.'}</p>
           </CardContent>
         </Card>
 

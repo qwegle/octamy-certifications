@@ -109,7 +109,7 @@ export default function AdminApprovals() {
               <Icon className="w-4 h-4" />
               <span>{label}</span>
               {count > 0 && (
-                <Badge className={`ml-1 ${tab === key ? "bg-white text-slate-900" : "bg-amber-100 text-amber-900"}`}>{count}</Badge>
+                <Badge className={`ml-1 ${tab === key ? "bg-white text-slate-900" : "bg-slate-100 text-slate-900"}`}>{count}</Badge>
               )}
             </button>
           ))}
@@ -120,7 +120,7 @@ export default function AdminApprovals() {
         ) : rows.length === 0 ? (
           <Card className="border-dashed">
             <CardContent className="py-12 text-center">
-              <CheckCircle2 className="w-10 h-10 mx-auto text-emerald-500 mb-3" />
+              <CheckCircle2 className="w-10 h-10 mx-auto text-slate-500 mb-3" />
               <h3 className="text-lg font-medium">All caught up</h3>
               <p className="text-sm text-slate-600 mt-1">No pending {tab} right now.</p>
             </CardContent>
@@ -139,7 +139,7 @@ export default function AdminApprovals() {
                         {tab === "institutes" && r.name}
                         {tab === "recruiters" && (r.full_name || r.email)}
                       </h3>
-                      <Badge variant="outline" className="bg-amber-50 text-amber-900 border-amber-200">
+                      <Badge variant="outline" className="bg-slate-50 text-slate-900 border-slate-200">
                         <Clock className="w-3 h-3 mr-1" />{r.reviewStatus || r.status || r.kyc_status || "pending"}
                       </Badge>
                     </div>
@@ -164,7 +164,7 @@ export default function AdminApprovals() {
                       size="sm"
                       onClick={() => update.mutate({ id: r.id, status: tab === "institutes" ? "verified" : "approved" })}
                       disabled={update.isPending}
-                      className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                      className="bg-slate-600 hover:bg-slate-700 text-white"
                     >
                       <CheckCircle2 className="w-4 h-4 mr-1" /> Approve
                     </Button>

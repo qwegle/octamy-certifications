@@ -272,7 +272,7 @@ export default function Register() {
         ]}
       >
         <div className="mb-6">
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-fuchsia-700">{isWorkspaceSetup ? 'Complete setup' : 'Get started — free'}</p>
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-700">{isWorkspaceSetup ? 'Complete setup' : 'Get started — free'}</p>
           <h1 className="mt-3 text-4xl font-extrabold tracking-[-0.04em] text-slate-950 sm:text-5xl">{isWorkspaceSetup ? `Add your ${role} workspace` : 'Create your account'}</h1>
           <p className="mt-3 text-sm leading-6 text-slate-600">{isWorkspaceSetup ? `Signed in as ${user?.email}. Your learning history stays connected.` : 'Start as a learner, creator or institute. Recruiters use a verified company workspace.'}</p>
         </div>
@@ -307,7 +307,7 @@ export default function Register() {
               <p className="font-bold text-slate-950">Signing up as {labelFor(role)}</p>
               <p className="mt-0.5 text-xs text-slate-500">{ROLES.find((item) => item.id === role)?.desc}</p>
             </div>
-            <span className="shrink-0 rounded-full bg-emerald-50 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-emerald-700">{selectedPlan ? `${selectedPlan} selected` : ROLES.find((item) => item.id === role)?.plan}</span>
+            <span className="shrink-0 rounded-full bg-slate-50 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-slate-700">{selectedPlan ? `${selectedPlan} selected` : ROLES.find((item) => item.id === role)?.plan}</span>
           </div>
 
           {!isWorkspaceSetup && <GoogleAuthButton type="user" isLoading={isLoading} hideWhenUnavailable className="mb-5" intent={{
@@ -368,7 +368,7 @@ export default function Register() {
             </Button>
           </form>
 
-          <div className="mt-5 flex items-center justify-center gap-2 rounded-xl bg-emerald-50 px-3 py-2.5 text-center text-xs font-medium text-emerald-800">
+          <div className="mt-5 flex items-center justify-center gap-2 rounded-xl bg-slate-50 px-3 py-2.5 text-center text-xs font-medium text-slate-800">
             <ShieldCheck className="h-4 w-4 shrink-0" /> Secure signup. No card required.
           </div>
         </section>

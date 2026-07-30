@@ -235,16 +235,16 @@ export default function Contact() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  <Link href="/help-center" className="block text-sm text-blue-600 hover:underline">
+                  <Link href="/help-center" className="block text-sm text-slate-600 hover:underline">
                     → Frequently Asked Questions
                   </Link>
-                  <Link href="/verify" className="block text-sm text-blue-600 hover:underline">
+                  <Link href="/verify" className="block text-sm text-slate-600 hover:underline">
                     → Verify Certificate
                   </Link>
-                  <Link href="/get-certified" className="block text-sm text-blue-600 hover:underline">
+                  <Link href="/get-certified" className="block text-sm text-slate-600 hover:underline">
                     → Browse Certification Courses
                   </Link>
-                  <Link href="/partners" className="block text-sm text-blue-600 hover:underline">
+                  <Link href="/partners" className="block text-sm text-slate-600 hover:underline">
                     → Partnership Opportunities
                   </Link>
                 </div>

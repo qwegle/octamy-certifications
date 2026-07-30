@@ -3,66 +3,66 @@
 @tailwind utilities;
 
 :root {
-  /* Warm-neutral semantic palette. Body and muted text meet WCAG AA. */
-  --background: hsl(40, 45%, 98%);
-  --foreground: hsl(24, 10%, 10%);
-  --muted: hsl(38, 28%, 94%);
-  --muted-foreground: hsl(24, 7%, 38%);
-  --popover: hsl(40, 50%, 99.5%);
-  --popover-foreground: hsl(24, 10%, 10%);
-  --card: hsl(40, 50%, 99.5%);
-  --card-foreground: hsl(24, 10%, 10%);
-  --border: hsl(34, 18%, 80%);
-  --input: hsl(34, 18%, 76%);
-  --primary: hsl(24, 10%, 10%);
-  --primary-foreground: hsl(40, 50%, 99%);
-  --secondary: hsl(38, 28%, 93%);
-  --secondary-foreground: hsl(24, 10%, 14%);
-  --accent: hsl(38, 30%, 92%);
-  --accent-foreground: hsl(24, 10%, 12%);
+  /* Octamy's interface is deliberately achromatic: black, white and neutral gray. */
+  --background: hsl(0, 0%, 98%);
+  --foreground: hsl(0, 0%, 8%);
+  --muted: hsl(0, 0%, 95%);
+  --muted-foreground: hsl(0, 0%, 36%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(0, 0%, 8%);
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(0, 0%, 8%);
+  --border: hsl(0, 0%, 82%);
+  --input: hsl(0, 0%, 76%);
+  --primary: hsl(0, 0%, 7%);
+  --primary-foreground: hsl(0, 0%, 100%);
+  --secondary: hsl(0, 0%, 94%);
+  --secondary-foreground: hsl(0, 0%, 12%);
+  --accent: hsl(0, 0%, 92%);
+  --accent-foreground: hsl(0, 0%, 10%);
   --destructive: hsl(0, 72%, 42%);
   --destructive-foreground: hsl(0, 0%, 100%);
-  --ring: hsl(217, 91%, 46%);
+  --ring: hsl(0, 0%, 12%);
   --radius: 0.875rem;
   --control-height: 2.75rem;
-  --shadow-surface: 0 1px 2px hsla(24, 10%, 10%, 0.06), 0 8px 24px -20px hsla(24, 10%, 10%, 0.28);
-  --shadow-raised: 0 12px 32px -18px hsla(24, 10%, 10%, 0.32), 0 2px 8px hsla(24, 10%, 10%, 0.06);
-  --chart-1: hsl(222, 72%, 48%);
-  --chart-2: hsl(158, 64%, 34%);
-  --chart-3: hsl(35, 88%, 45%);
-  --chart-4: hsl(271, 62%, 52%);
-  --chart-5: hsl(350, 68%, 48%);
-  --sidebar-background: hsl(40, 45%, 97%);
-  --sidebar-foreground: hsl(24, 10%, 14%);
-  --sidebar-primary: hsl(24, 10%, 10%);
-  --sidebar-primary-foreground: hsl(40, 50%, 99%);
-  --sidebar-accent: hsl(38, 28%, 92%);
-  --sidebar-accent-foreground: hsl(24, 10%, 12%);
-  --sidebar-border: hsl(34, 18%, 80%);
-  --sidebar-ring: hsl(217, 91%, 46%);
-  --cream: hsl(40, 45%, 98%);
-  --cream-soft: hsl(40, 50%, 99.5%);
-  --cream-deep: hsl(36, 26%, 86%);
-  --octamy-black: hsl(24, 10%, 8%);
+  --shadow-surface: 0 1px 2px hsl(0 0% 10% / 0.06), 0 8px 24px -20px hsl(0 0% 10% / 0.28);
+  --shadow-raised: 0 12px 32px -18px hsl(0 0% 10% / 0.32), 0 2px 8px hsl(0 0% 10% / 0.06);
+  --chart-1: hsl(0, 0%, 12%);
+  --chart-2: hsl(0, 0%, 30%);
+  --chart-3: hsl(0, 0%, 46%);
+  --chart-4: hsl(0, 0%, 62%);
+  --chart-5: hsl(0, 0%, 76%);
+  --sidebar-background: hsl(0, 0%, 97%);
+  --sidebar-foreground: hsl(0, 0%, 14%);
+  --sidebar-primary: hsl(0, 0%, 8%);
+  --sidebar-primary-foreground: hsl(0, 0%, 100%);
+  --sidebar-accent: hsl(0, 0%, 92%);
+  --sidebar-accent-foreground: hsl(0, 0%, 12%);
+  --sidebar-border: hsl(0, 0%, 80%);
+  --sidebar-ring: hsl(0, 0%, 12%);
+  --cream: hsl(0, 0%, 98%);
+  --cream-soft: hsl(0, 0%, 100%);
+  --cream-deep: hsl(0, 0%, 86%);
+  --octamy-black: hsl(0, 0%, 7%);
   --octamy-white: hsl(0, 0%, 100%);
-  --octamy-gray-50: hsl(36, 20%, 97%);
-  --octamy-gray-100: hsl(34, 16%, 92%);
-  --octamy-gray-200: hsl(34, 13%, 86%);
-  --octamy-gray-300: hsl(32, 10%, 76%);
-  --octamy-gray-400: hsl(28, 7%, 60%);
-  --octamy-gray-500: hsl(24, 7%, 42%);
-  --octamy-gray-600: hsl(24, 8%, 31%);
-  --octamy-gray-700: hsl(24, 9%, 22%);
-  --octamy-gray-800: hsl(24, 10%, 14%);
-  --octamy-gray-900: hsl(24, 10%, 8%);
+  --octamy-gray-50: hsl(0, 0%, 98%);
+  --octamy-gray-100: hsl(0, 0%, 94%);
+  --octamy-gray-200: hsl(0, 0%, 88%);
+  --octamy-gray-300: hsl(0, 0%, 76%);
+  --octamy-gray-400: hsl(0, 0%, 60%);
+  --octamy-gray-500: hsl(0, 0%, 42%);
+  --octamy-gray-600: hsl(0, 0%, 31%);
+  --octamy-gray-700: hsl(0, 0%, 22%);
+  --octamy-gray-800: hsl(0, 0%, 14%);
+  --octamy-gray-900: hsl(0, 0%, 7%);
 }
 
 .dark {
-  --chart-1: hsl(217, 91%, 66%);
-  --chart-2: hsl(158, 64%, 52%);
-  --chart-3: hsl(38, 92%, 58%);
-  --chart-4: hsl(271, 72%, 68%);
-  --chart-5: hsl(350, 78%, 65%);
+  --chart-1: hsl(0, 0%, 96%);
+  --chart-2: hsl(0, 0%, 80%);
+  --chart-3: hsl(0, 0%, 64%);
+  --chart-4: hsl(0, 0%, 48%);
+  --chart-5: hsl(0, 0%, 32%);
   --sidebar-background: hsl(0, 0%, 5%);
   --sidebar-foreground: hsl(0, 0%, 95%);
   --sidebar-primary: hsl(0, 0%, 98%);
@@ -70,7 +70,7 @@
   --sidebar-accent: hsl(0, 0%, 13%);
   --sidebar-accent-foreground: hsl(0, 0%, 98%);
   --sidebar-border: hsl(0, 0%, 18%);
-  --sidebar-ring: hsl(217, 91%, 66%);
+  --sidebar-ring: hsl(0, 0%, 84%);
 }
 
 @layer base {
@@ -94,7 +94,7 @@
   p { text-wrap: pretty; }
 
   ::selection {
-    background: hsl(217 91% 60% / 0.2);
+    background: hsl(0 0% 0% / 0.14);
     color: var(--foreground);
   }
 
@@ -251,11 +251,7 @@
 
   body {
     @apply font-sans antialiased text-foreground;
-    background:
-      radial-gradient(1200px 600px at 12% -10%, hsla(40,60%,88%,0.55), transparent 60%),
-      radial-gradient(900px 500px at 110% 10%, hsla(36,40%,86%,0.45), transparent 60%),
-      var(--cream);
-    background-attachment: fixed;
+    background: var(--cream);
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
@@ -265,6 +261,53 @@
     body.cookie-banner-visible {
     padding-bottom: 8.5rem;
     }
+  }
+}
+
+/* Compact black-and-white presentation shell for every non-exam route. */
+body.octamy-public {
+  background: #fafafa;
+}
+
+/* Restrain legacy landing-page whitespace while preserving comfortable rhythm. */
+body.octamy-public .py-24 {
+  padding-top: 4rem !important;
+  padding-bottom: 4rem !important;
+}
+
+body.octamy-public :is(.py-28, .py-32) {
+  padding-top: 4.5rem !important;
+  padding-bottom: 4.5rem !important;
+}
+
+@media (max-width: 639px) {
+  body.octamy-public :is(.py-20, .py-24, .py-28, .py-32) {
+    padding-top: 3rem !important;
+    padding-bottom: 3rem !important;
+  }
+}
+
+@media (min-width: 640px) {
+  body.octamy-public .sm\:py-24 {
+    padding-top: 4rem !important;
+    padding-bottom: 4rem !important;
+  }
+
+  body.octamy-public :is(.sm\:py-28, .sm\:py-32) {
+    padding-top: 4.5rem !important;
+    padding-bottom: 4.5rem !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  body.octamy-public .lg\:py-24 {
+    padding-top: 4rem !important;
+    padding-bottom: 4rem !important;
+  }
+
+  body.octamy-public :is(.lg\:py-28, .lg\:py-32) {
+    padding-top: 4.5rem !important;
+    padding-bottom: 4.5rem !important;
   }
 }
 
@@ -281,22 +324,22 @@
 
   /* Glass card — frosted iOS panel */
   .glass {
-    background: hsla(40, 50%, 99%, 0.65);
+    background: hsla(0, 0%, 99%, 0.65);
     backdrop-filter: saturate(180%) blur(18px);
     -webkit-backdrop-filter: saturate(180%) blur(18px);
-    border: 1px solid hsla(36, 30%, 80%, 0.55);
+    border: 1px solid hsla(0, 0%, 80%, 0.55);
     box-shadow:
       0 1px 0 hsla(0,0%,100%,0.7) inset,
-      0 10px 40px -12px hsla(36, 25%, 30%, 0.18);
+      0 10px 40px -12px hsla(0, 0%, 30%, 0.18);
   }
   .glass-strong {
-    background: hsla(40, 50%, 99%, 0.85);
+    background: hsla(0, 0%, 99%, 0.85);
     backdrop-filter: saturate(180%) blur(24px);
     -webkit-backdrop-filter: saturate(180%) blur(24px);
-    border: 1px solid hsla(36, 30%, 78%, 0.7);
+    border: 1px solid hsla(0, 0%, 78%, 0.7);
     box-shadow:
       0 1px 0 hsla(0,0%,100%,0.85) inset,
-      0 18px 50px -16px hsla(36, 25%, 20%, 0.2);
+      0 18px 50px -16px hsla(0, 0%, 20%, 0.2);
   }
   .glass-dark {
     background: hsla(0, 0%, 8%, 0.7);
@@ -323,8 +366,8 @@
     box-shadow: 3px 3px 0 0 hsl(0, 0%, 6%);
   }
   .neo-soft {
-    border: 1.5px solid hsla(36, 25%, 30%, 0.25);
-    box-shadow: 4px 4px 0 0 hsla(36, 25%, 30%, 0.18);
+    border: 1.5px solid hsla(0, 0%, 30%, 0.25);
+    box-shadow: 4px 4px 0 0 hsla(0, 0%, 30%, 0.18);
   }
 
   /* iOS rounded radii */
@@ -336,9 +379,9 @@
   .pill {
     border-radius: 999px;
     padding: 0.5rem 1rem;
-    background: hsla(40, 50%, 99%, 0.7);
+    background: hsla(0, 0%, 99%, 0.7);
     backdrop-filter: blur(12px);
-    border: 1px solid hsla(36, 30%, 80%, 0.6);
+    border: 1px solid hsla(0, 0%, 80%, 0.6);
   }
 }
 

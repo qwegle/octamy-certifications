@@ -25,9 +25,9 @@ type Course = {
 };
 
 function courseState(course: Course) {
-  if (course.isActive) return { label: "Live", className: "bg-emerald-100 text-emerald-800" };
+  if (course.isActive) return { label: "Live", className: "bg-slate-100 text-slate-800" };
   if (course.visibility === "private") return { label: "Draft", className: "bg-slate-100 text-slate-700" };
-  return { label: "Submitted", className: "bg-amber-100 text-amber-800" };
+  return { label: "Submitted", className: "bg-slate-100 text-slate-800" };
 }
 
 export default function InstituteCourses() {
@@ -87,8 +87,8 @@ export default function InstituteCourses() {
     >
       <SEO title="Institute courses" description="Manage institute-owned course content." path="/institute/courses" />
       {error ? (
-        <Card className="border-amber-200 bg-amber-50/70">
-          <CardContent className="p-4 text-sm text-amber-950">Courses could not be loaded. Refresh the page or check your institute membership.</CardContent>
+        <Card className="border-slate-200 bg-slate-50/70">
+          <CardContent className="p-4 text-sm text-slate-950">Courses could not be loaded. Refresh the page or check your institute membership.</CardContent>
         </Card>
       ) : isLoading ? (
         <div className="space-y-3" aria-label="Loading courses">

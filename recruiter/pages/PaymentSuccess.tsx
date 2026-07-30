@@ -42,7 +42,7 @@ export default function PaymentSuccess() {
       <RecruiterLayout>
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
-            <div className="animate-spin w-8 h-8 border-4 border-green-600 border-t-transparent rounded-full mx-auto mb-4" />
+            <div className="animate-spin w-8 h-8 border-4 border-slate-600 border-t-transparent rounded-full mx-auto mb-4" />
             <p className="text-gray-600">Processing your payment...</p>
           </div>
         </div>
@@ -53,10 +53,10 @@ export default function PaymentSuccess() {
   if (error) {
     return (
       <RecruiterLayout>
-        <Card className="mx-auto max-w-xl border-rose-200 bg-rose-50">
+        <Card className="mx-auto max-w-xl border-slate-200 bg-slate-50">
           <CardContent className="p-8 text-center">
-            <h1 className="text-2xl font-bold text-rose-950">Payment verification pending</h1>
-            <p className="mt-2 text-sm text-rose-800">{error}</p>
+            <h1 className="text-2xl font-bold text-slate-950">Payment verification pending</h1>
+            <p className="mt-2 text-sm text-slate-800">{error}</p>
             <Button className="mt-6" onClick={() => setLocation('/recruiter/wallet')}>Return to wallet</Button>
           </CardContent>
         </Card>
@@ -68,8 +68,8 @@ export default function PaymentSuccess() {
     <RecruiterLayout>
       <div className="max-w-2xl mx-auto space-y-6">
         <div className="text-center">
-          <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
-            <CheckCircle className="h-8 w-8 text-green-600" />
+          <div className="mx-auto w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
+            <CheckCircle className="h-8 w-8 text-slate-600" />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Payment Successful!</h1>
           <p className="text-gray-600">Your credits have been added to your account</p>
@@ -93,11 +93,11 @@ export default function PaymentSuccess() {
             </div>
             <div className="flex justify-between items-center py-2 border-b">
               <span className="text-gray-600">Credits Added</span>
-              <span className="font-semibold text-green-600">{paymentDetails?.credits} credits</span>
+              <span className="font-semibold text-slate-600">{paymentDetails?.credits} credits</span>
             </div>
             <div className="flex justify-between items-center py-2">
               <span className="text-gray-600">Status</span>
-              <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm">
+              <span className="px-2 py-1 bg-slate-100 text-slate-800 rounded-full text-sm">
                 Completed
               </span>
             </div>

@@ -36,7 +36,7 @@ export default function InstituteLanding() {
           accent="emerald"
           eyebrow="For institutes & L&D teams"
           eyebrowIcon={<GraduationCap className="h-3.5 w-3.5" />}
-          title={<>Turn assessments into <span className="bg-gradient-to-r from-emerald-700 via-teal-600 to-sky-700 bg-clip-text text-transparent">measurable learner evidence</span></>}
+          title={<>Turn assessments into <span className="bg-gradient-to-r from-slate-700 via-slate-600 to-slate-700 bg-clip-text text-transparent">measurable learner evidence</span></>}
           description="Organise students into cohorts, build private question banks, schedule assessments and review pass rates from one governed institute workspace."
           primary={{ label: 'Create institute account', href: '/register?role=institute' }}
           secondary={{ label: 'Talk to sales', href: '/contact' }}

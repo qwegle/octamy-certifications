@@ -341,7 +341,7 @@ function getStoredRecord(key: string): JsonRecord {
 function StatusDot({ active, label }: { active: boolean; label: string }) {
   return (
     <span className="inline-flex min-h-8 items-center gap-2 rounded-full border border-slate-200 bg-white px-3 text-xs font-medium text-slate-700">
-      <span className={cn("h-2 w-2 rounded-full", active ? "bg-emerald-500" : "bg-slate-300")} aria-hidden="true" />
+      <span className={cn("h-2 w-2 rounded-full", active ? "bg-slate-500" : "bg-slate-300")} aria-hidden="true" />
       {label}
     </span>
   );
@@ -1082,7 +1082,7 @@ export default function InterviewStudio() {
                 </div>
               </div>
               <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-                <LockKeyhole className="h-6 w-6 text-emerald-300" aria-hidden="true" />
+                <LockKeyhole className="h-6 w-6 text-slate-300" aria-hidden="true" />
                 <p className="mt-4 font-semibold">You control the evidence</p>
                 <p className="mt-2 text-sm leading-6 text-slate-300">
                   Practice sessions are private. Camera and screen previews stay in your browser and are not recorded. Recruiters cannot see this work.
@@ -1092,7 +1092,7 @@ export default function InterviewStudio() {
           </section>
 
           {statusQuery.isError && (
-            <Alert className="border-amber-200 bg-amber-50 text-amber-950">
+            <Alert className="border-slate-200 bg-slate-50 text-slate-950">
               <AlertCircle className="h-4 w-4" />
               <AlertTitle>Interview Studio is not available yet</AlertTitle>
               <AlertDescription>The service could not confirm its capabilities. No session can be started until it is available.</AlertDescription>
@@ -1120,7 +1120,7 @@ export default function InterviewStudio() {
                     return (
                       <div key={id || index} className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
                         <div className="flex min-w-0 items-start gap-3">
-                          <span className={cn("grid h-10 w-10 shrink-0 place-items-center rounded-xl", completed ? "bg-emerald-50 text-emerald-700" : "bg-violet-50 text-violet-700")}>{completed ? <CheckCircle2 className="h-5 w-5" /> : <Bot className="h-5 w-5" />}</span>
+                          <span className={cn("grid h-10 w-10 shrink-0 place-items-center rounded-xl", completed ? "bg-slate-50 text-slate-700" : "bg-slate-50 text-slate-700")}>{completed ? <CheckCircle2 className="h-5 w-5" /> : <Bot className="h-5 w-5" />}</span>
                           <div className="min-w-0">
                             <p className="truncate text-sm font-semibold text-slate-900">{matchingTemplate?.title || titleCase(templateKey || "Interview practice")}</p>
                             <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500">
@@ -1145,7 +1145,7 @@ export default function InterviewStudio() {
               <p className="mt-1 text-sm text-slate-600">Each session uses a versioned question and rubric blueprint.</p>
             </div>
             <div className="inline-flex items-center gap-2 text-xs font-medium text-slate-500">
-              <ShieldCheck className="h-4 w-4 text-emerald-600" aria-hidden="true" />
+              <ShieldCheck className="h-4 w-4 text-slate-600" aria-hidden="true" />
               No face, emotion, accent, or gaze scoring
             </div>
           </div>
@@ -1159,13 +1159,13 @@ export default function InterviewStudio() {
                   <Card key={`${template.id}-${template.version}`} className="flex h-full flex-col overflow-hidden border-slate-200 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md">
                     <CardHeader className="space-y-4 pb-4">
                       <div className="flex items-start justify-between gap-3">
-                        <span className="grid h-11 w-11 place-items-center rounded-xl bg-violet-50 text-violet-700 ring-1 ring-violet-100">
+                        <span className="grid h-11 w-11 place-items-center rounded-xl bg-slate-50 text-slate-700 ring-1 ring-slate-100">
                           <Bot className="h-5 w-5" aria-hidden="true" />
                         </span>
                         <Badge variant="outline" className="border-slate-200 bg-slate-50 text-slate-600">{titleCase(template.difficulty)}</Badge>
                       </div>
                       <div>
-                        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-violet-700">{template.targetRole}</p>
+                        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-700">{template.targetRole}</p>
                         <CardTitle className="mt-1 text-xl leading-7 text-slate-950">{template.title}</CardTitle>
                       </div>
                     </CardHeader>
@@ -1272,11 +1272,11 @@ export default function InterviewStudio() {
                 />
               </div>
 
-              <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+              <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
                 <Checkbox className="mt-0.5" checked={privacyUnderstood} onCheckedChange={(value) => setPrivacyUnderstood(value === true)} />
                 <span>
-                  <span className="block text-sm font-semibold text-emerald-950">I understand this is private practice</span>
-                  <span className="mt-1 block text-xs leading-5 text-emerald-800">It is not a certification, hiring recommendation, or recruiter-visible verified interview.</span>
+                  <span className="block text-sm font-semibold text-slate-950">I understand this is private practice</span>
+                  <span className="mt-1 block text-xs leading-5 text-slate-800">It is not a certification, hiring recommendation, or recruiter-visible verified interview.</span>
                 </span>
               </label>
               <p className="text-xs text-slate-500">Consent record: {status.consentVersion}. You can delete the draft session before submitting it.</p>
@@ -1299,7 +1299,7 @@ export default function InterviewStudio() {
       <DashboardLayout role="learner" title="Interview session" breadcrumbs={[{ label: "Interview studio", href: "/interview-studio" }, { label: "Session" }]}>
         <Card className="border-slate-200">
           <CardContent className="py-14 text-center">
-            <AlertCircle className="mx-auto h-8 w-8 text-amber-600" />
+            <AlertCircle className="mx-auto h-8 w-8 text-slate-600" />
             <h1 className="mt-4 text-xl font-semibold text-slate-950">This session could not be opened</h1>
             <p className="mt-2 text-sm text-slate-600">It may have been deleted, expired, or belong to another account.</p>
             <Button asChild className="mt-5"><Link href="/interview-studio">Back to Interview Studio</Link></Button>
@@ -1317,8 +1317,8 @@ export default function InterviewStudio() {
             <Card className="overflow-hidden border-slate-200 shadow-sm">
               <CardHeader className="border-b border-slate-100 bg-white">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                  <div><p className="text-xs font-semibold uppercase tracking-[0.12em] text-violet-700">Private practice</p><CardTitle className="mt-1 text-2xl">{sessionTemplate.title}</CardTitle><p className="mt-2 text-sm text-slate-600">{sessionTemplate.targetRole} · {sessionTemplate.durationMinutes} minutes · {totalItemCount} prompts</p></div>
-                  <Badge variant="outline" className="w-fit border-emerald-200 bg-emerald-50 text-emerald-700">Not recruiter-visible</Badge>
+                  <div><p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-700">Private practice</p><CardTitle className="mt-1 text-2xl">{sessionTemplate.title}</CardTitle><p className="mt-2 text-sm text-slate-600">{sessionTemplate.targetRole} · {sessionTemplate.durationMinutes} minutes · {totalItemCount} prompts</p></div>
+                  <Badge variant="outline" className="w-fit border-slate-200 bg-slate-50 text-slate-700">Not recruiter-visible</Badge>
                 </div>
               </CardHeader>
               <CardContent className="space-y-6 p-5 sm:p-6">
@@ -1351,12 +1351,12 @@ export default function InterviewStudio() {
 
                 {hasCoding && sessionConsent.screen && (
                   <div className="flex flex-col gap-4 rounded-2xl border border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="flex items-start gap-3"><span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-blue-50 text-blue-700"><MonitorUp className="h-5 w-5" /></span><div><p className="text-sm font-semibold text-slate-900">Screen-share readiness</p><p className="mt-1 text-xs leading-5 text-slate-600">A browser indicator remains visible while sharing. Octamy does not record or upload your screen.</p></div></div>
+                    <div className="flex items-start gap-3"><span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-slate-50 text-slate-700"><MonitorUp className="h-5 w-5" /></span><div><p className="text-sm font-semibold text-slate-900">Screen-share readiness</p><p className="mt-1 text-xs leading-5 text-slate-600">A browser indicator remains visible while sharing. Octamy does not record or upload your screen.</p></div></div>
                     <Button variant="outline" disabled={screenStatus === "requesting"} onClick={enableScreenShare}>{screenStatus === "requesting" ? <Loader2 className="animate-spin" /> : <MonitorUp />}{screenStatus === "active" ? "Change shared screen" : "Share a screen"}</Button>
                   </div>
                 )}
 
-                {deviceError && <Alert className="border-amber-200 bg-amber-50 text-amber-950"><AlertCircle className="h-4 w-4" /><AlertTitle>Device check</AlertTitle><AlertDescription>{deviceError}</AlertDescription></Alert>}
+                {deviceError && <Alert className="border-slate-200 bg-slate-50 text-slate-950"><AlertCircle className="h-4 w-4" /><AlertTitle>Device check</AlertTitle><AlertDescription>{deviceError}</AlertDescription></Alert>}
 
                 <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                   <div className="flex items-start gap-3"><Info className="mt-0.5 h-5 w-5 shrink-0 text-slate-500" /><div><p className="text-sm font-semibold text-slate-900">What Octamy evaluates</p><p className="mt-1 text-xs leading-5 text-slate-600">Only your submitted answer, code, sample-test outcomes, and the versioned rubric. Camera appearance, emotion, gaze, accent, and background are not scored.</p></div></div>
@@ -1378,7 +1378,7 @@ export default function InterviewStudio() {
                 <p className="text-center text-[11px] leading-4 text-slate-500">Starting confirms the consent choices recorded for this session.</p>
               </CardContent>
             </Card>
-            <Button variant="ghost" className="w-full text-rose-700 hover:bg-rose-50 hover:text-rose-800" onClick={() => setDeleteDialogOpen(true)}><Trash2 />Delete draft session</Button>
+            <Button variant="ghost" className="w-full text-slate-700 hover:bg-slate-50 hover:text-slate-800" onClick={() => setDeleteDialogOpen(true)}><Trash2 />Delete draft session</Button>
           </aside>
         </div>
         <DeleteDialog open={deleteDialogOpen} busy={actionBusy === "delete"} onOpenChange={setDeleteDialogOpen} onDelete={deleteSession} />
@@ -1410,16 +1410,16 @@ export default function InterviewStudio() {
           <section className="overflow-hidden rounded-3xl bg-slate-950 px-5 py-7 text-white sm:px-8 sm:py-9">
             <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
               <div><Badge className="border-white/15 bg-white/10 text-white hover:bg-white/10">Private practice report</Badge><h1 className="mt-4 text-3xl font-semibold tracking-tight">{sessionTemplate.title}</h1><p className="mt-3 max-w-2xl text-sm leading-6 text-slate-300">Use this report to improve your next answer. It is not a certification, selection prediction, or recruiter-visible record.</p></div>
-              {overallScore !== null ? <div className="rounded-2xl border border-white/10 bg-white/5 px-6 py-4 text-center"><p className="text-4xl font-semibold">{Math.round(overallScore)}</p><p className="mt-1 text-xs text-slate-300">Rubric score</p></div> : <LockKeyhole className="h-8 w-8 text-emerald-300" />}
+              {overallScore !== null ? <div className="rounded-2xl border border-white/10 bg-white/5 px-6 py-4 text-center"><p className="text-4xl font-semibold">{Math.round(overallScore)}</p><p className="mt-1 text-xs text-slate-300">Rubric score</p></div> : <LockKeyhole className="h-8 w-8 text-slate-300" />}
             </div>
           </section>
 
           {!status.aiEvaluationEnabled || !sessionConsent.aiProcessing ? (
-            <Alert className="border-blue-200 bg-blue-50 text-blue-950"><Info className="h-4 w-4" /><AlertTitle>No AI feedback was generated</AlertTitle><AlertDescription>{!sessionConsent.aiProcessing ? "You did not consent to AI processing for this session. Your submitted answers remain available without invented feedback." : "AI evaluation is not configured on this environment. Deterministic coding results can still appear when the isolated runner is available."}</AlertDescription></Alert>
+            <Alert className="border-slate-200 bg-slate-50 text-slate-950"><Info className="h-4 w-4" /><AlertTitle>No AI feedback was generated</AlertTitle><AlertDescription>{!sessionConsent.aiProcessing ? "You did not consent to AI processing for this session. Your submitted answers remain available without invented feedback." : "AI evaluation is not configured on this environment. Deterministic coding results can still appear when the isolated runner is available."}</AlertDescription></Alert>
           ) : !Object.keys(report).length || ["pending", "queued", "processing", "in_progress"].includes(reportStatus) ? (
-            <Alert className="border-violet-200 bg-violet-50 text-violet-950"><Loader2 className="h-4 w-4 animate-spin" /><AlertTitle>Rubric feedback is being prepared</AlertTitle><AlertDescription>Your submitted evidence is saved. Refresh later to see feedback; Octamy will not infer a result while evaluation is incomplete.</AlertDescription></Alert>
+            <Alert className="border-slate-200 bg-slate-50 text-slate-950"><Loader2 className="h-4 w-4 animate-spin" /><AlertTitle>Rubric feedback is being prepared</AlertTitle><AlertDescription>Your submitted evidence is saved. Refresh later to see feedback; Octamy will not infer a result while evaluation is incomplete.</AlertDescription></Alert>
           ) : ["failed", "review_required"].includes(reportStatus) && asArray(report.humanReviewReasons).length > 0 ? (
-            <Alert className="border-amber-200 bg-amber-50 text-amber-950"><AlertCircle className="h-4 w-4" /><AlertTitle>Feedback is incomplete</AlertTitle><AlertDescription>{asArray(report.humanReviewReasons).map(String).join(" ")}</AlertDescription></Alert>
+            <Alert className="border-slate-200 bg-slate-50 text-slate-950"><AlertCircle className="h-4 w-4" /><AlertTitle>Feedback is incomplete</AlertTitle><AlertDescription>{asArray(report.humanReviewReasons).map(String).join(" ")}</AlertDescription></Alert>
           ) : null}
 
           <div className="grid gap-4 sm:grid-cols-3">
@@ -1447,7 +1447,7 @@ export default function InterviewStudio() {
               <CardContent className="space-y-4 pt-0">
                 {itemFeedback.map((value, index) => {
                   const feedback = asRecord(value);
-                  return <div key={asString(feedback.itemKey, String(index))} className="rounded-2xl border border-slate-200 p-4"><div className="flex items-start justify-between gap-3"><div><p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Prompt {index + 1}</p><p className="mt-1 font-semibold text-slate-900">{asString(feedback.title, items[index]?.title || "Interview response")}</p></div>{typeof feedback.score === "number" && <Badge variant="outline">{Math.round(feedback.score)} / 100</Badge>}</div><p className="mt-3 text-sm leading-6 text-slate-600">{asString(feedback.feedback || feedback.summary, asArray(feedback.criterionScores).length ? "Feedback is grounded in the rubric evidence below." : "No written feedback was returned for this prompt.")}</p>{asArray(feedback.strengths).length > 0 && <p className="mt-3 text-xs text-emerald-700"><strong>Evidence:</strong> {asArray(feedback.strengths).map(String).join(" · ")}</p>}{asArray(feedback.improvements || feedback.improvementAreas).length > 0 && <p className="mt-2 text-xs text-amber-700"><strong>Try next:</strong> {asArray(feedback.improvements || feedback.improvementAreas).map(String).join(" · ")}</p>}</div>;
+                  return <div key={asString(feedback.itemKey, String(index))} className="rounded-2xl border border-slate-200 p-4"><div className="flex items-start justify-between gap-3"><div><p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Prompt {index + 1}</p><p className="mt-1 font-semibold text-slate-900">{asString(feedback.title, items[index]?.title || "Interview response")}</p></div>{typeof feedback.score === "number" && <Badge variant="outline">{Math.round(feedback.score)} / 100</Badge>}</div><p className="mt-3 text-sm leading-6 text-slate-600">{asString(feedback.feedback || feedback.summary, asArray(feedback.criterionScores).length ? "Feedback is grounded in the rubric evidence below." : "No written feedback was returned for this prompt.")}</p>{asArray(feedback.strengths).length > 0 && <p className="mt-3 text-xs text-slate-700"><strong>Evidence:</strong> {asArray(feedback.strengths).map(String).join(" · ")}</p>}{asArray(feedback.improvements || feedback.improvementAreas).length > 0 && <p className="mt-2 text-xs text-slate-700"><strong>Try next:</strong> {asArray(feedback.improvements || feedback.improvementAreas).map(String).join(" · ")}</p>}</div>;
                 })}
               </CardContent>
             </Card>
@@ -1455,7 +1455,7 @@ export default function InterviewStudio() {
 
           <div className="flex flex-col gap-3 sm:flex-row sm:justify-between">
             <Button variant="outline" asChild><Link href="/interview-studio"><ArrowLeft />Back to Interview Studio</Link></Button>
-            <div className="flex flex-col gap-2 sm:flex-row"><Button variant="outline" onClick={() => window.location.reload()}><RotateCcw />Refresh report</Button><Button variant="ghost" className="text-rose-700 hover:bg-rose-50" onClick={() => setDeleteDialogOpen(true)}><Trash2 />Delete session</Button></div>
+            <div className="flex flex-col gap-2 sm:flex-row"><Button variant="outline" onClick={() => window.location.reload()}><RotateCcw />Refresh report</Button><Button variant="ghost" className="text-slate-700 hover:bg-slate-50" onClick={() => setDeleteDialogOpen(true)}><Trash2 />Delete session</Button></div>
           </div>
         </div>
         <DeleteDialog open={deleteDialogOpen} busy={actionBusy === "delete"} onOpenChange={setDeleteDialogOpen} onDelete={deleteSession} />
@@ -1478,20 +1478,20 @@ export default function InterviewStudio() {
         <div className="sticky top-[72px] z-20 -mx-4 border-y border-slate-200 bg-white/95 px-4 py-3 shadow-sm backdrop-blur sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
           <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-2">
-              <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100">Private practice</Badge>
+              <Badge className="bg-slate-100 text-slate-800 hover:bg-slate-100">Private practice</Badge>
               <DeviceIndicator active={cameraStatus === "active"} icon={cameraStatus === "active" ? Camera : VideoOff} label={cameraStatus === "active" ? "Camera preview on" : "Camera off"} />
               <DeviceIndicator active={microphoneActive} icon={microphoneActive ? Mic : MicOff} label={microphoneActive ? "Microphone on" : "Microphone off"} />
               {hasCoding && <DeviceIndicator active={screenStatus === "active"} icon={MonitorUp} label={screenStatus === "active" ? "Screen shared" : "Screen not shared"} />}
-              {!isOnline && <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-800"><WifiOff className="h-3.5 w-3.5" />Offline backup</span>}
+              {!isOnline && <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-800"><WifiOff className="h-3.5 w-3.5" />Offline backup</span>}
             </div>
             <div className="flex items-center gap-3">
               <SaveIndicator status={saveStatus} pending={pendingKeys.size} />
-              {remainingSeconds !== null && <span className={cn("inline-flex items-center gap-2 rounded-lg px-3 py-2 font-mono text-sm font-semibold", remainingSeconds <= 300 ? "bg-rose-50 text-rose-700" : "bg-slate-100 text-slate-700")}><Clock3 className="h-4 w-4" />{formatClock(remainingSeconds)}</span>}
+              {remainingSeconds !== null && <span className={cn("inline-flex items-center gap-2 rounded-lg px-3 py-2 font-mono text-sm font-semibold", remainingSeconds <= 300 ? "bg-slate-50 text-slate-700" : "bg-slate-100 text-slate-700")}><Clock3 className="h-4 w-4" />{formatClock(remainingSeconds)}</span>}
             </div>
           </div>
         </div>
 
-        {!isOnline && <Alert className="border-amber-200 bg-amber-50 text-amber-950"><WifiOff className="h-4 w-4" /><AlertTitle>You are offline</AlertTitle><AlertDescription>Keep working. Answers are backed up in this browser and will sync when the connection returns. Do not clear site data or switch devices.</AlertDescription></Alert>}
+        {!isOnline && <Alert className="border-slate-200 bg-slate-50 text-slate-950"><WifiOff className="h-4 w-4" /><AlertTitle>You are offline</AlertTitle><AlertDescription>Keep working. Answers are backed up in this browser and will sync when the connection returns. Do not clear site data or switch devices.</AlertDescription></Alert>}
 
         <div className="grid gap-5 xl:grid-cols-[260px_minmax(0,1fr)_260px]">
           <aside className="order-2 xl:order-1">
@@ -1503,10 +1503,10 @@ export default function InterviewStudio() {
                     const answer = drafts[item.key];
                     const answered = hasMeaningfulResponse(item, answer);
                     const active = true;
-                    return <button key={item.key} type="button" disabled aria-label={`Question ${currentIndex + 1}${answered ? ", answered" : ""}`} aria-current={active ? "step" : undefined} className={cn("grid h-11 min-w-11 place-items-center rounded-xl border text-sm font-semibold outline-none transition focus-visible:ring-2 focus-visible:ring-slate-900", active ? "border-slate-950 bg-slate-950 text-white" : answered ? "border-emerald-200 bg-emerald-50 text-emerald-800 hover:border-emerald-300" : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50")}>{currentIndex + 1}</button>;
+                    return <button key={item.key} type="button" disabled aria-label={`Question ${currentIndex + 1}${answered ? ", answered" : ""}`} aria-current={active ? "step" : undefined} className={cn("grid h-11 min-w-11 place-items-center rounded-xl border text-sm font-semibold outline-none transition focus-visible:ring-2 focus-visible:ring-slate-900", active ? "border-slate-950 bg-slate-950 text-white" : answered ? "border-slate-200 bg-slate-50 text-slate-800 hover:border-slate-300" : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50")}>{currentIndex + 1}</button>;
                   })}
                 </div>
-                <div className="mt-4 flex items-center gap-4 text-[11px] text-slate-500"><span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-emerald-500" />Answered</span><span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-slate-300" />Not answered</span></div>
+                <div className="mt-4 flex items-center gap-4 text-[11px] text-slate-500"><span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-slate-500" />Answered</span><span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-slate-300" />Not answered</span></div>
               </CardContent>
             </Card>
           </aside>
@@ -1515,7 +1515,7 @@ export default function InterviewStudio() {
             {currentItem ? (
               <Card className="overflow-hidden border-slate-200 shadow-sm">
                 <CardHeader className="border-b border-slate-100 bg-white pb-5">
-                  <div className="flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-2"><Badge variant="outline" className={isCodingItem(currentItem) ? "border-blue-200 bg-blue-50 text-blue-700" : "border-violet-200 bg-violet-50 text-violet-700"}>{isCodingItem(currentItem) ? <><Code2 className="mr-1 h-3 w-3" />Hands-on task</> : <><Bot className="mr-1 h-3 w-3" />Interview prompt</>}</Badge><span className="text-xs font-medium text-slate-500">Question {currentIndex + 1} of {totalItemCount}</span></div>{currentItem.timeLimitSeconds && <span className="text-xs text-slate-500">Suggested: {Math.ceil(currentItem.timeLimitSeconds / 60)} min</span>}</div>
+                  <div className="flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-2"><Badge variant="outline" className={isCodingItem(currentItem) ? "border-slate-200 bg-slate-50 text-slate-700" : "border-slate-200 bg-slate-50 text-slate-700"}>{isCodingItem(currentItem) ? <><Code2 className="mr-1 h-3 w-3" />Hands-on task</> : <><Bot className="mr-1 h-3 w-3" />Interview prompt</>}</Badge><span className="text-xs font-medium text-slate-500">Question {currentIndex + 1} of {totalItemCount}</span></div>{currentItem.timeLimitSeconds && <span className="text-xs text-slate-500">Suggested: {Math.ceil(currentItem.timeLimitSeconds / 60)} min</span>}</div>
                   <CardTitle className="mt-4 text-xl leading-7 sm:text-2xl">{currentItem.title}</CardTitle>
                   <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-700">{currentItem.prompt}</p>
                   {currentItem.description && <p className="mt-3 rounded-xl bg-slate-50 p-3 text-xs leading-5 text-slate-600">{currentItem.description}</p>}
@@ -1527,13 +1527,13 @@ export default function InterviewStudio() {
                         <div className="w-full sm:w-52"><Label htmlFor="code-language" className="text-sm font-semibold">Language</Label><Select value={draft?.language || currentItem.allowedLanguages[0]} onValueChange={(language) => updateDraft(currentItem.key, { language })}><SelectTrigger id="code-language" className="mt-2 h-11"><SelectValue /></SelectTrigger><SelectContent>{currentItem.allowedLanguages.map((language) => <SelectItem key={language} value={language}>{titleCase(language)}</SelectItem>)}</SelectContent></Select></div>
                         {sessionConsent.screen && <Button variant="outline" onClick={enableScreenShare} disabled={screenStatus === "requesting"}>{screenStatus === "requesting" ? <Loader2 className="animate-spin" /> : <MonitorUp />}{screenStatus === "active" ? "Screen shared" : "Share screen"}</Button>}
                       </div>
-                      <div><Label htmlFor={`code-${currentItem.key}`} className="text-sm font-semibold">Your solution</Label><Textarea id={`code-${currentItem.key}`} spellCheck={false} autoCapitalize="off" autoCorrect="off" value={draft?.code || ""} onChange={(event) => updateDraft(currentItem.key, { code: event.target.value })} className="mt-2 min-h-[340px] resize-y rounded-xl border-slate-300 bg-slate-950 p-4 font-mono text-[13px] leading-6 text-slate-100 caret-white focus-visible:ring-blue-500" aria-describedby={`code-help-${currentItem.key}`} /><p id={`code-help-${currentItem.key}`} className="mt-2 text-xs text-slate-500">Write a complete solution. Sample tests are visible; final evaluation can include hidden tests.</p></div>
+                      <div><Label htmlFor={`code-${currentItem.key}`} className="text-sm font-semibold">Your solution</Label><Textarea id={`code-${currentItem.key}`} spellCheck={false} autoCapitalize="off" autoCorrect="off" value={draft?.code || ""} onChange={(event) => updateDraft(currentItem.key, { code: event.target.value })} className="mt-2 min-h-[340px] resize-y rounded-xl border-slate-300 bg-slate-950 p-4 font-mono text-[13px] leading-6 text-slate-100 caret-white focus-visible:ring-slate-500" aria-describedby={`code-help-${currentItem.key}`} /><p id={`code-help-${currentItem.key}`} className="mt-2 text-xs text-slate-500">Write a complete solution. Sample tests are visible; final evaluation can include hidden tests.</p></div>
 
                       <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4"><div className="flex items-center justify-between gap-3"><p className="text-sm font-semibold text-slate-900">Visible sample cases</p><span className="text-right text-xs text-slate-500">{currentItem.sampleTestCases.length} visible</span></div>{currentItem.sampleTestCases.length ? <div className="mt-3 space-y-3">{currentItem.sampleTestCases.map((test, index) => <div key={test.id || index} className="rounded-xl border border-slate-200 bg-white p-3"><p className="text-xs font-semibold text-slate-800">{test.name || `Sample ${index + 1}`}</p>{test.description && <p className="mt-1 text-xs text-slate-500">{test.description}</p>}<div className="mt-3 grid gap-3 sm:grid-cols-2"><div><p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Input</p><pre className="mt-1 overflow-x-auto whitespace-pre-wrap rounded-lg bg-slate-950 p-2.5 text-xs text-slate-100">{displayTestValue(test.input)}</pre></div><div><p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Expected</p><pre className="mt-1 overflow-x-auto whitespace-pre-wrap rounded-lg bg-slate-950 p-2.5 text-xs text-slate-100">{displayTestValue(test.expectedOutput)}</pre></div></div></div>)}</div> : <p className="mt-3 text-xs leading-5 text-slate-600">This task does not publish sample cases. Your code can still be saved for review.</p>}</div>
 
                       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><Button onClick={runSamples} disabled={!status.codeRunnerEnabled || runningItemKey === currentItem.key || !draft?.code.trim() || !isOnline}>{runningItemKey === currentItem.key ? <Loader2 className="animate-spin" /> : <Play />}{status.codeRunnerEnabled ? "Run visible samples" : "Code runner not configured"}</Button><p className="text-xs text-slate-500">Running samples does not submit the interview.</p></div>
 
-                      {currentRunTests.length > 0 && <div className="space-y-2" aria-live="polite"><p className="text-sm font-semibold text-slate-900">Latest sample run</p>{currentRunTests.map((value, index) => { const result = asRecord(value); const passed = asBoolean(result.passed || result.success); return <div key={index} className={cn("flex items-start gap-3 rounded-xl border p-3", passed ? "border-emerald-200 bg-emerald-50" : "border-rose-200 bg-rose-50")}>{passed ? <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-700" /> : <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-rose-700" />}<div><p className={cn("text-sm font-semibold", passed ? "text-emerald-900" : "text-rose-900")}>{asString(result.name, `Sample ${index + 1}`)} · {passed ? "Passed" : "Did not pass"}</p>{asString(result.message || result.error) && <p className="mt-1 whitespace-pre-wrap text-xs leading-5 text-slate-700">{asString(result.message || result.error)}</p>}</div></div>; })}</div>}
+                      {currentRunTests.length > 0 && <div className="space-y-2" aria-live="polite"><p className="text-sm font-semibold text-slate-900">Latest sample run</p>{currentRunTests.map((value, index) => { const result = asRecord(value); const passed = asBoolean(result.passed || result.success); return <div key={index} className={cn("flex items-start gap-3 rounded-xl border p-3", passed ? "border-slate-200 bg-slate-50" : "border-red-200 bg-red-50")}>{passed ? <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-slate-700" /> : <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-700" />}<div><p className={cn("text-sm font-semibold", passed ? "text-slate-900" : "text-red-900")}>{asString(result.name, `Sample ${index + 1}`)} · {passed ? "Passed" : "Did not pass"}</p>{asString(result.message || result.error) && <p className={cn("mt-1 whitespace-pre-wrap text-xs leading-5", passed ? "text-slate-700" : "text-red-800")}>{asString(result.message || result.error)}</p>}</div></div>; })}</div>}
                     </>
                   ) : (
                     <>
@@ -1543,7 +1543,7 @@ export default function InterviewStudio() {
                           <span className={cn(
                             "text-xs font-medium",
                             currentItem.maximumWords && wordCount(draft?.responseText || "") > currentItem.maximumWords
-                              ? "text-rose-700"
+                              ? "text-slate-700"
                               : "text-slate-500",
                           )}>
                             {wordCount(draft?.responseText || "")} words
@@ -1552,7 +1552,7 @@ export default function InterviewStudio() {
                               : ""}
                           </span>
                         </div>
-                        <Textarea id={`answer-${currentItem.key}`} value={draft?.responseText || ""} onChange={(event) => updateDraft(currentItem.key, { responseText: event.target.value })} placeholder="Structure your answer with the situation, your decisions, the actions you took, and measurable outcomes…" className="mt-2 min-h-[280px] resize-y rounded-xl border-slate-300 p-4 text-[15px] leading-7 focus-visible:ring-violet-500" />
+                        <Textarea id={`answer-${currentItem.key}`} value={draft?.responseText || ""} onChange={(event) => updateDraft(currentItem.key, { responseText: event.target.value })} placeholder="Structure your answer with the situation, your decisions, the actions you took, and measurable outcomes…" className="mt-2 min-h-[280px] resize-y rounded-xl border-slate-300 p-4 text-[15px] leading-7 focus-visible:ring-slate-500" />
                       </div>
                       {sessionConsent.microphone && <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4"><div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"><div><p className="text-sm font-semibold text-slate-900">Answer by voice</p><p className="mt-1 text-xs leading-5 text-slate-600">Up to 2 minutes. Raw audio is transient and is not retained after transcription. You can edit the transcript before saving.</p></div>{voiceStatus === "recording" ? <Button variant="destructive" onClick={stopVoiceRecording}><Square />Stop · {formatClock(voiceSeconds)}</Button> : <Button variant="outline" disabled={!status.voiceTranscriptionEnabled || !sessionConsent.aiProcessing || !microphoneActive || voiceStatus === "uploading"} onClick={startVoiceRecording}>{voiceStatus === "uploading" ? <Loader2 className="animate-spin" /> : <Mic />}{!status.voiceTranscriptionEnabled ? "Transcription unavailable" : !sessionConsent.aiProcessing ? "AI consent not selected" : voiceStatus === "uploading" ? "Transcribing…" : "Record answer"}</Button>}</div>{!microphoneActive && status.voiceTranscriptionEnabled && sessionConsent.aiProcessing && <Button variant="link" className="mt-2 h-auto p-0 text-xs" onClick={enableDevices}>Enable the selected microphone first</Button>}</div>}
                     </>
@@ -1588,8 +1588,8 @@ export default function InterviewStudio() {
       <AlertDialog open={submitDialogOpen} onOpenChange={setSubmitDialogOpen}>
         <AlertDialogContent className="rounded-2xl border-slate-200">
           <AlertDialogHeader><AlertDialogTitle>Submit this practice session?</AlertDialogTitle><AlertDialogDescription className="leading-6">You answered {answeredCount} of {totalItemCount} prompts. Submitted practice stays private. You cannot edit answers after submission.</AlertDialogDescription></AlertDialogHeader>
-          {answeredCount < totalItemCount && <Alert className="border-amber-200 bg-amber-50 text-amber-950"><AlertCircle className="h-4 w-4" /><AlertTitle>Some prompts are unanswered</AlertTitle><AlertDescription>You can submit now, or return and complete them.</AlertDescription></Alert>}
-        {(voiceStatus === "recording" || voiceStatus === "uploading") && <p className="text-sm font-medium text-amber-700">Finish the voice answer and review its transcript before submitting.</p>}
+          {answeredCount < totalItemCount && <Alert className="border-slate-200 bg-slate-50 text-slate-950"><AlertCircle className="h-4 w-4" /><AlertTitle>Some prompts are unanswered</AlertTitle><AlertDescription>You can submit now, or return and complete them.</AlertDescription></Alert>}
+        {(voiceStatus === "recording" || voiceStatus === "uploading") && <p className="text-sm font-medium text-slate-700">Finish the voice answer and review its transcript before submitting.</p>}
           <AlertDialogFooter><AlertDialogCancel>Keep working</AlertDialogCancel><AlertDialogAction disabled={actionBusy === "submit" || !isOnline || voiceStatus === "recording" || voiceStatus === "uploading"} onClick={(event) => { event.preventDefault(); void submitSession(false); }}>{actionBusy === "submit" && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Submit private practice</AlertDialogAction></AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -1607,8 +1607,8 @@ function ConsentOption({ id, checked, disabled, onChange, icon: Icon, title, des
   description: string;
 }) {
   return (
-    <label htmlFor={id} className={cn("flex items-start gap-3 rounded-xl border p-4 transition", checked ? "border-violet-300 bg-violet-50" : "border-slate-200 bg-white", disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer hover:border-slate-300")}>
-      <span className={cn("grid h-10 w-10 shrink-0 place-items-center rounded-xl", checked ? "bg-violet-100 text-violet-700" : "bg-slate-100 text-slate-500")}><Icon className="h-5 w-5" /></span>
+    <label htmlFor={id} className={cn("flex items-start gap-3 rounded-xl border p-4 transition", checked ? "border-slate-300 bg-slate-50" : "border-slate-200 bg-white", disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer hover:border-slate-300")}>
+      <span className={cn("grid h-10 w-10 shrink-0 place-items-center rounded-xl", checked ? "bg-slate-100 text-slate-700" : "bg-slate-100 text-slate-500")}><Icon className="h-5 w-5" /></span>
       <span className="min-w-0 flex-1"><span className="block text-sm font-semibold text-slate-900">{title}</span><span className="mt-1 block text-xs leading-5 text-slate-600">{description}</span></span>
       <Checkbox id={id} checked={checked} disabled={disabled} onCheckedChange={(value) => onChange(value === true)} className="mt-1" />
     </label>
@@ -1616,23 +1616,23 @@ function ConsentOption({ id, checked, disabled, onChange, icon: Icon, title, des
 }
 
 function CapabilityState({ icon: Icon, label, active, optional = false }: { icon: typeof Camera; label: string; active: boolean; optional?: boolean }) {
-  return <div className="flex min-h-10 items-center gap-3"><span className={cn("grid h-9 w-9 place-items-center rounded-lg", active ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-500")}><Icon className="h-4 w-4" /></span><span className="flex-1 text-sm font-medium text-slate-700">{label}</span><span className={cn("text-xs font-semibold", active ? "text-emerald-700" : "text-slate-400")}>{active ? "Ready" : optional ? "Not selected" : "Off"}</span></div>;
+  return <div className="flex min-h-10 items-center gap-3"><span className={cn("grid h-9 w-9 place-items-center rounded-lg", active ? "bg-slate-50 text-slate-700" : "bg-slate-100 text-slate-500")}><Icon className="h-4 w-4" /></span><span className="flex-1 text-sm font-medium text-slate-700">{label}</span><span className={cn("text-xs font-semibold", active ? "text-slate-700" : "text-slate-400")}>{active ? "Ready" : optional ? "Not selected" : "Off"}</span></div>;
 }
 
 function ChecklistRow({ complete, label, muted = false }: { complete: boolean; label: string; muted?: boolean }) {
-  return <div className={cn("flex min-h-9 items-center gap-2.5 text-sm", muted ? "text-slate-400" : "text-slate-700")}>{complete ? <CheckCircle2 className={cn("h-4 w-4 shrink-0", muted ? "text-slate-300" : "text-emerald-600")} /> : <Circle className="h-4 w-4 shrink-0 text-slate-300" />}<span>{label}</span></div>;
+  return <div className={cn("flex min-h-9 items-center gap-2.5 text-sm", muted ? "text-slate-400" : "text-slate-700")}>{complete ? <CheckCircle2 className={cn("h-4 w-4 shrink-0", muted ? "text-slate-300" : "text-slate-600")} /> : <Circle className="h-4 w-4 shrink-0 text-slate-300" />}<span>{label}</span></div>;
 }
 
 function DeviceIndicator({ active, icon: Icon, label }: { active: boolean; icon: typeof Camera; label: string }) {
-  return <span className={cn("inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold", active ? "bg-emerald-100 text-emerald-800" : "bg-slate-100 text-slate-500")}><Icon className="h-3.5 w-3.5" />{label}</span>;
+  return <span className={cn("inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold", active ? "bg-slate-100 text-slate-800" : "bg-slate-100 text-slate-500")}><Icon className="h-3.5 w-3.5" />{label}</span>;
 }
 
 function SaveIndicator({ status, pending }: { status: SaveStatus; pending: number }) {
-  const content = status === "saving" ? { icon: Loader2, text: "Saving", className: "text-blue-700", spin: true }
-    : status === "offline" ? { icon: WifiOff, text: "Saved on device", className: "text-amber-700", spin: false }
-      : status === "error" ? { icon: AlertCircle, text: "Sync paused", className: "text-rose-700", spin: false }
+  const content = status === "saving" ? { icon: Loader2, text: "Saving", className: "text-slate-700", spin: true }
+    : status === "offline" ? { icon: WifiOff, text: "Saved on device", className: "text-slate-700", spin: false }
+      : status === "error" ? { icon: AlertCircle, text: "Sync paused", className: "text-slate-700", spin: false }
         : pending > 0 ? { icon: Save, text: `${pending} pending`, className: "text-slate-500", spin: false }
-          : { icon: Check, text: "Saved", className: "text-emerald-700", spin: false };
+          : { icon: Check, text: "Saved", className: "text-slate-700", spin: false };
   const Icon = content.icon;
   return <span className={cn("inline-flex items-center gap-1.5 text-xs font-semibold", content.className)} aria-live="polite"><Icon className={cn("h-3.5 w-3.5", content.spin && "animate-spin")} />{content.text}</span>;
 }
@@ -1643,9 +1643,9 @@ function MetricCard({ label, value, helper, icon: Icon }: { label: string; value
 
 function FeedbackList({ title, items, tone }: { title: string; items: unknown[]; tone: "success" | "warning" }) {
   const success = tone === "success";
-  return <div className={cn("rounded-2xl border p-4", success ? "border-emerald-200 bg-emerald-50" : "border-amber-200 bg-amber-50")}><p className={cn("text-sm font-semibold", success ? "text-emerald-950" : "text-amber-950")}>{title}</p><ul className={cn("mt-2 space-y-2 text-xs leading-5", success ? "text-emerald-900" : "text-amber-900")}>{items.map((item, index) => <li key={index} className="flex gap-2">{success ? <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0" /> : <ArrowRight className="mt-0.5 h-3.5 w-3.5 shrink-0" />}<span>{String(item)}</span></li>)}</ul></div>;
+  return <div className={cn("rounded-2xl border p-4", success ? "border-slate-200 bg-slate-50" : "border-slate-200 bg-slate-50")}><p className={cn("text-sm font-semibold", success ? "text-slate-950" : "text-slate-950")}>{title}</p><ul className={cn("mt-2 space-y-2 text-xs leading-5", success ? "text-slate-900" : "text-slate-900")}>{items.map((item, index) => <li key={index} className="flex gap-2">{success ? <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0" /> : <ArrowRight className="mt-0.5 h-3.5 w-3.5 shrink-0" />}<span>{String(item)}</span></li>)}</ul></div>;
 }
 
 function DeleteDialog({ open, busy, onOpenChange, onDelete }: { open: boolean; busy: boolean; onOpenChange: (open: boolean) => void; onDelete: () => void }) {
-  return <AlertDialog open={open} onOpenChange={onOpenChange}><AlertDialogContent className="rounded-2xl border-slate-200"><AlertDialogHeader><AlertDialogTitle>Delete this interview session?</AlertDialogTitle><AlertDialogDescription>This removes the session and its saved responses from your account. This action cannot be undone.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction className="border-rose-700 bg-rose-700 hover:bg-rose-800" disabled={busy} onClick={(event) => { event.preventDefault(); onDelete(); }}>{busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Delete session</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>;
+  return <AlertDialog open={open} onOpenChange={onOpenChange}><AlertDialogContent className="rounded-2xl border-slate-200"><AlertDialogHeader><AlertDialogTitle>Delete this interview session?</AlertDialogTitle><AlertDialogDescription>This removes the session and its saved responses from your account. This action cannot be undone.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction className="border-red-700 bg-red-700 hover:bg-red-800" disabled={busy} onClick={(event) => { event.preventDefault(); onDelete(); }}>{busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Delete session</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>;
 }

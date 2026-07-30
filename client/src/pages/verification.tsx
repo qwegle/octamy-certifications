@@ -109,17 +109,17 @@ export default function Verification() {
                 {verificationResult ? (
                   <div className={`p-6 rounded-lg border-2 ${
                     isValid 
-                      ? 'bg-green-50 border-green-200' 
+                      ? 'bg-slate-50 border-slate-200'
                       : 'bg-red-50 border-red-200'
                   }`}>
                     <div className="flex items-center mb-4">
                       {isValid ? (
-                        <CheckCircle className="w-6 h-6 text-green-500 mr-3" />
+                        <CheckCircle className="w-6 h-6 text-slate-500 mr-3" />
                       ) : (
                         <XCircle className="w-6 h-6 text-red-500 mr-3" />
                       )}
                       <h3 className={`text-lg font-semibold ${
-                        isValid ? 'text-green-800' : 'text-red-800'
+                        isValid ? 'text-slate-800' : 'text-red-800'
                       }`}>
                         {isValid ? 'Valid Certificate' : 'Invalid Certificate'}
                       </h3>

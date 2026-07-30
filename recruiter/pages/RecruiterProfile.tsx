@@ -168,8 +168,8 @@ export default function RecruiterProfile() {
         </div>
 
         {profileError && (
-          <Card className="border-rose-200 bg-rose-50">
-            <CardContent className="p-4 text-sm text-rose-800">We couldn't load your recruiter profile. Refresh the page or sign in again.</CardContent>
+          <Card className="border-slate-200 bg-slate-50">
+            <CardContent className="p-4 text-sm text-slate-800">We couldn't load your recruiter profile. Refresh the page or sign in again.</CardContent>
           </Card>
         )}
 
@@ -345,8 +345,8 @@ export default function RecruiterProfile() {
                 <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">KYC Status</Label>
                 <div className="flex items-center gap-2">
                   <div className={`h-2 w-2 rounded-full ${
-                    profile?.kycStatus === 'approved' ? 'bg-green-500' :
-                    profile?.kycStatus === 'under_review' ? 'bg-yellow-500' : 'bg-red-500'
+                    profile?.kycStatus === 'rejected' ? 'bg-red-500' :
+                    profile?.kycStatus === 'approved' ? 'bg-slate-900' : 'bg-slate-400'
                   }`}></div>
                   <span className="text-black dark:text-white font-medium capitalize">
                     {profile?.kycStatus?.replace('_', ' ')}

@@ -111,15 +111,15 @@ export function EnhancedQuestionsManagement() {
           </Button>
         </div>
         {coursesQuery.isError && (
-          <p role="alert" className="mt-3 rounded-lg border border-amber-700/50 bg-amber-950/40 p-3 text-sm text-amber-100">
+          <p role="alert" className="mt-3 rounded-lg border border-slate-700/50 bg-slate-950/40 p-3 text-sm text-slate-100">
             The course filter is temporarily unavailable. Questions can still be searched.
           </p>
         )}
       </CardHeader>
       <CardContent>
         {questionsQuery.isError ? (
-          <div role="alert" aria-live="assertive" className="rounded-lg border border-amber-700/50 bg-amber-950/30 px-6 py-10 text-center">
-            <AlertCircle className="mx-auto mb-3 h-9 w-9 text-amber-300" aria-hidden="true" />
+          <div role="alert" aria-live="assertive" className="rounded-lg border border-slate-700/50 bg-slate-950/30 px-6 py-10 text-center">
+            <AlertCircle className="mx-auto mb-3 h-9 w-9 text-slate-300" aria-hidden="true" />
             <h3 className="font-semibold text-white">Questions could not be loaded</h3>
             <p className="mx-auto mt-1 max-w-md text-sm text-gray-300">
               {questionsQuery.error instanceof Error ? questionsQuery.error.message : "Check your connection and try again."}
@@ -191,14 +191,14 @@ export function EnhancedQuestionsManagement() {
                         question.difficulty === 'advanced' ? 'destructive' : 
                         question.difficulty === 'intermediate' ? 'default' : 'secondary'
                       } className={
-                        question.difficulty === 'advanced' ? "bg-red-600" : 
-                        question.difficulty === 'intermediate' ? "bg-blue-600" : "bg-gray-600"
+                        question.difficulty === 'advanced' ? "bg-slate-800" :
+                        question.difficulty === 'intermediate' ? "bg-slate-600" : "bg-gray-600"
                       }>
                         {question.difficulty || 'beginner'}
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={question.isActive ? 'default' : 'secondary'} className={question.isActive ? "bg-green-600" : "bg-gray-600"}>
+                      <Badge variant={question.isActive ? 'default' : 'secondary'} className={question.isActive ? "bg-slate-600" : "bg-gray-600"}>
                         {question.isActive ? 'Active' : 'Inactive'}
                       </Badge>
                     </TableCell>

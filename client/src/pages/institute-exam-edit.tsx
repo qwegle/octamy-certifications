@@ -172,7 +172,7 @@ export default function InstituteExamEdit() {
                   <option key={b.id} value={b.id}>{b.name} ({b.questionCount} {b.questionCount === 1 ? "question" : "questions"})</option>
                 ))}
               </select>
-              {!bankId && <p className="text-xs text-amber-600 mt-1">Without a bank, this exam will not be runnable.</p>}
+              {!bankId && <p className="text-xs text-slate-600 mt-1">Without a bank, this exam will not be runnable.</p>}
             </div>
             <div>
               <Label htmlFor="status">Status</Label>

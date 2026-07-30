@@ -45,11 +45,11 @@ export default function RecruiterLayout({ children }: RecruiterLayoutProps) {
   };
 
   const kycMeta = recruiter.kycStatus === 'approved'
-    ? { label: 'Verified', className: 'border-emerald-400/30 bg-emerald-400/10 text-emerald-300' }
+    ? { label: 'Verified', className: 'border-slate-400/30 bg-slate-400/10 text-slate-300' }
     : recruiter.kycStatus === 'under_review'
-      ? { label: 'Under review', className: 'border-amber-400/30 bg-amber-400/10 text-amber-200' }
+      ? { label: 'Under review', className: 'border-slate-400/30 bg-slate-400/10 text-slate-200' }
       : recruiter.kycStatus === 'rejected'
-        ? { label: 'Action required', className: 'border-rose-400/30 bg-rose-400/10 text-rose-200' }
+        ? { label: 'Action required', className: 'border-slate-400/30 bg-slate-400/10 text-slate-200' }
         : { label: 'Setup pending', className: 'border-slate-400/30 bg-white/5 text-slate-300' };
 
   const recruiterName = `${recruiter.firstName || ''} ${recruiter.lastName || ''}`.trim() || recruiter.email;
@@ -86,7 +86,7 @@ export default function RecruiterLayout({ children }: RecruiterLayoutProps) {
                 <p className="truncate text-sm font-semibold">{recruiter.companyName || 'Your company'}</p>
                 <p className="mt-0.5 truncate text-xs text-slate-400">{recruiterName}</p>
               </div>
-              <ShieldCheck className="h-5 w-5 shrink-0 text-sky-300" />
+              <ShieldCheck className="h-5 w-5 shrink-0 text-slate-300" />
             </div>
             <Badge variant="outline" className={`mt-3 ${kycMeta.className}`}>{kycMeta.label}</Badge>
           </div>
@@ -111,7 +111,7 @@ export default function RecruiterLayout({ children }: RecruiterLayoutProps) {
         </nav>
 
         <div className="border-t border-white/10 p-3">
-          <button type="button" onClick={handleLogout} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-300 hover:bg-rose-500/10 hover:text-rose-200">
+          <button type="button" onClick={handleLogout} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-300 hover:bg-slate-500/10 hover:text-slate-200">
             <LogOut className="h-4 w-4" /> Sign out
           </button>
         </div>
@@ -130,7 +130,7 @@ export default function RecruiterLayout({ children }: RecruiterLayoutProps) {
               </div>
             </div>
             <Link href="/recruiter/wallet" className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-800 shadow-sm hover:border-slate-300">
-              <CreditCard className="h-4 w-4 text-sky-600" />
+              <CreditCard className="h-4 w-4 text-slate-600" />
               <span>{Number(recruiter.creditsBalance || 0).toLocaleString()} credits</span>
             </Link>
           </div>

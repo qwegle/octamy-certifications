@@ -326,8 +326,8 @@ export default function SellerDashboard() {
             <div className="text-right">
               <p className="font-medium">{dashboardData.seller.name}</p>
               <Badge 
-                variant={dashboardData.seller.isApproved ? "default" : "destructive"}
-                className={dashboardData.seller.isApproved ? "bg-green-600" : "bg-red-600"}
+                variant={dashboardData.seller.isApproved ? "default" : "secondary"}
+                className={dashboardData.seller.isApproved ? "bg-slate-900" : "bg-slate-500"}
               >
                 {dashboardData.seller.isApproved ? "Approved" : "Pending Approval"}
               </Badge>
@@ -347,10 +347,10 @@ export default function SellerDashboard() {
       <div className="max-w-7xl mx-auto p-4 sm:p-6">
         {/* Approval Status Alert */}
         {!dashboardData.seller.isApproved && (
-          <div className="mb-6 p-4 bg-yellow-50 border-l-4 border-yellow-400">
+          <div className="mb-6 p-4 bg-slate-50 border-l-4 border-slate-400">
             <div className="flex">
               <div className="ml-3">
-                <p className="text-sm text-yellow-700">
+                <p className="text-sm text-slate-700">
                   <strong>Account Pending Approval:</strong> Your partner account is under review. You'll be able to start earning commissions once approved by our team.
                 </p>
               </div>
@@ -633,9 +633,9 @@ export default function SellerDashboard() {
 
                           {hasUrl ? (
                             <div className="space-y-2">
-                              <div className="flex items-center justify-between bg-green-50 border border-green-200 rounded p-2">
-                                <span className="text-xs text-green-800 font-medium">Referral URL Generated</span>
-                                <CheckCircle size={14} className="text-green-600" />
+                              <div className="flex items-center justify-between bg-slate-50 border border-slate-200 rounded p-2">
+                                <span className="text-xs text-slate-800 font-medium">Referral URL Generated</span>
+                                <CheckCircle size={14} className="text-slate-600" />
                               </div>
                               <div className="flex gap-2">
                                 <Button 
@@ -700,9 +700,9 @@ export default function SellerDashboard() {
 
                           {hasUrl ? (
                             <div className="space-y-2">
-                              <div className="flex items-center justify-between bg-green-50 border border-green-200 rounded p-2">
-                                <span className="text-xs text-green-800 font-medium">Referral URL Generated</span>
-                                <CheckCircle size={14} className="text-green-600" />
+                              <div className="flex items-center justify-between bg-slate-50 border border-slate-200 rounded p-2">
+                                <span className="text-xs text-slate-800 font-medium">Referral URL Generated</span>
+                                <CheckCircle size={14} className="text-slate-600" />
                               </div>
                               <div className="flex gap-2">
                                 <Button 
@@ -767,9 +767,9 @@ export default function SellerDashboard() {
 
                           {hasUrl ? (
                             <div className="space-y-2">
-                              <div className="flex items-center justify-between bg-green-50 border border-green-200 rounded p-2">
-                                <span className="text-xs text-green-800 font-medium">Referral URL Generated</span>
-                                <CheckCircle size={14} className="text-green-600" />
+                              <div className="flex items-center justify-between bg-slate-50 border border-slate-200 rounded p-2">
+                                <span className="text-xs text-slate-800 font-medium">Referral URL Generated</span>
+                                <CheckCircle size={14} className="text-slate-600" />
                               </div>
                               <div className="flex gap-2">
                                 <Button 

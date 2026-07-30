@@ -70,16 +70,16 @@ export default function SponsorPage() {
       <Header />
       <main id="main-content" className="mx-auto max-w-5xl px-4 py-12 sm:px-6">
         <section className="rounded-3xl bg-slate-950 p-7 text-white sm:p-10" aria-labelledby="sponsor-title">
-          <HeartHandshake className="h-9 w-9 text-violet-300" aria-hidden="true" />
+          <HeartHandshake className="h-9 w-9 text-slate-300" aria-hidden="true" />
           <h1 id="sponsor-title" className="mt-5 text-3xl font-black sm:text-5xl">Sponsor access without invented impact claims.</h1>
           <p className="mt-4 max-w-3xl leading-7 text-slate-300">Choose your own amount. Octamy records the sponsorship request and sends you to the configured payment provider. This page does not promise a particular learner allocation, tax treatment, or outcome; contact support first if you need a restricted or documented program.</p>
         </section>
 
         {returned?.has("success") && (
-          <div className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-950" role="status">A payment return was received. Fulfilment depends on the server-verified gateway callback; retain your provider receipt and contact support if confirmation is delayed.</div>
+          <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-5 text-sm text-slate-950" role="status">A payment return was received. Fulfilment depends on the server-verified gateway callback; retain your provider receipt and contact support if confirmation is delayed.</div>
         )}
         {returned?.has("error") && (
-          <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-950" role="alert">The provider did not confirm this sponsorship. Do not retry while your bank shows a pending debit; contact support with the provider reference.</div>
+          <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-5 text-sm text-slate-950" role="alert">The provider did not confirm this sponsorship. Do not retry while your bank shows a pending debit; contact support with the provider reference.</div>
         )}
 
         <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_340px]">
@@ -98,7 +98,7 @@ export default function SponsorPage() {
           </Card>
 
           <aside className="space-y-4">
-            <Card className="border-slate-200"><CardContent className="p-6"><ShieldCheck className="h-6 w-6 text-emerald-700" aria-hidden="true" /><h2 className="mt-4 font-bold">Payment boundary</h2><p className="mt-2 text-sm leading-6 text-slate-600">A request is not a successful payment. Octamy marks it paid only after validating the provider callback.</p></CardContent></Card>
+            <Card className="border-slate-200"><CardContent className="p-6"><ShieldCheck className="h-6 w-6 text-slate-700" aria-hidden="true" /><h2 className="mt-4 font-bold">Payment boundary</h2><p className="mt-2 text-sm leading-6 text-slate-600">A request is not a successful payment. Octamy marks it paid only after validating the provider callback.</p></CardContent></Card>
             <Card className="border-slate-200"><CardContent className="p-6"><h2 className="font-bold">Need an institute allocation?</h2><p className="mt-2 text-sm leading-6 text-slate-600">For named cohorts, vouchers, invoices, or procurement requirements, use the institute workflow instead of an unrestricted sponsorship.</p><Button asChild variant="outline" className="mt-4 w-full"><Link href="/institutes">Institute solutions</Link></Button><Button asChild variant="ghost" className="mt-2 w-full"><Link href="/contact">Contact support</Link></Button></CardContent></Card>
           </aside>
         </div>

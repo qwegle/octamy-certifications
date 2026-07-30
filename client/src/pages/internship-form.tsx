@@ -379,10 +379,10 @@ export default function InternshipFormPage() {
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-2 text-sm">
-                    <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-green-500" />A scored assessment attempt</li>
-                    <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-green-500" />Optional credential activation after passing</li>
-                    <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-green-500" />A public credential-status check</li>
-                    <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-green-500" />No claim of employment or supervised work experience</li>
+                    <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-slate-500" />A scored assessment attempt</li>
+                    <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-slate-500" />Optional credential activation after passing</li>
+                    <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-slate-500" />A public credential-status check</li>
+                    <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-slate-500" />No claim of employment or supervised work experience</li>
                   </ul>
                 </CardContent>
               </Card>
@@ -392,7 +392,7 @@ export default function InternshipFormPage() {
 
         {step === 2 && (
           <div className="text-center py-12">
-            <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-6" />
+            <CheckCircle className="w-16 h-16 text-slate-500 mx-auto mb-6" />
             <h2 className="text-3xl font-bold text-black mb-4">Application Submitted!</h2>
             <p className="text-gray-600 mb-8 max-w-2xl mx-auto">
               Your registration for {course.title} was received. This is an assessment-based skill program, not an employment or supervised-internship placement.

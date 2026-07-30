@@ -64,24 +64,24 @@ const statusDetails: Record<
     eyebrow: "Currently valid",
     description: "This credential is activated and remains within its stated validity period.",
     icon: CheckCircle2,
-    tone: "border-emerald-200 bg-emerald-50 text-emerald-950",
-    iconTone: "text-emerald-700",
+    tone: "border-slate-200 bg-slate-50 text-slate-950",
+    iconTone: "text-slate-700",
   },
   expired: {
     label: "Credential expired",
     eyebrow: "Authentic record · not currently valid",
     description: "The assessment record exists, but its credential validity period has ended.",
     icon: AlertTriangle,
-    tone: "border-amber-200 bg-amber-50 text-amber-950",
-    iconTone: "text-amber-700",
+    tone: "border-slate-200 bg-slate-50 text-slate-950",
+    iconTone: "text-slate-700",
   },
   revoked: {
     label: "Credential revoked",
     eyebrow: "Authentic record · not currently valid",
     description: "The record exists, but the issuer no longer considers this credential valid.",
     icon: Ban,
-    tone: "border-rose-200 bg-rose-50 text-rose-950",
-    iconTone: "text-rose-700",
+    tone: "border-slate-200 bg-slate-50 text-slate-950",
+    iconTone: "text-slate-700",
   },
   pending_activation: {
     label: "Not activated",
@@ -312,7 +312,7 @@ export default function CertificateView() {
             <Link href="/verify" className="inline-flex items-center gap-2 text-sm font-semibold text-slate-400 transition-colors hover:text-white"><ArrowLeft className="h-4 w-4" /> Credential verification</Link>
             <div className="mt-7 flex flex-col gap-7 lg:flex-row lg:items-end lg:justify-between">
               <div className="max-w-3xl">
-                <p className="text-xs font-bold uppercase tracking-[0.18em] text-sky-300">Assessment credential record</p>
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-300">Assessment credential record</p>
                 <h1 className="mt-3 text-3xl font-extrabold tracking-[-0.035em] sm:text-5xl">{certificate.courseTitle}</h1>
                 <p className="mt-4 max-w-2xl leading-7 text-slate-300">A scored assessment record with an inspectable issuer, validity window and live status.</p>
               </div>
@@ -403,7 +403,7 @@ export default function CertificateView() {
                 )}
               </section>
 
-              <section className="rounded-3xl border border-amber-200 bg-amber-50 p-6 text-amber-950">
+              <section className="rounded-3xl border border-slate-200 bg-slate-50 p-6 text-slate-950">
                 <h2 className="flex items-center gap-2 text-sm font-extrabold"><FileCheck2 className="h-4 w-4" />What this record proves</h2>
                 <p className="mt-3 text-xs leading-6">It reports an Octamy account holder's scored assessment result and the credential's current status. It is not government-ID verification, a degree, a professional licence, work experience, or a guarantee of job performance.</p>
               </section>

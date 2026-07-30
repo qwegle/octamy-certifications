@@ -65,8 +65,8 @@ export default function AdminLogin() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1 text-center">
-          <div className="flex items-center justify-center w-12 h-12 mx-auto bg-blue-100 dark:bg-blue-900 rounded-full mb-4">
-            <Shield className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+          <div className="flex items-center justify-center w-12 h-12 mx-auto bg-slate-100 dark:bg-slate-900 rounded-full mb-4">
+            <Shield className="w-6 h-6 text-slate-600 dark:text-slate-400" />
           </div>
           <CardTitle className="text-2xl font-bold">Admin Login</CardTitle>
           <CardDescription>

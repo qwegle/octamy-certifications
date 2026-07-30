@@ -129,7 +129,7 @@ export default function PayUMoneyForm({
         )}
       </Button>
       <div className="flex items-start justify-center gap-2 text-center text-xs leading-5 text-slate-500">
-        <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-700" aria-hidden="true" />
+        <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-slate-700" aria-hidden="true" />
         <span>
           {defaultGateway === "cashfree"
             ? "Secure checkout powered by Cashfree. Octamy never receives your card or UPI credentials."

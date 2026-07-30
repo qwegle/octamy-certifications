@@ -139,9 +139,9 @@ export default function QuestionBanksList() {
 
   const ownerBadge = (bank: QuestionBank) => {
     const map: Record<string, { label: string; icon: any; className: string }> = {
-      admin: { label: "Admin", icon: Shield, className: "bg-purple-100 text-purple-700" },
-      creator: { label: "Creator", icon: User, className: "bg-blue-100 text-blue-700" },
-      institute: { label: "Institute", icon: Building2, className: "bg-emerald-100 text-emerald-700" },
+      admin: { label: "Admin", icon: Shield, className: "bg-slate-100 text-slate-700" },
+      creator: { label: "Creator", icon: User, className: "bg-slate-100 text-slate-700" },
+      institute: { label: "Institute", icon: Building2, className: "bg-slate-100 text-slate-700" },
     };
     const m = map[bank.ownerType] || map.admin;
     const Icon = m.icon;
@@ -185,7 +185,7 @@ export default function QuestionBanksList() {
         {banksQuery.isError ? (
           <Card role="alert" aria-live="assertive">
             <CardContent className="p-8 text-center sm:p-12">
-              <AlertCircle className="mx-auto mb-3 h-10 w-10 text-amber-600" aria-hidden="true" />
+              <AlertCircle className="mx-auto mb-3 h-10 w-10 text-slate-600" aria-hidden="true" />
               <h2 className="font-semibold text-slate-900">Question banks could not be loaded</h2>
               <p className="mx-auto mt-1 max-w-md text-sm text-slate-600">
                 {banksQuery.error instanceof Error
@@ -325,7 +325,7 @@ export default function QuestionBanksList() {
               </p>
             </div>
             {rolesQuery.data && !rolesQuery.data.isAdmin && !rolesQuery.data.isCreator && !rolesQuery.data.isInstituteMember && (
-              <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded p-2">
+              <p className="text-sm text-slate-700 bg-slate-50 border border-slate-200 rounded p-2">
                 You need a creator or institute profile to create banks. Onboard first from your dashboard.
               </p>
             )}

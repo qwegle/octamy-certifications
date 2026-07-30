@@ -87,8 +87,8 @@ export function EnhancedContactSubmissionsManagement() {
                         contact.status === 'responded' ? "default" : 
                         contact.status === 'read' ? "secondary" : "destructive"
                       } className={
-                        contact.status === 'responded' ? "bg-green-600" : 
-                        contact.status === 'read' ? "bg-yellow-600" : "bg-gray-600"
+                        contact.status === 'responded' ? "bg-slate-600" :
+                        contact.status === 'read' ? "bg-slate-600" : "bg-gray-600"
                       }>
                         {contact.status || 'unread'}
                       </Badge>
@@ -101,7 +101,7 @@ export function EnhancedContactSubmissionsManagement() {
                         <Button 
                           variant="ghost" 
                           size="sm" 
-                          className="text-blue-400 hover:text-blue-300 hover:bg-gray-800"
+                          className="text-slate-400 hover:text-slate-300 hover:bg-gray-800"
                           onClick={() => {
                             toast({
                               title: "View Contact",
@@ -114,7 +114,7 @@ export function EnhancedContactSubmissionsManagement() {
                         <Button 
                           variant="ghost" 
                           size="sm" 
-                          className="text-green-400 hover:text-green-300 hover:bg-gray-800"
+                          className="text-slate-400 hover:text-slate-300 hover:bg-gray-800"
                           onClick={() => {
                             toast({
                               title: "Reply to Contact",

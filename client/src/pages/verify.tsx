@@ -56,19 +56,19 @@ const statusContent: Record<CredentialStatus, { title: string; description: stri
   active: {
     title: 'Credential active',
     description: 'This record exists, is activated and is within its validity period.',
-    shell: 'border-emerald-300 bg-emerald-50 text-emerald-800',
+    shell: 'border-slate-300 bg-slate-50 text-slate-800',
     icon: CheckCircle2,
   },
   expired: {
     title: 'Credential expired',
     description: 'The record is authentic, but its validity period has ended.',
-    shell: 'border-amber-300 bg-amber-50 text-amber-900',
+    shell: 'border-slate-300 bg-slate-50 text-slate-900',
     icon: AlertTriangle,
   },
   revoked: {
     title: 'Credential revoked',
     description: 'The record exists, but Octamy no longer considers it valid.',
-    shell: 'border-rose-300 bg-rose-50 text-rose-800',
+    shell: 'border-slate-300 bg-slate-50 text-slate-800',
     icon: XCircle,
   },
   pending_activation: {
@@ -149,7 +149,7 @@ export default function Verify() {
             <Link href="/" className="inline-flex items-center gap-2 text-sm font-semibold text-slate-400 hover:text-white"><ArrowLeft className="h-4 w-4" /> Back to Octamy</Link>
             <div className="mt-7 grid items-end gap-8 lg:grid-cols-[1fr_420px]">
               <div>
-                <span className="inline-flex items-center gap-2 rounded-full border border-sky-300/25 bg-sky-300/10 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-sky-200"><ShieldCheck className="h-3.5 w-3.5" /> Live evidence check</span>
+                <span className="inline-flex items-center gap-2 rounded-full border border-slate-300/25 bg-slate-300/10 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-200"><ShieldCheck className="h-3.5 w-3.5" /> Live evidence check</span>
                 <h1 className="mt-5 text-4xl font-extrabold tracking-[-0.04em] sm:text-5xl">Verify what the credential actually proves.</h1>
                 <p className="mt-4 max-w-2xl leading-7 text-slate-300">Inspect the assessment score, pass mark, issuer and current record status—not just a certificate image.</p>
               </div>
@@ -161,7 +161,7 @@ export default function Verify() {
                     <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                     <Input id="certificate-id" value={certificateId} onChange={(event) => setCertificateId(event.target.value)} placeholder="Enter credential ID" autoComplete="off" autoCapitalize="off" spellCheck={false} aria-describedby="certificate-id-help" className="h-12 rounded-xl border-white/15 bg-white pl-10 text-slate-950" />
                   </div>
-                  <Button type="submit" disabled={!certificateId.trim() || isLoading} className="h-12 rounded-xl bg-sky-300 px-6 font-bold text-slate-950 hover:bg-sky-200">{isLoading ? 'Checking…' : 'Check record'}</Button>
+                  <Button type="submit" disabled={!certificateId.trim() || isLoading} className="h-12 rounded-xl bg-slate-300 px-6 font-bold text-slate-950 hover:bg-slate-200">{isLoading ? 'Checking…' : 'Check record'}</Button>
                 </div>
                 <p id="certificate-id-help" className="mt-2 px-1 text-[11px] leading-5 text-slate-400">Use the complete ID shown on the credential. The check is public and does not require sign-in.</p>
               </form>
@@ -176,7 +176,7 @@ export default function Verify() {
                 { icon: FileCheck2, title: 'Authenticity', body: 'Does this ID exist in Octamy records?' },
                 { icon: Award, title: 'Assessment evidence', body: 'What score and pass threshold were recorded?' },
                 { icon: ShieldCheck, title: 'Current status', body: 'Is it active, expired, revoked or unactivated?' },
-              ].map((item) => <div key={item.title} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"><item.icon className="h-5 w-5 text-sky-700" /><h2 className="mt-5 font-extrabold">{item.title}</h2><p className="mt-2 text-sm leading-6 text-slate-600">{item.body}</p></div>)}
+              ].map((item) => <div key={item.title} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"><item.icon className="h-5 w-5 text-slate-700" /><h2 className="mt-5 font-extrabold">{item.title}</h2><p className="mt-2 text-sm leading-6 text-slate-600">{item.body}</p></div>)}
             </div>
           )}
 
@@ -244,7 +244,7 @@ export default function Verify() {
                   <Button type="button" variant="outline" onClick={copyVerificationLink} className="rounded-xl bg-white"><Copy className="mr-2 h-4 w-4" />Copy link</Button>
                   <Button asChild className="rounded-xl bg-slate-950 text-white hover:bg-slate-800"><Link href={`/certificate/${encodeURIComponent(data.certificateId)}`}><ExternalLink className="mr-2 h-4 w-4" />Open record</Link></Button>
                 </div>
-                <p className="mt-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs leading-5 text-amber-900"><strong>Evidence boundary:</strong> This verifies an Octamy account's recorded assessment result and credential status. It is not government-ID verification, a degree, a professional licence or a guarantee of job performance.</p>
+                <p className="mt-5 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs leading-5 text-slate-900"><strong>Evidence boundary:</strong> This verifies an Octamy account's recorded assessment result and credential status. It is not government-ID verification, a degree, a professional licence or a guarantee of job performance.</p>
               </div>
             </article>
           )}

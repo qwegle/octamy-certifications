@@ -87,7 +87,7 @@ export default function RecruiterAuth() {
         ]}
       >
         <div className="mb-7">
-          <p className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-fuchsia-700">
+          <p className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-slate-700">
             <Building2 className="h-4 w-4" /> Recruiter workspace
           </p>
           <h1 className="mt-3 text-4xl font-extrabold tracking-[-0.04em] text-slate-950 sm:text-5xl">
@@ -180,7 +180,7 @@ export default function RecruiterAuth() {
             )}
           </form>
 
-          <div className="mt-5 flex items-center justify-center gap-2 rounded-xl bg-emerald-50 px-3 py-2.5 text-center text-xs font-medium text-emerald-800">
+          <div className="mt-5 flex items-center justify-center gap-2 rounded-xl bg-slate-50 px-3 py-2.5 text-center text-xs font-medium text-slate-800">
             <ShieldCheck className="h-4 w-4 shrink-0" /> Candidate contact details remain protected until eligibility and credit checks pass.
           </div>
         </section>

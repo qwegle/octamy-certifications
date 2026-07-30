@@ -104,7 +104,7 @@ export default function CashfreeCheckout() {
     <main className="grid min-h-screen place-items-center bg-slate-50 px-4 py-12">
       <Card className="w-full max-w-md border-slate-200 shadow-lg">
         <CardContent className="space-y-5 p-8 text-center">
-          <span className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-emerald-50 text-emerald-700">
+          <span className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-slate-50 text-slate-700">
             {failed ? <ShieldCheck className="h-7 w-7" /> : <Loader2 className="h-7 w-7 animate-spin" />}
           </span>
           <div>

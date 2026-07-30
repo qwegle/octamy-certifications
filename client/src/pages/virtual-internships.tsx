@@ -140,7 +140,7 @@ export default function VirtualInternshipsPage() {
       <div className={`${viewMode === "list" ? "flex-1" : ""}`}>
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between gap-2">
-            <CardTitle className="text-lg group-hover:text-blue-600 transition-colors">
+            <CardTitle className="text-lg group-hover:text-slate-600 transition-colors">
               {internship.title}
             </CardTitle>
             <Badge variant="outline" className="text-xs">
@@ -196,7 +196,7 @@ export default function VirtualInternshipsPage() {
       <section className="bg-black text-white py-16">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center">
-            <div className="inline-block bg-yellow-500/20 border border-yellow-400/40 text-yellow-100 text-xs uppercase tracking-wider px-3 py-1 rounded-full mb-4">
+            <div className="inline-block bg-slate-500/20 border border-slate-400/40 text-slate-100 text-xs uppercase tracking-wider px-3 py-1 rounded-full mb-4">
               Assessment-Based Skill Verification Program
             </div>
             <h1 className="text-5xl md:text-6xl font-bold mb-6">

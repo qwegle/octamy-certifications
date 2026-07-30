@@ -76,9 +76,9 @@ function CertificateSlider() {
             {[0, 1, 2].map((item) => <div key={item} className="h-64 animate-pulse rounded-2xl bg-slate-200" aria-hidden="true" />)}
           </div>
         ) : error ? (
-          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-8 text-center" role="alert">
-            <p className="font-semibold text-amber-950">Recent certifications could not be loaded.</p>
-            <p className="mt-2 text-sm text-amber-900">No placeholder records are shown when the live feed is unavailable.</p>
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-8 text-center" role="alert">
+            <p className="font-semibold text-slate-950">Recent certifications could not be loaded.</p>
+            <p className="mt-2 text-sm text-slate-900">No placeholder records are shown when the live feed is unavailable.</p>
             <Button type="button" variant="outline" className="mt-4" onClick={() => void refetch()}>Try again</Button>
           </div>
         ) : liveCerts.length === 0 ? (
@@ -101,7 +101,7 @@ function CertificateSlider() {
                   <div className="p-5">
                     <p className="text-sm text-slate-500">Certified in</p><p className="truncate font-semibold text-slate-900">{cert.course}</p>
                     <div className="mt-3 flex items-center justify-between"><Badge variant="outline" className="border-slate-300 text-[11px] text-slate-700">{cert.badge} Badge</Badge><span className="text-xs font-medium text-slate-600">Score private</span></div>
-                    <div className="mt-3 flex items-center gap-2 text-[11px] text-slate-500"><ShieldCheck className="h-3.5 w-3.5 text-emerald-600" aria-hidden="true" />Publicly checkable · {cert.company || "Octamy.com"}</div>
+                    <div className="mt-3 flex items-center gap-2 text-[11px] text-slate-500"><ShieldCheck className="h-3.5 w-3.5 text-slate-600" aria-hidden="true" />Publicly checkable · {cert.company || "Octamy.com"}</div>
                   </div>
                 </motion.div>
               </StaggerItem>
@@ -401,8 +401,8 @@ export default function Landing() {
 
             {/* RIGHT — glassmorphic auth card */}
             <div className="lg:col-span-4 relative">
-              <div aria-hidden className="pointer-events-none absolute -top-10 -right-10 h-[280px] w-[280px] rounded-full bg-amber-300/40 blur-3xl" />
-              <div aria-hidden className="pointer-events-none absolute -bottom-10 -left-6 h-[220px] w-[220px] rounded-full bg-sky-300/40 blur-3xl" />
+              <div aria-hidden className="pointer-events-none absolute -top-10 -right-10 h-[280px] w-[280px] rounded-full bg-slate-300/40 blur-3xl" />
+              <div aria-hidden className="pointer-events-none absolute -bottom-10 -left-6 h-[220px] w-[220px] rounded-full bg-slate-300/40 blur-3xl" />
               <motion.div
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -463,7 +463,7 @@ export default function Landing() {
                       <ArrowRight className="h-3.5 w-3.5" />
                     </Link>
                     <div className="mt-3 flex items-center gap-2 text-[10px] text-slate-500">
-                      <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
+                      <ShieldCheck className="h-3.5 w-3.5 text-slate-600" />
                       Secure sign-up · No card required
                     </div>
                   </div>
@@ -492,7 +492,7 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid lg:grid-cols-12 gap-10 lg:gap-16 items-center">
             <Reveal as="div" className="lg:col-span-5">
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-sky-300">The Octamy difference</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-300">The Octamy difference</p>
               <h2 className="mt-4 text-3xl sm:text-5xl font-bold tracking-tight">One evidence trail from assessment to hiring.</h2>
               <p className="mt-5 text-slate-300 leading-relaxed">
                 Course platforms often prove completion. Credential tools verify issuance. Hiring tests often keep results inside one employer workflow. Octamy connects a scored attempt, learner-controlled share link, credential status and recruiter inspection in one record.
@@ -516,7 +516,7 @@ export default function Landing() {
                 <StaggerItem key={item.title}>
                   <div className="h-full rounded-2xl border border-white/10 bg-white/[0.05] p-6 backdrop-blur">
                     <div className="flex items-center justify-between">
-                      <item.Icon className="h-5 w-5 text-sky-300" />
+                      <item.Icon className="h-5 w-5 text-slate-300" />
                       <span className="text-xs font-mono text-white/35">{item.step}</span>
                     </div>
                     <h3 className="mt-8 text-lg font-semibold">{item.title}</h3>
@@ -533,7 +533,7 @@ export default function Landing() {
       <section id="how" className="py-12 sm:py-24 bg-cream-deep border-y border-cream-deep">
         <div className="max-w-7xl mx-auto px-6">
           <Reveal as="div" className="text-center max-w-2xl mx-auto mb-14">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-700">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-700">
               How it works
             </p>
             <h2 className="mt-3 text-3xl sm:text-4xl font-bold text-slate-900">
@@ -546,7 +546,7 @@ export default function Landing() {
           </Reveal>
 
           <Stagger className="relative grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
-            <div aria-hidden className="hidden lg:block absolute top-9 left-[12%] right-[12%] h-px bg-gradient-to-r from-transparent via-sky-300 to-transparent" />
+            <div aria-hidden className="hidden lg:block absolute top-9 left-[12%] right-[12%] h-px bg-gradient-to-r from-transparent via-slate-300 to-transparent" />
             {[
               {
                 n: "01",
@@ -580,7 +580,7 @@ export default function Landing() {
                   className="relative rounded-xl border border-cream-deep bg-cream-soft p-4 sm:p-6 transition-shadow hover:shadow-lg"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="inline-flex h-7 px-2 items-center rounded-full bg-sky-50 text-[11px] font-bold tracking-[0.2em] text-sky-700 ring-1 ring-sky-200">
+                    <span className="inline-flex h-7 px-2 items-center rounded-full bg-slate-50 text-[11px] font-bold tracking-[0.2em] text-slate-700 ring-1 ring-slate-200">
                       {step.n}
                     </span>
                     <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-slate-900 text-white">
@@ -610,7 +610,7 @@ export default function Landing() {
         <div className="max-w-5xl mx-auto px-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div className="rounded-xl border border-cream-deep bg-cream-soft p-8 text-center">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-700">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-700">
                 Live exams
               </p>
               <p className="mt-3 text-5xl font-extrabold tracking-tight text-slate-900 tabular-nums">
@@ -621,7 +621,7 @@ export default function Landing() {
               </p>
             </div>
             <div className="rounded-xl border border-cream-deep bg-cream-soft p-8 text-center">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-700">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-700">
                 Career tracks
               </p>
               <p className="mt-3 text-5xl font-extrabold tracking-tight text-slate-900 tabular-nums">
@@ -639,7 +639,7 @@ export default function Landing() {
       <section className="hidden py-12 sm:py-24 bg-cream-deep border-y border-cream-deep" aria-hidden="true">
         <div className="max-w-7xl mx-auto px-6">
           <Reveal as="div" className="text-center max-w-2xl mx-auto mb-14">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-700">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-700">
               Browse by track
             </p>
             <h2 className="mt-3 text-3xl sm:text-4xl font-bold text-slate-900">
@@ -656,13 +656,13 @@ export default function Landing() {
               const baseCard =
                 "group relative flex flex-col h-full rounded-xl border p-4 sm:p-6 transition-all hover:-translate-y-1 hover:shadow-xl";
               const cardClass = cat.isPremium
-                ? `${baseCard} bg-gradient-to-br from-amber-50 to-white border-amber-200 ring-1 ring-amber-200`
+                ? `${baseCard} bg-gradient-to-br from-slate-50 to-white border-slate-200 ring-1 ring-slate-200`
                 : `${baseCard} bg-cream-soft border-cream-deep hover:border-slate-900`;
               return (
                 <StaggerItem key={cat.id} className="h-full">
                   <Link href={publicAssessmentCategoryPath(cat.slug)} className={cardClass}>
                     {cat.isPremium && (
-                      <span className="absolute top-3 right-3 inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-amber-700">
+                      <span className="absolute top-3 right-3 inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-700">
                         <Sparkles className="w-3 h-3" />
                         Premium
                       </span>
@@ -671,7 +671,7 @@ export default function Landing() {
                       className={
                         "flex h-11 w-11 items-center justify-center rounded-lg transition-transform group-hover:scale-110 " +
                         (cat.isPremium
-                          ? "bg-amber-100 text-amber-700"
+                          ? "bg-slate-100 text-slate-700"
                           : "bg-slate-900 text-white")
                       }
                     >
@@ -729,7 +729,7 @@ export default function Landing() {
       <section className="hidden py-16 sm:py-24 bg-cream-soft" aria-hidden="true">
         <div className="max-w-7xl mx-auto px-6">
           <Reveal as="div" className="text-center max-w-2xl mx-auto mb-14">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-700">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-700">
               Why Octamy
             </p>
             <h2 className="mt-3 text-3xl sm:text-4xl font-bold text-slate-900">
@@ -788,7 +788,7 @@ export default function Landing() {
       >
         <div className="max-w-6xl mx-auto px-6">
           <Reveal as="div" className="text-center max-w-2xl mx-auto mb-14">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-700">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-700">
               Recognition
             </p>
             <h2 className="mt-3 text-3xl sm:text-4xl font-bold text-slate-900">
@@ -808,7 +808,7 @@ export default function Landing() {
                 range="50–69%"
                 label="Verified Pass"
                 icon={<Medal className="w-7 h-7" />}
-                accent="text-amber-700 bg-amber-50 ring-amber-200"
+                accent="text-slate-700 bg-slate-50 ring-slate-200"
               />
             </StaggerItem>
             <StaggerItem>
@@ -826,7 +826,7 @@ export default function Landing() {
                 range="80–89%"
                 label="Distinction"
                 icon={<Trophy className="w-7 h-7" />}
-                accent="text-yellow-700 bg-yellow-50 ring-yellow-200"
+                accent="text-slate-700 bg-slate-50 ring-slate-200"
               />
             </StaggerItem>
             <StaggerItem>
@@ -835,14 +835,14 @@ export default function Landing() {
                 range="90–100%"
                 label="Exceptional score"
                 icon={<Crown className="w-7 h-7" />}
-                accent="text-sky-800 bg-sky-50 ring-sky-200"
+                accent="text-slate-800 bg-slate-50 ring-slate-200"
               />
             </StaggerItem>
           </Stagger>
 
           <p className="mt-10 text-center text-xs text-slate-500">
             Tier is recorded on the certificate and verifiable at{" "}
-            <Link href="/verify" className="text-sky-700 hover:underline">
+            <Link href="/verify" className="text-slate-700 hover:underline">
               octamy.com/verify
             </Link>
             .
@@ -854,7 +854,7 @@ export default function Landing() {
       <section className="py-16 sm:py-24 bg-cream-deep border-y border-cream-deep">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center max-w-2xl mx-auto mb-12">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-700">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-700">
               Featured exams
             </p>
             <h2 className="mt-3 text-3xl sm:text-4xl font-bold text-slate-900">
@@ -908,17 +908,17 @@ export default function Landing() {
       {/* 9. RECRUITERS / SELLERS SPLIT CTA ------------------------------- */}
       <section className="hidden relative overflow-hidden py-16 sm:py-24 bg-slate-900" aria-hidden="true">
         <div aria-hidden className="pointer-events-none absolute inset-0 bg-grid-slate opacity-20 [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_75%)]" />
-        <div aria-hidden className="pointer-events-none absolute -top-20 left-10 h-[300px] w-[300px] rounded-full bg-sky-500/20 blur-3xl animate-blob" />
-        <div aria-hidden className="pointer-events-none absolute bottom-0 right-10 h-[260px] w-[260px] rounded-full bg-indigo-500/20 blur-3xl animate-blob-slow" />
+        <div aria-hidden className="pointer-events-none absolute -top-20 left-10 h-[300px] w-[300px] rounded-full bg-slate-500/20 blur-3xl animate-blob" />
+        <div aria-hidden className="pointer-events-none absolute bottom-0 right-10 h-[260px] w-[260px] rounded-full bg-slate-500/20 blur-3xl animate-blob-slow" />
         <div className="relative max-w-7xl mx-auto px-6">
           <Stagger className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <StaggerItem>
               <motion.div
                 whileHover={{ y: -4 }}
                 transition={{ type: "spring", stiffness: 240, damping: 18 }}
-                className="h-full rounded-2xl border border-slate-700/60 bg-slate-800/40 backdrop-blur p-8 hover:border-sky-400/40 transition-colors"
+                className="h-full rounded-2xl border border-slate-700/60 bg-slate-800/40 backdrop-blur p-8 hover:border-slate-400/40 transition-colors"
               >
-                <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-sky-500/15 text-sky-300 ring-1 ring-sky-400/30">
+                <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-slate-500/15 text-slate-300 ring-1 ring-slate-400/30">
                   <Users className="w-5 h-5" />
                 </div>
                 <h3 className="mt-5 text-2xl font-bold text-white">
@@ -944,9 +944,9 @@ export default function Landing() {
               <motion.div
                 whileHover={{ y: -4 }}
                 transition={{ type: "spring", stiffness: 240, damping: 18 }}
-                className="h-full rounded-2xl border border-slate-700/60 bg-slate-800/40 backdrop-blur p-8 hover:border-fuchsia-400/40 transition-colors"
+                className="h-full rounded-2xl border border-slate-700/60 bg-slate-800/40 backdrop-blur p-8 hover:border-slate-400/40 transition-colors"
               >
-                <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-fuchsia-500/15 text-fuchsia-300 ring-1 ring-fuchsia-400/30">
+                <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-slate-500/15 text-slate-300 ring-1 ring-slate-400/30">
                   <Briefcase className="w-5 h-5" />
                 </div>
                 <h3 className="mt-5 text-2xl font-bold text-white">
@@ -976,7 +976,7 @@ export default function Landing() {
       <section className="py-16 sm:py-24 bg-cream-soft">
         <div className="max-w-3xl mx-auto px-6">
           <Reveal as="div" className="text-center mb-12">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-700">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-700">
               Questions
             </p>
             <h2 className="mt-3 text-3xl sm:text-4xl font-bold text-slate-900">
@@ -1007,8 +1007,8 @@ export default function Landing() {
       {/* 11. FINAL CTA BAND ---------------------------------------------- */}
       <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 to-black">
         <div aria-hidden className="pointer-events-none absolute inset-0 bg-grid-slate opacity-15" />
-        <div aria-hidden className="pointer-events-none absolute -top-32 left-1/2 -translate-x-1/2 h-[420px] w-[720px] rounded-full bg-sky-500/20 blur-3xl animate-blob" />
-        <div aria-hidden className="pointer-events-none absolute bottom-0 left-1/3 h-[300px] w-[300px] rounded-full bg-indigo-500/20 blur-3xl animate-blob-slow" />
+        <div aria-hidden className="pointer-events-none absolute -top-32 left-1/2 -translate-x-1/2 h-[420px] w-[720px] rounded-full bg-slate-500/20 blur-3xl animate-blob" />
+        <div aria-hidden className="pointer-events-none absolute bottom-0 left-1/3 h-[300px] w-[300px] rounded-full bg-slate-500/20 blur-3xl animate-blob-slow" />
         <div className="relative max-w-4xl mx-auto px-6 py-20 sm:py-28 text-center">
           <Reveal as="h2" className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white">
             Start your first assessment — free.
@@ -1021,7 +1021,7 @@ export default function Landing() {
                 <Button
                   asChild
                   size="lg"
-                  className="bg-cream-soft text-slate-900 hover:bg-slate-100 rounded-full px-8 py-6 text-base font-semibold shadow-2xl shadow-sky-500/20"
+                  className="bg-cream-soft text-slate-900 hover:bg-slate-100 rounded-full px-8 py-6 text-base font-semibold shadow-2xl shadow-slate-500/20"
                 >
                   <Link href="/get-certified">
                   Browse exams

@@ -83,7 +83,7 @@ export default function RecruiterSavedSearches() {
                     <Button size="sm" variant="outline"><Search className="w-3.5 h-3.5 mr-1.5"/> Open</Button>
                   </Link>
                   <Button size="sm" variant="ghost" onClick={() => del.mutate(s.id)}>
-                    <Trash2 className="w-3.5 h-3.5 text-rose-600"/>
+                    <Trash2 className="w-3.5 h-3.5 text-slate-600"/>
                   </Button>
                 </div>
               </div>

@@ -109,13 +109,13 @@ export default function SellerAuth() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-10 lg:py-16 grid lg:grid-cols-12 gap-10 lg:gap-16 items-start">
         {/* LEFT: pitch */}
         <section className="lg:col-span-7">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-900 text-xs font-semibold uppercase tracking-wider">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-50 border border-slate-200 text-slate-900 text-xs font-semibold uppercase tracking-wider">
             <Sparkles className="w-3.5 h-3.5" />
             Now accepting partners — Q2 2026 cohort
           </div>
 
           <h1 className="mt-5 text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 leading-[1.05] tracking-tight">
-            Earn <span className="text-sky-700">10% commission</span><br className="hidden sm:block" />
+            Earn <span className="text-slate-700">10% commission</span><br className="hidden sm:block" />
             on every certificate you refer.
           </h1>
 
@@ -198,7 +198,7 @@ export default function SellerAuth() {
                 key={label}
                 className="flex items-start gap-3 p-3 rounded-lg bg-cream-soft border border-cream-deep"
               >
-                <Icon className="w-5 h-5 text-sky-700 flex-shrink-0 mt-0.5" />
+                <Icon className="w-5 h-5 text-slate-700 flex-shrink-0 mt-0.5" />
                 <span className="text-sm text-slate-700">{label}</span>
               </div>
             ))}
@@ -215,7 +215,7 @@ export default function SellerAuth() {
                 onClick={() => setIsLogin(false)}
                 className={`py-4 transition-colors ${
                   !isLogin
-                    ? "bg-cream-soft text-slate-900 border-b-2 border-sky-700"
+                    ? "bg-cream-soft text-slate-900 border-b-2 border-slate-700"
                     : "text-slate-500 hover:text-slate-700"
                 }`}
               >
@@ -226,7 +226,7 @@ export default function SellerAuth() {
                 onClick={() => setIsLogin(true)}
                 className={`py-4 transition-colors ${
                   isLogin
-                    ? "bg-cream-soft text-slate-900 border-b-2 border-sky-700"
+                    ? "bg-cream-soft text-slate-900 border-b-2 border-slate-700"
                     : "text-slate-500 hover:text-slate-700"
                 }`}
               >
@@ -349,20 +349,20 @@ export default function SellerAuth() {
                       type="checkbox"
                       checked={acceptedAgreement}
                       onChange={(e) => setAcceptedAgreement(e.target.checked)}
-                      className="mt-0.5 w-4 h-4 rounded border-slate-300 text-sky-700 focus:ring-sky-500"
+                      className="mt-0.5 w-4 h-4 rounded border-slate-300 text-slate-700 focus:ring-slate-500"
                       aria-label="Accept reseller agreement"
                     />
                     <span>
                       I agree to the{" "}
-                      <a href="/reseller-agreement" target="_blank" rel="noopener noreferrer" className="text-sky-700 underline font-medium">
+                      <a href="/reseller-agreement" target="_blank" rel="noopener noreferrer" className="text-slate-700 underline font-medium">
                         Reseller Agreement
                       </a>
                       ,{" "}
-                      <a href="/terms-of-service" target="_blank" rel="noopener noreferrer" className="text-sky-700 underline">
+                      <a href="/terms-of-service" target="_blank" rel="noopener noreferrer" className="text-slate-700 underline">
                         Terms
                       </a>{" "}
                       &amp;{" "}
-                      <a href="/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-sky-700 underline">
+                      <a href="/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-slate-700 underline">
                         Privacy Policy
                       </a>
                       . I am an independent marketing affiliate; payouts subject to KYC, TDS §194H and a ₹500 minimum threshold.
@@ -386,14 +386,14 @@ export default function SellerAuth() {
                   {isLogin ? (
                     <>
                       New to Octamy?{" "}
-                      <button type="button" onClick={() => setIsLogin(false)} className="text-sky-700 font-medium hover:underline">
+                      <button type="button" onClick={() => setIsLogin(false)} className="text-slate-700 font-medium hover:underline">
                         Become a partner
                       </button>
                     </>
                   ) : (
                     <>
                       Already a partner?{" "}
-                      <button type="button" onClick={() => setIsLogin(true)} className="text-sky-700 font-medium hover:underline">
+                      <button type="button" onClick={() => setIsLogin(true)} className="text-slate-700 font-medium hover:underline">
                         Sign in
                       </button>
                     </>
@@ -472,10 +472,10 @@ function EarningsCalculator() {
   const yearly = monthly * 12;
 
   return (
-    <div className="mt-10 rounded-2xl border border-sky-200 bg-gradient-to-br from-sky-50 to-white p-6">
+    <div className="mt-10 rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-50 to-white p-6">
       <div className="flex items-center justify-between mb-3">
         <h3 className="font-semibold text-slate-900">Estimate your monthly earnings</h3>
-        <Sparkles className="w-5 h-5 text-sky-600" />
+        <Sparkles className="w-5 h-5 text-slate-600" />
       </div>
       <label htmlFor="ref-slider" className="text-sm text-slate-600 block mb-2">
         I can refer roughly <span className="font-bold text-slate-900">{referrals}</span> certificates per month
@@ -488,7 +488,7 @@ function EarningsCalculator() {
         step={1}
         value={referrals}
         onChange={(e) => setReferrals(parseInt(e.target.value, 10))}
-        className="w-full accent-sky-700"
+        className="w-full accent-slate-700"
       />
       <div className="grid grid-cols-2 gap-3 mt-5">
         <div className="rounded-lg bg-cream-soft border border-cream-deep p-4">

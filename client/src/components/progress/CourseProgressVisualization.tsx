@@ -105,7 +105,7 @@ export function CourseProgressVisualization({ courseId, userId }: Props) {
       transition={{ duration: 0.5 }}
       className="relative"
     >
-      <Card className="border-2 border-yellow-400 bg-gradient-to-br from-yellow-50 to-amber-100 dark:from-yellow-900/20 dark:to-amber-900/20">
+      <Card className="border-2 border-slate-400 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900/20 dark:to-slate-900/20">
         <CardContent className="p-4 text-center">
           <div className="text-4xl mb-2">{achievement.achievement?.icon || '🏆'}</div>
           <h3 className="font-bold text-lg mb-1">{achievement.achievement?.title}</h3>
@@ -115,9 +115,9 @@ export function CourseProgressVisualization({ courseId, userId }: Props) {
           <Badge 
             variant="secondary" 
             className={`${
-              achievement.achievement?.rarity === 'legendary' ? 'bg-purple-500 text-white' :
-              achievement.achievement?.rarity === 'epic' ? 'bg-orange-500 text-white' :
-              achievement.achievement?.rarity === 'rare' ? 'bg-blue-500 text-white' :
+              achievement.achievement?.rarity === 'legendary' ? 'bg-slate-500 text-white' :
+              achievement.achievement?.rarity === 'epic' ? 'bg-slate-500 text-white' :
+              achievement.achievement?.rarity === 'rare' ? 'bg-slate-500 text-white' :
               'bg-gray-500 text-white'
             }`}
           >
@@ -155,7 +155,7 @@ export function CourseProgressVisualization({ courseId, userId }: Props) {
 
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-blue-500" />
+              <Clock className="h-4 w-4 text-slate-500" />
               <div>
                 <div className="font-medium">{Math.floor(courseProgress.timeSpent / 60)}h {courseProgress.timeSpent % 60}m</div>
                 <div className="text-gray-500">Time Spent</div>
@@ -163,7 +163,7 @@ export function CourseProgressVisualization({ courseId, userId }: Props) {
             </div>
             
             <div className="flex items-center gap-2">
-              <Target className="h-4 w-4 text-green-500" />
+              <Target className="h-4 w-4 text-slate-500" />
               <div>
                 <div className="font-medium">{courseProgress.bestScore || 0}%</div>
                 <div className="text-gray-500">Best Score</div>
@@ -171,7 +171,7 @@ export function CourseProgressVisualization({ courseId, userId }: Props) {
             </div>
             
             <div className="flex items-center gap-2">
-              <Zap className="h-4 w-4 text-orange-500" />
+              <Zap className="h-4 w-4 text-slate-500" />
               <div>
                 <div className="font-medium">{courseProgress.streakDays || 0} days</div>
                 <div className="text-gray-500">Streak</div>
@@ -179,7 +179,7 @@ export function CourseProgressVisualization({ courseId, userId }: Props) {
             </div>
             
             <div className="flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-purple-500" />
+              <TrendingUp className="h-4 w-4 text-slate-500" />
               <div>
                 <div className="font-medium">{courseProgress.attemptCount || 0}</div>
                 <div className="text-gray-500">Attempts</div>
@@ -209,10 +209,10 @@ export function CourseProgressVisualization({ courseId, userId }: Props) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <Card className="bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/10 dark:to-amber-900/10 border-yellow-200 dark:border-yellow-800">
+          <Card className="bg-gradient-to-r from-slate-50 to-slate-50 dark:from-slate-900/10 dark:to-slate-900/10 border-slate-200 dark:border-slate-800">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Trophy className="h-6 w-6 text-yellow-600" />
+                <Trophy className="h-6 w-6 text-slate-600" />
                 Recent Achievements
               </CardTitle>
             </CardHeader>
@@ -271,7 +271,7 @@ export function CourseProgressVisualization({ courseId, userId }: Props) {
           <Dialog open={showAchievementModal} onOpenChange={setShowAchievementModal}>
             <DialogContent className="max-w-md">
               <DialogHeader>
-                <DialogTitle className="text-center text-2xl font-bold text-yellow-600">
+                <DialogTitle className="text-center text-2xl font-bold text-slate-600">
                   🎉 Achievement Unlocked!
                 </DialogTitle>
               </DialogHeader>
@@ -287,7 +287,7 @@ export function CourseProgressVisualization({ courseId, userId }: Props) {
                       type: "spring",
                       stiffness: 200 
                     }}
-                    className="text-center p-6 bg-gradient-to-br from-yellow-100 to-amber-100 dark:from-yellow-900/30 dark:to-amber-900/30 rounded-lg border-2 border-yellow-400"
+                    className="text-center p-6 bg-gradient-to-br from-slate-100 to-slate-100 dark:from-slate-900/30 dark:to-slate-900/30 rounded-lg border-2 border-slate-400"
                   >
                     <motion.div
                       animate={{ 
@@ -309,22 +309,22 @@ export function CourseProgressVisualization({ courseId, userId }: Props) {
                     </p>
                     <Badge 
                       className={`${
-                        achievement.achievement?.rarity === 'legendary' ? 'bg-purple-500' :
-                        achievement.achievement?.rarity === 'epic' ? 'bg-orange-500' :
-                        achievement.achievement?.rarity === 'rare' ? 'bg-blue-500' :
+                        achievement.achievement?.rarity === 'legendary' ? 'bg-slate-500' :
+                        achievement.achievement?.rarity === 'epic' ? 'bg-slate-500' :
+                        achievement.achievement?.rarity === 'rare' ? 'bg-slate-500' :
                         'bg-gray-500'
                       } text-white px-3 py-1`}
                     >
                       {achievement.achievement?.rarity || 'common'}
                     </Badge>
-                    <div className="mt-3 text-lg font-bold text-yellow-600">
+                    <div className="mt-3 text-lg font-bold text-slate-600">
                       +{achievement.achievement?.points || 10} Points!
                     </div>
                   </motion.div>
                 ))}
                 <Button 
                   onClick={() => setShowAchievementModal(false)}
-                  className="w-full mt-6 bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600"
+                  className="w-full mt-6 bg-gradient-to-r from-slate-500 to-slate-500 hover:from-slate-600 hover:to-slate-600"
                 >
                   Awesome! 🎉
                 </Button>

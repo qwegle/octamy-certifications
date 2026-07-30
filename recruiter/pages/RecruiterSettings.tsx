@@ -137,8 +137,8 @@ export default function RecruiterSettings() {
         </div>
 
         {profileError && (
-          <Card className="border-rose-200 bg-rose-50">
-            <CardContent className="p-4 text-sm text-rose-800">We couldn't load your company settings. Refresh the page or sign in again.</CardContent>
+          <Card className="border-slate-200 bg-slate-50">
+            <CardContent className="p-4 text-sm text-slate-800">We couldn't load your company settings. Refresh the page or sign in again.</CardContent>
           </Card>
         )}
 
@@ -317,8 +317,8 @@ export default function RecruiterSettings() {
                 </div>
                 <div className="flex items-center gap-2">
                   <div className={`h-3 w-3 rounded-full ${
-                    profile?.kycStatus === 'approved' ? 'bg-green-500' :
-                    profile?.kycStatus === 'under_review' ? 'bg-yellow-500' : 'bg-red-500'
+                    profile?.kycStatus === 'rejected' ? 'bg-red-500' :
+                    profile?.kycStatus === 'approved' ? 'bg-slate-900' : 'bg-slate-400'
                   }`}></div>
                   <span className="text-black dark:text-white font-medium capitalize">
                     {profile?.kycStatus?.replace('_', ' ')}
@@ -335,7 +335,7 @@ export default function RecruiterSettings() {
                   </p>
                 )}
                 {profile?.kycStatus === 'approved' && (
-                  <p className="text-sm text-green-600 dark:text-green-400 mt-2">
+                  <p className="text-sm text-slate-600 dark:text-slate-400 mt-2">
                     Your KYC verification is complete. You can now access all platform features.
                   </p>
                 )}
@@ -376,7 +376,7 @@ export default function RecruiterSettings() {
                 <div className="text-sm text-gray-600 dark:text-gray-400">Registration Progress</div>
               </div>
               <div className="text-center">
-                <div className={`text-2xl font-bold ${profile?.isActive ? 'text-green-600' : 'text-red-600'}`}>
+                <div className={`text-2xl font-bold ${profile?.isActive ? 'text-slate-600' : 'text-red-600'}`}>
                   {profile?.isActive ? "Active" : "Inactive"}
                 </div>
                 <div className="text-sm text-gray-600 dark:text-gray-400">Account Status</div>

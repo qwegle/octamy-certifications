@@ -89,10 +89,10 @@ export default function BillingReturn() {
       <SEO title="Subscription status" description="Confirming your Octamy subscription." path="/billing/return" />
       <Card className="w-full max-w-lg border-2 border-slate-900 shadow-[6px_6px_0_0_rgba(15,23,42,0.9)]">
         <CardContent className="p-8 text-center">
-          {state === 'checking' && <Loader2 className="mx-auto h-12 w-12 animate-spin text-sky-600" />}
-          {state === 'active' && <CheckCircle2 className="mx-auto h-12 w-12 text-emerald-600" />}
-          {state === 'pending' && <Clock3 className="mx-auto h-12 w-12 text-amber-600" />}
-          {state === 'error' && <XCircle className="mx-auto h-12 w-12 text-rose-600" />}
+          {state === 'checking' && <Loader2 className="mx-auto h-12 w-12 animate-spin text-slate-600" />}
+          {state === 'active' && <CheckCircle2 className="mx-auto h-12 w-12 text-slate-600" />}
+          {state === 'pending' && <Clock3 className="mx-auto h-12 w-12 text-slate-600" />}
+          {state === 'error' && <XCircle className="mx-auto h-12 w-12 text-slate-600" />}
           <h1 className="mt-5 text-2xl font-bold text-slate-950">
             {state === 'checking' && 'Confirming your payment'}
             {state === 'active' && 'Plan activated'}

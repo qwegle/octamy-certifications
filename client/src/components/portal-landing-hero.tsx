@@ -25,22 +25,22 @@ interface PortalLandingHeroProps {
 
 const accents = {
   fuchsia: {
-    glow: 'from-fuchsia-300/35 via-violet-200/20 to-sky-300/35',
-    eyebrow: 'border-fuchsia-200 bg-fuchsia-50 text-fuchsia-700',
-    icon: 'bg-fuchsia-100 text-fuchsia-700',
-    metric: 'from-fuchsia-50 to-white',
+    glow: 'from-neutral-300/35 via-neutral-200/20 to-white',
+    eyebrow: 'border-neutral-300 bg-neutral-100 text-neutral-800',
+    icon: 'bg-neutral-200 text-neutral-800',
+    metric: 'from-neutral-100 to-white',
   },
   emerald: {
-    glow: 'from-emerald-300/35 via-teal-200/20 to-sky-300/35',
-    eyebrow: 'border-emerald-200 bg-emerald-50 text-emerald-700',
-    icon: 'bg-emerald-100 text-emerald-700',
-    metric: 'from-emerald-50 to-white',
+    glow: 'from-neutral-300/35 via-neutral-200/20 to-white',
+    eyebrow: 'border-neutral-300 bg-neutral-100 text-neutral-800',
+    icon: 'bg-neutral-200 text-neutral-800',
+    metric: 'from-neutral-100 to-white',
   },
   indigo: {
-    glow: 'from-indigo-300/35 via-blue-200/20 to-cyan-300/35',
-    eyebrow: 'border-indigo-200 bg-indigo-50 text-indigo-700',
-    icon: 'bg-indigo-100 text-indigo-700',
-    metric: 'from-indigo-50 to-white',
+    glow: 'from-neutral-300/35 via-neutral-200/20 to-white',
+    eyebrow: 'border-neutral-300 bg-neutral-100 text-neutral-800',
+    icon: 'bg-neutral-200 text-neutral-800',
+    metric: 'from-neutral-100 to-white',
   },
 } satisfies Record<Accent, Record<string, string>>;
 
@@ -70,8 +70,8 @@ export default function PortalLandingHero(props: PortalLandingHeroProps) {
             </Button>
           </div>
           <div className="mt-8 flex flex-wrap gap-x-5 gap-y-2 text-xs font-medium text-slate-600">
-            <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-4 w-4 text-emerald-600" />Role-based workspace</span>
-            <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4 text-emerald-600" />No card to create an account</span>
+            <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-4 w-4 text-slate-950" />Role-based workspace</span>
+            <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4 text-slate-950" />No card to create an account</span>
           </div>
         </motion.div>
 
@@ -83,7 +83,7 @@ export default function PortalLandingHero(props: PortalLandingHeroProps) {
                 <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/50">Illustrative preview · {props.preview.label}</p>
                 <p className="mt-0.5 text-sm font-semibold">{props.preview.title}</p>
               </div>
-              <span className="rounded-full border border-emerald-300/30 bg-emerald-300/10 px-2.5 py-1 text-[10px] font-semibold text-emerald-200">{props.preview.status}</span>
+              <span className="rounded-full border border-white/30 bg-white/10 px-2.5 py-1 text-[10px] font-semibold text-white">{props.preview.status}</span>
             </div>
             <div className="p-4 sm:p-5">
               <div className="grid grid-cols-3 gap-2.5">
@@ -97,7 +97,7 @@ export default function PortalLandingHero(props: PortalLandingHeroProps) {
               <div className="mt-4 rounded-xl border border-slate-200 bg-white p-4">
                 <div className="flex items-center justify-between">
                   <p className="text-xs font-bold uppercase tracking-[0.15em] text-slate-500">Recent activity</p>
-                  <span className="h-2 w-2 rounded-full bg-emerald-500 ring-4 ring-emerald-100" />
+                  <span className="h-2 w-2 rounded-full bg-slate-950 ring-4 ring-slate-200" />
                 </div>
                 <div className="mt-3 divide-y divide-slate-100">
                   {props.preview.activity.map((item) => (

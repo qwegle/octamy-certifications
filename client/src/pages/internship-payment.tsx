@@ -101,7 +101,7 @@ export default function InternshipPayment() {
           email: certificate?.userEmail || '',
         },
         theme: {
-          color: '#3B82F6',
+          color: '#111111',
         },
       };
 
@@ -125,7 +125,7 @@ export default function InternshipPayment() {
 
   if (!certificate) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-gray-900 dark:to-gray-800">
         <Header />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">
@@ -141,15 +141,15 @@ export default function InternshipPayment() {
 
   if (certificate.isPaid && step === 'completed') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-gray-900 dark:to-gray-800">
         <Header />
         <div className="container mx-auto px-4 py-8">
           <Card className="max-w-4xl mx-auto">
-            <CardHeader className="text-center bg-green-50 dark:bg-green-900">
-              <div className="w-16 h-16 bg-green-100 dark:bg-green-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-300" />
+            <CardHeader className="text-center bg-slate-50 dark:bg-slate-900">
+              <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                <CheckCircle className="w-8 h-8 text-slate-600 dark:text-slate-300" />
               </div>
-              <CardTitle className="text-2xl text-green-800 dark:text-green-200">
+              <CardTitle className="text-2xl text-slate-800 dark:text-slate-200">
                 Virtual Internship Certificate Ready!
               </CardTitle>
             </CardHeader>
@@ -187,7 +187,7 @@ export default function InternshipPayment() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-gray-900 dark:to-gray-800">
       <Header />
       <div className="container mx-auto px-4 py-8">
         {step === 'payment' && (
@@ -200,11 +200,11 @@ export default function InternshipPayment() {
               </p>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 rounded-lg p-6">
-                <h3 className="font-semibold text-blue-800 dark:text-blue-200 mb-3">
+              <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-6">
+                <h3 className="font-semibold text-slate-800 dark:text-slate-200 mb-3">
                   What happens after payment?
                 </h3>
-                <ol className="list-decimal list-inside space-y-2 text-blue-700 dark:text-blue-300">
+                <ol className="list-decimal list-inside space-y-2 text-slate-700 dark:text-slate-300">
                   <li>Payment confirmation</li>
                   <li>Fill internship details form</li>
                   <li>Customize duration and dates</li>
@@ -213,14 +213,14 @@ export default function InternshipPayment() {
               </div>
 
               <div className="text-center">
-                <div className="text-3xl font-bold text-green-600 mb-2">₹299</div>
+                <div className="text-3xl font-bold text-slate-600 mb-2">₹299</div>
                 <p className="text-gray-600 dark:text-gray-300">One-time payment</p>
               </div>
 
               <Button 
                 onClick={handlePayment}
                 disabled={paymentMutation.isPending}
-                className="w-full bg-blue-600 hover:bg-blue-700"
+                className="w-full bg-slate-600 hover:bg-slate-700"
                 size="lg"
               >
                 {paymentMutation.isPending ? 'Processing...' : 'Pay Now'}

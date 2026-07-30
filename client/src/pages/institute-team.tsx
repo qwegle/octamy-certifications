@@ -119,8 +119,8 @@ export default function InstituteTeam() {
             </p>
           </CardContent>
         </Card> : (
-          <Card className="mb-6 border-blue-200 bg-blue-50/70">
-            <CardContent className="p-4 text-sm leading-6 text-blue-950">You can view the institute roster. Only owners and admins can invite or remove team members.</CardContent>
+          <Card className="mb-6 border-slate-200 bg-slate-50/70">
+            <CardContent className="p-4 text-sm leading-6 text-slate-950">You can view the institute roster. Only owners and admins can invite or remove team members.</CardContent>
           </Card>
         )}
 
@@ -128,8 +128,8 @@ export default function InstituteTeam() {
           <CardHeader><CardTitle className="text-base">Members</CardTitle></CardHeader>
           <CardContent>
             {isError ? (
-              <div className="rounded-xl border border-amber-200 bg-amber-50 p-5 text-center">
-                <p className="text-sm text-amber-950">The team roster could not be loaded.</p>
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-5 text-center">
+                <p className="text-sm text-slate-950">The team roster could not be loaded.</p>
                 <Button type="button" variant="outline" className="mt-3" onClick={() => refetch()}>Retry</Button>
               </div>
             ) : isLoading ? (
@@ -152,7 +152,7 @@ export default function InstituteTeam() {
                     {members.map((m) => (
                       <tr key={m.id} className="border-b last:border-0">
                         <td className="py-2 text-slate-900 flex items-center gap-1">
-                          {m.role === "owner" && <Crown className="w-3.5 h-3.5 text-amber-500" />}
+                          {m.role === "owner" && <Crown className="w-3.5 h-3.5 text-slate-500" />}
                           {m.name || "—"}
                         </td>
                         <td className="py-2 text-slate-700">{m.email || "—"}</td>
@@ -163,7 +163,7 @@ export default function InstituteTeam() {
                         <td className="py-2 text-right">
                           {canManage && m.role !== "owner" && (
                             <Button size="icon" variant="ghost" onClick={() => remove.mutate(m.id)} disabled={remove.isPending} aria-label={`Remove ${m.name || m.email || "team member"}`}>
-                              <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+                              <Trash2 className="w-3.5 h-3.5 text-slate-600" />
                             </Button>
                           )}
                         </td>

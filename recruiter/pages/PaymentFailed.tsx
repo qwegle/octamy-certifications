@@ -48,9 +48,9 @@ export default function PaymentFailed() {
                 Failed
               </span>
             </div>
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <h3 className="font-semibold text-yellow-800 mb-2">Common Issues:</h3>
-              <ul className="text-sm text-yellow-700 space-y-1">
+            <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
+              <h3 className="font-semibold text-slate-800 mb-2">Common Issues:</h3>
+              <ul className="text-sm text-slate-700 space-y-1">
                 <li>• Insufficient funds in your account</li>
                 <li>• Card verification failed</li>
                 <li>• Bank declined the transaction</li>

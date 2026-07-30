@@ -135,40 +135,40 @@ const ROLE_META: Record<DashboardRole, {
     helper: "Learning operations",
     home: "/institute/dashboard",
     icon: Building2,
-    accent: "text-blue-700",
-    accentSoft: "bg-blue-50 ring-blue-100",
+    accent: "text-slate-700",
+    accentSoft: "bg-slate-50 ring-slate-100",
   },
   creator: {
     label: "Creator",
     helper: "Content studio",
     home: "/creator/dashboard",
     icon: BookOpen,
-    accent: "text-violet-700",
-    accentSoft: "bg-violet-50 ring-violet-100",
+    accent: "text-slate-700",
+    accentSoft: "bg-slate-50 ring-slate-100",
   },
   recruiter: {
     label: "Recruiter",
     helper: "Talent intelligence",
     home: "/recruiter/dashboard",
     icon: Briefcase,
-    accent: "text-emerald-700",
-    accentSoft: "bg-emerald-50 ring-emerald-100",
+    accent: "text-slate-700",
+    accentSoft: "bg-slate-50 ring-slate-100",
   },
   learner: {
     label: "Learner",
     helper: "Skills passport",
     home: "/dashboard",
     icon: GraduationCap,
-    accent: "text-amber-700",
-    accentSoft: "bg-amber-50 ring-amber-100",
+    accent: "text-slate-700",
+    accentSoft: "bg-slate-50 ring-slate-100",
   },
   admin: {
     label: "Admin",
     helper: "Platform operations",
     home: "/qwegle/dashboard",
     icon: Shield,
-    accent: "text-rose-700",
-    accentSoft: "bg-rose-50 ring-rose-100",
+    accent: "text-slate-700",
+    accentSoft: "bg-slate-50 ring-slate-100",
   },
 };
 
@@ -254,7 +254,7 @@ function WorkspaceSwitcher({
               >
                 <WorkspaceIcon className="h-4 w-4 text-slate-500" aria-hidden="true" />
                 <span className="flex-1 text-sm font-medium text-slate-800">{workspace.label}</span>
-                {isCurrent && <Check className="h-4 w-4 text-emerald-600" aria-hidden="true" />}
+                {isCurrent && <Check className="h-4 w-4 text-slate-600" aria-hidden="true" />}
               </Link>
             </DropdownMenuItem>
           );
@@ -567,7 +567,7 @@ export default function DashboardLayout({
                 <DropdownMenuSeparator className="bg-slate-200" />
                 <DropdownMenuItem
                   onSelect={handleLogout}
-                  className="min-h-11 cursor-pointer rounded-lg px-3 text-sm font-medium text-rose-700 focus:bg-rose-50 focus:text-rose-800"
+                  className="min-h-11 cursor-pointer rounded-lg px-3 text-sm font-medium text-slate-700 focus:bg-slate-50 focus:text-slate-800"
                 >
                   <LogOut className="h-4 w-4" aria-hidden="true" />
                   Sign out

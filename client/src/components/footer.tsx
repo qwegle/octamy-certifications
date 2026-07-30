@@ -128,12 +128,12 @@ export default function Footer() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
                   aria-label="Your email address"
-                  className="bg-cream-soft/5 border-white/15 text-white placeholder:text-slate-500 focus-visible:ring-sky-500"
+                  className="bg-white/5 border-white/15 text-white placeholder:text-slate-500 focus-visible:ring-white"
                 />
                 <Button
                   type="submit"
                   disabled={submitting}
-                  className="bg-sky-600 hover:bg-sky-500 text-white shrink-0"
+                  className="bg-white text-black hover:bg-slate-200 shrink-0"
                 >
                   {submitting ? "Sending…" : (
                     <>
@@ -233,7 +233,7 @@ export default function Footer() {
                   Support:&nbsp;
                   <a
                     href={`mailto:${SUPPORT_EMAIL}`}
-                    className="text-sky-400 hover:text-sky-300"
+                    className="text-white underline-offset-4 hover:underline"
                   >
                     {SUPPORT_EMAIL}
                   </a>
@@ -242,7 +242,7 @@ export default function Footer() {
                   Legal:&nbsp;
                   <a
                     href={`mailto:${LEGAL_EMAIL}`}
-                    className="text-sky-400 hover:text-sky-300"
+                    className="text-white underline-offset-4 hover:underline"
                   >
                     {LEGAL_EMAIL}
                   </a>
@@ -280,7 +280,7 @@ export default function Footer() {
             <div className="lg:col-span-5 lg:text-right space-y-1.5">
               <p className="text-slate-200">
                 Available payment methods and processor are shown at checkout. Refunds per{" "}
-                <Link href="/refund-policy" className="text-sky-400 hover:text-sky-300 underline">
+                <Link href="/refund-policy" className="text-white underline">
                   refund policy
                 </Link>
                 .
@@ -308,7 +308,7 @@ function TrustBadge({
 }) {
   return (
     <div className="flex items-center gap-3 rounded-lg border border-white/10 bg-cream-soft/5 px-3 py-2.5">
-      <div className="text-sky-400 shrink-0">{icon}</div>
+      <div className="shrink-0 text-white">{icon}</div>
       <div className="leading-tight">
         <div className="text-xs font-semibold text-white">{label}</div>
         <div className="text-[11px] text-slate-400">{sub}</div>

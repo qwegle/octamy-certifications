@@ -274,7 +274,7 @@ function SearchForm({ id, value, onChange, onSubmit, className = "", autoFocus =
       <label htmlFor={id} className="sr-only">Search certifications</label>
       <div className="relative">
         <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden="true" />
-        <input id={id} autoFocus={autoFocus} type="search" value={value} onChange={(event) => onChange(event.target.value)} placeholder="Search exams, subjects or skills" className="h-11 w-full rounded-xl border border-slate-300 bg-slate-50 pl-10 pr-4 text-sm outline-none focus:border-violet-400 focus:bg-white focus:ring-2 focus:ring-violet-100" />
+        <input id={id} autoFocus={autoFocus} type="search" value={value} onChange={(event) => onChange(event.target.value)} placeholder="Search exams, subjects or skills" className="h-11 w-full rounded-xl border border-slate-300 bg-slate-50 pl-10 pr-4 text-sm outline-none focus:border-slate-950 focus:bg-white focus:ring-2 focus:ring-slate-200" />
       </div>
     </form>
   );

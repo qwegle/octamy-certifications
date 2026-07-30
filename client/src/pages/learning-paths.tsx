@@ -213,9 +213,9 @@ export default function LearningPaths() {
   // Render tree node recursively
   const renderTreeNode = (node: PathTreeNode, depth = 0): JSX.Element => {
     const getNodeIcon = () => {
-      if (node.isCompleted) return <CheckCircle className="w-5 h-5 text-green-600" />;
+      if (node.isCompleted) return <CheckCircle className="w-5 h-5 text-slate-600" />;
       if (!node.isUnlocked) return <Lock className="w-5 h-5 text-gray-400" />;
-      return <Play className="w-5 h-5 text-blue-600" />;
+      return <Play className="w-5 h-5 text-slate-600" />;
     };
 
     return (
@@ -228,8 +228,8 @@ export default function LearningPaths() {
         style={{ marginLeft: `${depth * 24}px` }}
       >
         <div className={`flex items-center p-3 rounded-lg border transition-all ${
-          node.isCompleted ? 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800' :
-          node.isUnlocked ? 'bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800 hover:shadow-md cursor-pointer' :
+          node.isCompleted ? 'bg-slate-50 border-slate-200 dark:bg-slate-900/20 dark:border-slate-800' :
+          node.isUnlocked ? 'bg-slate-50 border-slate-200 dark:bg-slate-900/20 dark:border-slate-800 hover:shadow-md cursor-pointer' :
           'bg-cream-deep border-cream-deep dark:bg-gray-800 dark:border-gray-700'
         }`}>
           {getNodeIcon()}
@@ -256,11 +256,11 @@ export default function LearningPaths() {
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty.toLowerCase()) {
       case "beginner":
-        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
+        return "bg-slate-100 text-slate-800 dark:bg-slate-900 dark:text-slate-200";
       case "intermediate":
-        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";
+        return "bg-slate-100 text-slate-800 dark:bg-slate-900 dark:text-slate-200";
       case "advanced":
-        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
+        return "bg-slate-200 text-slate-900 dark:bg-slate-700 dark:text-slate-100";
       default:
         return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
     }
@@ -302,7 +302,7 @@ export default function LearningPaths() {
 
           <TabsContent value="discover" className="mt-6">
             {/* Skill Tree Visualization */}
-            <div className="mb-8 p-6 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950 dark:to-purple-950 rounded-lg border">
+            <div className="mb-8 p-6 bg-gradient-to-br from-slate-50 to-slate-50 dark:from-slate-950 dark:to-slate-950 rounded-lg border">
               <h2 className="text-2xl font-bold text-center mb-6 text-black dark:text-white">
                 Interactive Skill Tree
               </h2>
@@ -311,8 +311,8 @@ export default function LearningPaths() {
                   {/* Connection lines */}
                   <defs>
                     <linearGradient id="pathGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" stopColor="#3B82F6" />
-                      <stop offset="100%" stopColor="#8B5CF6" />
+                      <stop offset="0%" stopColor="#171717" />
+                      <stop offset="100%" stopColor="#737373" />
                     </linearGradient>
                   </defs>
                   
@@ -362,8 +362,8 @@ export default function LearningPaths() {
                         cx={node.x}
                         cy={node.y}
                         r="30"
-                        fill={node.unlocked ? "#10B981" : "#6B7280"}
-                        stroke={node.unlocked ? "#059669" : "#4B5563"}
+                        fill={node.unlocked ? "#262626" : "#737373"}
+                        stroke={node.unlocked ? "#0A0A0A" : "#525252"}
                         strokeWidth="3"
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
@@ -400,7 +400,7 @@ export default function LearningPaths() {
                           animate={{ opacity: 1 }}
                           transition={{ delay: index * 0.3 + 1 }}
                         >
-                          <circle cx={node.x + 20} cy={node.y - 20} r="8" fill="#EF4444" />
+                          <circle cx={node.x + 20} cy={node.y - 20} r="8" fill="#262626" />
                           <text x={node.x + 20} y={node.y - 15} textAnchor="middle" fontSize="10" fill="white">🔒</text>
                         </motion.g>
                       )}
@@ -451,8 +451,8 @@ export default function LearningPaths() {
                         <CardHeader>
                           <div className="flex items-start justify-between">
                             <div className="flex items-center gap-3 flex-1">
-                              <div className="p-2 rounded-full bg-blue-100 dark:bg-blue-900">
-                                <IconComponent className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                              <div className="p-2 rounded-full bg-slate-100 dark:bg-slate-900">
+                                <IconComponent className="w-5 h-5 text-slate-600 dark:text-slate-400" />
                               </div>
                               <div>
                                 <CardTitle className="text-lg text-black dark:text-white">
@@ -571,7 +571,7 @@ export default function LearningPaths() {
                             </CardDescription>
                           </div>
                           {userPath.completedAt && (
-                            <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                            <Badge className="bg-slate-100 text-slate-800 dark:bg-slate-900 dark:text-slate-200">
                               <CheckCircle className="w-3 h-3 mr-1" />
                               Completed
                             </Badge>
@@ -592,7 +592,7 @@ export default function LearningPaths() {
                         {/* Unique Tree View for this Learning Path */}
                         <div className="bg-cream-deep dark:bg-gray-900 rounded-lg p-4">
                           <div className="flex items-center gap-2 mb-3">
-                            <TreePine className="w-4 h-4 text-green-600" />
+                            <TreePine className="w-4 h-4 text-slate-600" />
                             <span className="text-sm font-medium">Learning Path Tree</span>
                           </div>
                           <div className="space-y-1">
@@ -615,7 +615,7 @@ export default function LearningPaths() {
                         {enrolledPathRecommendations.length > 0 && (
                           <div className="border-t pt-3">
                             <div className="flex items-center gap-2 mb-2">
-                              <Lightbulb className="w-4 h-4 text-yellow-500" />
+                              <Lightbulb className="w-4 h-4 text-slate-500" />
                               <span className="text-sm font-medium">Recommended for You</span>
                             </div>
                             <div className="space-y-2">
@@ -628,7 +628,7 @@ export default function LearningPaths() {
                                   initial={{ opacity: 0, y: 10 }}
                                   animate={{ opacity: 1, y: 0 }}
                                   transition={{ delay: idx * 0.1 }}
-                                  className="flex items-center justify-between p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg"
+                                  className="flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-900/20 rounded-lg"
                                 >
                                   <div className="flex-1">
                                     <div className="text-sm font-medium">{rec.course?.title || `Course ${rec.courseId}`}</div>
@@ -691,7 +691,7 @@ export default function LearningPaths() {
                         <CardTitle className="text-lg text-black dark:text-white">
                           Course Recommendation
                         </CardTitle>
-                        <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                        <Badge className="bg-slate-100 text-slate-800 dark:bg-slate-900 dark:text-slate-200">
                           {Math.round(parseFloat(rec.score) * 100)}% match
                         </Badge>
                       </div>
@@ -703,19 +703,19 @@ export default function LearningPaths() {
                       <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                         {rec.metadata.categoryMatch && (
                           <div className="flex items-center gap-2">
-                            <CheckCircle className="w-4 h-4 text-green-500" />
+                            <CheckCircle className="w-4 h-4 text-slate-500" />
                             Category match
                           </div>
                         )}
                         {rec.metadata.skillLevelMatch && (
                           <div className="flex items-center gap-2">
-                            <CheckCircle className="w-4 h-4 text-green-500" />
+                            <CheckCircle className="w-4 h-4 text-slate-500" />
                             Skill level match
                           </div>
                         )}
                         {rec.metadata.popularityScore && (
                           <div className="flex items-center gap-2">
-                            <Users className="w-4 h-4 text-blue-500" />
+                            <Users className="w-4 h-4 text-slate-500" />
                             Popular choice
                           </div>
                         )}

@@ -110,11 +110,11 @@ export default function RecruiterWallet() {
   const getTransactionIcon = (type: string) => {
     switch (type) {
       case 'purchase':
-        return <TrendingUp className="h-4 w-4 text-green-600" />;
+        return <TrendingUp className="h-4 w-4 text-slate-600" />;
       case 'spend':
-        return <TrendingDown className="h-4 w-4 text-amber-600" />;
+        return <TrendingDown className="h-4 w-4 text-slate-600" />;
       case 'refund':
-        return <TrendingUp className="h-4 w-4 text-blue-600" />;
+        return <TrendingUp className="h-4 w-4 text-slate-600" />;
       default:
         return <CreditCard className="h-4 w-4 text-gray-600" />;
     }
@@ -137,7 +137,7 @@ export default function RecruiterWallet() {
     return (
       <RecruiterLayout>
         <div className="flex items-center justify-center h-64">
-          <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full" />
+          <div className="animate-spin w-8 h-8 border-4 border-slate-600 border-t-transparent rounded-full" />
         </div>
       </RecruiterLayout>
     );
@@ -181,13 +181,13 @@ export default function RecruiterWallet() {
 
         <InterviewEvidenceNotice compact />
 
-        <Card className="border-sky-200 bg-sky-50/60">
-          <CardHeader className="pb-2"><CardTitle className="text-base text-sky-950">How credits are protected</CardTitle></CardHeader>
+        <Card className="border-slate-200 bg-slate-50/60">
+          <CardHeader className="pb-2"><CardTitle className="text-base text-slate-950">How credits are protected</CardTitle></CardHeader>
           <CardContent>
-            <ul className="grid gap-2 text-sm text-sky-900 md:grid-cols-3">
+            <ul className="grid gap-2 text-sm text-slate-900 md:grid-cols-3">
               {(walletData?.rules || [])
                 .filter((rule) => !rule.toLowerCase().includes('interview'))
-                .map((rule) => <li key={rule} className="rounded-lg border border-sky-100 bg-white/80 p-3">{rule}</li>)}
+                .map((rule) => <li key={rule} className="rounded-lg border border-slate-100 bg-white/80 p-3">{rule}</li>)}
             </ul>
           </CardContent>
         </Card>
@@ -222,7 +222,7 @@ export default function RecruiterWallet() {
                   )}
                   {plan.savings > 0 && (
                     <div className="absolute -top-2 -right-2">
-                      <Badge className="bg-green-600 text-white">Save {plan.savings}%</Badge>
+                      <Badge className="bg-slate-600 text-white">Save {plan.savings}%</Badge>
                     </div>
                   )}
                   <div className="text-center">
@@ -283,10 +283,10 @@ export default function RecruiterWallet() {
                       <p
                         className={`font-medium ${
                           transaction.type === 'purchase'
-                            ? 'text-green-600'
+                            ? 'text-slate-600'
                             : transaction.type === 'spend'
-                            ? 'text-amber-700'
-                            : 'text-blue-600'
+                            ? 'text-slate-700'
+                            : 'text-slate-600'
                         }`}
                       >
                         {transaction.type === 'spend' ? '-' : '+'}

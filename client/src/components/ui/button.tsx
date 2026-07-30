@@ -19,7 +19,7 @@ const buttonVariants = cva(
         ghost: "border border-transparent hover:bg-accent hover:text-accent-foreground",
         link: "min-h-0 rounded-none text-primary underline-offset-4 shadow-none hover:underline",
         neo: "bg-card text-foreground border-2 border-foreground shadow-[4px_4px_0_0_hsl(0,0%,6%)] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0_0_hsl(0,0%,6%)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[0_0_0_0_hsl(0,0%,6%)] rounded-xl",
-        success: "border border-emerald-700 bg-emerald-700 text-white shadow-surface hover:bg-emerald-800",
+        success: "border border-slate-700 bg-slate-700 text-white shadow-surface hover:bg-slate-800",
         subtle: "border border-transparent bg-muted text-foreground hover:bg-accent",
       },
       size: {

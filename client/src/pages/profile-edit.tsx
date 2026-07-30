@@ -314,7 +314,7 @@ export default function ProfileEdit() {
     return (
       <div className="grid min-h-screen place-items-center bg-slate-50 px-5">
         <Card className="w-full max-w-lg rounded-3xl"><CardContent className="p-10 text-center">
-          <User className="mx-auto h-10 w-10 text-violet-700" />
+          <User className="mx-auto h-10 w-10 text-slate-700" />
           <div className="text-center">
             <h2 className="mt-4 text-2xl font-black text-slate-950">Sign in to manage your profile</h2>
             <p className="mt-2 text-slate-600">Your learner identity, evidence settings, and recruiter visibility stay behind your account.</p>
@@ -346,7 +346,7 @@ export default function ProfileEdit() {
     <DashboardLayout role="learner" title="Your learner profile" description="Manage your identity, career context, evidence sharing, and recruiter visibility." breadcrumbs={[{ label: "Learner", href: "/dashboard" }, { label: "Profile" }]} actions={<Button type="submit" form="learner-profile-form" disabled={updateProfileMutation.isPending} className="w-full rounded-xl sm:w-auto"><Save className="mr-2 h-4 w-4" />{updateProfileMutation.isPending ? 'Saving…' : 'Save profile'}</Button>}>
       <SEO title="Learner profile" description="Manage your private Octamy learner profile and evidence sharing preferences." path="/profile-edit" noIndex />
       <div className="max-w-6xl">
-        <section className="mb-6 grid gap-3 sm:grid-cols-3" aria-label="Profile summary"><Card><CardContent className="flex items-center gap-4 p-5"><span className="grid h-11 w-11 place-items-center rounded-2xl bg-violet-50 text-violet-700"><User className="h-5 w-5" /></span><div><p className="text-sm text-slate-500">Profile completion</p><p className="text-2xl font-black">{completion}%</p></div></CardContent></Card><Card><CardContent className="flex items-center gap-4 p-5"><span className="grid h-11 w-11 place-items-center rounded-2xl bg-emerald-50 text-emerald-700"><Eye className="h-5 w-5" /></span><div><p className="text-sm text-slate-500">Recruiter visibility</p><p className="font-black">{formData.profileVisibility ? "Visible" : "Private"}</p></div></CardContent></Card><Card><CardContent className="flex items-center gap-4 p-5"><span className="grid h-11 w-11 place-items-center rounded-2xl bg-sky-50 text-sky-700"><ShieldCheck className="h-5 w-5" /></span><div><p className="text-sm text-slate-500">Evidence passport</p><p className="font-black">{formData.evidencePassportPublic ? "Share link on" : "Share link off"}</p></div></CardContent></Card></section>
+        <section className="mb-6 grid gap-3 sm:grid-cols-3" aria-label="Profile summary"><Card><CardContent className="flex items-center gap-4 p-5"><span className="grid h-11 w-11 place-items-center rounded-2xl bg-slate-50 text-slate-700"><User className="h-5 w-5" /></span><div><p className="text-sm text-slate-500">Profile completion</p><p className="text-2xl font-black">{completion}%</p></div></CardContent></Card><Card><CardContent className="flex items-center gap-4 p-5"><span className="grid h-11 w-11 place-items-center rounded-2xl bg-slate-50 text-slate-700"><Eye className="h-5 w-5" /></span><div><p className="text-sm text-slate-500">Recruiter visibility</p><p className="font-black">{formData.profileVisibility ? "Visible" : "Private"}</p></div></CardContent></Card><Card><CardContent className="flex items-center gap-4 p-5"><span className="grid h-11 w-11 place-items-center rounded-2xl bg-slate-50 text-slate-700"><ShieldCheck className="h-5 w-5" /></span><div><p className="text-sm text-slate-500">Evidence passport</p><p className="font-black">{formData.evidencePassportPublic ? "Share link on" : "Share link off"}</p></div></CardContent></Card></section>
         <form id="learner-profile-form" onSubmit={handleSubmit}>
           <div className="space-y-6">
             {/* Role-aware workspace cards: link out to org/creator dashboards */}
@@ -542,7 +542,7 @@ export default function ProfileEdit() {
                       id="availability"
                       value={formData.availability}
                       onChange={(e) => handleInputChange('availability', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-slate-500"
                     >
                       <option value="">Select Availability</option>
                       <option value="Immediately Available">Immediately Available</option>
@@ -558,7 +558,7 @@ export default function ProfileEdit() {
                       id="noticePeriod"
                       value={formData.noticePeriod}
                       onChange={(e) => handleInputChange('noticePeriod', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-slate-500"
                     >
                       <option value="">Select Notice Period</option>
                       <option value="Immediate">Immediate</option>
@@ -597,7 +597,7 @@ export default function ProfileEdit() {
                               handleInputChange('workType', currentWorkTypes.filter(t => t !== type));
                             }
                           }}
-                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          className="rounded border-gray-300 text-slate-600 focus:ring-slate-500"
                         />
                         <span>{type}</span>
                       </label>
@@ -621,7 +621,7 @@ export default function ProfileEdit() {
                               handleInputChange('category', currentCategories.filter(c => c !== category));
                             }
                           }}
-                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          className="rounded border-gray-300 text-slate-600 focus:ring-slate-500"
                         />
                         <span>{category}</span>
                       </label>
@@ -670,7 +670,7 @@ export default function ProfileEdit() {
                     id="profileVisibility"
                     checked={formData.profileVisibility ?? false}
                     onChange={(e) => handleInputChange('profileVisibility', e.target.checked)}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    className="rounded border-gray-300 text-slate-600 focus:ring-slate-500"
                   />
                   <Label htmlFor="profileVisibility">
                     Make my profile visible to recruiters
@@ -682,7 +682,7 @@ export default function ProfileEdit() {
                     id="evidencePassportPublic"
                     checked={formData.evidencePassportPublic ?? false}
                     onChange={(e) => handleInputChange('evidencePassportPublic', e.target.checked)}
-                    className="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    className="mt-1 rounded border-gray-300 text-slate-600 focus:ring-slate-500"
                   />
                   <div>
                     <Label htmlFor="evidencePassportPublic">Enable my shareable Skill Evidence Passport</Label>
@@ -735,15 +735,15 @@ export default function ProfileEdit() {
                     )}
                     
                     {uploadedCvUrl && (
-                      <div className="flex items-center p-3 bg-green-50 rounded-lg border border-green-200">
-                        <FileText className="h-4 w-4 mr-2 text-green-600" />
-                        <span className="text-sm text-green-800">CV uploaded successfully!</span>
+                      <div className="flex items-center p-3 bg-slate-50 rounded-lg border border-slate-200">
+                        <FileText className="h-4 w-4 mr-2 text-slate-600" />
+                        <span className="text-sm text-slate-800">CV uploaded successfully!</span>
                         <Button
                           type="button"
                           size="sm"
                           variant="outline"
                           onClick={() => window.open(uploadedCvUrl, '_blank')}
-                          className="ml-auto border-green-300 text-green-700 hover:bg-green-100"
+                          className="ml-auto border-slate-300 text-slate-700 hover:bg-slate-100"
                         >
                           View
                         </Button>

@@ -1270,7 +1270,7 @@ function CourseForm({ course, onCancel, onSuccess }: { course?: any; onCancel: (
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           {isThirdParty && (
-            <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
+            <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm text-slate-950">
               <p className="font-semibold">Editing a {course.ownerType} submission</p>
               <p className="mt-1 leading-5">Saving content changes unpublishes the item and returns it to review. Ownership, issuer, approval, subscription flags, and reseller access cannot be changed in this form.</p>
             </div>
@@ -2077,7 +2077,7 @@ export default function AdminDashboard() {
   if (analyticsLoading) {
     return (
       <div className="min-h-screen bg-cream-deep dark:bg-gray-900 flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full" />
+        <div className="animate-spin w-8 h-8 border-4 border-slate-600 border-t-transparent rounded-full" />
       </div>
     );
   }
@@ -2089,7 +2089,7 @@ export default function AdminDashboard() {
         <div className="mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-3">
-              <Shield className="w-8 h-8 text-blue-600" />
+              <Shield className="w-8 h-8 text-slate-600" />
               <div>
                 <h1 className="text-xl font-bold text-slate-950">Octamy control center</h1>
                 <p className="text-sm text-slate-500">Content, assessments, users, and operations</p>
@@ -2099,7 +2099,7 @@ export default function AdminDashboard() {
               <Button
                 onClick={() => setLocation("/admin/approvals")}
                 size="sm"
-                className="flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white"
+                className="flex items-center gap-2 bg-slate-600 hover:bg-slate-700 text-white"
               >
                 <Shield className="h-4 w-4" />
                 Approval queue
@@ -2346,7 +2346,7 @@ export default function AdminDashboard() {
                             </div>
                           </TableCell>
                           <TableCell>
-                            <Badge variant="outline" className={category.isActive ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-slate-200 bg-slate-50 text-slate-600"}>
+                            <Badge variant="outline" className={category.isActive ? "border-slate-200 bg-slate-50 text-slate-700" : "border-slate-200 bg-slate-50 text-slate-600"}>
                               {category.isActive ? "Active" : "Hidden"}
                             </Badge>
                           </TableCell>
@@ -2502,7 +2502,7 @@ export default function AdminDashboard() {
                                     {course.reviewStatus || "draft"}
                                   </Badge>
                                   <Badge variant={course.isActive ? "outline" : "secondary"}>{course.isActive ? "Published" : "Unavailable"}</Badge>
-                                  {course.subscriptionEligible && <Badge className="bg-emerald-100 text-emerald-900 hover:bg-emerald-100">Subscription</Badge>}
+                                  {course.subscriptionEligible && <Badge className="bg-slate-100 text-slate-900 hover:bg-slate-100">Subscription</Badge>}
                                   {course.resellerEligible && <Badge variant="outline">Reseller</Badge>}
                                   {course.isInternship && (
                                     <Badge variant="outline">Internship</Badge>
@@ -2832,8 +2832,8 @@ export default function AdminDashboard() {
                                 transaction.status === "success" ? "default" : 
                                 transaction.status === "pending" ? "secondary" : "destructive"
                               } className={
-                                transaction.status === "completed" ? "bg-green-100 text-green-800 hover:bg-green-200" :
-                                transaction.status === "success" ? "bg-green-100 text-green-800 hover:bg-green-200" : ""
+                                transaction.status === "completed" ? "bg-slate-100 text-slate-800 hover:bg-slate-200" :
+                                transaction.status === "success" ? "bg-slate-100 text-slate-800 hover:bg-slate-200" : ""
                               }>
                                 {transaction.status}
                               </Badge>

@@ -16,8 +16,8 @@ export function AuthShell({ eyebrow, title, description, highlights, children, w
   return (
     <div className="min-h-screen bg-[#f6f7f9] lg:grid lg:grid-cols-[minmax(360px,0.88fr)_minmax(560px,1.12fr)]">
       <aside className="relative hidden min-h-screen overflow-hidden bg-slate-950 p-10 text-white lg:flex lg:flex-col xl:p-14">
-        <div aria-hidden className="absolute -left-28 top-32 h-80 w-80 rounded-full bg-fuchsia-500/20 blur-3xl" />
-        <div aria-hidden className="absolute -right-24 bottom-16 h-80 w-80 rounded-full bg-sky-400/20 blur-3xl" />
+        <div aria-hidden className="absolute -left-28 top-32 h-80 w-80 rounded-full bg-white/10 blur-3xl" />
+        <div aria-hidden className="absolute -right-24 bottom-16 h-80 w-80 rounded-full bg-white/5 blur-3xl" />
         <div aria-hidden className="absolute inset-0 opacity-[0.08] [background-image:linear-gradient(rgba(255,255,255,.5)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.5)_1px,transparent_1px)] [background-size:40px_40px]" />
 
         <Link href="/" aria-label="Octamy home" className="relative inline-flex w-fit items-center rounded-full bg-white px-4 py-2.5 shadow-lg">
@@ -25,7 +25,7 @@ export function AuthShell({ eyebrow, title, description, highlights, children, w
         </Link>
 
         <div className="relative my-auto max-w-xl py-14">
-          <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-sky-200">
+          <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-white">
             <Sparkles className="h-3.5 w-3.5" /> {eyebrow}
           </span>
           <h2 className="mt-7 text-4xl font-extrabold leading-[1.05] tracking-[-0.045em] xl:text-5xl">{title}</h2>
@@ -34,7 +34,7 @@ export function AuthShell({ eyebrow, title, description, highlights, children, w
           <div className="mt-9 space-y-4">
             {highlights.map((highlight) => (
               <div key={highlight} className="flex items-center gap-3 text-sm font-medium text-slate-100">
-                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-emerald-300/20 bg-emerald-300/10 text-emerald-300">
+                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-white/20 bg-white/10 text-white">
                   <CheckCircle2 className="h-4 w-4" />
                 </span>
                 {highlight}
@@ -44,7 +44,7 @@ export function AuthShell({ eyebrow, title, description, highlights, children, w
         </div>
 
         <div className="relative flex items-center gap-2 text-xs text-slate-400">
-          <ShieldCheck className="h-4 w-4 text-emerald-300" />
+          <ShieldCheck className="h-4 w-4 text-white" />
           Secure, role-aware access for every Octamy workspace
         </div>
       </aside>

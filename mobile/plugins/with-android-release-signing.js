@@ -38,7 +38,7 @@ function withAndroidReleaseSigning(config) {
         `$1${RELEASE_SIGNING_CONFIG}$2`,
       );
       contents = contents.replace(
-        /(\n        release \{\n[\s\S]*?)            signingConfig signingConfigs\.debug/,
+        /(\n    buildTypes \{[\s\S]*?\n        release \{[\s\S]*?)            signingConfig signingConfigs\.debug/,
         "$1            signingConfig octamyReleaseSigningConfigured ? signingConfigs.release : null",
       );
     }

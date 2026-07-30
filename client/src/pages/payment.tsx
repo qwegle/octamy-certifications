@@ -117,7 +117,7 @@ export default function Payment() {
         <main className="mx-auto grid min-h-[70vh] max-w-xl place-items-center px-4 py-12">
           <Card className="w-full border-slate-200 bg-white shadow-sm">
             <CardContent className="p-8 text-center sm:p-10">
-              <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-sky-50 text-sky-700 ring-1 ring-sky-100">
+              <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-slate-50 text-slate-700 ring-1 ring-slate-100">
                 <LockKeyhole className="h-6 w-6" aria-hidden="true" />
               </span>
               <h1 className="mt-5 text-2xl font-semibold text-slate-950">Sign in to activate your credential</h1>
@@ -154,9 +154,9 @@ export default function Payment() {
       <div className="min-h-screen bg-slate-50">
         <Header />
         <main className="mx-auto grid min-h-[65vh] max-w-xl place-items-center px-4 py-12">
-          <Card className="w-full border-amber-200 bg-white shadow-sm" role="alert">
+          <Card className="w-full border-slate-200 bg-white shadow-sm" role="alert">
             <CardContent className="p-8 text-center">
-              <span className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-amber-50 text-amber-700">
+              <span className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-slate-50 text-slate-700">
                 <AlertCircle className="h-5 w-5" aria-hidden="true" />
               </span>
               <h1 className="mt-5 text-xl font-semibold text-slate-950">Activation could not be loaded</h1>
@@ -185,7 +185,7 @@ export default function Payment() {
         <main className="mx-auto grid min-h-[65vh] max-w-xl place-items-center px-4 py-12">
           <Card className="w-full border-slate-200 bg-white shadow-sm">
             <CardContent className="p-8 text-center sm:p-10">
-              <span className={`mx-auto grid h-14 w-14 place-items-center rounded-2xl ${isActivated ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-700"}`}>
+              <span className={`mx-auto grid h-14 w-14 place-items-center rounded-2xl ${isActivated ? "bg-slate-50 text-slate-700" : "bg-slate-100 text-slate-700"}`}>
                 {isActivated ? <CheckCircle2 className="h-6 w-6" /> : <ShieldCheck className="h-6 w-6" />}
               </span>
               <h1 className="mt-5 text-2xl font-semibold text-slate-950">
@@ -222,7 +222,7 @@ export default function Payment() {
         </Button>
 
         <div className="mb-8 max-w-3xl">
-          <Badge variant="outline" className="border-sky-200 bg-sky-50 text-sky-800">Optional credential activation</Badge>
+          <Badge variant="outline" className="border-slate-200 bg-slate-50 text-slate-800">Optional credential activation</Badge>
           <h1 className="mt-4 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">Make your assessment evidence recruiter-ready</h1>
           <p className="mt-3 text-base leading-7 text-slate-600">
             You have already passed. Activation adds a downloadable certificate and a live verification status to your Evidence Passport.
@@ -233,13 +233,13 @@ export default function Payment() {
           <Card className="h-fit border-slate-200 bg-white shadow-sm">
             <CardHeader className="border-b border-slate-100 pb-5">
               <CardTitle className="flex items-center gap-2 text-lg text-slate-950">
-                <Award className="h-5 w-5 text-sky-700" aria-hidden="true" />
+                <Award className="h-5 w-5 text-slate-700" aria-hidden="true" />
                 Passing evidence
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6 p-6">
               <div className="rounded-2xl bg-slate-950 p-6 text-white">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-sky-300">Assessment passed</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-300">Assessment passed</p>
                 <h2 className="mt-3 text-2xl font-semibold leading-tight">{credential.courseTitle}</h2>
                 <p className="mt-4 text-sm text-slate-300">Awarded to</p>
                 <p className="mt-1 font-semibold">{credential.userName}</p>
@@ -248,7 +248,7 @@ export default function Payment() {
                     <p className="text-xs text-slate-400">Score</p>
                     <p className="mt-1 text-2xl font-semibold">{credential.score}%</p>
                   </div>
-                  <Badge className="border-0 bg-sky-300 text-slate-950 hover:bg-sky-300">{credential.badge}</Badge>
+                  <Badge className="border-0 bg-slate-300 text-slate-950 hover:bg-slate-300">{credential.badge}</Badge>
                 </div>
               </div>
               <div className="space-y-3 text-sm">
@@ -261,9 +261,9 @@ export default function Payment() {
                   <span className="font-medium text-slate-800">12 months from activation</span>
                 </div>
               </div>
-              <div className="rounded-xl border border-sky-100 bg-sky-50 p-4 text-sm leading-6 text-sky-950">
+              <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 text-sm leading-6 text-slate-950">
                 <div className="flex items-start gap-3">
-                  <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-sky-700" aria-hidden="true" />
+                  <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-slate-700" aria-hidden="true" />
                   <p>Pricing and learner identity are verified by Octamy on the server. The payment provider activates this record only after a verified callback.</p>
                 </div>
               </div>
@@ -279,10 +279,10 @@ export default function Payment() {
                 <button
                   type="button"
                   aria-pressed={!includesPhysicalCopy}
-                  className={`flex min-h-24 w-full items-start gap-4 rounded-2xl border p-4 text-left transition ${!includesPhysicalCopy ? "border-sky-500 bg-sky-50 ring-1 ring-sky-500" : "border-slate-200 hover:border-slate-300"}`}
+                  className={`flex min-h-24 w-full items-start gap-4 rounded-2xl border p-4 text-left transition ${!includesPhysicalCopy ? "border-slate-500 bg-slate-50 ring-1 ring-slate-500" : "border-slate-200 hover:border-slate-300"}`}
                   onClick={() => setIncludesPhysicalCopy(false)}
                 >
-                  <span className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full border ${!includesPhysicalCopy ? "border-sky-700 bg-sky-700 text-white" : "border-slate-300 bg-white"}`} aria-hidden="true">
+                  <span className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full border ${!includesPhysicalCopy ? "border-slate-700 bg-slate-700 text-white" : "border-slate-300 bg-white"}`} aria-hidden="true">
                     {!includesPhysicalCopy && <CheckCircle2 className="h-3.5 w-3.5" />}
                   </span>
                   <span className="min-w-0 flex-1">
@@ -295,10 +295,10 @@ export default function Payment() {
                 <button
                   type="button"
                   aria-pressed={includesPhysicalCopy}
-                  className={`flex min-h-24 w-full items-start gap-4 rounded-2xl border p-4 text-left transition ${includesPhysicalCopy ? "border-sky-500 bg-sky-50 ring-1 ring-sky-500" : "border-slate-200 hover:border-slate-300"}`}
+                  className={`flex min-h-24 w-full items-start gap-4 rounded-2xl border p-4 text-left transition ${includesPhysicalCopy ? "border-slate-500 bg-slate-50 ring-1 ring-slate-500" : "border-slate-200 hover:border-slate-300"}`}
                   onClick={() => setIncludesPhysicalCopy(true)}
                 >
-                  <span className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full border ${includesPhysicalCopy ? "border-sky-700 bg-sky-700 text-white" : "border-slate-300 bg-white"}`} aria-hidden="true">
+                  <span className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full border ${includesPhysicalCopy ? "border-slate-700 bg-slate-700 text-white" : "border-slate-300 bg-white"}`} aria-hidden="true">
                     {includesPhysicalCopy && <CheckCircle2 className="h-3.5 w-3.5" />}
                   </span>
                   <span className="min-w-0 flex-1">

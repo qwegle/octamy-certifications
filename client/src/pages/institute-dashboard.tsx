@@ -90,10 +90,10 @@ export default function InstituteDashboard() {
       <SEO title="Institute dashboard" description="Skill-verify your students at scale." path="/institute/dashboard" />
 
       {error ? (
-        <Card className="border-rose-200 bg-rose-50/60">
+        <Card className="border-slate-200 bg-slate-50/60">
           <CardContent className="flex flex-col items-start gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex gap-3">
-              <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-rose-600" aria-hidden="true" />
+              <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-slate-600" aria-hidden="true" />
               <div>
                 <h2 className="font-semibold text-slate-900">We couldn't open this institute workspace</h2>
                 <p className="mt-1 text-sm text-slate-600">Check your connection and try again. No workspace data has been changed.</p>
@@ -107,9 +107,9 @@ export default function InstituteDashboard() {
       ) : (
         <>
           {institute?.status === 'pending' ? (
-            <Card className="mb-6 border-amber-200 bg-amber-50/70">
+            <Card className="mb-6 border-slate-200 bg-slate-50/70">
               <CardContent className="flex gap-3 p-4 sm:p-5">
-                <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-amber-700" aria-hidden="true" />
+                <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-slate-700" aria-hidden="true" />
                 <div>
                   <h2 className="font-semibold text-slate-900">Institute verification is in progress</h2>
                   <p className="mt-1 text-sm text-slate-700">{isStaff ? 'You can review this operational overview while workspace verification is in progress.' : 'You can prepare students, question banks, and exams now. Restricted publishing features unlock after approval.'}</p>
@@ -117,10 +117,10 @@ export default function InstituteDashboard() {
               </CardContent>
             </Card>
           ) : institute?.status === 'rejected' ? (
-            <Card className="mb-6 border-rose-200 bg-rose-50/70">
+            <Card className="mb-6 border-slate-200 bg-slate-50/70">
               <CardContent className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
                 <div className="flex gap-3">
-                  <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-rose-600" aria-hidden="true" />
+                  <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-slate-600" aria-hidden="true" />
                   <div>
                     <h2 className="font-semibold text-slate-900">Your institute details need attention</h2>
                     <p className="mt-1 text-sm text-slate-700">{canManageIdentity ? 'Review the workspace identity and submit corrected details before publishing.' : 'Ask an institute owner or admin to review the workspace identity and submit corrected details.'}</p>

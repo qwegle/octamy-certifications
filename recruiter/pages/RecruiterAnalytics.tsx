@@ -147,7 +147,7 @@ export default function RecruiterAnalytics() {
                     {data.recentTransactions.map((t) => (
                       <tr key={t.id} className="border-b last:border-0">
                         <td className="py-2"><Badge variant="outline" className="capitalize">{t.type}</Badge></td>
-                        <td className={`py-2 ${t.type === 'spend' ? 'text-rose-600' : 'text-emerald-700'}`}>{t.type === 'spend' ? '-' : '+'}{t.amount}</td>
+                        <td className={`py-2 ${t.type === 'spend' ? 'text-slate-600' : 'text-slate-700'}`}>{t.type === 'spend' ? '-' : '+'}{t.amount}</td>
                         <td className="py-2">{t.balance_after}</td>
                         <td className="py-2 text-gray-700">
                           <span>{formatTransactionDescription(t.description)}</span>
@@ -187,7 +187,7 @@ function SparkBars({ data }: { data: { label: string; value: number }[] }) {
   return (
     <div className="flex items-end gap-1 h-32">
       {data.map((d) => (
-        <div key={d.label} title={`${d.label}: ${d.value}`} className="flex-1 bg-blue-500/80 hover:bg-blue-500 rounded-t" style={{ height: `${(d.value / max) * 100}%`, minHeight: 2 }} />
+        <div key={d.label} title={`${d.label}: ${d.value}`} className="flex-1 bg-slate-500/80 hover:bg-slate-500 rounded-t" style={{ height: `${(d.value / max) * 100}%`, minHeight: 2 }} />
       ))}
     </div>
   );

@@ -169,9 +169,9 @@ export default function TempExamResults() {
   };
 
   const getScoreColor = (score: number, passingScore: number) => {
-    if (score >= 90) return "text-green-600";
-    if (score >= passingScore) return "text-blue-600";
-    return "text-amber-700";
+    if (score >= 90) return "text-slate-600";
+    if (score >= passingScore) return "text-slate-600";
+    return "text-slate-700";
   };
 
   const getBadgeVariant = (passed: boolean, mastered: boolean) => {
@@ -210,16 +210,16 @@ export default function TempExamResults() {
   const isPractice = results.assessmentPurpose === "practice" || results.course.assessmentPurpose === "practice";
 
   return (
-    <div className="min-h-screen bg-[#f5f2ec]">
+    <div className="min-h-screen bg-[#f5f5f5]">
       <div className="container mx-auto px-4 py-8 sm:py-10">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="text-center mb-8">
             <div className="flex justify-center mb-4">
               {results.passed ? (
-                <CheckCircle className="h-16 w-16 text-green-500" />
+                <CheckCircle className="h-16 w-16 text-slate-500" />
               ) : (
-                <XCircle className="h-16 w-16 text-amber-600" />
+                <XCircle className="h-16 w-16 text-slate-600" />
               )}
             </div>
             <h1 className="text-3xl font-bold mb-2">
@@ -232,7 +232,7 @@ export default function TempExamResults() {
             <Card className="mb-6 overflow-hidden border-slate-800 bg-slate-950 text-white shadow-xl shadow-slate-900/10">
               <CardContent className="flex flex-col gap-5 p-6 sm:flex-row sm:items-center sm:justify-between">
                 <div className="max-w-2xl">
-                  <div className="flex items-center gap-2 text-sm font-bold text-sky-300"><Mail className="h-4 w-4" />{results.recoveryEmailSent ? `Recovery link sent ${results.maskedEmail ? `to ${results.maskedEmail}` : "to your email"}` : "Your result is saved for 24 hours"}</div>
+                  <div className="flex items-center gap-2 text-sm font-bold text-slate-300"><Mail className="h-4 w-4" />{results.recoveryEmailSent ? `Recovery link sent ${results.maskedEmail ? `to ${results.maskedEmail}` : "to your email"}` : "Your result is saved for 24 hours"}</div>
                   <h2 className="mt-2 text-xl font-extrabold">Keep this result in your learner record</h2>
                   <p className="mt-2 text-sm leading-6 text-slate-300">Octamy now requires an account before a free exam attempt. Create an account or log in with the same email to keep this legacy result and future credentials together.</p>
                 </div>
@@ -310,7 +310,7 @@ export default function TempExamResults() {
           </div>
 
           {results.reviewLocked ? (
-            <Card className="relative mt-6 overflow-hidden border-violet-200 bg-white shadow-lg" role="region" aria-labelledby="locked-review-title" aria-describedby="locked-review-description">
+            <Card className="relative mt-6 overflow-hidden border-slate-200 bg-white shadow-lg" role="region" aria-labelledby="locked-review-title" aria-describedby="locked-review-description">
               <div className="pointer-events-none select-none space-y-3 p-6 opacity-45 blur-[3px]" aria-hidden="true">
                 {[0, 1, 2].map((item) => (
                   <div key={item} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
@@ -320,8 +320,8 @@ export default function TempExamResults() {
                 ))}
               </div>
               <div className="absolute inset-0 grid place-items-center bg-white/75 p-5 backdrop-blur-[1px]">
-                <div className="max-w-lg rounded-3xl border border-violet-200 bg-white p-6 text-center shadow-xl">
-                  <span className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-violet-100 text-violet-800"><LockKeyhole className="h-6 w-6" aria-hidden="true" /></span>
+                <div className="max-w-lg rounded-3xl border border-slate-200 bg-white p-6 text-center shadow-xl">
+                  <span className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-slate-100 text-slate-800"><LockKeyhole className="h-6 w-6" aria-hidden="true" /></span>
                   <h2 id="locked-review-title" className="mt-4 text-xl font-extrabold text-slate-950">Detailed answer review is locked</h2>
                   <p id="locked-review-description" className="mt-2 text-sm leading-6 text-slate-600">
                     Your free attempt includes the score and pass/fail result above. Question text, your answers, correct answers, explanations, and the verified certificate are released only after credential payment is confirmed by Octamy.
@@ -329,12 +329,12 @@ export default function TempExamResults() {
                   {results.passed ? (
                     <div className="mt-5">
                       <p className="mb-3 text-sm font-semibold text-slate-800">
-                        Credential activation: {results.course.isOnSale && results.course.originalPrice && <span className="mr-2 text-slate-500 line-through">₹{results.course.originalPrice}</span>}<span className="text-violet-800">₹{results.course.price}</span>
+                        Credential activation: {results.course.isOnSale && results.course.originalPrice && <span className="mr-2 text-slate-500 line-through">₹{results.course.originalPrice}</span>}<span className="text-slate-800">₹{results.course.price}</span>
                       </p>
                       <Button onClick={handleProceedToPayment} size="lg" className="min-w-56">Unlock review + certificate</Button>
                     </div>
                   ) : (
-                    <p className="mt-4 rounded-xl bg-amber-50 p-3 text-sm font-medium text-amber-900">Pass the assessment before credential activation becomes available.</p>
+                    <p className="mt-4 rounded-xl bg-slate-50 p-3 text-sm font-medium text-slate-900">Pass the assessment before credential activation becomes available.</p>
                   )}
                 </div>
               </div>
@@ -347,15 +347,15 @@ export default function TempExamResults() {
               </CardHeader>
               <CardContent className="space-y-3">
                 {results.review.map((item, index) => (
-                  <details key={item.questionId} className={`group rounded-2xl border p-4 ${item.isCorrect ? "border-emerald-200 bg-emerald-50/60" : "border-amber-200 bg-amber-50/60"}`}>
+                  <details key={item.questionId} className={`group rounded-2xl border p-4 ${item.isCorrect ? "border-slate-200 bg-slate-50/60" : "border-red-200 bg-red-50/60"}`}>
                     <summary className="flex cursor-pointer list-none items-start gap-3 font-semibold text-slate-950">
-                      {item.isCorrect ? <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-emerald-700" /> : <XCircle className="mt-0.5 h-5 w-5 shrink-0 text-amber-700" />}
+                      {item.isCorrect ? <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-slate-700" /> : <XCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-700" />}
                       <span className="flex-1">{index + 1}. {item.question}</span>
-                      <Badge variant="outline" className={item.isCorrect ? "border-emerald-300 text-emerald-800" : "border-amber-300 text-amber-900"}>{item.isCorrect ? "Correct" : item.selectedAnswer == null ? "Not answered" : "Review"}</Badge>
+                      <Badge variant="outline" className={item.isCorrect ? "border-slate-300 text-slate-800" : "border-red-300 text-red-900"}>{item.isCorrect ? "Correct" : item.selectedAnswer == null ? "Not answered" : "Review"}</Badge>
                     </summary>
                     <div className="ml-8 mt-4 grid gap-3 text-sm sm:grid-cols-2">
                       <div className="rounded-xl bg-white/80 p-3"><p className="text-xs font-bold uppercase tracking-wide text-slate-500">Your answer</p><p className="mt-1 font-medium text-slate-800">{item.selectedOption || "No answer selected"}</p></div>
-                      <div className="rounded-xl bg-white/80 p-3"><p className="text-xs font-bold uppercase tracking-wide text-emerald-700">Correct answer</p><p className="mt-1 font-medium text-slate-900">{item.correctOption}</p></div>
+                      <div className="rounded-xl bg-white/80 p-3"><p className="text-xs font-bold uppercase tracking-wide text-slate-700">Correct answer</p><p className="mt-1 font-medium text-slate-900">{item.correctOption}</p></div>
                     </div>
                   </details>
                 ))}
@@ -364,35 +364,35 @@ export default function TempExamResults() {
           ) : null}
 
           {results.credential && (
-            <Card className="mt-6 overflow-hidden border-emerald-200 bg-emerald-50/70 shadow-sm" role="region" aria-label="Unlocked credential">
+            <Card className="mt-6 overflow-hidden border-slate-200 bg-slate-50/70 shadow-sm" role="region" aria-label="Unlocked credential">
               <CardContent className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
-                <div><p className="flex items-center gap-2 font-extrabold text-emerald-950"><Award className="h-5 w-5" aria-hidden="true" />Review and certificate unlocked</p><p className="mt-1 text-sm text-emerald-900">Payment is confirmed. Your detailed review is above and your verified credential is ready.</p></div>
-                <Button onClick={() => navigate(results.credential!.href)} size="lg" className="bg-emerald-800 hover:bg-emerald-900">View certificate</Button>
+                <div><p className="flex items-center gap-2 font-extrabold text-slate-950"><Award className="h-5 w-5" aria-hidden="true" />Review and certificate unlocked</p><p className="mt-1 text-sm text-slate-900">Payment is confirmed. Your detailed review is above and your verified credential is ready.</p></div>
+                <Button onClick={() => navigate(results.credential!.href)} size="lg" className="bg-slate-800 hover:bg-slate-900">View certificate</Button>
               </CardContent>
             </Card>
           )}
 
           {/* Action Card */}
           {results.passed && !isPractice && results.course.subscriptionEligible && learnerPlanActive && (
-            <Card className="mt-6 border-emerald-200 bg-emerald-50/70">
+            <Card className="mt-6 border-slate-200 bg-slate-50/70">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-emerald-950"><ShieldCheck className="h-5 w-5" />Included with sponsored activation</CardTitle>
+                <CardTitle className="flex items-center gap-2 text-slate-950"><ShieldCheck className="h-5 w-5" />Included with sponsored activation</CardTitle>
                 <CardDescription>Your passing Octamy in-house assessment includes digital credential activation. No student checkout is required.</CardDescription>
               </CardHeader>
-              <CardContent><Button onClick={redeemSubscriptionCredential} disabled={redeeming} size="lg" className="bg-emerald-800 text-white hover:bg-emerald-900">{redeeming && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Issue my included credential</Button></CardContent>
+              <CardContent><Button onClick={redeemSubscriptionCredential} disabled={redeeming} size="lg" className="bg-slate-800 text-white hover:bg-slate-900">{redeeming && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Issue my included credential</Button></CardContent>
             </Card>
           )}
 
           {results.passed && !isPractice && results.course.subscriptionEligible && !learnerPlanActive && (
-            <Card className="mt-6 border-violet-200 bg-violet-50/60">
+            <Card className="mt-6 border-slate-200 bg-slate-50/60">
               <CardContent className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between"><div><p className="font-bold text-slate-950">This Octamy certification may support sponsored activation</p><p className="mt-1 text-sm text-slate-600">Certification credentials use direct activation, vouchers, or workspace sponsorship. Practice Pass is separate.</p></div><Button variant="outline" onClick={() => navigate("/pricing")}>View pricing</Button></CardContent>
             </Card>
           )}
 
           {isPractice && (
-            <Card className="mt-6 border-sky-200 bg-sky-50/70">
+            <Card className="mt-6 border-slate-200 bg-slate-50/70">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-sky-950"><ShieldCheck className="h-5 w-5" />Practice result saved</CardTitle>
+                <CardTitle className="flex items-center gap-2 text-slate-950"><ShieldCheck className="h-5 w-5" />Practice result saved</CardTitle>
                 <CardDescription>This was a practice-only exam. It helps preparation and is not shared with recruiters as a verified credential.</CardDescription>
               </CardHeader>
               <CardContent><Button variant="outline" onClick={() => navigate("/practice")}>Browse more practice exams</Button></CardContent>
@@ -400,15 +400,15 @@ export default function TempExamResults() {
           )}
 
           {results.passed && results.needsPayment && !(results.course.subscriptionEligible && learnerPlanActive) && (
-            <Card className="mt-6 overflow-hidden border-violet-200 bg-white shadow-sm">
-              <CardHeader className="border-b border-violet-100 bg-violet-50/70">
-                <CardTitle className="flex items-center gap-2 text-violet-950"><TicketCheck className="h-5 w-5" />Have an institute certification voucher?</CardTitle>
+            <Card className="mt-6 overflow-hidden border-slate-200 bg-white shadow-sm">
+              <CardHeader className="border-b border-slate-100 bg-slate-50/70">
+                <CardTitle className="flex items-center gap-2 text-slate-950"><TicketCheck className="h-5 w-5" />Have an institute certification voucher?</CardTitle>
                 <CardDescription>A valid voucher sponsors the credential after a passing result. It does not change your score or exam evidence.</CardDescription>
               </CardHeader>
               <CardContent className="p-6">
                 <div className="flex flex-col gap-3 sm:flex-row">
                   <label className="sr-only" htmlFor="certification-voucher">Certification voucher code</label>
-                  <input id="certification-voucher" value={voucherCode} onChange={(event) => setVoucherCode(event.target.value.toUpperCase())} autoComplete="off" spellCheck={false} placeholder="OCT-XXXXXXXXXX-XXXXXX" className="h-11 min-w-0 flex-1 rounded-xl border border-slate-300 bg-white px-4 font-mono text-sm uppercase tracking-wide outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-100" />
+                  <input id="certification-voucher" value={voucherCode} onChange={(event) => setVoucherCode(event.target.value.toUpperCase())} autoComplete="off" spellCheck={false} placeholder="OCT-XXXXXXXXXX-XXXXXX" className="h-11 min-w-0 flex-1 rounded-xl border border-slate-300 bg-white px-4 font-mono text-sm uppercase tracking-wide outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-100" />
                   <Button onClick={redeemInstituteVoucher} disabled={redeemingVoucher || voucherCode.trim().length < 16} className="h-11 rounded-xl px-6">
                     {redeemingVoucher && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Redeem voucher
                   </Button>

@@ -129,7 +129,7 @@ export default function InstituteExamNew() {
               <Label htmlFor="title">Title</Label>
               <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Mid-term Java OOP" />
             </div>
-            <div className="rounded-xl border border-indigo-200 bg-indigo-50/60 p-4 space-y-3">
+            <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-4 space-y-3">
               <div>
                 <Label htmlFor="cohort">Candidate cohort</Label>
                 <select
@@ -147,7 +147,7 @@ export default function InstituteExamNew() {
               <p className="text-xs leading-5 text-slate-700">
                 Published institute exams are private and delivered with a unique invitation for each cohort email. Your institute subscription funds every candidate attempt; learners are never charged.
               </p>
-              <p className={`text-xs font-medium ${subscriptionLooksActive ? "text-emerald-700" : "text-amber-700"}`}>
+              <p className={`text-xs font-medium ${subscriptionLooksActive ? "text-slate-700" : "text-slate-700"}`}>
                 {subscriptionLooksActive
                   ? `Workspace funding appears active until ${new Date(subscription!.institute!.renewsAt!).toLocaleDateString()}. The server verifies it again when publishing and starting.`
                   : "No current renewal is visible. You can save a draft now; publishing stays locked until the workspace subscription is active."}
@@ -174,7 +174,7 @@ export default function InstituteExamNew() {
                 ))}
               </select>
               {(banks ?? []).length === 0 && (
-                <p className="text-xs text-amber-600 mt-1">
+                <p className="text-xs text-slate-600 mt-1">
                   No question banks found. <a href="/institute/question-banks" className="underline">Create or import one first</a>.
                 </p>
               )}

@@ -1,6 +1,21 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 
+function isPublicPresentationRoute(location: string): boolean {
+  // Assessment detail and active examination screens have their own focused
+  // display system. Every other customer-facing workspace uses the same
+  // monochrome Octamy presentation layer.
+  if (
+    /^\/get-certified\/(?!categories\/)[^/]+/.test(location)
+    || /^\/practice\/(?!categories\/)[^/]+/.test(location)
+    || /^\/exam(?:\/|$)/.test(location)
+  ) {
+    return false;
+  }
+
+  return true;
+}
+
 /**
  * Restores predictable SPA navigation semantics for sighted and assistive-
  * technology users. Wouter intentionally leaves scroll/focus management to the
@@ -12,6 +27,8 @@ export function RouteEffects() {
   const [announcement, setAnnouncement] = useState("");
 
   useEffect(() => {
+    document.body.classList.toggle("octamy-public", isPublicPresentationRoute(location));
+
     const isNavigation = previousLocation.current !== null;
     previousLocation.current = location;
 
@@ -40,6 +57,8 @@ export function RouteEffects() {
 
     return () => window.cancelAnimationFrame(frame);
   }, [location]);
+
+  useEffect(() => () => document.body.classList.remove("octamy-public"), []);
 
   return (
     <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">

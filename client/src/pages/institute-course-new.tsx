@@ -152,9 +152,9 @@ export default function InstituteCourseNew() {
         <CardHeader><CardTitle className="text-base">Course details</CardTitle></CardHeader>
         <CardContent className="space-y-4">
           {aiDraft && (
-            <div className="flex flex-col gap-3 rounded-xl border border-violet-200 bg-violet-50/70 p-4 sm:flex-row sm:items-center sm:justify-between" role="status">
+            <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-slate-50/70 p-4 sm:flex-row sm:items-center sm:justify-between" role="status">
               <div className="flex min-w-0 gap-3">
-                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-violet-100 text-violet-700"><Sparkles className="h-4 w-4" aria-hidden="true" /></span>
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-slate-100 text-slate-700"><Sparkles className="h-4 w-4" aria-hidden="true" /></span>
                 <div>
                   <p className="text-sm font-semibold text-slate-950">AI curriculum ready to add</p>
                   <p className="mt-0.5 text-xs leading-5 text-slate-600"><Layers3 className="mr-1 inline h-3.5 w-3.5" aria-hidden="true" />{aiDraft.sections.length} modules will be created only when you save this course. Pricing, category, media, and visibility remain under institute control.</p>
@@ -164,7 +164,7 @@ export default function InstituteCourseNew() {
             </div>
           )}
           {!verified && (
-            <div className="flex gap-2 rounded-xl border border-amber-200 bg-amber-50/70 p-3 text-sm text-amber-950">
+            <div className="flex gap-2 rounded-xl border border-slate-200 bg-slate-50/70 p-3 text-sm text-slate-950">
               <Info className="mt-0.5 h-4 w-4 shrink-0" />
               <p>You can build the complete course now. It remains private until the institute workspace is verified and the course is submitted for review.</p>
             </div>
@@ -181,8 +181,8 @@ export default function InstituteCourseNew() {
                 </div>
               </div>
             ) : (
-              <button id="institute-course-thumbnail-picker" type="button" onClick={() => setMediaOpen(true)} className="flex min-h-11 w-full items-center gap-3 rounded-2xl border-2 border-dashed border-slate-300 bg-white px-4 py-5 text-left transition hover:border-violet-400 hover:bg-violet-50">
-                <span className="grid h-10 w-10 place-items-center rounded-xl bg-violet-100 text-violet-700"><ImageIcon className="h-5 w-5" /></span>
+              <button id="institute-course-thumbnail-picker" type="button" onClick={() => setMediaOpen(true)} className="flex min-h-11 w-full items-center gap-3 rounded-2xl border-2 border-dashed border-slate-300 bg-white px-4 py-5 text-left transition hover:border-slate-400 hover:bg-slate-50">
+                <span className="grid h-10 w-10 place-items-center rounded-xl bg-slate-100 text-slate-700"><ImageIcon className="h-5 w-5" /></span>
                 <span><span className="block text-sm font-bold text-slate-900">Choose from media library</span><span className="block text-xs text-slate-500">Upload once and reuse it across institute content.</span></span>
               </button>
             )}
@@ -214,11 +214,11 @@ export default function InstituteCourseNew() {
               {audienceBands.map((band, index) => {
                 const checked = form.audienceBandIds.includes(band.id);
                 return (
-                  <label key={band.id} className="flex cursor-pointer items-start gap-3 rounded-xl bg-white p-3 ring-1 ring-slate-200 transition hover:ring-violet-300">
+                  <label key={band.id} className="flex cursor-pointer items-start gap-3 rounded-xl bg-white p-3 ring-1 ring-slate-200 transition hover:ring-slate-300">
                     <input
                       id={index === 0 ? "institute-course-audience" : undefined}
                       type="checkbox"
-                      className="mt-1 h-4 w-4 accent-violet-700"
+                      className="mt-1 h-4 w-4 accent-slate-700"
                       checked={checked}
                       onChange={() => setForm((current) => ({
                         ...current,
@@ -289,5 +289,5 @@ export default function InstituteCourseNew() {
 }
 
 function Field({ id, label, required, children }: { id: string; label: string; required?: boolean; children: React.ReactNode }) {
-  return <div className="space-y-1.5"><Label htmlFor={id} className="text-sm text-slate-700">{label}{required && <span className="text-rose-700" aria-hidden="true"> *</span>}</Label>{children}</div>;
+  return <div className="space-y-1.5"><Label htmlFor={id} className="text-sm text-slate-700">{label}{required && <span className="text-slate-700" aria-hidden="true"> *</span>}</Label>{children}</div>;
 }

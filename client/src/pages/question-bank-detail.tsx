@@ -334,7 +334,7 @@ export default function QuestionBankDetail() {
       <DashboardLayout role={role} title="Bank not found" breadcrumbs={[{ label: "Question banks", href: bankBase }, { label: "Not found" }]}>
         <Card role={bankQuery.isError ? "alert" : undefined} className="mx-auto max-w-xl">
           <CardContent className="p-8 text-center sm:p-12">
-            <AlertCircle className="mx-auto mb-3 h-10 w-10 text-amber-600" aria-hidden="true" />
+            <AlertCircle className="mx-auto mb-3 h-10 w-10 text-slate-600" aria-hidden="true" />
             <h2 className="text-xl font-semibold text-slate-900">Question bank unavailable</h2>
             <p className="mt-1 text-sm text-slate-600">
               {bankQuery.error instanceof Error
@@ -383,7 +383,7 @@ export default function QuestionBankDetail() {
               <Button
                 variant="outline"
                 size="sm"
-                className="border-violet-200 bg-violet-50 text-violet-800 hover:bg-violet-100 hover:text-violet-900"
+                className="border-slate-200 bg-slate-50 text-slate-800 hover:bg-slate-100 hover:text-slate-900"
                 onClick={() => setAiDraftOpen(true)}
               >
                 <Sparkles className="w-4 h-4 mr-1" /> Draft with AI
@@ -425,7 +425,7 @@ export default function QuestionBankDetail() {
             <button
               type="button"
               aria-pressed={topicFilter === null}
-              className={`min-h-11 w-full rounded-lg px-3 py-2 text-left text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 ${topicFilter === null ? "bg-purple-50 text-purple-700 font-medium" : "hover:bg-slate-50"}`}
+              className={`min-h-11 w-full rounded-lg px-3 py-2 text-left text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 ${topicFilter === null ? "bg-slate-50 text-slate-700 font-medium" : "hover:bg-slate-50"}`}
               onClick={() => { setTopicFilter(null); setPage(1); }}
             >
               All topics
@@ -435,7 +435,7 @@ export default function QuestionBankDetail() {
                 <button
                   type="button"
                   aria-pressed={topicFilter === t.id}
-                  className={`min-h-11 flex-1 rounded-lg px-3 py-2 text-left text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 ${topicFilter === t.id ? "bg-purple-50 text-purple-700 font-medium" : "hover:bg-slate-50"}`}
+                  className={`min-h-11 flex-1 rounded-lg px-3 py-2 text-left text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 ${topicFilter === t.id ? "bg-slate-50 text-slate-700 font-medium" : "hover:bg-slate-50"}`}
                   onClick={() => { setTopicFilter(t.id); setPage(1); }}
                 >
                   {t.name}
@@ -446,7 +446,7 @@ export default function QuestionBankDetail() {
                     aria-label={`Delete topic ${t.name}`}
                     title={`Delete topic ${t.name}`}
                     disabled={deleteTopicMut.isPending}
-                    className="min-h-11 min-w-11 rounded-lg p-2 text-slate-500 hover:bg-rose-50 hover:text-rose-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 disabled:opacity-50 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100"
+                    className="min-h-11 min-w-11 rounded-lg p-2 text-slate-500 hover:bg-slate-50 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 disabled:opacity-50 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100"
                     onClick={() => {
                       if (confirm(`Delete topic '${t.name}'? Its questions will become ungrouped. Topics used by an assessment blueprint are protected.`)) {
                         deleteTopicMut.mutate(t.id);
@@ -505,7 +505,7 @@ export default function QuestionBankDetail() {
             {questionsQuery.isError ? (
               <Card role="alert" aria-live="assertive">
                 <CardContent className="p-8 text-center sm:p-12">
-                  <AlertCircle className="mx-auto mb-3 h-10 w-10 text-amber-600" aria-hidden="true" />
+                  <AlertCircle className="mx-auto mb-3 h-10 w-10 text-slate-600" aria-hidden="true" />
                   <h3 className="font-semibold text-slate-900">Questions could not be loaded</h3>
                   <p className="mx-auto mt-1 max-w-md text-sm text-slate-600">
                     {questionsQuery.error instanceof Error
@@ -542,15 +542,15 @@ export default function QuestionBankDetail() {
                             <span className="rounded-full border border-slate-200 px-2.5 py-0.5 text-xs font-semibold text-slate-700">{q.difficulty}</span>
                             <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize ${
                               q.reviewStatus === "approved"
-                                ? "bg-emerald-50 text-emerald-800"
+                                ? "bg-slate-50 text-slate-800"
                                 : q.reviewStatus === "rejected"
-                                  ? "bg-rose-50 text-rose-800"
-                                  : "bg-amber-50 text-amber-800"
+                                  ? "bg-slate-50 text-slate-800"
+                                  : "bg-slate-50 text-slate-800"
                             }`}>
                               {q.reviewStatus || "draft"}
                             </span>
                             {q.generationSource === "ai_draft" && (
-                              <span className="rounded-full bg-violet-50 px-2.5 py-0.5 text-xs font-semibold text-violet-800">AI draft</span>
+                              <span className="rounded-full bg-slate-50 px-2.5 py-0.5 text-xs font-semibold text-slate-800">AI draft</span>
                             )}
                             <span className="text-xs text-slate-500">{q.maxPoints} pts · v{q.version}</span>
                           </span>
@@ -576,7 +576,7 @@ export default function QuestionBankDetail() {
                                 if (confirm("Delete this question?")) deleteQuestionMut.mutate(q.id);
                               }}
                             >
-                              <Trash2 className="w-4 h-4 text-rose-700" />
+                              <Trash2 className="w-4 h-4 text-slate-700" />
                             </Button>
                           )}
                         </div>
@@ -775,10 +775,10 @@ function QuestionEditor({ bankId, topics, question, canEdit, onClose, onSave, sa
           {q.id ? (
             <section className={`rounded-xl border p-4 ${
               q.reviewStatus === "approved"
-                ? "border-emerald-200 bg-emerald-50"
+                ? "border-slate-200 bg-slate-50"
                 : q.reviewStatus === "rejected"
-                  ? "border-rose-200 bg-rose-50"
-                  : "border-amber-200 bg-amber-50"
+                  ? "border-slate-200 bg-slate-50"
+                  : "border-slate-200 bg-slate-50"
             }`} aria-labelledby={`${editorId}-governance-title`}>
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <h3 id={`${editorId}-governance-title`} className="font-semibold text-slate-900">Review governance</h3>
@@ -817,7 +817,7 @@ function QuestionEditor({ bankId, topics, question, canEdit, onClose, onSave, sa
                   />
                   <p className="mt-1 text-xs text-slate-600">Required for approval and rejection. It is tied to this exact content hash and version.</p>
                   {isDirty && (
-                    <p role="status" className="mt-1 text-xs font-medium text-amber-800">
+                    <p role="status" className="mt-1 text-xs font-medium text-slate-800">
                       Save your edits first. The saved version will return to pending review.
                     </p>
                   )}
@@ -825,12 +825,12 @@ function QuestionEditor({ bankId, topics, question, canEdit, onClose, onSave, sa
               )}
             </section>
           ) : (
-            <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900">
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-900">
               Octamy certification questions are saved for independent review; other workspace questions follow the owner’s review policy.
             </div>
           )}
           {q.id && canModify && requiresReleaseEvidence && (
-            <section className="rounded-xl border border-sky-200 bg-sky-50 p-4 space-y-3" aria-labelledby={`${editorId}-evidence-title`}>
+            <section className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-3" aria-labelledby={`${editorId}-evidence-title`}>
               <div><h3 id={`${editorId}-evidence-title`} className="font-semibold text-slate-900">Assessment release evidence</h3><p className="mt-1 text-xs leading-5 text-slate-600">Saving evidence creates a new pending version and invalidates any earlier approval.</p></div>
               <div><Label htmlFor={`${editorId}-syllabus`}>Syllabus version</Label><Input id={`${editorId}-syllabus`} value={evidence.syllabusVersion} onChange={(event) => setEvidence({ ...evidence, syllabusVersion: event.target.value })} maxLength={160} /></div>
               <div><Label htmlFor={`${editorId}-objective`}>Objective code</Label><Input id={`${editorId}-objective`} value={evidence.objectiveCode} onChange={(event) => setEvidence({ ...evidence, objectiveCode: event.target.value })} maxLength={160} /></div>
@@ -899,7 +899,7 @@ function QuestionEditor({ bankId, topics, question, canEdit, onClose, onSave, sa
                     type={q.questionFormat === "mcq_single" ? "radio" : "checkbox"}
                     name={`${editorId}-correct`}
                     aria-label={`Mark option ${"ABCD"[i]} as correct`}
-                    className="h-5 w-5 shrink-0 accent-purple-700"
+                    className="h-5 w-5 shrink-0 accent-slate-700"
                     checked={q.questionFormat === "mcq_single"
                       ? q.correctAnswer === i
                       : (q.expectedAnswer || "").split(",").map(Number).includes(i)}
@@ -1010,7 +1010,7 @@ function QuestionEditor({ bankId, topics, question, canEdit, onClose, onSave, sa
                 </AccordionTrigger>
                 <AccordionContent>
                   {versionsQuery.isError ? (
-                    <p role="alert" className="text-xs text-amber-700">
+                    <p role="alert" className="text-xs text-slate-700">
                       Version history could not be loaded.
                     </p>
                   ) : versionsQuery.isLoading ? (
@@ -1036,7 +1036,7 @@ function QuestionEditor({ bankId, topics, question, canEdit, onClose, onSave, sa
               <Button
                 type="button"
                 variant="outline"
-                className="border-rose-200 text-rose-800 hover:bg-rose-50 hover:text-rose-900"
+                className="border-slate-200 text-slate-800 hover:bg-slate-50 hover:text-slate-900"
                 disabled={isDirty || reviewing || reviewNote.trim().length < 20}
                 onClick={() => onReview(q.id, "rejected", q.version, reviewNote)}
               >
@@ -1046,7 +1046,7 @@ function QuestionEditor({ bankId, topics, question, canEdit, onClose, onSave, sa
             {canModify && q.id && q.reviewStatus !== "approved" && (
               <Button
                 type="button"
-                className="bg-emerald-700 hover:bg-emerald-800"
+                className="bg-slate-700 hover:bg-slate-800"
                 disabled={isDirty || reviewing || reviewNote.trim().length < 20}
                 onClick={() => onReview(q.id, "approved", q.version, reviewNote)}
               >
@@ -1113,7 +1113,7 @@ function ImportDialog({ bankId, onClose, onDone }: { bankId: number; onClose: ()
         <DialogHeader><DialogTitle>Bulk Import Questions</DialogTitle><DialogDescription>Validate a CSV or spreadsheet, then review each imported question before assessment use.</DialogDescription></DialogHeader>
         <div className="space-y-3">
           <p id="question-import-help" className="text-sm text-slate-600">
-            Upload a CSV or XLSX. <a href="/docs/question-import-format" className="font-medium text-purple-700 underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700">Download CSV template</a>. Required columns: topic, question, format, optionA-D, correctAnswer, marks. All imported rows remain inactive pending human review.
+            Upload a CSV or XLSX. <a href="/docs/question-import-format" className="font-medium text-slate-700 underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-700">Download CSV template</a>. Required columns: topic, question, format, optionA-D, correctAnswer, marks. All imported rows remain inactive pending human review.
           </p>
           <div>
             <Label htmlFor="question-import-file">Question file</Label>
@@ -1137,7 +1137,7 @@ function ImportDialog({ bankId, onClose, onDone }: { bankId: number; onClose: ()
             </p>
           )}
           {errorMessage && (
-            <div role="alert" className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+            <div role="alert" className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-900">
               <p className="font-medium">The file could not be processed</p>
               <p className="mt-1">{errorMessage}</p>
             </div>
@@ -1147,11 +1147,11 @@ function ImportDialog({ bankId, onClose, onDone }: { bankId: number; onClose: ()
               <p className="font-medium mb-2">
                 {preview.totalRows} rows · {preview.valid ?? preview.created} valid · {preview.errors?.length ?? 0} errors
               </p>
-              <p className="mb-2 text-amber-800">
+              <p className="mb-2 text-slate-800">
                 {preview.pendingReview ?? preview.valid ?? 0} valid questions will require approval after import.
               </p>
               {preview.errors?.length > 0 && (
-                <div className="mb-3 rounded-md bg-amber-50 p-2 text-amber-900">
+                <div className="mb-3 rounded-md bg-slate-50 p-2 text-slate-900">
                   <p className="font-medium">Rows that need attention</p>
                   <ul className="mt-1 space-y-1">
                   {preview.errors.slice(0, 10).map((e: any, i: number) => (

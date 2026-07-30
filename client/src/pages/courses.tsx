@@ -161,16 +161,16 @@ export default function CoursesPage() {
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-slate-950 text-white">
         <div aria-hidden className="pointer-events-none absolute inset-0 bg-grid-slate opacity-20 [mask-image:radial-gradient(ellipse_at_top,black_30%,transparent_70%)]" />
-        <div aria-hidden className="pointer-events-none absolute -top-24 left-1/4 h-[420px] w-[420px] rounded-full bg-sky-500/30 blur-3xl animate-blob" />
-        <div aria-hidden className="pointer-events-none absolute -top-10 right-10 h-[320px] w-[320px] rounded-full bg-indigo-500/25 blur-3xl animate-blob-slow" />
+        <div aria-hidden className="pointer-events-none absolute -top-24 left-1/4 h-[420px] w-[420px] rounded-full bg-slate-500/30 blur-3xl animate-blob" />
+        <div aria-hidden className="pointer-events-none absolute -top-10 right-10 h-[320px] w-[320px] rounded-full bg-slate-500/25 blur-3xl animate-blob-slow" />
         <div className="relative max-w-7xl mx-auto px-6 py-20 sm:py-24">
           <div className="text-center">
-            <p className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-cream-soft/5 backdrop-blur px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-sky-300">
+            <p className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-cream-soft/5 backdrop-blur px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-300">
               <Award className="h-3.5 w-3.5" /> Skill verification catalog
             </p>
             <h1 className="mt-6 text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight">
               <span className="block">Assess what you know.</span>
-              <span className="mt-1 block bg-gradient-to-r from-sky-300 via-indigo-300 to-fuchsia-300 bg-clip-text text-transparent">
+              <span className="mt-1 block bg-gradient-to-r from-slate-300 via-slate-300 to-slate-300 bg-clip-text text-transparent">
                 Carry the result forward.
               </span>
             </h1>
@@ -180,15 +180,15 @@ export default function CoursesPage() {
             </p>
             <div className="mt-7 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-sm text-slate-300">
               <div className="flex items-center gap-2">
-                <Award className="h-4 w-4 text-sky-300" />
+                <Award className="h-4 w-4 text-slate-300" />
                 {courses.length}+ exams
               </div>
               <div className="flex items-center gap-2">
-                <Users className="h-4 w-4 text-sky-300" />
+                <Users className="h-4 w-4 text-slate-300" />
                 {categories.length} categories
               </div>
               <div className="flex items-center gap-2">
-                <Star className="h-4 w-4 text-sky-300" />
+                <Star className="h-4 w-4 text-slate-300" />
                 Recruiter-verifiable
               </div>
             </div>

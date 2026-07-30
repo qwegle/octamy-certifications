@@ -30,23 +30,23 @@ interface OctamyMascotProps {
 }
 
 const mascotExpressions = {
-  happy: '😊',
-  excited: '🤩',
-  thinking: '🤔',
-  celebrating: '🎉',
-  encouraging: '💪',
-  winking: '😉',
-  studying: '📚',
-  pointing: '👉',
-  loving: '😍',
-  wise: '🧠',
+  happy: 'O',
+  excited: 'O',
+  thinking: 'O',
+  celebrating: 'O',
+  encouraging: 'O',
+  winking: 'O',
+  studying: 'O',
+  pointing: 'O',
+  loving: 'O',
+  wise: 'O',
 };
 
 const mascotPersonalities = [
   {
     name: "Wise",
-    color: "from-blue-500 to-purple-600",
-    emoji: "🦉",
+    color: "from-black to-slate-700",
+    emoji: "O",
     messages: {
       welcome: "Welcome back, learner! Ready to expand your mind today?",
       encouragement: "Every expert was once a beginner. You're doing great!",
@@ -57,8 +57,8 @@ const mascotPersonalities = [
   },
   {
     name: "Energetic", 
-    color: "from-orange-500 to-red-600",
-    emoji: "🚀",
+    color: "from-black to-slate-700",
+    emoji: "O",
     messages: {
       welcome: "Hey there, superstar! Let's crush some learning goals today!",
       encouragement: "You're on fire! Keep that momentum going!",
@@ -69,8 +69,8 @@ const mascotPersonalities = [
   },
   {
     name: "Gentle",
-    color: "from-green-500 to-teal-600",
-    emoji: "🌱", 
+    color: "from-black to-slate-700",
+    emoji: "O",
     messages: {
       welcome: "Hello, friend! Take your time and enjoy the learning journey.",
       encouragement: "Progress, not perfection. You're exactly where you need to be.",
@@ -427,7 +427,7 @@ export default function OctamyMascot({ currentPage = 'landing', userProgress, on
         onDoubleClick={handlePersonalityChange}
       >
         <div className={`w-16 h-16 rounded-full bg-gradient-to-br ${mascotPersonality.color} shadow-lg flex items-center justify-center border-4 border-white dark:border-gray-800 relative overflow-hidden`}>
-          <span className="text-2xl z-10" role="img" aria-label="mascot expression">
+          <span className="z-10 text-2xl font-black text-white" aria-label="Octamy assistant">
             {expression}
           </span>
           
@@ -469,7 +469,7 @@ export default function OctamyMascot({ currentPage = 'landing', userProgress, on
             initial={{ scale: 0 }}
             animate={{ scale: [1, 1.2, 1] }}
             transition={{ repeat: Infinity, duration: 1.5 }}
-            className="absolute -top-2 -right-2 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center"
+            className="absolute -top-2 -right-2 w-6 h-6 bg-slate-500 rounded-full flex items-center justify-center"
           >
             <MessageCircle className="w-3 h-3 text-white" />
           </motion.div>

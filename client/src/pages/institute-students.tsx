@@ -126,7 +126,7 @@ export default function InstituteStudents() {
             <CardContent className="p-0">
               <div className="grid gap-5 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 p-5 text-white md:grid-cols-[1fr_auto] md:items-center md:p-6">
                 <div>
-                  <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-sky-300">
+                  <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-300">
                     <ShieldCheck className="h-4 w-4" /> Consent-gated recruiter discovery
                   </div>
                   <h2 className="text-lg font-semibold">Allow eligible institute learners to appear in recruiter search</h2>
@@ -150,7 +150,7 @@ export default function InstituteStudents() {
                     />
                   </div>
                   {!['owner', 'admin'].includes(instituteQ.data?.memberRole || '') && !instituteQ.isLoading ? (
-                    <p className="mt-3 text-xs text-amber-200">An owner or admin controls this policy.</p>
+                    <p className="mt-3 text-xs text-slate-200">An owner or admin controls this policy.</p>
                   ) : null}
                 </div>
               </div>
@@ -238,10 +238,10 @@ export default function InstituteStudents() {
                               <p className="text-sm font-medium text-slate-900">{s.name || s.email}</p>
                               <p className="text-xs text-slate-500">{s.email}{s.rollNumber ? ` · ${s.rollNumber}` : ''}</p>
                               <div className="mt-1.5 flex flex-wrap gap-1.5">
-                                <Badge variant="outline" className={s.learnerConsent ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-slate-200 bg-slate-50 text-slate-600'}>
+                                <Badge variant="outline" className={s.learnerConsent ? 'border-slate-200 bg-slate-50 text-slate-700' : 'border-slate-200 bg-slate-50 text-slate-600'}>
                                   {s.learnerConsent ? 'Learner opted in' : 'Learner private'}
                                 </Badge>
-                                <Badge variant="outline" className={s.hasActiveEvidence ? 'border-sky-200 bg-sky-50 text-sky-700' : 'border-slate-200 bg-slate-50 text-slate-600'}>
+                                <Badge variant="outline" className={s.hasActiveEvidence ? 'border-slate-200 bg-slate-50 text-slate-700' : 'border-slate-200 bg-slate-50 text-slate-600'}>
                                   {s.hasActiveEvidence ? 'Evidence current' : 'No current paid evidence'}
                                 </Badge>
                               </div>

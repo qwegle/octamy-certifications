@@ -158,26 +158,26 @@ export default function InstituteExams() {
       <SEO title="Exams · Institute" description="Create and manage cohort exams." path="/institute/exams" />
 
       {institute && institute.status !== "verified" && (
-        <Card className="border-amber-200 bg-amber-50 mb-4">
-          <CardContent className="p-4 text-sm text-amber-900">
+        <Card className="border-slate-200 bg-slate-50 mb-4">
+          <CardContent className="p-4 text-sm text-slate-900">
             Your institute is still <strong>{institute?.status || "unverified"}</strong>. Some features may be limited until an admin approves your institute.
           </CardContent>
         </Card>
       )}
 
       {instances.some((instance) => !instance.fundingActive) && (
-        <Card className="mb-4 border-amber-200 bg-amber-50/70">
-          <CardContent className="p-4 text-sm text-amber-950">
+        <Card className="mb-4 border-slate-200 bg-slate-50/70">
+          <CardContent className="p-4 text-sm text-slate-950">
             Institute assessments are funded by the workspace and candidates are never charged. Drafts remain editable, but publishing, invitation delivery and candidate access stay locked until an active institute subscription is verified.
           </CardContent>
         </Card>
       )}
 
       {instituteError || instancesError ? (
-        <Card className="border-rose-200 bg-rose-50/60">
+        <Card className="border-slate-200 bg-slate-50/60">
           <CardContent className="flex flex-col items-start gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex gap-3">
-              <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-rose-600" aria-hidden="true" />
+              <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-slate-600" aria-hidden="true" />
               <div>
                 <h2 className="font-semibold text-slate-900">We couldn't load your exams</h2>
                 <p className="mt-1 text-sm text-slate-600">Check your connection and try again. Your existing exam data is safe.</p>
@@ -241,21 +241,21 @@ export default function InstituteExams() {
                       variant="outline"
                       className={`text-xs uppercase ${
                         x.status === "live"
-                          ? "border-green-300 text-green-700 bg-green-50"
+                          ? "border-slate-300 text-slate-700 bg-slate-50"
                           : x.status === "closed"
                           ? "border-slate-300 text-slate-600 bg-slate-50"
-                          : "border-amber-300 text-amber-700 bg-amber-50"
+                          : "border-slate-300 text-slate-700 bg-slate-50"
                       }`}
                     >
                       {x.status}
                     </Badge>
                     {x.proctorMode === "browser_evidence" && (
-                      <Badge variant="outline" className="text-xs border-indigo-200 bg-indigo-50 text-indigo-700">
+                      <Badge variant="outline" className="text-xs border-slate-200 bg-slate-50 text-slate-700">
                         Browser evidence
                       </Badge>
                     )}
                     {x.accessMode === "cohort_invite" && (
-                      <Badge variant="outline" className="border-indigo-200 bg-indigo-50 text-xs text-indigo-700">
+                      <Badge variant="outline" className="border-slate-200 bg-slate-50 text-xs text-slate-700">
                         Private cohort
                       </Badge>
                     )}

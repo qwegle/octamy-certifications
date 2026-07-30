@@ -119,7 +119,7 @@ export default function CreatorEarnings() {
                           <td className="py-2 text-slate-900">{a.course_title || "—"}</td>
                           <td className="py-2">{a.score}</td>
                           <td className="py-2">
-                            {a.passed ? <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100">Pass</Badge> : <Badge variant="outline">Fail</Badge>}
+                            {a.passed ? <Badge className="bg-slate-100 text-slate-800 hover:bg-slate-100">Pass</Badge> : <Badge variant="outline">Fail</Badge>}
                           </td>
                           <td className="py-2 text-slate-600">{new Date(a.created_at).toLocaleString()}</td>
                         </tr>

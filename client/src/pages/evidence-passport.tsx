@@ -59,9 +59,9 @@ interface EvidencePassportData {
 }
 
 const statusStyles: Record<EvidenceStatus, string> = {
-  active: 'border-emerald-200 bg-emerald-50 text-emerald-700',
-  expired: 'border-amber-200 bg-amber-50 text-amber-800',
-  revoked: 'border-rose-200 bg-rose-50 text-rose-700',
+  active: 'border-slate-200 bg-slate-50 text-slate-700',
+  expired: 'border-slate-200 bg-slate-50 text-slate-800',
+  revoked: 'border-slate-200 bg-slate-50 text-slate-700',
   pending_activation: 'border-slate-200 bg-slate-100 text-slate-600',
 };
 
@@ -124,14 +124,14 @@ export default function EvidencePassport() {
         ) : (
           <>
             <section className="relative overflow-hidden border-b border-slate-200 bg-slate-950 text-white">
-              <div aria-hidden className="absolute -left-24 top-10 h-80 w-80 rounded-full bg-fuchsia-500/20 blur-3xl" />
-              <div aria-hidden className="absolute -right-20 bottom-0 h-80 w-80 rounded-full bg-sky-400/20 blur-3xl" />
+              <div aria-hidden className="absolute -left-24 top-10 h-80 w-80 rounded-full bg-slate-500/20 blur-3xl" />
+              <div aria-hidden className="absolute -right-20 bottom-0 h-80 w-80 rounded-full bg-slate-400/20 blur-3xl" />
               <div aria-hidden className="absolute inset-0 opacity-[0.09] [background-image:linear-gradient(rgba(255,255,255,.55)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.55)_1px,transparent_1px)] [background-size:42px_42px]" />
 
               <div className="relative mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
                 <div className="flex flex-col justify-between gap-8 lg:flex-row lg:items-end">
                   <div className="max-w-3xl">
-                    <span className="inline-flex items-center gap-2 rounded-full border border-sky-300/25 bg-sky-300/10 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.2em] text-sky-200">
+                    <span className="inline-flex items-center gap-2 rounded-full border border-slate-300/25 bg-slate-300/10 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.2em] text-slate-200">
                       <ShieldCheck className="h-3.5 w-3.5" /> Skill Evidence Passport
                     </span>
                     <h1 className="mt-6 text-4xl font-extrabold tracking-[-0.045em] sm:text-6xl">{data.holder.name}</h1>
@@ -161,7 +161,7 @@ export default function EvidencePassport() {
             <section className="mx-auto grid max-w-6xl gap-6 px-4 py-10 sm:px-6 sm:py-14 lg:grid-cols-[minmax(0,1fr)_320px]">
               <div>
                 <div className="mb-5">
-                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-fuchsia-700">Assessment-backed records</p>
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-700">Assessment-backed records</p>
                   <h2 className="mt-2 text-3xl font-extrabold tracking-tight">Evidence an employer can inspect</h2>
                   <p className="mt-2 text-sm leading-6 text-slate-600">Scores below come from recorded Octamy assessment attempts. Status is checked against the live credential record.</p>
                 </div>
@@ -214,9 +214,9 @@ export default function EvidencePassport() {
                 <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                   <h2 className="font-extrabold">How to read this passport</h2>
                   <div className="mt-4 space-y-4 text-xs leading-5 text-slate-600">
-                    <p className="flex gap-2"><CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" /><span><strong className="text-slate-900">Assessment-backed</strong><br />Scores originate from an Octamy attempt, not a profile claim.</span></p>
-                    <p className="flex gap-2"><ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-sky-600" /><span><strong className="text-slate-900">Live status</strong><br />Each ID can be checked for activation, expiry or revocation.</span></p>
-                    <p className="flex gap-2"><AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" /><span><strong className="text-slate-900">Not an identity check</strong><br />Octamy has not independently verified this person's government identity.</span></p>
+                    <p className="flex gap-2"><CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-slate-600" /><span><strong className="text-slate-900">Assessment-backed</strong><br />Scores originate from an Octamy attempt, not a profile claim.</span></p>
+                    <p className="flex gap-2"><ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-slate-600" /><span><strong className="text-slate-900">Live status</strong><br />Each ID can be checked for activation, expiry or revocation.</span></p>
+                    <p className="flex gap-2"><AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-slate-600" /><span><strong className="text-slate-900">Not an identity check</strong><br />Octamy has not independently verified this person's government identity.</span></p>
                   </div>
                 </div>
 

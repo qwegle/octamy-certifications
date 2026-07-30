@@ -264,7 +264,7 @@ function EnhancedAdminDashboard() {
       <div className="container mx-auto p-6">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Enhanced Admin Dashboard</h1>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-400 to-slate-400 bg-clip-text text-transparent">Enhanced Admin Dashboard</h1>
             <p className="text-gray-400 mt-2">Advanced analytics and comprehensive platform management</p>
           </div>
           <div className="flex items-center space-x-3">
@@ -287,7 +287,7 @@ function EnhancedAdminDashboard() {
             <Button 
               onClick={handleLogout}
               variant="outline"
-              className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
+              className="border-slate-500 text-slate-300 hover:bg-slate-700 hover:text-white"
             >
               <Users className="h-4 w-4 mr-2" />
               Logout
@@ -437,7 +437,7 @@ function EnhancedAdminDashboard() {
                           <TableCell className="text-white">{course.certificateCount || 0}</TableCell>
                           <TableCell className="text-white">₹{course.revenue || 0}</TableCell>
                           <TableCell>
-                            <Badge variant={course.isActive ? "default" : "secondary"} className={course.isActive ? "bg-green-600" : "bg-gray-600"}>
+                            <Badge variant={course.isActive ? "default" : "secondary"} className={course.isActive ? "bg-slate-600" : "bg-gray-600"}>
                               {course.isActive ? "Active" : "Inactive"}
                             </Badge>
                           </TableCell>
@@ -521,7 +521,7 @@ function EnhancedAdminDashboard() {
                           <TableCell className="text-white">{customer.examAttempts || 0}</TableCell>
                           <TableCell className="text-gray-300">{format(new Date(customer.createdAt || new Date()), 'MMM dd, yyyy')}</TableCell>
                           <TableCell>
-                            <Badge variant={customer.isAdmin ? "destructive" : "default"} className={customer.isAdmin ? "bg-red-600" : "bg-blue-600"}>
+                            <Badge variant="default" className={customer.isAdmin ? "bg-slate-900" : "bg-slate-600"}>
                               {customer.isAdmin ? "Admin" : "User"}
                             </Badge>
                           </TableCell>
@@ -607,7 +607,7 @@ function EnhancedAdminDashboard() {
                                 transaction.status === 'success' ? "default" : 
                                 transaction.status === 'failed' ? "destructive" : "secondary"
                               } className={
-                                transaction.status === 'success' ? "bg-green-600" : 
+                                transaction.status === 'success' ? "bg-slate-600" :
                                 transaction.status === 'failed' ? "bg-red-600" : "bg-gray-600"
                               }>
                                 {transaction.status}
@@ -742,7 +742,7 @@ function EnhancedAdminDashboard() {
                                             </div>
                                             <div className="flex items-center gap-2 text-sm">
                                               <span className="text-gray-400">Status:</span>
-                                              <Badge variant="default" className="bg-green-600 text-xs">
+                                              <Badge variant="default" className="bg-slate-600 text-xs">
                                                 {transactionDetails[transaction.id].certificate.isPaid ? 'Paid' : 'Unpaid'}
                                               </Badge>
                                             </div>
@@ -848,11 +848,10 @@ function EnhancedAdminDashboard() {
                           <TableCell className="text-white">₹{partner.pendingEarnings || 0}</TableCell>
                           <TableCell>
                             <Badge variant={
-                              partner.isApproved && partner.isActive ? "default" : 
-                              partner.isApproved ? "secondary" : "destructive"
+                              partner.isApproved && partner.isActive ? "default" : "secondary"
                             } className={
-                              partner.isApproved && partner.isActive ? "bg-green-600" : 
-                              partner.isApproved ? "bg-gray-600" : "bg-red-600"
+                              partner.isApproved && partner.isActive ? "bg-slate-600" :
+                              partner.isApproved ? "bg-gray-600" : "bg-slate-500"
                             }>
                               {partner.isApproved ? (partner.isActive ? "Active" : "Inactive") : "Pending"}
                             </Badge>
@@ -930,7 +929,7 @@ function EnhancedAdminDashboard() {
                           <TableCell className="text-white">{attempt.score}/{attempt.totalQuestions}</TableCell>
                           <TableCell className="text-white">{Math.round((attempt.score / attempt.totalQuestions) * 100)}%</TableCell>
                           <TableCell>
-                            <Badge variant={attempt.passed ? "default" : "destructive"} className={attempt.passed ? "bg-green-600" : "bg-red-600"}>
+                            <Badge variant={attempt.passed ? "default" : "destructive"} className={attempt.passed ? "bg-slate-600" : "bg-red-600"}>
                               {attempt.passed ? "Passed" : "Failed"}
                             </Badge>
                           </TableCell>
@@ -1002,7 +1001,7 @@ function EnhancedAdminDashboard() {
                           <TableCell className="text-gray-300 max-w-xs truncate">{sponsor.message}</TableCell>
                           <TableCell>
                             <Badge variant={sponsor.paymentStatus === 'completed' ? "default" : sponsor.paymentStatus === 'pending' ? "secondary" : "destructive"} 
-                                   className={sponsor.paymentStatus === 'completed' ? "bg-green-600" : sponsor.paymentStatus === 'pending' ? "bg-yellow-600" : "bg-red-600"}>
+                                   className={sponsor.paymentStatus === 'completed' ? "bg-slate-600" : sponsor.paymentStatus === 'pending' ? "bg-slate-600" : "bg-red-600"}>
                               {sponsor.paymentStatus}
                             </Badge>
                           </TableCell>
@@ -1075,17 +1074,17 @@ function EnhancedAdminDashboard() {
                           <TableCell className="text-gray-300 max-w-xs truncate">{contact.message}</TableCell>
                           <TableCell>
                             <Badge variant={contact.status === 'responded' ? "default" : contact.status === 'read' ? "secondary" : "destructive"} 
-                                   className={contact.status === 'responded' ? "bg-green-600" : contact.status === 'read' ? "bg-yellow-600" : "bg-gray-600"}>
+                                   className={contact.status === 'responded' ? "bg-slate-600" : contact.status === 'read' ? "bg-slate-600" : "bg-gray-600"}>
                               {contact.status}
                             </Badge>
                           </TableCell>
                           <TableCell className="text-gray-300">{format(new Date(contact.submittedAt), 'MMM dd, yyyy HH:mm')}</TableCell>
                           <TableCell>
                             <div className="flex space-x-1">
-                              <Button variant="ghost" size="sm" className="text-blue-400 hover:text-blue-300 hover:bg-gray-800">
+                              <Button variant="ghost" size="sm" className="text-slate-400 hover:text-slate-300 hover:bg-gray-800">
                                 <Eye className="w-4 h-4" />
                               </Button>
-                              <Button variant="ghost" size="sm" className="text-green-400 hover:text-green-300 hover:bg-gray-800">
+                              <Button variant="ghost" size="sm" className="text-slate-400 hover:text-slate-300 hover:bg-gray-800">
                                 <Mail className="w-4 h-4" />
                               </Button>
                             </div>

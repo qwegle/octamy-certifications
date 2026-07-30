@@ -54,9 +54,9 @@ type AiCourseCopilotProps = {
 };
 
 const inputClassName =
-  "min-h-11 border-slate-300 bg-white text-slate-950 placeholder:text-slate-400 focus-visible:ring-violet-500";
+  "min-h-11 border-slate-300 bg-white text-slate-950 placeholder:text-slate-400 focus-visible:ring-slate-500";
 const selectClassName =
-  "h-11 w-full rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 disabled:cursor-not-allowed disabled:opacity-60";
+  "h-11 w-full rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-500/20 disabled:cursor-not-allowed disabled:opacity-60";
 
 function readError(error: unknown): string {
   return error instanceof Error ? error.message : "Something went wrong. Please try again.";
@@ -213,12 +213,12 @@ export function AiCourseCopilot({
     <>
       <section
         className={cn(
-          "relative overflow-hidden rounded-2xl border border-violet-200 bg-gradient-to-br from-white via-violet-50/70 to-indigo-50 p-4 shadow-sm sm:p-5",
+          "relative overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-slate-50/70 to-slate-50 p-4 shadow-sm sm:p-5",
           className,
         )}
         aria-labelledby={`${id}-title`}
       >
-        <div className="pointer-events-none absolute -right-12 -top-12 h-36 w-36 rounded-full bg-violet-300/20 blur-3xl" />
+        <div className="pointer-events-none absolute -right-12 -top-12 h-36 w-36 rounded-full bg-slate-300/20 blur-3xl" />
         <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex min-w-0 gap-3.5">
             <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-slate-950 text-white shadow-sm" aria-hidden="true">
@@ -227,7 +227,7 @@ export function AiCourseCopilot({
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <h2 id={`${id}-title`} className="text-base font-bold text-slate-950">AI course copilot</h2>
-                <Badge className="border border-violet-200 bg-violet-100 text-[10px] font-bold uppercase tracking-wider text-violet-800 hover:bg-violet-100">
+                <Badge className="border border-slate-200 bg-slate-100 text-[10px] font-bold uppercase tracking-wider text-slate-800 hover:bg-slate-100">
                   Guided draft
                 </Badge>
               </div>
@@ -257,7 +257,7 @@ export function AiCourseCopilot({
             )}
             <Button
               type="button"
-              className="min-h-11 flex-1 bg-slate-950 px-5 text-white hover:bg-violet-950 sm:flex-none"
+              className="min-h-11 flex-1 bg-slate-950 px-5 text-white hover:bg-slate-950 sm:flex-none"
               disabled={statusQuery.isLoading || unavailable}
               onClick={() => setOpen(true)}
             >
@@ -273,7 +273,7 @@ export function AiCourseCopilot({
           <div className="border-b border-slate-200 bg-white px-5 py-5 pr-16 sm:px-7">
             <DialogHeader>
               <div className="mb-2 flex flex-wrap items-center gap-2">
-                <Badge className="bg-violet-100 text-violet-800 hover:bg-violet-100">
+                <Badge className="bg-slate-100 text-slate-800 hover:bg-slate-100">
                   <Sparkles className="mr-1 h-3 w-3" /> Octamy AI
                 </Badge>
                 <span className="text-xs font-medium text-slate-500">
@@ -335,7 +335,7 @@ export function AiCourseCopilot({
                   <Field id={`${id}-goal`} label="Learner transformation" required className="sm:col-span-2">
                     <Textarea
                       id={`${id}-goal`}
-                      className="min-h-24 border-slate-300 bg-white text-slate-950 placeholder:text-slate-400 focus-visible:ring-violet-500"
+                      className="min-h-24 border-slate-300 bg-white text-slate-950 placeholder:text-slate-400 focus-visible:ring-slate-500"
                       value={brief.goal}
                       onChange={(event) => setBrief((current) => ({ ...current, goal: event.target.value }))}
                       placeholder="After completing this course, learners should be able to…"
@@ -389,7 +389,7 @@ export function AiCourseCopilot({
                   <Field id={`${id}-context`} label="Requirements or context" optional className="sm:col-span-2">
                     <Textarea
                       id={`${id}-context`}
-                      className="min-h-24 border-slate-300 bg-white text-slate-950 placeholder:text-slate-400 focus-visible:ring-violet-500"
+                      className="min-h-24 border-slate-300 bg-white text-slate-950 placeholder:text-slate-400 focus-visible:ring-slate-500"
                       value={brief.additionalContext}
                       onChange={(event) => setBrief((current) => ({ ...current, additionalContext: event.target.value }))}
                       placeholder="Include prerequisite knowledge, examples, standards, tools, or topics to avoid."
@@ -401,21 +401,21 @@ export function AiCourseCopilot({
 
                 <aside className="h-fit rounded-2xl border border-slate-200 bg-white p-4" aria-label="AI generation guidance">
                   <div className="flex items-center gap-2 text-sm font-bold text-slate-950">
-                    <ShieldCheck className="h-4 w-4 text-emerald-600" /> You stay in control
+                    <ShieldCheck className="h-4 w-4 text-slate-600" /> You stay in control
                   </div>
                   <ul className="mt-3 space-y-3 text-xs leading-5 text-slate-600">
-                    <li className="flex gap-2"><CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-violet-600" />Nothing is saved or published automatically.</li>
-                    <li className="flex gap-2"><CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-violet-600" />Your existing course form remains the source of truth.</li>
-                    <li className="flex gap-2"><CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-violet-600" />Review facts, outcomes, accessibility, and assessment quality.</li>
+                    <li className="flex gap-2"><CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-600" />Nothing is saved or published automatically.</li>
+                    <li className="flex gap-2"><CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-600" />Your existing course form remains the source of truth.</li>
+                    <li className="flex gap-2"><CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-600" />Review facts, outcomes, accessibility, and assessment quality.</li>
                   </ul>
-                  <div className="mt-4 rounded-xl bg-amber-50 p-3 text-xs leading-5 text-amber-950">
+                  <div className="mt-4 rounded-xl bg-slate-50 p-3 text-xs leading-5 text-slate-950">
                     Do not enter confidential student data, private company material, or personal information.
                   </div>
                 </aside>
               </div>
 
               {generate.isError && (
-                <div className="mx-5 mb-5 flex gap-2 rounded-xl border border-rose-200 bg-white p-3 text-sm text-rose-900 sm:mx-7" role="alert">
+                <div className="mx-5 mb-5 flex gap-2 rounded-xl border border-slate-200 bg-white p-3 text-sm text-slate-900 sm:mx-7" role="alert">
                   <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
                   <span><strong>Draft not generated.</strong> {readError(generate.error)}</span>
                 </div>
@@ -423,7 +423,7 @@ export function AiCourseCopilot({
 
               <DialogFooter className="gap-2 border-t border-slate-200 bg-white px-5 py-4 sm:px-7">
                 <Button type="button" variant="outline" className="min-h-11" onClick={() => setOpen(false)} disabled={generate.isPending}>Cancel</Button>
-                <Button type="submit" className="min-h-11 bg-slate-950 px-5 text-white hover:bg-violet-950" disabled={!canGenerate || generate.isPending}>
+                <Button type="submit" className="min-h-11 bg-slate-950 px-5 text-white hover:bg-slate-950" disabled={!canGenerate || generate.isPending}>
                   {generate.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
                   {generate.isPending ? "Designing your course…" : "Generate blueprint"}
                 </Button>
@@ -454,7 +454,7 @@ export function AiCourseCopilot({
                       {draft.sections.map((section, sectionIndex) => (
                         <li key={`${section.title}-${sectionIndex}`} className="rounded-2xl border border-slate-200 bg-white p-4">
                           <div className="flex gap-3">
-                            <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-violet-100 text-xs font-bold text-violet-800">{sectionIndex + 1}</span>
+                            <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-slate-100 text-xs font-bold text-slate-800">{sectionIndex + 1}</span>
                             <div className="min-w-0 flex-1">
                               <h4 className="font-bold text-slate-900">{section.title}</h4>
                               <p className="mt-1 text-xs leading-5 text-slate-500">{section.summary}</p>
@@ -479,23 +479,23 @@ export function AiCourseCopilot({
 
                 <aside className="space-y-4 lg:sticky lg:top-0 lg:h-fit" aria-label="Blueprint summary">
                   <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                    <div className="flex items-center gap-2 text-sm font-bold text-slate-950"><CheckCircle2 className="h-4 w-4 text-emerald-600" />Learning outcomes</div>
+                    <div className="flex items-center gap-2 text-sm font-bold text-slate-950"><CheckCircle2 className="h-4 w-4 text-slate-600" />Learning outcomes</div>
                     <ul className="mt-3 space-y-2">
                       {draft.learningOutcomes.map((outcome, index) => (
                         <li key={`${outcome}-${index}`} className="flex gap-2 text-xs leading-5 text-slate-600">
-                          <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-violet-600" />{outcome}
+                          <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-slate-600" />{outcome}
                         </li>
                       ))}
                     </ul>
                   </div>
                   {draft.assessmentIdeas.length > 0 && (
-                    <div className="rounded-2xl border border-amber-200 bg-amber-50/70 p-4">
-                      <div className="flex items-center gap-2 text-sm font-bold text-amber-950"><Lightbulb className="h-4 w-4" />Assessment planning notes</div>
-                      <ul className="mt-3 space-y-2 text-xs leading-5 text-amber-950/80">
+                    <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+                      <div className="flex items-center gap-2 text-sm font-bold text-slate-950"><Lightbulb className="h-4 w-4" />Assessment planning notes</div>
+                      <ul className="mt-3 space-y-2 text-xs leading-5 text-slate-950/80">
                         {draft.assessmentIdeas.map((idea, index) => (
                           <li key={`${idea.title}-${index}`} className="rounded-lg bg-white/60 px-2.5 py-2">
                             <span className="font-semibold">{idea.title}</span>
-                            <span className="mt-0.5 block text-[10px] font-bold uppercase tracking-wide text-amber-900/60">
+                            <span className="mt-0.5 block text-[10px] font-bold uppercase tracking-wide text-slate-900/60">
                               {idea.type.replace(/_/g, " ")} · {idea.difficulty}
                             </span>
                           </li>
@@ -510,7 +510,7 @@ export function AiCourseCopilot({
               </div>
 
               {applyError && (
-                <div className="mx-5 mb-5 flex gap-2 rounded-xl border border-rose-200 bg-white p-3 text-sm text-rose-900 sm:mx-7" role="alert">
+                <div className="mx-5 mb-5 flex gap-2 rounded-xl border border-slate-200 bg-white p-3 text-sm text-slate-900 sm:mx-7" role="alert">
                   <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
                   <span><strong>Blueprint not applied.</strong> {applyError}</span>
                 </div>
@@ -520,7 +520,7 @@ export function AiCourseCopilot({
                 <Button type="button" variant="outline" className="min-h-11" onClick={() => { setDraft(null); setApplyError(""); }} disabled={isApplying}>
                   <RefreshCw className="mr-2 h-4 w-4" />Refine brief
                 </Button>
-                <Button type="button" className="min-h-11 bg-slate-950 px-5 text-white hover:bg-violet-950" onClick={applyDraft} disabled={isApplying}>
+                <Button type="button" className="min-h-11 bg-slate-950 px-5 text-white hover:bg-slate-950" onClick={applyDraft} disabled={isApplying}>
                   {isApplying ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ArrowRight className="mr-2 h-4 w-4" />}
                   {isApplying ? "Applying blueprint…" : "Use this blueprint"}
                 </Button>
@@ -552,7 +552,7 @@ function Field({
     <div className={cn("min-w-0 space-y-1.5", className)}>
       <div className="flex items-center justify-between gap-3">
         <Label htmlFor={id} className="text-sm font-semibold text-slate-800">
-          {label}{required && <span className="text-rose-700" aria-hidden="true"> *</span>}
+          {label}{required && <span className="text-slate-700" aria-hidden="true"> *</span>}
         </Label>
         {optional && <span className="text-[11px] text-slate-400">Optional</span>}
       </div>

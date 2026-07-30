@@ -36,13 +36,13 @@ export default function BlogIndex() {
   });
 
   return (
-    <div className="min-h-screen bg-[#f7f5f0] text-slate-950">
+    <div className="min-h-screen bg-[#fafafa] text-slate-950">
       <SEO title="Octamy blog" description="Published Octamy product, assessment, and evidence updates. Only real published posts are listed." path="/blog" />
       <Header />
       <main id="main-content" tabIndex={-1}>
         <section className="px-4 pb-10 pt-7 sm:px-6 sm:pt-10">
           <div className="mx-auto max-w-7xl overflow-hidden rounded-[2rem] bg-slate-950 px-7 py-14 text-white shadow-2xl shadow-slate-950/15 sm:px-12 sm:py-20">
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-violet-300">Octamy journal</p>
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-300">Octamy journal</p>
             <h1 className="mt-4 max-w-3xl text-4xl font-black tracking-[-0.04em] sm:text-6xl">Product and assessment notes, published when there is something real to share.</h1>
             <p className="mt-5 max-w-2xl text-base leading-7 text-slate-300 sm:text-lg">No placeholder articles or invented claims. Published posts can point directly to the live certification and practice catalogue.</p>
           </div>
@@ -50,7 +50,7 @@ export default function BlogIndex() {
 
         <section className="mx-auto max-w-7xl px-5 pb-20" aria-labelledby="published-posts-heading">
           <div className="flex items-end justify-between gap-4">
-            <div><p className="text-xs font-black uppercase tracking-[0.14em] text-violet-700">Published</p><h2 id="published-posts-heading" className="mt-2 text-3xl font-black tracking-tight">Latest posts</h2></div>
+            <div><p className="text-xs font-black uppercase tracking-[0.14em] text-slate-700">Published</p><h2 id="published-posts-heading" className="mt-2 text-3xl font-black tracking-tight">Latest posts</h2></div>
             <Button asChild variant="outline" className="hidden rounded-full sm:inline-flex"><Link href="/get-certified">Browse certifications <ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
           </div>
 
@@ -59,7 +59,7 @@ export default function BlogIndex() {
               {Array.from({ length: 4 }, (_, index) => <div key={index} aria-hidden className="h-64 animate-pulse rounded-3xl bg-slate-200" />)}
             </div>
           ) : error ? (
-            <div className="mt-7 rounded-3xl border border-amber-200 bg-amber-50 p-10 text-center" role="alert">
+            <div className="mt-7 rounded-3xl border border-slate-200 bg-slate-50 p-10 text-center" role="alert">
               <h2 className="text-xl font-bold">The blog could not be loaded.</h2><p className="mt-2 text-sm text-slate-600">No substitute or sample articles are shown.</p>
               <Button type="button" variant="outline" className="mt-5" onClick={() => void refetch()}>Try again</Button>
             </div>
@@ -74,11 +74,11 @@ export default function BlogIndex() {
             <div className="mt-7 grid gap-5 md:grid-cols-2">
               {data?.items.map((post) => (
                 <article key={post.id} className="flex flex-col rounded-3xl border border-slate-200 bg-white p-7 shadow-sm">
-                  <p className="text-xs font-bold uppercase tracking-wide text-violet-700"><time dateTime={post.publishedAt}>{displayDate(post.publishedAt)}</time> · {post.authorName}</p>
-                  <h2 className="mt-3 text-2xl font-black tracking-tight"><Link href={`/blog/${post.slug}`} className="hover:text-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600">{post.title}</Link></h2>
+                  <p className="text-xs font-bold uppercase tracking-wide text-slate-700"><time dateTime={post.publishedAt}>{displayDate(post.publishedAt)}</time> · {post.authorName}</p>
+                  <h2 className="mt-3 text-2xl font-black tracking-tight"><Link href={`/blog/${post.slug}`} className="hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-600">{post.title}</Link></h2>
                   <p className="mt-3 flex-1 leading-7 text-slate-600">{post.excerpt}</p>
                   {post.relatedAssessments.length > 0 && <p className="mt-5 text-xs font-semibold text-slate-500">Links to {post.relatedAssessments.length} live assessment{post.relatedAssessments.length === 1 ? "" : "s"}</p>}
-                  <Link href={`/blog/${post.slug}`} aria-label={`Read ${post.title}`} className="mt-5 inline-flex min-h-11 items-center self-start font-bold text-violet-700 hover:text-violet-900">Read post <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                  <Link href={`/blog/${post.slug}`} aria-label={`Read ${post.title}`} className="mt-5 inline-flex min-h-11 items-center self-start font-bold text-slate-700 hover:text-slate-900">Read post <ArrowRight className="ml-2 h-4 w-4" /></Link>
                 </article>
               ))}
             </div>

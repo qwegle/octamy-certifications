@@ -38,10 +38,10 @@ export default function BlogPostPage() {
   });
   const post = data?.post;
 
-  if (isLoading) return <div className="min-h-screen bg-[#f7f5f0]"><Header /><main id="main-content" className="mx-auto max-w-4xl px-5 py-16" role="status" aria-label="Loading blog post"><div className="h-8 w-36 animate-pulse rounded bg-slate-200" /><div className="mt-8 h-20 animate-pulse rounded-2xl bg-slate-200" /><div className="mt-8 h-96 animate-pulse rounded-3xl bg-slate-200" /></main><Footer /></div>;
+  if (isLoading) return <div className="min-h-screen bg-[#fafafa]"><Header /><main id="main-content" className="mx-auto max-w-4xl px-5 py-16" role="status" aria-label="Loading blog post"><div className="h-8 w-36 animate-pulse rounded bg-slate-200" /><div className="mt-8 h-20 animate-pulse rounded-2xl bg-slate-200" /><div className="mt-8 h-96 animate-pulse rounded-3xl bg-slate-200" /></main><Footer /></div>;
   if (error || !post) {
     const missing = error instanceof ApiError && error.status === 404;
-    return <div className="min-h-screen bg-[#f7f5f0]"><SEO title={missing ? "Blog post not found" : "Blog unavailable"} description={missing ? "This Octamy blog post is not published or does not exist." : "The Octamy blog is temporarily unavailable."} path={`/blog/${slug}`} noIndex /><Header /><main id="main-content" className="mx-auto max-w-3xl px-5 py-20 text-center" role={missing ? undefined : "alert"}><BookOpenCheck className="mx-auto h-12 w-12 text-slate-400" /><h1 className="mt-5 text-3xl font-black">{missing ? "This post is not available" : "The post could not be loaded"}</h1><p className="mt-3 text-slate-600">{missing ? "It may still be a draft, may have been unpublished, or the address may be incorrect." : "Please try again. No substitute content is shown."}</p><div className="mt-7 flex justify-center gap-3"><Button asChild><Link href="/blog"><ArrowLeft className="mr-2 h-4 w-4" />All posts</Link></Button>{!missing && <Button type="button" variant="outline" onClick={() => void refetch()}>Try again</Button>}</div></main><Footer /></div>;
+    return <div className="min-h-screen bg-[#fafafa]"><SEO title={missing ? "Blog post not found" : "Blog unavailable"} description={missing ? "This Octamy blog post is not published or does not exist." : "The Octamy blog is temporarily unavailable."} path={`/blog/${slug}`} noIndex /><Header /><main id="main-content" className="mx-auto max-w-3xl px-5 py-20 text-center" role={missing ? undefined : "alert"}><BookOpenCheck className="mx-auto h-12 w-12 text-slate-400" /><h1 className="mt-5 text-3xl font-black">{missing ? "This post is not available" : "The post could not be loaded"}</h1><p className="mt-3 text-slate-600">{missing ? "It may still be a draft, may have been unpublished, or the address may be incorrect." : "Please try again. No substitute content is shown."}</p><div className="mt-7 flex justify-center gap-3"><Button asChild><Link href="/blog"><ArrowLeft className="mr-2 h-4 w-4" />All posts</Link></Button>{!missing && <Button type="button" variant="outline" onClick={() => void refetch()}>Try again</Button>}</div></main><Footer /></div>;
   }
 
   const articleUrl = canonicalOctamyUrl(`/blog/${post.slug}`);
@@ -61,14 +61,14 @@ export default function BlogPostPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f7f5f0] text-slate-950">
+    <div className="min-h-screen bg-[#fafafa] text-slate-950">
       <SEO title={title} description={description} path={`/blog/${post.slug}`} type="article" publishedTime={post.publishedAt} modifiedTime={post.updatedAt} jsonLd={structuredData} />
       <Header />
       <main id="main-content" tabIndex={-1}>
         <article className="mx-auto max-w-4xl px-5 pb-20 pt-10 sm:pt-16">
-          <Link href="/blog" className="inline-flex min-h-11 items-center font-bold text-slate-600 hover:text-violet-700"><ArrowLeft className="mr-2 h-4 w-4" />Back to blog</Link>
+          <Link href="/blog" className="inline-flex min-h-11 items-center font-bold text-slate-600 hover:text-slate-700"><ArrowLeft className="mr-2 h-4 w-4" />Back to blog</Link>
           <header className="mt-8 border-b border-slate-200 pb-10">
-            <p className="text-xs font-black uppercase tracking-[0.14em] text-violet-700">Published <time dateTime={post.publishedAt}>{displayDate(post.publishedAt)}</time></p>
+            <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-700">Published <time dateTime={post.publishedAt}>{displayDate(post.publishedAt)}</time></p>
             <h1 className="mt-4 text-4xl font-black tracking-[-0.04em] sm:text-6xl">{post.title}</h1>
             <p className="mt-5 text-xl leading-8 text-slate-600">{post.excerpt}</p>
             <p className="mt-5 text-sm font-semibold text-slate-500">By {post.authorName}</p>
@@ -77,7 +77,7 @@ export default function BlogPostPage() {
 
           {post.relatedAssessments.length > 0 && (
             <aside className="mt-10 rounded-[2rem] bg-slate-950 p-7 text-white sm:p-10" aria-labelledby="related-assessments-heading">
-              <p className="text-xs font-black uppercase tracking-[0.14em] text-violet-300">Continue on Octamy</p>
+              <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-300">Continue on Octamy</p>
               <h2 id="related-assessments-heading" className="mt-2 text-2xl font-black">Related live assessments</h2>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300">These links are included only while the assessment remains active, public, and approved.</p>
               <ul className="mt-6 grid gap-3 sm:grid-cols-2">{post.relatedAssessments.map((assessment) => <li key={assessment.id}><Link href={assessment.href} className="flex min-h-14 items-center justify-between rounded-2xl border border-white/15 bg-white/5 px-5 py-3 font-bold hover:bg-white/10">{assessment.title}<ArrowRight className="ml-3 h-4 w-4 shrink-0" /></Link><span className="sr-only">{assessment.purpose === "practice" ? "Practice assessment" : "Certification assessment"}</span></li>)}</ul>

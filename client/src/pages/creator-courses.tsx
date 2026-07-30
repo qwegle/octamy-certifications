@@ -25,9 +25,9 @@ type Course = {
 };
 
 function courseState(course: Course) {
-  if (course.isActive) return { label: 'Live', className: 'bg-emerald-100 text-emerald-800' };
+  if (course.isActive) return { label: 'Live', className: 'bg-slate-100 text-slate-800' };
   if (course.visibility === 'private') return { label: 'Draft', className: 'bg-slate-100 text-slate-700' };
-  return { label: 'Submitted', className: 'bg-amber-100 text-amber-800' };
+  return { label: 'Submitted', className: 'bg-slate-100 text-slate-800' };
 }
 
 export default function CreatorCourses() {
@@ -77,7 +77,7 @@ export default function CreatorCourses() {
     >
       <SEO title="My courses" description="Manage your Octamy courses." path="/creator/courses" />
         <div>
-          {error && <Card className="mb-5 border-rose-200 bg-rose-50"><CardContent className="p-4 text-sm text-rose-800">We couldn't load your courses. Refresh the page to try again.</CardContent></Card>}
+          {error && <Card className="mb-5 border-slate-200 bg-slate-50"><CardContent className="p-4 text-sm text-slate-800">We couldn't load your courses. Refresh the page to try again.</CardContent></Card>}
           {isLoading ? (
             <div className="space-y-3" aria-label="Loading courses">{[1,2,3].map((n) => <div key={n} className="h-20 animate-pulse rounded-xl bg-slate-200/70" />)}</div>
           ) : courses.length === 0 ? (

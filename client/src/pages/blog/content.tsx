@@ -26,9 +26,9 @@ function inlineNodes(line: string, keyPrefix: string): ReactNode[] {
     if (!href) {
       nodes.push(match[0]);
     } else if (href.startsWith("/")) {
-      nodes.push(<Link key={`${keyPrefix}-link-${index}`} href={href} className="font-semibold text-violet-700 underline decoration-violet-300 underline-offset-4 hover:text-violet-900">{match[1]}</Link>);
+      nodes.push(<Link key={`${keyPrefix}-link-${index}`} href={href} className="font-semibold text-slate-700 underline decoration-slate-300 underline-offset-4 hover:text-slate-900">{match[1]}</Link>);
     } else {
-      nodes.push(<a key={`${keyPrefix}-link-${index}`} href={href} target="_blank" rel="noopener noreferrer" className="font-semibold text-violet-700 underline decoration-violet-300 underline-offset-4 hover:text-violet-900">{match[1]}<span className="sr-only"> (opens in a new tab)</span></a>);
+      nodes.push(<a key={`${keyPrefix}-link-${index}`} href={href} target="_blank" rel="noopener noreferrer" className="font-semibold text-slate-700 underline decoration-slate-300 underline-offset-4 hover:text-slate-900">{match[1]}<span className="sr-only"> (opens in a new tab)</span></a>);
     }
     cursor = start + match[0].length;
   });

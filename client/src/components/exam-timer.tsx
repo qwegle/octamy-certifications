@@ -50,8 +50,8 @@ export default function ExamTimer({ duration, onTimeUp, startedAtMs }: ExamTimer
   return (
     <div className={`flex items-center px-4 py-2 rounded-lg ${
       isCritical ? 'bg-red-100 text-red-800' : 
-      isWarning ? 'bg-yellow-100 text-yellow-800' : 
-      'bg-octamy-gray-100 text-octamy-black'
+      isWarning ? 'bg-black text-white' :
+      'border border-slate-300 bg-slate-100 text-black'
     }`}>
       <Clock className="w-4 h-4 mr-2" />
       <span className="font-semibold">{formatTime(timeLeft)}</span>

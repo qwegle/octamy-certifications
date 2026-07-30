@@ -167,7 +167,7 @@ export default function InstituteExamResults() {
       </div>
 
       {view === "results" ? (query.error ? (
-        <Card className="border-amber-200 bg-amber-50/70"><CardContent className="p-4 text-sm text-amber-950">{(query.error as Error).message}</CardContent></Card>
+        <Card className="border-slate-200 bg-slate-50/70"><CardContent className="p-4 text-sm text-slate-950">{(query.error as Error).message}</CardContent></Card>
       ) : (
         <>
           <div className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
@@ -206,7 +206,7 @@ export default function InstituteExamResults() {
                           <td className="px-4 py-3"><p className="font-medium text-slate-900">{attempt.name || attempt.email || "Anonymous candidate"}</p>{attempt.name && <p className="text-xs text-slate-500">{attempt.email}</p>}</td>
                           <td className="px-4 py-3"><Badge variant="outline" className="capitalize">{attempt.status.replace(/_/g, " ")}</Badge></td>
                           <td className="px-4 py-3 font-medium text-slate-900">{attempt.submitted_at ? `${Number(attempt.score_pct).toFixed(1)}% (${attempt.score}/${attempt.total_points} points)` : "—"}</td>
-                          <td className="px-4 py-3">{!attempt.submitted_at ? <span className="text-slate-500">Pending</span> : attempt.passed ? <Badge className="bg-emerald-100 text-emerald-800">Pass</Badge> : <Badge variant="secondary">Did not pass</Badge>}</td>
+                          <td className="px-4 py-3">{!attempt.submitted_at ? <span className="text-slate-500">Pending</span> : attempt.passed ? <Badge className="bg-slate-100 text-slate-800">Pass</Badge> : <Badge variant="secondary">Did not pass</Badge>}</td>
                           <td className="px-4 py-3 text-slate-600">{new Date(attempt.started_at).toLocaleString()}</td>
                           <td className="px-4 py-3 text-slate-600">{formatDuration(attempt.duration_sec)}</td>
                         </tr>
@@ -284,7 +284,7 @@ function EvidenceReview({
   detailLoading: boolean;
   onClose: () => void;
 }) {
-  if (error) return <Card className="border-amber-200 bg-amber-50"><CardContent className="p-4 text-sm text-amber-950">{error.message}</CardContent></Card>;
+  if (error) return <Card className="border-slate-200 bg-slate-50"><CardContent className="p-4 text-sm text-slate-950">{error.message}</CardContent></Card>;
   if (loading) return <Card><CardContent className="p-10 text-center text-sm text-slate-500">Loading evidence summaries…</CardContent></Card>;
 
   const attempts = data?.attempts ?? [];
@@ -302,13 +302,13 @@ function EvidenceReview({
         <Stat icon={<WifiOff className="h-5 w-5" />} label="Connection events" value={networkEvents} />
       </div>
 
-      <Card className="border-indigo-200 bg-indigo-50/60">
-        <CardContent className="flex gap-3 p-4 text-sm text-indigo-950">
+      <Card className="border-slate-200 bg-slate-50/60">
+        <CardContent className="flex gap-3 p-4 text-sm text-slate-950">
           <ShieldCheck className="h-5 w-5 shrink-0 mt-0.5" />
           <div>
             <p className="font-medium">Context for human review — not an AI verdict</p>
-            <p className="mt-1 text-indigo-800">{data?.evidenceBoundary || "Browser signals do not alter assessment scoring."}</p>
-            <p className="mt-1 text-indigo-800">Camera, microphone, screen contents, clipboard contents and keystrokes are not collected.</p>
+            <p className="mt-1 text-slate-800">{data?.evidenceBoundary || "Browser signals do not alter assessment scoring."}</p>
+            <p className="mt-1 text-slate-800">Camera, microphone, screen contents, clipboard contents and keystrokes are not collected.</p>
           </div>
         </CardContent>
       </Card>
@@ -327,7 +327,7 @@ function EvidenceReview({
                     const browserSignals = numeric(attempt.visibility_hidden_count) + numeric(attempt.fullscreen_exit_count) + numeric(attempt.paste_count);
                     const disconnected = numeric(attempt.disconnected_seconds);
                     return (
-                      <tr key={attempt.id} className={selectedAttemptId === attempt.id ? "bg-indigo-50/60" : "hover:bg-slate-50"}>
+                      <tr key={attempt.id} className={selectedAttemptId === attempt.id ? "bg-slate-50/60" : "hover:bg-slate-50"}>
                         <td className="px-4 py-3"><p className="font-medium text-slate-900">{attempt.email || "Anonymous candidate"}</p><p className="text-xs text-slate-500">Attempt #{attempt.id}</p></td>
                         <td className="px-4 py-3"><Badge variant="outline">{attempt.proctor_mode === "browser_evidence" ? "Browser evidence" : "Standard"}</Badge></td>
                         <td className="px-4 py-3">{attempt.proctor_mode === "browser_evidence" ? `${browserSignals} event${browserSignals === 1 ? "" : "s"}` : <span className="text-slate-500">Not collected</span>}</td>

@@ -49,7 +49,7 @@ export function StarRating({ rating, onRatingChange, interactive = false }: {
           key={star}
           className={`h-5 w-5 cursor-pointer transition-colors ${
             star <= (hoverRating || rating)
-              ? 'fill-yellow-400 text-yellow-400'
+              ? 'fill-slate-400 text-slate-400'
               : 'text-gray-300'
           }`}
           onClick={interactive ? () => onRatingChange?.(star) : undefined}

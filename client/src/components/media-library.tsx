@@ -96,8 +96,8 @@ function AssetPreview({ asset, className }: { asset: MediaAsset; className?: str
     );
   }
   return (
-    <div className={cn("grid h-full w-full place-items-center bg-violet-50", className)}>
-      <FileText className="h-10 w-10 text-violet-700" />
+    <div className={cn("grid h-full w-full place-items-center bg-slate-50", className)}>
+      <FileText className="h-10 w-10 text-slate-700" />
     </div>
   );
 }
@@ -292,7 +292,7 @@ export function MediaLibrary({
         </div>
 
         {error ? (
-          <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50/70 p-8 text-center text-sm text-slate-700">
+          <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50/70 p-8 text-center text-sm text-slate-700">
             <p>The media library could not be loaded.</p>
             <Button type="button" variant="outline" className="mt-4" onClick={() => refetch()}>Try again</Button>
           </div>
@@ -301,7 +301,7 @@ export function MediaLibrary({
             {[1, 2, 3, 4, 5, 6].map((item) => <div key={item} className="aspect-square animate-pulse rounded-2xl bg-slate-200" />)}
           </div>
         ) : items.length === 0 ? (
-          <button type="button" onClick={() => inputRef.current?.click()} className="mt-5 w-full rounded-3xl border-2 border-dashed border-slate-300 bg-white/60 px-6 py-16 text-center transition hover:border-violet-400 hover:bg-violet-50/50">
+          <button type="button" onClick={() => inputRef.current?.click()} className="mt-5 w-full rounded-3xl border-2 border-dashed border-slate-300 bg-white/60 px-6 py-16 text-center transition hover:border-slate-400 hover:bg-slate-50/50">
             <UploadCloud className="mx-auto h-10 w-10 text-slate-400" />
             <span className="mt-4 block font-bold text-slate-900">Upload once, reuse everywhere</span>
             <span className="mt-1 block text-sm text-slate-500">Your images, videos, and PDFs will appear here.</span>
@@ -318,12 +318,12 @@ export function MediaLibrary({
                   onDoubleClick={() => onSelect?.(asset)}
                   className={cn(
                     "group overflow-hidden rounded-2xl border bg-white text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg",
-                    active ? "border-violet-600 ring-2 ring-violet-200" : "border-slate-200",
+                    active ? "border-slate-600 ring-2 ring-slate-200" : "border-slate-200",
                   )}
                 >
                   <div className="relative aspect-square overflow-hidden bg-slate-100">
                     <AssetPreview asset={asset} />
-                    {active && <span className="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-full bg-violet-700 text-white"><Check className="h-4 w-4" /></span>}
+                    {active && <span className="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-full bg-slate-700 text-white"><Check className="h-4 w-4" /></span>}
                   </div>
                   <div className="p-3">
                     <p className="truncate text-sm font-semibold text-slate-900">{asset.originalName}</p>
@@ -380,17 +380,17 @@ export function MediaLibrary({
               <Clipboard className="mr-2 h-4 w-4" /> {selected.kind === "image" ? "Copy file link" : "Copy protected viewer link"}
             </Button>
             {onSelect && (
-              <Button className="w-full bg-violet-700 text-white hover:bg-violet-800" onClick={() => onSelect(selected)}>
+              <Button className="w-full bg-slate-700 text-white hover:bg-slate-800" onClick={() => onSelect(selected)}>
                 <Check className="mr-2 h-4 w-4" /> Use this media
               </Button>
             )}
-            <Button variant="ghost" className="w-full justify-start text-rose-700 hover:bg-rose-50 hover:text-rose-800" onClick={() => setDeleteOpen(true)}>
+            <Button variant="ghost" className="w-full justify-start text-slate-700 hover:bg-slate-50 hover:text-slate-800" onClick={() => setDeleteOpen(true)}>
               <Trash2 className="mr-2 h-4 w-4" /> Delete permanently
             </Button>
           </div>
 
           {selected.usage && selected.usage.length > 0 && (
-            <div className="mt-4 rounded-xl bg-amber-50 p-3 text-xs leading-5 text-amber-900">
+            <div className="mt-4 rounded-xl bg-slate-50 p-3 text-xs leading-5 text-slate-900">
               <Info className="mr-1 inline h-3.5 w-3.5" /> In use by {selected.usage.map((usage) => usage.label).join(", ")}. Remove it there before deleting.
             </div>
           )}

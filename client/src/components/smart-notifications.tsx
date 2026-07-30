@@ -188,7 +188,7 @@ export function SmartNotifications() {
                 <div
                   key={notification.id}
                   className={`p-4 border-b border-gray-100 dark:border-gray-800 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 ${
-                    !notification.isRead ? "bg-blue-50 dark:bg-blue-900/20" : ""
+                    !notification.isRead ? "bg-slate-50 dark:bg-slate-900/20" : ""
                   }`}
                   onClick={() => !notification.isRead && markAsRead.mutate(notification.id)}
                 >
@@ -203,7 +203,7 @@ export function SmartNotifications() {
                       </p>
                     </div>
                     {!notification.isRead && (
-                      <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 mt-1"></div>
+                      <div className="w-2 h-2 bg-slate-500 rounded-full flex-shrink-0 mt-1"></div>
                     )}
                   </div>
                 </div>
@@ -271,7 +271,7 @@ export function SmartNotifications() {
                   }
                   
                   return (
-                    <Card key={rec.id || recommendation.id} className="border-2 hover:border-blue-500 transition-colors">
+                    <Card key={rec.id || recommendation.id} className="border-2 hover:border-slate-500 transition-colors">
                       <CardContent className="p-4">
                         <div className="flex items-start justify-between mb-2">
                           <Badge variant="secondary" className="flex items-center gap-1">
@@ -279,7 +279,7 @@ export function SmartNotifications() {
                             {getReasonText(reason)}
                           </Badge>
                           <div className="flex items-center gap-1">
-                            <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                            <Star className="w-3 h-3 fill-slate-400 text-slate-400" />
                             <span className="text-xs font-medium">
                               {(recommendationScore * 100).toFixed(0)}%
                             </span>

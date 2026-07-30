@@ -80,13 +80,13 @@ export default function DashboardAnalytics() {
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center">
-              <Target className="h-8 w-8 text-blue-600" />
+              <Target className="h-8 w-8 text-slate-600" />
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Completion Rate</p>
                 <p className="text-2xl font-bold text-gray-900">{completionRate}%</p>
                 <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
                   <div 
-                    className="bg-blue-600 h-2 rounded-full transition-all duration-500" 
+                    className="bg-slate-600 h-2 rounded-full transition-all duration-500"
                     style={{ width: `${completionRate}%` }}
                   ></div>
                 </div>
@@ -98,11 +98,11 @@ export default function DashboardAnalytics() {
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center">
-              <TrendingUp className="h-8 w-8 text-green-600" />
+              <TrendingUp className="h-8 w-8 text-slate-600" />
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Average Score</p>
                 <p className="text-2xl font-bold text-gray-900">{analytics.averageScore}%</p>
-                <p className="text-sm text-green-600">
+                <p className="text-sm text-slate-600">
                   {analytics.averageScore >= 80 ? '↗ Excellent' : analytics.averageScore >= 60 ? '→ Good' : '↘ Needs Improvement'}
                 </p>
               </div>
@@ -113,7 +113,7 @@ export default function DashboardAnalytics() {
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center">
-              <Clock className="h-8 w-8 text-orange-600" />
+              <Clock className="h-8 w-8 text-slate-600" />
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Study Streak</p>
                 <p className="text-2xl font-bold text-gray-900">{analytics.studyStreak}</p>
@@ -126,7 +126,7 @@ export default function DashboardAnalytics() {
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center">
-              <Brain className="h-8 w-8 text-purple-600" />
+              <Brain className="h-8 w-8 text-slate-600" />
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Study Time</p>
                 <p className="text-2xl font-bold text-gray-900">{Math.round(analytics.totalStudyTime / 60)}h</p>

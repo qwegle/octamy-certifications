@@ -101,8 +101,8 @@ export default function ExamResults() {
   }
 
   const getGradeColor = (score: number, passingScore: number) => {
-    if (score >= passingScore) return "text-green-600";
-    if (score >= passingScore * 0.8) return "text-yellow-600";
+    if (score >= passingScore) return "text-slate-600";
+    if (score >= passingScore * 0.8) return "text-slate-600";
     return "text-red-600";
   };
 
@@ -139,7 +139,7 @@ export default function ExamResults() {
         >
           <div className="mb-4">
             {examResult.passed ? (
-              <CheckCircle className="w-16 h-16 text-green-600 mx-auto mb-4" />
+              <CheckCircle className="w-16 h-16 text-slate-600 mx-auto mb-4" />
             ) : (
               <XCircle className="w-16 h-16 text-red-600 mx-auto mb-4" />
             )}
@@ -315,16 +315,16 @@ export default function ExamResults() {
             <Card className="border-cream-deep dark:border-gray-800">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-black dark:text-white">
-                  <Lightbulb className="w-5 h-5 text-yellow-600" />
+                  <Lightbulb className="w-5 h-5 text-slate-600" />
                   Study Recommendations
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   {examResult.questionAnalysis.recommendations.map((recommendation, index) => (
-                    <div key={index} className="flex items-start gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                      <Star className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
-                      <span className="text-blue-700 dark:text-blue-300 text-sm">{recommendation}</span>
+                    <div key={index} className="flex items-start gap-3 p-3 bg-slate-50 dark:bg-slate-900/20 rounded-lg">
+                      <Star className="w-4 h-4 text-slate-600 flex-shrink-0 mt-0.5" />
+                      <span className="text-slate-700 dark:text-slate-300 text-sm">{recommendation}</span>
                     </div>
                   ))}
                 </div>
@@ -361,7 +361,7 @@ export default function ExamResults() {
           ) : (
             <Button
               onClick={() => setLocation(`/payment?courseId=${examResult.courseId}&type=certificate`)}
-              className="bg-green-600 text-white hover:bg-green-700 flex items-center gap-2"
+              className="bg-slate-600 text-white hover:bg-slate-700 flex items-center gap-2"
             >
               <ArrowRight className="w-4 h-4" />
               Get Your Certificate - ₹{course?.price || "99"}

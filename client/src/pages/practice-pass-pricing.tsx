@@ -107,26 +107,26 @@ export default function PracticePassPricing() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#f7f5f0] text-slate-950">
+    <div className="flex min-h-screen flex-col bg-[#fafafa] text-slate-950">
       <SEO title="Practice Pass pricing" description="Practice Pass unlocks reviewed practice exams for 30 or 365 days. It does not include or issue a certification credential." path="/pricing/practice-pass" />
       <Header />
       <main id="main-content" tabIndex={-1} className="flex-1">
         <section className="relative overflow-hidden px-4 py-14 sm:py-20">
-          <div aria-hidden className="absolute inset-0 bg-gradient-to-br from-violet-100/80 via-transparent to-fuchsia-100/70" />
+          <div aria-hidden className="absolute inset-0 bg-gradient-to-br from-slate-100/80 via-transparent to-slate-100/70" />
           <div className="relative mx-auto grid max-w-6xl gap-10 lg:grid-cols-[1.05fr_.95fr] lg:items-center">
             <div>
-              <p className="inline-flex items-center gap-2 rounded-full border border-violet-200 bg-white/80 px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-violet-800"><Dumbbell className="h-4 w-4" />Practice subscription</p>
+              <p className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-slate-800"><Dumbbell className="h-4 w-4" />Practice subscription</p>
               <h1 className="mt-6 text-4xl font-black tracking-[-0.045em] sm:text-6xl">Practise deeply. Certify separately.</h1>
               <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-600">Practice Pass unlocks reviewed Practice exams and answer review for one fixed access term. It never grants a certificate, verified credential, or recruiter-facing evidence.</p>
-              <div className="mt-7 rounded-2xl border border-rose-200 bg-rose-50 p-5">
-                <p className="flex items-center gap-2 font-black text-rose-950"><ShieldX className="h-5 w-5" />No certification credential is included</p>
-                <p className="mt-1 text-sm leading-6 text-rose-800">Certification is a different product: attempt free, then pay its separate one-off credential price only after passing if you choose to activate it.</p>
+              <div className="mt-7 rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                <p className="flex items-center gap-2 font-black text-slate-950"><ShieldX className="h-5 w-5" />No certification credential is included</p>
+                <p className="mt-1 text-sm leading-6 text-slate-800">Certification is a different product: attempt free, then pay its separate one-off credential price only after passing if you choose to activate it.</p>
               </div>
             </div>
 
-            <Card className="rounded-[2rem] border-2 border-violet-300 bg-white shadow-[0_30px_80px_-40px_rgba(76,29,149,0.65)]">
+            <Card className="rounded-[2rem] border-2 border-slate-400 bg-white shadow-[0_30px_80px_-40px_rgba(15,23,42,0.45)]">
               <CardContent className="p-7 sm:p-9">
-                {(selected || welcome) && <div className="mb-5 flex gap-3 rounded-2xl bg-emerald-50 p-4 text-emerald-950"><CheckCircle2 className="h-5 w-5 shrink-0" /><div><p className="font-black">{welcome ? 'Account ready' : 'Practice Pass selected'}</p><p className="mt-1 text-xs">Review the term and price before continuing. Nothing is charged automatically.</p></div></div>}
+                {(selected || welcome) && <div className="mb-5 flex gap-3 rounded-2xl bg-slate-50 p-4 text-slate-950"><CheckCircle2 className="h-5 w-5 shrink-0" /><div><p className="font-black">{welcome ? 'Account ready' : 'Practice Pass selected'}</p><p className="mt-1 text-xs">Review the term and price before continuing. Nothing is charged automatically.</p></div></div>}
                 <div className="grid grid-cols-2 rounded-2xl bg-slate-100 p-1" aria-label="Access term">
                   <button type="button" aria-pressed={cycle === 'monthly'} onClick={() => setCycle('monthly')} className={`min-h-11 rounded-xl px-3 text-sm font-black ${cycle === 'monthly' ? 'bg-white text-slate-950 shadow-sm' : 'text-slate-600'}`}>30 days</button>
                   <button type="button" aria-pressed={cycle === 'yearly'} onClick={() => setCycle('yearly')} className={`min-h-11 rounded-xl px-3 text-sm font-black ${cycle === 'yearly' ? 'bg-white text-slate-950 shadow-sm' : 'text-slate-600'}`}>365 days</button>
@@ -135,13 +135,13 @@ export default function PracticePassPricing() {
                 <p className="mt-1 text-4xl font-black tracking-tight">₹{price.toLocaleString('en-IN')}</p>
                 <p className="mt-1 text-xs text-slate-500">Fixed term · GST extra where applicable</p>
                 <ul className="mt-7 space-y-3 text-sm font-semibold text-slate-700">
-                  {['Unlimited attempts on eligible reviewed Practice exams', 'Correct-and-incorrect answer review after practice attempts', 'Return to the practice assessment you started from'].map((item) => <li key={item} className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-violet-700" />{item}</li>)}
+                  {['Unlimited attempts on eligible reviewed Practice exams', 'Correct-and-incorrect answer review after practice attempts', 'Return to the practice assessment you started from'].map((item) => <li key={item} className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-slate-700" />{item}</li>)}
                 </ul>
                 {user ? (
-                  <Button className="mt-8 min-h-12 w-full bg-violet-700 text-white hover:bg-violet-800" disabled={submitting} onClick={() => void subscribe()}>{submitting && <Loader2 className="h-4 w-4 animate-spin" />}Continue to secure checkout<ArrowRight className="h-4 w-4" /></Button>
+                  <Button className="mt-8 min-h-12 w-full bg-slate-700 text-white hover:bg-slate-800" disabled={submitting} onClick={() => void subscribe()}>{submitting && <Loader2 className="h-4 w-4 animate-spin" />}Continue to secure checkout<ArrowRight className="h-4 w-4" /></Button>
                 ) : (
                   <div className="mt-8 grid gap-2 sm:grid-cols-2">
-                    <Button asChild className="min-h-12 bg-violet-700 text-white hover:bg-violet-800"><Link href={practiceAccountPath('register', { cycle, next })}>Create account</Link></Button>
+                    <Button asChild className="min-h-12 bg-slate-700 text-white hover:bg-slate-800"><Link href={practiceAccountPath('register', { cycle, next })}>Create account</Link></Button>
                     <Button asChild variant="outline" className="min-h-12"><Link href={practiceAccountPath('login', { cycle, next })}>Sign in</Link></Button>
                   </div>
                 )}
@@ -153,7 +153,7 @@ export default function PracticePassPricing() {
 
         <section className="border-y border-slate-200 bg-white px-4 py-12">
           <div className="mx-auto flex max-w-6xl flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-            <div><p className="text-xs font-black uppercase tracking-[0.16em] text-emerald-700">Looking for a credential?</p><h2 className="mt-2 text-2xl font-black">Certification attempts are free; credential activation is separate.</h2></div>
+            <div><p className="text-xs font-black uppercase tracking-[0.16em] text-slate-700">Looking for a credential?</p><h2 className="mt-2 text-2xl font-black">Certification attempts are free; credential activation is separate.</h2></div>
             <Button asChild variant="outline" className="min-h-11 shrink-0"><Link href="/pricing/certification">See certification pricing <ArrowRight className="h-4 w-4" /></Link></Button>
           </div>
         </section>
